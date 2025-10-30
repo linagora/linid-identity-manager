@@ -1,0 +1,31 @@
+name: ❓ Question / Help
+description: Ask a question about the tool, a feature, or usage
+title: "[QUESTION] - <title>"
+labels: ["question", "🆕 Needs triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Please provide as much information as possible so we can answer your question effectively."
+
+  - type: textarea
+    id: question_summary
+    attributes:
+      label: "Question summary"
+      description: "Provide a brief summary of your question"
+      placeholder: "E.g., How do I enable feature X?"
+
+  - type: textarea
+    id: detailed_description
+    attributes:
+      label: "Detailed description"
+      description: "Explain your question in detail"
+      placeholder: "Include context, what you have tried, and what you want to achieve."
+
+  - type: input
+    id: app_version
+    attributes:
+      label: "App version"
+      description: "Which version of the application are you using?"
+      placeholder: "e.g., 1.2.3"

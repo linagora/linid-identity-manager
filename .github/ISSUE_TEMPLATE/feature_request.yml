@@ -1,0 +1,90 @@
+name: 🚀 Feature Request / Enhancement
+description: Suggest a new feature or improvement for the project
+title: "[FEATURE] - <title>"
+labels: ["enhancement", "🆕 Needs triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: "Please provide detailed information to help us understand and evaluate your feature request."
+
+  - type: textarea
+    id: feature_summary
+    attributes:
+      label: "Feature summary"
+      description: "Provide a short title or summary of the feature you want"
+      placeholder: "E.g., Add dark mode option"
+
+  - type: textarea
+    id: detailed_description
+    attributes:
+      label: "Detailed description"
+      description: "Explain the feature or improvement in detail"
+      placeholder: "Describe the feature, its purpose, and how it should work"
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: "Benefits"
+      description: "Explain why this feature is useful or what problem it solves"
+      placeholder: "E.g., Improve accessibility for low-light environments"
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "Alternatives considered"
+      description: "Describe any alternative solutions or approaches you considered"
+      placeholder: "E.g., Using a browser extension, a different workflow, etc."
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: "Scope"
+      description: "Specify if this feature concerns the core app, a plugin, or unsure"
+      options:
+        - "Core application"
+        - "Plugin"
+        - "Unsure / I don't know"
+
+  - type: input
+    id: app_version
+    attributes:
+      label: "App version"
+      description: "Which version of the application would benefit from this feature?"
+      placeholder: "e.g., 1.2.3"
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: "Priority"
+      description: "How important is this feature to you?"
+      options:
+        - "Low"
+        - "Medium"
+        - "High"
+        - "Urgent"
+
+  - type: dropdown
+    id: device_type
+    attributes:
+      label: "Device type"
+      description: "Select the type of device you are targeting"
+      options:
+        - "All"
+        - "PC"
+        - "Smartphone"
+        - "Tablet"
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: "Browser"
+      description: "Select the browser you are using (if relevant)"
+      options:
+        - "All"
+        - "Chrome"
+        - "Firefox"
+        - "Safari"
+        - "Edge"
+        - "Other"

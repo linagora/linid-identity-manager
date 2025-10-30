@@ -1,0 +1,69 @@
+name: 🔒 Security / Dependency Issue
+description: Report a security vulnerability or dependency issue
+title: "[SECURITY] - <title>"
+labels: ["security", "🆕 Needs triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Do not include sensitive information in this public issue.**  
+        If this is a vulnerability, please follow responsible disclosure procedures.  
+
+        **Important:** If this is a **critical vulnerability** or could **endanger the application**, please **contact the project maintainers directly** via a private message/email. You will be **credited** for reporting the issue and/or helping to fix it.
+
+  - type: textarea
+    id: issue_summary
+    attributes:
+      label: "Summary of the issue"
+      description: "Provide a short summary of the security or dependency problem"
+      placeholder: "E.g., Outdated library X with known vulnerability CVE-1234"
+
+  - type: textarea
+    id: detailed_description
+    attributes:
+      label: "Detailed description"
+      description: "Describe the problem in detail, without including sensitive information"
+      placeholder: "Include context, version numbers, and affected modules"
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: "Steps to reproduce / observe"
+      description: "Explain how the issue can be observed without exposing sensitive data"
+      placeholder: "Step 1: ..., Step 2: ..."
+
+  - type: input
+    id: app_version
+    attributes:
+      label: "App version"
+      description: "Which version of the application is affected?"
+      placeholder: "e.g., 1.2.3"
+
+  - type: input
+    id: dependencies
+    attributes:
+      label: "Dependencies involved"
+      description: "List the affected libraries/plugins and their versions"
+      placeholder: "E.g., library X v1.0.0, plugin Y v2.3.1"
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: "Severity"
+      description: "Estimate the severity of the issue"
+      options:
+        - "Low"
+        - "Medium"
+        - "High"
+        - "Urgent"
+
+  - type: dropdown
+    id: disclosure_preference
+    attributes:
+      label: "Disclosure preference"
+      description: "Should this be handled privately?"
+      options:
+        - "Public discussion is OK"
+        - "Report privately (recommended for vulnerabilities)"

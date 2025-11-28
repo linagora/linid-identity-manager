@@ -1,0 +1,57 @@
+providers:
+  - name: LDAP1
+    type: ldap
+    # custom plugin options
+    url: X
+  - name: LDAP2
+    type: ldap
+    # custom plugin options
+    url: X
+
+routes:
+  - type: export
+    # options
+    exportType: xml
+
+tasks:
+  - type: S3SaveTask
+    name: saveDocument
+    # custom plugin options
+    url: X
+  - type: S3SaveTask
+    name: saveExcel
+    # custom plugin options
+    url: X
+
+validations:
+  - type: regex
+    name: regex1
+    pattern: ^/d$
+    ignoreCase: true
+    accessibleFront: false
+    phase: [ 'beforeCreate' ]
+
+entities:
+  - name: user
+    route: users
+    provider: LDAP1
+    disabledRoutes: [ "delete" ]
+    access:
+      baseDn: "ou=users,dc=example,dc=com"
+      filter: "(objectClass=person)"
+    tasks:
+      - name: saveDocument
+        phase: [ 'beforeCreate', 'beforeExport' ]
+    attributes:
+      - name: id
+        type: UUID
+        required: true
+        input: text
+        access:
+          ldapField: id
+        validations:
+          - name: regex1
+          - type: regex
+            pattern: ^/d$
+            ignoreCase: true
+            phase: [ 'beforeUpdate' ]

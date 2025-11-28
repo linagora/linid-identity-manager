@@ -1,0 +1,39 @@
+name: test
+
+services:
+  linid-im-api:
+    image: linid-im-api
+    container_name: linid-im-api
+    networks:
+      - test-network
+    ports:
+      - 8080:80
+    volumes:
+      - ./resources:/app/resources
+    environment:
+      - CONFIGURATION_PATH=${CONFIGURATION_PATH}
+      - PLUGIN_LOADER_PATH=${PLUGIN_LOADER_PATH}
+      - I18N_EXTERNAL_PATH=${I18N_EXTERNAL_PATH}
+
+  linid-im-front:
+    image: linid-im-front
+    container_name: linid-im-front
+    networks:
+      - test-network
+    ports:
+      - 9000:80
+
+  catalog-ui:
+    image: catalog-ui
+    container_name: catalog-ui
+    networks:
+      - test-network
+    ports:
+      - 5001:80
+    depends_on:
+      - linid-im-front
+
+networks:
+  test-network:
+    name: test-network
+    driver: bridge

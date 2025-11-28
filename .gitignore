@@ -1,0 +1,5 @@
+# Logs
+*.log
+
+# Local overrides
+docker-compose.override.yml

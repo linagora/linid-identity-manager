@@ -1,0 +1,37 @@
+name: test
+
+services:
+  linid-im-api:
+    image: linid-im-api
+    container_name: linid-im-api
+    networks:
+      - test-network
+    ports:
+      - 8081:8080
+    volumes:
+      - ./resources:/app/resources
+    env_file:
+      - .env
+
+  linid-im-front:
+    image: linid-im-front
+    container_name: linid-im-front
+    networks:
+      - test-network
+    ports:
+      - 8080:80
+
+  catalog-ui:
+    image: catalog-ui
+    container_name: catalog-ui
+    networks:
+      - test-network
+    ports:
+      - 5001:80
+    depends_on:
+      - linid-im-front
+
+networks:
+  test-network:
+    name: test-network
+    driver: bridge

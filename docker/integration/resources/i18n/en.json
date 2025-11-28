@@ -1,0 +1,7 @@
+{
+  "error.router.unknown.route": "Unknown route: {route}",
+  "error.entity.unknown": "Unknown entity: {entity}",
+  "error.entity.attributes": "Validation errors occurred for entity: {entity}",
+  "error.provider.unknown": "Unknown provider '{provider}' for entity '{entity}'",
+  "error.plugin.unknown": "Unknown plugin: {type}"
+}

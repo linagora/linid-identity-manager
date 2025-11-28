@@ -1,0 +1,35 @@
+name: demo
+
+services:
+  linid-im-api:
+    image: linid-im-api
+    container_name: linid-im-api
+    networks:
+      - demo-network
+    volumes:
+      - ./resources:/app/resources
+    env_file:
+      - .env
+
+  linid-im-front:
+    image: linid-im-front
+    container_name: linid-im-front
+    networks:
+      - demo-network
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+
+  catalog-ui:
+    image: catalog-ui
+    container_name: catalog-ui
+    networks:
+      - demo-network
+    depends_on:
+      - linid-im-front
+
+networks:
+  demo-network:
+    name: demo-network
+    driver: bridge

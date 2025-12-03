@@ -7,3 +7,6 @@
 [submodule "linid-im-front-community-plugins"]
 	path = linid-im-front-community-plugins
 	url = git@github.com:linagora/linid-im-front-community-plugins.git
+[submodule "tests/e2e"]
+	path = tests/e2e
+	url = https://github.com/zorin95670/e2e-test-runner

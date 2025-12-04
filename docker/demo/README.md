@@ -13,8 +13,8 @@ docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-fron
 docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
 
 # clean
-docker compose -f docker/demo/docker-compose.yml down -v
+docker container prune -f
 
 # run
-docker compose -f docker/demo/docker-compose.yml --env-file docker/demo/.env up -d
+docker compose -f docker/demo/docker-compose.yml --env-file docker/demo/.env up
 ```

@@ -1,20 +1,6 @@
 name: demo
 
 services:
-  nginx:
-    image: nginx:alpine
-    container_name: linid-im-proxy
-    networks:
-      - demo-network
-    ports:
-      - 8000:80
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - linid-im-api
-      - linid-im-front
-      - catalog-ui
-
   linid-im-api:
     image: linid-im-api
     container_name: linid-im-api

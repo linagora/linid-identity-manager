@@ -7,7 +7,7 @@ services:
     networks:
       - test-network
     ports:
-      - 8081:8080
+      - 8080:80
     volumes:
       - ./resources:/app/resources
     env_file:
@@ -19,7 +19,7 @@ services:
     networks:
       - test-network
     ports:
-      - 8080:80
+      - 9000:80
 
   catalog-ui:
     image: catalog-ui

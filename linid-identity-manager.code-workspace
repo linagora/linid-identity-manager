@@ -1,0 +1,31 @@
+{
+  "folders": [
+    { "path": "." },
+    { "path": "linid-im-api", "name": "linid-im-api" },
+    { "path": "linid-im-front", "name": "linid-im-front" },
+    {
+      "path": "linid-im-front-community-plugins",
+      "name": "linid-im-front-community-plugins"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "linid-im-api": true,
+      "linid-im-front": true,
+      "linid-im-front-community-plugins": true
+    },
+    "cucumberautocomplete.steps": ["tests/e2e/step_definitions/*.js"],
+    "cucumberautocomplete.strictGherkinCompletion": true,
+    "cucumberautocomplete.strictGherkinValidation": true,
+    "cucumberautocomplete.stepRegExSymbol": "'",
+    "cucumberautocomplete.syncfeatures": "tests/features/*.feature",
+    "cucumberautocomplete.smartSnippets": true,
+    "cucumberautocomplete.stepsInvariants": true,
+    "cucumberautocomplete.onTypeFormat": true,
+    "editor.quickSuggestions": {
+      "comments": false,
+      "strings": true,
+      "other": true
+    }
+  }
+}

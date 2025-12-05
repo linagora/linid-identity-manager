@@ -1,0 +1,102 @@
+name: Pull request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+env:
+  NODE_VERSION: 22.19
+
+jobs:
+  delete-comments:
+    name: Delete bot comment(s)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: izhangzhihao/delete-comment@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          delete_user_name: github-actions[bot]
+          issue_number: ${{ github.event.number }}
+
+  branch-naming-rules:
+    name: Check branch name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-branch-name@master
+        with:
+          regex: '^(feature|bugfix|improvement|release|hotfix)\/[a-z0-9_.-]+$'
+          allowed_prefixes: "feature,bugfix,improvement,release,hotfix"
+          ignore: main
+          min_length: 5
+          max_length: 50
+
+  commit-checks:
+    name: Check commit messages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install commitlint
+        run: npm install --save-dev @commitlint/config-conventional @commitlint/cli
+
+      - name: Run commitlint
+        run: |
+          echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.cjs
+          npx commitlint --from=origin/main --to=HEAD --verbose
+
+  check-style:
+    name: Code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        working-directory: tests/e2e
+        run: npm ci
+
+      - name: Check style
+        working-directory: tests/e2e
+        run: E2E_SPEC_PATTERN=../features npm run lint
+
+  e2e-tests:
+    name: E2E tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: "recursive"
+
+      - name: Build and start application
+        run: |
+          docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/
+          docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
+          docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
+          docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env up -d
+          sleep 15
+
+      - name: Run functional tests
+        run: |
+          docker run --rm \
+          --env-file docker/integration/.env \
+          --env TZ=Europe/Paris \
+          --network test-network \
+          -v "$(pwd)/tests/features":/app/features \
+          vincentmoittie/e2e-test-runner:latest
+
+      - name: Stop application
+        if: always()
+        run: docker compose -f docker/integration/docker-compose.yml down

@@ -6,6 +6,19 @@ Follow these steps carefully to ensure consistency across all repositories and s
 
 ---
 
+## 0️⃣ Create a Release Branch
+
+Before updating submodules, create a **release branch** from `main`:
+
+```bash
+git checkout main
+git pull
+git checkout -b release/vX.X.X
+git push origin release/vX.X.X
+```
+
+This branch will be used to prepare the release before creating the stable branch.
+
 ## 1️⃣ Update Submodules
 
 Update every submodule to the latest available **tag**:
@@ -21,7 +34,8 @@ Verify:
 git submodule foreach "git describe --tags"
 ```
 
-Then **update the README** to ensure the **submodules list and their associated tags** are correct and reflect the newly selected versions.
+Then **update the README** to ensure the **submodules list and their associated tags** are correct and reflect the newly
+selected versions.
 
 Make sure the section documenting submodules now references the updated tags.
 

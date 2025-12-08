@@ -83,7 +83,8 @@ The following modules are planned for future releases:
 - **Buildings Management Module** – Manage company buildings and their attributes.
 - **Roles & Functions Module** – Manage user roles, functions, and positions within the organization.
 
-> Each module is designed to be independent whenever possible, but some modules can extend others to add extra features or interfaces.
+> Each module is designed to be independent whenever possible, but some modules can extend others to add extra features
+> or interfaces.
 > All modules can be configured for your organization in terms of data, display, and design.
 
 ---
@@ -92,7 +93,8 @@ The following modules are planned for future releases:
 
 You can find more detailed information in the `docs/` folder:
 
-- **[Configuration Guide](docs/configuration.md)** – How to configure **Linid Identity Manager** and connect to different data sources.
+- **[Configuration Guide](docs/configuration.md)** – How to configure **Linid Identity Manager** and connect to
+  different data sources.
 - **[Modules Overview](docs/modules.md)** – List and description of available and planned front-end modules.
 - **[FAQ](docs/faq.md)** – Answers to common questions and troubleshooting tips.
 
@@ -100,7 +102,8 @@ You can find more detailed information in the `docs/` folder:
 
 ## 📄 License
 
-**Linid Identity Manager** is **open source** and licensed under the [GNU Affero General Public License (AGPL)](https://www.gnu.org/licenses/agpl-3.0.html).
+**Linid Identity Manager** is **open source** and licensed under
+the [GNU Affero General Public License (AGPL)](https://www.gnu.org/licenses/agpl-3.0.html).
 
 Maintained by **[Linagora](https://linagora.com/)**
 
@@ -115,11 +118,15 @@ Maintained by **[Linagora](https://linagora.com/)**
 **Linid Identity Manager** is composed of multiple projects, each responsible for a specific part of the system:
 
 - **[linid-im-api](https://github.com/linagora/linid-im-api)** – The main back-end API for managing data.
-- **[linid-im-api-community-plugins](https://github.com/linagora/linid-im-api-community-plugins)** – Community-contributed plugins for the back-end API.
-- **[linid-im-api-corelib](https://github.com/linagora/linid-im-api-corelib)** – Core libraries and utilities for the back-end api and back-end plugins.
+- **[linid-im-api-community-plugins](https://github.com/linagora/linid-im-api-community-plugins)** –
+  Community-contributed plugins for the back-end API.
+- **[linid-im-api-corelib](https://github.com/linagora/linid-im-api-corelib)** – Core libraries and utilities for the
+  back-end api and back-end plugins.
 - **[linid-im-front](https://github.com/linagora/linid-im-front)** – Main front-end application.
-- **[linid-im-front-community-plugins](https://github.com/linagora/linid-im-front-community-plugins)** – Community-contributed modules for the front-end.
-- **[linid-im-front-corelib](https://github.com/linagora/linid-im-front-corelib)** – Core libraries and utilities for the front-end and modules.
+- **[linid-im-front-community-plugins](https://github.com/linagora/linid-im-front-community-plugins)** –
+  Community-contributed modules for the front-end.
+- **[linid-im-front-corelib](https://github.com/linagora/linid-im-front-corelib)** – Core libraries and utilities for
+  the front-end and modules.
 
 ---
 
@@ -132,9 +139,9 @@ Here are the submodules and the tags currently in use:
 
 | Submodule                            | Tag Used |
 | ------------------------------------ | -------- |
-| **linid-im-api**                     | `v1.0.0` |
-| **linid-im-front**                   | `v1.0.0` |
-| **linid-im-front-community-plugins** | `v1.0.0` |
+| **linid-im-api**                     | `v0.1.3` |
+| **linid-im-front**                   | `v0.0.6` |
+| **linid-im-front-community-plugins** | `v0.0.1` |
 
 > You can check or update submodule tags using:
 > `git submodule foreach "git describe --tags"`

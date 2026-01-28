@@ -80,11 +80,15 @@ jobs:
         with:
           submodules: "recursive"
 
+      - name: Download plugins
+        run: ./docker/integration/scripts/init-plugins.sh
+
       - name: Build and start application
         run: |
           docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/
           docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
           docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
+          docker build -f linid-im-front-community-plugins/docker/module-users.Dockerfile -t module-users linid-im-front-community-plugins/
           docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env up -d
           sleep 15
 

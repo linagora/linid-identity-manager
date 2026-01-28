@@ -1,19 +1,37 @@
 name: test
 
 services:
+  mock-api:
+    build: ./mock-api
+    container_name: mock-api
+    networks:
+      - test-network
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/users', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
   linid-im-api:
     image: linid-im-api
     container_name: linid-im-api
     networks:
       - test-network
     ports:
-      - 8080:80
+      - 8080:8080
     volumes:
       - ./resources:/app/resources
     environment:
       - CONFIGURATION_PATH=${CONFIGURATION_PATH}
       - PLUGIN_LOADER_PATH=${PLUGIN_LOADER_PATH}
       - I18N_EXTERNAL_PATH=${I18N_EXTERNAL_PATH}
+      - AUTHORIZATION_ACCEPT_ALLOW_ALL=${AUTHORIZATION_ACCEPT_ALLOW_ALL}
+    depends_on:
+      mock-api:
+        condition: service_healthy
 
   linid-im-front:
     image: linid-im-front
@@ -22,6 +40,9 @@ services:
       - test-network
     ports:
       - 9000:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./remotes.json:/usr/share/nginx/html/remotes.json:ro
 
   catalog-ui:
     image: catalog-ui
@@ -30,6 +51,20 @@ services:
       - test-network
     ports:
       - 5001:80
+    volumes:
+      - ./nginx-modules.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - linid-im-front
+
+  module-users:
+    image: module-users
+    container_name: module-users
+    networks:
+      - test-network
+    ports:
+      - 5002:80
+    volumes:
+      - ./nginx-modules.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - linid-im-front
 

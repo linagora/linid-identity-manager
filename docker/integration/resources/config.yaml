@@ -1,6 +1,10 @@
 authorization:
   type: allow-all
 
+tasks:
+  - type: response-to-json
+    name: parseJsonResponse
+
 providers:
   - name: http-provider
     type: http
@@ -12,6 +16,14 @@ entities:
   - name: user
     route: users
     provider: http-provider
+    tasks:
+      - name: parseJsonResponse
+        phases:
+          - beforeResponseMappingFindAll
+          - beforeResponseMappingFindById
+          - beforeResponseMappingCreate
+          - beforeResponseMappingUpdate
+          - beforeResponseMappingPatch
     access:
       findAll:
         uri: /api/users
@@ -79,23 +91,29 @@ entities:
         type: UUID
         required: true
         input: text
+        validations: []
       - name: email
         type: string
         required: true
         input: email
+        validations: []
       - name: firstName
         type: string
         required: true
         input: text
+        validations: []
       - name: lastName
         type: string
         required: true
         input: text
+        validations: []
       - name: displayName
         type: string
         required: false
         input: text
+        validations: []
       - name: enabled
         type: boolean
         required: false
         input: checkbox
+        validations: []

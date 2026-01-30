@@ -194,7 +194,7 @@ Feature: Test API Users Module
   ####################################################
 
   Scenario: Should delete an existing user
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000002' with method 'DELETE'
+    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000004' with method 'DELETE'
     Then I expect status code is 204
 
   Scenario: Should return 404 when deleting non-existent user

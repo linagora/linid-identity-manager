@@ -1,0 +1,65 @@
+version: '3'
+
+vars:
+  E2E_API_URL: http://localhost:8080
+  E2E_FRONT_URL: http://localhost:9000
+  FEATURES_PATH: ../features
+  COMPOSE_FILE: docker/integration/docker-compose.yml
+  COMPOSE_ENV: docker/integration/local.env
+
+tasks:
+  e2e:install:
+    desc: Install E2E test dependencies
+    dir: tests/e2e
+    cmd: npm install
+
+  e2e:reset-mock-api:
+    desc: Restart mock-api container to reset in-memory data
+    cmd: docker compose -f {{.COMPOSE_FILE}} --env-file {{.COMPOSE_ENV}} restart mock-api
+
+  e2e:
+    desc: Run E2E tests locally (requires servers on localhost:8080 and :9000)
+    dir: tests/e2e
+    deps: [e2e:install, e2e:reset-mock-api]
+    env:
+      CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
+      E2E_API_URL: "{{.E2E_API_URL}}"
+      E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
+    cmd: npm run start
+
+  e2e:ui:
+    desc: Open Cypress UI for interactive testing
+    dir: tests/e2e
+    deps: [e2e:install, e2e:reset-mock-api]
+    env:
+      CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
+      E2E_API_URL: "{{.E2E_API_URL}}"
+      E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
+    cmd: npm run start:ui
+
+  e2e:lint:
+    desc: Lint Gherkin feature files
+    dir: tests/e2e
+    cmd: npx gherkin-lint "{{.FEATURES_PATH}}/**/*.feature"
+
+  e2e:spec:
+    desc: "Run specific test(s) - usage: task e2e:spec -- ../features/api/Health.feature"
+    dir: tests/e2e
+    deps: [e2e:install, e2e:reset-mock-api]
+    env:
+      CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
+      E2E_API_URL: "{{.E2E_API_URL}}"
+      E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
+    cmd: npx cypress run --spec "{{.CLI_ARGS}}"
+
+  e2e:docker:
+    desc: Run E2E tests in Docker (CI mode, requires test-network)
+    cmd: |
+      docker run --rm \
+        -e E2E_API_URL=http://linid-im-api:8080 \
+        -e E2E_FRONT_URL=http://linid-im-front \
+        -e CYPRESS_FEATURES_PATH=/app/features \
+        -e TZ=Europe/Paris \
+        --network test-network \
+        -v "$(pwd)/tests/features":/app/features \
+        vincentmoittie/e2e-test-runner:latest

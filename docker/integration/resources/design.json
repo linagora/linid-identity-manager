@@ -1,0 +1,119 @@
+{
+  "default": {
+    "q-btn": {
+      "dense": true,
+      "outline": true,
+      "color": "primary",
+      "noCaps": true
+    },
+    "q-tabs": {
+      "dense": false,
+      "align": "left",
+      "noCaps": true,
+      "inlineLabel": true,
+      "activeBgColor": "primary"
+    },
+    "q-route-tab": {
+      "noCaps": true
+    },
+    "q-table": {
+      "dense": true
+    },
+    "q-header": {
+      "elevated": true
+    },
+    "q-toolbar": {
+      "inset": false
+    },
+    "q-toolbar-title": {
+      "shrink": false
+    },
+    "q-badge": {
+      "color": "primary",
+      "align": "middle",
+      "floating": false
+    },
+    "q-input": {
+      "dense": true,
+      "outlined": true
+    },
+    "q-card-actions": {
+      "align": "right"
+    },
+    "q-avatar": {
+      "size": "md",
+      "color": "primary"
+    },
+    "q-icon": {
+      "size": "sm"
+    },
+    "q-toggle": {
+      "dense": true,
+      "color": "primary"
+    },
+    "q-card": {},
+    "q-date": {},
+    "q-img": {}
+  },
+  "base-layout": {
+    "header": {
+      "navigation-menu": {
+        "route-moduleUsers": {
+          "q-route-tab": {
+            "icon": "person",
+            "noCaps": true
+          }
+        }
+      },
+      "q-img": {
+        "src": "/toolbarApplicationLogo.svg"
+      }
+    }
+  },
+  "moduleUsers": {
+    "user-details-page": {
+      "entity-details-card": {
+        "id": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "badge"
+            }
+          }
+        },
+        "email": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "mail"
+            }
+          }
+        },
+        "firstName": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "account_circle"
+            }
+          }
+        },
+        "lastName": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "account_circle"
+            }
+          }
+        },
+        "role": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "admin_panel_settings"
+            }
+          }
+        }
+      }
+    }
+  }
+}

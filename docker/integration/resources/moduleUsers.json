@@ -1,0 +1,70 @@
+{
+  "instanceId": "moduleUsers",
+  "remoteName": "moduleUsers",
+  "apiEndpoint": "api/users",
+  "options": {
+    "userIdKey": "id",
+    "userTableColumns": [
+      {
+        "name": "table_actions",
+        "field": "id",
+        "label": "columnAction",
+        "style": "width: 150px",
+        "headerStyle": "width: 150px"
+      },
+      {
+        "name": "email",
+        "field": "email",
+        "label": "columnEmail",
+        "align": "left",
+        "sortable": true
+      },
+      {
+        "name": "firstName",
+        "field": "firstName",
+        "label": "columnFirstName",
+        "align": "left",
+        "sortable": true
+      },
+      {
+        "name": "lastName",
+        "field": "lastName",
+        "label": "columnLastName",
+        "align": "left",
+        "sortable": true
+      }
+    ],
+    "advancedSearch": {
+      "fields": [
+        {
+          "name": "email",
+          "type": "String",
+          "required": false,
+          "hasValidations": false,
+          "input": "Text",
+          "inputSettings": {}
+        },
+        {
+          "name": "firstName",
+          "type": "String",
+          "required": false,
+          "hasValidations": false,
+          "input": "Text",
+          "inputSettings": {}
+        },
+        {
+          "name": "lastName",
+          "type": "String",
+          "required": false,
+          "hasValidations": false,
+          "input": "Text",
+          "inputSettings": {}
+        }
+      ],
+      "defaultFieldsNames": ["email", "firstName"],
+      "advancedFieldsNames": ["lastName"]
+    },
+    "fieldOrder": ["id", "email", "firstName", "lastName", "role"],
+    "showRemainingFields": false
+  }
+}

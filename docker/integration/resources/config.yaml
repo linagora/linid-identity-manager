@@ -1,57 +1,119 @@
-providers:
-  - name: LDAP1
-    type: ldap
-    # custom plugin options
-    url: X
-  - name: LDAP2
-    type: ldap
-    # custom plugin options
-    url: X
-
-routes:
-  - type: export
-    # options
-    exportType: xml
+authorization:
+  type: allow-all
 
 tasks:
-  - type: S3SaveTask
-    name: saveDocument
-    # custom plugin options
-    url: X
-  - type: S3SaveTask
-    name: saveExcel
-    # custom plugin options
-    url: X
+  - type: response-to-json
+    name: parseJsonResponse
 
-validations:
-  - type: regex
-    name: regex1
-    pattern: ^/d$
-    ignoreCase: true
-    accessibleFront: false
-    phase: [ 'beforeCreate' ]
+providers:
+  - name: http-provider
+    type: http
+    baseUrl: http://mock-api:3000
+    headers:
+      Content-Type: application/json
 
 entities:
   - name: user
     route: users
-    provider: LDAP1
-    disabledRoutes: [ "delete" ]
-    access:
-      baseDn: "ou=users,dc=example,dc=com"
-      filter: "(objectClass=person)"
+    provider: http-provider
     tasks:
-      - name: saveDocument
-        phase: [ 'beforeCreate', 'beforeExport' ]
+      - name: parseJsonResponse
+        phases:
+          - beforeResponseMappingFindAll
+          - beforeResponseMappingFindById
+          - beforeResponseMappingCreate
+          - beforeResponseMappingUpdate
+          - beforeResponseMappingPatch
+    access:
+      findAll:
+        uri: /api/users
+        method: GET
+        page: "{{ context.response.pageable.pageNumber }}"
+        size: "{{ context.response.pageable.pageSize }}"
+        total: "{{ context.response.totalElements }}"
+        itemsCount: "{{ context.response.content | length }}"
+        entityMapping:
+          id: "{{ context.response.content[index].id }}"
+          email: "{{ context.response.content[index].email }}"
+          firstName: "{{ context.response.content[index].firstName }}"
+          lastName: "{{ context.response.content[index].lastName }}"
+          displayName: "{{ context.response.content[index].displayName }}"
+          enabled: "{{ context.response.content[index].enabled }}"
+      findById:
+        uri: "/api/users/{{ context.id }}"
+        method: GET
+        entityMapping:
+          id: "{{ context.response.id }}"
+          email: "{{ context.response.email }}"
+          firstName: "{{ context.response.firstName }}"
+          lastName: "{{ context.response.lastName }}"
+          displayName: "{{ context.response.displayName }}"
+          enabled: "{{ context.response.enabled }}"
+      create:
+        uri: /api/users
+        method: POST
+        body: "{{ entity | tojson }}"
+        entityMapping:
+          id: "{{ context.response.id }}"
+          email: "{{ context.response.email }}"
+          firstName: "{{ context.response.firstName }}"
+          lastName: "{{ context.response.lastName }}"
+          displayName: "{{ context.response.displayName }}"
+          enabled: "{{ context.response.enabled }}"
+      update:
+        uri: "/api/users/{{ context.id }}"
+        method: PUT
+        body: "{{ entity | tojson }}"
+        entityMapping:
+          id: "{{ context.response.id }}"
+          email: "{{ context.response.email }}"
+          firstName: "{{ context.response.firstName }}"
+          lastName: "{{ context.response.lastName }}"
+          displayName: "{{ context.response.displayName }}"
+          enabled: "{{ context.response.enabled }}"
+      patch:
+        uri: "/api/users/{{ context.id }}"
+        method: PATCH
+        body: "{{ entity | tojson }}"
+        entityMapping:
+          id: "{{ context.response.id }}"
+          email: "{{ context.response.email }}"
+          firstName: "{{ context.response.firstName }}"
+          lastName: "{{ context.response.lastName }}"
+          displayName: "{{ context.response.displayName }}"
+          enabled: "{{ context.response.enabled }}"
+      delete:
+        uri: "/api/users/{{ context.id }}"
+        method: DELETE
+        result: "true"
     attributes:
       - name: id
         type: UUID
         required: true
         input: text
-        access:
-          ldapField: id
-        validations:
-          - name: regex1
-          - type: regex
-            pattern: ^/d$
-            ignoreCase: true
-            phase: [ 'beforeUpdate' ]
+        validations: []
+      - name: email
+        type: string
+        required: true
+        input: email
+        validations: []
+      - name: firstName
+        type: string
+        required: true
+        input: text
+        validations: []
+      - name: lastName
+        type: string
+        required: true
+        input: text
+        validations: []
+      - name: displayName
+        type: string
+        required: false
+        input: text
+        validations: []
+      - name: enabled
+        type: boolean
+        required: false
+        input: checkbox
+        validations: []

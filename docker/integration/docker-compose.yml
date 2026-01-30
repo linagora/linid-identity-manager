@@ -18,6 +18,8 @@ services:
     container_name: linid-im-api
     networks:
       - test-network
+    ports:
+      - 8080:8080
     volumes:
       - ../plugins:/plugins
       - ./resources/config.yaml:/config/config.yaml

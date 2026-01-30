@@ -5,6 +5,18 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
+// Helper to create API error response matching linid-im-api format
+function createErrorResponse(status, errorKey, errorContext = {}, details = {}) {
+  return {
+    error: errorKey, // In real API, this would be i18n translated
+    errorKey,
+    errorContext,
+    status: status,
+    timestamp: Date.now(),
+    ...details,
+  };
+}
+
 const users = [
   {
     id: '00000000-0000-0000-0000-000000000001',
@@ -48,7 +60,7 @@ app.get('/api/users/:id', (req, res) => {
   const user = users.find((u) => u.id === req.params.id);
 
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
   }
 
   res.json(user);
@@ -70,7 +82,7 @@ app.put('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
   }
 
   users[index] = { ...users[index], ...req.body };
@@ -82,7 +94,7 @@ app.patch('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
   }
 
   users[index] = { ...users[index], ...req.body };
@@ -94,7 +106,7 @@ app.delete('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json({ error: 'User not found' });
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
   }
 
   users.splice(index, 1);

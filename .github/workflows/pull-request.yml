@@ -83,6 +83,16 @@ jobs:
       - name: Download plugins
         run: ./docker/scripts/init-plugins.sh
 
+      - name: Clean submodule caches and fix Dockerfiles
+        run: |
+          rm -rf linid-im-front-community-plugins/.nx
+          rm -rf linid-im-front-community-plugins/dist
+          rm -rf linid-im-front-community-plugins/node_modules
+          find linid-im-front-community-plugins/apps -name node_modules -type d -exec rm -rf {} + 2>/dev/null || true
+          # Fix Dockerfiles to clean all node_modules including nested ones
+          sed -i 's/RUN rm -rf node_modules/RUN find . -name node_modules -type d -exec rm -rf {} + 2>\/dev\/null || true \&\& rm -rf .nx dist/' linid-im-front-community-plugins/docker/catalog-ui.Dockerfile
+          sed -i 's/RUN rm -rf node_modules/RUN find . -name node_modules -type d -exec rm -rf {} + 2>\/dev\/null || true \&\& rm -rf .nx dist/' linid-im-front-community-plugins/docker/module-users.Dockerfile
+
       - name: Build and start application
         run: |
           docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/

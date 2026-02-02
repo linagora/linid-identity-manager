@@ -26,7 +26,7 @@ entities:
           - beforeResponseMappingPatch
     access:
       findAll:
-        uri: /api/users
+        uri: "/api/users?page={{ context.pageable.pageNumber }}&size={{ context.pageable.pageSize }}{% if context.filters.email %}&email={{ context.filters.email[0] }}{% endif %}{% if context.filters.firstName %}&firstName={{ context.filters.firstName[0] }}{% endif %}{% if context.filters.lastName %}&lastName={{ context.filters.lastName[0] }}{% endif %}"
         method: GET
         page: "{{ context.response.pageable.pageNumber }}"
         size: "{{ context.response.pageable.pageSize }}"

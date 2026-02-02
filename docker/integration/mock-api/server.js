@@ -34,23 +34,66 @@ const users = [
     displayName: 'Jane Roe',
     enabled: true,
   },
+  {
+    id: '00000000-0000-0000-0000-000000000003',
+    email: 'alice.smith@example.com',
+    firstName: 'Alice',
+    lastName: 'Smith',
+    displayName: 'Alice Smith',
+    enabled: true,
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000004',
+    email: 'bob.johnson@example.com',
+    firstName: 'Bob',
+    lastName: 'Johnson',
+    displayName: 'Bob Johnson',
+    enabled: false,
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000005',
+    email: 'charlie.doe@example.com',
+    firstName: 'Charlie',
+    lastName: 'Doe',
+    displayName: 'Charlie Doe',
+    enabled: true,
+  },
 ];
 
-// Find all users
-app.get('/api/users', (_req, res) => {
-  const page = parseInt(_req.query.page || '0', 10);
-  const size = parseInt(_req.query.size || '10', 10);
-  const start = page * size;
-  const content = users.slice(start, start + size);
+// Find all users with optional filtering
+app.get('/api/users', (req, res) => {
+  const page = parseInt(req.query.page || '0', 10);
+  const size = parseInt(req.query.size || '10', 10);
 
-  res.json({
+  // Filter users based on query parameters
+  let filteredUsers = users.filter((user) => {
+    if (req.query.email && !user.email.toLowerCase().includes(req.query.email.toLowerCase())) {
+      return false;
+    }
+    if (req.query.firstName && !user.firstName.toLowerCase().includes(req.query.firstName.toLowerCase())) {
+      return false;
+    }
+    if (req.query.lastName && !user.lastName.toLowerCase().includes(req.query.lastName.toLowerCase())) {
+      return false;
+    }
+    return true;
+  });
+
+  const start = page * size;
+  const content = filteredUsers.slice(start, start + size);
+  const totalPages = Math.ceil(filteredUsers.length / size);
+
+  // Return 206 Partial Content when there are more pages
+  const statusCode = totalPages > 1 ? 206 : 200;
+
+  res.status(statusCode).json({
     content,
     pageable: {
       pageNumber: page,
       pageSize: size,
     },
-    totalElements: users.length,
-    totalPages: Math.ceil(users.length / size),
+    totalElements: filteredUsers.length,
+    totalPages,
     numberOfElements: content.length,
   });
 });

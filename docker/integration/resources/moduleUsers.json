@@ -1,6 +1,7 @@
 {
   "instanceId": "moduleUsers",
   "remoteName": "moduleUsers",
+  "basePath": "/moduleUsers",
   "apiEndpoint": "api/users",
   "options": {
     "userIdKey": "id",

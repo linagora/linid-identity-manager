@@ -87,13 +87,31 @@
     },
     "fields": {
       "email": {
-        "label": "Email"
+        "label": "Email",
+        "validation": {
+          "required": "Email is required.",
+          "pattern": "Email must be a valid email address.",
+          "maxLength": "Email cannot exceed {max} characters.",
+          "unknownError": "An unknown error occurred."
+        }
       },
       "firstName": {
-        "label": "First Name"
+        "label": "First Name",
+        "validation": {
+          "required": "First Name is required.",
+          "minLength": "First Name must be at least {min} characters.",
+          "maxLength": "First Name cannot exceed {max} characters.",
+          "unknownError": "An unknown error occurred."
+        }
       },
       "lastName": {
-        "label": "Last Name"
+        "label": "Last Name",
+        "validation": {
+          "required": "Last Name is required.",
+          "minLength": "Last Name must be at least {min} characters.",
+          "maxLength": "Last Name cannot exceed {max} characters.",
+          "unknownError": "An unknown error occurred."
+        }
       },
       "displayName": {
         "label": "Display name"

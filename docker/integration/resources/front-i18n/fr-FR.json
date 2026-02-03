@@ -87,16 +87,34 @@
     },
     "fields": {
       "email": {
-        "label": "Email"
+        "label": "Email",
+        "validation": {
+          "required": "L'email est requis.",
+          "pattern": "L'email doit être une adresse email valide.",
+          "maxLength": "L'email ne peut pas dépasser {max} caractères.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
       },
       "firstName": {
-        "label": "Prénom"
+        "label": "Prénom",
+        "validation": {
+          "required": "Le prénom est requis.",
+          "minLength": "Le prénom doit comporter au moins {min} caractères.",
+          "maxLength": "Le prénom ne peut pas dépasser {max} caractères.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
       },
       "lastName": {
-        "label": "Nom"
+        "label": "Nom",
+        "validation": {
+          "required": "Le nom est requis.",
+          "minLength": "Le nom doit comporter au moins {min} caractères.",
+          "maxLength": "Le nom ne peut pas dépasser {max} caractères.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
       },
       "displayName": {
-        "label": "Nom d'affichage"
+        "label": "Nom complet"
       },
       "enabled": {
         "label": "Activé"

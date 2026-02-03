@@ -84,12 +84,11 @@ Feature: Test API Users Module
     And  I expect '{{response.body.id}}' is '00000000-0000-0000-0000-000000000001'
     And  I expect '{{response.body.email}}' is not empty
 
-  # Note: errorKey should be error.entity.notFound - see linagora/linid-im-api#13
   Scenario: 302 - Should return 404 for unknown user id
     When I request '{{env.E2E_API_URL}}/api/users/unknown-id-that-does-not-exist' with method 'GET'
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
-    And  I expect '{{response.body.errorKey}}' is 'hpp.error400'
+    And  I expect '{{response.body.errorKey}}' is 'hpp.error404'
 
   ####################################################
   ################## Create (POST /api/users) ########
@@ -175,7 +174,6 @@ Feature: Test API Users Module
     And  I expect '{{response.body.error}}' is 'Bad Request'
     And  I expect '{{response.body.status}}' is '400'
 
-  # Note: errorKey should be error.entity.notFound - see linagora/linid-im-api#13
   Scenario: 503 - Should return 404 when updating non-existent user
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-12345' with method 'PUT' with body:
@@ -184,7 +182,7 @@ Feature: Test API Users Module
       """
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
-    And  I expect '{{response.body.errorKey}}' is 'hpp.error400'
+    And  I expect '{{response.body.errorKey}}' is 'hpp.error404'
 
   # TODO: Required field validation not implemented - see linagora/linid-im-api#11
   # Scenario: Should return 400 when updating user without email
@@ -244,7 +242,6 @@ Feature: Test API Users Module
     And  I expect '{{response.body.error}}' is 'Bad Request'
     And  I expect '{{response.body.status}}' is '400'
 
-  # Note: errorKey should be error.entity.notFound - see linagora/linid-im-api#13
   Scenario: 603 - Should return 404 when patching non-existent user
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-67890' with method 'PATCH' with body:
@@ -253,7 +250,7 @@ Feature: Test API Users Module
       """
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
-    And  I expect '{{response.body.errorKey}}' is 'hpp.error400'
+    And  I expect '{{response.body.errorKey}}' is 'hpp.error404'
 
   ####################################################
   ################## Delete (DELETE /api/users/{id})
@@ -263,9 +260,8 @@ Feature: Test API Users Module
     When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000001' with method 'DELETE'
     Then I expect status code is 204
 
-  # Note: errorKey should be error.entity.notFound - see linagora/linid-im-api#13
   Scenario: 702 - Should return 404 when deleting non-existent user
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-99999' with method 'DELETE'
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
-    And  I expect '{{response.body.errorKey}}' is 'hpp.error400'
+    And  I expect '{{response.body.errorKey}}' is 'hpp.error404'

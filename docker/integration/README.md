@@ -10,6 +10,7 @@ All services are containerized with ports exposed for debugging and test access.
 git submodule update --init --recursive
 
 # Build Docker images
+docker build -t mock-api docker/integration/mock-api/
 docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/
 docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
 docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/

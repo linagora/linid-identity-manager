@@ -26,6 +26,7 @@ npm install -g dotenv-cli
 Build all the docker images of the application stack.
 
 ```bash
+docker build -t mock-api docker/integration/mock-api/
 docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/
 docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
 docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
@@ -61,6 +62,9 @@ task e2e:ui
 
 # Run a specific test file
 task e2e:spec -- ../features/front/Home.feature
+
+# Run tests inside a Docker container (recommended for CI-like behavior)
+task e2e:docker
 
 # Lint Gherkin feature files
 task e2e:lint
@@ -118,11 +122,13 @@ tests/features/
 │   ├── I18N.feature        # Internationalization endpoints
 │   ├── Metadata.feature    # Metadata endpoints
 │   └── users/              # Users module API tests
+│       ├── AdvancedSearch.feature
 │       ├── ModuleUsers.feature
 │       └── ModuleUsersSandbox.feature
 └── front/                  # Frontend tests
     ├── Home.feature        # Homepage validation
     └── users/              # Users module frontend tests
+        ├── AdvancedSearch.feature
         ├── ModuleUsers.feature
         └── ModuleUsersSandbox.feature
 ```

@@ -77,8 +77,8 @@ Feature: Test Frontend Advanced Search
     ####################################################
     ####################### Search #####################
     ####################################################
-    # 501 Should verify initial state: 5 users in table
-    And  I expect the HTML element '.q-table tbody tr' appear 5 times on screen
+    # 501 Should verify initial state: 6 users in table
+    And  I expect the HTML element '.q-table tbody tr' appear 6 times on screen
 
     # 502 Should filter table data when searching by email
     When I set the text 'alice.smith' in the HTML element 'input[data-cy="field_email"]'

@@ -58,6 +58,14 @@ const users = [
     displayName: 'Charlie Doe',
     enabled: true,
   },
+  {
+    id: '00000000-0000-0000-0000-000000000006',
+    email: 'eva.martin@example.com',
+    firstName: 'Eva',
+    lastName: 'Martin',
+    displayName: 'Eva Martin',
+    enabled: true,
+  },
 ];
 
 // Find all users with optional filtering

@@ -111,6 +111,9 @@ entities:
         type: String
         required: true
         input: Text
+        inputSettings:
+          minLength: 3
+          maxLength: 20
         validations:
           - type: required
             phases: [beforeCreate, beforeUpdate]
@@ -118,6 +121,9 @@ entities:
         type: String
         required: true
         input: Text
+        inputSettings:
+          minLength: 3
+          maxLength: 20
         validations:
           - type: required
             phases: [beforeCreate, beforeUpdate]
@@ -129,6 +135,4 @@ entities:
         input: Boolean
       - name: role
         type: String
-        required: false
         input: Text
-        validations: []

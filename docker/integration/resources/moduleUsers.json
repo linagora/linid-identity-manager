@@ -1,5 +1,6 @@
 {
   "instanceId": "moduleUsers",
+  "entity": "users",
   "remoteName": "moduleUsers",
   "basePath": "/moduleUsers",
   "apiEndpoint": "api/users",
@@ -66,6 +67,13 @@
       "advancedFieldsNames": ["lastName"]
     },
     "fieldOrder": ["id", "email", "firstName", "lastName", "role"],
-    "showRemainingFields": false
+    "showRemainingFields": false,
+    "formSections": [
+      {
+        "id": "main",
+        "order": 1,
+        "fieldsOrder": ["email", "firstName", "lastName", "enabled"]
+      }
+    ]
   }
 }

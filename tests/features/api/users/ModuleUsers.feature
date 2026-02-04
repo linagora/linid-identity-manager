@@ -46,7 +46,7 @@ Feature: Test API Users Module
     When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
     Then I expect status code is 200
     And  I expect '{{response.body.name}}' is 'user'
-    And  I expect '{{response.body.attributes.length}}' is '6'
+    And  I expect '{{response.body.attributes.length}}' is '7'
     And  I expect '{{response.body.attributes[0].name}}' is 'id'
     And  I expect '{{response.body.attributes[1].name}}' is 'email'
     And  I expect '{{response.body.attributes[2].name}}' is 'firstName'

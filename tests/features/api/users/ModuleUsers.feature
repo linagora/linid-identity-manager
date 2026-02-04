@@ -16,13 +16,13 @@ Feature: Test API Users Module
 
   ################## Create (POST /api/users) ########
   ## 401 Should return 400 for invalid JSON body on POST
-  ## 402 Should create a new user with all required fields
-  ## 403 Should return 400 when creating user without email (skipped - linagora/linid-im-api#11)
-  ## 404 Should return 400 when creating user without firstName (skipped - linagora/linid-im-api#11)
-  ## 405 Should return 400 when creating user without lastName (skipped - linagora/linid-im-api#11)
+  ## 402 Should create a new user with all required fields and remove it
+  ## 404 Should return 400 when creating user without email (skipped - linagora/linid-im-api#11)
+  ## 405 Should return 400 when creating user without firstName (skipped - linagora/linid-im-api#11)
+  ## 406 Should return 400 when creating user without lastName (skipped - linagora/linid-im-api#11)
 
   ################## Update (PUT /api/users/{id}) ####
-  ## 501 Should return 200 when updating existing user
+  ## 501 Should return 200 when updating a user
   ## 502 Should return 400 for invalid JSON body on PUT
   ## 503 Should return 404 when updating non-existent user
   ## 504 Should return 400 when updating user without email (skipped - linagora/linid-im-api#11)
@@ -30,7 +30,7 @@ Feature: Test API Users Module
   ## 506 Should return 400 when updating user without lastName (skipped - linagora/linid-im-api#11)
 
   ################## Partial Update (PATCH /api/users/{id})
-  ## 601 Should return 200 when patching existing user
+  ## 601 Should return 200 when patching a user
   ## 602 Should return 400 for invalid JSON body on PATCH
   ## 603 Should return 404 when patching non-existent user
 
@@ -38,8 +38,8 @@ Feature: Test API Users Module
   ## 701 Should return 204 when deleting existing user
   ## 702 Should return 404 when deleting non-existent user
 
-  ####################################################
   ################## Metadata ########################
+  ####################################################
   ####################################################
 
   Scenario: 101 - Should return users entity metadata with name and attributes
@@ -104,7 +104,7 @@ Feature: Test API Users Module
     And  I expect '{{response.body.error}}' is 'Bad Request'
     And  I expect '{{response.body.status}}' is '400'
 
-  Scenario: 402 - Should create a new user with all required fields
+  Scenario: 402 - Should create a new user with all required fields and remove it
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
@@ -115,6 +115,9 @@ Feature: Test API Users Module
     And  I expect '{{response.body.email}}' is 'test.create@example.com'
     And  I expect '{{response.body.firstName}}' is 'Test'
     And  I expect '{{response.body.lastName}}' is 'Create'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   # TODO: Required field validation not implemented - see linagora/linid-im-api#11
   # Scenario: Should return 400 when creating user without email
@@ -154,15 +157,31 @@ Feature: Test API Users Module
   ################## Update (PUT /api/users/{id}) ####
   ####################################################
 
-  Scenario: 501 - Should return 200 when updating existing user
+  Scenario: 501 - Should return 200 when updating a user
     Given I set http header 'Content-Type' with 'application/json'
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000001' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "john.updated@example.com", "firstName": "John", "lastName": "Updated"}
+      {"email": "test.put@example.com", "firstName": "Test", "lastName": "Put"}
+      """
+
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'PUT' with body:
+      """
+      {"email": "test.put.updated@example.com", "firstName": "TestUpdated", "lastName": "PutUpdated"}
       """
     Then I expect status code is 200
-    And  I expect '{{response.body.id}}' is '00000000-0000-0000-0000-000000000001'
-    And  I expect '{{response.body.email}}' is 'john.updated@example.com'
+    And  I expect '{{response.body.email}}' is 'test.put.updated@example.com'
+    And  I expect '{{response.body.firstName}}' is 'TestUpdated'
+    And  I expect '{{response.body.lastName}}' is 'PutUpdated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.email}}' is 'test.put.updated@example.com'
+    And  I expect '{{response.body.firstName}}' is 'TestUpdated'
+    And  I expect '{{response.body.lastName}}' is 'PutUpdated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 502 - Should return 400 for invalid JSON body on PUT
     Given I set http header 'Content-Type' with 'application/json'
@@ -185,7 +204,7 @@ Feature: Test API Users Module
     And  I expect '{{response.body.errorKey}}' is 'hpp.error404'
 
   # TODO: Required field validation not implemented - see linagora/linid-im-api#11
-  # Scenario: Should return 400 when updating user without email
+  # ## Should return 400 when updating user without email
   #   Given I set http header 'Content-Type' with 'application/json'
   #   When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
   #     """
@@ -222,15 +241,30 @@ Feature: Test API Users Module
   ################## Partial Update (PATCH /api/users/{id})
   ####################################################
 
-  Scenario: 601 - Should return 200 when patching existing user
+  Scenario: 601 - Should return 200 when patching a user
     Given I set http header 'Content-Type' with 'application/json'
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000002' with method 'PATCH' with body:
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"displayName": "Jane Updated"}
+      {"email": "test.patch@example.com", "firstName": "Test", "lastName": "Patch", "displayName": "Test Patch Original"}
+      """
+
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'PATCH' with body:
+      """
+      {"displayName": "Test Patch Updated"}
       """
     Then I expect status code is 200
-    And  I expect '{{response.body.id}}' is '00000000-0000-0000-0000-000000000002'
-    And  I expect '{{response.body.displayName}}' is 'Jane Updated'
+    And  I expect '{{response.body.displayName}}' is 'Test Patch Updated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.email}}' is 'test.patch@example.com'
+    And  I expect '{{response.body.firstName}}' is 'Test'
+    And  I expect '{{response.body.lastName}}' is 'Patch'
+    And  I expect '{{response.body.displayName}}' is 'Test Patch Updated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 602 - Should return 400 for invalid JSON body on PATCH
     Given I set http header 'Content-Type' with 'application/json'
@@ -256,9 +290,21 @@ Feature: Test API Users Module
   ################## Delete (DELETE /api/users/{id})
   ####################################################
 
-  Scenario: 701 - Should return 204 when deleting existing user
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000001' with method 'DELETE'
+  Scenario: 701 - Should return 204 when deleting a user
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
+      """
+      {"email": "test.delete@example.com", "firstName": "Test", "lastName": "Delete"}
+      """
+    Then I expect status code is 201
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
     Then I expect status code is 204
+
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.status}}' is '404'
 
   Scenario: 702 - Should return 404 when deleting non-existent user
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-99999' with method 'DELETE'

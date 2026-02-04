@@ -89,31 +89,31 @@ entities:
     attributes:
       - name: id
         type: UUID
-        required: true
         input: text
-        validations: []
       - name: email
         type: string
         required: true
         input: email
-        validations: []
+        validations:
+          - type: required
+            phases: [beforeCreate, beforeUpdate]
       - name: firstName
         type: string
         required: true
         input: text
-        validations: []
+        validations:
+          - type: required
+            phases: [beforeCreate, beforeUpdate]
       - name: lastName
         type: string
         required: true
         input: text
-        validations: []
+        validations:
+          - type: required
+            phases: [beforeCreate, beforeUpdate]
       - name: displayName
         type: string
-        required: false
         input: text
-        validations: []
       - name: enabled
         type: boolean
-        required: false
         input: checkbox
-        validations: []

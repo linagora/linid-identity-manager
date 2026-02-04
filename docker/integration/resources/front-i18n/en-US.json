@@ -1,0 +1,41 @@
+{
+  "application": {
+    "title": "Linid - Identity Manager",
+    "version": "Integration version"
+  },
+  "Homepage": {
+    "title": "LinID Identity Manager",
+    "intro": "<strong>LinID Identity Manager</strong> is an open source Identity and Access Management (IAM) solution. This project aims to provide a secure, extensible, and standards-compliant platform to manage users, their rights, and their access within organizations.",
+    "opensource": "<strong>Open source project</strong> developed and maintained by <a href=\"https://linagora.com\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>.",
+    "license": "This project is released under the <strong>GNU Affero General Public License v3</strong> (AGPLv3), ensuring that it remains free and open source for everyone.",
+    "links": "<ul class=\"q-pl-md\"><li>Source code available on <a href=\"https://github.com/linagora/linid-im-front\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>If you find a bug or an issue, please report it <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">here</a>.</li></ul>",
+    "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>A project by</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
+  },
+  "moduleUsers": {
+    "HomePage": {
+      "title": "Users",
+      "seeButton": "See",
+      "error": "Failed to load users",
+      "columnAction": "Actions",
+      "columnEmail": "Email",
+      "columnFirstName": "First Name",
+      "columnLastName": "Last Name",
+      "AdvancedSearchCard": {
+        "title": "Search",
+        "moreFilters": "More filters",
+        "lessFilters": "Less filters"
+      }
+    },
+    "fields": {
+      "email": {
+        "label": "Email"
+      },
+      "firstName": {
+        "label": "First Name"
+      },
+      "lastName": {
+        "label": "Last Name"
+      }
+    }
+  }
+}

@@ -17,17 +17,17 @@ Feature: Test API Users Module
   ################## Create (POST /api/users) ########
   ## 401 Should return 400 for invalid JSON body on POST
   ## 402 Should create a new user with all required fields
-  ## 403 Should return 400 when creating user without email (skipped - linagora/linid-im-api#11)
-  ## 404 Should return 400 when creating user without firstName (skipped - linagora/linid-im-api#11)
-  ## 405 Should return 400 when creating user without lastName (skipped - linagora/linid-im-api#11)
+  ## 403 Should return 400 when creating user without email
+  ## 404 Should return 400 when creating user without firstName
+  ## 405 Should return 400 when creating user without lastName
 
   ################## Update (PUT /api/users/{id}) ####
   ## 501 Should return 200 when updating existing user
   ## 502 Should return 400 for invalid JSON body on PUT
   ## 503 Should return 404 when updating non-existent user
-  ## 504 Should return 400 when updating user without email (skipped - linagora/linid-im-api#11)
-  ## 505 Should return 400 when updating user without firstName (skipped - linagora/linid-im-api#11)
-  ## 506 Should return 400 when updating user without lastName (skipped - linagora/linid-im-api#11)
+  ## 504 Should return 400 when updating user without email
+  ## 505 Should return 400 when updating user without firstName
+  ## 506 Should return 400 when updating user without lastName
 
   ################## Partial Update (PATCH /api/users/{id})
   ## 601 Should return 200 when patching existing user
@@ -37,6 +37,12 @@ Feature: Test API Users Module
   ################## Delete (DELETE /api/users/{id})
   ## 701 Should return 204 when deleting existing user
   ## 702 Should return 404 when deleting non-existent user
+
+  ################## Validate (POST /api/users/validate/{attribute})
+  ## 801 Should return 204 when validating attribute with valid value
+  ## 802 Should return 400 when validating attribute with empty value
+  ## 803 Should return 400 when validating attribute with null value
+  ## 804 Should return 404 when validating unknown attribute
 
   ####################################################
   ################## Metadata ########################
@@ -116,39 +122,50 @@ Feature: Test API Users Module
     And  I expect '{{response.body.firstName}}' is 'Test'
     And  I expect '{{response.body.lastName}}' is 'Create'
 
-  # TODO: Required field validation not implemented - see linagora/linid-im-api#11
-  # Scenario: Should return 400 when creating user without email
-  #   Given I set http header 'Content-Type' with 'application/json'
-  #   When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
-  #     """
-  #     {"firstName": "Test", "lastName": "Create"}
-  #     """
-  #   Then I expect status code is 400
-  #   And  I expect '{{response.body.status}}' is '400'
-  #   And  I expect '{{response.body.error}}' is 'Bad Request'
-  #   And  I expect '{{response.body.errorKey}}' is 'error.validation.required'
+  Scenario: 403 - Should return 400 when creating user without email
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
+      """
+      {"firstName": "Test", "lastName": "Create"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
 
-  # Scenario: Should return 400 when creating user without firstName
-  #   Given I set http header 'Content-Type' with 'application/json'
-  #   When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
-  #     """
-  #     {"email": "test@example.com", "lastName": "Create"}
-  #     """
-  #   Then I expect status code is 400
-  #   And  I expect '{{response.body.status}}' is '400'
-  #   And  I expect '{{response.body.error}}' is 'Bad Request'
-  #   And  I expect '{{response.body.errorKey}}' is 'error.validation.required'
+  Scenario: 404 - Should return 400 when creating user without firstName
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
+      """
+      {"email": "test@example.com", "lastName": "Create"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'firstName'
 
-  # Scenario: Should return 400 when creating user without lastName
-  #   Given I set http header 'Content-Type' with 'application/json'
-  #   When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
-  #     """
-  #     {"email": "test@example.com", "firstName": "Test"}
-  #     """
-  #   Then I expect status code is 400
-  #   And  I expect '{{response.body.status}}' is '400'
-  #   And  I expect '{{response.body.error}}' is 'Bad Request'
-  #   And  I expect '{{response.body.errorKey}}' is 'error.validation.required'
+  Scenario: 405 - Should return 400 when creating user without lastName
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
+      """
+      {"email": "test@example.com", "firstName": "Test"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'lastName'
 
   ####################################################
   ################## Update (PUT /api/users/{id}) ####
@@ -184,39 +201,50 @@ Feature: Test API Users Module
     And  I expect '{{response.body.status}}' is '404'
     And  I expect '{{response.body.errorKey}}' is 'hpp.error404'
 
-  # TODO: Required field validation not implemented - see linagora/linid-im-api#11
-  # Scenario: Should return 400 when updating user without email
-  #   Given I set http header 'Content-Type' with 'application/json'
-  #   When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
-  #     """
-  #     {"firstName": "Test", "lastName": "User"}
-  #     """
-  #   Then I expect status code is 400
-  #   And  I expect '{{response.body.status}}' is '400'
-  #   And  I expect '{{response.body.error}}' is 'Bad Request'
-  #   And  I expect '{{response.body.errorKey}}' is 'error.validation.required'
+  Scenario: 504 - Should return 400 when updating user without email
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
+      """
+      {"firstName": "Test", "lastName": "User"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
 
-  # Scenario: Should return 400 when updating user without firstName
-  #   Given I set http header 'Content-Type' with 'application/json'
-  #   When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
-  #     """
-  #     {"email": "test@example.com", "lastName": "User"}
-  #     """
-  #   Then I expect status code is 400
-  #   And  I expect '{{response.body.status}}' is '400'
-  #   And  I expect '{{response.body.error}}' is 'Bad Request'
-  #   And  I expect '{{response.body.errorKey}}' is 'error.validation.required'
+  Scenario: 505 - Should return 400 when updating user without firstName
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
+      """
+      {"email": "test@example.com", "lastName": "User"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'firstName'
 
-  # Scenario: Should return 400 when updating user without lastName
-  #   Given I set http header 'Content-Type' with 'application/json'
-  #   When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
-  #     """
-  #     {"email": "test@example.com", "firstName": "Test"}
-  #     """
-  #   Then I expect status code is 400
-  #   And  I expect '{{response.body.status}}' is '400'
-  #   And  I expect '{{response.body.error}}' is 'Bad Request'
-  #   And  I expect '{{response.body.errorKey}}' is 'error.validation.required'
+  Scenario: 506 - Should return 400 when updating user without lastName
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
+      """
+      {"email": "test@example.com", "firstName": "Test"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'lastName'
 
   ####################################################
   ################## Partial Update (PATCH /api/users/{id})
@@ -265,3 +293,68 @@ Feature: Test API Users Module
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
     And  I expect '{{response.body.errorKey}}' is 'hpp.error404'
+
+  ####################################################
+  ################## Validate (POST /api/users/validate/{attribute})
+  ####################################################
+
+  Scenario Outline: 801 - Should return 204 when validating "<attribute>" with valid value "<value>"
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/<attribute>' with method 'POST' with body:
+      """
+      "<value>"
+      """
+    Then I expect status code is 204
+
+    Examples:
+      | attribute | value            |
+      | email     | test@example.com |
+      | firstName | John             |
+      | lastName  | Doe              |
+
+  Scenario Outline: 802 - Should return 400 when validating "<attribute>" with empty value
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/<attribute>' with method 'POST' with body:
+      """
+      ""
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is '<attribute>'
+
+    Examples:
+      | attribute |
+      | email     |
+      | firstName |
+      | lastName  |
+
+  Scenario Outline: 803 - Should return 400 when validating "<attribute>" with null value
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/<attribute>' with method 'POST'
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is '<attribute>'
+
+    Examples:
+      | attribute |
+      | email     |
+      | firstName |
+      | lastName  |
+
+  Scenario: 804 - Should return 404 when validating unknown attribute
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/unknownAttribute' with method 'POST' with body:
+      """
+      "test"
+      """
+    Then I expect status code is 404
+    And  I expect '{{response.body.status}}' is '404'
+    And  I expect '{{response.body.errorKey}}' is 'error.attribute.unknown'

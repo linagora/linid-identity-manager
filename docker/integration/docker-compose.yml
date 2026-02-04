@@ -23,7 +23,7 @@ services:
     volumes:
       - ../plugins:/plugins
       - ./resources/config.yaml:/config/config.yaml
-      - ./resources/i18n:/i18n
+      - ./resources/api-i18n:/i18n
     environment:
       - CONFIGURATION_PATH=${CONFIGURATION_PATH}
       - PLUGIN_LOADER_PATH=${PLUGIN_LOADER_PATH}
@@ -53,8 +53,8 @@ services:
       - ./resources/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./resources/design.json:/usr/share/nginx/html/design.json:ro
       - ./resources/i18n.json:/usr/share/nginx/html/i18n.json:ro
-      - ./resources/i18n/fr-FR.json:/usr/share/nginx/html/i18n/fr-FR.json:ro
-      - ./resources/i18n/en-US.json:/usr/share/nginx/html/i18n/en-US.json:ro
+      - ./resources/front-i18n/fr-FR.json:/usr/share/nginx/html/i18n/fr-FR.json:ro
+      - ./resources/front-i18n/en-US.json:/usr/share/nginx/html/i18n/en-US.json:ro
       - ./resources/modules.json:/usr/share/nginx/html/modules.json:ro
       - ./resources/moduleUsers.json:/usr/share/nginx/html/moduleUsers.json:ro
       - ./resources/remotes.json:/usr/share/nginx/html/remotes.json:ro

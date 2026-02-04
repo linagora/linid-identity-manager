@@ -16,7 +16,9 @@ MAVEN_REPO=https://repo1.maven.org/maven2
 if [ -n "$1" ]; then
   PLUGINS="$1"
 else
-  PLUGINS="${PLUGINS:-io.github.linagora.linid.im:hpp:0.1.2}"
+  PLUGINS="${PLUGINS:-io.github.linagora.linid.im:hpp:0.1.3
+io.github.linagora.linid.im:rqvp:0.1.0
+io.github.linagora.linid.im:rvp:0.2.0}"
 fi
 
 ########################################

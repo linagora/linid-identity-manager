@@ -20,6 +20,7 @@ Feature: Test API Users Module
   ## 403 Should return 400 when creating user without email
   ## 404 Should return 400 when creating user without firstName
   ## 405 Should return 400 when creating user without lastName
+  ## 406 Should return 400 when creating user with invalid email format
 
   ################## Update (PUT /api/users/{id}) ####
   ## 501 Should return 200 when updating existing user
@@ -28,6 +29,7 @@ Feature: Test API Users Module
   ## 504 Should return 400 when updating user without email
   ## 505 Should return 400 when updating user without firstName
   ## 506 Should return 400 when updating user without lastName
+  ## 507 Should return 400 when updating user with invalid email format
 
   ################## Partial Update (PATCH /api/users/{id})
   ## 601 Should return 200 when patching existing user
@@ -43,6 +45,7 @@ Feature: Test API Users Module
   ## 802 Should return 400 when validating attribute with empty value
   ## 803 Should return 400 when validating attribute with null value
   ## 804 Should return 404 when validating unknown attribute
+  ## 805 Should return 400 when validating email with invalid format
 
   ####################################################
   ################## Metadata ########################
@@ -132,10 +135,13 @@ Feature: Test API Users Module
     And  I expect '{{response.body.status}}' is '400'
     And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
     And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
-    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors.length}}' is '2'
     And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
     And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
     And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
+    And  I expect '{{response.body.errors[1].key}}' is 'error.plugin.regexValidation.invalid.value'
+    And  I expect '{{response.body.errors[1].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[1].context.attribute}}' is 'email'
 
   Scenario: 404 - Should return 400 when creating user without firstName
     Given I set http header 'Content-Type' with 'application/json'
@@ -166,6 +172,21 @@ Feature: Test API Users Module
     And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
     And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
     And  I expect '{{response.body.errors[0].context.attribute}}' is 'lastName'
+
+  Scenario: 406 - Should return 400 when creating user with invalid email format
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
+      """
+      {"email": "notanemail", "firstName": "Test", "lastName": "Create"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.regexValidation.invalid.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
 
   ####################################################
   ################## Update (PUT /api/users/{id}) ####
@@ -211,10 +232,13 @@ Feature: Test API Users Module
     And  I expect '{{response.body.status}}' is '400'
     And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
     And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
-    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors.length}}' is '2'
     And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
     And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
     And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
+    And  I expect '{{response.body.errors[1].key}}' is 'error.plugin.regexValidation.invalid.value'
+    And  I expect '{{response.body.errors[1].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[1].context.attribute}}' is 'email'
 
   Scenario: 505 - Should return 400 when updating user without firstName
     Given I set http header 'Content-Type' with 'application/json'
@@ -245,6 +269,21 @@ Feature: Test API Users Module
     And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
     And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
     And  I expect '{{response.body.errors[0].context.attribute}}' is 'lastName'
+
+  Scenario: 507 - Should return 400 when updating user with invalid email format
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
+      """
+      {"email": "notanemail", "firstName": "Test", "lastName": "User"}
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.regexValidation.invalid.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
 
   ####################################################
   ################## Partial Update (PATCH /api/users/{id})
@@ -321,7 +360,6 @@ Feature: Test API Users Module
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
     And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
-    And  I expect '{{response.body.errors.length}}' is '1'
     And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
     And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
     And  I expect '{{response.body.errors[0].context.attribute}}' is '<attribute>'
@@ -338,7 +376,6 @@ Feature: Test API Users Module
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
     And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
-    And  I expect '{{response.body.errors.length}}' is '1'
     And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.required.empty.value'
     And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
     And  I expect '{{response.body.errors[0].context.attribute}}' is '<attribute>'
@@ -358,3 +395,23 @@ Feature: Test API Users Module
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
     And  I expect '{{response.body.errorKey}}' is 'error.attribute.unknown'
+
+  Scenario Outline: 805 - Should return 400 when validating email with invalid format "<value>"
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/email' with method 'POST' with body:
+      """
+      "<value>"
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.regexValidation.invalid.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
+
+    Examples:
+      | value              |
+      | notanemail         |
+      | test@example.org   |
+      | @example.com       |

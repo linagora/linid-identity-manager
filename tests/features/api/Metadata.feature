@@ -9,6 +9,7 @@ Feature: Test API Metadata Endpoints
   ## 202 Should return user entity metadata with name and attributes
   ## 203 Should return 404 for non-existent entity
   ## 204 Should return 405 for unsupported method on entities
+  ## 205 Should return email attribute with validation metadata
 
   ####################################################
   ################## Routes ##########################
@@ -64,3 +65,10 @@ Feature: Test API Metadata Endpoints
       | PUT    |
       | PATCH  |
       | DELETE |
+
+  Scenario: 205 - Should return email attribute with validation metadata
+    When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.attributes[1].name}}' is 'email'
+    And  I expect '{{response.body.attributes[1].hasValidations}}' is 'true'
+    And  I expect '{{response.body.attributes[1].inputSettings.pattern}}' is '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'

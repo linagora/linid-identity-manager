@@ -88,32 +88,32 @@ entities:
         result: "true"
     attributes:
       - name: id
-        type: UUID
-        input: text
+        type: String
+        input: Text
       - name: email
-        type: string
+        type: String
         required: true
-        input: email
+        input: Text
         validations:
           - type: required
             phases: [beforeCreate, beforeUpdate]
       - name: firstName
-        type: string
+        type: String
         required: true
-        input: text
+        input: Text
         validations:
           - type: required
             phases: [beforeCreate, beforeUpdate]
       - name: lastName
-        type: string
+        type: String
         required: true
-        input: text
+        input: Text
         validations:
           - type: required
             phases: [beforeCreate, beforeUpdate]
       - name: displayName
-        type: string
-        input: text
+        type: String
+        input: Text
       - name: enabled
-        type: boolean
-        input: checkbox
+        type: Boolean
+        input: Boolean

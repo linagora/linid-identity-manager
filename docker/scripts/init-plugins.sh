@@ -18,7 +18,7 @@ if [ -n "$1" ]; then
 else
   PLUGINS="${PLUGINS:-io.github.linagora.linid.im:hpp:0.1.3
 io.github.linagora.linid.im:rqvp:0.1.0
-io.github.linagora.linid.im:rvp:0.2.0}"
+io.github.linagora.linid.im:rvp:0.2.1}"
 fi
 
 ########################################

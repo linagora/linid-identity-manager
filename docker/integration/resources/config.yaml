@@ -94,8 +94,13 @@ entities:
         type: String
         required: true
         input: Text
+        inputSettings:
+          pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
         validations:
           - type: required
+            phases: [beforeCreate, beforeUpdate]
+          - type: regex
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.com$"
             phases: [beforeCreate, beforeUpdate]
       - name: firstName
         type: String

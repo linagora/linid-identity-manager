@@ -72,7 +72,7 @@
       {
         "id": "main",
         "order": 1,
-        "fieldsOrder": ["email", "firstName", "lastName", "enabled"]
+        "fieldsOrder": ["email", "firstName", "lastName", "displayName"]
       },
       {
         "id": "secondary",

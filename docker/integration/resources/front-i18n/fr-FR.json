@@ -26,6 +26,49 @@
         "lessFilters": "Moins de filtres"
       }
     },
+    "EditUserPage": {
+      "title": "Édition de l'utilisateur",
+      "loadError": "Échec du chargement des données de l'utilisateur",
+      "editError": "Échec de l'enregistrement des modifications",
+      "editSuccess": "Utilisateur mis à jour avec succès",
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Annuler",
+        "confirm": "Enregistrer",
+        "confirmLoading": "Enregistrement en cours..."
+      },
+      "formSections": {
+        "main": {
+          "title": "Formulaire d'édition de l'utilisateur",
+          "description": "Modifiez les informations de l'utilisateur et cliquez sur 'Enregistrer' pour appliquer les modifications."
+        },
+        "secondary": {
+          "title": "Informations secondaires",
+          "description": "Des détails supplémentaires sur l'utilisateur peuvent être modifiés ici."
+        }
+      }
+    },
+    "NewUserPage": {
+      "title": "Créer un nouvel utilisateur",
+      "error": "Échec de la création de l'utilisateur",
+      "success": "Utilisateur créé avec succès",
+      "formSections": {
+        "main": {
+          "title": "Formulaire de création de l'utilisateur",
+          "description": "Entrez les informations de base de l'utilisateur"
+        },
+        "secondary": {
+          "title": "Informations supplémentaires",
+          "description": "Des détails supplémentaires sur l'utilisateur peuvent être ajoutés ici."
+        }
+      },
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Annuler",
+        "confirm": "Créer",
+        "confirmLoading": "Création en cours..."
+      }
+    },
     "fields": {
       "email": {
         "label": "Email"
@@ -35,6 +78,15 @@
       },
       "lastName": {
         "label": "Nom"
+      },
+      "displayName": {
+        "label": "Nom d'affichage"
+      },
+      "enabled": {
+        "label": "Activé"
+      },
+      "role": {
+        "label": "Rôle"
       }
     }
   }

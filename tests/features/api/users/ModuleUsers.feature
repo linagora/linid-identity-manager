@@ -125,6 +125,9 @@ Feature: Test API Users Module
     And  I expect '{{response.body.firstName}}' is 'Test'
     And  I expect '{{response.body.lastName}}' is 'Create'
 
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
+
   Scenario: 403 - Should return 400 when creating user without email
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
@@ -194,15 +197,31 @@ Feature: Test API Users Module
 
   Scenario: 501 - Should return 200 when updating existing user
     Given I set http header 'Content-Type' with 'application/json'
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000001' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "john.updated@example.com", "firstName": "John", "lastName": "Updated"}
+      {"email": "test.put@example.com", "firstName": "Test", "lastName": "Put"}
+      """
+
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'PUT' with body:
+      """
+      {"email": "test.put.updated@example.com", "firstName": "TestUpdated", "lastName": "PutUpdated"}
       """
     Then I expect status code is 200
-    And  I expect '{{response.body.id}}' is '00000000-0000-0000-0000-000000000001'
-    And  I expect '{{response.body.email}}' is 'john.updated@example.com'
+    And  I expect '{{response.body.email}}' is 'test.put.updated@example.com'
+    And  I expect '{{response.body.firstName}}' is 'TestUpdated'
+    And  I expect '{{response.body.lastName}}' is 'PutUpdated'
 
-  Scenario: 502 - Should return 400 for invalid JSON body on PUT
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.email}}' is 'test.put.updated@example.com'
+    And  I expect '{{response.body.firstName}}' is 'TestUpdated'
+    And  I expect '{{response.body.lastName}}' is 'PutUpdated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+   Scenario: 502 - Should return 400 for invalid JSON body on PUT
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
       """
@@ -291,13 +310,29 @@ Feature: Test API Users Module
 
   Scenario: 601 - Should return 200 when patching existing user
     Given I set http header 'Content-Type' with 'application/json'
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000002' with method 'PATCH' with body:
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"displayName": "Jane Updated"}
+      {"email": "test.patch@example.com", "firstName": "Test", "lastName": "Patch", "displayName": "Test Patch Original"}
+      """
+
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'PATCH' with body:
+      """
+      {"displayName": "Test Patch Updated"}
       """
     Then I expect status code is 200
-    And  I expect '{{response.body.id}}' is '00000000-0000-0000-0000-000000000002'
-    And  I expect '{{response.body.displayName}}' is 'Jane Updated'
+    And  I expect '{{response.body.id}}' is '{{response.body.id}}'
+    And  I expect '{{response.body.displayName}}' is 'Test Patch Updated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.email}}' is 'test.patch@example.com'
+    And  I expect '{{response.body.firstName}}' is 'Test'
+    And  I expect '{{response.body.lastName}}' is 'Patch'
+    And  I expect '{{response.body.displayName}}' is 'Test Patch Updated'
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 602 - Should return 400 for invalid JSON body on PATCH
     Given I set http header 'Content-Type' with 'application/json'
@@ -324,8 +359,20 @@ Feature: Test API Users Module
   ####################################################
 
   Scenario: 701 - Should return 204 when deleting existing user
-    When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000001' with method 'DELETE'
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
+      """
+      {"email": "test.delete@example.com", "firstName": "Test", "lastName": "Delete"}
+      """
+    Then I expect status code is 201
+
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'DELETE'
     Then I expect status code is 204
+
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.status}}' is '404'
 
   Scenario: 702 - Should return 404 when deleting non-existent user
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-99999' with method 'DELETE'

@@ -26,6 +26,49 @@
         "lessFilters": "Less filters"
       }
     },
+    "EditUserPage": {
+      "title": "Edit User",
+      "loadError": "Failed to load user data",
+      "editError": "Failed to save changes",
+      "editSuccess": "User updated successfully",
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Cancel",
+        "confirm": "Save",
+        "confirmLoading": "Saving..."
+      },
+      "formSections": {
+        "main": {
+          "title": "Edit User form",
+          "description": "Modify the user information and click on 'Save' to apply changes."
+        },
+        "secondary": {
+          "title": "Secondary Information",
+          "description": "Additional user details can be modified here."
+        }
+      }
+    },
+    "NewUserPage": {
+      "title": "Create New User",
+      "error": "Failed to create user",
+      "success": "User created successfully",
+      "formSections": {
+        "main": {
+          "title": "Create User form",
+          "description": "Enter the basic user information and click on 'Create' to add the new user."
+        },
+        "secondary": {
+          "title": "Secondary Information",
+          "description": "Additional user details can be added here."
+        }
+      },
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
     "fields": {
       "email": {
         "label": "Email"
@@ -35,6 +78,15 @@
       },
       "lastName": {
         "label": "Last Name"
+      },
+      "displayName": {
+        "label": "Display Name"
+      },
+      "enabled": {
+        "label": "Enabled"
+      },
+      "role": {
+        "label": "Role"
       }
     }
   }

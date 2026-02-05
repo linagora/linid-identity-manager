@@ -114,6 +114,40 @@
           }
         }
       }
+    },
+    "edit-user-page": {
+      "form-section-main": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "form-section-secondary": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "confirm-button": {
+          "q-btn": { "color": "primary", "dense": false }
+        },
+        "cancel-button": {
+          "q-btn": { "color": "negative", "dense": false }
+        }
+      }
+    },
+    "new-user-page": {
+      "form-section-main": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "form-section-secondary": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "confirm-button": {
+          "q-btn": { "color": "positive", "dense": false }
+        },
+        "cancel-button": {
+          "q-btn": { "color": "negative", "dense": false }
+        }
+      }
     }
   }
 }

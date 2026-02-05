@@ -49,6 +49,7 @@ entities:
           lastName: "{{ context.response.lastName }}"
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
+          role: "{{ context.response.role }}"
       create:
         uri: /api/users
         method: POST
@@ -122,3 +123,8 @@ entities:
       - name: enabled
         type: Boolean
         input: Boolean
+      - name: role
+        type: String
+        required: false
+        input: Text
+        validations: []

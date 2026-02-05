@@ -73,6 +73,11 @@
         "id": "main",
         "order": 1,
         "fieldsOrder": ["email", "firstName", "lastName", "enabled"]
+      },
+      {
+        "id": "secondary",
+        "order": 2,
+        "fieldsOrder": ["enabled", "role"]
       }
     ]
   }

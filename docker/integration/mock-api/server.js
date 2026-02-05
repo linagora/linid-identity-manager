@@ -25,6 +25,7 @@ const users = [
     lastName: 'Doe',
     displayName: 'John Doe',
     enabled: true,
+    role: 'admin',
   },
   {
     id: '00000000-0000-0000-0000-000000000002',
@@ -33,6 +34,7 @@ const users = [
     lastName: 'Roe',
     displayName: 'Jane Roe',
     enabled: true,
+    role: 'user',
   },
   {
     id: '00000000-0000-0000-0000-000000000003',
@@ -41,6 +43,7 @@ const users = [
     lastName: 'Smith',
     displayName: 'Alice Smith',
     enabled: true,
+    role: 'user',
   },
   {
     id: '00000000-0000-0000-0000-000000000004',
@@ -49,6 +52,7 @@ const users = [
     lastName: 'Johnson',
     displayName: 'Bob Johnson',
     enabled: false,
+    role: 'user',
   },
   {
     id: '00000000-0000-0000-0000-000000000005',
@@ -57,6 +61,16 @@ const users = [
     lastName: 'Doe',
     displayName: 'Charlie Doe',
     enabled: true,
+    role: 'user',
+  },
+  {
+    id: '00000000-0000-0000-0000-000000000006',
+    email: 'eva.martin@example.com',
+    firstName: 'Eva',
+    lastName: 'Martin',
+    displayName: 'Eva Martin',
+    enabled: true,
+    role: "user"
   },
 ];
 

@@ -60,8 +60,7 @@
       "navigation-menu": {
         "route-moduleUsers": {
           "q-route-tab": {
-            "icon": "person",
-            "noCaps": true
+            "icon": "person"
           }
         }
       },
@@ -71,8 +70,59 @@
     }
   },
   "moduleUsers": {
+    "homepage": {
+      "buttons-card": {
+        "q-card": { "flat": true }
+      },
+      "create-button": {
+        "q-btn": { "dense": false }
+      },
+      "generic-entity-table": {
+        "q-table": { "dense": false, "bordered": true, "flat": true }
+      },
+      "advanced-search-card": {
+        "q-card": { "flat": true, "bordered": true },
+        "q-icon": { "name": "search", "color": "primary" },
+        "toggle-button": {
+          "q-btn": { "flat": true, "dense": false }
+        },
+        "default-filters": {
+          "fields": {
+            "email": {
+              "EntityAttributeField": {
+                "email": {
+                  "q-input": { "dense": true }
+                }
+              }
+            },
+            "firstName": {
+              "EntityAttributeField": {
+                "firstName": {
+                  "q-input": { "dense": true }
+                }
+              }
+            }
+          }
+        },
+        "advanced-filters": {
+          "fields": {
+            "lastName": {
+              "EntityAttributeField": {
+                "lastName": {
+                  "q-input": { "dense": true }
+                }
+              }
+            }
+          }
+        }
+      },
+      "see-button": {
+        "q-btn": { "flat": true, "dense": false }
+      }
+    },
     "user-details-page": {
       "entity-details-card": {
+        "q-card": { "flat": true },
         "id": {
           "information-card": {
             "q-icon": {
@@ -105,6 +155,14 @@
             }
           }
         },
+        "displayName": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "account_circle"
+            }
+          }
+        },
         "role": {
           "information-card": {
             "q-icon": {
@@ -112,6 +170,23 @@
               "name": "admin_panel_settings"
             }
           }
+        },
+        "enabled": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "toggle_on"
+            }
+          }
+        }
+      },
+      "edit-button": {
+        "q-btn": { "dense": false }
+      },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "cancel-button": {
+          "q-btn": { "dense": false }
         }
       }
     },

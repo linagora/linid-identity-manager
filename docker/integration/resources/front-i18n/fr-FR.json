@@ -15,6 +15,7 @@
     "HomePage": {
       "title": "Utilisateurs",
       "seeButton": "Voir",
+      "createButton": "Créer un utilisateur",
       "error": "Échec du chargement des utilisateurs",
       "columnAction": "Actions",
       "columnEmail": "Email",
@@ -24,6 +25,21 @@
         "title": "Recherche",
         "moreFilters": "Plus de filtres",
         "lessFilters": "Moins de filtres"
+      }
+    },
+    "UserDetailsPage": {
+      "title": "Détails de l'utilisateur",
+      "EntityDetailsCard": {
+        "title": "",
+        "attributes": {
+          "id": "ID",
+          "email": "Email",
+          "firstName": "Prénom",
+          "lastName": "Nom de famille",
+          "displayName": "Nom d'affichage",
+          "enabled": "Activé",
+          "role": "Rôle"
+        }
       }
     },
     "EditUserPage": {

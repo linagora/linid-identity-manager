@@ -39,6 +39,7 @@ entities:
           lastName: "{{ context.response.content[index].lastName }}"
           displayName: "{{ context.response.content[index].displayName }}"
           enabled: "{{ context.response.content[index].enabled }}"
+          role: "{{ context.response.content[index].role }}"
       findById:
         uri: "/api/users/{{ context.id }}"
         method: GET
@@ -61,6 +62,7 @@ entities:
           lastName: "{{ context.response.lastName }}"
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
+          role: "{{ context.response.role }}"
       update:
         uri: "/api/users/{{ context.id }}"
         method: PUT
@@ -72,6 +74,7 @@ entities:
           lastName: "{{ context.response.lastName }}"
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
+          role: "{{ context.response.role }}"
       patch:
         uri: "/api/users/{{ context.id }}"
         method: PATCH
@@ -83,6 +86,7 @@ entities:
           lastName: "{{ context.response.lastName }}"
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
+          role: "{{ context.response.role }}"
       delete:
         uri: "/api/users/{{ context.id }}"
         method: DELETE

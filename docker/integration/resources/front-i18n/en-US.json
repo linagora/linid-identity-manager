@@ -15,6 +15,7 @@
     "HomePage": {
       "title": "Users",
       "seeButton": "See",
+      "createButton": "Create User",
       "error": "Failed to load users",
       "columnAction": "Actions",
       "columnEmail": "Email",
@@ -24,6 +25,21 @@
         "title": "Search",
         "moreFilters": "More filters",
         "lessFilters": "Less filters"
+      }
+    },
+    "UserDetailsPage": {
+      "title": "User Details",
+      "EntityDetailsCard": {
+        "title": "",
+        "attributes": {
+          "id": "ID",
+          "email": "Email",
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "displayName": "Display Name",
+          "enabled": "Enabled",
+          "role": "Role"
+        }
       }
     },
     "EditUserPage": {
@@ -80,7 +96,7 @@
         "label": "Last Name"
       },
       "displayName": {
-        "label": "Display Name"
+        "label": "Display name"
       },
       "enabled": {
         "label": "Enabled"

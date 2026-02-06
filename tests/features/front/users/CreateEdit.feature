@@ -53,7 +53,7 @@ Feature: Test Module Users Edit and Create
     And I click on '[data-cy="button_confirm"]'
 
     ## 104 Should successfully display all data in details vue
-    And I expect the HTML element '[data-cy="user-details-page_title"]' contains "Détails de l’utilisateur :"
+    And I expect the HTML element '[data-cy="user-details-page_title"]' contains "Détails de l'utilisateur"
     And I expect current url is "{{ env.E2E_FRONT_URL }}/moduleUsers/00000000-0000-0000-0000-000000000007"
     And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "michael.scott@gmail.com"
     And I expect the HTML element '[data-cy="information-card--firstName"] [data-cy="value"]' contains "Michael"
@@ -75,7 +75,7 @@ Feature: Test Module Users Edit and Create
     ## 201 Should redirect to user detail page when clicking View
     When I click on '[data-cy="see-button_00000000-0000-0000-0000-000000000007"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/moduleUsers/00000000-0000-0000-0000-000000000007"
-    And I expect the HTML element '[data-cy="user-details-page_title"]' contains "Détails de l’utilisateur :"
+    And I expect the HTML element '[data-cy="user-details-page_title"]' contains "Détails de l'utilisateur"
 
     ## 202 Should display all user information on detail page
     And I expect the HTML element '[data-cy="user-details-card"]' to be visible

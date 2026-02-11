@@ -73,7 +73,8 @@
       "lastName",
       "displayName",
       "enabled",
-      "role"
+      "role",
+      "dateOfBirth"
     ],
     "showRemainingFields": false,
     "formSections": [
@@ -85,7 +86,7 @@
       {
         "id": "secondary",
         "order": 2,
-        "fieldsOrder": ["enabled", "role"]
+        "fieldsOrder": ["enabled", "role", "dateOfBirth"]
       }
     ]
   }

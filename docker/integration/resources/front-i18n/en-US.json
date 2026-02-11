@@ -38,7 +38,8 @@
           "lastName": "Last Name",
           "displayName": "Display Name",
           "enabled": "Enabled",
-          "role": "Role"
+          "role": "Role",
+          "dateOfBirth": "Date of Birth"
         }
       }
     },
@@ -121,6 +122,9 @@
       },
       "role": {
         "label": "Role"
+      },
+      "dateOfBirth": {
+        "label": "Date of Birth"
       }
     }
   }

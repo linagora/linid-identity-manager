@@ -40,6 +40,7 @@ entities:
           displayName: "{{ context.response.content[index].displayName }}"
           enabled: "{{ context.response.content[index].enabled }}"
           role: "{{ context.response.content[index].role }}"
+          dateOfBirth: "{{ context.response.content[index].dateOfBirth | replace('-', '/') }}"
       findById:
         uri: "/api/users/{{ context.id }}"
         method: GET
@@ -51,6 +52,7 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          dateOfBirth: "{{ context.response.dateOfBirth | replace('-', '/') }}"
       create:
         uri: /api/users
         method: POST
@@ -63,6 +65,7 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          dateOfBirth: "{{ context.response.dateOfBirth | replace('/', '-') }}"
       update:
         uri: "/api/users/{{ context.id }}"
         method: PUT
@@ -75,6 +78,7 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          dateOfBirth: "{{ context.response.dateOfBirth | replace('/', '-') }}"
       patch:
         uri: "/api/users/{{ context.id }}"
         method: PATCH
@@ -87,6 +91,7 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          dateOfBirth: "{{ context.response.dateOfBirth | replace('/', '-') }}"
       delete:
         uri: "/api/users/{{ context.id }}"
         method: DELETE
@@ -136,3 +141,6 @@ entities:
       - name: role
         type: String
         input: Text
+      - name: dateOfBirth
+        type: String
+        input: Date

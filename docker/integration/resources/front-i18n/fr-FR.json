@@ -38,7 +38,8 @@
           "lastName": "Nom de famille",
           "displayName": "Nom d'affichage",
           "enabled": "Activé",
-          "role": "Rôle"
+          "role": "Rôle",
+          "dateOfBirth": "Date de naissance"
         }
       }
     },
@@ -121,6 +122,9 @@
       },
       "role": {
         "label": "Rôle"
+      },
+      "dateOfBirth": {
+        "label": "Date de naissance"
       }
     }
   }

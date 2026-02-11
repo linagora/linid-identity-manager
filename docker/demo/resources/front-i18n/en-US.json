@@ -1,0 +1,131 @@
+{
+  "application": {
+    "title": "Linid - Identity Manager",
+    "version": "Demo version"
+  },
+  "Homepage": {
+    "title": "LinID Identity Manager",
+    "intro": "<strong>LinID Identity Manager</strong> is an open source Identity and Access Management (IAM) solution. This project aims to provide a secure, extensible, and standards-compliant platform to manage users, their rights, and their access within organizations.",
+    "opensource": "<strong>Open source project</strong> developed and maintained by <a href=\"https://linagora.com\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>.",
+    "license": "This project is released under the <strong>GNU Affero General Public License v3</strong> (AGPLv3), ensuring that it remains free and open source for everyone.",
+    "links": "<ul class=\"q-pl-md\"><li>Source code available on <a href=\"https://github.com/linagora/linid-im-front\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>If you find a bug or an issue, please report it <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">here</a>.</li></ul>",
+    "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>A project by</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
+  },
+  "moduleUsers": {
+    "HomePage": {
+      "title": "Users",
+      "seeButton": "See",
+      "createButton": "Create User",
+      "error": "Failed to load users",
+      "columnAction": "Actions",
+      "columnEmail": "Email",
+      "columnFirstName": "First Name",
+      "columnLastName": "Last Name",
+      "AdvancedSearchCard": {
+        "title": "Search",
+        "moreFilters": "More filters",
+        "lessFilters": "Less filters"
+      }
+    },
+    "UserDetailsPage": {
+      "title": "User Details",
+      "EntityDetailsCard": {
+        "title": "",
+        "attributes": {
+          "id": "ID",
+          "email": "Email",
+          "firstName": "First Name",
+          "lastName": "Last Name",
+          "displayName": "Display Name",
+          "enabled": "Enabled",
+          "role": "Role",
+          "dateOfBirth": "Date of Birth"
+        }
+      }
+    },
+    "EditUserPage": {
+      "title": "Edit User",
+      "loadError": "Failed to load user data",
+      "editError": "Failed to save changes",
+      "editSuccess": "User updated successfully",
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Cancel",
+        "confirm": "Save",
+        "confirmLoading": "Saving..."
+      },
+      "formSections": {
+        "main": {
+          "title": "Edit User form",
+          "description": "Modify the user information and click on 'Save' to apply changes."
+        },
+        "secondary": {
+          "title": "Secondary Information",
+          "description": "Additional user details can be modified here."
+        }
+      }
+    },
+    "NewUserPage": {
+      "title": "Create New User",
+      "error": "Failed to create user",
+      "success": "User created successfully",
+      "formSections": {
+        "main": {
+          "title": "Create User form",
+          "description": "Enter the basic user information and click on 'Create' to add the new user."
+        },
+        "secondary": {
+          "title": "Secondary Information",
+          "description": "Additional user details can be added here."
+        }
+      },
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
+    "fields": {
+      "email": {
+        "label": "Email",
+        "validation": {
+          "required": "Email is required.",
+          "pattern": "Email must be a valid email address.",
+          "maxLength": "Email cannot exceed {max} characters.",
+          "unknownError": "An unknown error occurred."
+        }
+      },
+      "firstName": {
+        "label": "First Name",
+        "validation": {
+          "required": "First Name is required.",
+          "minLength": "First Name must be at least {min} characters.",
+          "maxLength": "First Name cannot exceed {max} characters.",
+          "unknownError": "An unknown error occurred."
+        }
+      },
+      "lastName": {
+        "label": "Last Name",
+        "validation": {
+          "required": "Last Name is required.",
+          "minLength": "Last Name must be at least {min} characters.",
+          "maxLength": "Last Name cannot exceed {max} characters.",
+          "unknownError": "An unknown error occurred."
+        }
+      },
+      "displayName": {
+        "label": "Display name"
+      },
+      "enabled": {
+        "label": "Enabled"
+      },
+      "role": {
+        "label": "Role"
+      },
+      "dateOfBirth": {
+        "label": "Date of Birth"
+      }
+    }
+  }
+}

@@ -1,0 +1,10 @@
+[
+  {
+    "name": "catalogUI",
+    "entry": "/catalog-ui/mf-manifest.json"
+  },
+  {
+    "name": "moduleUsers",
+    "entry": "/module-users/mf-manifest.json"
+  }
+]

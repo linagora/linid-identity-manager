@@ -8,6 +8,10 @@ echo "This script builds all required Docker images and starts the demo environm
 echo "Make sure Docker and Docker Compose are installed on your machine."
 echo ""
 
+echo "Init git submodules"
+git submodule update --init --recursive
+
+clear
 echo "📦 Building Docker image: fake external api..."
 docker build -t mock-api docker/mock-api/
 
@@ -28,11 +32,14 @@ echo "📦 Building Docker image: module-users..."
 docker build -f linid-im-front-community-plugins/docker/module-users.Dockerfile -t module-users linid-im-front-community-plugins/
 
 clear
-echo ""
+echo "🧹 Cleaning previous back plugin and download all needed plugins"
+rm -rf docker/plugins
+source docker/demo/.env && sh docker/scripts/init-plugins.sh
+
+clear
 echo "🧹 Cleaning unused Docker containers and volumes..."
 docker container prune -f && docker volume prune -f
 
 clear
-echo ""
 echo "🚀 Starting Linid Identity Manager in demo mode..."
 docker compose -f docker/demo/docker-compose.yml --env-file docker/demo/.env up

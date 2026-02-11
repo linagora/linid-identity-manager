@@ -1,0 +1,131 @@
+{
+  "application": {
+    "title": "Linid - Identity Manager",
+    "version": "Version de demo"
+  },
+  "Homepage": {
+    "title": "LinID Identity Manager",
+    "intro": "<strong>LinID Identity Manager</strong> est une solution open source de gestion des identités et des accès (IAM). Ce projet vise à fournir une plateforme sécurisée, extensible et conforme aux standards pour gérer les utilisateurs, leurs droits et leurs accès au sein des organisations.",
+    "opensource": "<strong>Projet open source</strong> développé et maintenu par <a href=\"https://linagora.com\" target=\"_blank\" rel=\"noopener\">LINAGORA</a>.",
+    "license": "Ce projet est distribué sous la <strong>GNU Affero General Public License v3</strong> (AGPLv3), garantissant qu'il reste libre et open source pour tous.",
+    "links": "<ul class=\"q-pl-md\"><li>Code source disponible sur <a href=\"https://github.com/linagora/linid-im-front\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>Si vous trouvez un bug ou un problème, merci de le signaler <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">ici</a>.</li></ul>",
+    "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>Un projet de</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
+  },
+  "moduleUsers": {
+    "HomePage": {
+      "title": "Utilisateurs",
+      "seeButton": "Voir",
+      "createButton": "Créer un utilisateur",
+      "error": "Échec du chargement des utilisateurs",
+      "columnAction": "Actions",
+      "columnEmail": "Email",
+      "columnFirstName": "Prénom",
+      "columnLastName": "Nom",
+      "AdvancedSearchCard": {
+        "title": "Recherche",
+        "moreFilters": "Plus de filtres",
+        "lessFilters": "Moins de filtres"
+      }
+    },
+    "UserDetailsPage": {
+      "title": "Détails de l'utilisateur",
+      "EntityDetailsCard": {
+        "title": "",
+        "attributes": {
+          "id": "ID",
+          "email": "Email",
+          "firstName": "Prénom",
+          "lastName": "Nom de famille",
+          "displayName": "Nom d'affichage",
+          "enabled": "Activé",
+          "role": "Rôle",
+          "dateOfBirth": "Date de naissance"
+        }
+      }
+    },
+    "EditUserPage": {
+      "title": "Édition de l'utilisateur",
+      "loadError": "Échec du chargement des données de l'utilisateur",
+      "editError": "Échec de l'enregistrement des modifications",
+      "editSuccess": "Utilisateur mis à jour avec succès",
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Annuler",
+        "confirm": "Enregistrer",
+        "confirmLoading": "Enregistrement en cours..."
+      },
+      "formSections": {
+        "main": {
+          "title": "Formulaire d'édition de l'utilisateur",
+          "description": "Modifiez les informations de l'utilisateur et cliquez sur 'Enregistrer' pour appliquer les modifications."
+        },
+        "secondary": {
+          "title": "Informations secondaires",
+          "description": "Des détails supplémentaires sur l'utilisateur peuvent être modifiés ici."
+        }
+      }
+    },
+    "NewUserPage": {
+      "title": "Créer un nouvel utilisateur",
+      "error": "Échec de la création de l'utilisateur",
+      "success": "Utilisateur créé avec succès",
+      "formSections": {
+        "main": {
+          "title": "Formulaire de création de l'utilisateur",
+          "description": "Entrez les informations de base de l'utilisateur"
+        },
+        "secondary": {
+          "title": "Informations supplémentaires",
+          "description": "Des détails supplémentaires sur l'utilisateur peuvent être ajoutés ici."
+        }
+      },
+      "ButtonsCard": {
+        "title": "",
+        "cancel": "Annuler",
+        "confirm": "Créer",
+        "confirmLoading": "Création en cours..."
+      }
+    },
+    "fields": {
+      "email": {
+        "label": "Email",
+        "validation": {
+          "required": "L'email est requis.",
+          "pattern": "L'email doit être une adresse email valide.",
+          "maxLength": "L'email ne peut pas dépasser {max} caractères.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
+      },
+      "firstName": {
+        "label": "Prénom",
+        "validation": {
+          "required": "Le prénom est requis.",
+          "minLength": "Le prénom doit comporter au moins {min} caractères.",
+          "maxLength": "Le prénom ne peut pas dépasser {max} caractères.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
+      },
+      "lastName": {
+        "label": "Nom",
+        "validation": {
+          "required": "Le nom est requis.",
+          "minLength": "Le nom doit comporter au moins {min} caractères.",
+          "maxLength": "Le nom ne peut pas dépasser {max} caractères.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
+      },
+      "displayName": {
+        "label": "Nom complet"
+      },
+      "enabled": {
+        "label": "Activé"
+      },
+      "role": {
+        "label": "Rôle"
+      },
+      "dateOfBirth": {
+        "label": "Date de naissance"
+      }
+    }
+  }
+}

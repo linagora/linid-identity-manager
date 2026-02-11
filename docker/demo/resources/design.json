@@ -1,0 +1,228 @@
+{
+  "default": {
+    "q-btn": {
+      "dense": true,
+      "outline": true,
+      "color": "primary",
+      "noCaps": true
+    },
+    "q-tabs": {
+      "dense": false,
+      "align": "left",
+      "noCaps": true,
+      "inlineLabel": true,
+      "activeBgColor": "primary"
+    },
+    "q-route-tab": {
+      "noCaps": true
+    },
+    "q-table": {
+      "dense": true
+    },
+    "q-header": {
+      "elevated": true
+    },
+    "q-toolbar": {
+      "inset": false
+    },
+    "q-toolbar-title": {
+      "shrink": false
+    },
+    "q-badge": {
+      "color": "primary",
+      "align": "middle",
+      "floating": false
+    },
+    "q-input": {
+      "dense": true,
+      "outlined": true
+    },
+    "q-card-actions": {
+      "align": "right"
+    },
+    "q-avatar": {
+      "size": "md",
+      "color": "primary"
+    },
+    "q-icon": {
+      "size": "sm"
+    },
+    "q-toggle": {
+      "dense": true,
+      "color": "primary"
+    },
+    "q-card": {},
+    "q-date": {},
+    "q-img": {}
+  },
+  "base-layout": {
+    "header": {
+      "navigation-menu": {
+        "route-moduleUsers": {
+          "q-route-tab": {
+            "icon": "person"
+          }
+        }
+      },
+      "q-img": {
+        "src": "/toolbarApplicationLogo.svg"
+      }
+    }
+  },
+  "moduleUsers": {
+    "homepage": {
+      "buttons-card": {
+        "q-card": { "flat": true }
+      },
+      "create-button": {
+        "q-btn": { "dense": false }
+      },
+      "generic-entity-table": {
+        "q-table": { "dense": false, "bordered": true, "flat": true }
+      },
+      "advanced-search-card": {
+        "q-card": { "flat": true, "bordered": true },
+        "q-icon": { "name": "search", "color": "primary" },
+        "toggle-button": {
+          "q-btn": { "flat": true, "dense": false }
+        },
+        "default-filters": {
+          "fields": {
+            "email": {
+              "EntityAttributeField": {
+                "email": {
+                  "q-input": { "dense": true }
+                }
+              }
+            },
+            "firstName": {
+              "EntityAttributeField": {
+                "firstName": {
+                  "q-input": { "dense": true }
+                }
+              }
+            }
+          }
+        },
+        "advanced-filters": {
+          "fields": {
+            "lastName": {
+              "EntityAttributeField": {
+                "lastName": {
+                  "q-input": { "dense": true }
+                }
+              }
+            }
+          }
+        }
+      },
+      "see-button": {
+        "q-btn": { "flat": true, "dense": false }
+      }
+    },
+    "user-details-page": {
+      "entity-details-card": {
+        "q-card": { "flat": true },
+        "id": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "badge"
+            }
+          }
+        },
+        "email": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "mail"
+            }
+          }
+        },
+        "firstName": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "account_circle"
+            }
+          }
+        },
+        "lastName": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "account_circle"
+            }
+          }
+        },
+        "displayName": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "account_circle"
+            }
+          }
+        },
+        "role": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "admin_panel_settings"
+            }
+          }
+        },
+        "enabled": {
+          "information-card": {
+            "q-icon": {
+              "color": "primary",
+              "name": "toggle_on"
+            }
+          }
+        }
+      },
+      "edit-button": {
+        "q-btn": { "dense": false }
+      },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "cancel-button": {
+          "q-btn": { "dense": false }
+        }
+      }
+    },
+    "edit-user-page": {
+      "form-section-main": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "form-section-secondary": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "confirm-button": {
+          "q-btn": { "color": "primary", "dense": false }
+        },
+        "cancel-button": {
+          "q-btn": { "color": "negative", "dense": false }
+        }
+      }
+    },
+    "new-user-page": {
+      "form-section-main": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "form-section-secondary": {
+        "q-card": { "flat": true, "bordered": true }
+      },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "confirm-button": {
+          "q-btn": { "color": "positive", "dense": false }
+        },
+        "cancel-button": {
+          "q-btn": { "color": "negative", "dense": false }
+        }
+      }
+    }
+  }
+}

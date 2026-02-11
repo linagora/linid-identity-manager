@@ -82,7 +82,7 @@ Feature: Test Frontend Advanced Search
 
     # 502 Should filter table data when searching by email
     When I set the text 'alice.smith' in the HTML element 'input[data-cy="field_email"]'
-    And  I click on '[data-cy="advanced-search-card"]'
+    And  I click on '[data-cy="module-user-title"]'
     And  I wait 1s
     Then I expect the HTML element '.q-table tbody tr' appear 1 time on screen
     And  I expect the HTML element '.q-table tbody' contains 'alice.smith@example.com'
@@ -91,7 +91,7 @@ Feature: Test Frontend Advanced Search
     # 503 Should filter table data when searching by firstName
     When I clear the text in the HTML element 'input[data-cy="field_email"]'
     And  I set the text 'Alice' in the HTML element 'input[data-cy="field_firstName"]'
-    And  I click on '[data-cy="advanced-search-card"]'
+    And  I click on '[data-cy="module-user-title"]'
     And  I wait 1s
     Then I expect the HTML element '.q-table tbody tr' appear 1 time on screen
     And  I expect the HTML element '.q-table tbody' contains 'Alice'
@@ -101,7 +101,7 @@ Feature: Test Frontend Advanced Search
     When I clear the text in the HTML element 'input[data-cy="field_firstName"]'
     And  I click on '[data-cy="advanced-search-card--toggle-button"]'
     And  I set the text 'Smith' in the HTML element 'input[data-cy="field_lastName"]'
-    And  I click on '[data-cy="advanced-search-card"]'
+    And  I click on '[data-cy="module-user-title"]'
     And  I wait 1s
     Then I expect the HTML element '.q-table tbody tr' appear 1 time on screen
     And  I expect the HTML element '.q-table tbody' contains 'Smith'

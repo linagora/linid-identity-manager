@@ -42,23 +42,29 @@ Feature: Test Module Users Form Field Validation
     Then I expect the HTML element '[data-cy="field-container_email"]' contains "L'email est requis."
 
     When I set the text "test@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="title"]'
     Then I expect the HTML element '[data-cy="field-container_email"]' not contains "L'email est requis."
 
     #### 102 Validate email value must be valid email
     When I set the text " " in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="title"]'
     Then I expect the HTML element '[data-cy="field-container_email"]' contains "L'email doit être une adresse email valide."
 
     When I set the text "invalid_email" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="title"]'
     Then I expect the HTML element '[data-cy="field-container_email"]' contains "L'email doit être une adresse email valide."
 
     When I set the text "test@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="title"]'
     Then I expect the HTML element '[data-cy="field-container_email"]' not contains "L'email doit être une adresse email valide."
 
     #### 103 Validate email value must end with .com
     When I set the text "test@example.fr" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="title"]'
     Then I expect the HTML element '[data-cy="field-container_email"]' contains "Validation errors occurred for entity: user"
 
     When I set the text "test@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="title"]'
     Then I expect the HTML element '[data-cy="field-container_email"]' not contains "Validation errors occurred for entity: user"
 
     ####################################################
@@ -74,20 +80,25 @@ Feature: Test Module Users Form Field Validation
     Then I expect the HTML element '[data-cy="field-container_firstName"]' contains "Le prénom est requis."
 
     When I set the text "Test" in the HTML element '[data-cy="field_firstName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_firstName"]' not contains "Le prénom est requis."
 
     #### 202 Validate firstName length must be at most 20 characters
     When I set the text "ThisIsAVeryLongFirstNameExceedingLimit" in the HTML element '[data-cy="field_firstName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_firstName"]' contains "Le prénom ne peut pas dépasser 20 caractères."
 
     When I set the text "Test" in the HTML element '[data-cy="field_firstName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_firstName"]' not contains "Le prénom ne peut pas dépasser 20 caractères."
 
     #### 203 Validate firstName length must be at least 3 characters
     When I set the text "Te" in the HTML element '[data-cy="field_firstName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_firstName"]' contains "Le prénom doit comporter au moins 3 caractères."
 
     When I set the text "Test" in the HTML element '[data-cy="field_firstName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_firstName"]' not contains "Le prénom doit comporter au moins 3 caractères."
 
     ####################################################
@@ -103,20 +114,25 @@ Feature: Test Module Users Form Field Validation
     Then I expect the HTML element '[data-cy="field-container_lastName"]' contains "Le nom est requis."
 
     When I set the text "User" in the HTML element '[data-cy="field_lastName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_lastName"]' not contains "Le nom est requis."
 
     #### 302 Validate lastName length must be at most 20 characters
     When I set the text "ThisIsAVeryLongLastNameExceedingLimit" in the HTML element '[data-cy="field_lastName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_lastName"]' contains "Le nom ne peut pas dépasser 20 caractères."
 
     When I set the text "User" in the HTML element '[data-cy="field_lastName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_lastName"]' not contains "Le nom ne peut pas dépasser 20 caractères."
 
     #### 303 Validate lastName length must be at least 3 characters
     When I set the text "Us" in the HTML element '[data-cy="field_lastName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_lastName"]' contains "Le nom doit comporter au moins 3 caractères."
 
     When I set the text "User" in the HTML element '[data-cy="field_lastName"]'
+    And I click on '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="field-container_lastName"]' not contains "Le nom doit comporter au moins 3 caractères."
 
     ####################################################

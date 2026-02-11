@@ -21,9 +21,12 @@ Feature: Test Module Users Form Field Validation
   ################# role field ########################
   #### 501 Validate role is optional
 
+  ################# dateOfBirth field #################
+  #### 601 Validate dateOfBirth is optional
+
   ################# enabled field #####################
-  #### 601 Validate enabled is optional
-  #### 602 Remove the user
+  #### 701 Validate enabled is optional
+  #### 702 Remove the user
 
   Scenario: Roundtrip on form field validation
     Given I set the viewport size to 1920 px by 1080 px
@@ -162,12 +165,28 @@ Feature: Test Module Users Form Field Validation
 
     Then I expect the HTML element '[data-cy="field-container_role"]' not contains "est requis."
     And I set the text "role test" in the HTML element '[data-cy="field_role"]'
+    And I click on '[data-cy="field_email"]'
+
+    ####################################################
+    ############### dateOfBirth field ##################
+    ####################################################
+
+    #### 601 Validate dateOfBirth is optional
+    And I expect the HTML element '[data-cy="field_dateOfBirth"]' exists
+    And I expect the HTML element '[data-cy="field-container_dateOfBirth"]' not contains "est requis."
+
+    When I click on '[data-cy="field_dateOfBirth"]'
+    And I click on '[data-cy="title"]'
+
+    Then I expect the HTML element '[data-cy="field-container_dateOfBirth"]' not contains "est requis."
+    And I set the text "1985/03/09" in the HTML element '[data-cy="field_dateOfBirth"]'
+    And I click on '[data-cy="field_email"]'
 
     ####################################################
     ############### enabled field ######################
     ####################################################
 
-    #### 601 Validate enabled is optional
+    #### 701 Validate enabled is optional
     And I expect the HTML element '[data-cy="field_enabled"]' exists
     And I expect the HTML element '[data-cy="field-container_enabled"]' not contains "est requis."
 
@@ -178,6 +197,6 @@ Feature: Test Module Users Form Field Validation
     And I expect the HTML element '[data-cy="information-card--enabled"] [data-cy="value"]' not contains "true"
     And I expect the HTML element '[data-cy="information-card--enabled"] [data-cy="value"]' not contains "false"
 
-    #### 602 Remove the user
+    #### 702 Remove the user
     When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000007' with method 'DELETE'
     Then I expect status code is 204

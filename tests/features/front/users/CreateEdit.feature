@@ -13,9 +13,10 @@ Feature: Test Module Users Edit and Create
   ## 203 Should redirect to edit page
   ## 204 Should display correct form sections and fields on edit page
   ## 205 Should pre-fill form fields with existing user data
-  ## 206 Should successfully update user data and reflect changes in detail page
-  ## 207 Should reflect updated user data in users table
-  ## 208 Remove the user
+  ## 206 Should enabled save button on selecting a date in datepicker
+  ## 207 Should successfully update user data and reflect changes in detail page
+  ## 208 Should reflect updated user data in users table
+  ## 209 Remove the user
 
   Scenario: Complete user editing and creation workflow
     Given I set the viewport size to 1920 px by 1080 px
@@ -115,7 +116,13 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="field_role"]' to have value "Admin"
     And I expect the HTML element '[data-cy="field_dateOfBirth"]' to have value "1985/03/10"
 
-    ## 206 Should successfully update user data and reflect changes in detail page
+    ## 206 Should enabled save button on selecting a date in datepicker
+    And I expect the HTML element '[data-cy="button_confirm"]' to be disabled
+    When I click on '[data-cy="field-container_dateOfBirth"] .q-icon'
+    And I click on '.q-date__calendar-item--in:nth(1)'
+    Then I expect the HTML element '[data-cy="button_confirm"]' to be enabled
+
+    ## 207 Should successfully update user data and reflect changes in detail page
     When I set the text "Jean.dupont@example.com" in the HTML element '[data-cy="field_email"]'
     And I set the text "Jean" in the HTML element '[data-cy="field_firstName"]'
     And I set the text "Dupont" in the HTML element '[data-cy="field_lastName"]'
@@ -127,13 +134,13 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="information-card--lastName"] [data-cy="value"]' contains "Dupont"
     And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "User"
 
-    ## 207 Should reflect updated user data in users table
+    ## 208 Should reflect updated user data in users table
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/moduleUsers"
     And I expect the HTML element '[data-cy="cell-email_00000000-0000-0000-0000-000000000007"]' contains "Jean.dupont@example.com"
     And I expect the HTML element '[data-cy="cell-firstName_00000000-0000-0000-0000-000000000007"]' contains "Jean"
     And I expect the HTML element '[data-cy="cell-lastName_00000000-0000-0000-0000-000000000007"]' contains "Dupont"
 
-    ## 208 Remove the user
+    ## 209 Remove the user
     When I request '{{env.E2E_API_URL}}/api/users/00000000-0000-0000-0000-000000000007' with method 'DELETE'
     Then I expect status code is 204

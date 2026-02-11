@@ -26,6 +26,7 @@ const users = [
     displayName: 'John Doe',
     enabled: true,
     role: 'admin',
+    dateOfBirth: '1985-03-07',
   },
   {
     id: '00000000-0000-0000-0000-000000000002',
@@ -35,6 +36,7 @@ const users = [
     displayName: 'Jane Roe',
     enabled: true,
     role: 'user',
+    dateOfBirth: '1985-03-08',
   },
   {
     id: '00000000-0000-0000-0000-000000000003',
@@ -44,6 +46,7 @@ const users = [
     displayName: 'Alice Smith',
     enabled: true,
     role: 'user',
+    dateOfBirth: '1985-03-09',
   },
   {
     id: '00000000-0000-0000-0000-000000000004',
@@ -53,6 +56,7 @@ const users = [
     displayName: 'Bob Johnson',
     enabled: false,
     role: 'user',
+    dateOfBirth: '1985-03-10',
   },
   {
     id: '00000000-0000-0000-0000-000000000005',
@@ -62,6 +66,7 @@ const users = [
     displayName: 'Charlie Doe',
     enabled: true,
     role: 'user',
+    dateOfBirth: '1985-03-11',
   },
   {
     id: '00000000-0000-0000-0000-000000000006',
@@ -70,7 +75,8 @@ const users = [
     lastName: 'Martin',
     displayName: 'Eva Martin',
     enabled: true,
-    role: "user"
+    role: 'user',
+    dateOfBirth: '1985-03-12',
   },
 ];
 

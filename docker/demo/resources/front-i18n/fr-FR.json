@@ -88,7 +88,7 @@
     },
     "fields": {
       "email": {
-        "label": "Email",
+        "label": "Email *",
         "validation": {
           "required": "L'email est requis.",
           "pattern": "L'email doit être une adresse email valide.",
@@ -97,7 +97,7 @@
         }
       },
       "firstName": {
-        "label": "Prénom",
+        "label": "Prénom *",
         "validation": {
           "required": "Le prénom est requis.",
           "minLength": "Le prénom doit comporter au moins {min} caractères.",
@@ -106,7 +106,7 @@
         }
       },
       "lastName": {
-        "label": "Nom",
+        "label": "Nom *",
         "validation": {
           "required": "Le nom est requis.",
           "minLength": "Le nom doit comporter au moins {min} caractères.",

@@ -69,6 +69,7 @@ Feature: Test General display
     And I expect the HTML element '[data-cy="information-card--displayName"] [data-cy="value"]' contains "John Doe"
     And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "admin"
     And I expect the HTML element '[data-cy="information-card--enabled"] [data-cy="value"]' contains "true"
+    And I expect the HTML element '[data-cy="information-card--dateOfBirth"] [data-cy="value"]' contains "1985/03/07"
 
     ## 203 Should display all action buttons on detail page (John doe)
     And I expect the HTML element '[data-cy="buttons-card"]' to be visible
@@ -99,6 +100,7 @@ Feature: Test General display
     And I expect the HTML element '[data-cy="information-card--displayName"] [data-cy="value"]' contains "Jane Roe"
     And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "user"
     And I expect the HTML element '[data-cy="information-card--enabled"] [data-cy="value"]' contains "true"
+    And I expect the HTML element '[data-cy="information-card--dateOfBirth"] [data-cy="value"]' contains "1985/03/08"
 
     ## 208 Should display all action buttons on detail page (Jane Roe)
     And I expect the HTML element '[data-cy="buttons-card"]' to be visible

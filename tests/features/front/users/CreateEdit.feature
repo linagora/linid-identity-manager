@@ -50,6 +50,7 @@ Feature: Test Module Users Edit and Create
     Then I set the text "Michael" in the HTML element '[data-cy="field_firstName"]'
     And I set the text "Scott" in the HTML element '[data-cy="field_lastName"]'
     And I set the text "Admin" in the HTML element '[data-cy="field_role"]'
+    And I set the text "1985/03/10" in the HTML element '[data-cy="field_dateOfBirth"]'
     And I click on '[data-cy="button_confirm"]'
 
     ## 104 Should successfully display all data in details vue
@@ -59,6 +60,7 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="information-card--firstName"] [data-cy="value"]' contains "Michael"
     And I expect the HTML element '[data-cy="information-card--lastName"] [data-cy="value"]' contains "Scott"
     And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "Admin"
+    And I expect the HTML element '[data-cy="information-card--dateOfBirth"] [data-cy="value"]' contains "1985/03/10"
 
     ## 105 Should display newly created user in users table
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
@@ -84,6 +86,7 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="information-card--firstName"] [data-cy="value"]' contains "Michael"
     And I expect the HTML element '[data-cy="information-card--lastName"] [data-cy="value"]' contains "Scott"
     And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "Admin"
+    And I expect the HTML element '[data-cy="information-card--dateOfBirth"] [data-cy="value"]' contains "1985/03/10"
 
     ## 203 Should redirect to edit page
     And I click on '[data-cy="buttons-card"] [data-cy="button_edit"]'
@@ -103,12 +106,14 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="form-section-card_main"] [data-cy="field_displayName"]' to be visible
     And I expect the HTML element '[data-cy="form-section-card_secondary"] [data-cy="field_role"]' to be visible
     And I expect the HTML element '[data-cy="form-section-card_secondary"] [data-cy="field_enabled"]' to be visible
+    And I expect the HTML element '[data-cy="form-section-card_secondary"] [data-cy="field_dateOfBirth"]' to be visible
 
     ## 205 Should pre-fill form fields with existing user data
     And I expect the HTML element '[data-cy="field_email"]' to have value "michael.scott@gmail.com"
     And I expect the HTML element '[data-cy="field_firstName"]' to have value "Michael"
     And I expect the HTML element '[data-cy="field_lastName"]' to have value "Scott"
     And I expect the HTML element '[data-cy="field_role"]' to have value "Admin"
+    And I expect the HTML element '[data-cy="field_dateOfBirth"]' to have value "1985/03/10"
 
     ## 206 Should successfully update user data and reflect changes in detail page
     When I set the text "Jean.dupont@example.com" in the HTML element '[data-cy="field_email"]'

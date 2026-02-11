@@ -117,7 +117,11 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "test.create@example.com", "firstName": "Test", "lastName": "Create"}
+      {
+        "email": "test.create@example.com",
+        "firstName": "Test",
+        "lastName": "Create"
+      }
       """
     Then I expect status code is 201
     And  I expect '{{response.body.id}}' is not empty
@@ -132,7 +136,10 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"firstName": "Test", "lastName": "Create"}
+      {
+        "firstName": "Test",
+        "lastName": "Create"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -150,7 +157,10 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "test@example.com", "lastName": "Create"}
+      {
+        "email": "test@example.com",
+        "lastName": "Create"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -165,7 +175,10 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "test@example.com", "firstName": "Test"}
+      {
+        "email": "test@example.com",
+        "firstName": "Test"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -180,7 +193,11 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "notanemail", "firstName": "Test", "lastName": "Create"}
+      {
+        "email": "notanemail",
+        "firstName": "Test",
+        "lastName": "Create"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -199,13 +216,21 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "test.put@example.com", "firstName": "Test", "lastName": "Put"}
+      {
+        "email": "test.put@example.com",
+        "firstName": "Test",
+        "lastName": "Put"
+      }
       """
 
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'PUT' with body:
       """
-      {"email": "test.put.updated@example.com", "firstName": "TestUpdated", "lastName": "PutUpdated"}
+      {
+        "email": "test.put.updated@example.com",
+        "firstName": "TestUpdated",
+        "lastName": "PutUpdated"
+      }
       """
     Then I expect status code is 200
     And  I expect '{{response.body.email}}' is 'test.put.updated@example.com'
@@ -235,7 +260,11 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-12345' with method 'PUT' with body:
       """
-      {"email": "test@example.com", "firstName": "Test", "lastName": "User"}
+      {
+        "email": "test@example.com",
+        "firstName": "Test",
+        "lastName": "User"
+      }
       """
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
@@ -245,7 +274,10 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
       """
-      {"firstName": "Test", "lastName": "User"}
+      {
+        "firstName": "Test",
+        "lastName": "User"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -263,7 +295,10 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
       """
-      {"email": "test@example.com", "lastName": "User"}
+      {
+        "email": "test@example.com",
+        "lastName": "User"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -278,7 +313,10 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
       """
-      {"email": "test@example.com", "firstName": "Test"}
+      {
+        "email": "test@example.com",
+        "firstName": "Test"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -293,7 +331,11 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/any-user-id' with method 'PUT' with body:
       """
-      {"email": "notanemail", "firstName": "Test", "lastName": "User"}
+      {
+        "email": "notanemail",
+        "firstName": "Test",
+        "lastName": "User"
+      }
       """
     Then I expect status code is 400
     And  I expect '{{response.body.status}}' is '400'
@@ -312,13 +354,20 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "test.patch@example.com", "firstName": "Test", "lastName": "Patch", "displayName": "Test Patch Original"}
+      {
+        "email": "test.patch@example.com",
+        "firstName": "Test",
+        "lastName": "Patch",
+        "displayName": "Test Patch Original"
+      }
       """
 
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/{{response.body.id}}' with method 'PATCH' with body:
       """
-      {"displayName": "Test Patch Updated"}
+      {
+        "displayName": "Test Patch Updated"
+      }
       """
     Then I expect status code is 200
     And  I expect '{{response.body.id}}' is '{{response.body.id}}'
@@ -348,7 +397,9 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users/nonexistent-user-id-67890' with method 'PATCH' with body:
       """
-      {"displayName": "Test"}
+      {
+        "displayName": "Test"
+      }
       """
     Then I expect status code is 404
     And  I expect '{{response.body.status}}' is '404'
@@ -362,7 +413,11 @@ Feature: Test API Users Module
     Given I set http header 'Content-Type' with 'application/json'
     When I request '{{env.E2E_API_URL}}/api/users' with method 'POST' with body:
       """
-      {"email": "test.delete@example.com", "firstName": "Test", "lastName": "Delete"}
+      {
+        "email": "test.delete@example.com",
+        "firstName": "Test",
+        "lastName": "Delete"
+      }
       """
     Then I expect status code is 201
 
@@ -458,7 +513,7 @@ Feature: Test API Users Module
     And  I expect '{{response.body.errors[0].context.attribute}}' is 'email'
 
     Examples:
-      | value              |
-      | notanemail         |
-      | test@example.org   |
-      | @example.com       |
+      | value            |
+      | notanemail       |
+      | test@example.org |
+      | @example.com     |

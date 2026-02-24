@@ -24,7 +24,18 @@
       "AdvancedSearchCard": {
         "title": "Search",
         "moreFilters": "More filters",
-        "lessFilters": "Less filters"
+        "lessFilters": "Less filters",
+        "fields": {
+          "email": {
+            "label": "Filter by email"
+          },
+          "firstName": {
+            "label": "Filter by first name"
+          },
+          "lastName": {
+            "label": "Filter by last name"
+          }
+        }
       }
     },
     "UserDetailsPage": {

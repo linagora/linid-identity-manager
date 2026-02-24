@@ -2,8 +2,10 @@ authorization:
   type: allow-all
 
 tasks:
-  - type: response-to-json
+  - type: json-parsing
     name: parseJsonResponse
+    source: response
+    destination: response
 
 providers:
   - name: http-provider
@@ -108,10 +110,10 @@ entities:
           pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
         validations:
           - type: required
-            phases: [beforeCreate, beforeUpdate]
+            phases: [ beforeCreate, beforeUpdate ]
           - type: regex
             pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.com$"
-            phases: [beforeCreate, beforeUpdate]
+            phases: [ beforeCreate, beforeUpdate ]
       - name: firstName
         type: String
         required: true
@@ -121,7 +123,7 @@ entities:
           maxLength: 20
         validations:
           - type: required
-            phases: [beforeCreate, beforeUpdate]
+            phases: [ beforeCreate, beforeUpdate ]
       - name: lastName
         type: String
         required: true
@@ -131,7 +133,7 @@ entities:
           maxLength: 20
         validations:
           - type: required
-            phases: [beforeCreate, beforeUpdate]
+            phases: [ beforeCreate, beforeUpdate ]
       - name: displayName
         type: String
         input: Text

@@ -17,7 +17,9 @@
       "noCaps": true
     },
     "q-table": {
-      "dense": true
+      "dense": true,
+      "bordered": true,
+      "flat": true
     },
     "q-header": {
       "elevated": true
@@ -72,33 +74,41 @@
   "moduleUsers": {
     "homepage": {
       "buttons-card": {
-        "q-card": { "flat": true }
-      },
-      "create-button": {
-        "q-btn": { "dense": false }
-      },
-      "generic-entity-table": {
-        "q-table": { "dense": false, "bordered": true, "flat": true }
+        "q-card": {
+          "flat": true
+        }
       },
       "advanced-search-card": {
-        "q-card": { "flat": true, "bordered": true },
-        "q-icon": { "name": "search", "color": "primary" },
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        },
+        "q-icon": {
+          "name": "search",
+          "color": "primary"
+        },
         "toggle-button": {
-          "q-btn": { "flat": true, "dense": false }
+          "q-btn": {
+            "flat": true
+          }
         },
         "default-filters": {
           "fields": {
             "email": {
               "EntityAttributeField": {
                 "email": {
-                  "q-input": { "dense": true }
+                  "q-input": {
+                    "dense": true
+                  }
                 }
               }
             },
             "firstName": {
               "EntityAttributeField": {
                 "firstName": {
-                  "q-input": { "dense": true }
+                  "q-input": {
+                    "dense": true
+                  }
                 }
               }
             }
@@ -109,7 +119,9 @@
             "lastName": {
               "EntityAttributeField": {
                 "lastName": {
-                  "q-input": { "dense": true }
+                  "q-input": {
+                    "dense": true
+                  }
                 }
               }
             }
@@ -117,12 +129,16 @@
         }
       },
       "see-button": {
-        "q-btn": { "flat": true, "dense": false }
+        "q-btn": {
+          "flat": true
+        }
       }
     },
     "user-details-page": {
       "entity-details-card": {
-        "q-card": { "flat": true },
+        "q-card": {
+          "flat": true
+        },
         "id": {
           "information-card": {
             "q-icon": {
@@ -180,47 +196,67 @@
           }
         }
       },
-      "edit-button": {
-        "q-btn": { "dense": false }
-      },
       "buttons-card": {
-        "q-card": { "flat": true },
-        "cancel-button": {
-          "q-btn": { "dense": false }
+        "q-card": {
+          "flat": true
         }
       }
     },
     "edit-user-page": {
       "form-section-main": {
-        "q-card": { "flat": true, "bordered": true }
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        }
       },
       "form-section-secondary": {
-        "q-card": { "flat": true, "bordered": true }
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        }
       },
       "buttons-card": {
-        "q-card": { "flat": true },
+        "q-card": {
+          "flat": true
+        },
         "confirm-button": {
-          "q-btn": { "color": "primary", "dense": false }
+          "q-btn": {
+            "color": "primary"
+          }
         },
         "cancel-button": {
-          "q-btn": { "color": "negative", "dense": false }
+          "q-btn": {
+            "color": "negative"
+          }
         }
       }
     },
     "new-user-page": {
       "form-section-main": {
-        "q-card": { "flat": true, "bordered": true }
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        }
       },
       "form-section-secondary": {
-        "q-card": { "flat": true, "bordered": true }
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        }
       },
       "buttons-card": {
-        "q-card": { "flat": true },
+        "q-card": {
+          "flat": true
+        },
         "confirm-button": {
-          "q-btn": { "color": "positive", "dense": false }
+          "q-btn": {
+            "color": "positive"
+          }
         },
         "cancel-button": {
-          "q-btn": { "color": "negative", "dense": false }
+          "q-btn": {
+            "color": "negative"
+          }
         }
       }
     }

@@ -1,0 +1,3 @@
+Email;FirstName;LastName;Role;DateOfBirth
+test_csv_import_1@example.com;FN_CSV1;LN_CSV1;R_CSV1;01/01/1990
+test_csv_import_2@example.com;FN_CSV2;LN_CSV2;R_CSV2;02/01/1990

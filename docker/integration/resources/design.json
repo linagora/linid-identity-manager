@@ -6,6 +6,12 @@
       "color": "primary",
       "noCaps": true
     },
+    "q-btn-dropdown": {
+      "dense": true,
+      "outline": true,
+      "color": "primary",
+      "noCaps": true
+    },
     "q-tabs": {
       "dense": false,
       "align": "left",
@@ -52,6 +58,10 @@
     "q-toggle": {
       "dense": true,
       "color": "primary"
+    },
+    "q-file": {
+      "dense": true,
+      "outlined": true
     },
     "q-card": {},
     "q-date": {},

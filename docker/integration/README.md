@@ -15,6 +15,7 @@ docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/
 docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
 docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
 docker build -f linid-im-front-community-plugins/docker/module-users.Dockerfile -t module-users linid-im-front-community-plugins/
+docker build -f linid-im-front-community-plugins/docker/module-import.Dockerfile -t module-import linid-im-front-community-plugins/
 
 # Init plugins (download required JAR files)
 rm -rf docker/plugins
@@ -29,13 +30,14 @@ docker compose -f docker/integration/docker-compose.yml --env-file docker/integr
 
 ## Services
 
-| Service       | URL                    | Description                    |
-| ------------- | ---------------------- | ------------------------------ |
-| mock-api      | (internal network)     | Mock API for testing           |
-| linid-im-api  | (internal network)     | LinID Identity Manager API     |
-| linid-im-front| http://localhost:9000  | LinID Identity Manager Frontend|
-| catalog-ui    | (internal network)     | Module catalog                 |
-| module-users  | (internal network)     | Users module                   |
+| Service        | URL                    | Description                     |
+|----------------| ---------------------- |---------------------------------|
+| mock-api       | (internal network)     | Mock API for testing            |
+| linid-im-api   | (internal network)     | LinID Identity Manager API      |
+| linid-im-front | http://localhost:9000  | LinID Identity Manager Frontend |
+| catalog-ui     | (internal network)     | Module catalog                  |
+| module-users   | (internal network)     | Users module                    |
+| module-import  | (internal network)     | Import module                   |
 
 > **Note:** Most services are only accessible through the Docker network. The frontend
 > (`linid-im-front`) acts as a reverse proxy to the API and modules.

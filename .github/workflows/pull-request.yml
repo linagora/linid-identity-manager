@@ -2,7 +2,7 @@ name: Pull request
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
 
 env:
   NODE_VERSION: 22.19
@@ -89,12 +89,12 @@ jobs:
           docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
           docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
           docker build -f linid-im-front-community-plugins/docker/module-users.Dockerfile -t module-users linid-im-front-community-plugins/
+          docker build -f linid-im-front-community-plugins/docker/module-import.Dockerfile -t module-import linid-im-front-community-plugins/
           docker build -f docker/mock-api/Dockerfile -t mock-api docker/mock-api/
           docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env up -d
 
       - name: Run functional tests
-        run: |
-          docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env run --rm e2e-test-runner
+        run: docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env run --rm e2e-test-runner
 
       - name: Stop application
         if: always()

@@ -6,5 +6,9 @@
   {
     "name": "moduleUsers",
     "entry": "/module-users/mf-manifest.json"
+  },
+  {
+    "name": "moduleImport",
+    "entry": "/module-import/mf-manifest.json"
   }
 ]

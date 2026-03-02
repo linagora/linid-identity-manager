@@ -7,7 +7,7 @@ services:
     networks:
       - test-network
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/users"]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:3000/api/users" ]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -47,7 +47,7 @@ services:
       start_period: 10s
 
   e2e-test-runner:
-    image: ${E2E_TEST_RUNNER_IMAGE:-vincentmoittie/e2e-test-runner:v1.6.0}
+    image: ${E2E_TEST_RUNNER_IMAGE:-vincentmoittie/e2e-test-runner:v1.10.0}
     container_name: e2e-test-runner
     networks:
       - test-network
@@ -55,6 +55,7 @@ services:
       - .env
     volumes:
       - ../../tests/features:/app/features
+      - ../../tests/files:/app/files
     depends_on:
       linid-im-api:
         condition: service_healthy
@@ -78,6 +79,7 @@ services:
       - ./resources/front-i18n/en-US.json:/usr/share/nginx/html/i18n/en-US.json:ro
       - ./resources/modules.json:/usr/share/nginx/html/modules.json:ro
       - ./resources/moduleUsers.json:/usr/share/nginx/html/moduleUsers.json:ro
+      - ./resources/moduleImport.json:/usr/share/nginx/html/moduleImport.json:ro
       - ./resources/remotes.json:/usr/share/nginx/html/remotes.json:ro
     depends_on:
       - catalog-ui
@@ -98,6 +100,16 @@ services:
       - test-network
     volumes:
       - ./resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
+
+  module-import:
+    image: module-import
+    container_name: module-import
+    networks:
+      - test-network
+    volumes:
+      - ./resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - linid-im-front
 
 networks:
   test-network:

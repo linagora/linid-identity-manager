@@ -1,0 +1,22 @@
+{
+  "instanceId": "moduleImport",
+  "entity": "users",
+  "remoteName": "moduleImport",
+  "apiEndpoint": "api/users",
+  "basePath": "/moduleUsers/moduleImport",
+  "options": {
+    "zones": ["moduleUsers.HomePage.extraButtons"],
+    "fieldMappingTemplates": {
+      "email": "{{ Email }}",
+      "firstName": "{{ FirstName }}",
+      "lastName": "{{ LastName }}",
+      "displayName": "{{ FirstName }} {{ LastName }}",
+      "role": "{{ Role }}",
+      "dateOfBirth": "{{ DateOfBirth }}"
+    },
+    "useColumnIndexParsing": false,
+    "skipFirstCsvNLines": 1,
+    "numberOfParallelImports": 5,
+    "previousPath": "/moduleUsers"
+  }
+}

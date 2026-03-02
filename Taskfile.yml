@@ -62,4 +62,5 @@ tasks:
         -e TZ=Europe/Paris \
         --network test-network \
         -v "$(pwd)/tests/features":/app/features \
+        -v "$(pwd)/tests/files":/app/files \
         vincentmoittie/e2e-test-runner:latest

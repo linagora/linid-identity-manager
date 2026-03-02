@@ -16,6 +16,11 @@
       "title": "Utilisateurs",
       "seeButton": "Voir",
       "createButton": "Créer un utilisateur",
+      "ButtonsCard": {
+        "ImportButton": {
+          "label": "Importer un utilisateur"
+        }
+      },
       "error": "Échec du chargement des utilisateurs",
       "columnAction": "Actions",
       "columnEmail": "Email",

@@ -1,3 +1,3 @@
 {
-  "modules": ["/moduleUsers.json"]
+  "modules": ["/moduleUsers.json", "/moduleImport.json"]
 }

@@ -123,7 +123,7 @@ app.get('/api/users/:id', (req, res) => {
   const user = users.find((u) => u.id === req.params.id);
 
   if (!user) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
   }
 
   res.json(user);
@@ -131,6 +131,11 @@ app.get('/api/users/:id', (req, res) => {
 
 // Create user
 app.post('/api/users', (req, res) => {
+  if (req.body.email.indexOf('@') === -1) {
+    res.status(400).json({});
+    return;
+  }
+
   const newUser = {
     id: `00000000-0000-0000-0000-${String(users.length + 1).padStart(12, '0')}`,
     ...req.body,
@@ -145,10 +150,10 @@ app.put('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
   }
 
-  users[index] = { ...users[index], ...req.body };
+  users[index] = {...users[index], ...req.body};
   res.json(users[index]);
 });
 
@@ -157,10 +162,10 @@ app.patch('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
   }
 
-  users[index] = { ...users[index], ...req.body };
+  users[index] = {...users[index], ...req.body};
   res.json(users[index]);
 });
 
@@ -169,7 +174,7 @@ app.delete('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', { entity: 'user', id: req.params.id }));
+    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
   }
 
   users.splice(index, 1);

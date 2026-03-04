@@ -1,0 +1,65 @@
+flowchart TB
+
+    %% ─── External sources ───────────────────────────────────────────
+    EXT["External servers\nUser payload sources"]
+    KAFKA["Kafka\nEvent bus"]
+
+    %% ─── Main infrastructure ─────────────────────────────────────────
+    subgraph MAIN["Main infrastructure"]
+        direction TB
+
+        API["Spring Boot API\nREST endpoints"]
+
+        subgraph PG_PRIMARY["PostgreSQL (primary)"]
+            direction LR
+            REGO["Rego scripts\nOPA policy store"]
+            PAYLOADS["User payloads\nExternal source cache"]
+            RIGHTS["Rights & claims\nPer user & app"]
+            LEMON_CFG["LemonLDAP config\nPer application"]
+            RLS["Row Level Security policies"]
+        end
+
+        API -- "read / write" --> PG_PRIMARY
+    end
+
+    %% ─── Sync application ───────────────────────────────────────────
+    subgraph SYNC["Sync application (Java)"]
+        direction LR
+
+        TRIGGER["Cron / Kafka\nTrigger"]
+
+        subgraph POOL["Worker pool (per user × application)"]
+            W1["Worker"]
+            W2["Worker"]
+            W3["Worker"]
+        end
+
+        TRIGGER --> POOL
+    end
+
+    %% ─── OPA server ─────────────────────────────────────────────────
+    OPA["OPA server\nRego eval engine"]
+
+    %% ─── DMZ ─────────────────────────────────────────────────────────
+    subgraph DMZ["DMZ"]
+        direction LR
+        PG_REPLICA["PostgreSQL (replica)\nRead-only mirror"]
+        LLNG["LemonLDAP::NG\nSSO / token issuer"]
+        CLIENTS["Client applications / browsers"]
+
+        PG_REPLICA -- "config" --> LLNG
+        LLNG --> CLIENTS
+        CLIENTS --> LLNG
+    end
+
+    %% ─── Flows ───────────────────────────────────────────────────────
+    KAFKA -. "trigger event" .-> TRIGGER
+    EXT -- "fetch payloads" --> POOL
+
+    POOL -- "eval" --> OPA
+    OPA -- "result" --> POOL
+    OPA -. "load scripts" .-> REGO
+
+    POOL -- "store rights & claims" --> PG_PRIMARY
+
+    PG_PRIMARY -- "PG replication" --> PG_REPLICA

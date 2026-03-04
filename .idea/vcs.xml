@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/linid-im-api" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/linid-im-front" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/linid-im-front-community-plugins" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tests/e2e" vcs="Git" />
+  </component>
+</project>

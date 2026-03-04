@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant Admin
+    participant Clavis
+    participant DB as clavis-db
+    participant Redis
+    participant OPA as opa
+
+    Admin->>Clavis: Update OPA script
+    Clavis->>DB: Save new OPA script
+
+    Clavis->>OPA: Push new script
+
+    Clavis->>Redis: Delete keys matching pattern opa:*:{scriptId}

@@ -38,6 +38,7 @@ const initialUsers = [
     enabled: true,
     role: 'admin',
     dateOfBirth: '1985-03-07',
+    status: 'active',
   },
   {
     id: '00000000-0000-0000-0000-000000000002',
@@ -48,6 +49,7 @@ const initialUsers = [
     enabled: true,
     role: 'user',
     dateOfBirth: '1985-03-08',
+    status: 'active',
   },
   {
     id: '00000000-0000-0000-0000-000000000003',
@@ -58,6 +60,7 @@ const initialUsers = [
     enabled: true,
     role: 'user',
     dateOfBirth: '1985-03-09',
+    status: 'inactive',
   },
   {
     id: '00000000-0000-0000-0000-000000000004',
@@ -68,6 +71,7 @@ const initialUsers = [
     enabled: false,
     role: 'user',
     dateOfBirth: '1985-03-10',
+    status: 'inactive',
   },
   {
     id: '00000000-0000-0000-0000-000000000005',
@@ -78,6 +82,7 @@ const initialUsers = [
     enabled: true,
     role: 'user',
     dateOfBirth: '1985-03-11',
+    status: 'pending',
   },
   {
     id: '00000000-0000-0000-0000-000000000006',
@@ -88,6 +93,7 @@ const initialUsers = [
     enabled: true,
     role: 'user',
     dateOfBirth: '1985-03-12',
+    status: 'active',
   },
 ];
 

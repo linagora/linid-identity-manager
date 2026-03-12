@@ -6,7 +6,12 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 
 // Helper to create API error response matching linid-im-api format
-function createErrorResponse(status, errorKey, errorContext = {}, details = {}) {
+function createErrorResponse(
+  status,
+  errorKey,
+  errorContext = {},
+  details = {}
+) {
   return {
     error: errorKey, // In real API, this would be i18n translated
     errorKey,
@@ -17,7 +22,13 @@ function createErrorResponse(status, errorKey, errorContext = {}, details = {}) 
   };
 }
 
-const users = [
+const statuses = [
+  { id: 'active', label: 'Active' },
+  { id: 'inactive', label: 'Inactive' },
+  { id: 'pending', label: 'Pending' },
+];
+
+const initialUsers = [
   {
     id: '00000000-0000-0000-0000-000000000001',
     email: 'john.doe@example.com',
@@ -80,6 +91,8 @@ const users = [
   },
 ];
 
+let users = structuredClone(initialUsers);
+
 // Find all users with optional filtering
 app.get('/api/users', (req, res) => {
   const page = parseInt(req.query.page || '0', 10);
@@ -87,13 +100,22 @@ app.get('/api/users', (req, res) => {
 
   // Filter users based on query parameters
   let filteredUsers = users.filter((user) => {
-    if (req.query.email && !user.email.toLowerCase().includes(req.query.email.toLowerCase())) {
+    if (
+      req.query.email &&
+      !user.email.toLowerCase().includes(req.query.email.toLowerCase())
+    ) {
       return false;
     }
-    if (req.query.firstName && !user.firstName.toLowerCase().includes(req.query.firstName.toLowerCase())) {
+    if (
+      req.query.firstName &&
+      !user.firstName.toLowerCase().includes(req.query.firstName.toLowerCase())
+    ) {
       return false;
     }
-    if (req.query.lastName && !user.lastName.toLowerCase().includes(req.query.lastName.toLowerCase())) {
+    if (
+      req.query.lastName &&
+      !user.lastName.toLowerCase().includes(req.query.lastName.toLowerCase())
+    ) {
       return false;
     }
     return true;
@@ -123,7 +145,12 @@ app.get('/api/users/:id', (req, res) => {
   const user = users.find((u) => u.id === req.params.id);
 
   if (!user) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
+    return res.status(404).json(
+      createErrorResponse(404, 'error.entity.notFound', {
+        entity: 'user',
+        id: req.params.id,
+      })
+    );
   }
 
   res.json(user);
@@ -150,10 +177,15 @@ app.put('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
+    return res.status(404).json(
+      createErrorResponse(404, 'error.entity.notFound', {
+        entity: 'user',
+        id: req.params.id,
+      })
+    );
   }
 
-  users[index] = {...users[index], ...req.body};
+  users[index] = { ...users[index], ...req.body };
   res.json(users[index]);
 });
 
@@ -162,10 +194,15 @@ app.patch('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
+    return res.status(404).json(
+      createErrorResponse(404, 'error.entity.notFound', {
+        entity: 'user',
+        id: req.params.id,
+      })
+    );
   }
 
-  users[index] = {...users[index], ...req.body};
+  users[index] = { ...users[index], ...req.body };
   res.json(users[index]);
 });
 
@@ -174,10 +211,26 @@ app.delete('/api/users/:id', (req, res) => {
   const index = users.findIndex((u) => u.id === req.params.id);
 
   if (index === -1) {
-    return res.status(404).json(createErrorResponse(404, 'error.entity.notFound', {entity: 'user', id: req.params.id}));
+    return res.status(404).json(
+      createErrorResponse(404, 'error.entity.notFound', {
+        entity: 'user',
+        id: req.params.id,
+      })
+    );
   }
 
   users.splice(index, 1);
+  res.status(204).send();
+});
+
+// List available statuses for dynamic list
+app.get('/api/statuses', (req, res) => {
+  res.json(statuses);
+});
+
+// Reset mock-api state to initial data
+app.post('/api/reset', (req, res) => {
+  users = structuredClone(initialUsers);
   res.status(204).send();
 });
 

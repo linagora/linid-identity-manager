@@ -82,8 +82,10 @@ services:
       - ./resources/moduleImport.json:/usr/share/nginx/html/moduleImport.json:ro
       - ./resources/remotes.json:/usr/share/nginx/html/remotes.json:ro
     depends_on:
+      - linid-im-api
       - catalog-ui
       - module-users
+      - module-import
 
   catalog-ui:
     image: catalog-ui
@@ -108,8 +110,6 @@ services:
       - test-network
     volumes:
       - ./resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - linid-im-front
 
 networks:
   test-network:

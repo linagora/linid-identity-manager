@@ -10,6 +10,7 @@ Feature: Test API Metadata Endpoints
   ## 203 Should return 404 for non-existent entity
   ## 204 Should return 405 for unsupported method on entities
   ## 205 Should return email attribute with validation metadata
+  ## 206 Should return status attribute with DynamicList metadata
 
   ####################################################
   ################## Routes ##########################
@@ -72,3 +73,12 @@ Feature: Test API Metadata Endpoints
     And  I expect '{{response.body.attributes[1].name}}' is 'email'
     And  I expect '{{response.body.attributes[1].hasValidations}}' is 'true'
     And  I expect '{{response.body.attributes[1].inputSettings.pattern}}' is '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+  Scenario: 206 - Should return status attribute with DynamicList metadata
+    When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.attributes[8].name}}' is 'status'
+    And  I expect '{{response.body.attributes[8].input}}' is 'DynamicList'
+    And  I expect '{{response.body.attributes[8].hasValidations}}' is 'true'
+    And  I expect '{{response.body.attributes[8].required}}' is 'false'
+    And  I expect '{{response.body.attributes[8].inputSettings.route}}' is '/options/statuses'

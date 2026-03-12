@@ -46,6 +46,9 @@ Feature: Test API Users Module
   ## 803 Should return 400 when validating attribute with null value
   ## 804 Should return 404 when validating unknown attribute
   ## 805 Should return 400 when validating email with invalid format
+  ## 806 Should return 204 when validating status with empty value
+  ## 807 Should return 204 when validating status with null value
+  ## 808 Should return 400 when validating status with invalid value
 
   ####################################################
   ################## Metadata ########################
@@ -55,7 +58,7 @@ Feature: Test API Users Module
     When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
     Then I expect status code is 200
     And  I expect '{{response.body.name}}' is 'user'
-    And  I expect '{{response.body.attributes.length}}' is '8'
+    And  I expect '{{response.body.attributes.length}}' is '9'
     And  I expect '{{response.body.attributes[0].name}}' is 'id'
     And  I expect '{{response.body.attributes[1].name}}' is 'email'
     And  I expect '{{response.body.attributes[2].name}}' is 'firstName'
@@ -64,6 +67,7 @@ Feature: Test API Users Module
     And  I expect '{{response.body.attributes[5].name}}' is 'enabled'
     And  I expect '{{response.body.attributes[6].name}}' is 'role'
     And  I expect '{{response.body.attributes[7].name}}' is 'dateOfBirth'
+    And  I expect '{{response.body.attributes[8].name}}' is 'status'
 
   ####################################################
   ################## Find All (GET /api/users) #######
@@ -454,6 +458,7 @@ Feature: Test API Users Module
       | email     | test@example.com |
       | firstName | John             |
       | lastName  | Doe              |
+      | status    | active           |
 
   Scenario Outline: 802 - Should return 400 when validating "<attribute>" with empty value
     Given I set http header 'Content-Type' with 'application/json'
@@ -519,3 +524,31 @@ Feature: Test API Users Module
       | notanemail       |
       | test@example.org |
       | @example.com     |
+
+  Scenario: 806 - Should return 204 when validating status with empty value
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/status' with method 'POST' with body:
+      """
+      ""
+      """
+    Then I expect status code is 204
+
+  Scenario: 807 - Should return 204 when validating status with null value
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/status' with method 'POST'
+    Then I expect status code is 204
+
+  Scenario: 808 - Should return 400 when validating status with invalid value
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/api/users/validate/status' with method 'POST' with body:
+      """
+      "nonexistent-status"
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.status}}' is '400'
+    And  I expect '{{response.body.error}}' is 'Validation errors occurred for entity: user'
+    And  I expect '{{response.body.errorKey}}' is 'error.entity.attributes'
+    And  I expect '{{response.body.errors.length}}' is '1'
+    And  I expect '{{response.body.errors[0].key}}' is 'error.plugin.dynamicListValidation.invalid.value'
+    And  I expect '{{response.body.errors[0].context.entity}}' is 'user'
+    And  I expect '{{response.body.errors[0].context.attribute}}' is 'status'

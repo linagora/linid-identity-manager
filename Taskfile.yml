@@ -59,6 +59,7 @@ tasks:
         -e E2E_API_URL=http://linid-im-api:8080 \
         -e E2E_FRONT_URL=http://linid-im-front \
         -e CYPRESS_FEATURES_PATH=/app/features \
+        -e E2E_LOCAL_FILES=/app/files \
         -e TZ=Europe/Paris \
         --network test-network \
         -v "$(pwd)/tests/features":/app/features \

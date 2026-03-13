@@ -74,6 +74,8 @@
       "displayName",
       "enabled",
       "role",
+      "roleWithDefaultValue",
+      "roleWithInvalidDefaultValue",
       "dateOfBirth",
       "status"
     ],
@@ -87,7 +89,14 @@
       {
         "id": "secondary",
         "order": 2,
-        "fieldsOrder": ["enabled", "role", "dateOfBirth", "status"]
+        "fieldsOrder": [
+          "enabled",
+          "role",
+          "roleWithDefaultValue",
+          "roleWithInvalidDefaultValue",
+          "dateOfBirth",
+          "status"
+        ]
       }
     ]
   }

@@ -164,7 +164,6 @@ Feature: Test Module Users Form Field Validation
     And I click on '[data-cy="title"]'
 
     Then I expect the HTML element '[data-cy="field-container_role"]' not contains "est requis."
-    And I set the text "role test" in the HTML element '[data-cy="field_role"]'
     And I click on '[data-cy="field_email"]'
 
     ####################################################
@@ -190,7 +189,8 @@ Feature: Test Module Users Form Field Validation
     And I expect the HTML element '[data-cy="field_enabled"]' exists
     And I expect the HTML element '[data-cy="field-container_enabled"]' not contains "est requis."
 
-    When I click on '[data-cy="button_confirm"]'
+    When I select ".q-item:nth-child(3)" in "[data-cy='field_roleWithInvalidDefaultValue']"
+    And I click on '[data-cy="button_confirm"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/moduleUsers/00000000-0000-0000-0000-000000000007"
     And I expect the HTML element '[data-cy="user-details-card"]' to be visible
     And I expect the HTML element '[data-cy="information-card--enabled"]' to be visible

@@ -50,8 +50,8 @@ Feature: Test Module Users Edit and Create
     When I set the text "michael.scott@gmail.com" in the HTML element '[data-cy="field_email"]'
     Then I set the text "Michael" in the HTML element '[data-cy="field_firstName"]'
     And I set the text "Scott" in the HTML element '[data-cy="field_lastName"]'
-    And I set the text "Admin" in the HTML element '[data-cy="field_role"]'
     And I set the text "1985/03/10" in the HTML element '[data-cy="field_dateOfBirth"]'
+    And I select ".q-item:nth-child(3)" in "[data-cy='field_roleWithInvalidDefaultValue']"
     And I click on '[data-cy="button_confirm"]'
 
     ## 104 Should successfully display all data in details vue
@@ -60,7 +60,6 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "michael.scott@gmail.com"
     And I expect the HTML element '[data-cy="information-card--firstName"] [data-cy="value"]' contains "Michael"
     And I expect the HTML element '[data-cy="information-card--lastName"] [data-cy="value"]' contains "Scott"
-    And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "Admin"
     And I expect the HTML element '[data-cy="information-card--dateOfBirth"] [data-cy="value"]' contains "1985/03/10"
 
     ## 105 Should display newly created user in users table
@@ -86,7 +85,6 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "michael.scott@gmail.com"
     And I expect the HTML element '[data-cy="information-card--firstName"] [data-cy="value"]' contains "Michael"
     And I expect the HTML element '[data-cy="information-card--lastName"] [data-cy="value"]' contains "Scott"
-    And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "Admin"
     And I expect the HTML element '[data-cy="information-card--dateOfBirth"] [data-cy="value"]' contains "1985/03/10"
 
     ## 203 Should redirect to edit page
@@ -113,7 +111,6 @@ Feature: Test Module Users Edit and Create
     And I expect the HTML element '[data-cy="field_email"]' to have value "michael.scott@gmail.com"
     And I expect the HTML element '[data-cy="field_firstName"]' to have value "Michael"
     And I expect the HTML element '[data-cy="field_lastName"]' to have value "Scott"
-    And I expect the HTML element '[data-cy="field_role"]' to have value "Admin"
     And I expect the HTML element '[data-cy="field_dateOfBirth"]' to have value "1985/03/10"
 
     ## 206 Should enabled save button on selecting a date in datepicker
@@ -126,13 +123,11 @@ Feature: Test Module Users Edit and Create
     When I set the text "Jean.dupont@example.com" in the HTML element '[data-cy="field_email"]'
     And I set the text "Jean" in the HTML element '[data-cy="field_firstName"]'
     And I set the text "Dupont" in the HTML element '[data-cy="field_lastName"]'
-    And I set the text "User" in the HTML element '[data-cy="field_role"]'
     And I click on '[data-cy="button_confirm"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/moduleUsers/00000000-0000-0000-0000-000000000007"
     And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "Jean.dupont@example.com"
     And I expect the HTML element '[data-cy="information-card--firstName"] [data-cy="value"]' contains "Jean"
     And I expect the HTML element '[data-cy="information-card--lastName"] [data-cy="value"]' contains "Dupont"
-    And I expect the HTML element '[data-cy="information-card--role"] [data-cy="value"]' contains "User"
 
     ## 208 Should reflect updated user data in users table
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'

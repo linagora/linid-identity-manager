@@ -137,7 +137,23 @@
         "label": "Activé"
       },
       "role": {
-        "label": "Rôle"
+        "label": "Rôle",
+        "validation": {
+          "unknownError": "Une erreur inconnue est survenue."
+        }
+      },
+      "roleWithDefaultValue": {
+        "label": "Rôle avec valeur par défaut",
+        "validation": {
+          "unknownError": "Une erreur inconnue est survenue."
+        }
+      },
+      "roleWithInvalidDefaultValue": {
+        "label": "Rôle avec valeur par défaut invalide *",
+        "validation": {
+          "required": "Le rôle est requis.",
+          "unknownError": "Une erreur inconnue est survenue."
+        }
       },
       "dateOfBirth": {
         "label": "Date de naissance"

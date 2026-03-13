@@ -132,7 +132,23 @@
         "label": "Enabled"
       },
       "role": {
-        "label": "Role"
+        "label": "Role",
+        "validation": {
+          "unknownError": "An unknown error occurred."
+        }
+      },
+      "roleWithDefaultValue": {
+        "label": "Role with default value",
+        "validation": {
+          "unknownError": "An unknown error occurred."
+        }
+      },
+      "roleWithInvalidDefaultValue": {
+        "label": "Role with invalid default value *",
+        "validation": {
+          "required": "Role is required",
+          "unknownError": "An unknown error occurred."
+        }
       },
       "dateOfBirth": {
         "label": "Date of Birth"

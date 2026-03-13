@@ -68,6 +68,8 @@ entities:
           displayName: "{{ context.response.content[index].displayName }}"
           enabled: "{{ context.response.content[index].enabled }}"
           role: "{{ context.response.content[index].role }}"
+          roleWithDefaultValue: "{{ context.response.content[index].roleWithDefaultValue }}"
+          roleWithInvalidDefaultValue: "{{ context.response.content[index].roleWithInvalidDefaultValue }}"
           dateOfBirth: "{{ context.response.content[index].dateOfBirth | replace('-', '/') }}"
           status: "{{ context.response.content[index].status }}"
       findById:
@@ -81,6 +83,8 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          roleWithDefaultValue: "{{ context.response.roleWithDefaultValue }}"
+          roleWithInvalidDefaultValue: "{{ context.response.roleWithInvalidDefaultValue }}"
           dateOfBirth: "{{ context.response.dateOfBirth | replace('-', '/') }}"
           status: "{{ context.response.status }}"
       create:
@@ -95,6 +99,8 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          roleWithDefaultValue: "{{ context.response.roleWithDefaultValue }}"
+          roleWithInvalidDefaultValue: "{{ context.response.roleWithInvalidDefaultValue }}"
           dateOfBirth: "{{ context.response.dateOfBirth | replace('/', '-') }}"
           status: "{{ context.response.status }}"
       update:
@@ -109,6 +115,8 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          roleWithDefaultValue: "{{ context.response.roleWithDefaultValue }}"
+          roleWithInvalidDefaultValue: "{{ context.response.roleWithInvalidDefaultValue }}"
           dateOfBirth: "{{ context.response.dateOfBirth | replace('/', '-') }}"
           status: "{{ context.response.status }}"
       patch:
@@ -123,6 +131,8 @@ entities:
           displayName: "{{ context.response.displayName }}"
           enabled: "{{ context.response.enabled }}"
           role: "{{ context.response.role }}"
+          roleWithDefaultValue: "{{ context.response.roleWithDefaultValue }}"
+          roleWithInvalidDefaultValue: "{{ context.response.roleWithInvalidDefaultValue }}"
           dateOfBirth: "{{ context.response.dateOfBirth | replace('/', '-') }}"
           status: "{{ context.response.status }}"
       delete:
@@ -173,7 +183,33 @@ entities:
         input: Boolean
       - name: role
         type: String
-        input: Text
+        required: false
+        input: List
+        inputSettings:
+          values: ["user", "admin", "manager"]
+        validations:
+          - type: list
+            allowedValues: ["user", "admin", "manager"]
+      - name: roleWithDefaultValue
+        type: String
+        required: false
+        input: List
+        inputSettings:
+          defaultValue: "admin"
+          values: ["user", "admin", "manager"]
+        validations:
+          - type: list
+            allowedValues: ["user", "admin", "manager"]
+      - name: roleWithInvalidDefaultValue
+        type: String
+        required: true
+        input: List
+        inputSettings:
+          defaultValue: "invalid"
+          values: ["user", "admin", "manager"]
+        validations:
+          - type: list
+            allowedValues: ["user", "admin", "manager"]
       - name: dateOfBirth
         type: String
         input: Date

@@ -11,6 +11,8 @@ Feature: Test API Metadata Endpoints
   ## 204 Should return 405 for unsupported method on entities
   ## 205 Should return email attribute with validation metadata
   ## 206 Should return status attribute with DynamicList metadata
+  ## 207 Should return role attribute with List metadata
+  ## 208 Should return roleWithDefaultValue attribute with List metadata containing default value
 
   ####################################################
   ################## Routes ##########################
@@ -77,8 +79,33 @@ Feature: Test API Metadata Endpoints
   Scenario: 206 - Should return status attribute with DynamicList metadata
     When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
     Then I expect status code is 200
-    And  I expect '{{response.body.attributes[8].name}}' is 'status'
-    And  I expect '{{response.body.attributes[8].input}}' is 'DynamicList'
-    And  I expect '{{response.body.attributes[8].hasValidations}}' is 'true'
-    And  I expect '{{response.body.attributes[8].required}}' is 'false'
-    And  I expect '{{response.body.attributes[8].inputSettings.route}}' is '/options/statuses'
+    And  I expect '{{response.body.attributes[10].name}}' is 'status'
+    And  I expect '{{response.body.attributes[10].input}}' is 'DynamicList'
+    And  I expect '{{response.body.attributes[10].hasValidations}}' is 'true'
+    And  I expect '{{response.body.attributes[10].required}}' is 'false'
+    And  I expect '{{response.body.attributes[10].inputSettings.route}}' is '/options/statuses'
+
+  Scenario: 207 - Should return role attribute with List metadata
+    When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.attributes[6].name}}' is 'role'
+    And  I expect '{{response.body.attributes[6].input}}' is 'List'
+    And  I expect '{{response.body.attributes[6].hasValidations}}' is 'true'
+    And  I expect '{{response.body.attributes[6].required}}' is 'false'
+    And  I expect '{{response.body.attributes[6].inputSettings.values.length}}' is '3'
+    And  I expect '{{response.body.attributes[6].inputSettings.values[0]}}' is 'user'
+    And  I expect '{{response.body.attributes[6].inputSettings.values[1]}}' is 'admin'
+    And  I expect '{{response.body.attributes[6].inputSettings.values[2]}}' is 'manager'
+
+  Scenario: 208 - Should return roleWithDefaultValue attribute with List metadata containing default value
+    When I request '{{env.E2E_API_URL}}/metadata/entities/users' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.attributes[7].name}}' is 'roleWithDefaultValue'
+    And  I expect '{{response.body.attributes[7].input}}' is 'List'
+    And  I expect '{{response.body.attributes[7].hasValidations}}' is 'true'
+    And  I expect '{{response.body.attributes[7].required}}' is 'false'
+    And  I expect '{{response.body.attributes[7].inputSettings.values.length}}' is '3'
+    And  I expect '{{response.body.attributes[7].inputSettings.values[0]}}' is 'user'
+    And  I expect '{{response.body.attributes[7].inputSettings.values[1]}}' is 'admin'
+    And  I expect '{{response.body.attributes[7].inputSettings.values[2]}}' is 'manager'
+    And  I expect '{{response.body.attributes[7].inputSettings.defaultValue}}' is 'admin'

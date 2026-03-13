@@ -62,6 +62,7 @@ Feature: Test Dynamic List from Mock API
     When I set the text "dynlist.test@example.com" in the HTML element '[data-cy="field_email"]'
     And I set the text "Dynamic" in the HTML element '[data-cy="field_firstName"]'
     And I set the text "ListTest" in the HTML element '[data-cy="field_lastName"]'
+    And I select ".q-item:nth-child(3)" in "[data-cy='field_roleWithInvalidDefaultValue']"
     And I select ".q-virtual-scroll__content > :first-child" in "[data-cy='field_status']"
     And I expect the HTML element '.q-menu' not exists
     And I expect the HTML element '[data-cy="field-container_status"]' contains "{{ ctx.firstStatusLabel }}"

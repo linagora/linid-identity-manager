@@ -5,6 +5,66 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-03-18
+
+### Added
+
+#### Backend
+
+- Add label support in DynamicListPlugin
+- Introduce plugin for dynamic list validation and routing
+- Introduce plugin for static list validation
+- HttpProviderPlugin now uses JsonParsingTaskPlugin
+- Extract JSON parsing into a dedicated plugin
+
+#### Frontend - Core
+
+- Forward attributes in ZoneRenderer
+- Add multiple design definitions from Quasar
+- Add Nunjucks integration for module federation
+- Add unique field validation
+- Ensure single plugin instance per zone ("register once" mechanism)
+- Add composable for dialog management
+
+#### Frontend - Import Module
+
+- Complete import data module:
+    - Load multiple CSV files
+    - Interact with rows before import
+    - Display imported rows
+    - Clear errors and imported rows
+
+#### UI Component Catalog
+
+- Add field for dynamic list management
+- Add field for static list management
+
+### Removed
+
+#### Backend
+
+- Remove PATCH support in HttpProviderPlugin
+
+### Fixed
+
+#### Backend
+
+- Fix error handling in dynamic routing
+- Remove unnecessary result check in delete response
+- Skip validation for null or empty values in DynamicListValidationPlugin
+- Skip validation for null or empty values in ListValidationPlugin
+
+#### UI Component Catalog
+
+- Fix active navigation tab prefix handling
+
+### Build
+
+#### Backend
+
+- Migrate to Spring Boot 4
+- Replace libraries with lighter alternatives
+
 ## [0.2.0] - 2026-02-11
 
 ### Added
@@ -34,10 +94,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Complete **User Management module**:
 
-  - Users list page
-  - User details page
-  - User creation page
-  - User edition page
+    - Users list page
+    - User details page
+    - User creation page
+    - User edition page
 - User creation and edition forms.
 - Date picker field support.
 - Advanced search integration.
@@ -47,12 +107,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Introduction of reusable UI components:
 
-  - AdvancedSearchCard
-  - GenericEntityTable
-  - EntityDetailsCard
-  - InformationCard
-  - ButtonsCard
-  - BlurLoader
+    - AdvancedSearchCard
+    - GenericEntityTable
+    - EntityDetailsCard
+    - InformationCard
+    - ButtonsCard
+    - BlurLoader
 - Enhanced BaseLayout with header and navigation menu.
 - Simple field validation support.
 - Improved slot forwarding and configurability.
@@ -90,14 +150,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - API support for managing entities in the system.
 - Various back-end plugins for enhanced functionality:
-  - **Route Management Plugin** – Handles API routing.
-  - **Validation Plugins** – Ensure data integrity, including a regex-based validator.
-  - **Provider Plugins** – Connect to different data sources, currently supporting an external API.
-  - **Task Plugins** – Enable shared context management for background tasks.
-  - **Authorization Plugin** – Manage user permissions and access control.
+    - **Route Management Plugin** – Handles API routing.
+    - **Validation Plugins** – Ensure data integrity, including a regex-based validator.
+    - **Provider Plugins** – Connect to different data sources, currently supporting an external API.
+    - **Task Plugins** – Enable shared context management for background tasks.
+    - **Authorization Plugin** – Manage user permissions and access control.
 - Initial front-end setup, including a **component catalog** for modular UI development.
 - End-to-end tests implemented to validate the entire platform.
 - Comprehensive documentation created, both **global** and **per project**.
 
 [0.1.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.1.0
 [0.2.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.2.0
+[0.3.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.3.0

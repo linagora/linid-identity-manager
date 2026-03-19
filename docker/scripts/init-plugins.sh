@@ -16,13 +16,13 @@ MAVEN_REPO=https://repo1.maven.org/maven2
 if [ -n "$1" ]; then
   PLUGINS="$1"
 else
-  PLUGINS="${PLUGINS:-io.github.linagora.linid.im:hpp:0.2.2
-io.github.linagora.linid.im:rqvp:0.2.0
-io.github.linagora.linid.im:cmtp:0.2.0
+  PLUGINS="${PLUGINS:-io.github.linagora.linid.im:hpp:0.3.0
+io.github.linagora.linid.im:rqvp:0.2.1
+io.github.linagora.linid.im:cmtp:0.3.0
 io.github.linagora.linid.im:jptp:0.2.0
-io.github.linagora.linid.im:lvp:0.2.0
-io.github.linagora.linid.im:rvp:0.3.0
-io.github.linagora.linid.im:dlvp:0.4.1}"
+io.github.linagora.linid.im:lvp:0.2.1
+io.github.linagora.linid.im:rvp:0.3.1
+io.github.linagora.linid.im:dlvp:0.4.2}"
 fi
 
 ########################################

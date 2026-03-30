@@ -1,0 +1,80 @@
+{
+  "default": {
+    "q-btn": {
+      "dense": true,
+      "outline": true,
+      "color": "primary",
+      "noCaps": true
+    },
+    "q-tabs": {
+      "dense": false,
+      "align": "left",
+      "noCaps": true,
+      "inlineLabel": true,
+      "activeBgColor": "primary"
+    },
+    "q-route-tab": {
+      "noCaps": true
+    },
+    "q-table": {
+      "dense": true
+    },
+    "q-header": {
+      "elevated": true
+    },
+    "q-toolbar": {
+      "inset": false
+    },
+    "q-toolbar-title": {
+      "shrink": false
+    },
+    "q-badge": {
+      "color": "primary",
+      "align": "middle",
+      "floating": false
+    },
+    "q-input": {
+      "dense": true,
+      "outlined": true
+    },
+    "q-card-actions": {
+      "align": "right"
+    },
+    "q-avatar": {
+      "size": "md",
+      "color": "primary"
+    },
+    "q-icon": {
+      "size": "sm"
+    },
+    "q-toggle": {
+      "dense": true,
+      "color": "primary"
+    },
+    "q-card": {},
+    "q-date": {},
+    "q-img": {},
+    "q-file": {
+      "dense": true,
+      "outline": true,
+      "color": "primary"
+    },
+    "q-select": {
+      "outlined": true,
+      "dense": true
+    },
+    "q-spinner": {},
+    "q-btn-dropdown": {},
+    "q-list": {},
+    "q-item": {},
+    "q-item-section": {},
+    "q-item-label": {}
+  },
+  "base-layout": {
+    "header": {
+      "q-img": {
+        "src": "/toolbarApplicationLogo.svg"
+      }
+    }
+  }
+}

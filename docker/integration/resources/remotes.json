@@ -1,0 +1,6 @@
+[
+  {
+    "name": "catalogUI",
+    "entry": "http://ui/catalog-ui/mf-manifest.json"
+  }
+]

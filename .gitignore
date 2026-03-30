@@ -9,3 +9,9 @@ docker/plugins/
 
 # Intellij
 .idea
+
+# UI build artifacts (handled by ui/.gitignore but also ignored at root)
+ui/node_modules/
+ui/dist/
+ui/.quasar/
+ui/coverage/

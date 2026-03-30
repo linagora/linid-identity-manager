@@ -1,0 +1,6 @@
+[
+  {
+    "name": "catalogUI",
+    "entry": "http://localhost:5001/mf-manifest.json"
+  }
+]

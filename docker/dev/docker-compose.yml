@@ -1,0 +1,21 @@
+name: LinID_dev
+
+services:
+  db:
+    image: postgres:18.2
+    container_name: db
+    networks:
+      - linid-dev-network
+    environment:
+      POSTGRES_USER: ${DATABASE_ADMIN_USER}
+      POSTGRES_PASSWORD: ${DATABASE_ADMIN_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - ${DATABASE_PORT}:5432
+    volumes:
+      - ./resources/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+networks:
+  linid-dev-network:
+    name: linid-dev-network
+    driver: bridge

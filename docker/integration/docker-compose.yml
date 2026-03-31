@@ -1,0 +1,72 @@
+name: LinID_integration
+
+services:
+  db:
+    image: postgres:18.2
+    container_name: db
+    networks:
+      - linid-integration-network
+    environment:
+      POSTGRES_USER: ${DATABASE_ADMIN_USER}
+      POSTGRES_PASSWORD: ${DATABASE_ADMIN_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - ${DATABASE_PORT}:5432
+    volumes:
+      - ./resources/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
+
+  api:
+    image: linid-identity-manager-api
+    container_name: linid-identity-manager-api
+    networks:
+      - linid-integration-network
+    ports:
+      - 8443:8443
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_PORT=${DATABASE_PORT}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_ADMIN_USER=${DATABASE_ADMIN_USER}
+      - DATABASE_ADMIN_PASSWORD=${DATABASE_ADMIN_PASSWORD}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - SWAGGER_ENABLED=${SWAGGER_ENABLED}
+      - LOGGING_LEVEL=${LOGGING_LEVEL}
+      - AUTH_ISSUER_URI=${AUTH_ISSUER_URI}
+      - SSL_KEY_STORE=${SSL_KEY_STORE}
+      - SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD}
+      - SSL_KEY_PASSWORD=${SSL_KEY_PASSWORD}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--spider",
+          "-q",
+          "--no-check-certificate",
+          "https://localhost:8443/actuator/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+
+  e2e-test-runner:
+    image: ${E2E_TEST_RUNNER_IMAGE:-vincentmoittie/e2e-test-runner:v1.10.0}
+    container_name: e2e-test-runner
+    networks:
+      - linid-integration-network
+    env_file:
+      - .env
+    volumes:
+      - ../../tests/features:/app/features
+    depends_on:
+      api:
+        condition: service_healthy
+    profiles:
+      - test
+
+networks:
+  linid-integration-network:
+    name: linid-integration-network
+    driver: bridge

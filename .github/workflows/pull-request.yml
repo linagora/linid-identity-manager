@@ -12,7 +12,7 @@ jobs:
     name: Delete bot comment(s)
     runs-on: ubuntu-latest
     steps:
-      - uses: izhangzhihao/delete-comment@master
+      - uses: izhangzhihao/delete-comment@d075704468e1cf74e60944d9f335351213c34d85
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           delete_user_name: github-actions[bot]
@@ -22,7 +22,7 @@ jobs:
     name: Check branch name
     runs-on: ubuntu-latest
     steps:
-      - uses: deepakputhraya/action-branch-name@master
+      - uses: deepakputhraya/action-branch-name@5f1cc199284b75145ec2d13434422e6987cf6af8
         with:
           regex: '^(feature|bugfix|improvement|release|hotfix)\/[a-z0-9_.-]+$'
           allowed_prefixes: "feature,bugfix,improvement,release,hotfix"
@@ -34,12 +34,12 @@ jobs:
     name: Check commit messages
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -51,46 +51,117 @@ jobs:
           echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.cjs
           npx commitlint --from=origin/main --to=HEAD --verbose
 
-  check-style:
-    name: Code style
+  api-check-style:
+    name: API - Code style
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
         with:
-          submodules: "recursive"
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+          cache: maven
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Execute checkstyle
+        run: mvn -ntp checkstyle:check
+
+  api-javadoc:
+    name: API - Javadoc
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+          cache: maven
 
-      - name: Install dependencies
-        working-directory: tests/e2e
-        run: npm ci
+      - name: Generate Javadoc
+        run: mvn -ntp clean javadoc:javadoc
 
-      - name: Check style
-        working-directory: tests/e2e
-        run: E2E_SPEC_PATTERN=../features npm run lint
+  api-tests:
+    name: API - Unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+          cache: maven
+
+      - name: Execute unit tests
+        run: mvn -ntp test
+
+      - name: Execute mutation tests
+        run: mvn -ntp org.pitest:pitest-maven:mutationCoverage
+
+      - name: Extract summary from pitest
+        run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
+
+      - name: Post comment
+        uses: luukkemp/pr-comment@a36dd289fd0052e576955cd09d126449404d633b
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: api/pitest.html
+
+  api-check-dependencies:
+    name: API - Check dependencies
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up JDK 21 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          architecture: x64
+          cache: maven
+
+      - name: Execute check dependencies
+        run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false > dependency-updates.txt
+
+      - name: Post comment
+        uses: luukkemp/pr-comment@a36dd289fd0052e576955cd09d126449404d633b
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: api/dependency-updates.txt
 
   e2e-tests:
     name: E2E tests
     runs-on: ubuntu-latest
+    needs: [ api-tests ]
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: "recursive"
-
-      - name: Download plugins
-        run: ./docker/scripts/init-plugins.sh
+      - uses: actions/checkout@v6
 
       - name: Build and start application
         run: |
-          docker build -f linid-im-api/docker/Dockerfile -t linid-im-api linid-im-api/
-          docker build -f linid-im-front/docker/Dockerfile -t linid-im-front linid-im-front/
-          docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
-          docker build -f linid-im-front-community-plugins/docker/module-users.Dockerfile -t module-users linid-im-front-community-plugins/
-          docker build -f linid-im-front-community-plugins/docker/module-import.Dockerfile -t module-import linid-im-front-community-plugins/
-          docker build -f docker/mock-api/Dockerfile -t mock-api docker/mock-api/
+          keytool -genkeypair -v -alias mykey -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=Test" -keystore api/src/main/resources/keystore.jks -storepass password -keypass password -keyalg RSA -keysize 2048 -validity 3650
+          docker build --quiet -f api/Dockerfile -t linid-identity-manager-api api/
           docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env up -d
 
       - name: Run functional tests

@@ -6,3 +6,6 @@ docker-compose.override.yml
 
 # Plugin JARs (downloaded at runtime)
 docker/plugins/
+
+# Intellij
+.idea

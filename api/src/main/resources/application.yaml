@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: LinId-Identity-Manager
+
+  config:
+    import: optional:file:${EXTERNAL_CONFIGURATION}
+
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    generate-ddl: false
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    baseline-on-migrate: true
+    out-of-order: true
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    user: ${DATABASE_ADMIN_USER}
+    password: ${DATABASE_ADMIN_PASSWORD}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${AUTH_ISSUER_URI}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED}
+  show-actuator: ${SWAGGER_ENABLED}
+
+server:
+  port: 8443
+  ssl:
+    key-store: ${SSL_KEY_STORE}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD}
+    key-password: ${SSL_KEY_PASSWORD}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL:INFO}

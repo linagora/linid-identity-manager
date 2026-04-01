@@ -57,3 +57,8 @@ server:
 logging:
   level:
     root: ${LOGGING_LEVEL:INFO}
+
+copyright:
+  mode: ${COPYRIGHT_MODE:default}
+  default: "© 2020-2026 Linagora. All rights reserved."
+  custom: "${COPYRIGHT_CUSTOM:© 2020-2025 Linagora. All rights reserved.}"

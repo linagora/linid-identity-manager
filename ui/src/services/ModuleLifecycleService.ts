@@ -172,6 +172,7 @@ export function toRouteRecordRaw(
   config: ModuleHostConfig<unknown>
 ): RouteRecordRaw {
   return {
+    name: route.name,
     path: getNunjucksEnv().renderString(route.path, { config }),
     component: async () =>
       (await loadRemote<FederatedModule<Component>>(route.component))!.default,
@@ -271,7 +272,12 @@ export async function configure(
   if (routes) {
     routes
       .map((route) => toRouteRecordRaw(route, config))
-      .forEach(boot.router.addRoute);
+      .forEach((routeRecord) => {
+        if (routeRecord.name && boot.router.hasRoute(routeRecord.name)) {
+          boot.router.removeRoute(routeRecord.name);
+        }
+        boot.router.addRoute(routeRecord);
+      });
   }
 
   const i18nMessages = renameKeys(

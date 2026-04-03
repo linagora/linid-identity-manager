@@ -1,4 +1,4 @@
-name: LinID_integration
+name: linid_integration
 
 services:
   db:

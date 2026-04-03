@@ -10,6 +10,9 @@ First generate the necessary certificates and keys:
 ```bash
 # Generate self-signed certificates for Nginx
 openssl req -x509 -newkey rsa:2048 -keyout docker/integration/resources/selfsigned.key -out docker/integration/resources/selfsigned.crt -days 3650 -nodes
+
+# Generate OIDC keys for LemonLDAP::NG
+openssl genpkey -algorithm RSA -out docker/integration/resources/oidc.key -pkeyopt rsa_keygen_bits:2048 && openssl pkey -in docker/integration/resources/oidc.key -pubout -out docker/integration/resources/oidc.pub
 ```
 
 or with the provided Taskfile:
@@ -27,6 +30,7 @@ docker container prune -f
 # Build Docker images
 docker build -f api/Dockerfile -t linid-identity-manager-api api/
 docker build -f ui/Dockerfile -t linid-identity-manager-ui ui/
+docker build -f docker/llng/Dockerfile -t lemonldap-ng docker/llng/
 docker build -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
 
 # Start the stack
@@ -41,4 +45,5 @@ docker compose -f docker/integration/docker-compose.yml --env-file docker/integr
 | api             | (internal network) | LinID Identity Manager API  |
 | ui              | (internal network) | LinID Identity Manager UI   |
 | catalog-ui      | (internal network) | UI components library       |
+| auth            | (internal network) | LemonLDAP::NG portal        |
 | e2e-test-runner | (internal network) | Runner to execute e2e tests |

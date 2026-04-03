@@ -15,3 +15,8 @@ ui/node_modules/
 ui/dist/
 ui/.quasar/
 ui/coverage/
+
+# Generated files
+docker/**/*.crt
+docker/**/*.key
+api/**/*.jks

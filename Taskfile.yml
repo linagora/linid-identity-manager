@@ -45,7 +45,7 @@ tasks:
     cmd: npx cypress run --spec "{{.CLI_ARGS}}"
 
   e2e:docker:
-    desc: Run E2E tests in Docker (CI mode, requires test-network)
+    desc: Run E2E tests in Docker (CI mode, requires linid-integration-network)
     cmd: |
       docker run --rm \
         -e E2E_FRONT_URL=http://ui \
@@ -54,3 +54,20 @@ tasks:
         --network test-network \
         -v "$(pwd)/tests/features":/app/features \
         vincentmoittie/e2e-test-runner:latest
+
+  setup:certs:
+    desc: Generate all certificates and keys for dev and integration environments
+    cmds:
+      # API keystore
+      - rm -f api/src/main/resources/keystore.jks
+      - keytool -genkeypair -v -alias mykey
+        -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=FR"
+        -keystore api/src/main/resources/keystore.jks
+        -storepass password -keypass password
+        -keyalg RSA -keysize 2048 -validity 3650
+      # Integration SSL certificate
+      - openssl req -x509 -newkey rsa:2048
+        -keyout docker/integration/resources/selfsigned.key
+        -out docker/integration/resources/selfsigned.crt
+        -days 3650 -nodes
+        -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"

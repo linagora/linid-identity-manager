@@ -27,6 +27,9 @@ spring:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
     user: ${DATABASE_ADMIN_USER}
     password: ${DATABASE_ADMIN_PASSWORD}
+    client:
+      schema: ${CLIENT_DATABASE_SCHEMA:public}
+      location: ${CLIENT_DATABASE_MIGRATION_PATH:}
 
   security:
     oauth2:

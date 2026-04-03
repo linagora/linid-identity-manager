@@ -84,3 +84,10 @@ tasks:
       - openssl pkey
         -in docker/dev/resources/llng/conf/oidc.key
         -pubout -out docker/dev/resources/llng/conf/oidc.pub
+      # OIDC signing keys (integration)
+      - openssl genpkey -algorithm RSA
+        -out docker/integration/resources/oidc.key
+        -pkeyopt rsa_keygen_bits:2048
+      - openssl pkey
+        -in docker/integration/resources/oidc.key
+        -pubout -out docker/integration/resources/oidc.pub

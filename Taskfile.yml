@@ -1,7 +1,8 @@
 version: "3"
 
 vars:
-  E2E_FRONT_URL: http://localhost:9000
+  E2E_API_URL: https://localhost:8443
+  E2E_FRONT_URL: https://localhost:9000
   FEATURES_PATH: ../features
   COMPOSE_FILE: docker/integration/docker-compose.yml
   COMPOSE_ENV: docker/integration/local.env
@@ -18,6 +19,7 @@ tasks:
     deps: [e2e:install]
     env:
       CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
+      E2E_API_URL: "{{.E2E_API_URL}}"
       E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
     cmd: npm run start
 
@@ -27,6 +29,7 @@ tasks:
     deps: [e2e:install]
     env:
       CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
+      E2E_API_URL: "{{.E2E_API_URL}}"
       E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
     cmd: npm run start:ui
 
@@ -41,6 +44,7 @@ tasks:
     deps: [e2e:install]
     env:
       CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
+      E2E_API_URL: "{{.E2E_API_URL}}"
       E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
     cmd: npx cypress run --spec "{{.CLI_ARGS}}"
 
@@ -48,10 +52,11 @@ tasks:
     desc: Run E2E tests in Docker (CI mode, requires linid-integration-network)
     cmd: |
       docker run --rm \
-        -e E2E_FRONT_URL=http://ui \
+        -e E2E_API_URL=https://api:8443 \
+        -e E2E_FRONT_URL=https://ui \
         -e CYPRESS_FEATURES_PATH=/app/features \
         -e TZ=Europe/Paris \
-        --network test-network \
+        --network linid-integration-network \
         -v "$(pwd)/tests/features":/app/features \
         vincentmoittie/e2e-test-runner:latest
 

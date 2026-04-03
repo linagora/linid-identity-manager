@@ -62,3 +62,9 @@ copyright:
   mode: ${COPYRIGHT_MODE:default}
   default: "© 2020-2026 Linagora. All rights reserved."
   custom: "${COPYRIGHT_CUSTOM:© 2020-2025 Linagora. All rights reserved.}"
+
+i18n:
+  external:
+    path: ${I18N_EXTERNAL_PATH:}
+  merge:
+    order: ${I18N_MERGE_ORDER:plugin,external,internal}

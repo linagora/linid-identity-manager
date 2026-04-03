@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   E2E_FRONT_URL: http://localhost:9000
@@ -65,9 +65,22 @@ tasks:
         -keystore api/src/main/resources/keystore.jks
         -storepass password -keypass password
         -keyalg RSA -keysize 2048 -validity 3650
+      # Development SSL certificate
+      - openssl req -x509 -newkey rsa:2048
+        -keyout docker/dev/resources/llng/ssl/selfsigned.key
+        -out docker/dev/resources/llng/ssl/selfsigned.crt
+        -days 3650 -nodes
+        -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"
       # Integration SSL certificate
       - openssl req -x509 -newkey rsa:2048
         -keyout docker/integration/resources/selfsigned.key
         -out docker/integration/resources/selfsigned.crt
         -days 3650 -nodes
         -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"
+      # OIDC signing keys (dev)
+      - openssl genpkey -algorithm RSA
+        -out docker/dev/resources/llng/conf/oidc.key
+        -pkeyopt rsa_keygen_bits:2048
+      - openssl pkey
+        -in docker/dev/resources/llng/conf/oidc.key
+        -pubout -out docker/dev/resources/llng/conf/oidc.pub

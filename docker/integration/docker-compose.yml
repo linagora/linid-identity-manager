@@ -28,6 +28,10 @@ services:
       - linid-integration-network
     extra_hosts:
       - "linid.localtest.me:host-gateway"
+    volumes:
+      - ./resources/selfsigned.crt:/tmp/selfsigned.crt:ro
+      - ./resources/api-entrypoint.sh:/app/api-entrypoint.sh:ro
+    entrypoint: ["sh", "/app/api-entrypoint.sh"]
     ports:
       - 8443:8443
     environment:
@@ -99,6 +103,8 @@ services:
     container_name: e2e-test-runner
     networks:
       - linid-integration-network
+    extra_hosts:
+      - "linid.localtest.me:host-gateway"
     env_file:
       - .env
     volumes:

@@ -1,147 +1,262 @@
-# 🚀 Linid Identity Manager
+# LinId Identity Manager
 
-Welcome to **Linid Identity Manager**, your portal for managing identities and entities within your information system.
+## 🚀 Overview
 
-**Linid Identity Manager** allows you to:
+**LinId Identity Manager** is a platform designed to manage user identities, access rights, and application permissions
+within an organization.
 
-- Manage users, groups, and other organizational features.
-- Easily customize entity attributes to fit your company’s needs.
+It provides a centralized way to:
 
-**Linid Identity Manager** is built around a **modular system**, which means you can add or remove modules to fit your
-organization. Each module provides a specific feature, making the application flexible and adaptable.
+* Manage user accounts and organizational structures
+* Define and control application-level permissions
+* Configure authentication and identity flows
+* Dynamically generate access rights using policy-based logic
 
-The application also includes **system plugins**, which handle the connection to different data sources. These plugins:
+## 🎯 Purpose
 
-- Allow **retrieving and storing data** from multiple types of sources (currently only an external API is supported).
-- Ensure that the data is **validated and consistent** before it is saved or updated in the system.
-- Provide a foundation for future data sources, such as databases, LDAP, or other APIs.
+LinId helps organizations:
 
-In addition, we plan to provide **modules** that let you manage users, groups, and other organizational features
-directly from the application. Each module is independent, so you can choose only the features your company needs.
+* Centralize identity and access management (IAM)
+* Automate permission assignment
+* Standardize authentication and authorization across applications
+* Reduce complexity in multi-application environments
+
+## 🧩 Key Features
+
+* 👤 **User Management**
+
+    * Create and manage user accounts
+    * Assign users to Organizational Units (OU)
+    * Manage account status (Active, Inactive, Suspended)
+
+* 🏢 **Organizational Structure**
+
+    * Create and manage Organizational Units
+    * Structure users logically within the organization
+
+* 📦 **Application Management**
+
+    * Register applications
+    * Define application-specific roles
+    * Configure authentication per application
+
+* 🏷️ **Organizational Roles**
+
+    * Create and manage organizational roles
+    * Assign roles to users
+
+* 🔐 **Authentication (OIDC)**
+
+    * OIDC-based authentication
+    * Integration with LemonLDAP
+    * Certificate-based configuration
+
+* 🧠 **Policy-Based Authorization (PBAC)**
+
+    * Use OPA (Open Policy Agent) scripts
+    * Dynamically generate user permissions per application
+
+* 🏷️ **Claims Management**
+
+    * Define and map claims required by applications
+    * Customize identity payloads per application
+
+* 🎨 **UI Customization**
+
+    * Theme configuration
+    * Externalized translations (i18n)
+
+## 👥 Target Audience
+
+* Enterprises managing internal access control
+* SaaS platforms requiring multi-tenant identity management
+* DevOps / IAM / Security teams
+
+## 🧪 Project Status
+
+🚧  This project is currently **under active development**.
+
+Features and APIs may evolve.
 
 ---
 
-## 🧪 Running the Demo Locally
+## ⚡ Quick Start
 
-You can quickly test **Linid Identity Manager** using the **Docker demo** provided.
+> 🚧 Minimal setup to run LinId Identity Manager in under 5 minutes
 
-### Step 1: Install docker
+LinId provides a **Taskfile** to simplify running the demo environment.
+All you need is **Docker** and **Task** installed on your machine.
 
-Make sure Docker is installed on your machine. You can follow the official installation guide here:  
-https://docs.docker.com/get-docker/
+---
 
-### Step 2: Initialize submodules
+### 1️⃣ Prerequisites
+
+* **Docker 24+** and **Docker Compose 2+**
+* **Task** ([https://taskfile.dev/#/installation](https://taskfile.dev/#/installation))
+
+> ⚠️ Make sure Docker is running before executing any tasks.
+
+---
+
+### 2️⃣ Install LinId Repository
 
 ```bash
+git clone https://github.com/linagora/linid-identity-manager.git
+cd linid-identity-manager
 git submodule update --init --recursive
 ```
 
-### Step 3: Start the demo
+---
+
+### 3️⃣ Run the Demo
+
+1. Use the provided **Taskfile** to start the demo:
 
 ```bash
-./run
+task setup:demo
+task start:demo
 ```
 
-Once the demo are running, access the application at:
-[http://localhost:9000](http://localhost:9000)
+2. The task will automatically:
+
+* Start the backend, frontend, and database containers
+* Configure LemonLDAP demo environment
+* Apply initial configuration for quick testing
+
+👉 Access the demo: https://linid.localtest.me:9000
 
 ---
 
-## 🧩 Modules
+### 4️⃣ Access the Application
 
-**What is a Module?**
-
-In **Linid Identity Manager**, a **module** is a self-contained feature that adds a specific functionality to the
-application. Modules allow you to adapt the system to your organization’s needs, enabling you to pick only the features
-that are relevant for your business.
-
-Each module can also be **customized for your organization**:
-
-- 🗂️ **Data configuration** – Decide which data fields are available and how they are handled.
-- 🖥 **Display settings** – Adjust how information is presented in the interface.
-- 🎨 **Design customization** – Change the look and feel to match your company’s style or branding.
-
-Modules can have **hierarchies and dependencies**. For example, you could have a main **User Management Module** that
-handles creating, editing, and assigning users. Then, an additional module could extend it by adding extra interfaces or
-specialized tools for user management. This extension module would depend on the main User Management Module in order to
-function correctly (for example : company management).
+* **Backend API**: `https://localhost:8443/swagger-ui/index.html`
+* **Frontend UI**: `https://linid.localtest.me:9000`
+* **LemonLDAP portal**: `http://localhost:8080` (pre-configured demo)
 
 ---
 
-### 📦 Currently Available
+### 📝 Notes
 
-At the moment, no modules are included in the demo.
-
----
-
-### 🛠️ Planned Modules
-
-The following modules are planned for future releases:
-
-- **User Management Module** – Manage users: create, edit, and assign them to groups.
-- **Group Management Module** – Manage user groups, including group hierarchies and permissions.
-- **Buildings Management Module** – Manage company buildings and their attributes.
-- **Roles & Functions Module** – Manage user roles, functions, and positions within the organization.
-
-> Each module is designed to be independent whenever possible, but some modules can extend others to add extra features
-> or interfaces.
-> All modules can be configured for your organization in terms of data, display, and design.
+* `task start:demo` is intended for **quick testing / development only**
+* For custom environments, use the **Docker folders** with their README (`docker/<environment>/README.md`)
+* No manual configuration required for the demo
 
 ---
 
-## 📚 Additional Documentation
+## 📚 Documentation
 
-You can find more detailed information in the `docs/` folder:
+Full documentation is available in the [/docs](docs/index.md) directory.
 
-- **[Configuration Guide](docs/configuration.md)** – How to configure **Linid Identity Manager** and connect to
-  different data sources.
-- **[Modules Overview](docs/modules.md)** – List and description of available and planned front-end modules.
-- **[FAQ](docs/faq.md)** – Answers to common questions and troubleshooting tips.
+It includes:
 
-> Check these files for all the specifics you need to get the most out of **Linid Identity Manager**.
-
-## 📄 License
-
-**Linid Identity Manager** is **open source** and licensed under
-the [GNU Affero General Public License (AGPL)](https://www.gnu.org/licenses/agpl-3.0.html).
-
-Maintained by **[Linagora](https://linagora.com/)**
-
-<a href="https://linagora.com/">
-  <img src="https://linagora.com/themes/custom/linagora/images/header-logo-white.svg" alt="Linagora Logo" width="200"/>
-</a>
+* Getting started guides
+* Installation instructions
+* Configuration references
+* Advanced topics
 
 ---
 
-## 🙌 Contributors & Related Projects
+## 🛠️ Installation
 
-**Linid Identity Manager** is composed of multiple projects, each responsible for a specific part of the system:
+LinId provides Docker-based environments for running the application.
 
-- **[linid-im-api](https://github.com/linagora/linid-im-api)** – The main back-end API for managing data.
-- **[linid-im-api-community-plugins](https://github.com/linagora/linid-im-api-community-plugins)** –
-  Community-contributed plugins for the back-end API.
-- **[linid-im-api-corelib](https://github.com/linagora/linid-im-api-corelib)** – Core libraries and utilities for the
-  back-end api and back-end plugins.
-- **[linid-im-front](https://github.com/linagora/linid-im-front)** – Main front-end application.
-- **[linid-im-front-community-plugins](https://github.com/linagora/linid-im-front-community-plugins)** –
-  Community-contributed modules for the front-end.
-- **[linid-im-front-corelib](https://github.com/linagora/linid-im-front-corelib)** – Core libraries and utilities for
-  the front-end and modules.
+> See: [docs/installation](docs/installation/prerequisites.md)
 
 ---
 
-## 🔖 Submodule Tags
+## 🔐 Authentication
 
-The project relies on several Git submodules.
-Each submodule is pinned to a specific **tag** to ensure consistency and compatibility across the whole system.
+LinId supports **OIDC-based authentication**.
 
-Here are the submodules and the tags currently in use:
+### Supported Providers
 
-| Submodule                            | Tag Used |
-| ------------------------------------ | -------- |
-| **linid-im-api**                     | `v0.1.3` |
-| **linid-im-front**                   | `v0.0.6` |
-| **linid-im-front-community-plugins** | `v0.0.1` |
+* LemonLDAP
 
-> You can check or update submodule tags using:
-> `git submodule foreach "git describe --tags"`
+### Certificates
+
+Authentication requires certificate configuration.
+
+> See: [docs/configuration/certificates](docs/configuration/certificates.md)
+
+---
+
+## ⚙️ Configuration
+
+LinId is highly configurable and supports multiple configuration domains:
+
+### 📄 Application Configuration
+
+* YAML-based configuration files
+* Environment-based overrides
+
+> See: [docs/configuration/application/](docs/configuration/application/config-files.md)
+
+---
+
+### 🔐 Authentication Configuration
+
+* OIDC setup
+* Provider integration
+* Certificate management
+* Claims mapping
+
+> See: [docs/configuration/authentication/](docs/configuration/authentication/oidc.md)
+
+---
+
+### 🔌 Plugins
+
+LinId is designed to support a plugin system.
+
+> 🚧 Plugin system is not fully documented yet
+
+Planned documentation:
+
+* Plugin architecture
+* Installing plugins
+* Plugin configuration
+
+---
+
+### 🎨 UI Configuration
+
+* Theme customization
+* Branding
+* Externalized translations (i18n)
+
+> See: [docs/configuration/ui/](docs/configuration/ui/theming.md)
+
+---
+
+## 🧱 Tech Stack
+
+* **Frontend**: Quasar / Vue / Module Federation
+* **Backend**: Java / Spring Boot / Spring Plugin
+* **Database**: PostgreSQL
+* **Directory / IAM**: LemonLDAP
+* **Policy Engine**: OPA (Open Policy Agent)
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome.
+
+Please refer to the [CONTRIBUTING](CONTRIBUTING.md) file for guidelines.
+
+---
+
+## 📜 License
+
+This project is licensed under the:
+
+**GNU Affero General Public License (AGPL)**
+
+---
+
+## 🆘 Support
+
+For questions, issues, or feature requests:
+
+👉 Use **GitHub Issues**
+

@@ -1,7 +1,7 @@
 {
   "authentication": "DBI",
-  "cfgDate": 1775865600,
-  "cfgNum": 2,
+  "cfgDate": 1775952000,
+  "cfgNum": 3,
   "dbiAuthChain": "dbi:Pg:dbname=${LEMONLDAP_DATABASE_NAME};host=db",
   "dbiAuthUser": "${LEMONLDAP_DATABASE_ADMIN_USER}",
   "dbiAuthPassword": "${LEMONLDAP_DATABASE_ADMIN_PASSWORD}",
@@ -21,11 +21,11 @@
     "uid": "username",
     "roles": "roles"
   },
-  "domain": "auth",
+  "domain": "linid.localtest.me",
   "issuerDBOpenIDConnectActivation": 1,
   "key": "t3st-s3cr3t-k3y!",
   "locationRules": {
-    "auth": {
+    "linid.localtest.me": {
       "(?#errors)^/lmerror/": "accept",
       "default": "accept"
     }
@@ -49,7 +49,7 @@
       "oidcRPMetaDataOptionsBypassConsent": 1,
       "oidcRPMetaDataOptionsClientID": "linid-im-client",
       "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
-      "oidcRPMetaDataOptionsRedirectUris": "https://localhost:9000"
+      "oidcRPMetaDataOptionsRedirectUris": "https://linid.localtest.me:9000/callback"
     }
   },
   "oidcServiceIgnoreScopeForClaims": 1,
@@ -61,6 +61,6 @@
     "Directory": "/var/lib/lemonldap-ng/psessions",
     "LockDirectory": "/var/lib/lemonldap-ng/psessions/lock"
   },
-  "portal": "http://auth",
+  "portal": "https://linid.localtest.me:9000/auth",
   "userDB": "DBI"
 }

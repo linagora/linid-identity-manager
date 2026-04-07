@@ -2,7 +2,7 @@ version: "3"
 
 vars:
   E2E_API_URL: https://localhost:8443
-  E2E_FRONT_URL: https://localhost:9000
+  E2E_FRONT_URL: https://linid.localtest.me:9000
   FEATURES_PATH: ../features
   COMPOSE_FILE: docker/integration/docker-compose.yml
   COMPOSE_ENV: docker/integration/local.env
@@ -14,7 +14,7 @@ tasks:
     cmd: npm install
 
   e2e:
-    desc: Run E2E tests locally (requires frontend on localhost:9000)
+    desc: Run E2E tests locally (requires frontend on linid.localtest.me:9000)
     dir: tests/e2e
     deps: [e2e:install]
     env:
@@ -81,7 +81,8 @@ tasks:
         -keyout docker/integration/resources/selfsigned.key
         -out docker/integration/resources/selfsigned.crt
         -days 3650 -nodes
-        -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"
+        -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR"
+        -addext "subjectAltName=DNS:linid.localtest.me,DNS:localhost,IP:127.0.0.1"
       # OIDC signing keys (dev)
       - openssl genpkey -algorithm RSA
         -out docker/dev/resources/llng/conf/oidc.key

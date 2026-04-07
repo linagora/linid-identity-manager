@@ -26,6 +26,8 @@ services:
     container_name: linid-identity-manager-api
     networks:
       - linid-integration-network
+    extra_hosts:
+      - "linid.localtest.me:host-gateway"
     ports:
       - 8443:8443
     environment:
@@ -57,6 +59,8 @@ services:
       retries: 10
       start_period: 10s
     depends_on:
+      auth:
+        condition: service_healthy
       db:
         condition: service_healthy
 
@@ -124,6 +128,12 @@ services:
       - ./resources/lmConf-1.template.json:/var/lib/lemonldap-ng/conf/lmConf-1.json.template:ro
       - ./resources/oidc.key:/etc/keys/oidc.key:ro
       - ./resources/oidc.pub:/etc/keys/oidc.pub:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost/portal/"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     depends_on:
       db:
         condition: service_healthy

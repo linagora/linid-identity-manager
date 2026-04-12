@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,31 +24,38 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import { useLinidUserStore } from '@linagora/linid-im-front-corelib';
+import { UserManager } from 'oidc-client-ts';
+import { defineBoot } from '#q-app/wrappers';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [{ path: '', component: () => import('pages/Homepage.vue') }],
-  },
-];
-export default routes;
+let oidcClient: UserManager;
+
+declare module 'vue' {
+  /**
+   * Augments the Vue component instance properties to include the OIDC UserManager.
+   */
+  interface ComponentCustomProperties {
+    /**
+     * The OIDC UserManager instance for handling authentication.
+     */
+    $oidc: UserManager;
+  }
+}
+
+export default defineBoot(async ({ app }) => {
+  const response = await fetch('/oidc-config.json');
+  if (!response.ok) {
+    throw new Error(`Failed to load OIDC config: ${response.status}`);
+  }
+  const config = await response.json();
+  oidcClient = new UserManager(config);
+
+  oidcClient.events.addUserLoaded((user) => {
+    const userStore = useLinidUserStore();
+    userStore.setUserFromClaims(user.profile);
+  });
+
+  app.config.globalProperties.$oidc = oidcClient;
+});
+
+export { oidcClient };

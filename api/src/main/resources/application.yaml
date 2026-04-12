@@ -36,6 +36,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${AUTH_ISSUER_URI}
+          jwk-set-uri: ${AUTH_JWK_SET_URI}
 
 management:
   endpoints:
@@ -56,6 +57,9 @@ server:
     key-store: ${SSL_KEY_STORE}
     key-store-password: ${SSL_KEY_STORE_PASSWORD}
     key-password: ${SSL_KEY_PASSWORD}
+    truststore:
+      path: ${SSL_TRUSTSTORE_PATH}
+      password: ${SSL_TRUSTSTORE_PASSWORD}
 
 logging:
   level:

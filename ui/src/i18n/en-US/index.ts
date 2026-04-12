@@ -45,4 +45,7 @@ export default {
     links: 'text',
     branding: 'text',
   },
+  AuthenticationCallbackPage: {
+    processing: 'Processing authentication response...',
+  },
 };

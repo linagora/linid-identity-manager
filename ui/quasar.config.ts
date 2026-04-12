@@ -14,6 +14,7 @@ export default defineConfig((ctx) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      'oidc',
       'pinia',
       'nunjucks',
       'i18n',
@@ -151,6 +152,22 @@ export default defineConfig((ctx) => {
           changeOrigin: true,
           secure: false,
           rewrite: (path: string) => path.replace(/^\/backend/, ''),
+        },
+        '/auth': {
+          target: 'https://localhost:8080',
+          changeOrigin: true,
+          secure: false,
+          rewrite: (path: string) => path.replace(/^\/auth/, ''),
+        },
+        '/static': {
+          target: 'https://localhost:8080',
+          changeOrigin: true,
+          secure: false,
+        },
+        '/index.psgi': {
+          target: 'https://localhost:8080',
+          changeOrigin: true,
+          secure: false,
         },
       },
     },

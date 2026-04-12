@@ -1,10 +1,18 @@
 import { quasar, transformAssetUrls } from '@quasar/vite-plugin';
 import vue from '@vitejs/plugin-vue';
+import { fileURLToPath } from 'node:url';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      '#q-app/wrappers': fileURLToPath(
+        new URL('./tests/mocks/quasar-wrappers.ts', import.meta.url),
+      ),
+    },
+  },
   test: {
     environment: 'happy-dom',
     globals: true,

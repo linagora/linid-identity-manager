@@ -65,6 +65,7 @@ public class SecurityConfig {
             .securityMatcher(
                 "/health",
                 "/actuator/**",
+                "/i18n/**",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html"

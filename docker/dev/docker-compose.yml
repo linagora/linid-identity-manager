@@ -22,17 +22,13 @@ services:
       retries: 5
 
   auth:
-    image: lemonldap-ng
+    image: lemonldapng/lemonldap-ng:2.22.2
     networks:
       - linid-dev-network
     environment:
+      SSODOMAIN: ${LEMONLDAP_SSO_DOMAIN}
       PORTAL_HOSTNAME: ${LEMONLDAP_PORTAL_HOSTNAME}
-      LEMONLDAP_DATABASE_ADMIN_USER: ${LEMONLDAP_DATABASE_ADMIN_USER}
-      LEMONLDAP_DATABASE_ADMIN_PASSWORD: ${LEMONLDAP_DATABASE_ADMIN_PASSWORD}
-      LEMONLDAP_DATABASE_USER: ${LEMONLDAP_DATABASE_USER}
-      LEMONLDAP_DATABASE_PASSWORD: ${LEMONLDAP_DATABASE_PASSWORD}
-      LEMONLDAP_DATABASE_NAME: ${LEMONLDAP_DATABASE_NAME}
-    ports: 
+    ports:
       - ${LEMONLDAP_PORTAL_PORT}:443
     volumes:
       - ./resources/llng/conf:/var/lib/lemonldap-ng/conf

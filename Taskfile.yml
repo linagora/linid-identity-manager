@@ -1,98 +1,356 @@
 version: "3"
 
-vars:
-  E2E_API_URL: https://localhost:8443
-  E2E_FRONT_URL: https://localhost:9000
-  FEATURES_PATH: ../features
-  COMPOSE_FILE: docker/integration/docker-compose.yml
-  COMPOSE_ENV: docker/integration/local.env
+silent: true
 
 tasks:
-  e2e:install:
+  # ─── Setup ─────────────────────────────────────────────────────────
+
+  setup:
+    desc: Generate certificates, build Docker images and config files
+    cmds:
+      - task: setup:certs
+      - task: build:images
+      - task: setup:lemonldap-config
+      - task: setup:oidc-config
+
+  build:images:
+    desc: Build all Docker images
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: catalog-ui
+          DOCKERFILE: linid-im-front-community-plugins/docker/catalog-ui.Dockerfile
+          CONTEXT_DIR: linid-im-front-community-plugins/
+      - task: build:image
+        vars:
+          IMAGE_NAME: linid-identity-manager-ui
+          DOCKERFILE: ui/Dockerfile
+          CONTEXT_DIR: ui/
+      - task: build:image
+        vars:
+          IMAGE_NAME: linid-identity-manager-api
+          DOCKERFILE: api/Dockerfile
+          CONTEXT_DIR: api/
+
+  setup:certs:
+    desc: Generate all certificates and keys for dev and E2E environments
+    cmds:
+      - task: setup:certs:dev
+      - task: setup:certs:e2e
+
+  setup:certs:dev:
+    desc: Generate certificates and keys for dev environment
+    cmds:
+      - task: generate:certs
+        vars:
+          ENV: dev
+          TRUSTSTORE_PATH: "{{.ROOT_DIR}}/api/src/main/resources"
+
+  setup:certs:e2e:
+    desc: Generate certificates and keys for E2E environment
+    cmds:
+      - task: generate:certs
+        vars:
+          ENV: e2e
+
+  setup:oidc-config:
+    desc: Generate oidc-config.json for E2E environment
+    cmds:
+      - task: generate:config:oidc
+        vars:
+          ENV_FILE: local.env
+      - task: generate:config:oidc
+        vars:
+          ENV_FILE: .env
+
+  setup:lemonldap-config:
+    desc: Generate LemonLDAP configuration for a specific environment
+    cmds:
+      - task: setup:lemonldap-config:dev
+      - task: setup:lemonldap-config:e2e
+
+  setup:lemonldap-config:dev:
+    desc: Generate LemonLDAP configuration for dev environment
+    deps: ["setup:certs:dev"]
+    cmds:
+      - task: generate:config:lemonldap
+        vars:
+          ENV: dev
+          ENV_FILE: .env
+
+  setup:lemonldap-config:e2e:
+    desc: Generate LemonLDAP configuration for E2E environment
+    deps: ["setup:certs:e2e"]
+    vars:
+      ENV: e2e
+    cmds:
+      - task: generate:config:lemonldap
+        vars:
+          ENV: "{{.ENV}}"
+          ENV_FILE: local.env
+      - task: generate:config:lemonldap
+        vars:
+          ENV: "{{.ENV}}"
+          ENV_FILE: .env
+
+  # ─── Dev environment ─────────────────────────────────────────────
+
+  start:dev:
+    desc: Start the full dev environment (Docker + API + frontend modules)
+    deps: [setup:lemonldap-config:dev]
+    cmds:
+      - echo "Starting all services..."
+      - task: start:service
+        vars:
+          SERVICE_NAME: Docker services (DB + LemonLDAP)
+          CMD: cd docker/dev && docker compose -f docker-compose.yml --env-file .env up -d --quiet-pull
+          HEALTHCHECK: curl -sk https://localhost:8080 >/dev/null 2>&1
+          TIMEOUT: 90
+          LOG_FILE: /tmp/linid-docker.log
+      # Summary
+      - echo ""
+      - echo "  ✔ All services ready!"
+      - echo "    DB → postgresql://localhost:5432/linid-db"
+      - echo "    LemonLDAP → https://localhost:8080"
+      - echo ""
+      - echo "  Logs:"
+      - echo "    Docker       /tmp/linid-docker.log"
+
+  stop:dev:
+    desc: Stop the full dev environment
+    cmds:
+      - echo "Stopping all services..."
+      - task: stop:compose
+        vars:
+          SERVICE_NAME: Docker services (DB + LemonLDAP)
+          DIR: docker/dev
+      - echo "  All services stopped."
+
+  restart:dev:
+    desc: Restart the full local environment
+    cmds:
+      - task: stop:dev
+      - echo ""
+      - task: start:dev
+
+  # ─── E2E environment ──────────────────────────────────────────────
+
+  start:e2e:
+    desc: Start the full E2E environment (all-in-Docker)
+    deps: [setup:lemonldap-config:e2e, setup:oidc-config]
+    vars:
+      ENV_FILE: '{{.ENV_FILE| default "local.env"}}'
+    cmds:
+      - echo "Starting all services..."
+      - task: start:service
+        vars:
+          SERVICE_NAME: Docker services
+          LOG_FILE: /tmp/linid-docker.log
+          CMD: cd docker/e2e && docker compose --env-file {{.ENV_FILE}} up -d --quiet-pull
+          HEALTHCHECK: curl -sk https://linid.localtest.me:9000 >/dev/null 2>&1
+          TIMEOUT: 120
+      - echo ""
+      - echo "  ✔ E2E environment ready!"
+      - cmd: echo "  → https://linid.localtest.me:9000"
+        if: '[ "{{.ENV_FILE}}" == "local.env" ]'
+      - echo ""
+      - echo "  Logs:"
+      - echo "    Docker       /tmp/linid-docker.log"
+
+  stop:e2e:
+    desc: Stop the full E2E environment
+    cmds:
+      - echo "Stopping all services..."
+      - task: stop:compose
+        vars:
+          SERVICE_NAME: Docker services
+          DIR: docker/e2e
+      - echo ""
+      - echo "  E2E environment stopped."
+
+  restart:e2e:
+    desc: Restart the full E2E environment
+    cmds:
+      - task: stop:e2e
+      - echo ""
+      - task: start:e2e
+
+  # ─── Tests ─────────────────────────────────────────────────────────
+
+  setup:test:
     desc: Install E2E test dependencies
     dir: tests/e2e
     cmd: npm install
 
-  e2e:
-    desc: Run E2E tests locally (requires frontend on localhost:9000)
-    dir: tests/e2e
-    deps: [e2e:install]
-    env:
-      CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
-      E2E_API_URL: "{{.E2E_API_URL}}"
-      E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
-    cmd: npm run start
-
-  e2e:ui:
-    desc: Open Cypress UI for interactive testing
-    dir: tests/e2e
-    deps: [e2e:install]
-    env:
-      CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
-      E2E_API_URL: "{{.E2E_API_URL}}"
-      E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
-    cmd: npm run start:ui
-
-  e2e:lint:
+  lint:test:
     desc: Lint Gherkin feature files
     dir: tests/e2e
-    cmd: npx gherkin-lint "{{.FEATURES_PATH}}/**/*.feature"
+    cmd: npx gherkin-lint "../features/**/*.feature"
 
-  e2e:spec:
-    desc: "Run specific test(s) - usage: task e2e:spec -- ../features/Health.feature"
-    dir: tests/e2e
-    deps: [e2e:install]
-    env:
-      CYPRESS_FEATURES_PATH: "{{.FEATURES_PATH}}"
-      E2E_API_URL: "{{.E2E_API_URL}}"
-      E2E_FRONT_URL: "{{.E2E_FRONT_URL}}"
-    cmd: npx cypress run --spec "{{.CLI_ARGS}}"
-
-  e2e:docker:
-    desc: Run E2E tests in Docker (CI mode, requires linid-integration-network)
-    cmd: |
-      docker run --rm \
-        -e E2E_API_URL=https://api:8443 \
-        -e E2E_FRONT_URL=https://ui \
-        -e CYPRESS_FEATURES_PATH=/app/features \
-        -e TZ=Europe/Paris \
-        --network linid-integration-network \
-        -v "$(pwd)/tests/features":/app/features \
-        vincentmoittie/e2e-test-runner:latest
-
-  setup:certs:
-    desc: Generate all certificates and keys for dev and integration environments
+  start:test:ci:
+    desc: Run E2E tests in CI environment (Docker-based)
+    dir: docker/e2e
     cmds:
+      - task: start:e2e
+        vars:
+          ENV_FILE: .env
+      - docker compose run --rm --no-deps e2e-test-runner
+      - task: stop:e2e
+
+  start:test:
+    desc: Run E2E tests locally
+    deps: [setup:test]
+    dir: tests/e2e
+    dotenv: ["../../docker/e2e/local.env"]
+    cmds:
+      - task: start:e2e
+      - npm run start
+
+  start:test:ui:
+    desc: Open Cypress UI for E2E testing locally
+    deps: [setup:test]
+    dir: tests/e2e
+    dotenv: ["../../docker/e2e/local.env"]
+    cmds:
+      - task: start:e2e
+      - npm run start:ui
+
+  # ─── Internal tasks ─────────────────────────────────────────────────────────
+
+  generate:certs:
+    desc: Generate certificates and keys for a specific environment
+    internal: true
+    dir: "docker/{{.ENV}}/resources"
+    vars:
+      TRUSTSTORE_PATH: '{{.TRUSTSTORE_PATH | default "."}}'
+    cmds:
+      # SSL certificate
+      - cmd: |
+          openssl req -x509 -newkey rsa:2048 \
+            -keyout selfsigned.key \
+            -out selfsigned.crt \
+            -days 3650 -nodes \
+            -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR" >/dev/null 2>&1
+        if: "[ ! -f selfsigned.crt ]"
+      # OIDC signing keys
+      - cmd: |
+          openssl genpkey -algorithm RSA \
+            -out oidc.key \
+            -pkeyopt rsa_keygen_bits:2048 >/dev/null 2>&1 \
+          && openssl pkey \
+            -in oidc.key \
+            -pubout -out oidc.pub >/dev/null 2>&1
+        if: "[ ! -f oidc.key ]"
+      # API truststore
+      - cmd: |
+          keytool -importcert -noprompt -trustcacerts \
+            -alias lemonldap \
+            -file selfsigned.crt \
+            -keystore {{.TRUSTSTORE_PATH}}/truststore.jks \
+            -storepass changeit >/dev/null 2>&1
+        if: "[ ! -f {{.TRUSTSTORE_PATH}}/truststore.jks ]"
       # API keystore
-      - rm -f api/src/main/resources/keystore.jks
-      - keytool -genkeypair -v -alias mykey
-        -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=FR"
-        -keystore api/src/main/resources/keystore.jks
-        -storepass password -keypass password
-        -keyalg RSA -keysize 2048 -validity 3650
-      # Development SSL certificate
-      - openssl req -x509 -newkey rsa:2048
-        -keyout docker/dev/resources/llng/ssl/selfsigned.key
-        -out docker/dev/resources/llng/ssl/selfsigned.crt
-        -days 3650 -nodes
-        -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"
-      # Integration SSL certificate
-      - openssl req -x509 -newkey rsa:2048
-        -keyout docker/integration/resources/selfsigned.key
-        -out docker/integration/resources/selfsigned.crt
-        -days 3650 -nodes
-        -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"
-      # OIDC signing keys (dev)
-      - openssl genpkey -algorithm RSA
-        -out docker/dev/resources/llng/conf/oidc.key
-        -pkeyopt rsa_keygen_bits:2048
-      - openssl pkey
-        -in docker/dev/resources/llng/conf/oidc.key
-        -pubout -out docker/dev/resources/llng/conf/oidc.pub
-      # OIDC signing keys (integration)
-      - openssl genpkey -algorithm RSA
-        -out docker/integration/resources/oidc.key
-        -pkeyopt rsa_keygen_bits:2048
-      - openssl pkey
-        -in docker/integration/resources/oidc.key
-        -pubout -out docker/integration/resources/oidc.pub
+      - cmd: |
+          keytool -genkeypair -v -alias mykey \
+            -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=FR" \
+            -keystore {{.ROOT_DIR}}/api/src/main/resources/keystore.jks \
+            -storepass password -keypass password \
+            -keyalg RSA -keysize 2048 -validity 3650 >/dev/null 2>&1
+        if: "[ ! -f {{.ROOT_DIR}}/api/src/main/resources/keystore.jks ]"
+
+  generate:config:oidc:
+    desc: Generate OIDC configuration from templates using env variables
+    internal: true
+    dir: "docker/e2e/resources"
+    dotenv: ["../{{.ENV_FILE}}"]
+    cmds:
+      - mkdir -p ${CONFIG_DIR}/oidc/conf
+      - envsubst < oidc-config.template.json > ${CONFIG_DIR}/oidc/conf/oidc-config.json
+    if: "[ ! -f {{.CONFIG_DIR}}oidc/conf/oidc-config.json ]"
+
+  generate:config:lemonldap:
+    desc: Generate LemonLDAP configuration from template using env variables
+    internal: true
+    dir: "docker/{{.ENV}}/resources"
+    dotenv: ["../{{.ENV_FILE}}"]
+    vars:
+      CONFIG_DIR: "${CONFIG_DIR:+${CONFIG_DIR}/}"
+    status:
+      - "[ -f {{.CONFIG_DIR}}llng/conf/lmConf-1.json ]"
+    cmd: |
+      export OIDC_PRIVATE_KEY=$(awk '{printf "%s\\n", $0}' oidc.key)
+      export OIDC_PUBLIC_KEY=$(awk '{printf "%s\\n", $0}' oidc.pub)
+      mkdir -p {{.CONFIG_DIR}}llng/conf
+      envsubst < lmConf-1.template.json > {{.CONFIG_DIR}}llng/conf/lmConf-1.json
+    if: "[ ! -f {{.CONFIG_DIR}}llng/conf/lmConf-1.json ]"
+
+  build:image:
+    desc: Build a specific Docker image
+    internal: true
+    vars:
+      LOG_FILE: "/tmp/linid-{{.IMAGE_NAME}}-image.log"
+    status:
+      - docker image inspect {{.IMAGE_NAME}} >/dev/null 2>&1 && echo "  ✔ {{.IMAGE_NAME}} image already exists"
+    cmd: |
+      sh -c '
+        docker build --quiet -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}} {{.CONTEXT_DIR}} > {{.LOG_FILE}} 2>&1 &
+        p=$!
+        while kill -0 $p 2>/dev/null; do
+          dots=""
+          for i in 1 2 3 4; do
+            kill -0 $p 2>/dev/null || break 2
+            printf "\r  ⏳ Building {{.IMAGE_NAME}} image%-3s" "$dots"
+            dots="${dots}."
+            sleep 0.5
+          done
+        done
+        wait $p; r=$?
+        [ $r -eq 0 ] && printf "\r  ✔ {{.IMAGE_NAME}} image built      \n" || { printf "\r  ✗ {{.IMAGE_NAME}} image build failed — see {{.LOG_FILE}}\n"; exit $r; }
+      '
+
+  start:service:
+    desc: Start a specific service locally
+    internal: true
+    cmd: |
+      sh -c '
+        {{if .ENV_FILE}}set -a && . "{{.ENV_FILE}}" && set +a{{end}}
+        {{.CMD}} > {{.LOG_FILE}} 2>&1 &
+        p=$!
+        elapsed=0
+        while ! {{.HEALTHCHECK}} 2>/dev/null; do
+          if ! kill -0 $p 2>/dev/null; then
+            printf "\r  ✗ {{.SERVICE_NAME}} crashed — see {{.LOG_FILE}}\n"
+            exit 1
+          fi
+          if [ $elapsed -ge {{.TIMEOUT}} ]; then
+            printf "\r  ✗ {{.SERVICE_NAME}} not ready after {{.TIMEOUT}}s — see {{.LOG_FILE}}\n"
+            exit 1
+          fi
+          dots=""
+          for i in 1 2 3 4; do
+            if {{.HEALTHCHECK}} 2>/dev/null; then break 2; fi
+            printf "\r  ⏳ Starting {{.SERVICE_NAME}}%-3s" "$dots"
+            dots="${dots}."
+            sleep 1
+            elapsed=$((elapsed + 1))
+          done
+        done
+        printf "\r  ✔ {{.SERVICE_NAME}} started                    \n"
+      '
+
+  stop:service:
+    desc: Stop a specific service
+    internal: true
+    cmd: |
+      pids=$(lsof -t -i:{{.PORT}}) && /bin/kill $pids && echo "  ✔ {{.SERVICE_NAME}} stopped" || echo "  ○ {{.SERVICE_NAME}} (not running)"
+
+  stop:compose:
+    desc: Stop Docker Compose services
+    internal: true
+    dir: "{{.DIR}}"
+    cmd: |
+      if docker compose ps -q 2>/dev/null | grep -q .; then
+        docker compose down 2>/tmp/linid-docker.log && echo "  ✔ {{.SERVICE_NAME}} stopped" || { echo "  ✗ {{.SERVICE_NAME}} not stopped — see /tmp/linid-docker.log"; exit 1; }
+      else
+        echo "  ○ {{.SERVICE_NAME}} (not running)"
+      fi

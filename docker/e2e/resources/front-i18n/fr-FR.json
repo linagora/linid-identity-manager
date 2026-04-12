@@ -10,5 +10,8 @@
     "license": "Ce projet est distribué sous la licence <strong>GNU Affero General Public License v3</strong> (AGPLv3), garantissant qu'il reste libre et open source pour tous.",
     "links": "<ul class=\"q-pl-md\"><li>Code source disponible sur <a href=\"https://github.com/linagora/linid-identity-manager\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>Si vous trouvez un bug, merci de le signaler <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">ici</a>.</li></ul>",
     "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>Un projet de</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
+  },
+  "AuthenticationCallbackPage": {
+    "processing": "Traitement de la réponse d'authentification..."
   }
 }

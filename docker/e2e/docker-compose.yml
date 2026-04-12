@@ -16,7 +16,7 @@ services:
       - ./resources/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
       - ./resources/init_lemonldap_db.sql:/docker-entrypoint-initdb.d/init_lemonldap_db.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_ADMIN_USER}"]
+      test: ["CMD-SHELL", "psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1' || exit 1"]
       interval: 2s
       timeout: 5s
       retries: 5
@@ -26,6 +26,8 @@ services:
     container_name: linid-identity-manager-api
     networks:
       - linid-integration-network
+    extra_hosts:
+      - "linid.localtest.me:host-gateway"
     ports:
       - 8443:8443
     environment:
@@ -39,9 +41,14 @@ services:
       - SWAGGER_ENABLED=${SWAGGER_ENABLED}
       - LOGGING_LEVEL=${LOGGING_LEVEL}
       - AUTH_ISSUER_URI=${AUTH_ISSUER_URI}
+      - AUTH_JWK_SET_URI=${AUTH_JWK_SET_URI}
       - SSL_KEY_STORE=${SSL_KEY_STORE}
       - SSL_KEY_STORE_PASSWORD=${SSL_KEY_STORE_PASSWORD}
       - SSL_KEY_PASSWORD=${SSL_KEY_PASSWORD}
+      - SSL_TRUSTSTORE_PATH=${SSL_TRUSTSTORE_PATH}
+      - SSL_TRUSTSTORE_PASSWORD=${SSL_TRUSTSTORE_PASSWORD}
+    volumes:
+      - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
     healthcheck:
       test:
         [
@@ -57,6 +64,8 @@ services:
       retries: 10
       start_period: 10s
     depends_on:
+      auth:
+        condition: service_healthy
       db:
         condition: service_healthy
 
@@ -77,10 +86,14 @@ services:
       - ./resources/front-i18n/fr-FR.json:/usr/share/nginx/html/i18n/fr-FR.json:ro
       - ./resources/modules.json:/usr/share/nginx/html/modules.json:ro
       - ./resources/remotes.json:/usr/share/nginx/html/remotes.json:ro
+      - ./resources/${CONFIG_DIR}/oidc/conf/oidc-config.json:/usr/share/nginx/html/oidc-config.json:ro
     depends_on:
-      - catalog-ui
-      - api
-      - auth
+      catalog-ui:
+        condition: service_started
+      api:
+        condition: service_healthy
+      auth:
+        condition: service_healthy
 
   catalog-ui:
     image: catalog-ui
@@ -106,24 +119,26 @@ services:
         condition: service_started
     profiles:
       - test
-  
+
   auth:
-    image: lemonldap-ng
+    image: lemonldapng/lemonldap-ng:2.22.2
     networks:
       - linid-integration-network
     environment:
+      SSODOMAIN: ${LEMONLDAP_SSO_DOMAIN}
       PORTAL_HOSTNAME: ${LEMONLDAP_PORTAL_HOSTNAME}
-      LEMONLDAP_DATABASE_ADMIN_USER: ${LEMONLDAP_DATABASE_ADMIN_USER}
-      LEMONLDAP_DATABASE_ADMIN_PASSWORD: ${LEMONLDAP_DATABASE_ADMIN_PASSWORD}
-      LEMONLDAP_DATABASE_USER: ${LEMONLDAP_DATABASE_USER}
-      LEMONLDAP_DATABASE_PASSWORD: ${LEMONLDAP_DATABASE_PASSWORD}
-      LEMONLDAP_DATABASE_NAME: ${LEMONLDAP_DATABASE_NAME}
-    ports: 
+    ports:
       - ${LEMONLDAP_PORTAL_PORT}:80
     volumes:
-      - ./resources/lmConf-1.template.json:/var/lib/lemonldap-ng/conf/lmConf-1.json.template:ro
+      - ./resources/${CONFIG_DIR}/llng/conf:/var/lib/lemonldap-ng/conf
       - ./resources/oidc.key:/etc/keys/oidc.key:ro
       - ./resources/oidc.pub:/etc/keys/oidc.pub:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "--header=Host: ${LEMONLDAP_PORTAL_HOSTNAME}", "http://127.0.0.1/portal/"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
     depends_on:
       db:
         condition: service_healthy

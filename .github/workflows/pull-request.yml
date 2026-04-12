@@ -164,8 +164,8 @@ jobs:
       - name: Set up JDK 21 for x64 (with Maven cache)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           architecture: x64
           cache: maven
 
@@ -184,8 +184,8 @@ jobs:
       - name: Set up JDK 21 for x64 (with Maven cache)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           architecture: x64
           cache: maven
 
@@ -204,8 +204,8 @@ jobs:
       - name: Set up JDK 21 for x64 (with Maven cache)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           architecture: x64
           cache: maven
 
@@ -237,8 +237,8 @@ jobs:
       - name: Set up JDK 21 for x64 (with Maven cache)
         uses: actions/setup-java@v5
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
           architecture: x64
           cache: maven
 
@@ -282,29 +282,15 @@ jobs:
         with:
           submodules: "recursive"
 
-      - name: Generate self-signed certificates
+      - name: Install Task
+        uses: arduino/setup-task@v2
+
+      - name: Run e2e tests
         run: |
-          keytool -genkeypair -v -alias mykey -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=Test" -keystore api/src/main/resources/keystore.jks -storepass password -keypass password -keyalg RSA -keysize 2048 -validity 3650
-          openssl req -x509 -newkey rsa:2048 -keyout docker/integration/resources/selfsigned.key -out docker/integration/resources/selfsigned.crt -days 3650 -nodes -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR"
-          openssl genpkey -algorithm RSA -out docker/integration/resources/oidc.key -pkeyopt rsa_keygen_bits:2048 && openssl pkey -in docker/integration/resources/oidc.key -pubout -out docker/integration/resources/oidc.pub
+          task setup
+          task start:test:ci
 
-      - name: Build UI
-        run: docker build --quiet -f ui/Dockerfile -t linid-identity-manager-ui ui/
-
-      - name: Build catalog-ui
-        run: docker build --quiet -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
-
-      - name: Build and start application
-        run: |
-          docker build --quiet -f api/Dockerfile -t linid-identity-manager-api api/
-          docker build --quiet -f ui/Dockerfile -t linid-identity-manager-ui ui/
-          docker build --quiet -f docker/llng/Dockerfile -t lemonldap-ng docker/llng/
-          docker build --quiet -f linid-im-front-community-plugins/docker/catalog-ui.Dockerfile -t catalog-ui linid-im-front-community-plugins/
-          docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env up -d
-
-      - name: Run functional tests
-        run: docker compose -f docker/integration/docker-compose.yml --env-file docker/integration/.env run --rm e2e-test-runner
-
-      - name: Stop application
+      - name: Stop docker services
         if: always()
-        run: docker compose -f docker/integration/docker-compose.yml down
+        working-directory: docker/e2e
+        run: docker compose down

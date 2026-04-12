@@ -74,6 +74,19 @@
     "header": {
       "q-img": {
         "src": "/toolbarApplicationLogo.svg"
+      },
+      "header-profile": {
+        "q-btn": {
+          "flat": true,
+          "noCaps": true,
+          "textColor": "white"
+        },
+        "q-item-section": {
+          "avatar": true
+        },
+        "q-item-label": {
+          "caption": true
+        }
       }
     }
   }

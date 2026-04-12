@@ -5,14 +5,14 @@
   "dbiAuthChain": "dbi:Pg:dbname=${LEMONLDAP_DATABASE_NAME};host=db",
   "dbiAuthUser": "${LEMONLDAP_DATABASE_ADMIN_USER}",
   "dbiAuthPassword": "${LEMONLDAP_DATABASE_ADMIN_PASSWORD}",
-  "dbiAuthTable": "accounts",
+  "dbiAuthTable": "lemonldap_accounts",
   "dbiAuthLoginCol": "username",
   "dbiAuthPasswordCol": "password",
   "dbiAuthPasswordHash": "",
   "dbiUserChain": "dbi:Pg:dbname=${LEMONLDAP_DATABASE_NAME};host=db",
   "dbiUserUser": "${LEMONLDAP_DATABASE_USER}",
   "dbiUserPassword": "${LEMONLDAP_DATABASE_PASSWORD}",
-  "dbiUserTable": "accounts",
+  "dbiUserTable": "lemonldap_accounts",
   "dbiPasswordMailCol": "mail",
   "userPivot": "username",
   "dbiExportedVars": {
@@ -21,11 +21,11 @@
     "uid": "username",
     "roles": "roles"
   },
-  "domain": "localhost",
+  "domain": "${LEMONLDAP_SSO_DOMAIN}",
   "issuerDBOpenIDConnectActivation": 1,
   "key": "t3st-s3cr3t-k3y!",
   "locationRules": {
-    "localhost": {
+    "${LEMONLDAP_SSO_DOMAIN}": {
       "(?#errors)^/lmerror/": "accept",
       "default": "accept"
     }
@@ -45,14 +45,19 @@
       "oidcRPMetaDataOptionsAccessTokenJWT": 1,
       "oidcRPMetaDataOptionsAccessTokenSignAlg": "RS256",
       "oidcRPMetaDataOptionsIDTokenSignAlg": "RS256",
-      "oidcRPMetaDataOptionsAllowPasswordGrant": 1,
+      "oidcRPMetaDataOptionsPublic": 1,
+      "oidcRPMetaDataOptionsRequirePKCE": 1,
       "oidcRPMetaDataOptionsBypassConsent": 1,
       "oidcRPMetaDataOptionsClientID": "linid-im-client",
       "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
-      "oidcRPMetaDataOptionsRedirectUris": "http://localhost:9000"
+      "oidcRPMetaDataOptionsRedirectUris": "${LEMONLDAP_REDIRECT_URL}",
+      "oidcRPMetaDataOptionsNoJwtHeader": 1,
+      "oidcRPMetaDataOptionsIDTokenForceClaims": 1,
+      "oidcRPMetaDataOptionsExtraClaims": {
+        "roles": "roles"
+      }
     }
   },
-  "oidcServiceIgnoreScopeForClaims": 1,
   "oidcServicePrivateKeySig": "${OIDC_PRIVATE_KEY}",
   "oidcServicePublicKeySig": "${OIDC_PUBLIC_KEY}",
   "persistentStorage": "Apache::Session::File",
@@ -60,6 +65,6 @@
     "Directory": "/var/lib/lemonldap-ng/psessions",
     "LockDirectory": "/var/lib/lemonldap-ng/psessions/lock"
   },
-  "portal": "https://localhost:8080",
+  "portal": "${LEMONLDAP_PORTAL_URL}",
   "userDB": "DBI"
 }

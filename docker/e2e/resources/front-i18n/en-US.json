@@ -1,7 +1,9 @@
 {
   "application": {
     "title": "LinID Identity Manager",
-    "version": "Integration version"
+    "version": "Integration version",
+    "dateTimeFormat": "YYYY/MM/DD hh:mm:ss A",
+    "dateFormat": "YYYY/MM/DD"
   },
   "Homepage": {
     "title": "LinID Identity Manager",

@@ -24,30 +24,55 @@
  * LinID Identity Manager software.
  */
 
+import dayjs from 'dayjs';
+import { useI18n } from 'vue-i18n';
+
 /**
- * Type definition for i18n messages.
- * This must match the structure in public/i18n/en-US.json for proper type checking.
- *
- * Note: Only core application translations are defined here.
- * Module-specific translations (e.g., moduleUsers) are loaded dynamically
- * from the public/i18n/*.json files.
+ * Common mapper for data transformations.
+ * @returns Functions to convert datas.
  */
-export default {
-  application: {
-    title: 'LinID - Identity Manager',
-    version: 'Development version',
-    dateTimeFormat: 'YYYY/MM/DD hh:mm:ss A',
-    dateFormat: 'YYYY/MM/DD',
-  },
-  Homepage: {
-    title: 'text',
-    intro: 'text',
-    opensource: 'text',
-    license: 'text',
-    links: 'text',
-    branding: 'text',
-  },
-  AuthenticationCallbackPage: {
-    processing: 'Processing authentication response...',
-  },
-};
+export function useCommonMapper() {
+  const { t } = useI18n();
+
+  /**
+   * Convert ISO date to date with local date time format.
+   * @param value Date string in ISO format (e.g., "2024-06-30T12:34:56.789Z") to be converted to a human-readable format.
+   * @param format Optional format key to specify the desired date format from the i18n translations (default is "dateTimeFormat").
+   * @returns Formatted date string according to the application's locale settings, or "-" if the input is invalid or falsy.
+   */
+  const toDate = (
+    value: unknown,
+    format: string = 'dateTimeFormat'
+  ): string => {
+    if (!value) {
+      return '-';
+    }
+    const date = dayjs(value.toString());
+    if (!date.isValid()) {
+      return '-';
+    }
+    return date.format(t(`application.${format}`));
+  };
+
+  /**
+   * Convert date format to iso.
+   * @param value Date string to be converted to ISO format.
+   * @returns String in ISO format (e.g., "2024-06-30T12:34:56.789Z") or an empty string if the input is falsy.
+   */
+  const toDateISO = (value: unknown): string => {
+    const v = value?.toString() || '';
+    if (!v) {
+      return '';
+    }
+    const date = new Date(v);
+    if (Number.isNaN(date.getTime())) {
+      return '';
+    }
+    return date.toISOString();
+  };
+
+  return {
+    toDate,
+    toDateISO,
+  };
+}

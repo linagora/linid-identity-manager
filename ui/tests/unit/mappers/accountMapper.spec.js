@@ -6,8 +6,8 @@
  * any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
  * LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
  * which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
- * of the interface window, the display of the “You are using the Open Source and free version of LinID™, powered by
- * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!” infobox and in the e-mails
+ * of the interface window, the display of the "You are using the Open Source and free version of LinID™, powered by
+ * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!" infobox and in the e-mails
  * sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
  * as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
  * and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
@@ -24,30 +24,46 @@
  * LinID Identity Manager software.
  */
 
-/**
- * Type definition for i18n messages.
- * This must match the structure in public/i18n/en-US.json for proper type checking.
- *
- * Note: Only core application translations are defined here.
- * Module-specific translations (e.g., moduleUsers) are loaded dynamically
- * from the public/i18n/*.json files.
- */
-export default {
-  application: {
-    title: 'LinID - Identity Manager',
-    version: 'Development version',
-    dateTimeFormat: 'YYYY/MM/DD hh:mm:ss A',
-    dateFormat: 'YYYY/MM/DD',
-  },
-  Homepage: {
-    title: 'text',
-    intro: 'text',
-    opensource: 'text',
-    license: 'text',
-    links: 'text',
-    branding: 'text',
-  },
-  AuthenticationCallbackPage: {
-    processing: 'Processing authentication response...',
-  },
-};
+import dayjs from 'dayjs';
+import { useAccountMapper } from 'src/mappers/accountMapper';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useI18n } from 'vue-i18n';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(),
+}));
+
+describe('accountMapper', () => {
+  const tMock = vi.fn();
+
+  beforeEach(() => {
+    tMock.mockReset();
+    useI18n.mockReturnValue({ t: tMock });
+  });
+
+  describe('toAccount', () => {
+    it('Map an AccountDTO to Account', () => {
+      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
+      const { toAccount } = useAccountMapper();
+
+      const dto = {
+        id: 1,
+        lastname: 'Doe',
+        firstname: 'John',
+        email: 'john.doe@example.com',
+        externalId: 'ext-1',
+        createdBy: 'admin',
+        updatedBy: 'admin2',
+        insertDate: '2024-01-01T00:00:00Z',
+        updateDate: '2024-02-01T00:00:00Z',
+      };
+
+      const account = toAccount(dto);
+      expect(account).toEqual({
+        ...dto,
+        insertDate: dayjs(dto.insertDate).format('YYYY-MM-DD HH:mm'),
+        updateDate: dayjs(dto.updateDate).format('YYYY-MM-DD HH:mm'),
+      });
+    });
+  });
+});

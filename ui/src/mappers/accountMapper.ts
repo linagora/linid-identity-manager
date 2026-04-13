@@ -24,30 +24,30 @@
  * LinID Identity Manager software.
  */
 
+import { useCommonMapper } from 'src/mappers/commonMapper';
+import type { AccountDTO, Account } from 'src/types/accounts';
+
 /**
- * Type definition for i18n messages.
- * This must match the structure in public/i18n/en-US.json for proper type checking.
- *
- * Note: Only core application translations are defined here.
- * Module-specific translations (e.g., moduleUsers) are loaded dynamically
- * from the public/i18n/*.json files.
+ * Mapper for accounts-related data transformations.
+ * @returns Functions to convert API records to UI-friendly formats.
  */
-export default {
-  application: {
-    title: 'LinID - Identity Manager',
-    version: 'Development version',
-    dateTimeFormat: 'YYYY/MM/DD hh:mm:ss A',
-    dateFormat: 'YYYY/MM/DD',
-  },
-  Homepage: {
-    title: 'text',
-    intro: 'text',
-    opensource: 'text',
-    license: 'text',
-    links: 'text',
-    branding: 'text',
-  },
-  AuthenticationCallbackPage: {
-    processing: 'Processing authentication response...',
-  },
-};
+export function useAccountMapper() {
+  const { toDate } = useCommonMapper();
+
+  /**
+   * Maps an AccountDTO to an Account, converting date to date ISO.
+   * @param account AccountDTO to be transformed into an Account.
+   * @returns Account with properly typed fields for UI.
+   */
+  const toAccount = (account: AccountDTO): Account => {
+    return {
+      ...account,
+      insertDate: toDate(account.insertDate),
+      updateDate: toDate(account.updateDate),
+    };
+  };
+
+  return {
+    toAccount,
+  };
+}

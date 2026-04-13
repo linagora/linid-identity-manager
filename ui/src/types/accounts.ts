@@ -25,29 +25,92 @@
  */
 
 /**
- * Type definition for i18n messages.
- * This must match the structure in public/i18n/en-US.json for proper type checking.
- *
- * Note: Only core application translations are defined here.
- * Module-specific translations (e.g., moduleUsers) are loaded dynamically
- * from the public/i18n/*.json files.
+ * Raw user shape returned by the API.
  */
-export default {
-  application: {
-    title: 'LinID - Identity Manager',
-    version: 'Development version',
-    dateTimeFormat: 'YYYY/MM/DD hh:mm:ss A',
-    dateFormat: 'YYYY/MM/DD',
-  },
-  Homepage: {
-    title: 'text',
-    intro: 'text',
-    opensource: 'text',
-    license: 'text',
-    links: 'text',
-    branding: 'text',
-  },
-  AuthenticationCallbackPage: {
-    processing: 'Processing authentication response...',
-  },
-};
+export interface AccountDTO {
+  /**
+   * Unique account identifier.
+   */
+  id: string;
+  /**
+   * External business identifier.
+   */
+  externalId: string;
+  /**
+   * User lastname.
+   */
+  lastname: string;
+  /**
+   * User firstname.
+   */
+  firstname: string;
+  /**
+   * User email address.
+   */
+  email: string;
+  /**
+   * Creator identifier.
+   */
+  createdBy: string;
+  /**
+   * Last updater identifier.
+   */
+  updatedBy: string;
+  /**
+   * Account creation timestamp in ISO 8601 / RFC 3339 UTC format
+   * with nanosecond precision.
+   * Example: 2026-04-15T17:09:36.898493688Z.
+   */
+  insertDate: string;
+  /**
+   * Account last update timestamp in ISO 8601 / RFC 3339 UTC format
+   * with nanosecond precision.
+   * Example: 2026-04-15T17:09:36.898493688Z.
+   */
+  updateDate: string;
+}
+
+/**
+ * Account shape consumed by Vue components.
+ */
+export interface Account {
+  /**
+   * Unique account identifier.
+   */
+  id: string;
+  /**
+   * User lastname.
+   */
+  lastname: string;
+  /**
+   * User firstname.
+   */
+  firstname: string;
+  /**
+   * User email address.
+   */
+  email: string;
+  /**
+   * External business identifier.
+   */
+  externalId: string;
+  /**
+   * Creator identifier.
+   */
+  createdBy: string;
+  /**
+   * Last updater identifier.
+   */
+  updatedBy: string;
+  /**
+   * Account creation date converted from API ISO timestamp.
+   * Display formatting depends on the user's locale.
+   */
+  insertDate: string;
+
+  /**
+   * Account last update date converted from API ISO timestamp.
+   * Display formatting depends on the user's locale.
+   */
+  updateDate: string;
+}

@@ -230,7 +230,8 @@ tasks:
             -keyout selfsigned.key \
             -out selfsigned.crt \
             -days 3650 -nodes \
-            -subj "/CN=Test/OU=Test/O=Test/L=Test/ST=Test/C=FR" >/dev/null 2>&1
+            -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
+            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:localhost" >/dev/null 2>&1
         if: "[ ! -f selfsigned.crt ]"
       # OIDC signing keys
       - cmd: |

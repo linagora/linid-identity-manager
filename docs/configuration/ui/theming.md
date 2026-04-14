@@ -26,7 +26,6 @@ There are **three main files** to control theming:
 * Defines **component-level defaults**
 * Can be applied **globally** or for a **specific namespace / layout**
 * Examples of attributes:
-
     * `dense`, `outline`, `color`, `noCaps`, `align`, `inlineLabel`, etc.
 
 ### Example
@@ -91,7 +90,6 @@ There are **three main files** to control theming:
 * Allows **global CSS customizations**
 * Can be used for advanced styling not covered by `design.json`
 * Typical use cases:
-
     * Custom fonts
     * Margins/paddings adjustments
     * Custom animations or transitions

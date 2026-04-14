@@ -6,12 +6,34 @@ tasks:
   # ─── Setup ─────────────────────────────────────────────────────────
 
   setup:
-    desc: Generate certificates, build Docker images and config files
+    desc: Generate certificates, build Docker images and config files for all environments
     cmds:
       - task: setup:certs
       - task: build:images
       - task: setup:lemonldap-config
       - task: setup:oidc-config
+
+  setup:demo:
+    desc: Setup certificates, config files and Docker images for demo environment
+    cmds:
+      - task: setup:certs:demo
+      - task: build:images
+      - task: setup:lemonldap-config:demo
+      - task: setup:oidc-config:demo
+
+  setup:dev:
+    desc: Setup certificates, config files and Docker images for dev environment
+    cmds:
+      - task: setup:certs:dev
+      - task: setup:lemonldap-config:dev
+
+  setup:e2e:
+    desc: Setup certificates, config files and Docker images for E2E environment
+    cmds:
+      - task: setup:certs:e2e
+      - task: build:images
+      - task: setup:lemonldap-config:e2e
+      - task: setup:oidc-config:e2e
 
   build:images:
     desc: Build all Docker images
@@ -33,8 +55,9 @@ tasks:
           CONTEXT_DIR: api/
 
   setup:certs:
-    desc: Generate all certificates and keys for dev and E2E environments
+    desc: Generate all certificates and keys for all environments
     cmds:
+      - task: setup:certs:demo
       - task: setup:certs:dev
       - task: setup:certs:e2e
 
@@ -46,6 +69,13 @@ tasks:
           ENV: dev
           TRUSTSTORE_PATH: "{{.ROOT_DIR}}/api/src/main/resources"
 
+  setup:certs:demo:
+    desc: Generate certificates and keys for demo environment
+    cmds:
+      - task: generate:certs
+        vars:
+          ENV: demo
+
   setup:certs:e2e:
     desc: Generate certificates and keys for E2E environment
     cmds:
@@ -54,24 +84,48 @@ tasks:
           ENV: e2e
 
   setup:oidc-config:
-    desc: Generate oidc-config.json for E2E environment
+    desc: Generate OIDC configuration for a specific environment
+    cmds:
+      - task: setup:oidc-config:demo
+      - task: setup:oidc-config:e2e
+
+  setup:oidc-config:demo:
+    desc: Generate OIDC configuration for demo environment
     cmds:
       - task: generate:config:oidc
         vars:
+          ENV: demo
+          ENV_FILE: .env
+
+  setup:oidc-config:e2e:
+    desc: Generate OIDC configuration for E2E environment
+    cmds:
+      - task: generate:config:oidc
+        vars:
+          ENV: e2e
           ENV_FILE: local.env
       - task: generate:config:oidc
         vars:
+          ENV: e2e
           ENV_FILE: .env
 
   setup:lemonldap-config:
-    desc: Generate LemonLDAP configuration for a specific environment
+    desc: Generate LemonLDAP configuration for all environment
     cmds:
+      - task: setup:lemonldap-config:demo
       - task: setup:lemonldap-config:dev
       - task: setup:lemonldap-config:e2e
 
+  setup:lemonldap-config:demo:
+    desc: Generate LemonLDAP configuration for demo environment
+    cmds:
+      - task: generate:config:lemonldap
+        vars:
+          ENV: demo
+          ENV_FILE: .env
+
   setup:lemonldap-config:dev:
     desc: Generate LemonLDAP configuration for dev environment
-    deps: ["setup:certs:dev"]
     cmds:
       - task: generate:config:lemonldap
         vars:
@@ -80,7 +134,6 @@ tasks:
 
   setup:lemonldap-config:e2e:
     desc: Generate LemonLDAP configuration for E2E environment
-    deps: ["setup:certs:e2e"]
     vars:
       ENV: e2e
     cmds:
@@ -93,11 +146,48 @@ tasks:
           ENV: "{{.ENV}}"
           ENV_FILE: .env
 
+  # ─── Demo environment ─────────────────────────────────────────────
+
+  start:demo:
+    desc: Start the demo of LinID
+    cmds:
+      - echo "Starting all services..."
+      - task: start:service
+        vars:
+          SERVICE_NAME: Docker services
+          CMD: cd docker/demo && docker compose -f docker-compose.yml --env-file .env up -d --quiet-pull
+          HEALTHCHECK: curl -sk https://linid.localtest.me:9000 >/dev/null 2>&1
+          TIMEOUT: 90
+          LOG_FILE: /tmp/linid-docker.log
+      # Summary
+      - echo ""
+      - echo "  ✔ All services ready!"
+      - echo "    LinID → https://linid.localtest.me:9000"
+      - echo ""
+      - echo "  Logs:"
+      - echo "    Docker       /tmp/linid-docker.log"
+
+  stop:demo:
+    desc: Stop the demo of LinID
+    cmds:
+      - echo "Stopping all services..."
+      - task: stop:compose
+        vars:
+          SERVICE_NAME: Docker services (DB + LemonLDAP)
+          DIR: docker/demo
+      - echo "  All services stopped."
+
+  restart:demo:
+    desc: Restart the demo of LinID
+    cmds:
+      - task: stop:demo
+      - echo ""
+      - task: start:demo
+
   # ─── Dev environment ─────────────────────────────────────────────
 
   start:dev:
     desc: Start the full dev environment (Docker + API + frontend modules)
-    deps: [setup:lemonldap-config:dev]
     cmds:
       - echo "Starting all services..."
       - task: start:service
@@ -137,7 +227,6 @@ tasks:
 
   start:e2e:
     desc: Start the full E2E environment (all-in-Docker)
-    deps: [setup:lemonldap-config:e2e, setup:oidc-config]
     vars:
       ENV_FILE: '{{.ENV_FILE| default "local.env"}}'
     cmds:
@@ -262,7 +351,7 @@ tasks:
   generate:config:oidc:
     desc: Generate OIDC configuration from templates using env variables
     internal: true
-    dir: "docker/e2e/resources"
+    dir: "docker/{{.ENV}}/resources"
     dotenv: ["../{{.ENV_FILE}}"]
     cmds:
       - mkdir -p ${CONFIG_DIR}/oidc/conf

@@ -5,24 +5,23 @@ All services are containerized with ports exposed for debugging and test access.
 
 ## Quick Start
 
-Generate certificates and start everything with the following commands:
+Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build images and start everything with the following commands:
 
 ```bash
-task setup
+task setup:e2e
 task start:e2e
 ```
 
 ## Services
 
-| Service         | URL                | Description                 |
-| --------------- | ------------------ | --------------------------- |
-| db              | (internal network) | Default database            |
-| api             | (internal network) | LinID Identity Manager API  |
-| ui              | (internal network) | LinID Identity Manager UI   |
-| catalog-ui      | (internal network) | UI components library       |
-| module-oidc     | (internal network) | OIDC header profile module  |
-| auth            | (internal network) | LemonLDAP::NG portal        |
-| e2e-test-runner | (internal network) | Runner to execute e2e tests |
+| Service         | URL                             | Description                 |
+| --------------- | ------------------------------- | --------------------------- |
+| db              | (internal network)              | Default database            |
+| api             | (internal network)              | LinID Identity Manager API  |
+| ui              | https://linid.localtest.me:9000 | LinID Identity Manager UI   |
+| catalog-ui      | (internal network)              | UI components library       |
+| auth            | (internal network)              | LemonLDAP::NG portal        |
+| e2e-test-runner | (internal network)              | Runner to execute e2e tests |
 
 ## Notes
 

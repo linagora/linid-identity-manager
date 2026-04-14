@@ -71,7 +71,6 @@ resources/i18n/en-US.json
 1. Backend translations are **loaded from the path specified in `I18N_EXTERNAL_PATH`**
 2. Frontend translations are **read from `i18n/*.json`**
 3. Frontend merges the two sets of translations:
-
     * Plugin/backend translations
     * Frontend-specific translations
 4. The resulting language bundle is used by the UI dynamically

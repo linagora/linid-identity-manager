@@ -31,7 +31,6 @@ LinId operates alongside:
 3. The user authenticates via LemonLDAP
 4. LemonLDAP retrieves user data from LDAP
 5. LinId provides:
-
     * roles definition
     * claims configuration
     * access logic (OPA policies)

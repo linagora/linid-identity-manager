@@ -47,7 +47,6 @@ Ensuring these are met will allow a smooth setup and avoid common issues.
 ## 🔑 Environment Variables
 
 Some configuration depends on environment variables:
-
 * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`
 * `AUTH_ISSUER_URI` (URL of the OIDC issuer / LemonLDAP)
 * `I18N_EXTERNAL_PATH` (optional, for backend/plugin translations)

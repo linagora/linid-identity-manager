@@ -190,7 +190,7 @@ jobs:
           cache: maven
 
       - name: Generate Javadoc
-        run: mvn -ntp clean javadoc:javadoc
+        run: mvn -ntp clean compile javadoc:javadoc
 
   api-tests:
     name: API - Unit tests

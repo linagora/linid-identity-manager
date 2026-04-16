@@ -24,25 +24,33 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.user;
+package io.github.linagora.linid.im.api.controller;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.UUID;
-import lombok.Data;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 
-@Data
-@Schema(description = "Data Transfer Object representing a user")
-public class UserDTO {
-    /**
-     * Unique identifier of the user (OIDC subject).
-     */
-    @Schema(description = "Unique identifier of the user", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
+/**
+ * Resolves the appropriate HTTP status for paginated responses.
+ *
+ * <p>Returns {@code 200 OK} when all content fits in one page,
+ * or {@code 206 Partial Content} when there are more pages available.</p>
+ */
+@Component
+public class PagedResponseStatusResolver {
 
-    /**
-     * Email of the user.
-     */
-    @Schema(description = "Email address of the user", example = "john.doe@example.com")
-    private String email;
-
+  /**
+   * Builds a {@link ResponseEntity} with the appropriate status for the given page.
+   *
+   * @param page the page of results
+   * @param <T>  the type of elements in the page
+   * @return a response with status 200 or 206
+   */
+  public <T> ResponseEntity<Page<T>> resolve(final Page<T> page) {
+    if (page.getTotalPages() > 1) {
+      return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(page);
+    }
+    return ResponseEntity.ok(page);
+  }
 }

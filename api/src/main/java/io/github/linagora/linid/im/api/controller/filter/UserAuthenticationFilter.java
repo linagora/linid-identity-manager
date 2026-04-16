@@ -70,9 +70,15 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String email = jwt.getClaimAsString("email");
+        java.util.UUID id;
+        try {
+            id = java.util.UUID.fromString(jwt.getSubject());
+        } catch (IllegalArgumentException e) {
+            id = java.util.UUID.nameUUIDFromBytes(jwt.getSubject().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
 
-        // TODO change by retrieve user from database.
         UserPrincipal user = new UserPrincipal();
+        user.setId(id);
         user.setEmail(email);
 
         SecurityContextHolder.getContext().setAuthentication(

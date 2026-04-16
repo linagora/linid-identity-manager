@@ -6,5 +6,6 @@
   "error.provider.unknown": "Provider inconnu '{provider}' pour l'entité '{entity}'",
   "error.plugin.unknown": "Plugin inconnu: {type}",
   "error.authentication.unauthorized": "Non autorisé",
-  "error.router.unknown.language": "Langue inconnue: {language}"
+  "error.router.unknown.language": "Langue inconnue: {language}",
+  "error.account.not_found": "Compte introuvable: {id}"
 }

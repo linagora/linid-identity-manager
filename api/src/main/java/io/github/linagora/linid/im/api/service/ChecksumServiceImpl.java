@@ -24,25 +24,30 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.user;
+package io.github.linagora.linid.im.api.service;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.UUID;
-import lombok.Data;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import org.springframework.stereotype.Service;
 
-@Data
-@Schema(description = "Data Transfer Object representing a user")
-public class UserDTO {
-    /**
-     * Unique identifier of the user (OIDC subject).
-     */
-    @Schema(description = "Unique identifier of the user", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
+/**
+ * SHA-256 implementation of {@link ChecksumService}.
+ *
+ * <p>Used to generate deterministic hashes from string payloads for change detection.</p>
+ */
+@Service
+public class ChecksumServiceImpl implements ChecksumService {
 
-    /**
-     * Email of the user.
-     */
-    @Schema(description = "Email address of the user", example = "john.doe@example.com")
-    private String email;
-
+  @Override
+  public String compute(final String payload) {
+    try {
+      MessageDigest digest = MessageDigest.getInstance("SHA-256");
+      byte[] hash = digest.digest(payload.getBytes(StandardCharsets.UTF_8));
+      return HexFormat.of().formatHex(hash);
+    } catch (NoSuchAlgorithmException e) {
+      throw new IllegalStateException("SHA-256 algorithm not available", e);
+    }
+  }
 }

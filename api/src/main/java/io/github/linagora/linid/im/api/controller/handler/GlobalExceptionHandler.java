@@ -33,7 +33,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -90,5 +92,30 @@ public class GlobalExceptionHandler {
     }
 
     return ResponseEntity.status(exception.getStatusCode()).body(body);
+  }
+
+  /**
+   * Handles validation errors thrown when request body fails {@code @Valid} constraints.
+   *
+   * <p>Returns a structured response with field-level error messages.
+   *
+   * @param exception the validation exception
+   * @return a {@link ResponseEntity} containing field errors and HTTP 400 status
+   */
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<Map<String, Object>> handleValidationException(
+      final MethodArgumentNotValidException exception) {
+    Map<String, String> fieldErrors = new LinkedHashMap<>();
+    exception.getBindingResult().getFieldErrors()
+        .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
+
+    Map<String, Object> body = new LinkedHashMap<>();
+    body.put("error", "Validation failed");
+    body.put("errorKey", "error.validation");
+    body.put("errorContext", fieldErrors);
+    body.put("status", HttpStatus.BAD_REQUEST.value());
+    body.put("timestamp", Instant.now().toEpochMilli());
+
+    return ResponseEntity.badRequest().body(body);
   }
 }

@@ -6,5 +6,6 @@
   "error.provider.unknown": "Unknown provider '{provider}' for entity '{entity}'",
   "error.plugin.unknown": "Unknown plugin: {type}",
   "error.authentication.unauthorized": "Unauthorized",
-  "error.router.unknown.language": "Unknown language: {language}"
+  "error.router.unknown.language": "Unknown language: {language}",
+  "error.account.not_found": "Account not found: {id}"
 }

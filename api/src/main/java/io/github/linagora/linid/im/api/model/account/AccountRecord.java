@@ -24,25 +24,32 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.user;
+package io.github.linagora.linid.im.api.model.account;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.UUID;
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-@Data
-@Schema(description = "Data Transfer Object representing a user")
-public class UserDTO {
-    /**
-     * Unique identifier of the user (OIDC subject).
-     */
-    @Schema(description = "Unique identifier of the user", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
+/**
+ * Request payload for creating a new account.
+ *
+ * @param externalId external identifier (e.g. OIDC sub)
+ * @param lastname   last name of the account holder
+ * @param firstname  first name of the account holder
+ * @param email      email address, must be valid format
+ */
+@Schema(description = "Request payload for creating a new account")
+public record AccountRecord(
+    @NotBlank @Schema(description = "External identifier", example = "oidc-sub-12345")
+    String externalId,
 
-    /**
-     * Email of the user.
-     */
-    @Schema(description = "Email address of the user", example = "john.doe@example.com")
-    private String email;
+    @NotBlank @Schema(description = "Last name", example = "Doe")
+    String lastname,
 
+    @NotBlank @Schema(description = "First name", example = "John")
+    String firstname,
+
+    @NotBlank @Email @Schema(description = "Email address", example = "john.doe@example.com")
+    String email
+) {
 }

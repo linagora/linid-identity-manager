@@ -14,50 +14,139 @@ This API allows you to:
 
 ---
 
-## Base URL
+## Prerequisites
 
-The API is typically available at:
-
-[https://localhost:8443/](https://localhost:8443/)
-
-Adjust the host and port according to your deployment configuration.
+- Java 21+
+- Maven 3.8+ (or use the included `./mvnw` wrapper)
+- PostgreSQL 15+
 
 ---
 
 ## Build & Run
 
-### Prerequisites
+### Build
 
-- Java 21+
-- Maven 3.8+
+```bash
+./mvnw clean package
+```
+
+### Run tests
+
+```bash
+./mvnw clean verify
+```
 
 ### Run locally
 
 ```bash
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 
-### Build artifact
+> All required environment variables must be set before running. See [Environment Variables](#environment-variables).
 
-```bash
-mvn clean package
-```
-
-Then run the JAR:
+### Run the JAR
 
 ```bash
 java -jar target/linid-identity-manager-api-0.1.0.jar
 ```
 
-### Generate certificate for HTTPS
+---
 
-To generate certificate, run this command at the root of your project folder:
+## API Documentation
 
-```bash
-keytool -genkey -alias myKeyAlias -keyalg RSA -keysize 2048 -keystore src/main/resources/keystore.jks -validity 3650
+When Swagger is enabled (`SWAGGER_ENABLED=true`), the full API documentation is available at:
 
-keytool -importcert -noprompt -trustcacerts -alias lemonldap -file selfsigned.crt -keystore src/main/resources/truststore.jks -storepass changeit >/dev/null 2>&1
+```
+https://localhost:8443/swagger-ui/index.html
 ```
 
-You will be asked to set a password for the key store and another for the key itself. Make sure to use the same
-passwords in your .env file when building unless it will use the default "password" password.
+---
+
+## Security
+
+The API uses **OAuth2 JWT** as a resource server (Spring Security). All endpoints except health, actuator, and Swagger are secured.
+
+Authentication is configured via:
+
+- `AUTH_ISSUER_URI`: OIDC issuer URI
+- `AUTH_JWK_SET_URI`: JSON Web Key Set URI
+
+The `UserAuthenticationFilter` extracts the user email from the JWT token and creates a `UserPrincipal` in the security context.
+
+---
+
+## Environment Variables
+
+### Database
+
+| Variable                  | Description                          | Required |
+| ------------------------- | ------------------------------------ | -------- |
+| `DATABASE_HOST`           | PostgreSQL host                      | Yes      |
+| `DATABASE_PORT`           | PostgreSQL port                      | Yes      |
+| `DATABASE_NAME`           | Database name                        | Yes      |
+| `DATABASE_USER`           | Application database user            | Yes      |
+| `DATABASE_PASSWORD`       | Application database password        | Yes      |
+| `DATABASE_ADMIN_USER`     | Admin user for Flyway migrations     | Yes      |
+| `DATABASE_ADMIN_PASSWORD` | Admin password for Flyway migrations | Yes      |
+
+### Authentication
+
+| Variable           | Description     | Required |
+| ------------------ | --------------- | -------- |
+| `AUTH_ISSUER_URI`  | OIDC issuer URI | Yes      |
+| `AUTH_JWK_SET_URI` | JWK Set URI     | Yes      |
+
+### SSL
+
+| Variable                  | Description         | Required |
+| ------------------------- | ------------------- | -------- |
+| `SSL_KEY_STORE`           | Path to keystore    | Yes      |
+| `SSL_KEY_STORE_PASSWORD`  | Keystore password   | Yes      |
+| `SSL_KEY_PASSWORD`        | Key password        | Yes      |
+| `SSL_TRUSTSTORE_PATH`     | Path to truststore  | Yes      |
+| `SSL_TRUSTSTORE_PASSWORD` | Truststore password | Yes      |
+
+### Application
+
+| Variable                         | Description                                  | Default                    |
+| -------------------------------- | -------------------------------------------- | -------------------------- |
+| `SWAGGER_ENABLED`                | Enable Swagger UI and API docs               | —                          |
+| `LOGGING_LEVEL`                  | Root logging level                           | `INFO`                     |
+| `I18N_EXTERNAL_PATH`             | Path to external i18n files                  | —                          |
+| `I18N_MERGE_ORDER`               | i18n merge priority                          | `plugin,external,internal` |
+| `PLUGIN_LOADER_PATH`             | Path to plugin JARs                          | —                          |
+| `COPYRIGHT_MODE`                 | Copyright mode (`default`, `custom`, `none`) | `default`                  |
+| `COPYRIGHT_CUSTOM`               | Custom copyright text                        | —                          |
+| `EXTERNAL_CONFIGURATION`         | Path to external YAML config                 | —                          |
+| `CLIENT_DATABASE_SCHEMA`         | Client Flyway schema                         | `public`                   |
+| `CLIENT_DATABASE_MIGRATION_PATH` | Client Flyway migration path                 | —                          |
+
+---
+
+## Generate Certificates for HTTPS
+
+```bash
+keytool -genkey -alias myKeyAlias -keyalg RSA -keysize 2048 \
+  -keystore src/main/resources/keystore.jks -validity 3650
+
+keytool -importcert -noprompt -trustcacerts -alias lemonldap \
+  -file selfsigned.crt -keystore src/main/resources/truststore.jks \
+  -storepass changeit >/dev/null 2>&1
+```
+
+Set the keystore and truststore passwords in the corresponding environment variables.
+
+---
+
+## Database Migrations
+
+The API uses **Flyway** for database migrations. Migration files are located in:
+
+```
+src/main/resources/db/migration/
+```
+
+Current migrations:
+
+- `V1__init.sql` — pgcrypto extension, `update_timestamp()` trigger function
+- `V2__create_table_accounts.sql` — `accounts` table with indexes, triggers, and comments

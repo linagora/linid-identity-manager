@@ -104,7 +104,7 @@ services:
       - ./resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
 
   e2e-test-runner:
-    image: ${E2E_TEST_RUNNER_IMAGE:-vincentmoittie/e2e-test-runner:v1.10.0}
+    image: ${E2E_TEST_RUNNER_IMAGE:-vincentmoittie/e2e-test-runner:v1.11.0}
     container_name: e2e-test-runner
     networks:
       - linid-integration-network

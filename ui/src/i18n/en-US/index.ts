@@ -50,4 +50,27 @@ export default {
   AuthenticationCallbackPage: {
     processing: 'Processing authentication response...',
   },
+  AccountDetailsPage: {
+    title: 'Account details',
+    EntityDetailsCard: {
+      title: 'Account information',
+      attributes: {
+        firstname: 'First name',
+        lastname: 'Last name',
+        email: 'Email',
+        createdBy: 'Created by',
+        updatedBy: 'Updated by',
+        insertDate: 'Creation date',
+        updateDate: 'Last update',
+      },
+    },
+    ButtonsCard: {
+      cancel: 'Back',
+      edit: 'Edit',
+    },
+    errors: {
+      notFound: 'Account not found',
+      generic: 'Unable to load the account. Please try again later.',
+    },
+  },
 };

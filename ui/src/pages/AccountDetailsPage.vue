@@ -1,0 +1,160 @@
+<!--
+  Copyright (C) 2026 Linagora
+
+  This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
+  any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
+  LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
+  which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
+  of the interface window, the display of the “You are using the Open Source and free version of LinID™, powered by
+  Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!” infobox and in the e-mails
+  sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
+  as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
+  and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
+  intellectual property rights over its trademarks and commercial brands. Other Additional Terms apply, see
+  <http://www.linagora.com/licenses/> for more details.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+  details.
+
+  You should have received a copy of the GNU Affero General Public License and its applicable Additional Terms for
+  LinID Identity Manager along with this program. If not, see <http://www.gnu.org/licenses/> for the GNU Affero
+  General Public License version 3 and <http://www.linagora.com/licenses/> for the Additional Terms applicable to the
+  LinID Identity Manager software.
+-->
+
+<template>
+  <!-- v8 ignore start -->
+  <q-page
+    class="row justify-center q-pa-md account-details-page"
+    data-cy="account-details-page"
+  >
+    <div class="col-12 col-md-10 col-lg-10 account-details-page--content">
+      <div
+        class="row items-center justify-between q-mb-md account-details-page--header"
+      >
+        <h1
+          class="q-ma-none text-h5 account-details-page--title"
+          data-cy="account-details-page_title"
+        >
+          {{ t('title') }}
+        </h1>
+        <div class="account-details-page--actions">
+          <component
+            :is="buttonsCard"
+            v-if="buttonsCard"
+            :ui-namespace="uiNamespace"
+            :i18n-scope="i18nScope"
+            :show-confirm-button="false"
+            @cancel="goBack"
+          >
+            <template #append-buttons>
+              <q-btn
+                v-bind="uiProps.editButton"
+                class="buttons-card--edit-button"
+                :label="t('ButtonsCard.edit')"
+                data-cy="button_edit"
+                @click="goToEdit"
+              />
+            </template>
+          </component>
+        </div>
+      </div>
+
+      <component
+        :is="entityDetailsCard"
+        v-if="entityDetailsCard"
+        :entity="account || {}"
+        :field-order="fieldsOrder"
+        :is-loading="isLoading"
+        :ui-namespace="uiNamespace"
+        :i18n-scope="i18nScope"
+        class="q-mb-md account-details-page--cards"
+        data-cy="account-details-page_cards"
+      />
+    </div>
+  </q-page>
+  <!-- v8 ignore stop -->
+</template>
+
+<script setup lang="ts">
+import type { LinidQBtnProps } from '@linagora/linid-im-front-corelib';
+import {
+  loadAsyncComponent,
+  useNotify,
+  useScopedI18n,
+  useUiDesign,
+} from '@linagora/linid-im-front-corelib';
+import axios from 'axios';
+import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
+import { getAccountById } from 'src/services/AccountService';
+import type { Account } from 'src/types/accounts';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const pageName = 'AccountDetailsPage';
+const i18nScope = pageName;
+const uiNamespace = 'accounts.details-page';
+
+const route = useRoute();
+const router = useRouter();
+const { t } = useScopedI18n(i18nScope);
+const { Notify } = useNotify();
+const { ui } = useUiDesign();
+
+const uiProps = {
+  editButton: ui<LinidQBtnProps>(
+    `${uiNamespace}.buttons-card.edit-button`,
+    'q-btn'
+  ),
+};
+
+const accountId = computed(() => route.params.id as string);
+
+const account = ref<Account | null>(null);
+const isLoading = ref<boolean>(false);
+
+const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
+const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
+
+/**
+ * Loads the account data from the backend based on the route parameter.
+ */
+async function loadAccount(): Promise<void> {
+  isLoading.value = true;
+  try {
+    account.value = await getAccountById(accountId.value);
+  } catch (error) {
+    const errorMessageKey =
+      axios.isAxiosError(error) && error.response?.status === 404
+        ? 'errors.notFound'
+        : 'errors.generic';
+    Notify({
+      type: 'negative',
+      message: t(errorMessageKey),
+    });
+    goBack();
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+/**
+ * Navigates back to the accounts list.
+ */
+function goBack(): void {
+  router.push('/accounts');
+}
+
+/**
+ * Navigates to the edit page for the current account.
+ */
+function goToEdit(): void {
+  router.push(`/accounts/${accountId.value}/edit`);
+}
+
+onMounted(() => {
+  loadAccount();
+});
+</script>

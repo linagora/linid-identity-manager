@@ -69,6 +69,7 @@ public class FlywayConfig {
       .locations("classpath:db/migration")
       .table("flyway_schema_history_core")
       .baselineOnMigrate(props.isBaselineOnMigrate())
+      .baselineVersion(props.getBaselineVersion())
       .outOfOrder(props.isOutOfOrder())
       .load();
   }

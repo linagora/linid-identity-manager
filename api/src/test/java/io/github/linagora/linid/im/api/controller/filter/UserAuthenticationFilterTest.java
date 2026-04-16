@@ -75,6 +75,7 @@ class UserAuthenticationFilterTest {
     void doFilterInternal_withValidJwt_setsAuthenticationAndContinues() throws ServletException, IOException {
         // Mock Jwt
         Jwt jwt = mock(Jwt.class);
+        when(jwt.getSubject()).thenReturn("550e8400-e29b-41d4-a716-446655440000");
         when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
 
         // Set Authentication with mocked Jwt as principal
@@ -94,6 +95,7 @@ class UserAuthenticationFilterTest {
         assertTrue(auth.getPrincipal() instanceof UserPrincipal);
 
         UserPrincipal user = (UserPrincipal) auth.getPrincipal();
+        assertEquals(java.util.UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), user.getId());
         assertEquals("test@example.com", user.getEmail());
     }
 

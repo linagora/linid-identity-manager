@@ -34,6 +34,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import io.github.linagora.linid.im.api.controller.AccountController;
+import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.i18n.I18nService;
@@ -47,7 +50,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: GlobalExceptionHandler")
@@ -130,5 +137,33 @@ class GlobalExceptionHandlerTest {
         .filter(event -> event.getLevel() == Level.ERROR)
         .count());
     assertEquals("Internal server error", logAppender.list.getFirst().getMessage());
+  }
+
+  @Test
+  @DisplayName("Should return 400 with field errors for validation exception")
+  @SuppressWarnings("unchecked")
+  void testHandleValidationException_shouldReturn400WithFieldErrors()
+      throws NoSuchMethodException {
+    var methodParam = new MethodParameter(
+        AccountController.class.getMethod("create", UserPrincipal.class,
+            AccountRecord.class), 0);
+    var bindingResult = new BeanPropertyBindingResult(new Object(), "request");
+    bindingResult.addError(new FieldError("request", "email", "must not be blank"));
+    bindingResult.addError(new FieldError("request", "lastname", "must not be blank"));
+    var exception = new MethodArgumentNotValidException(methodParam, bindingResult);
+
+    ResponseEntity<Map<String, Object>> response = handler.handleValidationException(exception);
+
+    assertNotNull(response);
+    assertEquals(400, response.getStatusCode().value());
+    Map<String, Object> body = response.getBody();
+    assertNotNull(body);
+    assertEquals("Validation failed", body.get("error"));
+    assertEquals("error.validation", body.get("errorKey"));
+    assertEquals(400, body.get("status"));
+    assertNotNull(body.get("timestamp"));
+    Map<String, String> errorContext = (Map<String, String>) body.get("errorContext");
+    assertEquals("must not be blank", errorContext.get("email"));
+    assertEquals("must not be blank", errorContext.get("lastname"));
   }
 }

@@ -1,10 +1,11 @@
 {
   "default": {
     "q-btn": {
-      "dense": true,
+      "dense": false,
       "outline": true,
       "color": "primary",
-      "noCaps": true
+      "noCaps": true,
+      "unelevated": true
     },
     "q-tabs": {
       "dense": false,
@@ -51,7 +52,10 @@
       "dense": true,
       "color": "primary"
     },
-    "q-card": {},
+    "q-card": {
+      "flat": true,
+      "bordered": false
+    },
     "q-date": {},
     "q-img": {},
     "q-file": {
@@ -78,7 +82,6 @@
       "header-profile": {
         "q-btn": {
           "flat": true,
-          "noCaps": true,
           "textColor": "white"
         },
         "q-item-section": {
@@ -86,6 +89,54 @@
         },
         "q-item-label": {
           "caption": true
+        }
+      }
+    }
+  },
+  "accounts": {
+    "details-page": {
+      "entity-details-card": {
+        "firstname": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "account_circle" }
+          }
+        },
+        "lastname": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "account_circle" }
+          }
+        },
+        "email": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "mail" }
+          }
+        },
+        "createdBy": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "person_add" }
+          }
+        },
+        "updatedBy": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "manage_accounts" }
+          }
+        },
+        "insertDate": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "event_available" }
+          }
+        },
+        "updateDate": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "update" }
+          }
+        }
+      },
+      "buttons-card": {
+        "edit-button": {
+          "q-btn": {
+            "outline": false
+          }
         }
       }
     }

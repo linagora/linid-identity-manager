@@ -15,5 +15,28 @@
   },
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
+  },
+  "AccountDetailsPage": {
+    "title": "Détails du compte",
+    "EntityDetailsCard": {
+      "title": "Informations du compte",
+      "attributes": {
+        "firstname": "Prénom",
+        "lastname": "Nom",
+        "email": "E-mail",
+        "createdBy": "Créé par",
+        "updatedBy": "Modifié par",
+        "insertDate": "Date de création",
+        "updateDate": "Dernière modification"
+      }
+    },
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "edit": "Modifier"
+    },
+    "errors": {
+      "notFound": "Compte introuvable",
+      "generic": "Impossible de charger le compte. Veuillez réessayer plus tard."
+    }
   }
 }

@@ -24,25 +24,22 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.user;
+package io.github.linagora.linid.im.api.model.account;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.UUID;
-import lombok.Data;
+import io.github.linagora.linid.im.api.persistence.model.Account;
+import org.mapstruct.Mapper;
 
-@Data
-@Schema(description = "Data Transfer Object representing a user")
-public class UserDTO {
-    /**
-     * Unique identifier of the user (OIDC subject).
-     */
-    @Schema(description = "Unique identifier of the user", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
+/**
+ * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
+ */
+@Mapper(componentModel = "spring")
+public interface AccountMapper {
 
-    /**
-     * Email of the user.
-     */
-    @Schema(description = "Email address of the user", example = "john.doe@example.com")
-    private String email;
-
+  /**
+   * Converts an {@link Account} entity to an {@link AccountDTO}.
+   *
+   * @param account the account entity
+   * @return the corresponding DTO
+   */
+  AccountDTO toDTO(Account account);
 }

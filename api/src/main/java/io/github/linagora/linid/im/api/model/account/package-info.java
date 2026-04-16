@@ -24,25 +24,10 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.user;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.UUID;
-import lombok.Data;
-
-@Data
-@Schema(description = "Data Transfer Object representing a user")
-public class UserDTO {
-    /**
-     * Unique identifier of the user (OIDC subject).
-     */
-    @Schema(description = "Unique identifier of the user", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
-
-    /**
-     * Email of the user.
-     */
-    @Schema(description = "Email address of the user", example = "john.doe@example.com")
-    private String email;
-
-}
+/**
+ * Model classes for the Account domain.
+ *
+ * <p>This package contains DTOs, records, and mappers for the
+ * Account domain in the LinID-identity-manager API.</p>
+ */
+package io.github.linagora.linid.im.api.model.account;

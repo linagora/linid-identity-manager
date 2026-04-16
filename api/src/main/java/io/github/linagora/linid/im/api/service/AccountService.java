@@ -24,25 +24,56 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.user;
+package io.github.linagora.linid.im.api.service;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
+import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import java.util.UUID;
-import lombok.Data;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-@Data
-@Schema(description = "Data Transfer Object representing a user")
-public class UserDTO {
-    /**
-     * Unique identifier of the user (OIDC subject).
-     */
-    @Schema(description = "Unique identifier of the user", example = "550e8400-e29b-41d4-a716-446655440000")
-    private UUID id;
+/**
+ * Service interface for account management operations.
+ */
+public interface AccountService {
 
-    /**
-     * Email of the user.
-     */
-    @Schema(description = "Email address of the user", example = "john.doe@example.com")
-    private String email;
+  /**
+   * Creates a new account from the given request.
+   *
+   * @param userPrincipal the authenticated user
+   * @param account       the account creation record
+   * @return the created account entity
+   */
+  Account create(UserPrincipal userPrincipal, AccountRecord account);
 
+  /**
+   * Retrieves a paginated list of accounts, optionally filtered.
+   *
+   * @param userPrincipal the authenticated user
+   * @param filters       generated filter DTO from query parameters
+   * @param pageable      pagination information
+   * @return a page of account entities
+   */
+  Page<Account> findAll(UserPrincipal userPrincipal, AccountQueryFilterDto filters, Pageable pageable);
+
+  /**
+   * Retrieves an account by its unique identifier.
+   *
+   * @param userPrincipal the authenticated user
+   * @param id            the account UUID
+   * @return the account entity
+   * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
+   */
+  Account findById(UserPrincipal userPrincipal, UUID id);
+
+  /**
+   * Deletes an account by its unique identifier.
+   *
+   * @param userPrincipal the authenticated user
+   * @param id            the account UUID
+   * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
+   */
+  void deleteById(UserPrincipal userPrincipal, UUID id);
 }

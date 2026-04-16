@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- TODO
+- You can now create, view, and delete accounts directly through the application.
+- The account list has been enhanced with pagination, allowing you to browse results more easily.
+- Filtering options have been added to help you quickly find specific accounts.
+- Input validation has been improved to reduce errors when managing accounts.
 
 ### Fixed
 
-- TODO
+- Fixed an issue that could prevent initial database migrations from running correctly, which might have blocked setup or updates in some cases.
 
 ### Changed
 
@@ -70,10 +73,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Frontend - Import Module
 
 - Complete import data module:
-    - Load multiple CSV files
-    - Interact with rows before import
-    - Display imported rows
-    - Clear errors and imported rows
+  - Load multiple CSV files
+  - Interact with rows before import
+  - Display imported rows
+  - Clear errors and imported rows
 
 #### UI Component Catalog
 
@@ -134,11 +137,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Frontend – User Module
 
 - Complete **User Management module**:
+  - Users list page
+  - User details page
+  - User creation page
+  - User edition page
 
-    - Users list page
-    - User details page
-    - User creation page
-    - User edition page
 - User creation and edition forms.
 - Date picker field support.
 - Advanced search integration.
@@ -147,13 +150,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### UI Component Catalog
 
 - Introduction of reusable UI components:
+  - AdvancedSearchCard
+  - GenericEntityTable
+  - EntityDetailsCard
+  - InformationCard
+  - ButtonsCard
+  - BlurLoader
 
-    - AdvancedSearchCard
-    - GenericEntityTable
-    - EntityDetailsCard
-    - InformationCard
-    - ButtonsCard
-    - BlurLoader
 - Enhanced BaseLayout with header and navigation menu.
 - Simple field validation support.
 - Improved slot forwarding and configurability.
@@ -191,11 +194,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - API support for managing entities in the system.
 - Various back-end plugins for enhanced functionality:
-    - **Route Management Plugin** – Handles API routing.
-    - **Validation Plugins** – Ensure data integrity, including a regex-based validator.
-    - **Provider Plugins** – Connect to different data sources, currently supporting an external API.
-    - **Task Plugins** – Enable shared context management for background tasks.
-    - **Authorization Plugin** – Manage user permissions and access control.
+  - **Route Management Plugin** – Handles API routing.
+  - **Validation Plugins** – Ensure data integrity, including a regex-based validator.
+  - **Provider Plugins** – Connect to different data sources, currently supporting an external API.
+  - **Task Plugins** – Enable shared context management for background tasks.
+  - **Authorization Plugin** – Manage user permissions and access control.
 - Initial front-end setup, including a **component catalog** for modular UI development.
 - End-to-end tests implemented to validate the entire platform.
 - Comprehensive documentation created, both **global** and **per project**.

@@ -26,7 +26,7 @@
 
 import { defineRouter } from '#q-app/wrappers';
 import { useLinidUserStore } from '@linagora/linid-im-front-corelib';
-import { oidcClient } from 'src/boot/oidc';
+import { getUser, oidcClient } from 'src/boot/oidc';
 import {
   createMemoryHistory,
   createRouter,
@@ -77,12 +77,12 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     if (!requiresAuth) {
       return next();
     }
-    const user = await oidcClient.getUser();
+    const user = await getUser();
 
-    if (user && !user.expired) {
+    if (user) {
       if (!userReady) {
         const userStore = useLinidUserStore();
-        await userStore.setUserFromClaims(user.profile);
+        userStore.setUserFromClaims(user.profile);
         userReady = true;
       }
 

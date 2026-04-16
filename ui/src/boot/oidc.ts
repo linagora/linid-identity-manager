@@ -25,10 +25,37 @@
  */
 
 import { useLinidUserStore } from '@linagora/linid-im-front-corelib';
-import { UserManager } from 'oidc-client-ts';
+import { UserManager, type User } from 'oidc-client-ts';
 import { defineBoot } from '#q-app/wrappers';
 
 let oidcClient: UserManager;
+let silentRefresh: Promise<User | null> | null = null;
+
+/**
+ * Returns the current OIDC user with a non-expired access token.
+ *
+ * If the stored user is expired, a silent refresh is attempted; concurrent
+ * callers share the same in-flight refresh promise to avoid stampeding the
+ * authorization server.
+ * @returns The refreshed user, or `null` if no user is logged in or the
+ * silent refresh failed. When `null` is returned, the caller should treat
+ * the session as unauthenticated and fall back to a full sign-in flow.
+ */
+async function getUser(): Promise<User | null> {
+  const user = await oidcClient.getUser();
+  if (!user || !user.expired) {
+    return user;
+  }
+  silentRefresh ??= oidcClient.signinSilent().finally(() => {
+    silentRefresh = null;
+  });
+  try {
+    return await silentRefresh;
+  } catch (error) {
+    console.warn('Silent OIDC refresh failed', error);
+    return null;
+  }
+}
 
 declare module 'vue' {
   /**
@@ -58,4 +85,4 @@ export default defineBoot(async ({ app }) => {
   app.config.globalProperties.$oidc = oidcClient;
 });
 
-export { oidcClient };
+export { oidcClient, getUser };

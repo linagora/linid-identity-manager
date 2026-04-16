@@ -44,6 +44,7 @@ import routes from './routes';
  * with the Router instance.
  */
 let userReady = false;
+let unloadListenerRegistered = false;
 
 /**
  * Creates and configures the Vue Router instance.
@@ -67,10 +68,14 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach(async (to, from, next) => {
-    if (!userReady) {
+    // Registered lazily: the OIDC boot finishes asynchronously after the
+    // router factory, so `oidcClient` may still be undefined at factory
+    // time. The first navigation always happens after all boots resolved.
+    if (!unloadListenerRegistered && oidcClient) {
       oidcClient.events.addUserUnloaded(() => {
         userReady = false;
       });
+      unloadListenerRegistered = true;
     }
 
     const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);

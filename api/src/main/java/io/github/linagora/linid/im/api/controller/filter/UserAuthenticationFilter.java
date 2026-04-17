@@ -27,12 +27,14 @@
 package io.github.linagora.linid.im.api.controller.filter;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,12 +50,15 @@ import java.util.List;
  * <p>This filter extracts the JWT from the security context, validates it, retrieves the corresponding
  * {@link UserPrincipal} and sets the authentication in the security context.
  *
- * <p>If the JWT corresponds to the configured admin email, the admin user is loaded; otherwise, a regular user is
- * loaded.
- *
  * <p>Extends {@link OncePerRequestFilter} to ensure that this filter is executed once per request.
  */
+@RequiredArgsConstructor
 public class UserAuthenticationFilter extends OncePerRequestFilter {
+
+    /**
+     * Service used to retrieve Account.
+     */
+    private final AccountService accountService;
 
     @Override
     protected void doFilterInternal(final HttpServletRequest request,
@@ -70,15 +75,15 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String email = jwt.getClaimAsString("email");
-        java.util.UUID id;
-        try {
-            id = java.util.UUID.fromString(jwt.getSubject());
-        } catch (IllegalArgumentException e) {
-            id = java.util.UUID.nameUUIDFromBytes(jwt.getSubject().getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        }
+
+        var account = accountService.getAccountByEmail(email)
+          .orElseThrow(() -> new ApiException(
+          HttpStatus.UNAUTHORIZED.value(),
+          I18nMessage.of("error.unauthorized")
+        ));
 
         UserPrincipal user = new UserPrincipal();
-        user.setId(id);
+        user.setId(account.getId());
         user.setEmail(email);
 
         SecurityContextHolder.getContext().setAuthentication(

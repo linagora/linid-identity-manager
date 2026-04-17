@@ -27,10 +27,12 @@
 package io.github.linagora.linid.im.api.config;
 
 import io.github.linagora.linid.im.api.controller.filter.UserAuthenticationFilter;
+import io.github.linagora.linid.im.api.service.AccountService;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -49,7 +51,13 @@ import org.springframework.security.web.SecurityFilterChain;
  * <p>CSRF protection is disabled, and the application is stateless (no HTTP sessions).
  */
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+    /**
+     * Service used to retrieve Account.
+     */
+    private final AccountService accountService;
 
     /**
      * Public endpoints (no authentication, no custom filter).
@@ -93,7 +101,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .addFilterAfter(
-                new UserAuthenticationFilter(),
+                new UserAuthenticationFilter(accountService),
                 BearerTokenAuthenticationFilter.class
             );
 

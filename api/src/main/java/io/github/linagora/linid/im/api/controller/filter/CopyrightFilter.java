@@ -30,53 +30,51 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.io.IOException;
+
 /**
- * Servlet filter that adds a custom copyright header to HTTP responses based on
- * the configured mode.
+ * Servlet filter that adds a custom copyright header to HTTP responses based on the configured mode.
  */
 @Component
 @Order() // By default is LOWEST_PRECEDENCE
 public class CopyrightFilter extends OncePerRequestFilter {
 
-  /**
-   * The mode controlling how the copyright header is applied.
-   */
-  @Value("${copyright.mode}")
-  private String copyrightMode;
+    /**
+     * The mode controlling how the copyright header is applied.
+     */
+    @Value("${copyright.mode}")
+    private String copyrightMode;
 
-  /**
-   * The default copyright value to be applied when mode is not {@code custom} or
-   * {@code none}.
-   */
-  @Value("${copyright.default}")
-  private String copyrightDefault;
+    /**
+     * The default copyright value to be applied when mode is not {@code custom} or {@code none}.
+     */
+    @Value("${copyright.default}")
+    private String copyrightDefault;
 
-  /**
-   * The custom copyright value to be used when {@code copyright.mode} is set to
-   * {@code custom}.
-   */
-  @Value("${copyright.custom}")
-  private String copyrightCustom;
+    /**
+     * The custom copyright value to be used when {@code copyright.mode} is set to {@code custom}.
+     */
+    @Value("${copyright.custom}")
+    private String copyrightCustom;
 
-  @Override
-  protected void doFilterInternal(@NonNull final HttpServletRequest request,
-      @NonNull final HttpServletResponse response,
-      @NonNull final FilterChain filterChain)
-      throws ServletException, IOException {
-    if ("custom".equals(copyrightMode)) {
-      response.setHeader("X-Copyright", copyrightCustom);
-    } else if (!"none".equalsIgnoreCase(copyrightMode)) {
-      response.setHeader("X-Copyright", copyrightDefault);
+    @Override
+    protected void doFilterInternal(@NonNull final HttpServletRequest request,
+                                    @NonNull final HttpServletResponse response,
+                                    @NonNull final FilterChain filterChain)
+        throws ServletException, IOException {
+        if ("custom".equals(copyrightMode)) {
+            response.setHeader("X-Copyright", copyrightCustom);
+        } else if (!"none".equalsIgnoreCase(copyrightMode)) {
+            response.setHeader("X-Copyright", copyrightDefault);
+        }
+
+        filterChain.doFilter(request, response);
     }
-
-    filterChain.doFilter(request, response);
-  }
 
 }

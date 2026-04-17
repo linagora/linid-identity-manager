@@ -30,15 +30,16 @@ import io.github.zorin95670.predicate.FilterType;
 import io.github.zorin95670.processor.annotation.QueryFilterField;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import java.time.OffsetDateTime;
-import java.util.Date;
-import java.util.UUID;
-import org.hibernate.annotations.Generated;
-import org.hibernate.generator.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Generated;
+import org.hibernate.generator.EventType;
+
+import java.time.OffsetDateTime;
+import java.util.Date;
+import java.util.UUID;
 
 /**
  * Base entity with audit fields shared across all persistent entities.
@@ -53,29 +54,37 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public abstract class AbstractEntity {
 
-  /** Identifier of the creator of this record. */
-  @Column(name = "created_by", nullable = false)
-  @FilterType(type = UUID.class)
-  @QueryFilterField(type = UUID.class, description = "Creator of the record")
-  private UUID createdBy;
+    /**
+     * Identifier of the creator of this record.
+     */
+    @Column(name = "created_by", nullable = false)
+    @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class, description = "Creator of the record")
+    private UUID createdBy;
 
-  /** Identifier of the last updater of this record. */
-  @Column(name = "updated_by", nullable = false)
-  @FilterType(type = UUID.class)
-  @QueryFilterField(type = UUID.class, description = "Last updater of the record")
-  private UUID updatedBy;
+    /**
+     * Identifier of the last updater of this record.
+     */
+    @Column(name = "updated_by", nullable = false)
+    @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class, description = "Last updater of the record")
+    private UUID updatedBy;
 
-  /** Timestamp when the record was created. Managed by PostgreSQL default. */
-  @Generated(event = EventType.INSERT)
-  @Column(name = "insert_date", updatable = false, insertable = false)
-  @FilterType(type = Date.class)
-  @QueryFilterField(type = Date.class, description = "Record creation date")
-  private OffsetDateTime insertDate;
+    /**
+     * Timestamp when the record was created. Managed by PostgreSQL default.
+     */
+    @Generated(event = EventType.INSERT)
+    @Column(name = "insert_date", updatable = false, insertable = false)
+    @FilterType(type = Date.class)
+    @QueryFilterField(type = Date.class, description = "Record creation date")
+    private OffsetDateTime insertDate;
 
-  /** Timestamp when the record was last updated. Managed by PostgreSQL trigger. */
-  @Generated(event = {EventType.INSERT, EventType.UPDATE})
-  @Column(name = "update_date", insertable = false)
-  @FilterType(type = Date.class)
-  @QueryFilterField(type = Date.class, description = "Record last update date")
-  private OffsetDateTime updateDate;
+    /**
+     * Timestamp when the record was last updated. Managed by PostgreSQL trigger.
+     */
+    @Generated(event = {EventType.INSERT, EventType.UPDATE})
+    @Column(name = "update_date", insertable = false)
+    @FilterType(type = Date.class)
+    @QueryFilterField(type = Date.class, description = "Record last update date")
+    private OffsetDateTime updateDate;
 }

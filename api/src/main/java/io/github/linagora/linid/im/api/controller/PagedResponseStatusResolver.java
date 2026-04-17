@@ -40,17 +40,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class PagedResponseStatusResolver {
 
-  /**
-   * Builds a {@link ResponseEntity} with the appropriate status for the given page.
-   *
-   * @param page the page of results
-   * @param <T>  the type of elements in the page
-   * @return a response with status 200 or 206
-   */
-  public <T> ResponseEntity<Page<T>> resolve(final Page<T> page) {
-    if (page.getTotalPages() > 1) {
-      return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(page);
+    /**
+     * Builds a {@link ResponseEntity} with the appropriate status for the given page.
+     *
+     * @param page the page of results
+     * @param <T>  the type of elements in the page
+     * @return a response with status 200 or 206
+     */
+    public <T> ResponseEntity<Page<T>> resolve(final Page<T> page) {
+        if (page.getTotalPages() > 1) {
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).body(page);
+        }
+        return ResponseEntity.ok(page);
     }
-    return ResponseEntity.ok(page);
-  }
 }

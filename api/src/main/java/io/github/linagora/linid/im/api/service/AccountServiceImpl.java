@@ -78,7 +78,7 @@ public class AccountServiceImpl implements AccountService {
         entity.setExternalId(account.externalId());
         entity.setLastname(account.lastname());
         entity.setFirstname(account.firstname());
-        entity.setEmail(account.email().toLowerCase());
+        entity.setEmail(account.email());
         entity.setPayload(DEFAULT_PAYLOAD);
         entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
         entity.setCreatedBy(userPrincipal.getId());

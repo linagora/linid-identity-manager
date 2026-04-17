@@ -27,12 +27,13 @@
 package io.github.linagora.linid.im.api.model.account;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 /**
  * Data Transfer Object representing an account in API responses.
@@ -44,39 +45,57 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Account data transfer object")
 public class AccountDTO {
 
-  /** Unique identifier of the account. */
-  @Schema(description = "Unique identifier of the account", example = "550e8400-e29b-41d4-a716-446655440000")
-  private UUID id;
+    /**
+     * Unique identifier of the account.
+     */
+    @Schema(description = "Unique identifier of the account", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
-  /** External identifier (e.g. OIDC sub or external system ID). */
-  @Schema(description = "External identifier (e.g. OIDC sub)", example = "ext-001")
-  private String externalId;
+    /**
+     * External identifier (e.g. OIDC sub or external system ID).
+     */
+    @Schema(description = "External identifier (e.g. OIDC sub)", example = "ext-001")
+    private String externalId;
 
-  /** Last name of the account holder. */
-  @Schema(description = "Last name of the account holder", example = "Doe")
-  private String lastname;
+    /**
+     * Last name of the account holder.
+     */
+    @Schema(description = "Last name of the account holder", example = "Doe")
+    private String lastname;
 
-  /** First name of the account holder. */
-  @Schema(description = "First name of the account holder", example = "John")
-  private String firstname;
+    /**
+     * First name of the account holder.
+     */
+    @Schema(description = "First name of the account holder", example = "John")
+    private String firstname;
 
-  /** Email address associated with the account. */
-  @Schema(description = "Email address of the account", example = "john.doe@example.com")
-  private String email;
+    /**
+     * Email address associated with the account.
+     */
+    @Schema(description = "Email address of the account", example = "john.doe@example.com")
+    private String email;
 
-  /** Identifier of the creator of this record. */
-  @Schema(description = "Creator of the record", example = "550e8400-e29b-41d4-a716-446655440000")
-  private UUID createdBy;
+    /**
+     * Identifier of the creator of this record.
+     */
+    @Schema(description = "Creator of the record", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID createdBy;
 
-  /** Identifier of the last updater of this record. */
-  @Schema(description = "Last updater of the record", example = "550e8400-e29b-41d4-a716-446655440000")
-  private UUID updatedBy;
+    /**
+     * Identifier of the last updater of this record.
+     */
+    @Schema(description = "Last updater of the record", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID updatedBy;
 
-  /** Timestamp when the record was created. */
-  @Schema(description = "Record creation date")
-  private OffsetDateTime insertDate;
+    /**
+     * Timestamp when the record was created.
+     */
+    @Schema(description = "Record creation date")
+    private OffsetDateTime insertDate;
 
-  /** Timestamp when the record was last updated. */
-  @Schema(description = "Record last update date")
-  private OffsetDateTime updateDate;
+    /**
+     * Timestamp when the record was last updated.
+     */
+    @Schema(description = "Record last update date")
+    private OffsetDateTime updateDate;
 }

@@ -26,18 +26,17 @@
 
 package io.github.linagora.linid.im.api.controller;
 
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -53,6 +52,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.UUID;
+
 /**
  * REST controller for account management endpoints.
  *
@@ -66,92 +67,98 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Accounts", description = "Account management endpoints")
 public class AccountController {
 
-  /** Service handling account business logic. */
-  private final AccountService accountService;
+    /**
+     * Service handling account business logic.
+     */
+    private final AccountService accountService;
 
-  /** Mapper for entity-to-DTO conversion. */
-  private final AccountMapper accountMapper;
+    /**
+     * Mapper for entity-to-DTO conversion.
+     */
+    private final AccountMapper accountMapper;
 
-  /** Resolver for paginated response HTTP status. */
-  private final PagedResponseStatusResolver pagedResponseStatusResolver;
+    /**
+     * Resolver for paginated response HTTP status.
+     */
+    private final PagedResponseStatusResolver pagedResponseStatusResolver;
 
-  /**
-   * Creates a new account.
-   *
-   * @param userPrincipal the authenticated user
-   * @param account       the account creation record with validated fields
-   * @return the created account with HTTP 201 status
-   */
-  @PostMapping
-  @Operation(summary = "Create a new account")
-  @ApiResponse(responseCode = "201", description = "Account successfully created")
-  @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
-  public ResponseEntity<AccountDTO> create(
-      @AuthenticationPrincipal final UserPrincipal userPrincipal,
-      @Valid @RequestBody final AccountRecord account) {
-    log.info("[{}] Received POST request to create account with {}", userPrincipal.getEmail(),
-        account);
-    var entity = accountService.create(userPrincipal, account);
-    return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toDTO(entity));
-  }
+    /**
+     * Creates a new account.
+     *
+     * @param userPrincipal the authenticated user
+     * @param account       the account creation record with validated fields
+     * @return the created account with HTTP 201 status
+     */
+    @PostMapping
+    @Operation(summary = "Create a new account")
+    @ApiResponse(responseCode = "201", description = "Account successfully created")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    public ResponseEntity<AccountDTO> create(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @Valid @RequestBody final AccountRecord account) {
+        log.info("[{}] Received POST request to create account with {}", userPrincipal.getEmail(),
+            account);
+        var entity = accountService.create(userPrincipal, account);
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toDTO(entity));
+    }
 
-  /**
-   * Retrieves a paginated and optionally filtered list of accounts.
-   *
-   * @param userPrincipal the authenticated user
-   * @param filters       generated filter DTO from query parameters
-   * @param pageable      pagination parameters
-   * @return a page of account DTOs
-   */
-  @GetMapping
-  @Operation(summary = "Get all accounts with pagination and filtering")
-  @ApiResponse(responseCode = "200", description = "Full list of accounts")
-  @ApiResponse(responseCode = "206", description = "Partial list of accounts (more pages available)")
-  public ResponseEntity<Page<AccountDTO>> findAll(
-      @AuthenticationPrincipal final UserPrincipal userPrincipal,
-      final AccountQueryFilterDto filters,
-      final Pageable pageable) {
-    log.info("[{}] Received GET request to list accounts with filters {} and pageable {}",
-        userPrincipal.getEmail(), filters, pageable);
-    var page = accountService.findAll(userPrincipal, filters, pageable).map(accountMapper::toDTO);
-    return pagedResponseStatusResolver.resolve(page);
-  }
+    /**
+     * Retrieves a paginated and optionally filtered list of accounts.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of account DTOs
+     */
+    @GetMapping
+    @Operation(summary = "Get all accounts with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of accounts")
+    @ApiResponse(responseCode = "206", description = "Partial list of accounts (more pages available)")
+    public ResponseEntity<Page<AccountDTO>> findAll(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        final AccountQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request to list accounts with filters {} and pageable {}",
+            userPrincipal.getEmail(), filters, pageable);
+        var page = accountService.findAll(userPrincipal, filters, pageable).map(accountMapper::toDTO);
+        return pagedResponseStatusResolver.resolve(page);
+    }
 
-  /**
-   * Retrieves an account by its unique identifier.
-   *
-   * @param userPrincipal the authenticated user
-   * @param id            the account UUID
-   * @return the account DTO
-   */
-  @GetMapping("/{id}")
-  @Operation(summary = "Get an account by ID")
-  @ApiResponse(responseCode = "200", description = "Account found")
-  @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
-  public ResponseEntity<AccountDTO> findById(
-      @AuthenticationPrincipal final UserPrincipal userPrincipal,
-      @PathVariable final UUID id) {
-    log.info("[{}] Received GET request for account {}", userPrincipal.getEmail(), id);
-    var entity = accountService.findById(userPrincipal, id);
-    return ResponseEntity.ok(accountMapper.toDTO(entity));
-  }
+    /**
+     * Retrieves an account by its unique identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @return the account DTO
+     */
+    @GetMapping("/{id}")
+    @Operation(summary = "Get an account by ID")
+    @ApiResponse(responseCode = "200", description = "Account found")
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<AccountDTO> findById(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id) {
+        log.info("[{}] Received GET request for account {}", userPrincipal.getEmail(), id);
+        var entity = accountService.findById(userPrincipal, id);
+        return ResponseEntity.ok(accountMapper.toDTO(entity));
+    }
 
-  /**
-   * Deletes an account by its unique identifier.
-   *
-   * @param userPrincipal the authenticated user
-   * @param id            the account UUID
-   * @return HTTP 204 No Content
-   */
-  @DeleteMapping("/{id}")
-  @Operation(summary = "Delete an account by ID")
-  @ApiResponse(responseCode = "204", description = "Account successfully deleted")
-  @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
-  public ResponseEntity<Void> deleteById(
-      @AuthenticationPrincipal final UserPrincipal userPrincipal,
-      @PathVariable final UUID id) {
-    log.info("[{}] Received DELETE request for account {}", userPrincipal.getEmail(), id);
-    accountService.deleteById(userPrincipal, id);
-    return ResponseEntity.noContent().build();
-  }
+    /**
+     * Deletes an account by its unique identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @return HTTP 204 No Content
+     */
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete an account by ID")
+    @ApiResponse(responseCode = "204", description = "Account successfully deleted")
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<Void> deleteById(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id) {
+        log.info("[{}] Received DELETE request for account {}", userPrincipal.getEmail(), id);
+        accountService.deleteById(userPrincipal, id);
+        return ResponseEntity.noContent().build();
+    }
 }

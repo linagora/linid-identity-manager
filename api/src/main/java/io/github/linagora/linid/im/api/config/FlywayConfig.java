@@ -51,58 +51,58 @@ import org.springframework.context.annotation.DependsOn;
 @EnableConfigurationProperties(FlywayProperties.class)
 public class FlywayConfig {
 
-  /**
-   * Flyway bean for core application migrations.
-   *
-   * @param props global Flyway properties injected by Spring Boot
-   * @return Flyway instance configured for core migrations
-   */
-  @Bean(initMethod = "migrate")
-  public Flyway flywayCore(final FlywayProperties props) {
-    return Flyway.configure()
-      .dataSource(
-        props.getUrl(),
-        props.getUser(),
-        props.getPassword()
-      )
-      .schemas("public")
-      .locations("classpath:db/migration")
-      .table("flyway_schema_history_core")
-      .baselineOnMigrate(props.isBaselineOnMigrate())
-      .baselineVersion(props.getBaselineVersion())
-      .outOfOrder(props.isOutOfOrder())
-      .load();
-  }
+    /**
+     * Flyway bean for core application migrations.
+     *
+     * @param props global Flyway properties injected by Spring Boot
+     * @return Flyway instance configured for core migrations
+     */
+    @Bean(initMethod = "migrate")
+    public Flyway flywayCore(final FlywayProperties props) {
+        return Flyway.configure()
+            .dataSource(
+                props.getUrl(),
+                props.getUser(),
+                props.getPassword()
+            )
+            .schemas("public")
+            .locations("classpath:db/migration")
+            .table("flyway_schema_history_core")
+            .baselineOnMigrate(props.isBaselineOnMigrate())
+            .baselineVersion(props.getBaselineVersion())
+            .outOfOrder(props.isOutOfOrder())
+            .load();
+    }
 
-  /**
-   * Flyway bean for client-specific migrations.
-   *
-   * <p>
-   * Runs after {@link #flywayCore(FlywayProperties)}. Only created if {@code spring.flyway.client.location} is
-   * defined.
-   *
-   * @param props    global Flyway properties injected by Spring Boot
-   * @param location path to client migrations
-   * @param schema   client schema name
-   * @return Flyway instance configured for client migrations
-   */
-  @Bean(initMethod = "migrate")
-  @DependsOn("flywayCore")
-  public Flyway flywayClient(final FlywayProperties props,
-                             final @Value("${spring.flyway.client.location}") String location,
-                             final @Value("${spring.flyway.client.schema}") String schema) {
-    System.out.println(location);
-    return Flyway.configure()
-      .dataSource(
-        props.getUrl(),
-        props.getUser(),
-        props.getPassword()
-      )
-      .schemas(schema)
-      .locations(location)
-      .table("flyway_schema_history_client")
-      .baselineOnMigrate(props.isBaselineOnMigrate())
-      .outOfOrder(props.isOutOfOrder())
-      .load();
-  }
+    /**
+     * Flyway bean for client-specific migrations.
+     *
+     * <p>
+     * Runs after {@link #flywayCore(FlywayProperties)}. Only created if {@code spring.flyway.client.location} is
+     * defined.
+     *
+     * @param props    global Flyway properties injected by Spring Boot
+     * @param location path to client migrations
+     * @param schema   client schema name
+     * @return Flyway instance configured for client migrations
+     */
+    @Bean(initMethod = "migrate")
+    @DependsOn("flywayCore")
+    public Flyway flywayClient(final FlywayProperties props,
+                               final @Value("${spring.flyway.client.location}") String location,
+                               final @Value("${spring.flyway.client.schema}") String schema) {
+        System.out.println(location);
+        return Flyway.configure()
+            .dataSource(
+                props.getUrl(),
+                props.getUser(),
+                props.getPassword()
+            )
+            .schemas(schema)
+            .locations(location)
+            .table("flyway_schema_history_client")
+            .baselineOnMigrate(props.isBaselineOnMigrate())
+            .outOfOrder(props.isOutOfOrder())
+            .load();
+    }
 }

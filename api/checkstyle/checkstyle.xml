@@ -199,6 +199,13 @@
         <module name="TodoComment"/>
         <module name="UpperEll"/>
 
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="tabWidth" value="4"/>
+            <property name="caseIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="4"/>
+        </module>
+
     </module>
 
 </module>

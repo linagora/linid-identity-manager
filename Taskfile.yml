@@ -379,8 +379,6 @@ tasks:
     internal: true
     vars:
       LOG_FILE: "/tmp/linid-{{.IMAGE_NAME}}-image.log"
-    status:
-      - docker image inspect {{.IMAGE_NAME}} >/dev/null 2>&1 && echo "  ✔ {{.IMAGE_NAME}} image already exists"
     cmd: |
       sh -c '
         docker build --quiet -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}} {{.CONTEXT_DIR}} > {{.LOG_FILE}} 2>&1 &

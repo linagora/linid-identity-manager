@@ -31,19 +31,20 @@ import io.github.zorin95670.processor.annotation.QueryFilter;
 import io.github.zorin95670.processor.annotation.QueryFilterField;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import org.hibernate.annotations.DynamicInsert;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import java.util.UUID;
 
 /**
  * JPA entity representing an account in the system.
@@ -63,48 +64,62 @@ import org.hibernate.type.SqlTypes;
 @QueryFilter
 public class Account extends AbstractEntity {
 
-  /** Unique identifier of the account, auto-generated as UUID. */
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(name = "act_id")
-  @FilterType(type = UUID.class)
-  @QueryFilterField(type = UUID.class, description = "Account unique identifier")
-  private UUID id;
+    /**
+     * Unique identifier of the account, auto-generated as UUID.
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "act_id")
+    @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class, description = "Account unique identifier")
+    private UUID id;
 
-  /** External identifier (e.g. OIDC sub or external system ID). */
-  @Column(name = "external_id", nullable = false)
-  @FilterType(type = String.class)
-  @QueryFilterField(type = String.class, description = "External identifier (e.g. OIDC sub)")
-  private String externalId;
+    /**
+     * External identifier (e.g. OIDC sub or external system ID).
+     */
+    @Column(name = "external_id", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "External identifier (e.g. OIDC sub)")
+    private String externalId;
 
-  /** Last name of the account holder. */
-  @Column(name = "lastname", nullable = false)
-  @FilterType(type = String.class)
-  @QueryFilterField(type = String.class, description = "Last name of the account holder")
-  private String lastname;
+    /**
+     * Last name of the account holder.
+     */
+    @Column(name = "lastname", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Last name of the account holder")
+    private String lastname;
 
-  /** First name of the account holder. */
-  @Column(name = "firstname", nullable = false)
-  @FilterType(type = String.class)
-  @QueryFilterField(type = String.class, description = "First name of the account holder")
-  private String firstname;
+    /**
+     * First name of the account holder.
+     */
+    @Column(name = "firstname", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "First name of the account holder")
+    private String firstname;
 
-  /** Email address associated with the account. */
-  @Column(name = "email", nullable = false)
-  @FilterType(type = String.class)
-  @QueryFilterField(type = String.class, description = "Email address of the account")
-  private String email;
+    /**
+     * Email address associated with the account.
+     */
+    @Column(name = "email", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Email address of the account")
+    private String email;
 
-  /** JSONB payload from external systems, used for OPA and JWT claims. */
-  @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
-  @JdbcTypeCode(SqlTypes.JSON)
-  @FilterType(type = String.class)
-  @QueryFilterField(type = String.class, description = "JSONB payload from external systems")
-  private String payload;
+    /**
+     * JSONB payload from external systems, used for OPA and JWT claims.
+     */
+    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "JSONB payload from external systems")
+    private String payload;
 
-  /** SHA-256 checksum computed from the payload for change detection. */
-  @Column(name = "checksum", nullable = false)
-  @FilterType(type = String.class)
-  @QueryFilterField(type = String.class, description = "SHA-256 checksum of the payload")
-  private String checksum;
+    /**
+     * SHA-256 checksum computed from the payload for change detection.
+     */
+    @Column(name = "checksum", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "SHA-256 checksum of the payload")
+    private String checksum;
 }

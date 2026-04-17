@@ -29,6 +29,12 @@ package io.github.linagora.linid.im.api.i18n.loader;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.linagora.linid.im.api.i18n.collector.I18nMergeCollector;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,11 +46,6 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * Loads i18n (internationalization) translation files embedded in plugin JAR
@@ -69,101 +70,100 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class PluginI18nLoader implements I18nSourceLoader {
-  /**
-   * Pattern used to identify i18n JSON translation files within a JAR.
-   */
-  private final Pattern pattern = Pattern.compile("i18n/(.+)\\.json");
+    /**
+     * Pattern used to identify i18n JSON translation files within a JAR.
+     */
+    private final Pattern pattern = Pattern.compile("i18n/(.+)\\.json");
 
-  /**
-   * ObjectMapper for parsing JSON translation files.
-   */
-  private final ObjectMapper objectMapper;
+    /**
+     * ObjectMapper for parsing JSON translation files.
+     */
+    private final ObjectMapper objectMapper;
+    /**
+     * Directory containing plugin JAR files. This value is injected from the
+     * {@code plugin.loader.directory} configuration
+     * property.
+     */
+    @Value("${plugin.loader.path}")
+    private String pluginDirectoryPath;
 
-  /**
-   * Creates a new {@code PluginI18nLoader}.
-   */
-  public PluginI18nLoader() {
-    this.objectMapper = new ObjectMapper();
-  }
-
-  /**
-   * Directory containing plugin JAR files. This value is injected from the
-   * {@code plugin.loader.directory} configuration
-   * property.
-   */
-  @Value("${plugin.loader.path}")
-  private String pluginDirectoryPath;
-
-  @Override
-  public boolean supports(final @NonNull String type) {
-    return "plugin".equals(type);
-  }
-
-  @Override
-  public Map<String, Map<String, String>> load() {
-    Map<String, Map<String, String>> result = new HashMap<>();
-
-    if (StringUtils.isBlank(pluginDirectoryPath)) {
-      return result;
+    /**
+     * Creates a new {@code PluginI18nLoader}.
+     */
+    public PluginI18nLoader() {
+        this.objectMapper = new ObjectMapper();
     }
 
-    try (Stream<Path> paths = Files.walk(Paths.get(pluginDirectoryPath), 1)) {
-      paths
-          .filter(Files::isRegularFile)
-          .filter(path -> path.toString().endsWith(".jar"))
-          .forEach(path -> {
-            try (JarFile jarFile = new JarFile(path.toFile())) {
-              var jarTranslations = parse(jarFile);
-              I18nMergeCollector.merge(result, jarTranslations);
-            } catch (IOException e) {
-              log.error("Error during loading translation from jar: {}", path, e);
-            }
-          });
-    } catch (Exception e) {
-      log.error("Error walking through plugin directory: {}", pluginDirectoryPath, e);
+    @Override
+    public boolean supports(final @NonNull String type) {
+        return "plugin".equals(type);
     }
 
-    return result;
-  }
+    @Override
+    public Map<String, Map<String, String>> load() {
+        Map<String, Map<String, String>> result = new HashMap<>();
 
-  /**
-   * Parses the i18n JSON files contained within the provided {@link JarFile}.
-   *
-   * <p>
-   * This method scans all entries in the JAR, filters for regular (non-directory)
-   * entries whose path matches the pattern
-   * {@code i18n/{lang}.json}, and attempts to parse them into a map of
-   * translations.
-   *
-   * @param jarFile the JAR file to parse for i18n translation entries
-   * @return a map where the keys are language codes (e.g., "en", "fr") and the
-   *         values are maps of translation keys to their
-   *         corresponding values. If a JAR entry is not a valid i18n file or
-   *         parsing fails, it is silently ignored.
-   */
-  public Map<String, Map<String, String>> parse(final JarFile jarFile) {
-    return jarFile.stream()
-        .filter(jarEntry -> !jarEntry.isDirectory())
-        .map((jarEntry -> {
-          Matcher matcher = pattern.matcher(jarEntry.getName());
+        if (StringUtils.isBlank(pluginDirectoryPath)) {
+            return result;
+        }
 
-          if (!matcher.matches()) {
-            return null;
-          }
-
-          try {
-            var lang = matcher.group(1);
-            var translations = objectMapper.readValue(
-                jarFile.getInputStream(jarEntry),
-                new TypeReference<Map<String, String>>() {
+        try (Stream<Path> paths = Files.walk(Paths.get(pluginDirectoryPath), 1)) {
+            paths
+                .filter(Files::isRegularFile)
+                .filter(path -> path.toString().endsWith(".jar"))
+                .forEach(path -> {
+                    try (JarFile jarFile = new JarFile(path.toFile())) {
+                        var jarTranslations = parse(jarFile);
+                        I18nMergeCollector.merge(result, jarTranslations);
+                    } catch (IOException e) {
+                        log.error("Error during loading translation from jar: {}", path, e);
+                    }
                 });
+        } catch (Exception e) {
+            log.error("Error walking through plugin directory: {}", pluginDirectoryPath, e);
+        }
 
-            return Map.of(lang, translations);
-          } catch (Exception e) {
-            return null;
-          }
-        }))
-        .filter(Objects::nonNull)
-        .collect(I18nMergeCollector.toCollect());
-  }
+        return result;
+    }
+
+    /**
+     * Parses the i18n JSON files contained within the provided {@link JarFile}.
+     *
+     * <p>
+     * This method scans all entries in the JAR, filters for regular (non-directory)
+     * entries whose path matches the pattern
+     * {@code i18n/{lang}.json}, and attempts to parse them into a map of
+     * translations.
+     *
+     * @param jarFile the JAR file to parse for i18n translation entries
+     * @return a map where the keys are language codes (e.g., "en", "fr") and the
+     * values are maps of translation keys to their
+     * corresponding values. If a JAR entry is not a valid i18n file or
+     * parsing fails, it is silently ignored.
+     */
+    public Map<String, Map<String, String>> parse(final JarFile jarFile) {
+        return jarFile.stream()
+            .filter(jarEntry -> !jarEntry.isDirectory())
+            .map((jarEntry -> {
+                Matcher matcher = pattern.matcher(jarEntry.getName());
+
+                if (!matcher.matches()) {
+                    return null;
+                }
+
+                try {
+                    var lang = matcher.group(1);
+                    var translations = objectMapper.readValue(
+                        jarFile.getInputStream(jarEntry),
+                        new TypeReference<Map<String, String>>() {
+                        });
+
+                    return Map.of(lang, translations);
+                } catch (Exception e) {
+                    return null;
+                }
+            }))
+            .filter(Objects::nonNull)
+            .collect(I18nMergeCollector.toCollect());
+    }
 }

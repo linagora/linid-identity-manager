@@ -26,65 +26,65 @@
 
 package io.github.linagora.linid.im.api.service;
 
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 /**
  * Service interface for account management operations.
  */
 public interface AccountService {
 
-  /**
-   * Creates a new account from the given request.
-   *
-   * @param userPrincipal the authenticated user
-   * @param account       the account creation record
-   * @return the created account entity
-   */
-  Account create(UserPrincipal userPrincipal, AccountRecord account);
+    /**
+     * Creates a new account from the given request.
+     *
+     * @param userPrincipal the authenticated user
+     * @param account       the account creation record
+     * @return the created account entity
+     */
+    Account create(UserPrincipal userPrincipal, AccountRecord account);
 
-  /**
-   * Retrieves a paginated list of accounts, optionally filtered.
-   *
-   * @param userPrincipal the authenticated user
-   * @param filters       generated filter DTO from query parameters
-   * @param pageable      pagination information
-   * @return a page of account entities
-   */
-  Page<Account> findAll(UserPrincipal userPrincipal, AccountQueryFilterDto filters, Pageable pageable);
+    /**
+     * Retrieves a paginated list of accounts, optionally filtered.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination information
+     * @return a page of account entities
+     */
+    Page<Account> findAll(UserPrincipal userPrincipal, AccountQueryFilterDto filters, Pageable pageable);
 
-  /**
-   * Retrieves an account by its unique identifier.
-   *
-   * @param userPrincipal the authenticated user
-   * @param id            the account UUID
-   * @return the account entity
-   * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
-   */
-  Account findById(UserPrincipal userPrincipal, UUID id);
+    /**
+     * Retrieves an account by its unique identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @return the account entity
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
+     */
+    Account findById(UserPrincipal userPrincipal, UUID id);
 
-  /**
-   * Deletes an account by its unique identifier.
-   *
-   * @param userPrincipal the authenticated user
-   * @param id            the account UUID
-   * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
-   */
-  void deleteById(UserPrincipal userPrincipal, UUID id);
+    /**
+     * Deletes an account by its unique identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
+     */
+    void deleteById(UserPrincipal userPrincipal, UUID id);
 
-  /**
-   * Retrieves an {@link Account} associated with the given email address.
-   *
-   * @param email the email address used to look up the account
-   * @return an {@link Optional} containing the matching {@link Account} if found,
-   *         or {@link Optional#empty()} if no account exists for the given email
-   */
-  Optional<Account> getAccountByEmail(String email);
+    /**
+     * Retrieves an {@link Account} associated with the given email address.
+     *
+     * @param email the email address used to look up the account
+     * @return an {@link Optional} containing the matching {@link Account} if found,
+     * or {@link Optional#empty()} if no account exists for the given email
+     */
+    Optional<Account> getAccountByEmail(String email);
 }

@@ -31,11 +31,11 @@ package io.github.linagora.linid.im.api.service;
  */
 public interface ChecksumService {
 
-  /**
-   * Computes a checksum of the given payload.
-   *
-   * @param payload the string to hash
-   * @return the hex-encoded hash
-   */
-  String compute(String payload);
+    /**
+     * Computes a checksum of the given payload.
+     *
+     * @param payload the string to hash
+     * @return the hex-encoded hash
+     */
+    String compute(String payload);
 }

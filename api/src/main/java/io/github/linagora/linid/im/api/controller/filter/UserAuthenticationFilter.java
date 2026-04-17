@@ -77,10 +77,10 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         String email = jwt.getClaimAsString("email");
 
         var account = accountService.getAccountByEmail(email)
-          .orElseThrow(() -> new ApiException(
-          HttpStatus.UNAUTHORIZED.value(),
-          I18nMessage.of("error.unauthorized")
-        ));
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.UNAUTHORIZED.value(),
+                I18nMessage.of("error.unauthorized")
+            ));
 
         UserPrincipal user = new UserPrincipal();
         user.setId(account.getId());

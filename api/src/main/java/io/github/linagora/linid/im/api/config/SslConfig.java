@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.api.config;
 
 import jakarta.annotation.PostConstruct;
-import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,39 +35,52 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-/** SSL configuration class that sets up the Java system properties for the SSL trust store. */
+import java.io.IOException;
+
+/**
+ * SSL configuration class that sets up the Java system properties for the SSL trust store.
+ */
 @Slf4j
 @Configuration
 public class SslConfig {
 
-  /** Path to the SSL trust store file, injected from application properties. */
-  @Value("${server.ssl.truststore.path}")
-  private String trustStorePath;
+    /**
+     * Path to the SSL trust store file, injected from application properties.
+     */
+    @Value("${server.ssl.truststore.path}")
+    private String trustStorePath;
 
-  /** Password for the SSL trust store, injected from application properties. */
-  @Value("${server.ssl.truststore.password}")
-  private String trustStorePassword;
+    /**
+     * Password for the SSL trust store, injected from application properties.
+     */
+    @Value("${server.ssl.truststore.password}")
+    private String trustStorePassword;
 
-  /** ResourceLoader to load the trust store file from the specified path. */
-  @Autowired private ResourceLoader resourceLoader;
+    /**
+     * ResourceLoader to load the trust store file from the specified path.
+     */
+    @Autowired
+    private ResourceLoader resourceLoader;
 
-  /** Configures the SSL trust store. */
-  @PostConstruct
-  public void configureSsl() throws IOException {
-    if (!StringUtils.isBlank(trustStorePath)) {
-      Resource resource = resourceLoader.getResource(trustStorePath);
-      if (!resource.exists()) {
-        log.warn(
-            "SSL truststore not found at '{}'. "
-                + "HTTPS connections to external services may fail.",
-            trustStorePath);
-        return;
-      }
-      System.setProperty("javax.net.ssl.trustStore", resource.getFile().getAbsolutePath());
+    /**
+     * Configures the SSL trust store.
+     */
+    @PostConstruct
+    public void configureSsl() throws IOException {
+        if (!StringUtils.isBlank(trustStorePath)) {
+            Resource resource = resourceLoader.getResource(trustStorePath);
+            if (!resource.exists()) {
+                log.warn(
+                    "SSL truststore not found at '{}'. "
+                        + "HTTPS connections to external services may fail.",
+                    trustStorePath);
+                return;
+            }
+            System.setProperty("javax.net.ssl.trustStore", resource.getFile().getAbsolutePath());
+        }
+
+        if (!StringUtils.isBlank(trustStorePassword)) {
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
+        }
     }
-
-    if (!StringUtils.isBlank(trustStorePassword)) {
-      System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-    }
-  }
 }

@@ -30,6 +30,8 @@ import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -76,4 +78,13 @@ public interface AccountService {
    * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
    */
   void deleteById(UserPrincipal userPrincipal, UUID id);
+
+  /**
+   * Retrieves an {@link Account} associated with the given email address.
+   *
+   * @param email the email address used to look up the account
+   * @return an {@link Optional} containing the matching {@link Account} if found,
+   *         or {@link Optional#empty()} if no account exists for the given email
+   */
+  Optional<Account> getAccountByEmail(String email);
 }

@@ -27,6 +27,8 @@
 package io.github.linagora.linid.im.api.persistence.repository;
 
 import io.github.linagora.linid.im.api.persistence.model.Account;
+
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -39,4 +41,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  */
 public interface AccountRepository extends JpaRepository<Account, UUID>,
     JpaSpecificationExecutor<Account> {
+  /**
+   * Retrieves an {@link Account} associated with the given email address.
+   *
+   * @param email the email address used to search for the account
+   * @return an {@link Optional} containing the matching {@link Account} if found,
+   *         or {@link Optional#empty()} if no account exists for the given email
+   */
+  Optional<Account> findAccountByEmail(String email);
 }

@@ -26,22 +26,25 @@
 
 package io.github.linagora.linid.im.api.service;
 
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
-import java.util.Map;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Implementation of {@link AccountService}.
@@ -54,51 +57,67 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class AccountServiceImpl implements AccountService {
 
-  /** Default JSON payload assigned to newly created accounts. */
-  private static final String DEFAULT_PAYLOAD = "{}";
+    /**
+     * Default JSON payload assigned to newly created accounts.
+     */
+    private static final String DEFAULT_PAYLOAD = "{}";
 
-  /** Repository for account persistence operations. */
-  private final AccountRepository accountRepository;
+    /**
+     * Repository for account persistence operations.
+     */
+    private final AccountRepository accountRepository;
 
-  /** Service for computing SHA-256 checksums. */
-  private final ChecksumService checksumService;
+    /**
+     * Service for computing SHA-256 checksums.
+     */
+    private final ChecksumService checksumService;
 
-  @Override
-  public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
-    Account entity = new Account();
-    entity.setExternalId(account.externalId());
-    entity.setLastname(account.lastname());
-    entity.setFirstname(account.firstname());
-    entity.setEmail(account.email());
-    entity.setPayload(DEFAULT_PAYLOAD);
-    entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
-    entity.setCreatedBy(userPrincipal.getId());
-    entity.setUpdatedBy(userPrincipal.getId());
+    @Override
+    public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
+        Account entity = new Account();
+        entity.setExternalId(account.externalId());
+        entity.setLastname(account.lastname());
+        entity.setFirstname(account.firstname());
+        entity.setEmail(account.email().toLowerCase());
+        entity.setPayload(DEFAULT_PAYLOAD);
+        entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
+        entity.setCreatedBy(userPrincipal.getId());
+        entity.setUpdatedBy(userPrincipal.getId());
 
-    return accountRepository.save(entity);
-  }
+        return accountRepository.save(entity);
+    }
 
-  @Override
-  @Transactional(readOnly = true)
-  public Page<Account> findAll(final UserPrincipal userPrincipal, final AccountQueryFilterDto filters,
-      final Pageable pageable) {
-    var specification = new SpringQueryFilterSpecification<>(Account.class, filters);
-    return accountRepository.findAll(specification, pageable);
-  }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Account> findAll(final UserPrincipal userPrincipal, final AccountQueryFilterDto filters,
+                                 final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(Account.class, filters);
+        return accountRepository.findAll(specification, pageable);
+    }
 
-  @Override
-  @Transactional(readOnly = true)
-  public Account findById(final UserPrincipal userPrincipal, final UUID id) {
-    return accountRepository.findById(id)
-        .orElseThrow(() -> new ApiException(
-            HttpStatus.NOT_FOUND.value(),
-            I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))
-        ));
-  }
+    @Override
+    @Transactional(readOnly = true)
+    public Account findById(final UserPrincipal userPrincipal, final UUID id) {
+        return accountRepository.findById(id)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))
+            ));
+    }
 
-  @Override
-  public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
-    findById(userPrincipal, id);
-    accountRepository.deleteById(id);
-  }
+    @Override
+    public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
+        findById(userPrincipal, id);
+        accountRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Account> getAccountByEmail(final String email) {
+        if (StringUtils.isBlank(email)) {
+            return Optional.empty();
+        }
+
+        return accountRepository.findAccountByEmail(email.toLowerCase());
+    }
 }

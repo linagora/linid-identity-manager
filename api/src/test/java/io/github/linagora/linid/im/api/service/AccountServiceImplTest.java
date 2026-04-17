@@ -26,23 +26,12 @@
 
 package io.github.linagora.linid.im.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,135 +44,161 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: AccountServiceImpl")
 class AccountServiceImplTest {
 
-  @Mock
-  private AccountRepository accountRepository;
+    private static final UUID ADMIN_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    @Mock
+    private AccountRepository accountRepository;
+    @Mock
+    private ChecksumService checksumService;
+    @InjectMocks
+    private AccountServiceImpl accountService;
+    private UserPrincipal userPrincipal;
 
-  @Mock
-  private ChecksumService checksumService;
+    @BeforeEach
+    void setUp() {
+        userPrincipal = new UserPrincipal();
+        userPrincipal.setId(ADMIN_ID);
+        userPrincipal.setEmail("admin@example.com");
+    }
 
-  @InjectMocks
-  private AccountServiceImpl accountService;
+    @Test
+    @DisplayName("Should create account with correct fields and checksum")
+    void testCreate_shouldSetAllFieldsAndChecksum() {
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
+        when(checksumService.compute("{}")).thenReturn(
+            "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a");
+        when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-  private static final UUID ADMIN_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+        Account result = accountService.create(userPrincipal, request);
 
-  private UserPrincipal userPrincipal;
+        assertNotNull(result);
+        assertEquals("ext-001", result.getExternalId());
+        assertEquals("Doe", result.getLastname());
+        assertEquals("John", result.getFirstname());
+        assertEquals("john@example.com", result.getEmail());
+        assertEquals("{}", result.getPayload());
+        assertEquals(ADMIN_ID, result.getCreatedBy());
+        assertEquals(ADMIN_ID, result.getUpdatedBy());
+        assertEquals("44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+            result.getChecksum());
+    }
 
-  @BeforeEach
-  void setUp() {
-    userPrincipal = new UserPrincipal();
-    userPrincipal.setId(ADMIN_ID);
-    userPrincipal.setEmail("admin@example.com");
-  }
+    @Test
+    @DisplayName("Should generate consistent SHA-256 checksum for default payload")
+    void testCreate_shouldGenerateConsistentChecksum() {
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
+        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
+        when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
-  @Test
-  @DisplayName("Should create account with correct fields and checksum")
-  void testCreate_shouldSetAllFieldsAndChecksum() {
-    var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
-    when(checksumService.compute("{}")).thenReturn(
-        "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a");
-    when(accountRepository.save(any(Account.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+        Account first = accountService.create(userPrincipal, request);
+        Account second = accountService.create(userPrincipal, request);
 
-    Account result = accountService.create(userPrincipal, request);
+        assertEquals(first.getChecksum(), second.getChecksum());
+    }
 
-    assertNotNull(result);
-    assertEquals("ext-001", result.getExternalId());
-    assertEquals("Doe", result.getLastname());
-    assertEquals("John", result.getFirstname());
-    assertEquals("john@example.com", result.getEmail());
-    assertEquals("{}", result.getPayload());
-    assertEquals(ADMIN_ID, result.getCreatedBy());
-    assertEquals(ADMIN_ID, result.getUpdatedBy());
-    assertEquals("44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-        result.getChecksum());
-  }
+    @Test
+    @DisplayName("Should call repository with specification and pageable")
+    @SuppressWarnings("unchecked")
+    void testFindAll_shouldDelegateToRepository() {
+        var pageable = PageRequest.of(0, 10);
+        var entity = new Account();
+        var filters = new AccountQueryFilterDto();
+        when(accountRepository.findAll(any(Specification.class), any(PageRequest.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
 
-  @Test
-  @DisplayName("Should generate consistent SHA-256 checksum for default payload")
-  void testCreate_shouldGenerateConsistentChecksum() {
-    var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
-    when(checksumService.compute("{}")).thenReturn("fixed-checksum");
-    when(accountRepository.save(any(Account.class)))
-        .thenAnswer(invocation -> invocation.getArgument(0));
+        Page<Account> result = accountService.findAll(userPrincipal, filters, pageable);
 
-    Account first = accountService.create(userPrincipal, request);
-    Account second = accountService.create(userPrincipal, request);
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(accountRepository).findAll(any(Specification.class), any(PageRequest.class));
+    }
 
-    assertEquals(first.getChecksum(), second.getChecksum());
-  }
+    @Test
+    @DisplayName("Should return account when found by ID")
+    void testFindById_shouldReturnAccountWhenFound() {
+        UUID id = UUID.randomUUID();
+        var entity = new Account();
+        entity.setId(id);
+        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
 
-  @Test
-  @DisplayName("Should call repository with specification and pageable")
-  @SuppressWarnings("unchecked")
-  void testFindAll_shouldDelegateToRepository() {
-    var pageable = PageRequest.of(0, 10);
-    var entity = new Account();
-    var filters = new AccountQueryFilterDto();
-    when(accountRepository.findAll(any(Specification.class), any(PageRequest.class)))
-        .thenReturn(new PageImpl<>(List.of(entity)));
+        Account result = accountService.findById(userPrincipal, id);
 
-    Page<Account> result = accountService.findAll(userPrincipal, filters, pageable);
+        assertNotNull(result);
+        assertEquals(id, result.getId());
+    }
 
-    assertNotNull(result);
-    assertEquals(1, result.getTotalElements());
-    verify(accountRepository).findAll(any(Specification.class), any(PageRequest.class));
-  }
+    @Test
+    @DisplayName("Should throw ApiException 404 when account not found")
+    void testFindById_shouldThrow404WhenNotFound() {
+        UUID id = UUID.randomUUID();
+        when(accountRepository.findById(id)).thenReturn(Optional.empty());
 
-  @Test
-  @DisplayName("Should return account when found by ID")
-  void testFindById_shouldReturnAccountWhenFound() {
-    UUID id = UUID.randomUUID();
-    var entity = new Account();
-    entity.setId(id);
-    when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+        ApiException exception = assertThrows(ApiException.class,
+            () -> accountService.findById(userPrincipal, id));
 
-    Account result = accountService.findById(userPrincipal, id);
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+    }
 
-    assertNotNull(result);
-    assertEquals(id, result.getId());
-  }
+    @Test
+    @DisplayName("Should delete account when it exists")
+    void testDeleteById_shouldDeleteWhenFound() {
+        UUID id = UUID.randomUUID();
+        var entity = new Account();
+        entity.setId(id);
+        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
 
-  @Test
-  @DisplayName("Should throw ApiException 404 when account not found")
-  void testFindById_shouldThrow404WhenNotFound() {
-    UUID id = UUID.randomUUID();
-    when(accountRepository.findById(id)).thenReturn(Optional.empty());
+        accountService.deleteById(userPrincipal, id);
 
-    ApiException exception = assertThrows(ApiException.class,
-        () -> accountService.findById(userPrincipal, id));
+        verify(accountRepository).deleteById(id);
+    }
 
-    assertEquals(404, exception.getStatusCode());
-    assertEquals("error.account.not_found", exception.getError().key());
-  }
+    @Test
+    @DisplayName("Should throw ApiException 404 when deleting non-existent account")
+    void testDeleteById_shouldThrow404WhenNotFound() {
+        UUID id = UUID.randomUUID();
+        when(accountRepository.findById(id)).thenReturn(Optional.empty());
 
-  @Test
-  @DisplayName("Should delete account when it exists")
-  void testDeleteById_shouldDeleteWhenFound() {
-    UUID id = UUID.randomUUID();
-    var entity = new Account();
-    entity.setId(id);
-    when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+        ApiException exception = assertThrows(ApiException.class,
+            () -> accountService.deleteById(userPrincipal, id));
 
-    accountService.deleteById(userPrincipal, id);
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(accountRepository, never()).deleteById(any());
+    }
 
-    verify(accountRepository).deleteById(id);
-  }
+    @Test
+    @DisplayName("Should get account by email")
+    void testGetAccountByEmail_shouldReturnOptional() {
+        UUID id = UUID.randomUUID();
+        var entity = new Account();
+        entity.setId(id);
+        when(accountRepository.findAccountByEmail("email")).thenReturn(Optional.of(entity));
 
-  @Test
-  @DisplayName("Should throw ApiException 404 when deleting non-existent account")
-  void testDeleteById_shouldThrow404WhenNotFound() {
-    UUID id = UUID.randomUUID();
-    when(accountRepository.findById(id)).thenReturn(Optional.empty());
+        var account = accountService.getAccountByEmail("email");
 
-    ApiException exception = assertThrows(ApiException.class,
-        () -> accountService.deleteById(userPrincipal, id));
+        assertTrue(account.isPresent());
+        assertEquals(entity, account.get());
+    }
 
-    assertEquals(404, exception.getStatusCode());
-    assertEquals("error.account.not_found", exception.getError().key());
-    verify(accountRepository, never()).deleteById(any());
-  }
+    @Test
+    @DisplayName("Should get empty account on null email")
+    void testGetAccountByEmail_shouldReturnOptionalOnNull() {
+        assertTrue(accountService.getAccountByEmail(null).isEmpty());
+        assertTrue(accountService.getAccountByEmail("").isEmpty());
+        assertTrue(accountService.getAccountByEmail("  ").isEmpty());
+    }
 }

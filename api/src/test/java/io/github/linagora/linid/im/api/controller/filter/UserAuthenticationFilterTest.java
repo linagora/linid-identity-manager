@@ -27,6 +27,8 @@
 package io.github.linagora.linid.im.api.controller.filter;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -42,6 +44,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -54,10 +58,12 @@ class UserAuthenticationFilterTest {
     private HttpServletRequest request;
     private HttpServletResponse response;
     private FilterChain filterChain;
+    private AccountService accountService;
 
     @BeforeEach
     void setUp() {
-        filter = new UserAuthenticationFilter();
+        accountService = mock(AccountService.class);
+        filter = new UserAuthenticationFilter(accountService);
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
         filterChain = mock(FilterChain.class);
@@ -75,8 +81,9 @@ class UserAuthenticationFilterTest {
     void doFilterInternal_withValidJwt_setsAuthenticationAndContinues() throws ServletException, IOException {
         // Mock Jwt
         Jwt jwt = mock(Jwt.class);
-        when(jwt.getSubject()).thenReturn("550e8400-e29b-41d4-a716-446655440000");
+        UUID uuid = UUID.randomUUID();
         when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
+        when(accountService.getAccountByEmail("test@example.com")).thenReturn(Optional.of(Account.builder().id(uuid).build()));
 
         // Set Authentication with mocked Jwt as principal
         SecurityContextHolder.getContext().setAuthentication(
@@ -92,11 +99,33 @@ class UserAuthenticationFilterTest {
         // Verify SecurityContext now has UserPrincipal
         var auth = SecurityContextHolder.getContext().getAuthentication();
         assertNotNull(auth);
-        assertTrue(auth.getPrincipal() instanceof UserPrincipal);
+        assertInstanceOf(UserPrincipal.class, auth.getPrincipal());
 
         UserPrincipal user = (UserPrincipal) auth.getPrincipal();
-        assertEquals(java.util.UUID.fromString("550e8400-e29b-41d4-a716-446655440000"), user.getId());
+        assertEquals(uuid, user.getId());
         assertEquals("test@example.com", user.getEmail());
+    }
+
+    @Test
+    @DisplayName("test doFilterInternal: should throw exception on unknown account")
+    void doFilterInternal_withUnknownAccount_throwsApiException() throws ServletException, IOException {
+        // Mock Jwt
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
+        when(accountService.getAccountByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        // Set Authentication with mocked Jwt as principal
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
+        );
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+            filter.doFilterInternal(request, response, filterChain)
+        );
+
+        assertEquals(401, exception.getStatusCode());
+        assertEquals("error.unauthorized", exception.getError().key());
+        verify(filterChain, never()).doFilter(any(), any());
     }
 
     @Test

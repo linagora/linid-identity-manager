@@ -1,0 +1,23 @@
+flowchart LR
+
+    ExternalUserServer[external_user_server]
+    SyncUserData[sync-user-data]
+
+    ClavisDB[(clavis-db)]
+    Redis[(redis)]
+
+    Clavis[clavis]
+    OPA[opa]
+    Lemon[lemon]
+
+    ExternalUserServer ---|User data| SyncUserData
+
+    SyncUserData ---|Upsert + checksum| ClavisDB
+    SyncUserData ---|Computed rights| OPA
+    SyncUserData ---|Store computed rights| Redis
+
+    ClavisDB ---| Read user + status| Clavis
+    OPA ---|Fallback permission computation| Clavis
+    Redis ---|Read / cache rights| Clavis
+    
+    Clavis ---|Authorization response| Lemon

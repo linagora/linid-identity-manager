@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant External as external_user_server
+    participant Sync as sync-user-data
+    participant DB as clavis-db
+    participant OPA as opa
+    participant Redis
+
+    Note over Sync: Periodic synchronization job
+
+    Sync->>External: Fetch updated users
+    External-->>Sync: User data
+
+    Sync->>Sync: Transform to normalized JSON
+    Sync->>Sync: Compute checksum
+
+    Sync->>DB: Retrieve stored checksum
+    DB-->>Sync: Existing checksum
+
+    alt Data changed
+        Sync->>DB: Upsert user record
+
+        Sync->>Redis: Delete keys matching pattern opa:{userId}:*
+
+        Sync->>OPA: Compute user permissions
+        OPA-->>Sync: Computed rights
+
+        Sync->>Redis: Store computed rights (key: opa:{userId}:{scriptId})
+    else No change
+        Note over Sync: Skip recomputation
+    end

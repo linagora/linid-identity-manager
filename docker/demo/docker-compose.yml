@@ -9,6 +9,40 @@ services:
     networks:
       - demo-network
 
+  linid-im-database:
+    image: postgres:18
+    container_name: linid-im-database
+    networks:
+      - demo-network
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - ${DATABASE_PORT}:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  linid-im-database-migration:
+    image: flyway/flyway:12
+    container_name: linid-im-database-migration
+    command: migrate
+    networks:
+      - demo-network
+    environment:
+      FLYWAY_URL: jdbc:postgresql://linid-im-database:5432/${DATABASE_NAME}
+      FLYWAY_USER: ${DATABASE_USER}
+      FLYWAY_PASSWORD: ${DATABASE_PASSWORD}
+    volumes:
+      - ../linid-im-database/migration:/flyway/sql
+    depends_on:
+      linid-im-database:
+        condition: service_healthy
+
   linid-im-api:
     image: linid-im-api
     container_name: linid-im-api

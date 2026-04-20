@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant Lemon
+    participant Clavis
+    participant DB as clavis-db
+    participant Redis
+    participant OPA as opa
+
+    Lemon->>Clavis: Request applications/roles for authenticated user
+
+    Clavis->>DB: Fetch user + status + checksum
+    DB-->>Clavis: User record
+
+    Clavis->>Clavis: Validate activation/suspension/deactivation state
+    alt Account invalid
+        Clavis-->>Lemon: Access denied
+    else Account valid
+        Clavis->>Redis: Retrieve cached permissions (key: opa:{userId}:{scriptId})
+        alt Permissions found
+            Redis-->>Clavis: Cached applications/roles
+        else Cache miss
+            Clavis->>OPA: Compute permissions
+            OPA-->>Clavis: Computed applications/roles
+            Clavis->>Redis: Cache permissions (key: opa:{userId}:{scriptId})
+        end
+        Clavis-->>Lemon: Return applications/roles (Access granted)
+    end

@@ -157,8 +157,16 @@ Feature: Test API Account endpoints
 
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
     Then  I expect status code is 200
-    And   I expect '{{response.body.totalElements}}' is not empty
-    And   I expect '{{response.body | json}}' contains 'ext-301'
+    And   I expect '{{response.body.totalElements}}' is '4'
+    And   I expect '{{response.body.content[3].id}}' is '{{ctx.accountId}}'
+    And   I expect '{{response.body.content[3].externalId}}' is 'ext-301'
+    And   I expect '{{response.body.content[3].lastname}}' is 'Find'
+    And   I expect '{{response.body.content[3].firstname}}' is 'All'
+    And   I expect '{{response.body.content[3].email}}' is 'findall301@example.com'
+    And   I expect '{{response.body.content[3].createdBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.content[3].updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.content[3].insertDate}}' is not empty
+    And   I expect '{{response.body.content[3].updateDate}}' is not empty
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
@@ -187,6 +195,10 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.lastname}}' is 'Find'
     And   I expect '{{response.body.firstname}}' is 'ById'
     And   I expect '{{response.body.email}}' is 'findbyid401@example.com'
+    And   I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.insertDate}}' is not empty
+    And   I expect '{{response.body.updateDate}}' is not empty
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204

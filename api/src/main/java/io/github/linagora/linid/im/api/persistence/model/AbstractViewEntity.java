@@ -27,89 +27,63 @@
 package io.github.linagora.linid.im.api.persistence.model;
 
 import io.github.zorin95670.predicate.FilterType;
+import io.github.zorin95670.processor.annotation.QueryFilterField;
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
+import java.time.OffsetDateTime;
+import java.util.Date;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import java.util.UUID;
 
 /**
- * JPA entity representing an account in the system.
+ * Base class for JPA entities representing database views.
  *
- * <p>Maps to the {@code accounts} table and includes identity fields, a JSONB payload,
- * and a SHA-256 checksum for change detection. Inherits audit fields from
- * {@link AbstractEntity}.</p>
+ * <p>Entities extending this class are mapped to database views rather than tables. This allows them to
+ * be used for read-only queries while still benefiting from JPA's mapping capabilities. Concrete view
+ * entities should extend this class and be annotated with {@code @Entity} and {@code @Immutable}.</p>
  */
-@Entity
-@Table(name = "accounts")
-@DynamicInsert
-@Data
+@MappedSuperclass
+@Getter
+@EqualsAndHashCode
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class Account extends AbstractEntity {
+public abstract class AbstractViewEntity {
 
     /**
-     * Unique identifier of the account, auto-generated as UUID.
+     * Identifier of the creator of this record.
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "act_id")
-    @FilterType(type = UUID.class)
-    private UUID id;
-
-    /**
-     * External identifier (e.g. OIDC sub or external system ID).
-     */
-    @Column(name = "external_id", nullable = false)
+    @Column(name = "created_by")
     @FilterType(type = String.class)
-    private String externalId;
+    @QueryFilterField(type = String.class, description = "Full name of the record creator")
+    private String createdBy;
 
     /**
-     * Last name of the account holder.
+     * Identifier of the last updater of this record.
      */
-    @Column(name = "lastname", nullable = false)
+    @Column(name = "updated_by")
     @FilterType(type = String.class)
-    private String lastname;
+    @QueryFilterField(type = String.class, description = "Full name of the record last updater")
+    private String updatedBy;
 
     /**
-     * First name of the account holder.
+     * Timestamp when the record was created. Managed by PostgreSQL default.
      */
-    @Column(name = "firstname", nullable = false)
-    @FilterType(type = String.class)
-    private String firstname;
+    @Column(name = "insert_date", updatable = false, insertable = false)
+    @FilterType(type = Date.class)
+    @QueryFilterField(type = Date.class, description = "Record creation date")
+    private OffsetDateTime insertDate;
 
     /**
-     * Email address associated with the account.
+     * Timestamp when the record was last updated. Managed by PostgreSQL trigger.
      */
-    @Column(name = "email", nullable = false)
-    @FilterType(type = String.class)
-    private String email;
-
-    /**
-     * JSONB payload from external systems, used for OPA and JWT claims.
-     */
-    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    @FilterType(type = String.class)
-    private String payload;
-
-    /**
-     * SHA-256 checksum computed from the payload for change detection.
-     */
-    @Column(name = "checksum", nullable = false)
-    @FilterType(type = String.class)
-    private String checksum;
+    @Version
+    @Column(name = "update_date", insertable = false)
+    @FilterType(type = Date.class)
+    @QueryFilterField(type = Date.class, description = "Record last update date")
+    private OffsetDateTime updateDate;
 }

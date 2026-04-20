@@ -27,47 +27,44 @@
 package io.github.linagora.linid.im.api.persistence.model;
 
 import io.github.zorin95670.predicate.FilterType;
+import io.github.zorin95670.processor.annotation.QueryFilter;
+import io.github.zorin95670.processor.annotation.QueryFilterField;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
-import java.util.UUID;
+import org.hibernate.annotations.Immutable;
 
 /**
- * JPA entity representing an account in the system.
+ * Entity with enriched account information, mapped to the {@code accounts_view} database view.
  *
- * <p>Maps to the {@code accounts} table and includes identity fields, a JSONB payload,
- * and a SHA-256 checksum for change detection. Inherits audit fields from
- * {@link AbstractEntity}.</p>
+ * <p>Provides {@code createdBy}, {@code updatedBy}, {@code insertDate}, and {@code updateDate}
+ * columns that are automatically managed by the service layer and database triggers.
  */
 @Entity
-@Table(name = "accounts")
-@DynamicInsert
+@Table(name = "accounts_view")
 @Data
+@Immutable
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class Account extends AbstractEntity {
+@QueryFilter
+public class AccountView extends AbstractViewEntity {
 
     /**
-     * Unique identifier of the account, auto-generated as UUID.
+     * Unique identifier of the account (UUID).
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "act_id")
     @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class, description = "Account unique identifier")
     private UUID id;
 
     /**
@@ -75,6 +72,7 @@ public class Account extends AbstractEntity {
      */
     @Column(name = "external_id", nullable = false)
     @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "External identifier (e.g. OIDC sub)")
     private String externalId;
 
     /**
@@ -82,6 +80,7 @@ public class Account extends AbstractEntity {
      */
     @Column(name = "lastname", nullable = false)
     @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Last name of the account holder")
     private String lastname;
 
     /**
@@ -89,6 +88,7 @@ public class Account extends AbstractEntity {
      */
     @Column(name = "firstname", nullable = false)
     @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "First name of the account holder")
     private String firstname;
 
     /**
@@ -96,20 +96,6 @@ public class Account extends AbstractEntity {
      */
     @Column(name = "email", nullable = false)
     @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Email address of the account")
     private String email;
-
-    /**
-     * JSONB payload from external systems, used for OPA and JWT claims.
-     */
-    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    @FilterType(type = String.class)
-    private String payload;
-
-    /**
-     * SHA-256 checksum computed from the payload for change detection.
-     */
-    @Column(name = "checksum", nullable = false)
-    @FilterType(type = String.class)
-    private String checksum;
 }

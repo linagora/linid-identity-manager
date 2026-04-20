@@ -29,8 +29,10 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -68,6 +70,11 @@ public class AccountServiceImpl implements AccountService {
     private final AccountRepository accountRepository;
 
     /**
+     * Repository for read-only account view operations, supporting dynamic filtering.
+     */
+    private final AccountViewRepository accountViewRepository;
+
+    /**
      * Service for computing SHA-256 checksums.
      */
     private final ChecksumService checksumService;
@@ -89,16 +96,17 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Account> findAll(final UserPrincipal userPrincipal, final AccountQueryFilterDto filters,
-                                 final Pageable pageable) {
-        var specification = new SpringQueryFilterSpecification<>(Account.class, filters);
-        return accountRepository.findAll(specification, pageable);
+    public Page<AccountView> findAll(final UserPrincipal userPrincipal,
+                                     final AccountViewQueryFilterDto filters,
+                                     final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(AccountView.class, filters);
+        return accountViewRepository.findAll(specification, pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Account findById(final UserPrincipal userPrincipal, final UUID id) {
-        return accountRepository.findById(id)
+    public AccountView findById(final UserPrincipal userPrincipal, final UUID id) {
+        return accountViewRepository.findById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))

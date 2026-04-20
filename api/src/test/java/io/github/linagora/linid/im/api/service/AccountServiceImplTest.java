@@ -29,8 +29,10 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,9 +41,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -59,6 +63,8 @@ class AccountServiceImplTest {
     private static final UUID ADMIN_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
     @Mock
     private AccountRepository accountRepository;
+    @Mock
+    private AccountViewRepository accountViewRepository;
     @Mock
     private ChecksumService checksumService;
     @InjectMocks
@@ -111,30 +117,33 @@ class AccountServiceImplTest {
 
     @Test
     @DisplayName("Should call repository with specification and pageable")
-    @SuppressWarnings("unchecked")
     void testFindAll_shouldDelegateToRepository() {
         var pageable = PageRequest.of(0, 10);
-        var entity = new Account();
-        var filters = new AccountQueryFilterDto();
-        when(accountRepository.findAll(any(Specification.class), any(PageRequest.class)))
+        var entity = new AccountView();
+        var filters = new AccountViewQueryFilterDto();
+        when(accountViewRepository.findAll(
+            ArgumentMatchers.<Specification<AccountView>>any(),
+            any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(entity)));
 
-        Page<Account> result = accountService.findAll(userPrincipal, filters, pageable);
+        Page<AccountView> result = accountService.findAll(userPrincipal, filters, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(accountRepository).findAll(any(Specification.class), any(PageRequest.class));
+        verify(accountViewRepository).findAll(
+            ArgumentMatchers.<Specification<AccountView>>any(),
+            any(Pageable.class));
     }
 
     @Test
     @DisplayName("Should return account when found by ID")
     void testFindById_shouldReturnAccountWhenFound() {
         UUID id = UUID.randomUUID();
-        var entity = new Account();
+        var entity = new AccountView();
         entity.setId(id);
-        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(entity));
 
-        Account result = accountService.findById(userPrincipal, id);
+        AccountView result = accountService.findById(userPrincipal, id);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
@@ -144,7 +153,7 @@ class AccountServiceImplTest {
     @DisplayName("Should throw ApiException 404 when account not found")
     void testFindById_shouldThrow404WhenNotFound() {
         UUID id = UUID.randomUUID();
-        when(accountRepository.findById(id)).thenReturn(Optional.empty());
+        when(accountViewRepository.findById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
             () -> accountService.findById(userPrincipal, id));
@@ -157,9 +166,9 @@ class AccountServiceImplTest {
     @DisplayName("Should delete account when it exists")
     void testDeleteById_shouldDeleteWhenFound() {
         UUID id = UUID.randomUUID();
-        var entity = new Account();
+        var entity = new AccountView();
         entity.setId(id);
-        when(accountRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(entity));
 
         accountService.deleteById(userPrincipal, id);
 
@@ -170,7 +179,7 @@ class AccountServiceImplTest {
     @DisplayName("Should throw ApiException 404 when deleting non-existent account")
     void testDeleteById_shouldThrow404WhenNotFound() {
         UUID id = UUID.randomUUID();
-        when(accountRepository.findById(id)).thenReturn(Optional.empty());
+        when(accountViewRepository.findById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
             () -> accountService.deleteById(userPrincipal, id));

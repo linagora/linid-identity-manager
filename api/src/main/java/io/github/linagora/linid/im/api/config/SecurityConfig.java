@@ -45,8 +45,8 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * Security configuration for the LinID-identity-manager API application.
  *
- * <p>This class defines the security filter chain based on the {@code auth.enabled}
- * property, allowing dynamic enabling/disabling of JWT authentication.
+ * <p>This class defines the security filter chain based on the {@code auth.enabled} property,
+ * allowing dynamic enabling/disabling of JWT authentication.
  *
  * <p>CSRF protection is disabled, and the application is stateless (no HTTP sessions).
  */
@@ -69,14 +69,13 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain publicEndpoints(final HttpSecurity http) throws Exception {
-        http
-            .securityMatcher(
+        http.securityMatcher(
                 "/health",
                 "/actuator/**",
+                "/i18n/**",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
-                "/swagger-ui.html"
-            )
+                "/swagger-ui.html")
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
 
@@ -93,17 +92,15 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain securedEndpoints(final HttpSecurity http) throws Exception {
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(
-                org.springframework.security.config.http.SessionCreationPolicy.STATELESS
-            ))
+        http.csrf(AbstractHttpConfigurer::disable)
+            .sessionManagement(
+                session ->
+                    session.sessionCreationPolicy(
+                        org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .addFilterAfter(
-                new UserAuthenticationFilter(accountService),
-                BearerTokenAuthenticationFilter.class
-            );
+                new UserAuthenticationFilter(accountService), BearerTokenAuthenticationFilter.class);
 
         return http.build();
     }
@@ -111,24 +108,26 @@ public class SecurityConfig {
     /**
      * Configures the OpenAPI documentation with a security scheme for bearer token authentication.
      *
-     * <p>This configuration adds a security scheme named {@code bearerAuth} using the HTTP Bearer authentication
-     * method with JWT tokens. It also registers a global security requirement so that all endpoints in the Swagger UI
-     * require this authentication unless explicitly overridden.</p>
+     * <p>This configuration adds a security scheme named {@code bearerAuth} using the HTTP Bearer
+     * authentication method with JWT tokens. It also registers a global security requirement so that
+     * all endpoints in the Swagger UI require this authentication unless explicitly overridden.
      *
      * <p>This allows the Swagger UI to display an "Authorize" button where users can input their JWT
-     * Bearer token, which will be sent as an {@code Authorization} header in subsequent requests.</p>
+     * Bearer token, which will be sent as an {@code Authorization} header in subsequent requests.
      *
      * @return the configured {@link OpenAPI} instance for Swagger documentation
      */
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-            .components(new Components().addSecuritySchemes("bearerAuth",
-                new SecurityScheme()
-                    .type(SecurityScheme.Type.HTTP)
-                    .scheme("bearer")
-                    .bearerFormat("JWT")
-            ))
+            .components(
+                new Components()
+                    .addSecuritySchemes(
+                        "bearerAuth",
+                        new SecurityScheme()
+                            .type(SecurityScheme.Type.HTTP)
+                            .scheme("bearer")
+                            .bearerFormat("JWT")))
             .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 }

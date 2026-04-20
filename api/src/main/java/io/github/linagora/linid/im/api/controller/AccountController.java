@@ -29,8 +29,9 @@ package io.github.linagora.linid.im.api.controller;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -114,9 +115,9 @@ public class AccountController {
     @Operation(summary = "Get all accounts with pagination and filtering")
     @ApiResponse(responseCode = "200", description = "Full list of accounts")
     @ApiResponse(responseCode = "206", description = "Partial list of accounts (more pages available)")
-    public ResponseEntity<Page<AccountDTO>> findAll(
+    public ResponseEntity<Page<AccountViewDTO>> findAll(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
-        final AccountQueryFilterDto filters,
+        final AccountViewQueryFilterDto filters,
         final Pageable pageable) {
         log.info("[{}] Received GET request to list accounts with filters {} and pageable {}",
             userPrincipal.getEmail(), filters, pageable);
@@ -135,7 +136,7 @@ public class AccountController {
     @Operation(summary = "Get an account by ID")
     @ApiResponse(responseCode = "200", description = "Account found")
     @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
-    public ResponseEntity<AccountDTO> findById(
+    public ResponseEntity<AccountViewDTO> findById(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id) {
         log.info("[{}] Received GET request for account {}", userPrincipal.getEmail(), id);

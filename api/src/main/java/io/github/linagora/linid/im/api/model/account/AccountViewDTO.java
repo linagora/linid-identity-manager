@@ -26,29 +26,75 @@
 
 package io.github.linagora.linid.im.api.model.account;
 
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
-import org.mapstruct.Mapper;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
+ * Data Transfer Object representing an account in API responses,
+ * with enriched createdBy and updatedBy fields as full names instead of UUIDs.
  */
-@Mapper(componentModel = "spring")
-public interface AccountMapper {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Account view data transfer object with enriched creator and updater information")
+public class AccountViewDTO {
+    /**
+     * Unique identifier of the account.
+     */
+    @Schema(description = "Unique identifier of the account", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
     /**
-     * Converts an {@link Account} entity to an {@link AccountDTO}.
-     *
-     * @param account the account entity
-     * @return the corresponding DTO
+     * External identifier (e.g. OIDC sub or external system ID).
      */
-    AccountDTO toDTO(Account account);
+    @Schema(description = "External identifier (e.g. OIDC sub)", example = "ext-001")
+    private String externalId;
 
     /**
-     * Converts an {@link AccountView} entity to an {@link AccountViewDTO}.
-     *
-     * @param accountView the account view entity
-     * @return the corresponding DTO
+     * Last name of the account holder.
      */
-    AccountViewDTO toDTO(AccountView accountView);
+    @Schema(description = "Last name of the account holder", example = "Doe")
+    private String lastname;
+
+    /**
+     * First name of the account holder.
+     */
+    @Schema(description = "First name of the account holder", example = "John")
+    private String firstname;
+
+    /**
+     * Email address associated with the account.
+     */
+    @Schema(description = "Email address of the account", example = "john.doe@example.com")
+    private String email;
+
+    /**
+     * Identifier of the creator of this record.
+     */
+    @Schema(description = "Full name of the record last creator", example = "John Doe")
+    private String createdBy;
+
+    /**
+     * Identifier of the last updater of this record.
+     */
+    @Schema(description = "Full name of the record last updater", example = "John Doe")
+    private String updatedBy;
+
+    /**
+     * Timestamp when the record was created.
+     */
+    @Schema(description = "Record creation date")
+    private OffsetDateTime insertDate;
+
+    /**
+     * Timestamp when the record was last updated.
+     */
+    @Schema(description = "Record last update date")
+    private OffsetDateTime updateDate;
 }

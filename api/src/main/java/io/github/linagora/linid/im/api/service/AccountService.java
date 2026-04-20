@@ -29,7 +29,8 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -58,7 +59,7 @@ public interface AccountService {
      * @param pageable      pagination information
      * @return a page of account entities
      */
-    Page<Account> findAll(UserPrincipal userPrincipal, AccountQueryFilterDto filters, Pageable pageable);
+    Page<AccountView> findAll(UserPrincipal userPrincipal, AccountViewQueryFilterDto filters, Pageable pageable);
 
     /**
      * Retrieves an account by its unique identifier.
@@ -68,7 +69,7 @@ public interface AccountService {
      * @return the account entity
      * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
      */
-    Account findById(UserPrincipal userPrincipal, UUID id);
+    AccountView findById(UserPrincipal userPrincipal, UUID id);
 
     /**
      * Deletes an account by its unique identifier.

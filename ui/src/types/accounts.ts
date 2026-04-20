@@ -25,7 +25,32 @@
  */
 
 /**
- * Raw user shape returned by the API.
+ * Writable fields of an account, sent to the backend when creating an
+ * account. Distinct from {@link AccountDTO}: a record carries only
+ * client-provided values, with no server-managed metadata, and may grow
+ * write-only fields that never appear in the DTO.
+ */
+export interface AccountRecord {
+  /**
+   * External business identifier.
+   */
+  externalId: string;
+  /**
+   * User last name.
+   */
+  lastname: string;
+  /**
+   * User first name.
+   */
+  firstname: string;
+  /**
+   * User email address.
+   */
+  email: string;
+}
+
+/**
+ * Raw account shape returned by the API.
  */
 export interface AccountDTO {
   /**
@@ -37,11 +62,11 @@ export interface AccountDTO {
    */
   externalId: string;
   /**
-   * User lastname.
+   * User last name.
    */
   lastname: string;
   /**
-   * User firstname.
+   * User first name.
    */
   firstname: string;
   /**
@@ -79,21 +104,21 @@ export interface Account {
    */
   id: string;
   /**
-   * User lastname.
+   * External business identifier.
+   */
+  externalId: string;
+  /**
+   * User last name.
    */
   lastname: string;
   /**
-   * User firstname.
+   * User first name.
    */
   firstname: string;
   /**
    * User email address.
    */
   email: string;
-  /**
-   * External business identifier.
-   */
-  externalId: string;
   /**
    * Creator identifier.
    */
@@ -107,7 +132,6 @@ export interface Account {
    * Display formatting depends on the user's locale.
    */
   insertDate: string;
-
   /**
    * Account last update date converted from API ISO timestamp.
    * Display formatting depends on the user's locale.

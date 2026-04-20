@@ -26,7 +26,7 @@
 
 import { api } from 'boot/axios';
 import { useAccountMapper } from 'src/mappers/accountMapper';
-import type { Account, AccountDTO } from 'src/types/accounts';
+import type { Account, AccountDTO, AccountRecord } from 'src/types/accounts';
 
 /**
  * Retrieves a single account by its identifier from the backend.
@@ -39,4 +39,17 @@ export async function getAccountById(id: string): Promise<Account> {
   return api
     .get<AccountDTO>(`/accounts/${id}`)
     .then((response) => toAccount(response.data));
+}
+
+/**
+ * Creates a new account on the backend.
+ * @param payload - The account fields submitted by the user.
+ * @returns A promise resolving to the raw DTO of the newly created account.
+ */
+export async function createAccount(
+  payload: AccountRecord
+): Promise<AccountDTO> {
+  return api
+    .post<AccountDTO>('/accounts', payload)
+    .then((response) => response.data);
 }

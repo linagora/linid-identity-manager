@@ -30,6 +30,7 @@ import io.github.zorin95670.predicate.FilterType;
 import io.github.zorin95670.processor.annotation.QueryFilterField;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -82,6 +83,7 @@ public abstract class AbstractEntity {
     /**
      * Timestamp when the record was last updated. Managed by PostgreSQL trigger.
      */
+    @Version
     @Generated(event = {EventType.INSERT, EventType.UPDATE})
     @Column(name = "update_date", insertable = false)
     @FilterType(type = Date.class)

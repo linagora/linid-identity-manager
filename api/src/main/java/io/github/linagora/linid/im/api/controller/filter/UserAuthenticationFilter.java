@@ -35,6 +35,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,6 +76,13 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String email = jwt.getClaimAsString("email");
+
+        if (StringUtils.isBlank(email)) {
+            throw new ApiException(
+                HttpStatus.UNAUTHORIZED.value(),
+                I18nMessage.of("error.unauthorized")
+            );
+        }
 
         var account = accountService.getAccountByEmail(email)
             .orElseThrow(() -> new ApiException(

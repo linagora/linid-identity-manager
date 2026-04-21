@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,44 +24,23 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
+import { api } from 'boot/axios';
+import type { AccountDTO, AccountQueryFilterDTO } from 'src/types/accounts';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Retrieves accounts list from the API.
+ * @param filters Object containing the filter criteria for querying accounts.
+ * @param pagination Object containing pagination parameters.
+ * @returns Promise of paginated accounts.
+ */
+export async function getAccounts(
+  filters: AccountQueryFilterDTO,
+  pagination: Pagination
+): Promise<Page<AccountDTO>> {
+  return api
+    .get<
+      Page<AccountDTO>
+    >(`/accounts`, { params: { ...filters, ...pagination } })
+    .then(({ data }) => data);
+}

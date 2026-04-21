@@ -16,6 +16,55 @@
   "AuthenticationCallbackPage": {
     "processing": "Processing authentication response..."
   },
+  "AccountsPage": {
+    "menuTitle": "Accounts",
+    "title": "Accounts",
+    "detailButton": "Details",
+    "ButtonsCard": {
+      "create": "Create"
+    },
+    "AdvancedSearchCard": {
+      "fields": {
+        "firstname": {
+          "label": "First name",
+          "hint": "Enter a first name to filter accounts."
+        },
+        "lastname": {
+          "label": "Last name",
+          "hint": "Enter a last name to filter accounts."
+        },
+        "email": {
+          "label": "Email",
+          "hint": "Enter an email to filter accounts."
+        },
+        "createdBy": {
+          "label": "Created by",
+          "hint": "Enter the name of the user who created the account to filter accounts."
+        },
+        "insertDate": {
+          "close": "Close",
+          "label": "Insert date",
+          "hint": "Select an insert date to filter accounts."
+        }
+      }
+    },
+    "accountColumns": {
+      "firstname": "First name",
+      "lastname": "Last name",
+      "email": "Email",
+      "createdBy": "Created by",
+      "insertDate": "Insert date",
+      "actions": "Actions"
+    },
+    "GenericEntityTable": {
+      "rowsPerPage": "Rows per page",
+      "paginationLabel": "{start}-{end} on {total}"
+    },
+    "errors": {
+      "notFound": "Accounts not found",
+      "generic": "Unable to load the accounts. Please try again later."
+    }
+  },
   "AccountCreationPage": {
     "title": "Create a new account",
     "fields": {

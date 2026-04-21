@@ -94,6 +94,20 @@
     }
   },
   "accounts": {
+    "homepage": {
+      "create-button": {
+        "q-btn": {
+          "outline": false
+        }
+      },
+      "buttons-card": {
+        "see-button": {
+          "q-btn": {
+            "flat": true
+          }
+        }
+      }
+    },
     "creation-page": {
       "buttons-card": {
         "confirm-button": {

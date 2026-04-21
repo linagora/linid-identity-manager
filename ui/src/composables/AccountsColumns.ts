@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,44 +24,59 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import type { QTableColumn } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Defines the columns for the accounts table in the UI.
+ * @returns An array of QTableColumn objects representing the columns.
+ */
+export function useAccountsColumns() {
+  const { t } = useI18n();
+
+  const accountColumns: QTableColumn[] = [
+    {
+      name: 'firstname',
+      label: t('AccountsPage.accountColumns.firstname'),
+      field: 'firstname',
+      sortable: true,
+      align: 'left',
+    },
+    {
+      name: 'lastname',
+      label: t('AccountsPage.accountColumns.lastname'),
+      field: 'lastname',
+      sortable: true,
+      align: 'left',
+    },
+    {
+      name: 'email',
+      label: t('AccountsPage.accountColumns.email'),
+      field: 'email',
+      sortable: true,
+      align: 'left',
+    },
+    {
+      name: 'createdBy',
+      label: t('AccountsPage.accountColumns.createdBy'),
+      field: 'createdBy',
+      sortable: true,
+      align: 'left',
+    },
+    {
+      name: 'insertDate',
+      label: t('AccountsPage.accountColumns.insertDate'),
+      field: 'insertDate',
+      sortable: true,
+      align: 'left',
+    },
+    {
+      name: 'actions',
+      label: t('AccountsPage.accountColumns.actions'),
+      field: '',
+      sortable: false,
+      align: 'center',
+    },
+  ];
+  return accountColumns;
+}

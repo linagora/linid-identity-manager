@@ -59,14 +59,14 @@ describe('commonMapper', () => {
     });
 
     it('should format a valid ISO date string', () => {
-      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
+      tMock.mockReturnValue('YYYY-MM-DD');
       const { toDate } = useCommonMapper();
 
       const iso = '2024-07-20T12:34:56.000Z';
       const result = toDate(iso);
 
-      expect(result).toBe(dayjs(iso).format('YYYY-MM-DD HH:mm'));
-      expect(tMock).toHaveBeenCalledWith('application.dateTimeFormat');
+      expect(result).toBe(dayjs(iso).format('YYYY-MM-DD'));
+      expect(tMock).toHaveBeenCalledWith('application.dateFormat');
     });
   });
 
@@ -120,6 +120,42 @@ describe('commonMapper', () => {
       const fields = [{ name: 'foo', type: 'text', rules: [] }];
 
       expect(toEmptyRecord(fields)).not.toBe(toEmptyRecord(fields));
+    });
+  });
+
+  describe('Test function: toLikeFilter', () => {
+    it('should format string values with lk_*value*', () => {
+      const { toLikeFilter } = useCommonMapper();
+
+      expect(toLikeFilter('John')).toEqual(['lk_*John*']);
+      expect(toLikeFilter(123)).toEqual(['lk_*123*']);
+    });
+
+    it('should return null for falsy values (null/undefined/empty)', () => {
+      const { toLikeFilter } = useCommonMapper();
+
+      expect(toLikeFilter(null)).toBe(null);
+      expect(toLikeFilter(undefined)).toBe(null);
+      expect(toLikeFilter('')).toBe(null);
+    });
+  });
+
+  describe('Test function: toDateFilter', () => {
+    it('should format a date value as a between filter (start of day to end of day)', () => {
+      const { toDateFilter } = useCommonMapper();
+
+      const value = '24/07/2025';
+      expect(toDateFilter(value)).toEqual([
+        `${value} 00:00:00_bt_${value} 23:59:59`,
+      ]);
+    });
+
+    it('should return null for falsy values (null/undefined/empty)', () => {
+      const { toDateFilter } = useCommonMapper();
+
+      expect(toDateFilter(null)).toBe(null);
+      expect(toDateFilter(undefined)).toBe(null);
+      expect(toDateFilter('')).toBe(null);
     });
   });
 });

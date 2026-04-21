@@ -13,6 +13,55 @@
     "links": "<ul class=\"q-pl-md\"><li>Code source disponible sur <a href=\"https://github.com/linagora/linid-identity-manager\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>Si vous trouvez un bug, merci de le signaler <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">ici</a>.</li></ul>",
     "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>Un projet de</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
   },
+  "AccountsPage": {
+    "menuTitle": "Comptes",
+    "title": "Comptes",
+    "detailButton": "Voir",
+    "ButtonsCard": {
+      "create": "Créer"
+    },
+    "AdvancedSearchCard": {
+      "fields": {
+        "firstname": {
+          "label": "Prénom",
+          "hint": "Saisissez un prénom pour filtrer les comptes."
+        },
+        "lastname": {
+          "label": "Nom de famille",
+          "hint": "Saisissez un nom de famille pour filtrer les comptes."
+        },
+        "email": {
+          "label": "Email",
+          "hint": "Saisissez une adresse email pour filtrer les comptes."
+        },
+        "createdBy": {
+          "label": "Créé par",
+          "hint": "Saisissez le nom de l'utilisateur qui a créé le compte pour filtrer les comptes."
+        },
+        "insertDate": {
+          "close": "Fermer",
+          "label": "Date d'insertion",
+          "hint": "Sélectionnez une date d'insertion pour filtrer les comptes."
+        }
+      }
+    },
+    "accountColumns": {
+      "firstname": "Prénom",
+      "lastname": "Nom de famille",
+      "email": "Email",
+      "createdBy": "Créé par",
+      "insertDate": "Date d'insertion",
+      "actions": "Actions"
+    },
+    "GenericEntityTable": {
+      "rowsPerPage": "Lignes par page",
+      "paginationLabel": "{start}-{end} sur {total}"
+    },
+    "errors": {
+      "notFound": "Comptes introuvables",
+      "generic": "Impossible de charger les comptes. Veuillez réessayer plus tard."
+    }
+  },
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },

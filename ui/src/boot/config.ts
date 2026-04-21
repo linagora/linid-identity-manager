@@ -1,13 +1,14 @@
+/* eslint-disable */
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
  * LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
  * which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
- * of the interface window, the display of the “You are using the Open Source and free version of LinID™, powered by
- * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!” infobox and in the e-mails
+ * of the interface window, the display of the "You are using the Open Source and free version of LinID™, powered by
+ * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!" infobox and in the e-mails
  * sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
  * as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
  * and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
@@ -24,44 +25,26 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import {
+  useLinidUiStore,
+  getI18nInstance,
+} from '@linagora/linid-im-front-corelib';
+import { defineBoot } from '@quasar/app-vite/wrappers';
+import { Composer } from 'vue-i18n';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Application configuration boot file.
+ *
+ * This boot file is responsible for registering navigation menu items into
+ * the UI store.
+ */
+export default defineBoot((): void => {
+  const uiStore = useLinidUiStore();
+  const { t } = getI18nInstance().global as Composer;
+
+  uiStore.addMainNavigationMenuItems({
+    id: 'accounts',
+    label: t('AccountsPage.menuTitle'),
+    path: '/accounts',
+  });
+});

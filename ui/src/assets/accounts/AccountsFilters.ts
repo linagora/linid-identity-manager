@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,44 +24,66 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 
-const routes: RouteRecordRaw[] = [
+/**
+ * Defines the search fields for the accounts page in the UI.
+ */
+export const fieldsSearch: LinidAttributeConfiguration[] = [
   {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
+    name: 'firstname',
+    type: 'String',
+    required: false,
+    hasValidations: false,
+    input: 'Text',
+    inputSettings: {},
   },
   {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
+    name: 'lastname',
+    type: 'String',
+    required: false,
+    hasValidations: false,
+    input: 'Text',
+    inputSettings: {},
   },
   {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-    ],
+    name: 'email',
+    type: 'String',
+    required: false,
+    hasValidations: false,
+    input: 'Text',
+    inputSettings: {},
+  },
+  {
+    name: 'createdBy',
+    type: 'String',
+    required: false,
+    hasValidations: false,
+    input: 'Text',
+    inputSettings: {},
+  },
+  {
+    name: 'insertDate',
+    type: 'String',
+    required: false,
+    hasValidations: false,
+    input: 'Date',
+    inputSettings: {},
   },
 ];
-export default routes;
+
+/**
+ * Defines the default fields for the AdvancedSearchCard (fields that are shown by default).
+ */
+export const defaultFields: string[] = [
+  'firstname',
+  'lastname',
+  'email',
+  'createdBy',
+  'insertDate',
+];
+
+/**
+ * Defines the advanced fields for the AdvancedSearchCard (fields that are not shown by default).
+ */
+export const advancedFields: string[] = [];

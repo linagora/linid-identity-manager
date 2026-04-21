@@ -96,6 +96,41 @@ export interface AccountDTO {
 }
 
 /**
+ * Shape of the filter object sent to the backend when querying accounts with filters.
+ */
+export interface AccountQueryFilterDTO {
+  /**
+   * List of last names to filter by.
+   */
+  lastname: string[] | null;
+
+  /**
+   * List of first names to filter by.
+   */
+  firstname: string[] | null;
+
+  /**
+   * List of email addresses to filter by.
+   */
+  email: string[] | null;
+
+  /**
+   * List of createdBy to filter by.
+   */
+  createdBy: string[] | null;
+
+  /**
+   * List of creation dates to filter by.
+   */
+  insertDate: string[] | null;
+
+  /**
+   * The date format used in the date filters.
+   */
+  dateFormat: string | null;
+}
+
+/**
  * Account shape consumed by Vue components.
  */
 export interface Account {

@@ -29,6 +29,8 @@ import { useAccountMapper } from 'src/mappers/accountMapper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
 
+const SPRING_QUERY_DATE_FORMAT = 'dd/MM/yyyy HH:mm:ss';
+
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
@@ -64,6 +66,98 @@ describe('accountMapper', () => {
         insertDate: dayjs(dto.insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dto.updateDate).format('YYYY-MM-DD HH:mm'),
       });
+    });
+  });
+
+  describe('Test function: toAccountQueryFilterDTO', () => {
+    it('Convert filters to AccountQueryFilter', () => {
+      const { toAccountQueryFilterDTO } = useAccountMapper();
+      tMock.mockReturnValue('DD/MM/YYYY');
+
+      const filters = {
+        firstname: 'John',
+        lastname: 'doe',
+        email: 'john.doe',
+        createdBy: 'admin',
+        insertDate: '2025-07-24T00:00:00Z',
+      };
+
+      const result = toAccountQueryFilterDTO(filters);
+
+      expect(result.lastname).toEqual([`lk_*${filters.lastname}*`]);
+      expect(result.firstname).toEqual([`lk_*${filters.firstname}*`]);
+      expect(result.email).toEqual([`lk_*${filters.email}*`]);
+      expect(result.createdBy).toEqual([`lk_*${filters.createdBy}*`]);
+      const formattedDate = dayjs(filters.insertDate).format('DD/MM/YYYY');
+      expect(result.insertDate).toEqual([
+        `${formattedDate} 00:00:00_bt_${formattedDate} 23:59:59`,
+      ]);
+      expect(result.dateFormat).toBe(SPRING_QUERY_DATE_FORMAT);
+    });
+
+    it('Handle empty filters', () => {
+      const { toAccountQueryFilterDTO } = useAccountMapper();
+      tMock.mockReturnValue('DD/MM/YYYY');
+
+      const result = toAccountQueryFilterDTO({});
+
+      expect(result.lastname).toBeNull();
+      expect(result.firstname).toBeNull();
+      expect(result.email).toBeNull();
+      expect(result.createdBy).toBeNull();
+      expect(result.insertDate).toBeNull();
+      expect(result.dateFormat).toBe(SPRING_QUERY_DATE_FORMAT);
+    });
+  });
+
+  describe('Test function: toAccountList', () => {
+    it('Map an array of AccountDTOs to Accounts', () => {
+      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
+      const { toAccountList } = useAccountMapper();
+
+      const dtos = [
+        {
+          id: 1,
+          lastname: 'Doe',
+          firstname: 'John',
+          email: 'john.doe@example.com',
+          externalId: 'ext-1',
+          createdBy: 'admin',
+          updatedBy: 'admin2',
+          insertDate: '2024-01-01T00:00:00Z',
+          updateDate: '2024-02-01T00:00:00Z',
+        },
+        {
+          id: 2,
+          lastname: 'Smith',
+          firstname: 'Jane',
+          email: 'jane.smith@example.com',
+          externalId: 'ext-2',
+          createdBy: 'admin',
+          updatedBy: 'admin',
+          insertDate: '2024-03-01T00:00:00Z',
+          updateDate: '2024-04-01T00:00:00Z',
+        },
+      ];
+
+      const accounts = toAccountList(dtos);
+
+      expect(accounts).toHaveLength(2);
+      expect(accounts[0]).toEqual({
+        ...dtos[0],
+        insertDate: dayjs(dtos[0].insertDate).format('YYYY-MM-DD HH:mm'),
+        updateDate: dayjs(dtos[0].updateDate).format('YYYY-MM-DD HH:mm'),
+      });
+      expect(accounts[1]).toEqual({
+        ...dtos[1],
+        insertDate: dayjs(dtos[1].insertDate).format('YYYY-MM-DD HH:mm'),
+        updateDate: dayjs(dtos[1].updateDate).format('YYYY-MM-DD HH:mm'),
+      });
+    });
+
+    it('Return empty array when given an empty list', () => {
+      const { toAccountList } = useAccountMapper();
+      expect(toAccountList([])).toEqual([]);
     });
   });
 });

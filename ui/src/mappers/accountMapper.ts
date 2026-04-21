@@ -25,14 +25,19 @@
  */
 
 import { useCommonMapper } from 'src/mappers/commonMapper';
-import type { AccountDTO, Account } from 'src/types/accounts';
+import type {
+  AccountDTO,
+  Account,
+  AccountQueryFilterDTO,
+} from 'src/types/accounts';
 
 /**
  * Mapper for accounts-related data transformations.
- * @returns Functions to convert API records to UI-friendly formats.
+ * @returns Functions to convert API records to UI-friendly formats and to transform search filters for Spring Security.
  */
 export function useAccountMapper() {
-  const { toDate } = useCommonMapper();
+  const { toDate, toDateFilter, toLikeFilter, SPRING_QUERY_DATE_FORMAT } =
+    useCommonMapper();
 
   /**
    * Maps an AccountDTO to an Account, converting date to date ISO.
@@ -47,7 +52,36 @@ export function useAccountMapper() {
     };
   };
 
+  /**
+   * Maps an array of AccountDTOs to an array of Accounts, converting dates from date ISO to date with local date format.
+   * @param accounts Array of AccountDTOs to be transformed into Accounts.
+   * @returns Array of Accounts with properly typed fields for UI.
+   */
+  const toAccountList = (accounts: AccountDTO[]): Account[] => {
+    return accounts.map(toAccount);
+  };
+
+  /**
+   * Transforms advanced search filters from the UI into a format suitable for API filters.
+   * @param advancedSearchFilters Record containing the raw filter values entered by the user in the advanced search form.
+   * @returns AccountQueryFilterDTO with properly formatted filter values for querying accounts in the backend.
+   */
+  const toAccountQueryFilterDTO = (
+    advancedSearchFilters: Record<string, unknown>
+  ): AccountQueryFilterDTO => {
+    return {
+      lastname: toLikeFilter(advancedSearchFilters['lastname']),
+      firstname: toLikeFilter(advancedSearchFilters['firstname']),
+      email: toLikeFilter(advancedSearchFilters['email']),
+      createdBy: toLikeFilter(advancedSearchFilters['createdBy']),
+      insertDate: toDateFilter(toDate(advancedSearchFilters['insertDate'])),
+      dateFormat: SPRING_QUERY_DATE_FORMAT,
+    };
+  };
+
   return {
     toAccount,
+    toAccountList,
+    toAccountQueryFilterDTO,
   };
 }

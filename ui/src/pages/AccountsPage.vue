@@ -1,0 +1,246 @@
+<!--
+  Copyright (C) 2026 Linagora
+
+  This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+  Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
+  any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
+  LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
+  which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
+  of the interface window, the display of the “You are using the Open Source and free version of LinID™, powered by
+  Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!” infobox and in the e-mails
+  sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
+  as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
+  and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
+  intellectual property rights over its trademarks and commercial brands. Other Additional Terms apply, see
+  <http://www.linagora.com/licenses/> for more details.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+  details.
+
+  You should have received a copy of the GNU Affero General Public License and its applicable Additional Terms for
+  LinID Identity Manager along with this program. If not, see <http://www.gnu.org/licenses/> for the GNU Affero
+  General Public License version 3 and <http://www.linagora.com/licenses/> for the Additional Terms applicable to the
+  LinID Identity Manager software.
+-->
+
+<template>
+  <q-page
+    data-cy="accounts-page"
+    class="q-pa-md accounts-page"
+  >
+    <div class="accounts-page--header">
+      <h1
+        class="q-ma-none text-h5 accounts-page--title"
+        data-cy="accounts-page_title"
+      >
+        {{ t('title') }}
+      </h1>
+      <div class="accounts-page--actions">
+        <component
+          :is="buttonsCard"
+          v-if="buttonsCard"
+          :ui-namespace="uiNamespace"
+          :i18n-scope="i18nScope"
+          :show-confirm-button="false"
+          :show-cancel-button="false"
+        >
+          <template #append-buttons>
+            <q-btn
+              v-bind="uiProps.createButton"
+              :label="t('ButtonsCard.create')"
+              class="buttons-card--create-button"
+              data-cy="button_create"
+              @click="goToCreate"
+            />
+          </template>
+        </component>
+      </div>
+    </div>
+
+    <component
+      :is="advancedSearchComponent"
+      v-if="advancedSearchComponent"
+      v-model:filters="filters"
+      :ui-namespace="uiNamespace"
+      :i18n-scope="i18nScope"
+      :fields="fieldsSearch"
+      :default-fields-names="defaultFields"
+      :advanced-fields-names="advancedFields"
+      class="q-mb-md"
+      @update:filters="onFiltersChange"
+    />
+    <component
+      :is="tableComponent"
+      v-if="tableComponent"
+      v-model:pagination="pagination"
+      :ui-namespace="uiNamespace"
+      :i18n-scope="i18nScope"
+      :rows="accounts"
+      :columns="accountColumns"
+      :loading="isLoading"
+      @request="onRequest"
+    >
+      <template #body="props">
+        <q-tr
+          :props="props"
+          data-cy="account-row"
+        >
+          <q-td
+            v-for="col in props.cols"
+            :key="col.name"
+            :props="props"
+            :data-cy="`cell-${col.name}`"
+          >
+            <template v-if="col.name === 'actions'">
+              <q-btn
+                v-bind="uiProps.seeButton"
+                :label="t('detailButton')"
+                data-cy="see-button"
+                @click="goToAccountDetails(props.row)"
+              />
+            </template>
+            <template v-else>
+              {{ col.value }}
+            </template>
+          </q-td>
+        </q-tr>
+      </template>
+    </component>
+  </q-page>
+</template>
+
+<script setup lang="ts">
+import type {
+  LinidQBtnProps,
+  QTableRequestEvent,
+  QuasarPagination,
+} from '@linagora/linid-im-front-corelib';
+import {
+  loadAsyncComponent,
+  useNotify,
+  usePagination,
+  useScopedI18n,
+  useUiDesign,
+} from '@linagora/linid-im-front-corelib';
+import {
+  advancedFields,
+  defaultFields,
+  fieldsSearch,
+} from 'assets/accounts/AccountsFilters';
+import axios from 'axios';
+import { useAccountsColumns } from 'src/composables/AccountsColumns';
+import { useAccountMapper } from 'src/mappers/accountMapper';
+import { getAccounts } from 'src/services/AccountsService';
+import type { Account } from 'src/types/accounts';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+
+const router = useRouter();
+const route = useRoute();
+const i18nScope = 'AccountsPage';
+const { t } = useScopedI18n(i18nScope);
+const { Notify } = useNotify();
+const advancedSearchComponent = loadAsyncComponent(
+  'catalogUI/AdvancedSearchCard'
+);
+const tableComponent = loadAsyncComponent('catalogUI/GenericEntityTable');
+const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
+const filters = ref<Record<string, unknown>>({});
+
+const accounts = ref<Account[]>([]);
+const isLoading = ref<boolean>(false);
+
+const { ui } = useUiDesign();
+const uiProps = computed(() => ({
+  createButton: ui<LinidQBtnProps>(`${uiNamespace}.create-button`, 'q-btn'),
+  seeButton: ui<LinidQBtnProps>(
+    `${uiNamespace}.buttons-card.see-button`,
+    'q-btn'
+  ),
+}));
+
+const { toAccountQueryFilterDTO, toAccountList } = useAccountMapper();
+const { toPagination, toQuasarPagination } = usePagination();
+const accountColumns = computed(() => useAccountsColumns());
+
+const pagination = ref<QuasarPagination>({
+  page: 1,
+  rowsNumber: 0,
+  sortBy: undefined,
+  rowsPerPage: 10,
+  descending: true,
+});
+const uiNamespace = 'accounts.homepage';
+
+/**
+ * Loads the account list.
+ */
+async function loadData(): Promise<void> {
+  isLoading.value = true;
+
+  try {
+    const accountsPage = await getAccounts(
+      toAccountQueryFilterDTO(filters.value),
+      toPagination(pagination.value)
+    );
+    accounts.value = toAccountList(accountsPage.content);
+    pagination.value = toQuasarPagination(accountsPage);
+  } catch (error) {
+    const errorMessageKey =
+      axios.isAxiosError(error) && error.response?.status === 404
+        ? 'errors.notFound'
+        : 'errors.generic';
+    Notify({
+      type: 'negative',
+      message: t(errorMessageKey),
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+/**
+ * Navigates to the account creation page.
+ * @returns A promise resolved once navigation finishes.
+ */
+function goToCreate() {
+  return router.push({
+    path: `${route.path}/create`,
+  });
+}
+
+/**
+ * Navigates to the account detail page.
+ * @param account - Account row selected in the table.
+ * @returns A promise resolved once navigation finishes.
+ */
+function goToAccountDetails(account: Account) {
+  return router.push({
+    path: `${route.path}/${account.id}`,
+  });
+}
+
+/**
+ * Handles pagination/sort changes requested by QTable.
+ * @param props - QTable request payload.
+ */
+async function onRequest(props: QTableRequestEvent) {
+  pagination.value = props.pagination;
+  await loadData();
+}
+
+/**
+ * Handles filter changes from the AdvancedSearchCard component.
+ * Resets pagination to the first page and reloads data with new filters.
+ * @param newFilters - The updated filters object.
+ * @returns A promise that resolves when the data has been loaded.
+ */
+function onFiltersChange(newFilters: Record<string, unknown>): Promise<void> {
+  filters.value = newFilters;
+  pagination.value.page = 1;
+  return loadData();
+}
+
+onMounted(loadData);
+</script>

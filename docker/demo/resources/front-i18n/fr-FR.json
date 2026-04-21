@@ -16,6 +16,55 @@
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },
+  "AccountsPage": {
+    "menuTitle": "Comptes",
+    "title": "Comptes",
+    "detailButton": "Voir",
+    "ButtonsCard": {
+      "create": "Créer"
+    },
+    "AdvancedSearchCard": {
+      "fields": {
+        "firstname": {
+          "label": "Prénom",
+          "hint": "Saisissez un prénom pour filtrer les comptes."
+        },
+        "lastname": {
+          "label": "Nom de famille",
+          "hint": "Saisissez un nom de famille pour filtrer les comptes."
+        },
+        "email": {
+          "label": "Email",
+          "hint": "Saisissez une adresse email pour filtrer les comptes."
+        },
+        "createdBy": {
+          "label": "Créé par",
+          "hint": "Saisissez le nom de l'utilisateur qui a créé le compte pour filtrer les comptes."
+        },
+        "insertDate": {
+          "close": "Fermer",
+          "label": "Date d'insertion",
+          "hint": "Sélectionnez une date d'insertion pour filtrer les comptes."
+        }
+      }
+    },
+    "accountColumns": {
+      "firstname": "Prénom",
+      "lastname": "Nom de famille",
+      "email": "Email",
+      "createdBy": "Créé par",
+      "insertDate": "Date d'insertion",
+      "actions": "Actions"
+    },
+    "GenericEntityTable": {
+      "rowsPerPage": "Lignes par page",
+      "paginationLabel": "{start}-{end} sur {total}"
+    },
+    "errors": {
+      "notFound": "Comptes introuvables",
+      "generic": "Impossible de charger les comptes. Veuillez réessayer plus tard."
+    }
+  },
   "AccountCreationPage": {
     "title": "Créer un nouveau compte",
     "fields": {

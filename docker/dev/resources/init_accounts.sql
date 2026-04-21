@@ -16,7 +16,7 @@ SELECT admin_id,
        'admin_ln',
        'admin_fn',
        '{}'::jsonb,
-       encode(digest('{}', 'sha256'), 'hex'),
+    encode(digest('{}', 'sha256'), 'hex'),
        admin_id,
        admin_id
 FROM generated
@@ -29,7 +29,7 @@ SELECT gen_random_uuid(),
        'user1_ln',
        'user1_fn',
        '{}'::jsonb,
-       encode(digest('{}', 'sha256'), 'hex'),
+    encode(digest('{}', 'sha256'), 'hex'),
        admin_id,
        admin_id
 FROM generated
@@ -86,4 +86,4 @@ SELECT gen_random_uuid(),
        admin_id
 FROM generated
 
-ON CONFLICT (email) DO NOTHING;
+    ON CONFLICT (email) DO NOTHING;

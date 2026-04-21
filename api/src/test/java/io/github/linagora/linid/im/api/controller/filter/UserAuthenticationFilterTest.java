@@ -26,6 +26,17 @@
 
 package io.github.linagora.linid.im.api.controller.filter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.service.AccountService;
@@ -34,6 +45,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,14 +56,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @DisplayName("Test class: UserAuthenticationFilter")
 class UserAuthenticationFilterTest {
@@ -83,7 +90,8 @@ class UserAuthenticationFilterTest {
         Jwt jwt = mock(Jwt.class);
         UUID uuid = UUID.randomUUID();
         when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
-        when(accountService.getAccountByEmail("test@example.com")).thenReturn(Optional.of(Account.builder().id(uuid).build()));
+        when(accountService.getAccountByEmail("test@example.com")).thenReturn(
+            Optional.of(Account.builder().id(uuid).build()));
 
         // Set Authentication with mocked Jwt as principal
         SecurityContextHolder.getContext().setAuthentication(
@@ -155,5 +163,45 @@ class UserAuthenticationFilterTest {
 
         assertEquals(401, exception.getStatusCode());
         assertEquals("error.unauthorized", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("test doFilterInternal: should throw exception when email claim is null")
+    void doFilterInternal_withNullEmailClaim_throwsApiException() throws ServletException, IOException {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("email")).thenReturn(null);
+
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
+        );
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+            filter.doFilterInternal(request, response, filterChain)
+        );
+
+        assertEquals(401, exception.getStatusCode());
+        assertEquals("error.unauthorized", exception.getError().key());
+        verify(accountService, never()).getAccountByEmail(any());
+        verify(filterChain, never()).doFilter(any(), any());
+    }
+
+    @Test
+    @DisplayName("test doFilterInternal: should throw exception when email claim is blank")
+    void doFilterInternal_withBlankEmailClaim_throwsApiException() throws ServletException, IOException {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getClaimAsString("email")).thenReturn("   ");
+
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
+        );
+
+        ApiException exception = assertThrows(ApiException.class, () ->
+            filter.doFilterInternal(request, response, filterChain)
+        );
+
+        assertEquals(401, exception.getStatusCode());
+        assertEquals("error.unauthorized", exception.getError().key());
+        verify(accountService, never()).getAccountByEmail(any());
+        verify(filterChain, never()).doFilter(any(), any());
     }
 }

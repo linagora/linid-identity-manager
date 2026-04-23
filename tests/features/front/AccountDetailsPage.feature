@@ -3,11 +3,10 @@ Feature: Test Account details page display
   ################## Account Details ##################
   ## 101 Should display all account information on detail page
   ## 102 Should display all action buttons on detail page
-  ## 103 Edit button should go to the edit page
-  ## 104 Cancel button should come back at accounts list page
-  ## 105 Remove the account
-  ## 106 Should display a not found notification when navigating to a non-existent account
-  ## 107 Should display a generic error notification when navigating to an account with a malformed ID
+  ## 103 Cancel button should come back at accounts list page
+  ## 104 Remove the account
+  ## 105 Should display a not found notification when navigating to a non-existent account
+  ## 106 Should display a generic error notification when navigating to an account with a malformed ID
 
   Scenario: Roundtrip about Account Details
 
@@ -72,27 +71,21 @@ Feature: Test Account details page display
     ## 102 Should display all action buttons on detail page
     And I expect the HTML element '[data-cy="buttons-card"]' to be visible
     And I expect the HTML element '[data-cy="buttons-card"] [data-cy="button_cancel"]' contains "Retour"
-    And I expect the HTML element '[data-cy="buttons-card"] [data-cy="button_edit"]' contains "Modifier"
 
-    ## 103 Edit button should go to the edit page
-    When I click on '[data-cy="buttons-card"] [data-cy="button_edit"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/{{ctx.accountId}}/edit"
-
-    ## 104 Cancel button should come back at accounts list page
-    When I visit the "{{ env.E2E_FRONT_URL }}/accounts/{{ctx.accountId}}"
-    And I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    ## 103 Cancel button should come back at accounts list page
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
 
-    ## 105: Remove the account
+    ## 104: Remove the account
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204
 
-    ## 106 Should display a not found notification when navigating to a non-existent account
+    ## 105 Should display a not found notification when navigating to a non-existent account
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-0000-0000-000000000000"
     Then I expect the HTML element '.q-notification__message' contains "Compte introuvable"
     And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
 
-    ## 107 Should display a generic error notification when navigating to an account with a malformed ID
+    ## 106 Should display a generic error notification when navigating to an account with a malformed ID
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/not-a-valid-uuid"
     Then I expect the HTML element '.q-notification__message' contains "Impossible de charger le compte. Veuillez réessayer plus tard."
     And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"

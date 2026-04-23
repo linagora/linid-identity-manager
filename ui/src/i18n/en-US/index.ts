@@ -89,7 +89,6 @@ export default {
     },
     ButtonsCard: {
       cancel: 'Back',
-      edit: 'Edit',
     },
     errors: {
       notFound: 'Account not found',

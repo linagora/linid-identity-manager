@@ -54,8 +54,7 @@
       }
     },
     "ButtonsCard": {
-      "cancel": "Back",
-      "edit": "Edit"
+      "cancel": "Back"
     },
     "errors": {
       "notFound": "Account not found",

@@ -50,9 +50,6 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: () => ({
     t: vi.fn((v) => v),
   }),
-  useUiDesign: () => ({
-    ui: vi.fn(() => ({})),
-  }),
 }));
 
 vi.mock('axios', () => ({
@@ -93,15 +90,6 @@ describe('Test component: AccountDetailsPage', () => {
       wrapper = shallowMount(AccountDetailsPage);
 
       expect(wrapper.vm.accountId).toBe('test-account-id');
-    });
-  });
-
-  describe('Test computed: uiProps', () => {
-    it('should compute uiProps correctly', () => {
-      wrapper = shallowMount(AccountDetailsPage);
-
-      expect(wrapper.vm.uiProps).toBeDefined();
-      expect(wrapper.vm.uiProps.editButton).toBeDefined();
     });
   });
 
@@ -166,17 +154,6 @@ describe('Test component: AccountDetailsPage', () => {
       });
       expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
       expect(wrapper.vm.isLoading).toBe(false);
-    });
-  });
-
-  describe('Test function: goToEdit', () => {
-    it('should navigate to edit page', () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      wrapper.vm.goToEdit();
-
-      expect(mockRouter.push).toHaveBeenCalledWith(
-        '/accounts/test-account-id/edit'
-      );
     });
   });
 

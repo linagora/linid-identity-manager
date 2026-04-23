@@ -140,13 +140,6 @@
             "q-icon": { "color": "primary", "name": "update" }
           }
         }
-      },
-      "buttons-card": {
-        "edit-button": {
-          "q-btn": {
-            "outline": false
-          }
-        }
       }
     }
   }

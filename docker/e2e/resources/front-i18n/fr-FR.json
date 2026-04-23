@@ -16,6 +16,29 @@
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },
+  "AccountCreationPage": {
+    "title": "Créer un nouveau compte",
+    "fields": {
+      "externalId": "Identifiant externe",
+      "lastname": "Nom",
+      "firstname": "Prénom",
+      "email": "E-mail"
+    },
+    "validation": {
+      "required": "Ce champ est requis",
+      "email": "Format d'e-mail invalide"
+    },
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Créer",
+      "confirmLoading": "Création..."
+    },
+    "success": "Compte créé avec succès",
+    "errors": {
+      "validation": "Données invalides. Veuillez vérifier le formulaire.",
+      "generic": "Impossible de créer le compte. Veuillez réessayer plus tard."
+    }
+  },
   "AccountDetailsPage": {
     "title": "Détails du compte",
     "EntityDetailsCard": {

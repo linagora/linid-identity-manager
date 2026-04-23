@@ -94,6 +94,15 @@
     }
   },
   "accounts": {
+    "creation-page": {
+      "buttons-card": {
+        "confirm-button": {
+          "q-btn": {
+            "outline": false
+          }
+        }
+      }
+    },
     "details-page": {
       "entity-details-card": {
         "firstname": {

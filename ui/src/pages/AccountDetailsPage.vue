@@ -48,17 +48,7 @@
             :i18n-scope="i18nScope"
             :show-confirm-button="false"
             @cancel="goBack"
-          >
-            <template #append-buttons>
-              <q-btn
-                v-bind="uiProps.editButton"
-                class="buttons-card--edit-button"
-                :label="t('ButtonsCard.edit')"
-                data-cy="button_edit"
-                @click="goToEdit"
-              />
-            </template>
-          </component>
+          />
         </div>
       </div>
 
@@ -79,12 +69,10 @@
 </template>
 
 <script setup lang="ts">
-import type { LinidQBtnProps } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
   useNotify,
   useScopedI18n,
-  useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
@@ -101,14 +89,6 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
-const { ui } = useUiDesign();
-
-const uiProps = {
-  editButton: ui<LinidQBtnProps>(
-    `${uiNamespace}.buttons-card.edit-button`,
-    'q-btn'
-  ),
-};
 
 const accountId = computed(() => route.params.id as string);
 
@@ -145,13 +125,6 @@ async function loadAccount(): Promise<void> {
  */
 function goBack(): void {
   router.push('/accounts');
-}
-
-/**
- * Navigates to the edit page for the current account.
- */
-function goToEdit(): void {
-  router.push(`/accounts/${accountId.value}/edit`);
 }
 
 onMounted(() => {

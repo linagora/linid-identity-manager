@@ -54,8 +54,7 @@
       }
     },
     "ButtonsCard": {
-      "cancel": "Retour",
-      "edit": "Modifier"
+      "cancel": "Retour"
     },
     "errors": {
       "notFound": "Compte introuvable",

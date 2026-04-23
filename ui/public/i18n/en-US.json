@@ -16,6 +16,29 @@
   "AuthenticationCallbackPage": {
     "processing": "Processing authentication response..."
   },
+  "AccountCreationPage": {
+    "title": "Create a new account",
+    "fields": {
+      "externalId": "External ID",
+      "lastname": "Last name",
+      "firstname": "First name",
+      "email": "Email"
+    },
+    "validation": {
+      "required": "This field is required",
+      "email": "Invalid email format"
+    },
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "success": "Account successfully created",
+    "errors": {
+      "validation": "Invalid data. Please check the form.",
+      "generic": "Unable to create the account. Please try again later."
+    }
+  },
   "AccountDetailsPage": {
     "title": "Account details",
     "EntityDetailsCard": {

@@ -24,76 +24,51 @@
  * LinID Identity Manager software.
  */
 
+import {
+  useFieldValidation,
+  useScopedI18n,
+} from '@linagora/linid-im-front-corelib';
+import type { AccountRecord } from 'src/types/accounts';
+import type { FormField } from 'src/types/form';
+
 /**
- * Type definition for i18n messages.
- * This must match the structure in public/i18n/en-US.json for proper type checking.
- *
- * Note: Only core application translations are defined here.
- * Module-specific translations (e.g., moduleUsers) are loaded dynamically
- * from the public/i18n/*.json files.
+ * Build the declarative field configuration for the account creation
+ * form. Each field carries its already-translated label and the concrete
+ * Quasar validation rules to apply.
+ * @param i18nScope - I18n scope used for both labels (`fields.<name>`)
+ * and validator error messages (`validation.<rule>`).
+ * @returns The ordered list of fields rendered by the creation form.
  */
-export default {
-  application: {
-    title: 'LinID - Identity Manager',
-    version: 'Development version',
-    dateTimeFormat: 'YYYY/MM/DD hh:mm:ss A',
-    dateFormat: 'YYYY/MM/DD',
-  },
-  Homepage: {
-    title: 'text',
-    intro: 'text',
-    opensource: 'text',
-    license: 'text',
-    links: 'text',
-    branding: 'text',
-  },
-  AuthenticationCallbackPage: {
-    processing: 'Processing authentication response...',
-  },
-  AccountCreationPage: {
-    title: 'Create a new account',
-    fields: {
-      externalId: 'External ID',
-      lastname: 'Last name',
-      firstname: 'First name',
-      email: 'Email',
+export function useAccountCreationConfig(i18nScope: string) {
+  const { t } = useScopedI18n(i18nScope);
+  const { required, email } = useFieldValidation(i18nScope);
+
+  const creationFields: FormField<AccountRecord>[] = [
+    {
+      name: 'externalId',
+      label: t('fields.externalId'),
+      type: 'text',
+      rules: [required],
     },
-    validation: {
-      required: 'This field is required',
-      email: 'Invalid email format',
+    {
+      name: 'lastname',
+      label: t('fields.lastname'),
+      type: 'text',
+      rules: [required],
     },
-    ButtonsCard: {
-      cancel: 'Cancel',
-      confirm: 'Create',
-      confirmLoading: 'Creating...',
+    {
+      name: 'firstname',
+      label: t('fields.firstname'),
+      type: 'text',
+      rules: [required],
     },
-    success: 'Account successfully created',
-    errors: {
-      validation: 'Invalid data. Please check the form.',
-      generic: 'Unable to create the account. Please try again later.',
+    {
+      name: 'email',
+      label: t('fields.email'),
+      type: 'email',
+      rules: [required, email],
     },
-  },
-  AccountDetailsPage: {
-    title: 'Account details',
-    EntityDetailsCard: {
-      title: 'Account information',
-      attributes: {
-        firstname: 'First name',
-        lastname: 'Last name',
-        email: 'Email',
-        createdBy: 'Created by',
-        updatedBy: 'Updated by',
-        insertDate: 'Creation date',
-        updateDate: 'Last update',
-      },
-    },
-    ButtonsCard: {
-      cancel: 'Back',
-      edit: 'Edit',
-    },
-    errors: {
-      notFound: 'Account not found',
-      generic: 'Unable to load the account. Please try again later.',
-    },
-  },
-};
+  ];
+
+  return { creationFields };
+}

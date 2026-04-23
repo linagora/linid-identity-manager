@@ -94,4 +94,32 @@ describe('commonMapper', () => {
       expect(result).toBe('2025-07-24T00:00:00.000Z');
     });
   });
+
+  describe('toEmptyRecord', () => {
+    it('should return a record with every declared field set to an empty string', () => {
+      const { toEmptyRecord } = useCommonMapper();
+      const fields = [
+        { name: 'externalId', type: 'text', rules: ['required'] },
+        { name: 'email', type: 'email', rules: ['required', 'email'] },
+      ];
+
+      expect(toEmptyRecord(fields)).toEqual({
+        externalId: '',
+        email: '',
+      });
+    });
+
+    it('should return an empty object for an empty field list', () => {
+      const { toEmptyRecord } = useCommonMapper();
+
+      expect(toEmptyRecord([])).toEqual({});
+    });
+
+    it('should return a new object on each call', () => {
+      const { toEmptyRecord } = useCommonMapper();
+      const fields = [{ name: 'foo', type: 'text', rules: [] }];
+
+      expect(toEmptyRecord(fields)).not.toBe(toEmptyRecord(fields));
+    });
+  });
 });

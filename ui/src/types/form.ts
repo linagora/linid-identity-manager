@@ -24,71 +24,31 @@
  * LinID Identity Manager software.
  */
 
-import dayjs from 'dayjs';
-import type { FormField } from 'src/types/form';
-import { useI18n } from 'vue-i18n';
+import type { ValidationRule } from 'quasar';
 
 /**
- * Common mapper for data transformations.
- * @returns Functions to convert datas.
+ * Supported input types on forms.
  */
-export function useCommonMapper() {
-  const { t } = useI18n();
+export type FieldType = 'text' | 'email';
 
+/**
+ * Declarative definition of a single form field.
+ */
+export interface FormField<T> {
   /**
-   * Convert ISO date to date with local date time format.
-   * @param value Date string in ISO format (e.g., "2024-06-30T12:34:56.789Z") to be converted to a human-readable format.
-   * @param format Optional format key to specify the desired date format from the i18n translations (default is "dateTimeFormat").
-   * @returns Formatted date string according to the application's locale settings, or "-" if the input is invalid or falsy.
+   * Key of the field inside {@link T}.
    */
-  const toDate = (
-    value: unknown,
-    format: string = 'dateTimeFormat'
-  ): string => {
-    if (!value) {
-      return '-';
-    }
-    const date = dayjs(value.toString());
-    if (!date.isValid()) {
-      return '-';
-    }
-    return date.format(t(`application.${format}`));
-  };
-
+  name: Extract<keyof T, string>;
   /**
-   * Convert date format to iso.
-   * @param value Date string to be converted to ISO format.
-   * @returns String in ISO format (e.g., "2024-06-30T12:34:56.789Z") or an empty string if the input is falsy.
+   * Translated label displayed next to the input.
    */
-  const toDateISO = (value: unknown): string => {
-    const v = value?.toString() || '';
-    if (!v) {
-      return '';
-    }
-    const date = new Date(v);
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-    return date.toISOString();
-  };
-
+  label: string;
   /**
-   * Build an empty record seed where every field declared in {@link fields}
-   * is set to an empty string. Generic over the record type {@link T} so it
-   * can be reused by any resource-specific form configuration.
-   * @param fields - The form fields that define the shape of the record.
-   * @returns A fresh empty record matching the given field set.
+   * Input type rendered by the q-input component.
    */
-  const toEmptyRecord = <T>(fields: FormField<T>[]): T => {
-    return fields.reduce((acc, field) => {
-      acc[field.name] = '' as T[typeof field.name];
-      return acc;
-    }, {} as T);
-  };
-
-  return {
-    toDate,
-    toDateISO,
-    toEmptyRecord,
-  };
+  type: FieldType;
+  /**
+   * Validation rules applied to the field in the order they should run.
+   */
+  rules: ValidationRule[];
 }

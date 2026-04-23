@@ -16,6 +16,12 @@
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },
+  "AccountDeactivatedInfoText": {
+    "message": "Ce compte va être désactivé le {date}."
+  },
+  "AccountSuspendedInfoText": {
+    "message": "Ce compte va être suspendu le {date}."
+  },
   "AccountsPage": {
     "menuTitle": "Comptes",
     "title": "Comptes",

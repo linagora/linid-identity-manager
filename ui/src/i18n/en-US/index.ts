@@ -50,6 +50,12 @@ export default {
   AuthenticationCallbackPage: {
     processing: 'Processing authentication response...',
   },
+  AccountDeactivatedInfoText: {
+    message: 'This account will be deactivated on {date}.',
+  },
+  AccountSuspendedInfoText: {
+    message: 'This account will be suspended on {date}',
+  },
   AccountsPage: {
     menuTitle: 'Accounts',
     title: 'Accounts',

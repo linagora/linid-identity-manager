@@ -24,6 +24,8 @@
  * LinID Identity Manager software.
  */
 
+import type { Period } from 'src/types/common';
+
 /**
  * Writable fields of an account, sent to the backend when creating an
  * account. Distinct from {@link AccountDTO}: a record carries only
@@ -172,4 +174,47 @@ export interface Account {
    * Display formatting depends on the user's locale.
    */
   updateDate: string;
+}
+
+/**
+ * Represents the detailed status of an account, including lifecycle periods
+ * and optional status metadata such as reasons and comments.
+ */
+export interface AccountStatus extends Account {
+  /**
+   * Period during which the account is considered active.
+   */
+  validityPeriod: Period;
+
+  /**
+   * Period during which the account is suspended.
+   */
+  suspensionPeriod: Period;
+
+  /**
+   * ISO 8601 date representing when the user activated their account.
+   * Null if the account has not been activated yet.
+   */
+  activationAt: string | null;
+
+  /**
+   * Primary reason for the current account status, if any.
+   */
+  statusReason: string | null;
+
+  /**
+   * More specific sub-reason for the account status, if available.
+   */
+  statusSubreason: string | null;
+
+  /**
+   * Optional free-text comment providing additional context about the status.
+   */
+  statusComment: string | null;
+
+  /**
+   * Number of days remaining before the account is deactivated.
+   * Null if not applicable or not scheduled.
+   */
+  daysBeforeDeactivation: number | null;
 }

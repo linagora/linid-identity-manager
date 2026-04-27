@@ -168,5 +168,64 @@
       "name": "warning",
       "size": "xs"
     }
+  },
+  "account-deactivated-banner": {
+    "q-icon": {
+      "color": "white",
+      "name": "warning"
+    },
+    "reactivate-immediate-button": {
+      "q-btn": {
+        "color": "white",
+        "textColor": "negative",
+        "outline": false,
+        "icon": "error"
+      }
+    },
+    "reactivate-scheduled-button": {
+      "q-btn": {
+        "color": "white"
+      }
+    }
+  },
+  "account-deactivated-warning-banner": {
+    "q-banner": {
+      "color": "negative"
+    },
+    "q-icon": {
+      "color": "negative",
+      "name": "warning"
+    },
+    "deactivate-immediate-button": {
+      "q-btn": {
+        "color": "negative",
+        "outline": false,
+        "icon": "error"
+      }
+    },
+    "modify-deactivation-button": {
+      "q-btn": {
+        "color": "negative"
+      }
+    }
+  },
+  "account-suspended-banner": {
+    "q-icon": {
+      "color": "white",
+      "name": "warning"
+    },
+    "clear-suspension-button": {
+      "q-btn": {
+        "color": "white",
+        "textColor": "warning",
+        "outline": false,
+        "icon": "error"
+      }
+    },
+    "modify-suspension-button": {
+      "q-btn": {
+        "color": "white"
+      }
+    }
   }
 }

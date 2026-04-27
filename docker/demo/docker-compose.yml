@@ -81,6 +81,7 @@ services:
       - ./resources/selfsigned.crt:/etc/nginx/certs/selfsigned.crt:ro
       - ./resources/selfsigned.key:/etc/nginx/certs/selfsigned.key:ro
       - ./resources/design.json:/usr/share/nginx/html/design.json:ro
+      - ./resources/theme-style.css:/usr/share/nginx/html/theme-style.css:ro
       - ./resources/i18n.json:/usr/share/nginx/html/i18n.json:ro
       - ./resources/front-i18n/en-US.json:/usr/share/nginx/html/i18n/en-US.json:ro
       - ./resources/front-i18n/fr-FR.json:/usr/share/nginx/html/i18n/fr-FR.json:ro

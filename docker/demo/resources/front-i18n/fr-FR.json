@@ -115,5 +115,21 @@
       "notFound": "Compte introuvable",
       "generic": "Impossible de charger le compte. Veuillez réessayer plus tard."
     }
+  },
+  "AccountDeactivatedBanner": {
+    "content": "Ce compte a été désactivé depuis le {date}.",
+    "reactivateImmediateButton": "Réactivation immédiate",
+    "reactivateScheduledButton": "Planifier la réactivation"
+  },
+  "AccountDeactivatedWarningBanner": {
+    "content": "Ce compte sera désactivé demain (le {date}) | Ce compte sera désactivé dans {count} jours (le {date})",
+    "deactivateImmediateButton": "Désactivation immédiate",
+    "modifyDeactivationButton": "Modifier la date de désactivation"
+  },
+  "AccountSuspendedBanner": {
+    "content": "Ce compte est suspendu depuis le {date}.",
+    "contentWithEndDate": "Ce compte est suspendu depuis le {date} jusqu'au {endDate}.",
+    "clearSuspensionButton": "Réactivation immédiate",
+    "modifySuspensionButton": "Modifier les paramètres de suspension"
   }
 }

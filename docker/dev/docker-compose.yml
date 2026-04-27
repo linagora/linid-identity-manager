@@ -16,7 +16,7 @@ services:
       - ./resources/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
       - ./resources/init_lemonldap_db.sql:/docker-entrypoint-initdb.d/init_lemonldap_db.sql
     healthcheck:
-      test: [ "CMD-SHELL", "psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1' || exit 1" ]
+      test: ["CMD-SHELL", "psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1' || exit 1"]
       interval: 2s
       timeout: 5s
       retries: 5
@@ -56,7 +56,7 @@ services:
     volumes:
       - ./resources/init_accounts.sql:/init_accounts.sql:ro
       - ./resources/init_accounts.sh:/init_accounts.sh:ro
-    entrypoint: [ "/bin/sh", "/init_accounts.sh" ]
+    entrypoint: ["/bin/sh", "/init_accounts.sh"]
 
 networks:
   linid-dev-network:

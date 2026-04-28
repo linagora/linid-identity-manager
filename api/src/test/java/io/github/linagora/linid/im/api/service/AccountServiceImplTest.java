@@ -26,14 +26,22 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
+import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
+import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,12 +56,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +78,12 @@ class AccountServiceImplTest {
     private AccountViewRepository accountViewRepository;
     @Mock
     private ChecksumService checksumService;
+    @Mock
+    private AccountStatusRepository accountStatusRepository;
+    @Mock
+    private AccountStatusMapper accountStatusMapper;
+    @Mock
+    private AccountActivationValidator accountActivationValidator;
     @InjectMocks
     private AccountServiceImpl accountService;
     private UserPrincipal userPrincipal;
@@ -209,5 +226,141 @@ class AccountServiceImplTest {
         assertTrue(accountService.getAccountByEmail(null).isEmpty());
         assertTrue(accountService.getAccountByEmail("").isEmpty());
         assertTrue(accountService.getAccountByEmail("  ").isEmpty());
+    }
+
+    @Test
+    @DisplayName("updateStatus should create a new status row when none exists and persist it")
+    void testUpdateStatus_shouldCreateRowWhenNoneExists() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var record = new AccountStatusRecord(null, null, null, "REASON", null, null);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
+        when(accountStatusRepository.saveAndFlush(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AccountView result = accountService.updateStatus(userPrincipal, id, record);
+
+        assertNotNull(result);
+        verify(accountStatusMapper).update(any(AccountStatus.class), eq(record));
+        verify(accountStatusRepository).saveAndFlush(any(AccountStatus.class));
+    }
+
+    @Test
+    @DisplayName("updateStatus should update existing status row")
+    void testUpdateStatus_shouldUpdateExistingRow() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        existing.setAccountId(id);
+        var record = new AccountStatusRecord(null, null, null, null, null, null);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+
+        accountService.updateStatus(userPrincipal, id, record);
+
+        verify(accountStatusMapper).update(existing, record);
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("updateStatus should throw 404 when account not found")
+    void testUpdateStatus_shouldThrow404WhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateStatus(userPrincipal, id,
+                new AccountStatusRecord(null, null, null, null, null, null)));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.not_found", ex.getError().key());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("updateActivation should throw 404 when no status row exists, without invoking the validator")
+    void testUpdateActivation_shouldThrow404WhenNoStatus() {
+        UUID id = UUID.randomUUID();
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateActivation(userPrincipal, id,
+                new AccountActivationRecord(OffsetDateTime.now())));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.status.not_found", ex.getError().key());
+        verify(accountActivationValidator, never()).validate(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("updateActivation should propagate the exception thrown by the validator")
+    void testUpdateActivation_shouldPropagateValidatorFailure() {
+        UUID id = UUID.randomUUID();
+        var existing = new AccountStatus();
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.account.status.activation.already_activated",
+                Map.of("id", id.toString()))))
+            .when(accountActivationValidator).validate(eq(existing), any(), eq(id));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateActivation(userPrincipal, id,
+                new AccountActivationRecord(OffsetDateTime.now())));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.activation.already_activated", ex.getError().key());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("updateActivation should set activationAt and save on happy path")
+    void testUpdateActivation_shouldSucceedOnHappyPath() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        OffsetDateTime activationAt = OffsetDateTime.now().minusHours(1);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+
+        AccountView result = accountService.updateActivation(userPrincipal, id,
+            new AccountActivationRecord(activationAt));
+
+        assertNotNull(result);
+        assertEquals(activationAt, existing.getActivationAt());
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountActivationValidator).validate(eq(existing), any(), eq(id));
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("updateActivation should throw 404 when account not found")
+    void testUpdateActivation_shouldThrow404WhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateActivation(userPrincipal, id,
+                new AccountActivationRecord(OffsetDateTime.now())));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.not_found", ex.getError().key());
+        verify(accountActivationValidator, never()).validate(any(), any(), any());
     }
 }

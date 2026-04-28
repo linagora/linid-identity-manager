@@ -27,14 +27,12 @@
 package io.github.linagora.linid.im.api.persistence.model;
 
 import io.github.zorin95670.predicate.FilterType;
-import io.github.zorin95670.processor.annotation.QueryFilter;
-import io.github.zorin95670.processor.annotation.QueryFilterField;
 import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
@@ -46,76 +44,53 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Type;
 
 /**
- * Entity with enriched account information, mapped to the {@code accounts_view} database view.
+ * JPA entity representing the status lifecycle of an account.
  *
- * <p>Provides {@code createdBy}, {@code updatedBy}, {@code insertDate}, and {@code updateDate}
- * columns that are automatically managed by the service layer and database triggers.
+ * <p>Maps to the {@code account_status} table. There is a one-to-one relationship with
+ * {@link Account} enforced by the unique index on {@code act_id}. Inherits audit fields
+ * from {@link AbstractEntity}.</p>
  */
 @Entity
-@Table(name = "accounts_view")
+@Table(name = "account_status")
+@DynamicInsert
 @Data
-@Immutable
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@QueryFilter
-public class AccountView extends AbstractViewEntity {
+public class AccountStatus extends AbstractEntity {
 
     /**
-     * Unique identifier of the account (UUID).
+     * Unique identifier of the account status record, auto-generated as UUID.
      */
     @Id
-    @Column(name = "act_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "ast_id")
     @FilterType(type = UUID.class)
-    @QueryFilterField(type = UUID.class, description = "Account unique identifier")
     private UUID id;
 
     /**
-     * External identifier (e.g. OIDC sub or external system ID).
+     * Identifier of the owning account.
      */
-    @Column(name = "external_id", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "External identifier (e.g. OIDC sub)")
-    private String externalId;
+    @Column(name = "act_id", nullable = false)
+    @FilterType(type = UUID.class)
+    private UUID accountId;
 
     /**
-     * Last name of the account holder.
-     */
-    @Column(name = "lastname", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Last name of the account holder")
-    private String lastname;
-
-    /**
-     * First name of the account holder.
-     */
-    @Column(name = "firstname", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "First name of the account holder")
-    private String firstname;
-
-    /**
-     * Email address associated with the account.
-     */
-    @Column(name = "email", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Email address of the account")
-    private String email;
-
-    /**
-     * Time range during which the account is considered valid. {@code null} when no status row exists.
+     * Time range during which the account is considered valid. Stored as {@code TSTZRANGE}.
+     * May be {@code null} when the validity period has not been configured yet.
      */
     @Type(PostgreSQLRangeType.class)
     @Column(name = "validity_period", columnDefinition = "tstzrange")
     private Range<ZonedDateTime> validityPeriod;
 
     /**
-     * Time range during which the account is suspended. {@code null} when no suspension is configured.
+     * Time range during which the account is suspended. Stored as {@code TSTZRANGE}.
+     * {@code null} when no suspension is configured.
      */
     @Type(PostgreSQLRangeType.class)
     @Column(name = "suspension_period", columnDefinition = "tstzrange")
@@ -127,7 +102,6 @@ public class AccountView extends AbstractViewEntity {
      */
     @Column(name = "activation_at")
     @FilterType(type = Date.class)
-    @QueryFilterField(type = Date.class, description = "Activation timestamp")
     private OffsetDateTime activationAt;
 
     /**
@@ -135,7 +109,6 @@ public class AccountView extends AbstractViewEntity {
      */
     @Column(name = "status_reason")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Status reason code")
     private String statusReason;
 
     /**
@@ -143,7 +116,6 @@ public class AccountView extends AbstractViewEntity {
      */
     @Column(name = "status_subreason")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Status sub-reason code")
     private String statusSubreason;
 
     /**
@@ -152,24 +124,5 @@ public class AccountView extends AbstractViewEntity {
      */
     @Column(name = "status_comment")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text status comment")
     private String statusComment;
-
-    /**
-     * Computed account status: {@code ACTIVE}, {@code SUSPENDED} or {@code INACTIVE}.
-     */
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Computed account status (ACTIVE, SUSPENDED or INACTIVE)")
-    private AccountStatusEnum status;
-
-    /**
-     * Integer number of calendar days before the validity period's upper bound.
-     * Can be negative. {@code null} when the validity period has no upper bound.
-     */
-    @Column(name = "days_before_deactivation")
-    @FilterType(type = Integer.class)
-    @QueryFilterField(type = Integer.class, description = "Days before validity period upper bound")
-    private Integer daysBeforeDeactivation;
 }

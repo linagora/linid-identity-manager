@@ -26,6 +26,8 @@
 
 package io.github.linagora.linid.im.api.model.account;
 
+import io.github.linagora.linid.im.api.model.common.PeriodDTO;
+import io.github.linagora.linid.im.api.persistence.model.AccountStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -73,6 +75,55 @@ public class AccountViewDTO {
      */
     @Schema(description = "Email address of the account", example = "john.doe@example.com")
     private String email;
+
+    /**
+     * Time range during which the account is considered valid.
+     */
+    @Schema(description = "Time range during which the account is considered valid")
+    private PeriodDTO validityPeriod;
+
+    /**
+     * Time range during which the account is suspended.
+     */
+    @Schema(description = "Time range during which the account is suspended")
+    private PeriodDTO suspensionPeriod;
+
+    /**
+     * Timestamp when the account was activated or reactivated.
+     */
+    @Schema(description = "Activation timestamp", example = "2025-02-01T00:00:00Z")
+    private OffsetDateTime activationAt;
+
+    /**
+     * High-level reason code explaining the current status.
+     */
+    @Schema(description = "High-level reason code", example = "ONBOARDING")
+    private String statusReason;
+
+    /**
+     * More detailed classification of the status reason.
+     */
+    @Schema(description = "Detailed classification of the status reason", example = "FIRST_ACTIVATION")
+    private String statusSubreason;
+
+    /**
+     * Free-text comment providing additional context about the status change.
+     */
+    @Schema(description = "Free-text comment", example = "Manual activation after KYC approval")
+    private String statusComment;
+
+    /**
+     * Computed account status (ACTIVE, SUSPENDED or INACTIVE).
+     */
+    @Schema(description = "Computed account status", example = "ACTIVE")
+    private AccountStatusEnum status;
+
+    /**
+     * Integer number of calendar days before the validity period's upper bound.
+     */
+    @Schema(description = "Days before the validity period upper bound; can be negative; null when unbounded",
+        example = "30")
+    private Integer daysBeforeDeactivation;
 
     /**
      * Identifier of the creator of this record.

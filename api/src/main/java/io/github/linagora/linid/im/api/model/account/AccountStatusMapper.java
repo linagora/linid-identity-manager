@@ -27,29 +27,38 @@
 package io.github.linagora.linid.im.api.model.account;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 /**
- * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
+ * MapStruct mapper between {@link AccountStatus} entities and their API representations.
+ *
+ * <p>Uses {@link CommonMapper} to convert between persistence
+ * {@link io.hypersistence.utils.hibernate.type.range.Range Range&lt;ZonedDateTime&gt;}
+ * values and the API records / DTOs
+ * ({@link io.github.linagora.linid.im.api.model.common.PeriodDTO},
+ * {@link io.github.linagora.linid.im.api.model.common.PeriodRecord}).</p>
  */
 @Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface AccountMapper {
+public interface AccountStatusMapper {
 
     /**
-     * Converts an {@link Account} entity to an {@link AccountDTO}.
+     * Applies a pass-through {@link AccountStatusRecord} on top of an existing {@link AccountStatus}.
      *
-     * @param account the account entity
-     * @return the corresponding DTO
-     */
-    AccountDTO toDTO(Account account);
-
-    /**
-     * Converts an {@link AccountView} entity to an {@link AccountViewDTO}.
+     * <p>Every field carried by the record (including {@code null} values) overwrites the
+     * corresponding field on the target entity, matching the endpoint's documented
+     * pass-through semantics.</p>
      *
-     * @param accountView the account view entity
-     * @return the corresponding DTO
+     * @param entity the entity to update in place
+     * @param record the request record providing the new values
      */
-    AccountViewDTO toDTO(AccountView accountView);
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "accountId", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "updatedBy", ignore = true)
+    @Mapping(target = "insertDate", ignore = true)
+    @Mapping(target = "updateDate", ignore = true)
+    void update(@MappingTarget AccountStatus entity, AccountStatusRecord record);
 }

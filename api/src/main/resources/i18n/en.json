@@ -7,5 +7,11 @@
   "error.plugin.unknown": "Unknown plugin: {type}",
   "error.authentication.unauthorized": "Unauthorized",
   "error.router.unknown.language": "Unknown language: {language}",
-  "error.account.not_found": "Account not found: {id}"
+  "error.account.not_found": "Account not found: {id}",
+  "error.account.status.not_found": "Account status not found for account: {id}",
+  "error.account.status.activation.already_activated": "Account {id} is already activated.",
+  "error.account.status.activation.validity_required": "Account {id} cannot be activated: no validity period start date is defined.",
+  "error.account.status.activation.validity_in_future": "Account {id} cannot be activated: the validity period starts on {start}, which is a future date.",
+  "error.account.status.activation.before_validity_start": "Account {id} cannot be activated: the activation date ({activationAt}) is before the validity period start ({start}).",
+  "error.account.status.activation.in_future": "Account {id} cannot be activated: the activation date ({activationAt}) is a future date."
 }

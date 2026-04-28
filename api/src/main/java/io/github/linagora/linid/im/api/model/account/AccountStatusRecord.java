@@ -26,30 +26,41 @@
 
 package io.github.linagora.linid.im.api.model.account;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
-import org.mapstruct.Mapper;
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.OffsetDateTime;
 
 /**
- * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
+ * Request payload for the {@code PUT /accounts/{id}/status} endpoint.
+ *
+ * <p>Acts as a pass-through record: no business validation is applied, every field
+ * is persisted as received (including {@code null} values, which clear the corresponding
+ * column).</p>
+ *
+ * @param validityPeriod   time range during which the account is valid
+ * @param suspensionPeriod time range during which the account is suspended
+ * @param activationAt     activation timestamp
+ * @param statusReason     high-level reason code explaining the status
+ * @param statusSubreason  detailed classification of the status reason
+ * @param statusComment    free-text comment
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface AccountMapper {
+@Schema(description = "Request payload for updating account status fields (pass-through, no validation)")
+public record AccountStatusRecord(
+    @Schema(description = "Time range during which the account is valid")
+    PeriodRecord validityPeriod,
 
-    /**
-     * Converts an {@link Account} entity to an {@link AccountDTO}.
-     *
-     * @param account the account entity
-     * @return the corresponding DTO
-     */
-    AccountDTO toDTO(Account account);
+    @Schema(description = "Time range during which the account is suspended")
+    PeriodRecord suspensionPeriod,
 
-    /**
-     * Converts an {@link AccountView} entity to an {@link AccountViewDTO}.
-     *
-     * @param accountView the account view entity
-     * @return the corresponding DTO
-     */
-    AccountViewDTO toDTO(AccountView accountView);
+    @Schema(description = "Activation timestamp", example = "2025-02-01T00:00:00Z")
+    OffsetDateTime activationAt,
+
+    @Schema(description = "High-level reason code", example = "ONBOARDING")
+    String statusReason,
+
+    @Schema(description = "Detailed classification of the status reason", example = "FIRST_ACTIVATION")
+    String statusSubreason,
+
+    @Schema(description = "Free-text comment", example = "Manual activation after KYC approval")
+    String statusComment) {
 }

@@ -7,5 +7,11 @@
   "error.plugin.unknown": "Plugin inconnu: {type}",
   "error.authentication.unauthorized": "Non autorisé",
   "error.router.unknown.language": "Langue inconnue: {language}",
-  "error.account.not_found": "Compte introuvable: {id}"
+  "error.account.not_found": "Compte introuvable: {id}",
+  "error.account.status.not_found": "Statut de compte introuvable pour le compte : {id}",
+  "error.account.status.activation.already_activated": "Le compte {id} est déjà activé.",
+  "error.account.status.activation.validity_required": "Le compte {id} ne peut pas être activé : aucune date de début de validité n'est définie.",
+  "error.account.status.activation.validity_in_future": "Le compte {id} ne peut pas être activé : la période de validité commence le {start}, qui est une date future.",
+  "error.account.status.activation.before_validity_start": "Le compte {id} ne peut pas être activé : la date d'activation ({activationAt}) est antérieure au début de la période de validité ({start}).",
+  "error.account.status.activation.in_future": "Le compte {id} ne peut pas être activé : la date d'activation ({activationAt}) est une date future."
 }

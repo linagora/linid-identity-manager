@@ -26,30 +26,28 @@
 
 package io.github.linagora.linid.im.api.model.account;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
-import org.mapstruct.Mapper;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
 
 /**
- * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
+ * Request payload for the {@code PUT /accounts/{id}/status/activation} endpoint.
+ *
+ * <p>Business rules (enforced server-side):
+ * <ul>
+ *   <li>The current {@code activationAt} on the account must be {@code null}.</li>
+ *   <li>The validity period and its start must be set.</li>
+ *   <li>The validity period's start must be less than or equal to {@code now()}.</li>
+ *   <li>The provided {@code activationAt} must be greater than or equal to the validity period's start.</li>
+ *   <li>The provided {@code activationAt} must be less than or equal to {@code now()}.</li>
+ * </ul>
+ *
+ * @param activationAt the requested activation timestamp
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface AccountMapper {
-
-    /**
-     * Converts an {@link Account} entity to an {@link AccountDTO}.
-     *
-     * @param account the account entity
-     * @return the corresponding DTO
-     */
-    AccountDTO toDTO(Account account);
-
-    /**
-     * Converts an {@link AccountView} entity to an {@link AccountViewDTO}.
-     *
-     * @param accountView the account view entity
-     * @return the corresponding DTO
-     */
-    AccountViewDTO toDTO(AccountView accountView);
+@Schema(description = "Request payload for activating an account")
+public record AccountActivationRecord(
+    @NotNull
+    @Schema(description = "Activation timestamp; must be >= validityPeriod.start",
+        example = "2025-02-01T00:00:00Z")
+    OffsetDateTime activationAt) {
 }

@@ -293,4 +293,4 @@ jobs:
       - name: Stop docker services
         if: always()
         working-directory: docker/e2e
-        run: docker compose down
+        run: echo /tmp/linid-docker.log && docker compose down

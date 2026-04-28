@@ -33,9 +33,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
@@ -229,5 +231,51 @@ class AccountControllerTest {
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(accountService).deleteById(userPrincipal, id);
+    }
+
+    @Test
+    @DisplayName("Should update status and return 200 with AccountViewDTO")
+    void testUpdateStatus_shouldReturn200WithAccountViewDTO() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountStatusRecord(null, null, null, "REASON", null, null);
+        var entity = createSampleViewEntity();
+        var dto = createSampleViewDTO(entity);
+        when(accountService.updateStatus(userPrincipal, id, record)).thenReturn(entity);
+        when(accountMapper.toDTO(entity)).thenReturn(dto);
+
+        ResponseEntity<AccountViewDTO> response = accountController.updateStatus(userPrincipal, id, record);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(entity.getId(), response.getBody().getId());
+    }
+
+    @Test
+    @DisplayName("Should activate account and return 200 with AccountViewDTO")
+    void testActivate_shouldReturn200WithAccountViewDTO() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountActivationRecord(OffsetDateTime.now());
+        var entity = createSampleViewEntity();
+        var dto = createSampleViewDTO(entity);
+        when(accountService.updateActivation(userPrincipal, id, record)).thenReturn(entity);
+        when(accountMapper.toDTO(entity)).thenReturn(dto);
+
+        ResponseEntity<AccountViewDTO> response = accountController.activate(userPrincipal, id, record);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(entity.getId(), response.getBody().getId());
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on activate request parameter")
+    void testActivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = AccountController.class.getMethod("activate", UserPrincipal.class,
+            UUID.class, AccountActivationRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "activate() request parameter must have @Valid annotation"
+        );
     }
 }

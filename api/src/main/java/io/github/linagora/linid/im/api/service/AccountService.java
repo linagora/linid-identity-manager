@@ -26,7 +26,9 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
@@ -88,4 +90,40 @@ public interface AccountService {
      * or {@link Optional#empty()} if no account exists for the given email
      */
     Optional<Account> getAccountByEmail(String email);
+
+    /**
+     * Pass-through update of the status fields of the account with the given identifier.
+     *
+     * <p>Every field carried by the record (including {@code null} values) is persisted
+     * as-is. No business validation is performed here.</p>
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param record        the new status values
+     * @return the refreshed account view, including computed {@code status} and
+     *         {@code daysBeforeDeactivation}
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if the account is not found
+     */
+    AccountView updateStatus(UserPrincipal userPrincipal, UUID accountId, AccountStatusRecord record);
+
+    /**
+     * Sets the {@code activationAt} timestamp of the account with the given identifier.
+     *
+     * <p>Business rules enforced (delegated to {@code AccountActivationValidator}):
+     * <ul>
+     *   <li>The current {@code activationAt} must be {@code null}.</li>
+     *   <li>The validity period must exist with a non-null start.</li>
+     *   <li>The validity period's start must be less than or equal to {@code now()}.</li>
+     *   <li>The provided {@code activationAt} must be greater than or equal to the validity start.</li>
+     *   <li>The provided {@code activationAt} must be less than or equal to {@code now()}.</li>
+     * </ul>
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param record        the activation request carrying the new {@code activationAt}
+     * @return the refreshed account view
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if the account is not found
+     *         or if any business rule is violated
+     */
+    AccountView updateActivation(UserPrincipal userPrincipal, UUID accountId, AccountActivationRecord record);
 }

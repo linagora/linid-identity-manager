@@ -26,9 +26,11 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
@@ -49,6 +51,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -161,5 +164,49 @@ public class AccountController {
         log.info("[{}] Received DELETE request for account {}", userPrincipal.getEmail(), id);
         accountService.deleteById(userPrincipal, id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Applies a pass-through update of the account's status fields.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @param record        the new status values; {@code null} fields clear the corresponding column
+     * @return the refreshed account view with computed {@code status} and {@code daysBeforeDeactivation}
+     */
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Update the status fields of an account (pass-through)")
+    @ApiResponse(responseCode = "200", description = "Status successfully updated")
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<AccountViewDTO> updateStatus(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @RequestBody final AccountStatusRecord record) {
+        log.info("[{}] Received PUT /accounts/{}/status with {}", userPrincipal.getEmail(), id, record);
+        var view = accountService.updateStatus(userPrincipal, id, record);
+        return ResponseEntity.ok(accountMapper.toDTO(view));
+    }
+
+    /**
+     * Activates the account once business rules are satisfied.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @param record        the activation request carrying the new {@code activationAt}
+     * @return the refreshed account view
+     */
+    @PutMapping("/{id}/status/activation")
+    @Operation(summary = "Activate the account when business rules are met")
+    @ApiResponse(responseCode = "200", description = "Account successfully activated")
+    @ApiResponse(responseCode = "400", description = "Activation rules violated", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Account or account status not found", content = @Content)
+    public ResponseEntity<AccountViewDTO> activate(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final AccountActivationRecord record) {
+        log.info("[{}] Received PUT /accounts/{}/status/activation with {}",
+            userPrincipal.getEmail(), id, record);
+        var view = accountService.updateActivation(userPrincipal, id, record);
+        return ResponseEntity.ok(accountMapper.toDTO(view));
     }
 }

@@ -26,13 +26,19 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
+import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
+import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
+import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -53,6 +59,19 @@ import java.util.UUID;
  *
  * <p>Handles account CRUD operations including SHA-256 checksum generation
  * on creation and dynamic filtering via {@code spring-query-filter}.</p>
+ *
+ * <p><b>Note for status-mutation endpoints:</b> {@link AccountView} is mapped to the
+ * {@code accounts_view} SQL view, which is computed by joining {@code accounts} and
+ * {@code account_status}. Hibernate's first-level cache cannot detect that a write to
+ * {@code account_status} invalidates a previously loaded {@link AccountView} instance.
+ * To return a fresh view to the caller, methods that mutate {@link AccountStatus} must:
+ * <ul>
+ *   <li>use {@link AccountRepository#existsById} (not {@link #findById}) for the
+ *       existence precondition, so the view is not loaded into the persistence context;</li>
+ *   <li>call {@code saveAndFlush} on {@link AccountStatusRepository} to push the changes
+ *       to the database before reading the view;</li>
+ *   <li>read the view only once, at the end of the operation, via {@link #findById}.</li>
+ * </ul>
  */
 @Service
 @RequiredArgsConstructor
@@ -78,6 +97,21 @@ public class AccountServiceImpl implements AccountService {
      * Service for computing SHA-256 checksums.
      */
     private final ChecksumService checksumService;
+
+    /**
+     * Repository for account status persistence operations.
+     */
+    private final AccountStatusRepository accountStatusRepository;
+
+    /**
+     * Mapper applying pass-through status updates on account status entities.
+     */
+    private final AccountStatusMapper accountStatusMapper;
+
+    /**
+     * Validator enforcing the business rules of the account activation flow.
+     */
+    private final AccountActivationValidator accountActivationValidator;
 
     @Override
     public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
@@ -127,5 +161,66 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return accountRepository.findAccountByEmail(email.toLowerCase());
+    }
+
+    @Override
+    public AccountView updateStatus(final UserPrincipal userPrincipal,
+                                    final UUID accountId,
+                                    final AccountStatusRecord record) {
+        ensureAccountExists(accountId);
+
+        AccountStatus status = accountStatusRepository.findByAccountId(accountId)
+            .orElseGet(() -> {
+                AccountStatus created = new AccountStatus();
+                created.setAccountId(accountId);
+                created.setCreatedBy(userPrincipal.getId());
+                return created;
+            });
+
+        accountStatusMapper.update(status, record);
+        status.setUpdatedBy(userPrincipal.getId());
+        accountStatusRepository.saveAndFlush(status);
+
+        return findById(userPrincipal, accountId);
+    }
+
+    @Override
+    public AccountView updateActivation(final UserPrincipal userPrincipal,
+                                        final UUID accountId,
+                                        final AccountActivationRecord record) {
+        ensureAccountExists(accountId);
+
+        AccountStatus status = accountStatusRepository.findByAccountId(accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.status.not_found",
+                    Map.of("id", accountId.toString()))
+            ));
+
+        accountActivationValidator.validate(status, record, accountId);
+
+        status.setActivationAt(record.activationAt());
+        status.setUpdatedBy(userPrincipal.getId());
+        accountStatusRepository.saveAndFlush(status);
+
+        return findById(userPrincipal, accountId);
+    }
+
+    /**
+     * Ensures the account with the given identifier exists, without loading the read-only view.
+     *
+     * <p>Used as a precondition by the status-mutation endpoints to keep the {@code accounts_view}
+     * row out of the persistence context until the new status has been flushed.</p>
+     *
+     * @param accountId the account UUID
+     * @throws ApiException with key {@code error.account.not_found} (HTTP 404) when no account matches
+     */
+    private void ensureAccountExists(final UUID accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            );
+        }
     }
 }

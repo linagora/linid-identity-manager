@@ -13,5 +13,14 @@
   "error.account.status.activation.validity_required": "Account {id} cannot be activated: no validity period start date is defined.",
   "error.account.status.activation.validity_in_future": "Account {id} cannot be activated: the validity period starts on {start}, which is a future date.",
   "error.account.status.activation.before_validity_start": "Account {id} cannot be activated: the activation date ({activationAt}) is before the validity period start ({start}).",
-  "error.account.status.activation.in_future": "Account {id} cannot be activated: the activation date ({activationAt}) is a future date."
+  "error.account.status.activation.in_future": "Account {id} cannot be activated: the activation date ({activationAt}) is a future date.",
+  "error.account.status.activation_at_read_only": "Account {id} status cannot set activationAt: this field is managed by the activation endpoint.",
+  "error.account.status.validity_period_invalid": "Account {id} status cannot be updated: validity period start ({start}) must be before or equal to end ({end}).",
+  "error.account.status.suspension_period_invalid": "Account {id} status cannot be updated: suspension period start ({start}) must be before or equal to end ({end}).",
+  "error.account.status.validity_start_frozen": "Account {id} status cannot be updated: the existing validity period start ({current}) is in the past and cannot be modified.",
+  "error.account.status.validity_start_in_past": "Account {id} status cannot be updated: the new validity period start ({start}) must be greater than or equal to today.",
+  "error.account.status.validity_end_in_past": "Account {id} status cannot be updated: the validity period end ({end}) must be greater than or equal to today.",
+  "error.account.status.suspension_start_before_validity_start": "Account {id} status cannot be updated: the suspension period start ({suspensionStart}) must be greater than or equal to the validity period start ({validityStart}).",
+  "error.account.status.suspension_start_in_past": "Account {id} status cannot be updated: the suspension period start ({start}) must be greater than or equal to today.",
+  "error.account.status.suspension_outside_validity": "Account {id} status cannot be updated: the suspension period must be within the validity period (validity end: {validityEnd})."
 }

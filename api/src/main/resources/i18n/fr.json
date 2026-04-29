@@ -13,5 +13,14 @@
   "error.account.status.activation.validity_required": "Le compte {id} ne peut pas être activé : aucune date de début de validité n'est définie.",
   "error.account.status.activation.validity_in_future": "Le compte {id} ne peut pas être activé : la période de validité commence le {start}, qui est une date future.",
   "error.account.status.activation.before_validity_start": "Le compte {id} ne peut pas être activé : la date d'activation ({activationAt}) est antérieure au début de la période de validité ({start}).",
-  "error.account.status.activation.in_future": "Le compte {id} ne peut pas être activé : la date d'activation ({activationAt}) est une date future."
+  "error.account.status.activation.in_future": "Le compte {id} ne peut pas être activé : la date d'activation ({activationAt}) est une date future.",
+  "error.account.status.activation_at_read_only": "Le statut du compte {id} ne peut pas définir activationAt : ce champ est géré par l'endpoint d'activation.",
+  "error.account.status.validity_period_invalid": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de validité ({start}) doit être antérieur ou égal à la fin ({end}).",
+  "error.account.status.suspension_period_invalid": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de suspension ({start}) doit être antérieur ou égal à la fin ({end}).",
+  "error.account.status.validity_start_frozen": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de validité existante ({current}) est passé et ne peut pas être modifié.",
+  "error.account.status.validity_start_in_past": "Le statut du compte {id} ne peut pas être mis à jour : le nouveau début de période de validité ({start}) doit être supérieur ou égal à la date du jour.",
+  "error.account.status.validity_end_in_past": "Le statut du compte {id} ne peut pas être mis à jour : la fin de période de validité ({end}) doit être supérieure ou égale à la date du jour.",
+  "error.account.status.suspension_start_before_validity_start": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de suspension ({suspensionStart}) doit être supérieur ou égal au début de la période de validité ({validityStart}).",
+  "error.account.status.suspension_start_in_past": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de suspension ({start}) doit être supérieur ou égal à la date du jour.",
+  "error.account.status.suspension_outside_validity": "Le statut du compte {id} ne peut pas être mis à jour : la période de suspension doit être dans la période de validité (fin de validité : {validityEnd})."
 }

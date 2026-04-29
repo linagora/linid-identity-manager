@@ -31,12 +31,13 @@ import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.hypersistence.utils.hibernate.type.range.Range;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 
 /**
  * Encapsulates the business rules applied when activating an account via
@@ -96,6 +97,7 @@ public class AccountActivationValidator {
      */
     public OffsetDateTime ensureValidityStartExists(final AccountStatus status, final UUID accountId) {
         Range<ZonedDateTime> validity = status.getValidityPeriod();
+
         if (validity == null || !validity.hasLowerBound()) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
@@ -103,6 +105,7 @@ public class AccountActivationValidator {
                     Map.of("id", accountId.toString()))
             );
         }
+
         return validity.lower().toOffsetDateTime();
     }
 

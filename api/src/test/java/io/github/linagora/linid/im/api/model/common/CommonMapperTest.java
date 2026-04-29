@@ -125,4 +125,80 @@ class CommonMapperTest {
         assertNull(endOnly.getStart());
         assertEquals(END, endOnly.getEnd());
     }
+
+    @Test
+    @DisplayName("startOf(Range) should return null when range is null")
+    void testStartOfRange_shouldReturnNullOnNullRange() {
+        assertNull(mapper.startOf((Range<ZonedDateTime>) null));
+    }
+
+    @Test
+    @DisplayName("startOf(Range) should return null when range has no lower bound")
+    void testStartOfRange_shouldReturnNullWhenNoLowerBound() {
+        assertNull(mapper.startOf(Range.infiniteOpen(END.toZonedDateTime())));
+    }
+
+    @Test
+    @DisplayName("startOf(Range) should return the lower bound as OffsetDateTime")
+    void testStartOfRange_shouldReturnLowerBound() {
+        Range<ZonedDateTime> range = Range.closedOpen(START.toZonedDateTime(), END.toZonedDateTime());
+
+        assertEquals(START, mapper.startOf(range));
+    }
+
+    @Test
+    @DisplayName("endOf(Range) should return null when range is null")
+    void testEndOfRange_shouldReturnNullOnNullRange() {
+        assertNull(mapper.endOf((Range<ZonedDateTime>) null));
+    }
+
+    @Test
+    @DisplayName("endOf(Range) should return null when range has no upper bound")
+    void testEndOfRange_shouldReturnNullWhenNoUpperBound() {
+        assertNull(mapper.endOf(Range.closedInfinite(START.toZonedDateTime())));
+    }
+
+    @Test
+    @DisplayName("endOf(Range) should return the upper bound as OffsetDateTime")
+    void testEndOfRange_shouldReturnUpperBound() {
+        Range<ZonedDateTime> range = Range.closedOpen(START.toZonedDateTime(), END.toZonedDateTime());
+
+        assertEquals(END, mapper.endOf(range));
+    }
+
+    @Test
+    @DisplayName("startOf(PeriodRecord) should return null when period is null")
+    void testStartOfPeriod_shouldReturnNullOnNullPeriod() {
+        assertNull(mapper.startOf((PeriodRecord) null));
+    }
+
+    @Test
+    @DisplayName("startOf(PeriodRecord) should return the start when period is set")
+    void testStartOfPeriod_shouldReturnStart() {
+        assertEquals(START, mapper.startOf(new PeriodRecord(START, END)));
+    }
+
+    @Test
+    @DisplayName("endOf(PeriodRecord) should return null when period is null")
+    void testEndOfPeriod_shouldReturnNullOnNullPeriod() {
+        assertNull(mapper.endOf((PeriodRecord) null));
+    }
+
+    @Test
+    @DisplayName("endOf(PeriodRecord) should return the end when period is set")
+    void testEndOfPeriod_shouldReturnEnd() {
+        assertEquals(END, mapper.endOf(new PeriodRecord(START, END)));
+    }
+
+    @Test
+    @DisplayName("toInstantOrNull should return null on null input")
+    void testToInstantOrNull_shouldReturnNullOnNullInput() {
+        assertNull(mapper.toInstantOrNull(null));
+    }
+
+    @Test
+    @DisplayName("toInstantOrNull should return the Instant of the given OffsetDateTime")
+    void testToInstantOrNull_shouldReturnInstant() {
+        assertEquals(START.toInstant(), mapper.toInstantOrNull(START));
+    }
 }

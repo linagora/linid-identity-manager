@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.model.common;
 
 import io.hypersistence.utils.hibernate.type.range.Range;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -96,6 +97,79 @@ public class CommonMapper {
             end = toOffsetDateTime(range.upper());
         }
         return new PeriodDTO(start, end);
+    }
+
+    /**
+     * Returns the start of a persisted {@link Range Range&lt;ZonedDateTime&gt;} as an
+     * {@link OffsetDateTime}, or {@code null} when the range is {@code null} or infinite on the
+     * lower side.
+     *
+     * @param range the persisted range, possibly {@code null}
+     * @return the lower bound as {@link OffsetDateTime}, or {@code null}
+     */
+    public OffsetDateTime startOf(final Range<ZonedDateTime> range) {
+        if (range == null || !range.hasLowerBound()) {
+            return null;
+        }
+        return toOffsetDateTime(range.lower());
+    }
+
+    /**
+     * Returns the end of a persisted {@link Range Range&lt;ZonedDateTime&gt;} as an
+     * {@link OffsetDateTime}, or {@code null} when the range is {@code null} or infinite on the
+     * upper side.
+     *
+     * @param range the persisted range, possibly {@code null}
+     * @return the upper bound as {@link OffsetDateTime}, or {@code null}
+     */
+    public OffsetDateTime endOf(final Range<ZonedDateTime> range) {
+        if (range == null || !range.hasUpperBound()) {
+            return null;
+        }
+        return toOffsetDateTime(range.upper());
+    }
+
+    /**
+     * Returns the start of a request {@link PeriodRecord}, or {@code null} when the record itself
+     * is {@code null}.
+     *
+     * @param period the request period, possibly {@code null}
+     * @return the start, or {@code null}
+     */
+    public OffsetDateTime startOf(final PeriodRecord period) {
+        if (period == null) {
+            return null;
+        }
+        return period.start();
+    }
+
+    /**
+     * Returns the end of a request {@link PeriodRecord}, or {@code null} when the record itself is
+     * {@code null}.
+     *
+     * @param period the request period, possibly {@code null}
+     * @return the end, or {@code null}
+     */
+    public OffsetDateTime endOf(final PeriodRecord period) {
+        if (period == null) {
+            return null;
+        }
+        return period.end();
+    }
+
+    /**
+     * Converts an {@link OffsetDateTime} to its {@link Instant} representation, or {@code null}
+     * when the input is {@code null}. Useful to compare temporal values across different time
+     * zones without surprises.
+     *
+     * @param value the value to convert, possibly {@code null}
+     * @return the {@link Instant}, or {@code null} when the input is {@code null}
+     */
+    public Instant toInstantOrNull(final OffsetDateTime value) {
+        if (value == null) {
+            return null;
+        }
+        return value.toInstant();
     }
 
     /**

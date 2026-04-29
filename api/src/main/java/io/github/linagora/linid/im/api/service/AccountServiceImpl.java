@@ -39,6 +39,7 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountStatusValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -113,6 +114,11 @@ public class AccountServiceImpl implements AccountService {
      */
     private final AccountActivationValidator accountActivationValidator;
 
+    /**
+     * Validator enforcing the business rules applied when updating account status fields.
+     */
+    private final AccountStatusValidator accountStatusValidator;
+
     @Override
     public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
         Account entity = new Account();
@@ -134,6 +140,7 @@ public class AccountServiceImpl implements AccountService {
                                      final AccountViewQueryFilterDto filters,
                                      final Pageable pageable) {
         var specification = new SpringQueryFilterSpecification<>(AccountView.class, filters);
+
         return accountViewRepository.findAll(specification, pageable);
     }
 
@@ -176,6 +183,8 @@ public class AccountServiceImpl implements AccountService {
                 created.setCreatedBy(userPrincipal.getId());
                 return created;
             });
+
+        accountStatusValidator.validate(status, record, accountId);
 
         accountStatusMapper.update(status, record);
         status.setUpdatedBy(userPrincipal.getId());

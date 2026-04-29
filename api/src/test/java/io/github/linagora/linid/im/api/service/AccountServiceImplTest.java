@@ -39,6 +39,7 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountStatusValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import org.springframework.http.HttpStatus;
@@ -84,6 +85,8 @@ class AccountServiceImplTest {
     private AccountStatusMapper accountStatusMapper;
     @Mock
     private AccountActivationValidator accountActivationValidator;
+    @Mock
+    private AccountStatusValidator accountStatusValidator;
     @InjectMocks
     private AccountServiceImpl accountService;
     private UserPrincipal userPrincipal;
@@ -284,6 +287,52 @@ class AccountServiceImplTest {
         assertEquals(404, ex.getStatusCode());
         assertEquals("error.account.not_found", ex.getError().key());
         verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("updateStatus should propagate the exception thrown by the status validator")
+    void testUpdateStatus_shouldPropagateValidatorFailure() {
+        UUID id = UUID.randomUUID();
+        var existing = new AccountStatus();
+        var record = new AccountStatusRecord(null, null, null, null, null, null);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.account.status.validity_end_in_past",
+                Map.of("id", id.toString(), "end", "x"))))
+            .when(accountStatusValidator).validate(eq(existing), eq(record), eq(id));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateStatus(userPrincipal, id, record));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.validity_end_in_past", ex.getError().key());
+        verify(accountStatusMapper, never()).update(any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("updateStatus should invoke the validator before mapping and saving")
+    void testUpdateStatus_shouldInvokeValidatorBeforeMapping() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        existing.setAccountId(id);
+        var record = new AccountStatusRecord(null, null, null, null, null, null);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+
+        accountService.updateStatus(userPrincipal, id, record);
+
+        var inOrder = inOrder(accountStatusValidator, accountStatusMapper, accountStatusRepository);
+        inOrder.verify(accountStatusValidator).validate(existing, record, id);
+        inOrder.verify(accountStatusMapper).update(existing, record);
+        inOrder.verify(accountStatusRepository).saveAndFlush(existing);
     }
 
     @Test

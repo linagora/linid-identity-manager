@@ -78,6 +78,32 @@
   "AccountNotActivatedInfoText": {
     "message": "L'utilisateur n'a pas encore activé son compte."
   },
+  "AccountLifecycleActions": {
+    "DropdownButton": {
+      "title": "Actions sur le cycle de vie",
+      "activation": {
+        "title": "Activation",
+        "immediate": "Activation immédiate",
+        "scheduled": "Planifier l'activation"
+      },
+      "suspension": {
+        "title": "Suspension",
+        "immediate": "Suspension immédiate",
+        "scheduled": "Planifier la suspension",
+        "modify": "Modifier la suspension"
+      },
+      "deactivation": {
+        "title": "Désactivation",
+        "immediate": "Désactivation immédiate",
+        "scheduled": "Planifier la désactivation",
+        "modify": "Modifier la désactivation"
+      },
+      "reactivation": {
+        "title": "Réactivation",
+        "immediate": "Réactivation immédiate"
+      }
+    }
+  },
   "AccountCreationPage": {
     "title": "Créer un nouveau compte",
     "fields": {

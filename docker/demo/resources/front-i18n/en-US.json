@@ -29,6 +29,32 @@
   "AccountNotActivatedInfoText": {
     "message": "This user has not activated their account yet."
   },
+  "AccountLifecycleActions": {
+    "DropdownButton": {
+      "title": "Lifecycle actions",
+      "activation": {
+        "title": "Activation",
+        "immediate": "Immediate activation",
+        "scheduled": "Schedule activation"
+      },
+      "suspension": {
+        "title": "Suspension",
+        "immediate": "Immediate suspension",
+        "scheduled": "Schedule suspension",
+        "modify": "Modify suspension"
+      },
+      "deactivation": {
+        "title": "Deactivation",
+        "immediate": "Immediate deactivation",
+        "scheduled": "Schedule deactivation",
+        "modify": "Modify deactivation"
+      },
+      "reactivation": {
+        "title": "Reactivation",
+        "immediate": "Immediate reactivation"
+      }
+    }
+  },
   "AccountsPage": {
     "menuTitle": "Accounts",
     "title": "Accounts",

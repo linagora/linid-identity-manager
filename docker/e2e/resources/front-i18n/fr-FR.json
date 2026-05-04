@@ -26,6 +26,9 @@
   "AccountSuspendedInfoText": {
     "message": "Ce compte va être suspendu le {date}."
   },
+  "AccountNotActivatedInfoText": {
+    "message": "L'utilisateur n'a pas encore activé son compte."
+  },
   "AccountsPage": {
     "menuTitle": "Comptes",
     "title": "Comptes",

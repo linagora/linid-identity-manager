@@ -60,6 +60,9 @@ export default {
   AccountSuspendedInfoText: {
     message: 'This account will be suspended on {date}',
   },
+  AccountNotActivatedInfoText: {
+    message: 'This user has not activated their account yet.',
+  },
   AccountsPage: {
     menuTitle: 'Accounts',
     title: 'Accounts',

@@ -82,6 +82,14 @@ describe('Test component: AccountDetailsPage', () => {
       updatedBy: 'Bob Updater',
       insertDate: '2026-04-15T12:00:24.814930Z',
       updateDate: '2026-04-16T09:30:00.000000Z',
+      status: 'ACTIVE',
+      validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+      suspensionPeriod: { start: null, end: null },
+      activationAt: '2026-01-01T00:00:00Z',
+      statusReason: null,
+      statusSubreason: null,
+      statusComment: null,
+      daysBeforeDeactivation: null,
     });
   });
 
@@ -109,6 +117,14 @@ describe('Test component: AccountDetailsPage', () => {
         updatedBy: 'Bob Updater',
         insertDate: '2026-04-15T12:00:24.814930Z',
         updateDate: '2026-04-16T09:30:00.000000Z',
+        status: 'ACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: { start: null, end: null },
+        activationAt: '2026-01-01T00:00:00Z',
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+        daysBeforeDeactivation: null,
       });
     });
 

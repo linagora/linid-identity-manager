@@ -77,7 +77,7 @@ import {
 import axios from 'axios';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
 import { getAccountById } from 'src/services/AccountService';
-import type { Account } from 'src/types/accounts';
+import type { AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -92,7 +92,7 @@ const { Notify } = useNotify();
 
 const accountId = computed(() => route.params.id as string);
 
-const account = ref<Account | null>(null);
+const account = ref<AccountStatus | null>(null);
 const isLoading = ref<boolean>(false);
 
 const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');

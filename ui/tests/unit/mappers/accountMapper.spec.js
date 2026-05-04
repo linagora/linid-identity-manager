@@ -43,29 +43,113 @@ describe('accountMapper', () => {
     useI18n.mockReturnValue({ t: tMock });
   });
 
+  const buildDto = (overrides = {}) => ({
+    id: 1,
+    lastname: 'Doe',
+    firstname: 'John',
+    email: 'john.doe@example.com',
+    externalId: 'ext-1',
+    createdBy: 'admin',
+    updatedBy: 'admin2',
+    insertDate: '2024-01-01T00:00:00Z',
+    updateDate: '2024-02-01T00:00:00Z',
+    status: 'ACTIVE',
+    validityPeriod: { start: '2024-01-01T00:00:00Z', end: null },
+    suspensionPeriod: { start: null, end: null },
+    activationAt: '2024-01-02T00:00:00Z',
+    statusReason: null,
+    statusSubreason: null,
+    statusComment: null,
+    daysBeforeDeactivation: null,
+    ...overrides,
+  });
+
   describe('toAccount', () => {
-    it('Map an AccountDTO to Account', () => {
+    it('Map an AccountDTO to Account without lifecycle detail', () => {
       tMock.mockReturnValue('YYYY-MM-DD HH:mm');
       const { toAccount } = useAccountMapper();
 
-      const dto = {
-        id: 1,
-        lastname: 'Doe',
-        firstname: 'John',
-        email: 'john.doe@example.com',
-        externalId: 'ext-1',
-        createdBy: 'admin',
-        updatedBy: 'admin2',
-        insertDate: '2024-01-01T00:00:00Z',
-        updateDate: '2024-02-01T00:00:00Z',
-      };
-
+      const dto = buildDto();
       const account = toAccount(dto);
+
       expect(account).toEqual({
-        ...dto,
+        id: dto.id,
+        externalId: dto.externalId,
+        lastname: dto.lastname,
+        firstname: dto.firstname,
+        email: dto.email,
+        createdBy: dto.createdBy,
+        updatedBy: dto.updatedBy,
         insertDate: dayjs(dto.insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dto.updateDate).format('YYYY-MM-DD HH:mm'),
+        status: dto.status,
       });
+      expect(account).not.toHaveProperty('validityPeriod');
+      expect(account).not.toHaveProperty('suspensionPeriod');
+      expect(account).not.toHaveProperty('activationAt');
+      expect(account).not.toHaveProperty('daysBeforeDeactivation');
+    });
+  });
+
+  describe('toAccountStatus', () => {
+    it('Map an AccountDTO to AccountStatus exposing only lifecycle fields', () => {
+      const { toAccountStatus } = useAccountMapper();
+
+      const dto = buildDto({
+        status: 'SUSPENDED',
+        validityPeriod: {
+          start: '2024-01-01T00:00:00Z',
+          end: '2025-01-01T00:00:00Z',
+        },
+        suspensionPeriod: {
+          start: '2024-06-01T00:00:00Z',
+          end: '2024-09-01T00:00:00Z',
+        },
+        statusReason: 'INVESTIGATION',
+        statusSubreason: 'FRAUD',
+        statusComment: 'Pending review',
+        daysBeforeDeactivation: 42,
+      });
+
+      const accountStatus = toAccountStatus(dto);
+
+      expect(accountStatus).toEqual({
+        status: dto.status,
+        validityPeriod: dto.validityPeriod,
+        suspensionPeriod: dto.suspensionPeriod,
+        activationAt: dto.activationAt,
+        statusReason: dto.statusReason,
+        statusSubreason: dto.statusSubreason,
+        statusComment: dto.statusComment,
+        daysBeforeDeactivation: dto.daysBeforeDeactivation,
+      });
+      expect(accountStatus).not.toHaveProperty('id');
+      expect(accountStatus).not.toHaveProperty('firstname');
+      expect(accountStatus).not.toHaveProperty('lastname');
+      expect(accountStatus).not.toHaveProperty('email');
+      expect(accountStatus).not.toHaveProperty('insertDate');
+      expect(accountStatus).not.toHaveProperty('updateDate');
+    });
+
+    it('Preserve null lifecycle values', () => {
+      const { toAccountStatus } = useAccountMapper();
+
+      const dto = buildDto({
+        status: 'INACTIVE',
+        activationAt: null,
+        validityPeriod: { start: null, end: null },
+        suspensionPeriod: { start: null, end: null },
+      });
+
+      const accountStatus = toAccountStatus(dto);
+
+      expect(accountStatus.activationAt).toBeNull();
+      expect(accountStatus.validityPeriod).toEqual({ start: null, end: null });
+      expect(accountStatus.suspensionPeriod).toEqual({
+        start: null,
+        end: null,
+      });
+      expect(accountStatus.daysBeforeDeactivation).toBeNull();
     });
   });
 
@@ -116,42 +200,46 @@ describe('accountMapper', () => {
       const { toAccountList } = useAccountMapper();
 
       const dtos = [
-        {
-          id: 1,
-          lastname: 'Doe',
-          firstname: 'John',
-          email: 'john.doe@example.com',
-          externalId: 'ext-1',
-          createdBy: 'admin',
-          updatedBy: 'admin2',
-          insertDate: '2024-01-01T00:00:00Z',
-          updateDate: '2024-02-01T00:00:00Z',
-        },
-        {
+        buildDto({ id: 1 }),
+        buildDto({
           id: 2,
           lastname: 'Smith',
           firstname: 'Jane',
           email: 'jane.smith@example.com',
           externalId: 'ext-2',
-          createdBy: 'admin',
           updatedBy: 'admin',
           insertDate: '2024-03-01T00:00:00Z',
           updateDate: '2024-04-01T00:00:00Z',
-        },
+          status: 'INACTIVE',
+        }),
       ];
 
       const accounts = toAccountList(dtos);
 
       expect(accounts).toHaveLength(2);
       expect(accounts[0]).toEqual({
-        ...dtos[0],
+        id: dtos[0].id,
+        externalId: dtos[0].externalId,
+        lastname: dtos[0].lastname,
+        firstname: dtos[0].firstname,
+        email: dtos[0].email,
+        createdBy: dtos[0].createdBy,
+        updatedBy: dtos[0].updatedBy,
         insertDate: dayjs(dtos[0].insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dtos[0].updateDate).format('YYYY-MM-DD HH:mm'),
+        status: dtos[0].status,
       });
       expect(accounts[1]).toEqual({
-        ...dtos[1],
+        id: dtos[1].id,
+        externalId: dtos[1].externalId,
+        lastname: dtos[1].lastname,
+        firstname: dtos[1].firstname,
+        email: dtos[1].email,
+        createdBy: dtos[1].createdBy,
+        updatedBy: dtos[1].updatedBy,
         insertDate: dayjs(dtos[1].insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dtos[1].updateDate).format('YYYY-MM-DD HH:mm'),
+        status: dtos[1].status,
       });
     });
 

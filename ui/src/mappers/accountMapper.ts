@@ -29,6 +29,7 @@ import type {
   AccountDTO,
   Account,
   AccountQueryFilterDTO,
+  AccountStatus,
 } from 'src/types/accounts';
 
 /**
@@ -46,9 +47,36 @@ export function useAccountMapper() {
    */
   const toAccount = (account: AccountDTO): Account => {
     return {
-      ...account,
+      id: account.id,
+      externalId: account.externalId,
+      lastname: account.lastname,
+      firstname: account.firstname,
+      email: account.email,
+      createdBy: account.createdBy,
+      updatedBy: account.updatedBy,
       insertDate: toDate(account.insertDate),
       updateDate: toDate(account.updateDate),
+      status: account.status,
+    };
+  };
+
+  /**
+   * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status
+   * fields. Identity fields (firstname, lastname, ...) are intentionally not
+   * included; combine with {@link toAccount} when both are needed.
+   * @param account AccountDTO to be transformed into an AccountStatus.
+   * @returns AccountStatus with lifecycle fields preserved as ISO strings.
+   */
+  const toAccountStatus = (account: AccountDTO): AccountStatus => {
+    return {
+      status: account.status,
+      validityPeriod: account.validityPeriod,
+      suspensionPeriod: account.suspensionPeriod,
+      activationAt: account.activationAt,
+      statusReason: account.statusReason,
+      statusSubreason: account.statusSubreason,
+      statusComment: account.statusComment,
+      daysBeforeDeactivation: account.daysBeforeDeactivation,
     };
   };
 
@@ -81,6 +109,7 @@ export function useAccountMapper() {
 
   return {
     toAccount,
+    toAccountStatus,
     toAccountList,
     toAccountQueryFilterDTO,
   };

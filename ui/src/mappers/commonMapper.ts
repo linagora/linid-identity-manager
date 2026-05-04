@@ -110,12 +110,32 @@ export function useCommonMapper() {
     return [`${v} 00:00:00_bt_${v} 23:59:59`];
   };
 
+  /**
+   * Parses a date value into a {@link Date} object. Returns null when the
+   * input is falsy, the placeholder "-", or cannot be parsed by the JavaScript
+   * Date constructor.
+   * @param value Date value to parse (typically an ISO 8601 string from the API).
+   * @returns A Date object, or null when the input is invalid or absent.
+   */
+  const toDateObject = (value: unknown): Date | null => {
+    const v = value?.toString() || '';
+    if (v === '-' || v === '') {
+      return null;
+    }
+    const date = new Date(v);
+    if (Number.isNaN(date.getTime())) {
+      return null;
+    }
+    return date;
+  };
+
   return {
     toDate,
     toDateISO,
     toEmptyRecord,
     toLikeFilter,
     toDateFilter,
+    toDateObject,
     SPRING_QUERY_DATE_FORMAT,
   };
 }

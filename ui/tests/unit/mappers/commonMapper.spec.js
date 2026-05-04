@@ -158,4 +158,35 @@ describe('commonMapper', () => {
       expect(toDateFilter('')).toBe(null);
     });
   });
+
+  describe('Test function: toDateObject', () => {
+    it('should parse an ISO 8601 string into a Date', () => {
+      const { toDateObject } = useCommonMapper();
+
+      const result = toDateObject('2025-07-24T12:34:56.000Z');
+
+      expect(result).toBeInstanceOf(Date);
+      expect(result?.toISOString()).toBe('2025-07-24T12:34:56.000Z');
+    });
+
+    it('should return null for falsy values (null/undefined/empty)', () => {
+      const { toDateObject } = useCommonMapper();
+
+      expect(toDateObject(null)).toBeNull();
+      expect(toDateObject(undefined)).toBeNull();
+      expect(toDateObject('')).toBeNull();
+    });
+
+    it('should return null for the placeholder "-"', () => {
+      const { toDateObject } = useCommonMapper();
+
+      expect(toDateObject('-')).toBeNull();
+    });
+
+    it('should return null for an invalid date string', () => {
+      const { toDateObject } = useCommonMapper();
+
+      expect(toDateObject('not-a-valid-date')).toBeNull();
+    });
+  });
 });

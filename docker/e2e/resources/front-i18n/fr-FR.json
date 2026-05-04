@@ -16,6 +16,10 @@
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },
+  "AccountStatusBadge": {
+    "active": "Actif",
+    "inactive": "Inactif"
+  },
   "AccountDeactivatedInfoText": {
     "message": "Ce compte va être désactivé le {date}."
   },

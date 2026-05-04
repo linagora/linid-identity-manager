@@ -50,6 +50,10 @@ export default {
   AuthenticationCallbackPage: {
     processing: 'Processing authentication response...',
   },
+  AccountStatusBadge: {
+    active: 'Active',
+    inactive: 'Inactive',
+  },
   AccountDeactivatedInfoText: {
     message: 'This account will be deactivated on {date}.',
   },

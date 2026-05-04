@@ -183,4 +183,22 @@ export default {
       generic: 'Unable to load the account. Please try again later.',
     },
   },
+  AccountDeactivatedBanner: {
+    content: 'This account has been deactivated since {date}.',
+    reactivateImmediateButton: 'Immediate reactivation',
+    reactivateScheduledButton: 'Schedule reactivation',
+  },
+  AccountDeactivatedWarningBanner: {
+    content:
+      'This account will be deactivated tomorrow (on {date}) | This account will be deactivated in {count} days (on {date})',
+    deactivateImmediateButton: 'Immediate deactivation',
+    modifyDeactivationButton: 'Modify deactivation date',
+  },
+  AccountSuspendedBanner: {
+    content: 'This account has been suspended since {date}.',
+    contentWithEndDate:
+      'This account has been suspended from {date} until {endDate}.',
+    clearSuspensionButton: 'Immediate reactivation',
+    modifySuspensionButton: 'Adjust suspension settings',
+  },
 };

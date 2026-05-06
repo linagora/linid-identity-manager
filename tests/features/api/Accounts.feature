@@ -44,12 +44,13 @@ Feature: Test API Account endpoints
   ## 616 Should accept open-ended validity (end null) without suspension
 
   ################## Activate (PUT /accounts/{id}/status/activation) #####
-  ## 701 Should activate account when business rules are satisfied (@skip — see #114)
+  ## 701 Should activate account when business rules are satisfied
   ## 702 Should return 404 when no account status row exists yet
-  ## 703 Should return 400 when account is already activated (@skip — see #114)
+  ## 703 Should return 400 when account is already activated
   ## 704 Should return 400 when validity period start is in the future
-  ## 705 Should return 400 when activationAt is before validity start (@skip — see #114)
-  ## 706 Should return 404 when activating unknown account
+  ## 705 Should return 400 when activationAt is before validity start
+  ## 706 Should return 400 when activationAt is in the future
+  ## 707 Should return 404 when activating unknown account
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -894,65 +895,19 @@ Feature: Test API Account endpoints
   ################## Activate (PUT /accounts/{id}/status/activation) ##
   ####################################################
 
-  # Skipped after #110: this scenario requires a persisted account_status whose
-  # validityPeriod.start is in the past, but the new status validation rules forbid
-  # PUT /accounts/{id}/status from setting a past start. Re-enable once #114 lands
-  # (account_status will be co-created at POST /accounts with a validity start
-  # supplied at creation time, which can be set in the past via a fixture or seed).
-  @skip
   Scenario: 701 - Should activate account when business rules are satisfied
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002/status/activation' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-701",
-        "lastname": "Activate",
-        "firstname": "Me",
-        "email": "activate701@example.com"
-      }
-      """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
-      """
-      {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
-        "suspensionPeriod": null,
-        "activationAt": null,
-        "statusReason": null,
-        "statusSubreason": null,
-        "statusComment": null
-      }
-      """
-    Then  I expect status code is 200
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activation' with method 'PUT' with body:
-      """
-      {
-        "activationAt": "2099-06-01T00:00:00Z"
+        "activationAt": "2025-06-01T00:00:00Z"
       }
       """
     Then  I expect status code is 200
     And   I expect '{{response.body.activationAt}}' is not empty
     And   I expect '{{response.body.status}}' is 'ACTIVE'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
-
   Scenario: 702 - Should return 404 when no account status row exists yet
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
-      """
-      {
-        "externalId": "ext-702",
-        "lastname": "NoStatus",
-        "firstname": "Yet",
-        "email": "activate702@example.com"
-      }
-      """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a001/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
@@ -962,55 +917,16 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.errorKey}}' is 'error.account.status.not_found'
     And   I expect '{{response.body.status}}' is '404'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
-
-  # Skipped after #110: the first activation step needs validityPeriod.start in the
-  # past, which the new status validation rules forbid via PUT /status. Re-enable
-  # once #114 lands (status seeded at account creation can carry a past start).
-  @skip
   Scenario: 703 - Should return 400 when account is already activated
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002/status/activation' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-703",
-        "lastname": "Already",
-        "firstname": "Activated",
-        "email": "activate703@example.com"
+        "activationAt": "2025-07-01T00:00:00Z"
       }
-      """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
-      """
-      {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
-        "suspensionPeriod": null,
-        "activationAt": null,
-        "statusReason": null,
-        "statusSubreason": null,
-        "statusComment": null
-      }
-      """
-    Then  I expect status code is 200
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activation' with method 'PUT' with body:
-      """
-      { "activationAt": "2099-06-01T00:00:00Z" }
-      """
-    Then  I expect status code is 200
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activation' with method 'PUT' with body:
-      """
-      { "activationAt": "2099-07-01T00:00:00Z" }
       """
     Then  I expect status code is 400
     And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.already_activated'
     And   I expect '{{response.body.status}}' is '400'
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
 
   Scenario: 704 - Should return 400 when validity period start is in the future
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
@@ -1019,28 +935,21 @@ Feature: Test API Account endpoints
         "externalId": "ext-704",
         "lastname": "Future",
         "firstname": "Validity",
-        "email": "activate704@example.com"
+        "email": "activate704@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
     And   I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
-      """
-      {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2100-01-01T00:00:00Z"},
-        "suspensionPeriod": null,
-        "activationAt": null,
-        "statusReason": null,
-        "statusSubreason": null,
-        "statusComment": null
-      }
-      """
-    Then  I expect status code is 200
-
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activation' with method 'PUT' with body:
       """
-      { "activationAt": "2099-06-01T00:00:00Z" }
+      {
+        "activationAt": "2099-06-01T00:00:00Z"
+      }
       """
     Then  I expect status code is 400
     And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.validity_in_future'
@@ -1049,53 +958,34 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  # Skipped after #110: AccountActivationValidator checks validity_in_future before
-  # before_validity_start, so any validity.start >= today (the only ones the new
-  # status rules allow) reaches validity_in_future first and never exercises the
-  # rule under test. Re-enable once #114 lands (status seeded with a past validity
-  # start lets us isolate before_validity_start).
-  @skip
   Scenario: 705 - Should return 400 when activationAt is before validity start
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status/activation' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-705",
-        "lastname": "Before",
-        "firstname": "Start",
-        "email": "activate705@example.com"
+        "activationAt": "2020-01-01T00:00:00Z"
       }
-      """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
-      """
-      {
-        "validityPeriod": {"start": "2099-06-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
-        "suspensionPeriod": null,
-        "activationAt": null,
-        "statusReason": null,
-        "statusSubreason": null,
-        "statusComment": null
-      }
-      """
-    Then  I expect status code is 200
-
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activation' with method 'PUT' with body:
-      """
-      { "activationAt": "2099-01-01T00:00:00Z" }
       """
     Then  I expect status code is 400
     And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.before_validity_start'
     And   I expect '{{response.body.status}}' is '400'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+  Scenario: 706 - Should return 400 when activationAt is in the future
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a004/status/activation' with method 'PUT' with body:
+      """
+      {
+        "activationAt": "2099-06-01T00:00:00Z"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.in_future'
+    And   I expect '{{response.body.status}}' is '400'
 
-  Scenario: 706 - Should return 404 when activating unknown account
+  Scenario: 707 - Should return 404 when activating unknown account
     When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-000000000000/status/activation' with method 'PUT' with body:
       """
-      { "activationAt": "2099-06-01T00:00:00Z" }
+      {
+        "activationAt": "2099-06-01T00:00:00Z"
+      }
       """
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'

@@ -44,6 +44,9 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: () => ({
     t: vi.fn((v) => v),
   }),
+  useUiDesign: () => ({
+    ui: vi.fn(() => ({})),
+  }),
 }));
 
 vi.mock('src/composables/useAccountCreationConfig', () => ({
@@ -116,6 +119,10 @@ describe('Test component: AccountCreationPage', () => {
         lastname: 'Doe',
         firstname: 'John',
         email: 'john.doe@example.com',
+        validityPeriod: {
+          start: null,
+          end: null,
+        },
       });
     });
 

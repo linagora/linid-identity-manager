@@ -28,7 +28,9 @@ import { useCommonMapper } from 'src/mappers/commonMapper';
 import type {
   Account,
   AccountDTO,
+  AccountForm,
   AccountQueryFilterDTO,
+  AccountRecord,
   AccountStatus,
 } from 'src/types/accounts';
 
@@ -37,8 +39,13 @@ import type {
  * @returns Functions to convert API records to UI-friendly formats and to transform search filters for Spring Security.
  */
 export function useAccountMapper() {
-  const { toDate, toDateFilter, toLikeFilter, SPRING_QUERY_DATE_FORMAT } =
-    useCommonMapper();
+  const {
+    toDate,
+    toDateFilter,
+    toDateISO,
+    toLikeFilter,
+    SPRING_QUERY_DATE_FORMAT,
+  } = useCommonMapper();
 
   /**
    * Maps an AccountDTO to an Account, converting date to date ISO.
@@ -106,10 +113,28 @@ export function useAccountMapper() {
     };
   };
 
+  /**
+   * Transforms an AccountForm into an AccountRecord, nesting the validity period fields into a single validityPeriod object.
+   * @param account AccountForm containing the flat fields from the account creation form.
+   * @returns AccountRecord with the validity period properly structured for API consumption.
+   */
+  const toAccountRecord = (account: AccountForm): AccountRecord => {
+    const { validityPeriodStart, ...baseFields } = account;
+
+    return {
+      ...baseFields,
+      validityPeriod: {
+        start: toDateISO(validityPeriodStart) || null,
+        end: null,
+      },
+    };
+  };
+
   return {
     toAccount,
     toAccountStatus,
     toAccountList,
     toAccountQueryFilterDTO,
+    toAccountRecord,
   };
 }

@@ -24,12 +24,17 @@
  * LinID Identity Manager software.
  */
 
+import type {
+  LinidQBtnProps,
+  LinidQDateProps,
+  LinidQIconProps,
+} from '@linagora/linid-im-front-corelib';
 import type { ValidationRule } from 'quasar';
 
 /**
  * Supported input types on forms.
  */
-export type FieldType = 'text' | 'email';
+export type FieldType = 'text' | 'email' | 'date';
 
 /**
  * Declarative definition of a single form field.
@@ -52,3 +57,25 @@ export interface FormField<T> {
    */
   rules: ValidationRule[];
 }
+
+/**
+ * UI props for a date picker field, grouped by field name.
+ * Each field carries the props for the icon, date picker and button components.
+ */
+export type DatePickerUiProps = Record<
+  string,
+  {
+    /**
+     * Icon props for the date picker component.
+     */
+    icon: LinidQIconProps;
+    /**
+     * Date props for the date picker component.
+     */
+    date: LinidQDateProps;
+    /**
+     * Button props for the date picker component.
+     */
+    btn: LinidQBtnProps;
+  }
+>;

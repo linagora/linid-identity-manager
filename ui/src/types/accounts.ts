@@ -54,6 +54,10 @@ export interface AccountRecord {
    * User email address.
    */
   email: string;
+  /**
+   * Validity period of the account, with start and end dates.
+   */
+  validityPeriod: Period;
 }
 
 /**
@@ -264,4 +268,30 @@ export interface AccountStatus {
    * Null if not applicable or not scheduled.
    */
   daysBeforeDeactivation: number | null;
+}
+
+/**
+ * Shape of the account form used for creation and edition. Differs from {@link AccountRecord} as it carries flat keys for nested fields, which is more convenient for form input bindings.
+ */
+export interface AccountForm {
+  /**
+   * External business identifier.
+   */
+  externalId: string;
+  /**
+   * User last name.
+   */
+  lastname: string;
+  /**
+   * User first name.
+   */
+  firstname: string;
+  /**
+   * User email address.
+   */
+  email: string;
+  /**
+   * Start date of the account's validity period.
+   */
+  validityPeriodStart: string;
 }

@@ -9,7 +9,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '#q-app/wrappers': fileURLToPath(
-        new URL('./tests/mocks/quasar-wrappers.ts', import.meta.url),
+        new URL('./tests/mocks/quasar-wrappers.ts', import.meta.url)
       ),
     },
   },
@@ -17,6 +17,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     passWithNoTests: true,
+    setupFiles: ['./tests/setup.ts'],
     include: [
       // Matches vitest tests in 'tests/unit' subfolders
       'tests/unit/**/*.{test,spec}.js',

@@ -24,62 +24,23 @@
  * LinID Identity Manager software.
  */
 
-import {
-  useQuasarFieldValidation,
-  useScopedI18n,
-} from '@linagora/linid-im-front-corelib';
-import type { AccountForm } from 'src/types/accounts';
-import type { FormField } from 'src/types/form';
-import { useI18n } from 'vue-i18n';
+import { defineBoot } from '@quasar/app-vite/wrappers';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import utc from 'dayjs/plugin/utc';
 
 /**
- * Build the declarative field configuration for the account creation
- * form. Each field carries its already-translated label and the concrete
- * Quasar validation rules to apply.
- * @param i18nScope - I18n scope used for both labels (`fields.<name>`)
- * and validator error messages (`validation.<rule>`).
- * @returns The ordered list of fields rendered by the creation form.
+ * Boot file to configure Day.js and add it to the global Vue properties.
+ * @param app - The Vue application instance.
  */
-export function useAccountCreationConfig(i18nScope: string) {
-  const { t: globalT } = useI18n();
-  const { t } = useScopedI18n(i18nScope);
-  const { required, email, validDate, dateNotInPast } =
-    useQuasarFieldValidation(i18nScope);
+export default defineBoot(({ app }) => {
+  // Extend Day.js with the necessary plugins
+  dayjs.extend(utc);
+  dayjs.extend(customParseFormat);
 
-  const dateFormat = globalT('application.dateFormat');
+  app.config.globalProperties.$dayjs = dayjs;
+  // ^ ^ ^ this will allow you to use this.$dayjs (for Vue Options API form)
+  //       so you won't necessarily have to import dayjs in each vue file
+});
 
-  const creationFields: FormField<AccountForm>[] = [
-    {
-      name: 'externalId',
-      label: t('fields.externalId'),
-      type: 'text',
-      rules: [required],
-    },
-    {
-      name: 'lastname',
-      label: t('fields.lastname'),
-      type: 'text',
-      rules: [required],
-    },
-    {
-      name: 'firstname',
-      label: t('fields.firstname'),
-      type: 'text',
-      rules: [required],
-    },
-    {
-      name: 'email',
-      label: t('fields.email'),
-      type: 'email',
-      rules: [required, email],
-    },
-    {
-      name: 'validityPeriodStart',
-      label: t('fields.validityPeriodStart.label'),
-      type: 'date',
-      rules: [required, validDate(dateFormat), dateNotInPast(dateFormat)],
-    },
-  ];
-
-  return { creationFields };
-}
+export { dayjs };

@@ -112,11 +112,17 @@
       "externalId": "External ID",
       "lastname": "Last name",
       "firstname": "First name",
-      "email": "Email"
+      "email": "Email",
+      "validityPeriodStart": {
+        "label": "Start date of validity",
+        "close": "Close"
+      }
     },
     "validation": {
       "required": "This field is required",
-      "email": "Invalid email format"
+      "email": "Invalid email format",
+      "invalidDate": "Invalid date format. Expected format is {format}",
+      "dateInPast": "The date cannot be in the past"
     },
     "ButtonsCard": {
       "cancel": "Cancel",

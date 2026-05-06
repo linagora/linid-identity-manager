@@ -8,23 +8,23 @@ VALUES ('00000000-0000-0000-0000-00000000a001', 'admin',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
-       (gen_random_uuid(), 'user1', 'user1@example.com', 'user1_ln', 'user1_fn',
+       ('00000000-0000-0000-0000-00000000a002', 'user1', 'user1@example.com', 'user1_ln', 'user1_fn',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
-       (gen_random_uuid(), 'user2', 'user2@example.com', 'user2_ln', 'user2_fn',
+       ('00000000-0000-0000-0000-00000000a003', 'user2', 'user2@example.com', 'user2_ln', 'user2_fn',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
-       (gen_random_uuid(), 'user3', 'user3@example.com', 'user3_ln', 'user3_fn',
+       ('00000000-0000-0000-0000-00000000a004', 'user3', 'user3@example.com', 'user3_ln', 'user3_fn',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
-       (gen_random_uuid(), 'user4', 'user4@example.com', 'user4_ln', 'user4_fn',
+       ('00000000-0000-0000-0000-00000000a005', 'user4', 'user4@example.com', 'user4_ln', 'user4_fn',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
-       (gen_random_uuid(), 'user5', 'user5@example.com', 'user5_ln', 'user5_fn',
+       ('00000000-0000-0000-0000-00000000a006', 'user5', 'user5@example.com', 'user5_ln', 'user5_fn',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001')
@@ -94,6 +94,18 @@ VALUES ('00000000-0000-0000-0000-0000000000c1', 'lifecycle-c1',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
+
+-- Account status for basic users (user1-5 only).
+-- Admin is excluded to allow testing of 404 when no status account row exists yet.
+INSERT
+INTO account_status (act_id, validity_period, created_by, updated_by)
+SELECT a.act_id,
+       tstzrange('2024-01-01 00:00:00+00'::timestamptz, NULL, '[)'),
+       '00000000-0000-0000-0000-00000000a001',
+       '00000000-0000-0000-0000-00000000a001'
+FROM accounts a
+WHERE a.external_id IN ('user1', 'user2', 'user3', 'user4', 'user5')
+ON CONFLICT (act_id) DO NOTHING;
 
 INSERT
 INTO account_status (act_id, validity_period, suspension_period, activation_at,

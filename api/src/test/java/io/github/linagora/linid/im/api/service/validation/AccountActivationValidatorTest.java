@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.hypersistence.utils.hibernate.type.range.Range;
@@ -51,7 +52,7 @@ class AccountActivationValidatorTest {
 
     @BeforeEach
     void setUp() {
-        this.validator = new AccountActivationValidator();
+        this.validator = new AccountActivationValidator(new CommonMapper());
         this.now = OffsetDateTime.now();
     }
 

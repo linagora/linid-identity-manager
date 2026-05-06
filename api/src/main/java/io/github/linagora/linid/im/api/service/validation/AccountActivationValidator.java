@@ -27,10 +27,12 @@
 package io.github.linagora.linid.im.api.service.validation;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.hypersistence.utils.hibernate.type.range.Range;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +50,14 @@ import java.util.UUID;
  * in the order required by the issue.</p>
  */
 @Component
+@RequiredArgsConstructor
 public class AccountActivationValidator {
+
+    /**
+     * Shared mapper providing range and period accessor helpers, so that bound extraction logic
+     * stays in one place.
+     */
+    private final CommonMapper commonMapper;
 
     /**
      * Runs every activation rule against the given status and request record.
@@ -106,7 +115,7 @@ public class AccountActivationValidator {
             );
         }
 
-        return validity.lower().toOffsetDateTime();
+        return commonMapper.startOf(validity);
     }
 
     /**

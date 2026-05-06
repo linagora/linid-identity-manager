@@ -167,21 +167,23 @@ public class AccountController {
     }
 
     /**
-     * Applies a pass-through update of the account's status fields.
+     * Update of the account's status fields.
      *
      * @param userPrincipal the authenticated user
      * @param id            the account UUID
-     * @param record        the new status values; {@code null} fields clear the corresponding column
+     * @param record        the new status values; {@code null} fields clear the corresponding column.
+     *                      except for {@code validityPeriod} which is mandatory and must be provided with
+     *                      a non-{@code null} value.
      * @return the refreshed account view with computed {@code status} and {@code daysBeforeDeactivation}
      */
     @PutMapping("/{id}/status")
-    @Operation(summary = "Update the status fields of an account (pass-through)")
+    @Operation(summary = "Update the status fields of an account")
     @ApiResponse(responseCode = "200", description = "Status successfully updated")
     @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
     public ResponseEntity<AccountViewDTO> updateStatus(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id,
-        @RequestBody final AccountStatusRecord record) {
+        @Valid @RequestBody final AccountStatusRecord record) {
         log.info("[{}] Received PUT /accounts/{}/status with {}", userPrincipal.getEmail(), id, record);
         var view = accountService.updateStatus(userPrincipal, id, record);
         return ResponseEntity.ok(accountMapper.toDTO(view));

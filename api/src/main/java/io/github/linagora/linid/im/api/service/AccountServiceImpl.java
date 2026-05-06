@@ -70,6 +70,10 @@ import org.springframework.transaction.annotation.Transactional;
  * <ul>
  *   <li>use {@link AccountRepository#existsById} (not {@link #findById}) for the
  *       existence precondition, so the view is not loaded into the persistence context;</li>
+ *   <li>load the persisted {@link AccountStatus} via
+ *       {@link AccountStatusRepository#findByAccountId} and {@code orElseThrow} a 404 — every
+ *       account is created with a companion status row in {@link #create}, so a missing row
+ *       indicates a data integrity issue, not a normal flow;</li>
  *   <li>call {@code saveAndFlush} on {@link AccountStatusRepository} to push the changes
  *       to the database before reading the view;</li>
  *   <li>read the view only once, at the end of the operation, via {@link #findById}.</li>
@@ -111,7 +115,7 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
 
     /**
-     * Mapper applying pass-through status updates on account status entities.
+     * Mapper applying status updates on account status entities.
      */
     private final AccountStatusMapper accountStatusMapper;
 
@@ -190,18 +194,16 @@ public class AccountServiceImpl implements AccountService {
         ensureAccountExists(accountId);
 
         AccountStatus status = accountStatusRepository.findByAccountId(accountId)
-            .orElseGet(() -> {
-                AccountStatus created = new AccountStatus();
-                created.setAccountId(accountId);
-                created.setCreatedBy(userPrincipal.getId());
-                return created;
-            });
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.status.not_found",
+                    Map.of("id", accountId.toString()))
+            ));
 
         accountStatusValidator.validate(status, record, accountId);
 
-        accountStatusMapper.update(status, record);
-        status.setUpdatedBy(userPrincipal.getId());
-        accountStatusRepository.saveAndFlush(status);
+        AccountStatus updatedStatus = accountStatusMapper.toAccountStatus(status, record, userPrincipal);
+        accountStatusRepository.saveAndFlush(updatedStatus);
 
         return findById(userPrincipal, accountId);
     }

@@ -33,7 +33,6 @@ import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.time.OffsetDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -73,8 +72,10 @@ public class AccountStatusValidator {
      * fall back to the persisted {@code validityPeriod} when the request omits it, so a partial
      * PUT touching only suspension still respects the persisted validity bounds.</p>
      *
-     * @param current   the persisted {@link AccountStatus} of the targeted account (never {@code null};
-     *                  fields may be {@code null} when no status row exists yet)
+     * @param current   the persisted {@link AccountStatus} of the targeted account; the caller
+     *                  guarantees the row exists (via {@code orElseThrow}), and the DB constraint {@code
+     *                  chk_account_status_validity_has_lower_bound} guarantees that {@code validityPeriod} carries
+     *                  a finite lower bound
      * @param record    the request record carrying the requested status fields
      * @param accountId the account UUID, used to enrich error messages
      * @throws ApiException if any rule is violated (HTTP 400)
@@ -85,14 +86,15 @@ public class AccountStatusValidator {
         OffsetDateTime now = OffsetDateTime.now();
 
         ensureActivationAtNotProvided(record, accountId);
+        ensureValidityPeriodStartNotNull(record, accountId);
         ensureValidityPeriodCoherent(record, accountId);
         ensureSuspensionPeriodCoherent(record, accountId);
         ensureValidityStartNotChangedWhenPast(current, record, now, accountId);
         ensureNewValidityStartNotInPast(current, record, now, accountId);
         ensureValidityEndNotInPast(record, now, accountId);
-        ensureSuspensionStartAfterValidityStart(current, record, accountId);
+        ensureSuspensionStartAfterValidityStart(record, accountId);
         ensureSuspensionStartNotInPast(record, now, accountId);
-        ensureSuspensionWithinValidity(current, record, accountId);
+        ensureSuspensionWithinValidity(record, accountId);
     }
 
     /**
@@ -108,6 +110,29 @@ public class AccountStatusValidator {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.account.status.activation_at_read_only",
+                    Map.of("id", accountId.toString()))
+            );
+        }
+    }
+
+    /**
+     * Rejects requests whose {@code validityPeriod} has no lower bound (period absent or open-ended
+     * start). A finite start is mandatory for every status update — it mirrors the DB constraint
+     * {@code chk_account_status_validity_has_lower_bound} on the persisted row.
+     *
+     * @param record    the request record
+     * @param accountId the account UUID, used in the error message
+     * @throws ApiException with key {@code error.account.status.validity_period_start_required} (HTTP
+     *                      400)
+     */
+    public void ensureValidityPeriodStartNotNull(
+        final AccountStatusRecord record, final UUID accountId) {
+        OffsetDateTime requestedStart = commonMapper.startOf(record.validityPeriod());
+
+        if (requestedStart == null) {
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of("error.account.status.validity_period_start_required",
                     Map.of("id", accountId.toString()))
             );
         }
@@ -145,8 +170,9 @@ public class AccountStatusValidator {
 
     /**
      * Rejects updates that change a validity start which is already in the past. Idempotent calls
-     * (request start equals persisted start) are accepted; clearing a past start (request start
-     * {@code null}) is treated as a modification and rejected.
+     * (request start equals persisted start) are accepted. Both {@code persistedStart} and {@code
+     * requestedStart} are guaranteed non-{@code null} by upstream invariants: the DB constraint on
+     * the persisted row, and {@link #ensureValidityPeriodStartNotNull} on the request.
      *
      * @param current   the persisted {@link AccountStatus}
      * @param record    the request record
@@ -159,15 +185,13 @@ public class AccountStatusValidator {
                                                       final OffsetDateTime now,
                                                       final UUID accountId) {
         OffsetDateTime persistedStart = commonMapper.startOf(current.getValidityPeriod());
+        OffsetDateTime requestedStart = commonMapper.startOf(record.validityPeriod());
 
-        if (persistedStart == null || persistedStart.isAfter(now)) {
+        if (persistedStart.isEqual(requestedStart)) {
             return;
         }
 
-        OffsetDateTime requestedStart = commonMapper.startOf(record.validityPeriod());
-
-        if (!Objects.equals(commonMapper.toInstantOrNull(persistedStart),
-            commonMapper.toInstantOrNull(requestedStart))) {
+        if (persistedStart.isBefore(now)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.account.status.validity_start_frozen",
@@ -178,7 +202,7 @@ public class AccountStatusValidator {
     }
 
     /**
-     * Rejects a new validity start that is in the past, when the persisted start is null or in
+     * Rejects a new validity start that is in the past, when the persisted start is in
      * the future. The freeze rule (see
      * {@link #ensureValidityStartNotChangedWhenPast(AccountStatus, AccountStatusRecord, OffsetDateTime, UUID)})
      * already protects past persisted starts from any change, so this rule only applies to the
@@ -195,14 +219,13 @@ public class AccountStatusValidator {
                                                 final OffsetDateTime now,
                                                 final UUID accountId) {
         OffsetDateTime persistedStart = commonMapper.startOf(current.getValidityPeriod());
+        OffsetDateTime requestedStart = commonMapper.startOf(record.validityPeriod());
 
-        if (persistedStart != null && !persistedStart.isAfter(now)) {
+        if (persistedStart.isEqual(requestedStart)) {
             return;
         }
 
-        OffsetDateTime requestedStart = commonMapper.startOf(record.validityPeriod());
-
-        if (requestedStart != null && requestedStart.isBefore(now)) {
+        if (requestedStart.isBefore(now)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.account.status.validity_start_in_past",
@@ -236,32 +259,20 @@ public class AccountStatusValidator {
     }
 
     /**
-     * Rejects a suspension start strictly before the validity start. The validity start is read
-     * from the request when provided, otherwise falls back to the persisted value, so a PUT that
-     * touches only the suspension still respects the existing validity bounds. Skipped when no
-     * validity start can be resolved or when no suspension start is provided.
+     * Rejects a suspension start strictly before the validity start. Both bounds are read from the
+     * request — {@code validityPeriod.start} is guaranteed non-{@code null} by {@link
+     * #ensureValidityPeriodStartNotNull} upstream. Skipped when no suspension start is provided.
      *
-     * @param current   the persisted {@link AccountStatus}, used as fallback
      * @param record    the request record
      * @param accountId the account UUID, used in the error message
-     * @throws ApiException with key {@code error.account.status.suspension_start_before_validity_start}
-     *         (HTTP 400)
+     * @throws ApiException with key {@code error.account.status.suspension_start_before_validity_start} (HTTP 400)
      */
-    public void ensureSuspensionStartAfterValidityStart(final AccountStatus current,
-                                                        final AccountStatusRecord record,
+    public void ensureSuspensionStartAfterValidityStart(final AccountStatusRecord record,
                                                         final UUID accountId) {
         OffsetDateTime suspensionStart = commonMapper.startOf(record.suspensionPeriod());
         OffsetDateTime validityStart = commonMapper.startOf(record.validityPeriod());
 
-        if (validityStart == null) {
-            validityStart = commonMapper.startOf(current.getValidityPeriod());
-        }
-
-        if (suspensionStart == null || validityStart == null) {
-            return;
-        }
-
-        if (suspensionStart.isBefore(validityStart)) {
+        if (suspensionStart != null && suspensionStart.isBefore(validityStart)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.account.status.suspension_start_before_validity_start",
@@ -296,25 +307,18 @@ public class AccountStatusValidator {
     }
 
     /**
-     * Rejects suspension bounds that fall outside the validity end. The validity end is read from
-     * the request when provided, otherwise falls back to the persisted value, so a PUT that
-     * touches only the suspension still respects the existing validity bounds. Both
-     * {@code suspensionPeriod.start} and {@code suspensionPeriod.end} (when present) must be
-     * {@code <= validityPeriod.end}. Skipped when no validity end can be resolved (open-ended).
+     * Rejects suspension bounds that fall outside the validity end. Both {@code
+     * suspensionPeriod.start} and {@code suspensionPeriod.end} (when present) must be {@code <=
+     * validityPeriod.end}. Skipped when {@code validityPeriod.end} is {@code null} (open-ended
+     * validity).
      *
-     * @param current   the persisted {@link AccountStatus}, used as fallback
      * @param record    the request record
      * @param accountId the account UUID, used in the error message
      * @throws ApiException with key {@code error.account.status.suspension_outside_validity} (HTTP 400)
      */
-    public void ensureSuspensionWithinValidity(final AccountStatus current,
-                                               final AccountStatusRecord record,
+    public void ensureSuspensionWithinValidity(final AccountStatusRecord record,
                                                final UUID accountId) {
         OffsetDateTime validityEnd = commonMapper.endOf(record.validityPeriod());
-
-        if (validityEnd == null) {
-            validityEnd = commonMapper.endOf(current.getValidityPeriod());
-        }
 
         if (validityEnd == null) {
             return;

@@ -73,6 +73,7 @@ class AccountStatusValidatorTest {
     @DisplayName("validate should accept a fully valid status update")
     void testValidate_shouldAcceptValidRequest() {
         AccountStatus current = new AccountStatus();
+        current.setValidityPeriod(closedOpen(now.plusDays(1), now.plusDays(30)));
         AccountStatusRecord input = record(
             new PeriodRecord(now.plusDays(1), now.plusDays(30)),
             new PeriodRecord(now.plusDays(5), now.plusDays(10))
@@ -85,6 +86,7 @@ class AccountStatusValidatorTest {
     @DisplayName("validate should accept open-ended validity (end null) without suspension")
     void testValidate_shouldAcceptOpenEndedValidity() {
         AccountStatus current = new AccountStatus();
+        current.setValidityPeriod(closedOpen(now.plusDays(1), now.plusDays(60)));
         AccountStatusRecord input = record(new PeriodRecord(now.plusDays(1), null), null);
 
         assertDoesNotThrow(() -> validator.validate(current, input, ACCOUNT_ID));
@@ -119,6 +121,38 @@ class AccountStatusValidatorTest {
         AccountStatusRecord input = recordWithActivationAt(null);
 
         assertDoesNotThrow(() -> validator.ensureActivationAtNotProvided(input, ACCOUNT_ID));
+    }
+
+    @Test
+    @DisplayName("ensureValidityPeriodStartNotNull should throw 400 when validity start is null")
+    void testEnsureValidityPeriodStartNotNull_shouldThrowWhenNull() {
+        AccountStatusRecord input = record(new PeriodRecord(null, now.plusDays(30)), null);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> validator.ensureValidityPeriodStartNotNull(input, ACCOUNT_ID));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.validity_period_start_required", ex.getError().key());
+    }
+
+    @Test
+    @DisplayName("ensureValidityPeriodStartNotNull should throw 400 when validity period is null")
+    void testEnsureValidityPeriodStartNotNull_shouldThrowWhenPeriodNull() {
+        AccountStatusRecord input = record(null, null);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> validator.ensureValidityPeriodStartNotNull(input, ACCOUNT_ID));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.validity_period_start_required", ex.getError().key());
+    }
+
+    @Test
+    @DisplayName("ensureValidityPeriodStartNotNull should accept a non-null validity start")
+    void testEnsureValidityPeriodStartNotNull_shouldAcceptNonNull() {
+        AccountStatusRecord input = record(new PeriodRecord(now.plusDays(1), now.plusDays(30)), null);
+
+        assertDoesNotThrow(() -> validator.ensureValidityPeriodStartNotNull(input, ACCOUNT_ID));
     }
 
     @Test
@@ -184,11 +218,11 @@ class AccountStatusValidatorTest {
     }
 
     @Test
-    @DisplayName("ensureValidityStartNotChangedWhenPast should throw 400 when clearing a past start")
-    void testEnsureValidityStartNotChangedWhenPast_shouldThrowWhenCleared() {
+    @DisplayName("ensureValidityStartNotChangedWhenPast should throw 400 when changing a past start to a different past date")
+    void testEnsureValidityStartNotChangedWhenPast_shouldThrowWhenChangedToAnotherPastDate() {
         AccountStatus current = new AccountStatus();
         current.setValidityPeriod(closedOpen(now.minusDays(10), now.plusDays(30)));
-        AccountStatusRecord input = record(null, null);
+        AccountStatusRecord input = record(new PeriodRecord(now.minusDays(5), now.plusDays(30)), null);
 
         ApiException ex = assertThrows(ApiException.class,
             () -> validator.ensureValidityStartNotChangedWhenPast(current, input, now, ACCOUNT_ID));
@@ -224,6 +258,7 @@ class AccountStatusValidatorTest {
     @DisplayName("ensureNewValidityStartNotInPast should throw 400 when new start is in the past")
     void testEnsureNewValidityStartNotInPast_shouldThrowWhenInPast() {
         AccountStatus current = new AccountStatus();
+        current.setValidityPeriod(closedOpen(now.plusDays(1), now.plusDays(30)));
         AccountStatusRecord input = record(new PeriodRecord(now.minusDays(1), now.plusDays(30)), null);
 
         ApiException ex = assertThrows(ApiException.class,
@@ -237,6 +272,7 @@ class AccountStatusValidatorTest {
     @DisplayName("ensureNewValidityStartNotInPast should accept boundary equality (start == now)")
     void testEnsureNewValidityStartNotInPast_shouldAcceptBoundary() {
         AccountStatus current = new AccountStatus();
+        current.setValidityPeriod(closedOpen(now.plusDays(1), now.plusDays(30)));
         AccountStatusRecord input = record(new PeriodRecord(now, now.plusDays(30)), null);
 
         assertDoesNotThrow(
@@ -285,14 +321,13 @@ class AccountStatusValidatorTest {
     @Test
     @DisplayName("ensureSuspensionStartAfterValidityStart should throw 400 when suspension start is before validity start")
     void testEnsureSuspensionStartAfterValidityStart_shouldThrowWhenBefore() {
-        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(
             new PeriodRecord(now.plusDays(5), now.plusDays(30)),
             new PeriodRecord(now.plusDays(1), now.plusDays(10))
         );
 
         ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspensionStartAfterValidityStart(current, input, ACCOUNT_ID));
+            () -> validator.ensureSuspensionStartAfterValidityStart(input, ACCOUNT_ID));
 
         assertEquals(400, ex.getStatusCode());
         assertEquals("error.account.status.suspension_start_before_validity_start", ex.getError().key());
@@ -302,27 +337,20 @@ class AccountStatusValidatorTest {
     @DisplayName("ensureSuspensionStartAfterValidityStart should accept boundary equality")
     void testEnsureSuspensionStartAfterValidityStart_shouldAcceptBoundary() {
         OffsetDateTime aligned = now.plusDays(5);
-        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(
             new PeriodRecord(aligned, now.plusDays(30)),
             new PeriodRecord(aligned, now.plusDays(10))
         );
 
-        assertDoesNotThrow(() -> validator.ensureSuspensionStartAfterValidityStart(current, input, ACCOUNT_ID));
+        assertDoesNotThrow(() -> validator.ensureSuspensionStartAfterValidityStart(input, ACCOUNT_ID));
     }
 
     @Test
-    @DisplayName("ensureSuspensionStartAfterValidityStart should fall back to persisted validity start when request omits it")
-    void testEnsureSuspensionStartAfterValidityStart_shouldFallbackToPersisted() {
-        AccountStatus current = new AccountStatus();
-        current.setValidityPeriod(closedOpen(now.plusDays(10), now.plusDays(30)));
-        AccountStatusRecord input = record(null, new PeriodRecord(now.plusDays(5), now.plusDays(20)));
+    @DisplayName("ensureSuspensionStartAfterValidityStart should skip when no suspension start is provided")
+    void testEnsureSuspensionStartAfterValidityStart_shouldSkipWhenNoSuspension() {
+        AccountStatusRecord input = record(new PeriodRecord(now.plusDays(10), now.plusDays(30)), null);
 
-        ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspensionStartAfterValidityStart(current, input, ACCOUNT_ID));
-
-        assertEquals(400, ex.getStatusCode());
-        assertEquals("error.account.status.suspension_start_before_validity_start", ex.getError().key());
+        assertDoesNotThrow(() -> validator.ensureSuspensionStartAfterValidityStart(input, ACCOUNT_ID));
     }
 
     @Test
@@ -348,14 +376,13 @@ class AccountStatusValidatorTest {
     @Test
     @DisplayName("ensureSuspensionWithinValidity should throw 400 when suspension start is after validity end")
     void testEnsureSuspensionWithinValidity_shouldThrowWhenStartOutside() {
-        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(
             new PeriodRecord(now.plusDays(1), now.plusDays(10)),
             new PeriodRecord(now.plusDays(20), now.plusDays(25))
         );
 
         ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspensionWithinValidity(current, input, ACCOUNT_ID));
+            () -> validator.ensureSuspensionWithinValidity(input, ACCOUNT_ID));
 
         assertEquals(400, ex.getStatusCode());
         assertEquals("error.account.status.suspension_outside_validity", ex.getError().key());
@@ -364,14 +391,13 @@ class AccountStatusValidatorTest {
     @Test
     @DisplayName("ensureSuspensionWithinValidity should throw 400 when suspension end is after validity end")
     void testEnsureSuspensionWithinValidity_shouldThrowWhenEndOutside() {
-        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(
             new PeriodRecord(now.plusDays(1), now.plusDays(10)),
             new PeriodRecord(now.plusDays(5), now.plusDays(15))
         );
 
         ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspensionWithinValidity(current, input, ACCOUNT_ID));
+            () -> validator.ensureSuspensionWithinValidity(input, ACCOUNT_ID));
 
         assertEquals(400, ex.getStatusCode());
         assertEquals("error.account.status.suspension_outside_validity", ex.getError().key());
@@ -380,38 +406,30 @@ class AccountStatusValidatorTest {
     @Test
     @DisplayName("ensureSuspensionWithinValidity should accept suspension within validity")
     void testEnsureSuspensionWithinValidity_shouldAcceptInside() {
-        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(
             new PeriodRecord(now.plusDays(1), now.plusDays(30)),
             new PeriodRecord(now.plusDays(5), now.plusDays(10))
         );
 
-        assertDoesNotThrow(() -> validator.ensureSuspensionWithinValidity(current, input, ACCOUNT_ID));
+        assertDoesNotThrow(() -> validator.ensureSuspensionWithinValidity(input, ACCOUNT_ID));
     }
 
     @Test
     @DisplayName("ensureSuspensionWithinValidity should skip when validity end is null (open-ended)")
     void testEnsureSuspensionWithinValidity_shouldSkipWhenOpenEnded() {
-        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(
             new PeriodRecord(now.plusDays(1), null),
             new PeriodRecord(now.plusDays(5), now.plusDays(10))
         );
 
-        assertDoesNotThrow(() -> validator.ensureSuspensionWithinValidity(current, input, ACCOUNT_ID));
+        assertDoesNotThrow(() -> validator.ensureSuspensionWithinValidity(input, ACCOUNT_ID));
     }
 
     @Test
-    @DisplayName("ensureSuspensionWithinValidity should fall back to persisted validity end when request omits it")
-    void testEnsureSuspensionWithinValidity_shouldFallbackToPersisted() {
-        AccountStatus current = new AccountStatus();
-        current.setValidityPeriod(closedOpen(now.plusDays(1), now.plusDays(10)));
+    @DisplayName("ensureSuspensionWithinValidity should skip when record validity period is null (treated as open-ended)")
+    void testEnsureSuspensionWithinValidity_shouldSkipWhenRecordValidityNull() {
         AccountStatusRecord input = record(null, new PeriodRecord(now.plusDays(20), now.plusDays(25)));
 
-        ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspensionWithinValidity(current, input, ACCOUNT_ID));
-
-        assertEquals(400, ex.getStatusCode());
-        assertEquals("error.account.status.suspension_outside_validity", ex.getError().key());
+        assertDoesNotThrow(() -> validator.ensureSuspensionWithinValidity(input, ACCOUNT_ID));
     }
 }

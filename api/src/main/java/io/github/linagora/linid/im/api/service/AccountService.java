@@ -47,6 +47,12 @@ public interface AccountService {
     /**
      * Creates a new account from the given request.
      *
+     * <p> Business rules enforced (delegated to {@code AccountCreationValidator}):</p>
+     * <ul>
+     *   <li>The validity period must exist with a non-null start.</li>
+     *   <li>The validity period's start must be greater than or equal to {@code now()}.</li>
+     * </ul>
+     *
      * @param userPrincipal the authenticated user
      * @param account       the account creation record
      * @return the created account entity

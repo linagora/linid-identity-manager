@@ -27,6 +27,8 @@
 package io.github.linagora.linid.im.api.model.account;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -43,6 +45,32 @@ import org.mapstruct.MappingTarget;
  */
 @Mapper(componentModel = "spring", uses = CommonMapper.class)
 public interface AccountStatusMapper {
+
+    /**
+     * Creates an initial {@link AccountStatus} for a newly created account.
+     *
+     * <p>The validity period end is intentionally left open-ended ({@code null}) — only the start
+     * date from the creation request is persisted. The end date can later be set via
+     * {@code PUT /accounts/{id}/status}.</p>
+     *
+     * @param accountRecord the creation request record providing the validity period
+     * @param userPrincipal the authenticated principal performing the creation
+     * @param account       the persisted account whose ID must be linked
+     * @return a new {@link AccountStatus} entity ready to be persisted
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "insertDate", ignore = true)
+    @Mapping(target = "updateDate", ignore = true)
+    @Mapping(target = "suspensionPeriod", ignore = true)
+    @Mapping(target = "activationAt", ignore = true)
+    @Mapping(target = "statusReason", ignore = true)
+    @Mapping(target = "statusSubreason", ignore = true)
+    @Mapping(target = "statusComment", ignore = true)
+    @Mapping(target = "createdBy", source = "userPrincipal.id")
+    @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "accountId", source = "account.id")
+    @Mapping(target = "validityPeriod", source = "accountRecord.validityPeriod")
+    AccountStatus toAccountStatus(AccountRecord accountRecord, UserPrincipal userPrincipal, Account account);
 
     /**
      * Applies a pass-through {@link AccountStatusRecord} on top of an existing {@link AccountStatus}.

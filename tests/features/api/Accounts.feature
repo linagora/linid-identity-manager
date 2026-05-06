@@ -11,6 +11,8 @@ Feature: Test API Account endpoints
   ## 202 Should return 400 with missing required fields
   ## 203 Should return 400 with invalid email
   ## 204 Should return 500 when creating account with duplicate email
+  ## 205 Should return 400 when validity period start is null
+  ## 206 Should return 400 when validity period start is before current date
 
   ################## Find All (GET /accounts) #############
   ## 301 Should return paginated list of accounts
@@ -68,7 +70,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-001",
         "lastname": "Doe",
         "firstname": "John",
-        "email": "john@example.com"
+        "email": "john@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 401
@@ -84,7 +90,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-201",
         "lastname": "Doe",
         "firstname": "John",
-        "email": "john201@example.com"
+        "email": "john201@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -109,7 +119,8 @@ Feature: Test API Account endpoints
         "externalId": "",
         "lastname": "",
         "firstname": "",
-        "email": ""
+        "email": "",
+        "validityPeriod": null
       }
       """
     Then  I expect status code is 400
@@ -124,7 +135,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-203",
         "lastname": "Doe",
         "firstname": "Jane",
-        "email": "not-an-email"
+        "email": "not-an-email",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 400
@@ -139,7 +154,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-204-a",
         "lastname": "Doe",
         "firstname": "John",
-        "email": "duplicate204@example.com"
+        "email": "duplicate204@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -151,13 +170,53 @@ Feature: Test API Account endpoints
         "externalId": "ext-204-b",
         "lastname": "Doe",
         "firstname": "Jane",
-        "email": "duplicate204@example.com"
+        "email": "duplicate204@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 500
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
+
+  Scenario: 205 - Should return 400 when validity period start is null
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-205",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john205@example.com",
+        "validityPeriod": {
+          "start": null,
+          "end": "2030-01-01T00:00:00Z"
+        }
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_required'
+    And   I expect '{{response.body.status}}' is '400'
+
+  Scenario: 206 - Should return 400 when validity period start is before current date
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-206",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john206@example.com",
+        "validityPeriod": {
+          "start": "2000-01-01T00:00:00Z",
+          "end": "2030-01-01T00:00:00Z"
+        }
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_in_past'
+    And   I expect '{{response.body.status}}' is '400'
 
   ####################################################
   ################## Find All (GET /accounts) #########
@@ -170,7 +229,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-301",
         "lastname": "Find",
         "firstname": "All",
-        "email": "findall301@example.com"
+        "email": "findall301@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -203,7 +266,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-401",
         "lastname": "Find",
         "firstname": "ById",
-        "email": "findbyid401@example.com"
+        "email": "findbyid401@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -241,7 +308,11 @@ Feature: Test API Account endpoints
         "externalId": "ext-501",
         "lastname": "Delete",
         "firstname": "Me",
-        "email": "delete501@example.com"
+        "email": "delete501@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201

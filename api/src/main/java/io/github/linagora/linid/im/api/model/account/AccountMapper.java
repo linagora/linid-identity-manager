@@ -27,15 +27,41 @@
 package io.github.linagora.linid.im.api.model.account;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 /**
  * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
  */
 @Mapper(componentModel = "spring", uses = CommonMapper.class)
 public interface AccountMapper {
+
+    /**
+     * Creates a new {@link Account} entity from an {@link AccountRecord} and the calling principal.
+     *
+     * <p>Only the fields present in the record ({@code externalId}, {@code lastname}, {@code
+     * firstname}, {@code email}) and the principal's identifier ({@code createdBy}, {@code
+     * updatedBy}) are mapped. Computed fields ({@code payload}, {@code checksum}) are left unset and
+     * must be populated by the caller after this method returns. {@code validityPeriod} is
+     * intentionally omitted — it is stored in the companion {@code account_status} row, not on the
+     * account itself.
+     *
+     * @param record        the creation request record
+     * @param userPrincipal the authenticated principal performing the creation
+     * @return a partially populated {@link Account} entity
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "payload", ignore = true)
+    @Mapping(target = "checksum", ignore = true)
+    @Mapping(target = "insertDate", ignore = true)
+    @Mapping(target = "updateDate", ignore = true)
+    @Mapping(target = "createdBy", source = "userPrincipal.id")
+    @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "email", source = "record.email")
+    Account toAccount(AccountRecord record, UserPrincipal userPrincipal);
 
     /**
      * Converts an {@link Account} entity to an {@link AccountDTO}.

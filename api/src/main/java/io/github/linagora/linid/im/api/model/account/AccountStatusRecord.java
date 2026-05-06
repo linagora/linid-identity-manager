@@ -28,14 +28,11 @@ package io.github.linagora.linid.im.api.model.account;
 
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
 
 /**
  * Request payload for the {@code PUT /accounts/{id}/status} endpoint.
- *
- * <p>Acts as a pass-through record: no business validation is applied, every field
- * is persisted as received (including {@code null} values, which clear the corresponding
- * column).</p>
  *
  * @param validityPeriod   time range during which the account is valid
  * @param suspensionPeriod time range during which the account is suspended
@@ -44,9 +41,9 @@ import java.time.OffsetDateTime;
  * @param statusSubreason  detailed classification of the status reason
  * @param statusComment    free-text comment
  */
-@Schema(description = "Request payload for updating account status fields (pass-through, no validation)")
+@Schema(description = "Request payload for updating account status fields")
 public record AccountStatusRecord(
-    @Schema(description = "Time range during which the account is valid")
+    @NotNull @Schema(description = "Time range during which the account is valid")
     PeriodRecord validityPeriod,
 
     @Schema(description = "Time range during which the account is suspended")

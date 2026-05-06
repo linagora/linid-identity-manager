@@ -32,7 +32,6 @@ import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 /**
  * MapStruct mapper between {@link AccountStatus} entities and their API representations.
@@ -73,20 +72,33 @@ public interface AccountStatusMapper {
     AccountStatus toAccountStatus(AccountRecord accountRecord, UserPrincipal userPrincipal, Account account);
 
     /**
-     * Applies a pass-through {@link AccountStatusRecord} on top of an existing {@link AccountStatus}.
+     * Builds an updated {@link AccountStatus} from an existing entity, a request record and
+     * the calling principal.
      *
-     * <p>Every field carried by the record (including {@code null} values) overwrites the
-     * corresponding field on the target entity, matching the endpoint's documented
-     * pass-through semantics.</p>
+     * <p>Identity and immutable audit fields ({@code id}, {@code accountId}, {@code createdBy},
+     * {@code insertDate}) are carried over from {@code entity}, and the optimistic-lock version
+     * field ({@code updateDate}, annotated {@code @Version}) is also copied so that Spring Data
+     * JPA's {@code isNew()} check returns {@code false} — ensuring {@code em.merge()} (UPDATE)
+     * is called rather than {@code em.persist()} (INSERT). The database trigger then refreshes
+     * {@code updateDate} after the {@code UPDATE} and Hibernate re-reads it via
+     * {@code @Generated}.</p>
      *
-     * @param entity the entity to update in place
-     * @param record the request record providing the new values
+     * @param entity        the existing entity whose identity fields are preserved
+     * @param record        the request record providing the new field values
+     * @param userPrincipal the authenticated principal performing the update
+     * @return a new {@link AccountStatus} instance ready to be persisted
      */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "accountId", ignore = true)
-    @Mapping(target = "createdBy", ignore = true)
-    @Mapping(target = "updatedBy", ignore = true)
-    @Mapping(target = "insertDate", ignore = true)
-    @Mapping(target = "updateDate", ignore = true)
-    void update(@MappingTarget AccountStatus entity, AccountStatusRecord record);
+    @Mapping(target = "id", source = "entity.id")
+    @Mapping(target = "accountId", source = "entity.accountId")
+    @Mapping(target = "createdBy", source = "entity.createdBy")
+    @Mapping(target = "insertDate", source = "entity.insertDate")
+    @Mapping(target = "updateDate", source = "entity.updateDate")
+    @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "validityPeriod", source = "record.validityPeriod")
+    @Mapping(target = "suspensionPeriod", source = "record.suspensionPeriod")
+    @Mapping(target = "activationAt", source = "record.activationAt")
+    @Mapping(target = "statusReason", source = "record.statusReason")
+    @Mapping(target = "statusSubreason", source = "record.statusSubreason")
+    @Mapping(target = "statusComment", source = "record.statusComment")
+    AccountStatus toAccountStatus(AccountStatus entity, AccountStatusRecord record, UserPrincipal userPrincipal);
 }

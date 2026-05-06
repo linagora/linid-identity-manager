@@ -98,24 +98,49 @@ public interface AccountService {
     Optional<Account> getAccountByEmail(String email);
 
     /**
-     * Pass-through update of the status fields of the account with the given identifier.
+     * Updates the status fields of the account with the given identifier, after enforcing the
+     * business rules delegated to {@code AccountStatusValidator}. Validated fields are then
+     * persisted as-is.
      *
-     * <p>Every field carried by the record (including {@code null} values) is persisted
-     * as-is. No business validation is performed here.</p>
+     * <p>Business rules enforced (delegated to {@code AccountStatusValidator}):</p>
+     * <ul>
+     *   <li>{@code activationAt} must be {@code null} (managed exclusively by
+     *       {@code PUT /accounts/{id}/status/activation}).</li>
+     *   <li>The validity period must carry a finite lower bound ({@code validityPeriod.start} is
+     *       mandatory).</li>
+     *   <li>The validity period must be internally coherent: when both bounds are provided,
+     *       {@code validityPeriod.start <= validityPeriod.end}.</li>
+     *   <li>The suspension period must be internally coherent: when both bounds are provided,
+     *       {@code suspensionPeriod.start <= suspensionPeriod.end}.</li>
+     *   <li>If the persisted {@code validityPeriod.start} is already in the past, it cannot be
+     *       changed (frozen — only idempotent echo of the same value is accepted).</li>
+     *   <li>Otherwise, the new {@code validityPeriod.start} must be greater than or equal to
+     *       {@code now()}.</li>
+     *   <li>If provided, {@code validityPeriod.end} must be greater than or equal to
+     *       {@code now()}.</li>
+     *   <li>If provided, {@code suspensionPeriod.start} must be greater than or equal to
+     *       {@code validityPeriod.start}.</li>
+     *   <li>If provided, {@code suspensionPeriod.start} must be greater than or equal to
+     *       {@code now()}.</li>
+     *   <li>If {@code validityPeriod.end} is defined (request or persisted fallback), both
+     *       {@code suspensionPeriod.start} and {@code suspensionPeriod.end} must be less than
+     *       or equal to {@code validityPeriod.end}.</li>
+     * </ul>
      *
      * @param userPrincipal the authenticated user
      * @param accountId     the account UUID
      * @param record        the new status values
      * @return the refreshed account view, including computed {@code status} and
      *         {@code daysBeforeDeactivation}
-     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if the account is not found
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException 404 if the account or its
+     *         companion status row is not found; 400 if any business rule is violated
      */
     AccountView updateStatus(UserPrincipal userPrincipal, UUID accountId, AccountStatusRecord record);
 
     /**
      * Sets the {@code activationAt} timestamp of the account with the given identifier.
      *
-     * <p>Business rules enforced (delegated to {@code AccountActivationValidator}):
+     * <p>Business rules enforced (delegated to {@code AccountActivationValidator}):</p>
      * <ul>
      *   <li>The current {@code activationAt} must be {@code null}.</li>
      *   <li>The validity period must exist with a non-null start.</li>
@@ -128,8 +153,8 @@ public interface AccountService {
      * @param accountId     the account UUID
      * @param record        the activation request carrying the new {@code activationAt}
      * @return the refreshed account view
-     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if the account is not found
-     *         or if any business rule is violated
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException 404 if the account or its
+     *         companion status row is not found; 400 if any business rule is violated
      */
     AccountView updateActivation(UserPrincipal userPrincipal, UUID accountId, AccountActivationRecord record);
 }

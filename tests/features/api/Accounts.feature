@@ -26,17 +26,22 @@ Feature: Test API Account endpoints
   ## 502 Should return 404 when deleting unknown account
 
   ################## Update Status (PUT /accounts/{id}/status) #####
-  ## 601 Should pass-through update status fields and return updated view
-  ## 602 Should clear status fields when null values are provided
-  ## 603 Should return 404 when updating status of unknown account
-  ## 604 Should return 400 when activationAt is provided
-  ## 605 Should return 400 when validity period start is after end
-  ## 606 Should return 400 when suspension period start is after end
-  ## 607 Should return 400 when new validity start is in the past
-  ## 608 Should return 400 when validity end is in the past
-  ## 609 Should return 400 when suspension start is before validity start
-  ## 610 Should return 400 when suspension is outside validity end
-  ## 611 Should accept open-ended validity (end null) without suspension
+  ## 601 Should update status fields and return updated view
+  ## 602 Should update status fields and return updated view when persisted validity start is equal to new validity start
+  ## 603 Should clear status fields when null values are provided
+  ## 604 Should return 404 when updating status of unknown account
+  ## 605 Should return 404 when no status account row exists yet
+  ## 606 Should return 400 when activationAt is provided
+  ## 607 Should return 400 when validity period start is null
+  ## 608 Should return 400 when validity period start is after end
+  ## 609 Should return 400 when suspension period start is after end
+  ## 610 Should return 400 when persisted validity start is in the past and new validity start is not equal to persisted one
+  ## 611 Should return 400 when new validity start is in the past
+  ## 612 Should return 400 when validity end is in the past
+  ## 613 Should return 400 when suspension start is before validity start
+  ## 614 Should return 400 when suspension start is in the past
+  ## 615 Should return 400 when suspension is outside validity end
+  ## 616 Should accept open-ended validity (end null) without suspension
 
   ################## Activate (PUT /accounts/{id}/status/activation) #####
   ## 701 Should activate account when business rules are satisfied (@skip — see #114)
@@ -334,14 +339,18 @@ Feature: Test API Account endpoints
   ################## Update Status (PUT /accounts/{id}/status) ##
   ####################################################
 
-  Scenario: 601 - Should pass-through update status fields and return updated view
+  Scenario: 601 - Should update status fields and return updated view
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-601",
         "lastname": "Status",
         "firstname": "Update",
-        "email": "status601@example.com"
+        "email": "status601@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -373,14 +382,46 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 602 - Should clear status fields when null values are provided
+  Scenario: 602 - Should update status fields and return updated view when persisted validity start is equal to new validity start
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002' with method 'GET'
+    Then  I expect status code is 200
+    And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002/status' with method 'PUT' with body:
+      """
+      {
+        "validityPeriod": {
+          "start": "{{ctx.validityPeriodStart}}",
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": null,
+        "activationAt": null,
+        "statusReason": "ONBOARDING",
+        "statusSubreason": "INITIAL_SETUP",
+        "statusComment": "Initial onboarding"
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.id}}' is '00000000-0000-0000-0000-00000000a002'
+    And   I expect '{{response.body.statusReason}}' is 'ONBOARDING'
+    And   I expect '{{response.body.statusSubreason}}' is 'INITIAL_SETUP'
+    And   I expect '{{response.body.statusComment}}' is 'Initial onboarding'
+    And   I expect '{{response.body.validityPeriod.start}}' is '{{ctx.validityPeriodStart}}'
+    And   I expect '{{response.body.validityPeriod.end}}' is '2099-12-31T00:00:00Z'
+    And   I expect '{{response.body.status}}' is 'INACTIVE'
+
+  Scenario: 603 - Should clear status fields when null values are provided
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-602",
+        "externalId": "ext-603",
         "lastname": "Status",
         "firstname": "Clear",
-        "email": "status602@example.com"
+        "email": "status603@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -389,7 +430,10 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": "ONBOARDING",
@@ -402,7 +446,10 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": null,
@@ -417,11 +464,14 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 603 - Should return 404 when updating status of unknown account
+  Scenario: 604 - Should return 404 when updating status of unknown account
     When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-000000000000/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": null,
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": null,
@@ -433,14 +483,37 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
     And   I expect '{{response.body.status}}' is '404'
 
-  Scenario: 604 - Should return 400 when activationAt is provided on PUT /status
+  Scenario: 605 - Should return 404 when no status account row exists yet
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a001/status' with method 'PUT' with body:
+      """
+      {
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": null,
+        "activationAt": null,
+        "statusReason": null,
+        "statusSubreason": null,
+        "statusComment": null
+      }
+      """
+    Then  I expect status code is 404
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.not_found'
+    And   I expect '{{response.body.status}}' is '404'
+
+  Scenario: 606 - Should return 400 when activationAt is provided on PUT /status
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-604",
+        "externalId": "ext-606",
         "lastname": "Status",
         "firstname": "ActivationAtForbidden",
-        "email": "status604@example.com"
+        "email": "status606@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -449,7 +522,10 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": "2099-06-01T00:00:00Z",
         "statusReason": null,
@@ -464,14 +540,18 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 605 - Should return 400 when validity period start is after end
+  Scenario: 607 - Should return 400 when validity period start is null
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-605",
+        "externalId": "ext-607",
         "lastname": "Status",
-        "firstname": "ValidityInverted",
-        "email": "status605@example.com"
+        "firstname": "ValidityStartNull",
+        "email": "status607@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -480,7 +560,48 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-12-31T00:00:00Z", "end": "2099-01-01T00:00:00Z"},
+        "validityPeriod": {
+          "start": null,
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": null,
+        "activationAt": null,
+        "statusReason": null,
+        "statusSubreason": null,
+        "statusComment": null
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.validity_period_start_required'
+    And   I expect '{{response.body.status}}' is '400'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
+  Scenario: 608 - Should return 400 when validity period start is after end
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-608",
+        "lastname": "Status",
+        "firstname": "ValidityInverted",
+        "email": "status608@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
+      """
+      {
+        "validityPeriod": {
+          "start": "2099-12-31T00:00:00Z",
+          "end": "2099-01-01T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": null,
@@ -495,14 +616,18 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 606 - Should return 400 when suspension period start is after end
+  Scenario: 609 - Should return 400 when suspension period start is after end
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-606",
+        "externalId": "ext-609",
         "lastname": "Status",
         "firstname": "SuspensionInverted",
-        "email": "status606@example.com"
+        "email": "status609@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -511,8 +636,14 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
-        "suspensionPeriod": {"start": "2099-06-30T00:00:00Z", "end": "2099-06-01T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": {
+          "start": "2099-06-30T00:00:00Z",
+          "end": "2099-06-01T00:00:00Z"
+        },
         "activationAt": null,
         "statusReason": null,
         "statusSubreason": null,
@@ -526,14 +657,44 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 607 - Should return 400 when new validity start is in the past
+  Scenario: 610 - Should return 400 when persisted validity start is in the past and new validity start is not equal to persisted one
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003' with method 'GET'
+    Then  I expect status code is 200
+    And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status' with method 'PUT' with body:
+      """
+      {
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": {
+          "start": "2099-05-30T00:00:00Z",
+          "end": "2099-06-01T00:00:00Z"
+        },
+        "activationAt": null,
+        "statusReason": null,
+        "statusSubreason": null,
+        "statusComment": null
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.validity_start_frozen'
+    And   I expect '{{response.body.status}}' is '400'
+
+  Scenario: 611 - Should return 400 when new validity start is in the past
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-607",
+        "externalId": "ext-611",
         "lastname": "Status",
         "firstname": "PastStart",
-        "email": "status607@example.com"
+        "email": "status611@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -542,7 +703,10 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2020-01-01T00:00:00Z", "end": "2099-01-01T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2020-01-01T00:00:00Z",
+          "end": "2099-01-01T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": null,
@@ -557,23 +721,18 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 608 - Should return 400 when validity end is in the past
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
-      """
-      {
-        "externalId": "ext-608",
-        "lastname": "Status",
-        "firstname": "PastEnd",
-        "email": "status608@example.com"
-      }
-      """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+  Scenario: 612 - Should return 400 when validity end is in the past
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003' with method 'GET'
+    Then  I expect status code is 200
+    And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": null, "end": "2020-12-31T00:00:00Z"},
+        "validityPeriod": {
+          "start": "{{ctx.validityPeriodStart}}",
+          "end": "2025-01-01T00:00:00Z"
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": null,
@@ -585,17 +744,18 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.errorKey}}' is 'error.account.status.validity_end_in_past'
     And   I expect '{{response.body.status}}' is '400'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
-
-  Scenario: 609 - Should return 400 when suspension start is before validity start
+  Scenario: 613 - Should return 400 when suspension start is before validity start
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-609",
+        "externalId": "ext-613",
         "lastname": "Status",
         "firstname": "SuspensionBeforeValidity",
-        "email": "status609@example.com"
+        "email": "status613@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -604,8 +764,14 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-06-01T00:00:00Z", "end": "2099-12-31T00:00:00Z"},
-        "suspensionPeriod": {"start": "2099-03-01T00:00:00Z", "end": "2099-03-15T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2099-06-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": {
+          "start": "2099-03-01T00:00:00Z",
+          "end": "2099-03-15T00:00:00Z"
+        },
         "activationAt": null,
         "statusReason": null,
         "statusSubreason": null,
@@ -619,14 +785,44 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 610 - Should return 400 when suspension is outside validity end
+  Scenario: 614 - Should return 400 when suspension start is in the past
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003' with method 'GET'
+    Then  I expect status code is 200
+    And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status' with method 'PUT' with body:
+      """
+      {
+        "validityPeriod": {
+          "start": "{{ctx.validityPeriodStart}}",
+          "end": "2099-12-31T00:00:00Z"
+        },
+        "suspensionPeriod": {
+          "start": "2025-01-01T00:00:00Z",
+          "end": "2025-01-15T00:00:00Z"
+        },
+        "activationAt": null,
+        "statusReason": null,
+        "statusSubreason": null,
+        "statusComment": null
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_start_in_past'
+    And   I expect '{{response.body.status}}' is '400'
+
+  Scenario: 615 - Should return 400 when suspension is outside validity end
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-610",
+        "externalId": "ext-615",
         "lastname": "Status",
         "firstname": "SuspensionAfterEnd",
-        "email": "status610@example.com"
+        "email": "status615@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -635,8 +831,14 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": "2099-06-30T00:00:00Z"},
-        "suspensionPeriod": {"start": "2099-08-01T00:00:00Z", "end": "2099-08-15T00:00:00Z"},
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-06-30T00:00:00Z"
+        },
+        "suspensionPeriod": {
+          "start": "2099-08-01T00:00:00Z",
+          "end": "2099-08-15T00:00:00Z"
+        },
         "activationAt": null,
         "statusReason": null,
         "statusSubreason": null,
@@ -650,14 +852,18 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 611 - Should accept open-ended validity (end null) without suspension
+  Scenario: 616 - Should accept open-ended validity (end null) without suspension
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
-        "externalId": "ext-611",
+        "externalId": "ext-616",
         "lastname": "Status",
         "firstname": "OpenEnded",
-        "email": "status611@example.com"
+        "email": "status616@example.com",
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": "2099-12-31T00:00:00Z"
+        }
       }
       """
     Then  I expect status code is 201
@@ -666,7 +872,10 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status' with method 'PUT' with body:
       """
       {
-        "validityPeriod": {"start": "2099-01-01T00:00:00Z", "end": null},
+        "validityPeriod": {
+          "start": "2099-01-01T00:00:00Z",
+          "end": null
+        },
         "suspensionPeriod": null,
         "activationAt": null,
         "statusReason": "ONBOARDING",

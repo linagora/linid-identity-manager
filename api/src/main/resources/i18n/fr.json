@@ -23,6 +23,7 @@
   "error.account.status.suspension_start_before_validity_start": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de suspension ({suspensionStart}) doit être supérieur ou égal au début de la période de validité ({validityStart}).",
   "error.account.status.suspension_start_in_past": "Le statut du compte {id} ne peut pas être mis à jour : le début de la période de suspension ({start}) doit être supérieur ou égal à la date du jour.",
   "error.account.status.suspension_outside_validity": "Le statut du compte {id} ne peut pas être mis à jour : la période de suspension doit être dans la période de validité (fin de validité : {validityEnd}).",
+  "error.account.status.validity_period_start_required": "Le statut du compte {id} ne peut pas être mis à jour : la date de début de la période de validité est requise.",
   "error.account.creation.validity_period_start_required": "Le compte associé à {email} ne peut pas être créé : la date de début de la période de validité est requise.",
   "error.account.creation.validity_period_start_in_past": "Le compte associé à {email} ne peut pas être créé : la date de début de la période de validité ({start}) doit être supérieure ou égale à la date du jour."
 }

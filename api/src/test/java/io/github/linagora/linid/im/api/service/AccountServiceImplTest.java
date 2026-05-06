@@ -337,46 +337,44 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateStatus should create a new status row when none exists and persist it")
-    void testUpdateStatus_shouldCreateRowWhenNoneExists() {
+    @DisplayName("updateStatus should throw 404 when account status row does not exist")
+    void testUpdateStatus_shouldThrow404WhenStatusNotFound() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
-        view.setId(id);
         var record = new AccountStatusRecord(null, null, null, "REASON", null, null);
 
         when(accountRepository.existsById(id)).thenReturn(true);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
-        when(accountStatusRepository.saveAndFlush(any(AccountStatus.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
 
-        AccountView result = accountService.updateStatus(userPrincipal, id, record);
+        ApiException exception = assertThrows(ApiException.class,
+            () -> accountService.updateStatus(userPrincipal, id, record));
 
-        assertNotNull(result);
-        verify(accountStatusMapper).update(any(AccountStatus.class), eq(record));
-        verify(accountStatusRepository).saveAndFlush(any(AccountStatus.class));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.status.not_found", exception.getError().key());
+        verify(accountStatusMapper, never()).toAccountStatus(
+            any(AccountStatus.class), any(), any(UserPrincipal.class));
+        verify(accountStatusRepository, never()).saveAndFlush(any());
     }
 
     @Test
-    @DisplayName("updateStatus should update existing status row")
-    void testUpdateStatus_shouldUpdateExistingRow() {
+    @DisplayName("updateStatus should pass the mapper output to saveAndFlush and return the refreshed view")
+    void testUpdateStatus_shouldPersistMapperOutputAndReturnView() {
         UUID id = UUID.randomUUID();
         var view = new AccountView();
-        view.setId(id);
         var existing = new AccountStatus();
-        existing.setAccountId(id);
         var record = new AccountStatusRecord(null, null, null, null, null, null);
+        var mappedStatus = new AccountStatus();
 
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
-        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountStatusMapper.toAccountStatus(existing, record, userPrincipal)).thenReturn(mappedStatus);
+        when(accountStatusRepository.saveAndFlush(mappedStatus)).thenReturn(mappedStatus);
 
-        accountService.updateStatus(userPrincipal, id, record);
+        AccountView result = accountService.updateStatus(userPrincipal, id, record);
 
-        verify(accountStatusMapper).update(existing, record);
-        assertEquals(ADMIN_ID, existing.getUpdatedBy());
-        verify(accountStatusRepository).saveAndFlush(existing);
+        assertSame(view, result);
+        verify(accountStatusMapper).toAccountStatus(existing, record, userPrincipal);
+        verify(accountStatusRepository).saveAndFlush(mappedStatus);
     }
 
     @Test
@@ -413,7 +411,8 @@ class AccountServiceImplTest {
 
         assertEquals(400, ex.getStatusCode());
         assertEquals("error.account.status.validity_end_in_past", ex.getError().key());
-        verify(accountStatusMapper, never()).update(any(), any());
+        verify(accountStatusMapper, never()).toAccountStatus(
+            any(AccountStatus.class), any(), any(UserPrincipal.class));
         verify(accountStatusRepository, never()).saveAndFlush(any());
     }
 
@@ -430,13 +429,14 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusMapper.toAccountStatus(existing, record, userPrincipal)).thenReturn(existing);
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
 
         accountService.updateStatus(userPrincipal, id, record);
 
         var inOrder = inOrder(accountStatusValidator, accountStatusMapper, accountStatusRepository);
         inOrder.verify(accountStatusValidator).validate(existing, record, id);
-        inOrder.verify(accountStatusMapper).update(existing, record);
+        inOrder.verify(accountStatusMapper).toAccountStatus(existing, record, userPrincipal);
         inOrder.verify(accountStatusRepository).saveAndFlush(existing);
     }
 

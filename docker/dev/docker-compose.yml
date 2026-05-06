@@ -53,10 +53,11 @@ services:
       DATABASE_ADMIN_USER: ${DATABASE_ADMIN_USER}
       DATABASE_ADMIN_PASSWORD: ${DATABASE_ADMIN_PASSWORD}
       DATABASE_NAME: ${DATABASE_NAME}
+      PGPASSWORD: ${DATABASE_ADMIN_PASSWORD}
     volumes:
-      - ./resources/init_accounts.sql:/init_accounts.sql:ro
-      - ./resources/init_accounts.sh:/init_accounts.sh:ro
-    entrypoint: ["/bin/sh", "/init_accounts.sh"]
+      - ./resources/init_accounts_and_status.sql:/init_accounts_and_status.sql:ro
+      - ./resources/init_accounts_and_status.sh:/init_accounts_and_status.sh:ro
+    entrypoint: ["/bin/sh", "/init_accounts_and_status.sh"]
 
 networks:
   linid-dev-network:

@@ -7,4 +7,4 @@ do
   sleep 2
 done
 
-psql -h db -p 5432 -U "$DATABASE_ADMIN_USER" -d "$DATABASE_NAME" -f /init_accounts.sql
+psql -h db -p 5432 -U "$DATABASE_ADMIN_USER" -d "$DATABASE_NAME" -f /init_accounts_and_status.sql

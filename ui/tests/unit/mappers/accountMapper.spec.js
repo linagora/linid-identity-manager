@@ -156,14 +156,16 @@ describe('accountMapper', () => {
   describe('Test function: toAccountQueryFilterDTO', () => {
     it('Convert filters to AccountQueryFilter', () => {
       const { toAccountQueryFilterDTO } = useAccountMapper();
-      tMock.mockReturnValue('DD/MM/YYYY');
 
+      // The date field already applies the locale mask, so the value is
+      // already formatted in the same `dateFormat` declared in the i18n
+      // translations (here "DD/MM/YYYY").
       const filters = {
         firstname: 'John',
         lastname: 'doe',
         email: 'john.doe',
         createdBy: 'admin',
-        insertDate: '2025-07-24T00:00:00Z',
+        insertDate: '24/07/2025',
       };
 
       const result = toAccountQueryFilterDTO(filters);
@@ -172,11 +174,22 @@ describe('accountMapper', () => {
       expect(result.firstname).toEqual([`lk_*${filters.firstname}*`]);
       expect(result.email).toEqual([`lk_*${filters.email}*`]);
       expect(result.createdBy).toEqual([`lk_*${filters.createdBy}*`]);
-      const formattedDate = dayjs(filters.insertDate).format('DD/MM/YYYY');
       expect(result.insertDate).toEqual([
-        `${formattedDate} 00:00:00_bt_${formattedDate} 23:59:59`,
+        `${filters.insertDate} 00:00:00_bt_${filters.insertDate} 23:59:59`,
       ]);
       expect(result.dateFormat).toBe(SPRING_QUERY_DATE_FORMAT);
+    });
+
+    it('Preserves locale-ambiguous dates instead of swapping day and month', () => {
+      const { toAccountQueryFilterDTO } = useAccountMapper();
+
+      // Without forwarding the value as-is, dayjs would re-parse "04/05/2026"
+      // as 5 April (MM/DD) and produce "05/04/2026" in the filter.
+      const result = toAccountQueryFilterDTO({ insertDate: '04/05/2026' });
+
+      expect(result.insertDate).toEqual([
+        '04/05/2026 00:00:00_bt_04/05/2026 23:59:59',
+      ]);
     });
 
     it('Handle empty filters', () => {

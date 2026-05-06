@@ -39,6 +39,7 @@ import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
@@ -84,6 +85,8 @@ class AccountControllerTest {
     private static final UUID ADMIN_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
     private static final String ADMIN_FULL_NAME = "Admin User";
+
+    private static final OffsetDateTime START = OffsetDateTime.parse("2100-01-01T00:00:00Z");
 
     @BeforeEach
     void setUp() {
@@ -152,7 +155,7 @@ class AccountControllerTest {
     @Test
     @DisplayName("Should create account and return 201")
     void testCreate_shouldReturn201WithAccountDTO() {
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null));
         var entity = createSampleEntity();
         var dto = createSampleDTO(entity);
         when(accountService.create(userPrincipal, request)).thenReturn(entity);

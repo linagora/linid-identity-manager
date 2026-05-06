@@ -26,17 +26,20 @@
 
 package io.github.linagora.linid.im.api.model.account;
 
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Request payload for creating a new account.
  *
- * @param externalId external identifier (e.g. OIDC sub)
- * @param lastname   last name of the account holder
- * @param firstname  first name of the account holder
- * @param email      email address, must be valid format
+ * @param externalId     external identifier (e.g. OIDC sub)
+ * @param lastname       last name of the account holder
+ * @param firstname      first name of the account holder
+ * @param email          email address, must be valid format
+ * @param validityPeriod time range during which the account is valid;
  */
 @Schema(description = "Request payload for creating a new account")
 public record AccountRecord(
@@ -50,6 +53,9 @@ public record AccountRecord(
     String firstname,
 
     @NotBlank @Email @Schema(description = "Email address", example = "john.doe@example.com")
-    String email
+    String email,
+
+    @NotNull @Schema(description = "Time range during which the account is valid")
+    PeriodRecord validityPeriod
 ) {
 }

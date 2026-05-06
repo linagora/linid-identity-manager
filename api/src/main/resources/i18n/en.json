@@ -22,5 +22,7 @@
   "error.account.status.validity_end_in_past": "Account {id} status cannot be updated: the validity period end ({end}) must be greater than or equal to today.",
   "error.account.status.suspension_start_before_validity_start": "Account {id} status cannot be updated: the suspension period start ({suspensionStart}) must be greater than or equal to the validity period start ({validityStart}).",
   "error.account.status.suspension_start_in_past": "Account {id} status cannot be updated: the suspension period start ({start}) must be greater than or equal to today.",
-  "error.account.status.suspension_outside_validity": "Account {id} status cannot be updated: the suspension period must be within the validity period (validity end: {validityEnd})."
+  "error.account.status.suspension_outside_validity": "Account {id} status cannot be updated: the suspension period must be within the validity period (validity end: {validityEnd}).",
+  "error.account.creation.validity_period_start_required": "Account for {email} cannot be created: validity period start date is required.",
+  "error.account.creation.validity_period_start_in_past": "Account for {email} cannot be created: the validity period start date ({start}) must be greater than or equal to today."
 }

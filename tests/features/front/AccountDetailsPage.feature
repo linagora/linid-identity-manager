@@ -52,7 +52,11 @@ Feature: Test Account details page display
         "externalId": "external-id1",
         "lastname": "Doe",
         "firstname": "John",
-        "email": "john@example.com"
+        "email": "john@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        }
       }
       """
     Then I expect status code is 201

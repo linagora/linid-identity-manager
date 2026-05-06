@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
 import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
@@ -39,10 +40,14 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountStatusValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -50,10 +55,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
  * Implementation of {@link AccountService}.
@@ -105,6 +106,11 @@ public class AccountServiceImpl implements AccountService {
     private final AccountStatusRepository accountStatusRepository;
 
     /**
+     * Mapper for converting account records into {@link Account} entities.
+     */
+    private final AccountMapper accountMapper;
+
+    /**
      * Mapper applying pass-through status updates on account status entities.
      */
     private final AccountStatusMapper accountStatusMapper;
@@ -119,19 +125,26 @@ public class AccountServiceImpl implements AccountService {
      */
     private final AccountStatusValidator accountStatusValidator;
 
+    /**
+     * Validator enforcing the business rules of the account creation flow.
+     */
+    private final AccountCreationValidator accountCreationValidator;
+
     @Override
     public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
-        Account entity = new Account();
-        entity.setExternalId(account.externalId());
-        entity.setLastname(account.lastname());
-        entity.setFirstname(account.firstname());
-        entity.setEmail(account.email());
+
+        accountCreationValidator.validate(account);
+
+        Account entity = accountMapper.toAccount(account, userPrincipal);
         entity.setPayload(DEFAULT_PAYLOAD);
         entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
-        entity.setCreatedBy(userPrincipal.getId());
-        entity.setUpdatedBy(userPrincipal.getId());
 
-        return accountRepository.save(entity);
+        Account createdAccount = accountRepository.save(entity);
+
+        AccountStatus statusEntity = accountStatusMapper.toAccountStatus(account, userPrincipal, createdAccount);
+        accountStatusRepository.save(statusEntity);
+
+        return createdAccount;
     }
 
     @Override

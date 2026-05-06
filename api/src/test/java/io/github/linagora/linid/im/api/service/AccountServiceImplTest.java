@@ -27,9 +27,11 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
 import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
@@ -39,6 +41,7 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountStatusValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
@@ -73,6 +76,8 @@ import static org.mockito.Mockito.*;
 class AccountServiceImplTest {
 
     private static final UUID ADMIN_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final OffsetDateTime START = OffsetDateTime.parse("2100-01-01T00:00:00Z");
+
     @Mock
     private AccountRepository accountRepository;
     @Mock
@@ -82,11 +87,15 @@ class AccountServiceImplTest {
     @Mock
     private AccountStatusRepository accountStatusRepository;
     @Mock
+    private AccountMapper accountMapper;
+    @Mock
     private AccountStatusMapper accountStatusMapper;
     @Mock
     private AccountActivationValidator accountActivationValidator;
     @Mock
     private AccountStatusValidator accountStatusValidator;
+    @Mock
+    private AccountCreationValidator accountCreationValidator;
     @InjectMocks
     private AccountServiceImpl accountService;
     private UserPrincipal userPrincipal;
@@ -101,7 +110,16 @@ class AccountServiceImplTest {
     @Test
     @DisplayName("Should create account with correct fields and checksum")
     void testCreate_shouldSetAllFieldsAndChecksum() {
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
+            new PeriodRecord(START, null));
+        Account mappedAccount = new Account();
+        mappedAccount.setExternalId("ext-001");
+        mappedAccount.setLastname("Doe");
+        mappedAccount.setFirstname("John");
+        mappedAccount.setEmail("john@example.com");
+        mappedAccount.setCreatedBy(ADMIN_ID);
+        mappedAccount.setUpdatedBy(ADMIN_ID);
+        when(accountMapper.toAccount(request, userPrincipal)).thenReturn(mappedAccount);
         when(checksumService.compute("{}")).thenReturn(
             "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a");
         when(accountRepository.save(any(Account.class)))
@@ -124,7 +142,9 @@ class AccountServiceImplTest {
     @Test
     @DisplayName("Should generate consistent SHA-256 checksum for default payload")
     void testCreate_shouldGenerateConsistentChecksum() {
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com");
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
+            new PeriodRecord(START, null));
+        when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
@@ -133,6 +153,91 @@ class AccountServiceImplTest {
         Account second = accountService.create(userPrincipal, request);
 
         assertEquals(first.getChecksum(), second.getChecksum());
+    }
+
+    @Test
+    @DisplayName("Should delegate validation to accountCreationValidator")
+    void testCreate_shouldCallValidator() {
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
+            new PeriodRecord(START, null));
+        when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
+        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
+        when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.create(userPrincipal, request);
+
+        verify(accountCreationValidator).validate(request);
+    }
+
+    @Test
+    @DisplayName("Should not save account when validator throws")
+    void testCreate_shouldNotSaveWhenValidatorThrows() {
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
+            new PeriodRecord(START, null));
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.account.creation.validity_period_start_in_past")))
+            .when(accountCreationValidator).validate(request);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.create(userPrincipal, request));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.creation.validity_period_start_in_past", ex.getError().key());
+        verify(accountRepository, never()).save(any());
+        verify(accountStatusRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Should save account status with correct accountId, createdBy and updatedBy")
+    void testCreate_shouldSaveStatusWithCorrectAuditFields() {
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
+            new PeriodRecord(START, null));
+        UUID generatedId = UUID.randomUUID();
+        AccountStatus mockStatus = new AccountStatus();
+        when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
+        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
+        when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> {
+                Account saved = invocation.getArgument(0);
+                saved.setId(generatedId);
+                return saved;
+            });
+        when(accountStatusMapper.toAccountStatus(
+            eq(request), any(UserPrincipal.class), argThat(a -> generatedId.equals(a.getId()))))
+            .thenReturn(mockStatus);
+
+        accountService.create(userPrincipal, request);
+
+        verify(accountStatusMapper).toAccountStatus(
+            eq(request), any(UserPrincipal.class), argThat(a -> generatedId.equals(a.getId())));
+        verify(accountStatusRepository).save(mockStatus);
+    }
+
+    @Test
+    @DisplayName("create should validate first, then persist the account, then map and persist the status — in that order")
+    void testCreate_shouldRespectValidatePersistAccountMapPersistStatusOrder() {
+        var request = new AccountRecord("ext-002", "Doe", "John", "john2@example.com",
+            new PeriodRecord(START, null));
+        AccountStatus mockStatus = new AccountStatus();
+        when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
+        when(accountStatusMapper.toAccountStatus(
+            any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
+            .thenReturn(mockStatus);
+        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
+        when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.create(userPrincipal, request);
+
+        var inOrder = inOrder(accountCreationValidator, accountMapper, accountRepository,
+            accountStatusMapper, accountStatusRepository);
+        inOrder.verify(accountCreationValidator).validate(request);
+        inOrder.verify(accountMapper).toAccount(eq(request), any(UserPrincipal.class));
+        inOrder.verify(accountRepository).save(any(Account.class));
+        inOrder.verify(accountStatusMapper).toAccountStatus(
+            eq(request), any(UserPrincipal.class), any(Account.class));
+        inOrder.verify(accountStatusRepository).save(mockStatus);
     }
 
     @Test

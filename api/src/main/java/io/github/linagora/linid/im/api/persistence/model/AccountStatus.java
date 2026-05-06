@@ -82,10 +82,12 @@ public class AccountStatus extends AbstractEntity {
 
     /**
      * Time range during which the account is considered valid. Stored as {@code TSTZRANGE}.
-     * May be {@code null} when the validity period has not been configured yet.
+     * Always non-{@code null} on persisted rows ({@code NOT NULL} column) and guaranteed to
+     * carry a finite lower bound by the DB constraint
+     * {@code chk_account_status_validity_has_lower_bound}.
      */
     @Type(PostgreSQLRangeType.class)
-    @Column(name = "validity_period", columnDefinition = "tstzrange")
+    @Column(name = "validity_period", columnDefinition = "tstzrange", nullable = false)
     private Range<ZonedDateTime> validityPeriod;
 
     /**

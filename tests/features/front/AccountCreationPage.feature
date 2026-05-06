@@ -4,10 +4,11 @@ Feature: Test Account creation page
   ## 101 Should display title, form fields and action buttons
   ## 102 Submitting an empty form should display required validation messages
   ## 103 Submitting an invalid email should display email validation message
-  ## 104 Submitting a valid form should create the account on the backend
-  ## 105 Should display a success notification after creation
-  ## 106 Should redirect to the account details page after creation
-  ## 107 Remove the created account
+  ## 104 Submitting a form with a past validity start date should display date validation message
+  ## 105 Submitting a valid form should create the account on the backend
+  ## 106 Should display a success notification after creation
+  ## 107 Should redirect to the account details page after creation
+  ## 108 Remove the created account
 
   Scenario: Roundtrip about Account creation
 
@@ -35,6 +36,7 @@ Feature: Test Account creation page
     And I expect the HTML element '[data-cy="field_lastname"]' to be visible
     And I expect the HTML element '[data-cy="field_firstname"]' to be visible
     And I expect the HTML element '[data-cy="field_email"]' to be visible
+    And I expect the HTML element '[data-cy="field_validityPeriodStart"]' to be visible
     And I expect the HTML element '[data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 
@@ -53,15 +55,21 @@ Feature: Test Account creation page
     Then I expect the HTML element '[data-cy="field_email"]' contains "Format d'e-mail invalide"
     And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/create"
 
-    ## 104 Submitting a valid form should create the account on the backend
+    ## 104 Submitting a form with a past validity start date should display date validation message
+    When I set the text "01/01/2020" in the HTML element "[data-cy=\"field_validityPeriodStart\"] input"
+    And I click on '[data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="field_validityPeriodStart"]' contains "La date ne peut pas être dans le passé"
+
+    ## 105 Submitting a valid form should create the account on the backend
     When I set the text "john.doe@example.com" in the HTML element "[data-cy=\"field_email\"] input"
+    And I set the text "01/01/2080" in the HTML element "[data-cy=\"field_validityPeriodStart\"] input"
     And I click on '[data-cy="button_confirm"]'
 
-    ## 105 Should display a success notification after creation
+    ## 106 Should display a success notification after creation
     Then I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Compte créé avec succès"
 
-    ## 106 Should redirect to the account details page after creation
+    ## 107 Should redirect to the account details page after creation
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
 
     ####################################################
@@ -79,7 +87,7 @@ Feature: Test Account creation page
     And I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And I set http header 'Content-Type' with 'application/json'
 
-    ## 107 Remove the created account (looked up by externalId)
+    ## 108 Remove the created account (looked up by externalId)
     When I request '{{env.E2E_API_URL}}/accounts?externalId=external-id-e2e' with method 'GET'
     Then I expect status code is 200
     And I store 'accountId' as '{{response.body.content[0].id}}' in context

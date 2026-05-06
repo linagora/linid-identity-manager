@@ -24,7 +24,8 @@
  * LinID Identity Manager software.
  */
 
-import dayjs, { type Dayjs } from 'dayjs';
+import { dayjs } from 'boot/dayjs';
+import type { Dayjs } from 'dayjs';
 import type { FormField } from 'src/types/form';
 import { useI18n } from 'vue-i18n';
 
@@ -39,10 +40,10 @@ export function useCommonMapper() {
   /**
    * Convert ISO date to date with local date time format.
    * @param value Date string in ISO format (e.g., "2024-06-30T12:34:56.789Z") to be converted to a human-readable format.
-   * @param format Optional format key to specify the desired date format from the i18n translations (default is "dateFormat").
+   * @param formatKey Optional format key to specify the desired date format from the i18n translations (default is "dateFormat").
    * @returns Formatted date string according to the application's locale settings, or "-" if the input is invalid or falsy.
    */
-  const toDate = (value: unknown, format: string = 'dateFormat'): string => {
+  const toDate = (value: unknown, formatKey: string = 'dateFormat'): string => {
     if (!value) {
       return '-';
     }
@@ -50,24 +51,29 @@ export function useCommonMapper() {
     if (!date.isValid()) {
       return '-';
     }
-    return date.format(t(`application.${format}`));
+    return date.format(t(`application.${formatKey}`));
   };
 
   /**
-   * Convert date format to iso.
-   * @param value Date string to be converted to ISO format for API consumption.
-   * @returns String in ISO format (e.g., "2024-06-30T12:34:56.789Z") or an empty string if the input is falsy.
+   * Convert a locale-formatted date string to an ISO 8601 UTC string.
+   * @param value Date string to be converted to ISO format for API consumption. The value must
+   * match the format pattern retrieved from `application.${formatKey}` (e.g., "DD/MM/YYYY");
+   * strict parsing is enforced, so any value that does not exactly match the format will
+   * return an empty string.
+   * @param formatKey Optional format key to specify the expected input date format from the i18n translations (default is "dateFormat").
+   * @returns String in ISO 8601 UTC format (e.g., "2024-06-30T00:00:00.000Z"), or an empty string if the input is falsy or does not match the expected format.
    */
-  const toDateISO = (value: unknown): string => {
+  const toDateISO = (
+    value: unknown,
+    formatKey: string = 'dateFormat'
+  ): string => {
     const v = value?.toString() || '';
     if (!v) {
       return '';
     }
-    const date = new Date(v);
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-    return date.toISOString();
+
+    const date = dayjs.utc(v, t(`application.${formatKey}`), true);
+    return date.isValid() ? date.toISOString() : '';
   };
 
   /**

@@ -49,6 +49,46 @@
           :data-cy="`field_${field.name}`"
         >
           <q-input
+            v-if="field.type === 'date'"
+            v-model="form[field.name]"
+            :label="field.label"
+            :rules="field.rules"
+            type="text"
+            class="q-mb-sm"
+            lazy-rules
+          >
+            <template #append>
+              <q-icon
+                name="event"
+                class="cursor-pointer"
+                v-bind="uiProps[field.name]?.icon"
+              >
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date
+                    v-model="form[field.name]"
+                    :data-cy="`field_${field.name}_datepicker`"
+                    v-bind="uiProps[field.name]?.date"
+                    :mask="globalT('application.dateFormat')"
+                  >
+                    <div class="row items-center justify-end">
+                      <q-btn
+                        v-close-popup
+                        :label="t(`fields.${field.name}.close`)"
+                        v-bind="uiProps[field.name]?.btn"
+                      />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+
+          <q-input
+            v-else
             v-model="form[field.name]"
             :label="field.label"
             :rules="field.rules"
@@ -74,17 +114,26 @@
 </template>
 
 <script setup lang="ts">
+import type {
+  LinidQBtnProps,
+  LinidQDateProps,
+  LinidQIconProps,
+} from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
   useNotify,
   useScopedI18n,
+  useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { useAccountCreationConfig } from 'src/composables/useAccountCreationConfig';
+import { useAccountMapper } from 'src/mappers/accountMapper';
 import { useCommonMapper } from 'src/mappers/commonMapper';
 import { createAccount } from 'src/services/AccountService';
-import type { AccountRecord } from 'src/types/accounts';
+import type { AccountForm } from 'src/types/accounts';
+import type { DatePickerUiProps } from 'src/types/form';
 import { reactive, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 const pageName = 'AccountCreationPage';
@@ -92,12 +141,15 @@ const i18nScope = pageName;
 const uiNamespace = 'accounts.creation-page';
 
 const router = useRouter();
+const { t: globalT } = useI18n();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
 const { toEmptyRecord } = useCommonMapper();
 const { creationFields } = useAccountCreationConfig(i18nScope);
+const { ui } = useUiDesign();
+const { toAccountRecord } = useAccountMapper();
 
-const form = reactive<AccountRecord>(toEmptyRecord(creationFields));
+const form = reactive<AccountForm>(toEmptyRecord(creationFields));
 const isLoading = ref<boolean>(false);
 
 const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
@@ -112,7 +164,7 @@ const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 async function onSubmit(): Promise<void> {
   isLoading.value = true;
   try {
-    const created = await createAccount({ ...form });
+    const created = await createAccount(toAccountRecord({ ...form }));
     Notify({
       type: 'positive',
       message: t('success'),
@@ -131,6 +183,23 @@ async function onSubmit(): Promise<void> {
     isLoading.value = false;
   }
 }
+
+const uiProps = creationFields
+  .filter((field) => field.type === 'date')
+  .reduce<DatePickerUiProps>((acc, field) => {
+    acc[field.name] = {
+      icon: ui<LinidQIconProps>(
+        `${uiNamespace}.fields.${field.name}`,
+        'q-icon'
+      ),
+      date: ui<LinidQDateProps>(
+        `${uiNamespace}.fields.${field.name}`,
+        'q-date'
+      ),
+      btn: ui<LinidQBtnProps>(`${uiNamespace}.fields.${field.name}`, 'q-btn'),
+    };
+    return acc;
+  }, {});
 
 /**
  * Cancels the account creation and navigates back to the accounts list.

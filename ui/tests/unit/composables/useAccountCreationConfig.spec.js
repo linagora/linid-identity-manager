@@ -25,7 +25,7 @@
  */
 
 import {
-  useFieldValidation,
+  useQuasarFieldValidation,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import { useAccountCreationConfig } from 'src/composables/useAccountCreationConfig';
@@ -35,14 +35,24 @@ const requiredRule = (value) =>
   value === undefined || value === null || value === '' ? 'required' : true;
 const emailRule = (value) =>
   typeof value === 'string' && value.includes('@') ? true : 'email';
+const validDateRule = vi.fn();
+const dateNotInPastRule = vi.fn();
 
 vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: vi.fn(() => ({
     t: vi.fn((key) => `translated.${key}`),
   })),
-  useFieldValidation: vi.fn(() => ({
+  useQuasarFieldValidation: vi.fn(() => ({
     required: requiredRule,
     email: emailRule,
+    validDate: vi.fn(() => validDateRule),
+    dateNotInPast: vi.fn(() => dateNotInPastRule),
+  })),
+}));
+
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(() => ({
+    t: vi.fn((key) => `global.${key}`),
   })),
 }));
 
@@ -55,10 +65,12 @@ describe('Test composable: useAccountCreationConfig', () => {
     useAccountCreationConfig('AccountCreationPage');
 
     expect(useScopedI18n).toHaveBeenCalledWith('AccountCreationPage');
-    expect(useFieldValidation).toHaveBeenCalledWith('AccountCreationPage');
+    expect(useQuasarFieldValidation).toHaveBeenCalledWith(
+      'AccountCreationPage'
+    );
   });
 
-  it('should declare the four expected fields in order with translated labels', () => {
+  it('should declare the five expected fields in order with translated labels', () => {
     const { creationFields } = useAccountCreationConfig('AccountCreationPage');
 
     expect(creationFields.map((field) => field.name)).toEqual([
@@ -66,24 +78,23 @@ describe('Test composable: useAccountCreationConfig', () => {
       'lastname',
       'firstname',
       'email',
+      'validityPeriodStart',
     ]);
     expect(creationFields.map((field) => field.label)).toEqual([
       'translated.fields.externalId',
       'translated.fields.lastname',
       'translated.fields.firstname',
       'translated.fields.email',
+      'translated.fields.validityPeriodStart.label',
     ]);
   });
 
-  it('should apply only the required rule on non-email fields', () => {
+  it('should apply only the required rule on text fields', () => {
     const { creationFields } = useAccountCreationConfig('AccountCreationPage');
-    const nonEmailFields = creationFields.filter(
-      (field) => field.name !== 'email'
-    );
+    const textFields = creationFields.filter((field) => field.type === 'text');
 
-    for (const field of nonEmailFields) {
+    for (const field of textFields) {
       expect(field.rules).toEqual([requiredRule]);
-      expect(field.type).toBe('text');
     }
   });
 
@@ -93,5 +104,19 @@ describe('Test composable: useAccountCreationConfig', () => {
 
     expect(emailField?.type).toBe('email');
     expect(emailField?.rules).toEqual([requiredRule, emailRule]);
+  });
+
+  it('should apply required, validDate and dateNotInPast rules on the validityPeriodStart field', () => {
+    const { creationFields } = useAccountCreationConfig('AccountCreationPage');
+    const dateField = creationFields.find(
+      (field) => field.name === 'validityPeriodStart'
+    );
+
+    expect(dateField?.type).toBe('date');
+    expect(dateField?.rules).toEqual([
+      requiredRule,
+      validDateRule,
+      dateNotInPastRule,
+    ]);
   });
 });

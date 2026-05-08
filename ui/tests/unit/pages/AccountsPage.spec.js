@@ -86,7 +86,7 @@ vi.mock('src/mappers/accountMapper', () => ({
   }),
 }));
 
-vi.mock('src/composables/AccountsColumns', () => ({
+vi.mock('src/composables/useAccountsColumns', () => ({
   useAccountsColumns: vi.fn(() => []),
 }));
 

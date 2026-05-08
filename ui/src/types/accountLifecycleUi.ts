@@ -108,15 +108,3 @@ export interface UseAccountLifecycleUiOptions {
    */
   now?: () => Date;
 }
-
-/**
- * Partial UI projection augmented with the ordered action list that drives the
- * dropdown menu items. Used internally by case branches so each one can
- * declare its actions flatly while letting `withMenuItems` translate them.
- */
-export interface PartialUiWithActions extends AccountLifecycleUi {
-  /**
-   * Ordered list of dotted action keys exposed in the dropdown.
-   */
-  actions?: AccountLifecycleAction[];
-}

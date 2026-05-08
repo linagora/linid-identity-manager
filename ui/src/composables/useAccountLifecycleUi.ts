@@ -29,7 +29,6 @@ import { useCommonMapper } from 'src/mappers/commonMapper';
 import type {
   AccountLifecycleAction,
   AccountLifecycleUi,
-  PartialUiWithActions,
   UseAccountLifecycleUiOptions,
 } from 'src/types/accountLifecycleUi';
 import type { AccountStatus } from 'src/types/accounts';
@@ -100,42 +99,20 @@ export function useAccountLifecycleUi(
    * @param actions - Ordered list of dotted action keys to expose.
    * @returns Menu items consumed by the federated DropdownButton component.
    */
-  function buildMenuItems(actions: AccountLifecycleAction[]): MenuItem[] {
-    const groups = new Map<string, string[]>();
-    for (const action of actions) {
-      const dotIndex = action.indexOf('.');
-      const group = action.slice(0, dotIndex);
-      const child = action.slice(dotIndex + 1);
-      const list = groups.get(group);
-      if (list) {
-        if (!list.includes(child)) {
-          list.push(child);
-        }
-      } else {
-        groups.set(group, [child]);
-      }
-    }
+  function toMenuItems(actions: AccountLifecycleAction[]): MenuItem[] {
+    const groups = actions
+      .map((action) => action.split('.') as [string, string])
+      .reduce(
+        (acc, [group, child]) =>
+          acc.set(group, [...(acc.get(group) ?? []), child]),
+        new Map<string, string[]>()
+      );
+
     return Array.from(groups.entries()).map(([group, children]) => ({
       key: group,
       clickable: true,
       children,
     }));
-  }
-
-  /**
-   * Wraps a partial UI projection by computing its `menuItems` from `actions`.
-   * Lets every case branch declare its action list flatly without repeating
-   * the menu-item construction.
-   * @param ui - Partial UI projection. The `actions` field, when present, drives the dropdown menu items.
-   * @returns The same projection with `menuItems` populated when actions exist.
-   */
-  function withMenuItems(ui: PartialUiWithActions): AccountLifecycleUi {
-    const { actions, ...rest } = ui;
-    if (actions === undefined || actions.length === 0) {
-      return rest;
-    }
-
-    return { ...rest, menuItems: buildMenuItems(actions) };
   }
 
   /**
@@ -154,15 +131,15 @@ export function useAccountLifecycleUi(
       validityStart != null &&
       validityStart.getTime() > now.getTime()
     ) {
-      return withMenuItems({
+      return {
         badge: 'inactive',
-        actions: [
+        menuItems: toMenuItems([
           'activation.immediate',
           'activation.scheduled',
           'suspension.scheduled',
           'deactivation.scheduled',
-        ],
-      });
+        ]),
+      };
     }
   }
 
@@ -176,11 +153,14 @@ export function useAccountLifecycleUi(
   ): AccountLifecycleUi | undefined {
     const activationAt = toDateObject(status.activationAt);
     if (activationAt == null && status.status === 'INACTIVE') {
-      return withMenuItems({
+      return {
         badge: 'inactive',
         showNotActivatedInfoText: true,
-        actions: ['suspension.scheduled', 'deactivation.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'suspension.scheduled',
+          'deactivation.scheduled',
+        ]),
+      };
     }
   }
 
@@ -199,15 +179,15 @@ export function useAccountLifecycleUi(
       status.validityPeriod?.end == null &&
       !hasFutureSuspension(status, now)
     ) {
-      return withMenuItems({
+      return {
         badge: 'active',
-        actions: [
+        menuItems: toMenuItems([
           'suspension.immediate',
           'suspension.scheduled',
           'deactivation.immediate',
           'deactivation.scheduled',
-        ],
-      });
+        ]),
+      };
     }
   }
 
@@ -227,16 +207,16 @@ export function useAccountLifecycleUi(
       isMoreThan15Days(status) &&
       !hasFutureSuspension(status, now)
     ) {
-      return withMenuItems({
+      return {
         badge: 'active',
         showWillDeactivateInfoText: true,
-        actions: [
+        menuItems: toMenuItems([
           'suspension.immediate',
           'suspension.scheduled',
           'deactivation.immediate',
           'deactivation.modify',
-        ],
-      });
+        ]),
+      };
     }
   }
 
@@ -256,11 +236,14 @@ export function useAccountLifecycleUi(
       isWithin15Days(status) &&
       !hasFutureSuspension(status, now)
     ) {
-      return withMenuItems({
+      return {
         badge: 'active',
         showDeactivationWarningBanner: true,
-        actions: ['suspension.immediate', 'suspension.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'suspension.immediate',
+          'suspension.scheduled',
+        ]),
+      };
     }
   }
 
@@ -279,16 +262,16 @@ export function useAccountLifecycleUi(
       status.validityPeriod?.end == null &&
       hasFutureSuspension(status, now)
     ) {
-      return withMenuItems({
+      return {
         badge: 'active',
         showWillSuspendInfoText: true,
-        actions: [
+        menuItems: toMenuItems([
           'suspension.immediate',
           'suspension.scheduled',
           'deactivation.immediate',
           'deactivation.scheduled',
-        ],
-      });
+        ]),
+      };
     }
   }
 
@@ -308,17 +291,17 @@ export function useAccountLifecycleUi(
       isMoreThan15Days(status) &&
       hasFutureSuspension(status, now)
     ) {
-      return withMenuItems({
+      return {
         badge: 'active',
         showWillDeactivateInfoText: true,
         showWillSuspendInfoText: true,
-        actions: [
+        menuItems: toMenuItems([
           'suspension.immediate',
           'suspension.scheduled',
           'deactivation.immediate',
           'deactivation.modify',
-        ],
-      });
+        ]),
+      };
     }
   }
 
@@ -338,12 +321,15 @@ export function useAccountLifecycleUi(
       isWithin15Days(status) &&
       hasFutureSuspension(status, now)
     ) {
-      return withMenuItems({
+      return {
         badge: 'active',
         showDeactivationWarningBanner: true,
         showWillSuspendInfoText: true,
-        actions: ['suspension.immediate', 'suspension.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'suspension.immediate',
+          'suspension.scheduled',
+        ]),
+      };
     }
   }
 
@@ -360,10 +346,13 @@ export function useAccountLifecycleUi(
       status.validityPeriod?.end == null &&
       toDateObject(status.suspensionPeriod?.end) == null
     ) {
-      return withMenuItems({
+      return {
         showSuspendedBanner: true,
-        actions: ['deactivation.immediate', 'deactivation.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'deactivation.immediate',
+          'deactivation.scheduled',
+        ]),
+      };
     }
   }
 
@@ -380,10 +369,13 @@ export function useAccountLifecycleUi(
       status.validityPeriod?.end == null &&
       toDateObject(status.suspensionPeriod?.end) != null
     ) {
-      return withMenuItems({
+      return {
         showSuspendedBanner: true,
-        actions: ['deactivation.immediate', 'deactivation.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'deactivation.immediate',
+          'deactivation.scheduled',
+        ]),
+      };
     }
   }
 
@@ -396,11 +388,14 @@ export function useAccountLifecycleUi(
     status: AccountStatus
   ): AccountLifecycleUi | undefined {
     if (status.status === 'SUSPENDED' && isMoreThan15Days(status)) {
-      return withMenuItems({
+      return {
         showSuspendedBanner: true,
         showWillDeactivateInfoText: true,
-        actions: ['deactivation.immediate', 'deactivation.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'deactivation.immediate',
+          'deactivation.scheduled',
+        ]),
+      };
     }
   }
 
@@ -413,17 +408,20 @@ export function useAccountLifecycleUi(
     status: AccountStatus
   ): AccountLifecycleUi | undefined {
     if (status.status === 'SUSPENDED' && isWithin15Days(status)) {
-      return withMenuItems({
+      return {
         showSuspendedBanner: true,
         showDeactivationWarningBanner: true,
-        actions: ['deactivation.immediate', 'deactivation.scheduled'],
-      });
+        menuItems: toMenuItems([
+          'deactivation.immediate',
+          'deactivation.scheduled',
+        ]),
+      };
     }
   }
 
   return computed(() => {
     const value = accountStatus.value;
-    if (value === null || value === undefined || !value.status) {
+    if (value == null || !value.status) {
       return null;
     }
     const now = options.now?.() ?? new Date();

@@ -29,7 +29,6 @@ import { useCommonMapper } from 'src/mappers/commonMapper';
 import type {
   AccountLifecycleAction,
   AccountLifecycleUi,
-  UseAccountLifecycleUiOptions,
 } from 'src/types/accountLifecycleUi';
 import type { AccountStatus } from 'src/types/accounts';
 import { computed, type ComputedRef, type Ref } from 'vue';
@@ -43,14 +42,12 @@ import { computed, type ComputedRef, type Ref } from 'vue';
  * The projection is the single source of truth for lifecycle rendering: no
  * other component should reimplement these rules.
  * @param accountStatus - Reactive reference to the account status, or null while loading.
- * @param options - Optional projection options, see {@link UseAccountLifecycleUiOptions}.
  * @returns A reactive UI projection, or null when the account is not loaded.
  */
 export function useAccountLifecycleUi(
-  accountStatus: Ref<AccountStatus | null>,
-  options: UseAccountLifecycleUiOptions = {}
+  accountStatus: Ref<AccountStatus | null>
 ): ComputedRef<AccountLifecycleUi | null> {
-  const { toDateObject } = useCommonMapper();
+  const { toDayJs } = useCommonMapper();
 
   /**
    * True when `daysBeforeDeactivation` is set and the deactivation falls
@@ -85,10 +82,8 @@ export function useAccountLifecycleUi(
    * @returns Whether a future suspension is planned.
    */
   function hasFutureSuspension(status: AccountStatus, now: Date): boolean {
-    const suspensionStart = toDateObject(status.suspensionPeriod?.start);
-    return (
-      suspensionStart !== null && suspensionStart.getTime() > now.getTime()
-    );
+    const suspensionStart = toDayJs(status.suspensionPeriod?.start);
+    return suspensionStart !== null && suspensionStart.isAfter(now);
   }
 
   /**
@@ -125,11 +120,11 @@ export function useAccountLifecycleUi(
     status: AccountStatus,
     now: Date
   ): AccountLifecycleUi | undefined {
-    const validityStart = toDateObject(status.validityPeriod?.start);
+    const validityStart = toDayJs(status.validityPeriod?.start);
     if (
       status.status === 'INACTIVE' &&
       validityStart != null &&
-      validityStart.getTime() > now.getTime()
+      validityStart.isAfter(now)
     ) {
       return {
         showBadge: true,
@@ -151,7 +146,7 @@ export function useAccountLifecycleUi(
   function notActivatedYet(
     status: AccountStatus
   ): AccountLifecycleUi | undefined {
-    const activationAt = toDateObject(status.activationAt);
+    const activationAt = toDayJs(status.activationAt);
     if (activationAt == null && status.status === 'INACTIVE') {
       return {
         showBadge: true,
@@ -344,7 +339,7 @@ export function useAccountLifecycleUi(
     if (
       status.status === 'SUSPENDED' &&
       status.validityPeriod?.end == null &&
-      toDateObject(status.suspensionPeriod?.end) == null
+      toDayJs(status.suspensionPeriod?.end) == null
     ) {
       return {
         showSuspendedBanner: true,
@@ -367,7 +362,7 @@ export function useAccountLifecycleUi(
     if (
       status.status === 'SUSPENDED' &&
       status.validityPeriod?.end == null &&
-      toDateObject(status.suspensionPeriod?.end) != null
+      toDayJs(status.suspensionPeriod?.end) != null
     ) {
       return {
         showSuspendedBanner: true,
@@ -424,7 +419,7 @@ export function useAccountLifecycleUi(
     if (value == null || !value.status) {
       return null;
     }
-    const now = options.now?.() ?? new Date();
+    const now = new Date();
     return (
       futureActivation(value, now) ??
       notActivatedYet(value) ??

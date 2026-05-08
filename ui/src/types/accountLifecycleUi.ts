@@ -90,16 +90,3 @@ export interface AccountLifecycleUi {
    */
   menuItems?: MenuItem[];
 }
-
-/**
- * Options accepted by {@link useAccountLifecycleUi}.
- */
-export interface UseAccountLifecycleUiOptions {
-  /**
-   * Clock used as reference time when comparing validity and suspension
-   * periods. Defaults to a function returning the current `Date`. Override to
-   * project the lifecycle relative to a different instant (for example to
-   * preview the state at a future date or align on a server clock).
-   */
-  now?: () => Date;
-}

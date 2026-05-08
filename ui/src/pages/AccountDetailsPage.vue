@@ -98,7 +98,7 @@
           :items="lifecycleUi.menuItems"
           class="account-details-page--lifecycle--actions"
           data-cy="account-lifecycle-actions"
-          @item-click="onDropdownItemClick"
+          @item-click="onLifecycleAction"
         />
       </div>
 
@@ -136,8 +136,10 @@ import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { useAccountMapper } from 'src/mappers/accountMapper';
 import { getAccountById } from 'src/services/AccountService';
-import type { AccountLifecycleAction } from 'src/types/accountLifecycleUi';
-import { ACCOUNT_LIFECYCLE_ACTIONS } from 'src/types/accountLifecycleUi';
+import {
+  ACCOUNT_LIFECYCLE_ACTIONS,
+  type AccountLifecycleAction,
+} from 'src/types/accountLifecycleUi';
 import { type Account, type AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -203,20 +205,12 @@ function goBack(): void {
  * delivered in a follow-up.
  * @param action - The triggered lifecycle action.
  */
-function onLifecycleAction(action: AccountLifecycleAction): void {
-  void action;
-}
-
-/**
- * Forwards a DropdownButton click as a typed lifecycle action when the key is
- * recognised; otherwise the event is ignored.
- * @param payload - The DropdownButton click payload.
- */
-function onDropdownItemClick(payload: DropdownClickPayload): void {
-  if (
-    (ACCOUNT_LIFECYCLE_ACTIONS as ReadonlyArray<string>).includes(payload.key)
-  ) {
-    onLifecycleAction(payload.key as AccountLifecycleAction);
+function onLifecycleAction(
+  action: AccountLifecycleAction | DropdownClickPayload
+): void {
+  const actionKey = typeof action === 'string' ? action : action.key;
+  if ((ACCOUNT_LIFECYCLE_ACTIONS as readonly string[]).includes(actionKey)) {
+    void actionKey;
   }
 }
 

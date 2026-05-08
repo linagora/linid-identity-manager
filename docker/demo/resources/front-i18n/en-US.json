@@ -27,7 +27,7 @@
     "message": "This account will be suspended on {date}."
   },
   "AccountNotActivatedInfoText": {
-    "message": "This user has not activated their account yet."
+    "message": "This account has not been activated yet."
   },
   "AccountLifecycleActions": {
     "DropdownButton": {

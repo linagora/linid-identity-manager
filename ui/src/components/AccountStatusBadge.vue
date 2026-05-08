@@ -27,27 +27,25 @@
 <template>
   <q-badge
     v-bind="uiProps.badge"
-    :class="['account-status-badge', `account-status-badge--${kind}`]"
-    :label="t(kind)"
-    :data-cy="`account-status-badge_${kind}`"
+    :class="['account-status-badge', `account-status-badge--${statusKey}`]"
+    :label="t(statusKey)"
+    :data-cy="`account-status-badge_${statusKey}`"
   />
 </template>
 
 <script setup lang="ts">
 import type { LinidQBadgeProps } from '@linagora/linid-im-front-corelib';
 import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import type { AccountLifecycleBadge } from 'src/types/accountLifecycleUi';
+import type { AccountStatusBadgeProps } from 'src/types/accountStatusBadgeProps';
+import { computed } from 'vue';
 
-defineProps<{
-  /**
-   * Badge variant: "active" maps to a positive label, "inactive" to a neutral one.
-   */
-  kind: AccountLifecycleBadge;
-}>();
+const props = defineProps<AccountStatusBadgeProps>();
 
 const localUiNamespace = `account-status-badge`;
 const { t } = useScopedI18n('AccountStatusBadge');
 const { ui } = useUiDesign();
+
+const statusKey = computed(() => props.status.toLowerCase());
 
 const uiProps = {
   badge: ui<LinidQBadgeProps>(localUiNamespace, 'q-badge'),

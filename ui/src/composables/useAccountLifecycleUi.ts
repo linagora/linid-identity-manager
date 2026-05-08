@@ -132,7 +132,7 @@ export function useAccountLifecycleUi(
       validityStart.getTime() > now.getTime()
     ) {
       return {
-        badge: 'inactive',
+        showBadge: true,
         menuItems: toMenuItems([
           'activation.immediate',
           'activation.scheduled',
@@ -154,7 +154,7 @@ export function useAccountLifecycleUi(
     const activationAt = toDateObject(status.activationAt);
     if (activationAt == null && status.status === 'INACTIVE') {
       return {
-        badge: 'inactive',
+        showBadge: true,
         showNotActivatedInfoText: true,
         menuItems: toMenuItems([
           'suspension.scheduled',
@@ -180,7 +180,7 @@ export function useAccountLifecycleUi(
       !hasFutureSuspension(status, now)
     ) {
       return {
-        badge: 'active',
+        showBadge: true,
         menuItems: toMenuItems([
           'suspension.immediate',
           'suspension.scheduled',
@@ -208,7 +208,7 @@ export function useAccountLifecycleUi(
       !hasFutureSuspension(status, now)
     ) {
       return {
-        badge: 'active',
+        showBadge: true,
         showWillDeactivateInfoText: true,
         menuItems: toMenuItems([
           'suspension.immediate',
@@ -237,7 +237,7 @@ export function useAccountLifecycleUi(
       !hasFutureSuspension(status, now)
     ) {
       return {
-        badge: 'active',
+        showBadge: true,
         showDeactivationWarningBanner: true,
         menuItems: toMenuItems([
           'suspension.immediate',
@@ -263,7 +263,7 @@ export function useAccountLifecycleUi(
       hasFutureSuspension(status, now)
     ) {
       return {
-        badge: 'active',
+        showBadge: true,
         showWillSuspendInfoText: true,
         menuItems: toMenuItems([
           'suspension.immediate',
@@ -292,7 +292,7 @@ export function useAccountLifecycleUi(
       hasFutureSuspension(status, now)
     ) {
       return {
-        badge: 'active',
+        showBadge: true,
         showWillDeactivateInfoText: true,
         showWillSuspendInfoText: true,
         menuItems: toMenuItems([
@@ -322,7 +322,7 @@ export function useAccountLifecycleUi(
       hasFutureSuspension(status, now)
     ) {
       return {
-        badge: 'active',
+        showBadge: true,
         showDeactivationWarningBanner: true,
         showWillSuspendInfoText: true,
         menuItems: toMenuItems([

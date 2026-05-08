@@ -53,11 +53,6 @@ export const ACCOUNT_LIFECYCLE_ACTIONS = [
 export type AccountLifecycleAction = (typeof ACCOUNT_LIFECYCLE_ACTIONS)[number];
 
 /**
- * Badge variant, mapped to a colour and label by the badge component.
- */
-export type AccountLifecycleBadge = 'active' | 'inactive';
-
-/**
  * UI projection of the account lifecycle state, derived deterministically from
  * an {@link AccountStatus}. All template logic must consume this object only,
  * to avoid recomputing the same rules in multiple places.
@@ -66,7 +61,7 @@ export interface AccountLifecycleUi {
   /**
    * Badge to display, or undefined when a banner replaces the badge.
    */
-  badge?: AccountLifecycleBadge;
+  showBadge?: boolean;
   /**
    * True when the yellow suspension banner must be rendered.
    */

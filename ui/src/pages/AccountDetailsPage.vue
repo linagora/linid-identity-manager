@@ -58,9 +58,8 @@
         data-cy="account-details-page_lifecycle"
       >
         <AccountStatusBadge
-          v-if="lifecycleUi.badge"
-          :kind="lifecycleUi.badge"
-          class="account-details-page--lifecycle--badge"
+          v-if="lifecycleUi.showBadge"
+          :status="accountStatus.status"
         />
 
         <AccountSuspendedBanner

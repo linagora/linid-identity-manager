@@ -213,10 +213,6 @@ export interface Account {
    * Display formatting depends on the user's locale.
    */
   updateDate: string;
-  /**
-   * Computed account lifecycle status.
-   */
-  status: AccountStatusEnum;
 }
 
 /**

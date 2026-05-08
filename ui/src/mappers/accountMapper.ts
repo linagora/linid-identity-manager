@@ -56,7 +56,6 @@ export function useAccountMapper() {
       updatedBy: account.updatedBy,
       insertDate: toDate(account.insertDate),
       updateDate: toDate(account.updateDate),
-      status: account.status,
     };
   };
 

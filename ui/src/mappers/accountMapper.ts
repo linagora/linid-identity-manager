@@ -26,8 +26,8 @@
 
 import { useCommonMapper } from 'src/mappers/commonMapper';
 import type {
-  AccountDTO,
   Account,
+  AccountDTO,
   AccountQueryFilterDTO,
   AccountStatus,
 } from 'src/types/accounts';

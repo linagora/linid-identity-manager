@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import type { LinidQBadgeProps } from '@linagora/linid-im-front-corelib';
 import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import type { AccountLifecycleBadge } from 'src/composables/useAccountLifecycleUi';
+import type { AccountLifecycleBadge } from 'src/types/accountLifecycleUi';
 
 defineProps<{
   /**

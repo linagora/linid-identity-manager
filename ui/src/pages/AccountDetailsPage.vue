@@ -134,14 +134,12 @@ import AccountStatusBadge from 'src/components/AccountStatusBadge.vue';
 import AccountSuspendedInfoText from 'src/components/AccountSuspendedInfoText.vue';
 import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
-import {
-  ACCOUNT_LIFECYCLE_ACTIONS,
-  type AccountLifecycleAction,
-  useAccountLifecycleUi,
-} from 'src/composables/useAccountLifecycleUi';
+import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { useAccountMapper } from 'src/mappers/accountMapper';
 import { getAccountById } from 'src/services/AccountService';
-import type { Account, AccountStatus } from 'src/types/accounts';
+import type { AccountLifecycleAction } from 'src/types/accountLifecycleUi';
+import { ACCOUNT_LIFECYCLE_ACTIONS } from 'src/types/accountLifecycleUi';
+import { type Account, type AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

@@ -24,11 +24,9 @@
  * LinID Identity Manager software.
  */
 
-import {
-  ACCOUNT_LIFECYCLE_ACTIONS,
-  useAccountLifecycleUi,
-} from 'src/composables/useAccountLifecycleUi';
-import { describe, expect, it, vi } from 'vitest';
+import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
+import { ACCOUNT_LIFECYCLE_ACTIONS } from 'src/types/accountLifecycleUi';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 
 vi.mock('vue-i18n', () => ({
@@ -36,8 +34,6 @@ vi.mock('vue-i18n', () => ({
 }));
 
 const NOW_ISO = '2026-05-04T12:00:00Z';
-const NOW = new Date(NOW_ISO);
-const fixedNow = () => NOW;
 
 const buildStatus = (overrides = {}) => ({
   status: 'ACTIVE',
@@ -53,14 +49,17 @@ const buildStatus = (overrides = {}) => ({
 
 const project = (status) => {
   const status$ = ref(status);
-  return useAccountLifecycleUi(status$, { now: fixedNow }).value;
+  return useAccountLifecycleUi(status$).value;
 };
 
 const expectMenuItems = (ui, expected) => {
   expect(ui?.menuItems).toEqual(expected);
 };
 
-describe('useAccountLifecycleUi', () => {
+describe('Test composable: useAccountLifecycleUi', () => {
+  beforeEach(() => vi.useFakeTimers().setSystemTime(new Date(NOW_ISO)));
+  afterEach(() => vi.useRealTimers());
+
   it('exposes ACCOUNT_LIFECYCLE_ACTIONS as a frozen tuple', () => {
     expect(ACCOUNT_LIFECYCLE_ACTIONS).toEqual([
       'activation.immediate',
@@ -75,405 +74,390 @@ describe('useAccountLifecycleUi', () => {
     ]);
   });
 
-  describe('projection lifecycle', () => {
-    it('returns null when the status ref holds null', () => {
-      const status$ = ref(null);
-      expect(
-        useAccountLifecycleUi(status$, { now: fixedNow }).value
-      ).toBeNull();
-    });
-
-    it('returns null when the status ref holds undefined', () => {
-      const status$ = ref(undefined);
-      expect(
-        useAccountLifecycleUi(status$, { now: fixedNow }).value
-      ).toBeNull();
-    });
-
-    it('returns null when status field is missing', () => {
-      const status$ = ref(buildStatus({ status: undefined }));
-      expect(
-        useAccountLifecycleUi(status$, { now: fixedNow }).value
-      ).toBeNull();
-    });
-
-    it('falls back to the system clock when no clock is provided', () => {
-      const status$ = ref(buildStatus({ status: 'ACTIVE' }));
-      const ui = useAccountLifecycleUi(status$).value;
-      expect(ui).not.toBeNull();
-      expect(ui?.badge).toBe('active');
-    });
-
-    it('reacts to account status changes', () => {
-      const status$ = ref(
-        buildStatus({ status: 'INACTIVE', activationAt: null })
-      );
-      const ui = useAccountLifecycleUi(status$, { now: fixedNow });
-      expect(ui.value?.badge).toBe('inactive');
-      expect(ui.value?.showNotActivatedInfoText).toBe(true);
-
-      status$.value = buildStatus({ status: 'ACTIVE' });
-      expect(ui.value?.badge).toBe('active');
-      expect(ui.value?.showNotActivatedInfoText).toBeFalsy();
-    });
-
-    it('falls back to an empty projection when no branch matches', () => {
-      // ACTIVE with non-null end date string but no daysBeforeDeactivation:
-      // none of the active* branches qualify, so the projection is empty.
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-12-01T00:00:00Z',
-          },
-          suspensionPeriod: { start: null, end: null },
-          daysBeforeDeactivation: null,
-        })
-      );
-      expect(ui).toEqual({});
-    });
+  it('returns null when the status ref holds null', () => {
+    const status$ = ref(null);
+    expect(useAccountLifecycleUi(status$).value).toBeNull();
   });
 
-  describe('INACTIVE — future activation', () => {
-    it('matches when validity.start > now', () => {
-      const ui = project(
-        buildStatus({
-          status: 'INACTIVE',
-          validityPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-          activationAt: null,
-        })
-      );
-      expect(ui?.badge).toBe('inactive');
-      expect(ui?.showNotActivatedInfoText).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'activation',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
-        },
-        { key: 'suspension', clickable: true, children: ['scheduled'] },
-        { key: 'deactivation', clickable: true, children: ['scheduled'] },
-      ]);
-    });
+  it('returns null when the status ref holds undefined', () => {
+    const status$ = ref(undefined);
+    expect(useAccountLifecycleUi(status$).value).toBeNull();
   });
 
-  describe('INACTIVE — not activated yet', () => {
-    it('matches when status is INACTIVE and activationAt is null', () => {
-      const ui = project(
-        buildStatus({
-          status: 'INACTIVE',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          activationAt: null,
-        })
-      );
-      expect(ui?.badge).toBe('inactive');
-      expect(ui?.showNotActivatedInfoText).toBe(true);
-      expectMenuItems(ui, [
-        { key: 'suspension', clickable: true, children: ['scheduled'] },
-        { key: 'deactivation', clickable: true, children: ['scheduled'] },
-      ]);
-    });
-
-    it('does not match when activationAt is set', () => {
-      const ui = project(
-        buildStatus({
-          status: 'INACTIVE',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          activationAt: '2026-01-02T00:00:00Z',
-        })
-      );
-      expect(ui?.showNotActivatedInfoText).toBeFalsy();
-    });
+  it('returns null when status field is missing', () => {
+    const status$ = ref(buildStatus({ status: undefined }));
+    expect(useAccountLifecycleUi(status$).value).toBeNull();
   });
 
-  describe('ACTIVE — no end date, no future suspension', () => {
-    it('matches and exposes the full action set', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          suspensionPeriod: { start: null, end: null },
-          daysBeforeDeactivation: null,
-        })
-      );
-      expect(ui?.badge).toBe('active');
-      expect(ui?.showWillDeactivateInfoText).toBeFalsy();
-      expect(ui?.showWillSuspendInfoText).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'suspension',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
-        },
-        {
-          key: 'deactivation',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
-        },
-      ]);
-    });
+  it('reacts to account status changes', () => {
+    const status$ = ref(
+      buildStatus({ status: 'INACTIVE', activationAt: null })
+    );
+    const ui = useAccountLifecycleUi(status$);
+    expect(ui.value?.showBadge).toBe(true);
+    expect(ui.value?.showNotActivatedInfoText).toBe(true);
 
-    it('ignores past suspension start when none is in the future', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          suspensionPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-02-01T00:00:00Z',
-          },
-        })
-      );
-      expect(ui?.badge).toBe('active');
-      expect(ui?.showWillSuspendInfoText).toBeFalsy();
-    });
+    status$.value = buildStatus({ status: 'ACTIVE' });
+    expect(ui.value?.showBadge).toBe(true);
+    expect(ui.value?.showNotActivatedInfoText).toBeFalsy();
   });
 
-  describe('ACTIVE — end date > 15 days, no future suspension', () => {
-    it('matches and shows the will-deactivate info text', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-12-01T00:00:00Z',
-          },
-          daysBeforeDeactivation: 30,
-        })
-      );
-      expect(ui?.badge).toBe('active');
-      expect(ui?.showWillDeactivateInfoText).toBe(true);
-      expect(ui?.showDeactivationWarningBanner).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'suspension',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
+  it('falls back to an empty projection when no branch matches', () => {
+    // ACTIVE with non-null end date string but no daysBeforeDeactivation:
+    // none of the active* branches qualify, so the projection is empty.
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-12-01T00:00:00Z',
         },
-        {
-          key: 'deactivation',
-          clickable: true,
-          children: ['immediate', 'modify'],
-        },
-      ]);
-    });
+        suspensionPeriod: { start: null, end: null },
+        daysBeforeDeactivation: null,
+      })
+    );
+    expect(ui).toEqual({});
+  });
+});
 
-    it('treats daysBeforeDeactivation = 16 as more-than-15 (boundary)', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-05-20T00:00:00Z',
-          },
-          daysBeforeDeactivation: 16,
-        })
-      );
-      expect(ui?.showWillDeactivateInfoText).toBe(true);
-    });
+describe('Test case: INACTIVE — future activation', () => {
+  it('matches when validity.start > now', () => {
+    const ui = project(
+      buildStatus({
+        status: 'INACTIVE',
+        validityPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        activationAt: null,
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showNotActivatedInfoText).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'activation',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+      { key: 'suspension', clickable: true, children: ['scheduled'] },
+      { key: 'deactivation', clickable: true, children: ['scheduled'] },
+    ]);
+  });
+});
+
+describe('Test case: INACTIVE — not activated yet', () => {
+  it('matches when status is INACTIVE and activationAt is null', () => {
+    const ui = project(
+      buildStatus({
+        status: 'INACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        activationAt: null,
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showNotActivatedInfoText).toBe(true);
+    expectMenuItems(ui, [
+      { key: 'suspension', clickable: true, children: ['scheduled'] },
+      { key: 'deactivation', clickable: true, children: ['scheduled'] },
+    ]);
   });
 
-  describe('ACTIVE — end date <= 15 days, no future suspension', () => {
-    it('matches and shows the deactivation warning banner', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-05-15T00:00:00Z',
-          },
-          daysBeforeDeactivation: 11,
-        })
-      );
-      expect(ui?.badge).toBe('active');
-      expect(ui?.showDeactivationWarningBanner).toBe(true);
-      expect(ui?.showWillDeactivateInfoText).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'suspension',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
-        },
-      ]);
-    });
+  it('does not match when activationAt is set', () => {
+    const ui = project(
+      buildStatus({
+        status: 'INACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        activationAt: '2026-01-02T00:00:00Z',
+      })
+    );
+    expect(ui?.showNotActivatedInfoText).toBeFalsy();
+  });
+});
 
-    it('treats daysBeforeDeactivation = 15 as within-15 (boundary)', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-05-19T00:00:00Z',
-          },
-          daysBeforeDeactivation: 15,
-        })
-      );
-      expect(ui?.showDeactivationWarningBanner).toBe(true);
-    });
+describe('Test case: ACTIVE — no end date, no future suspension', () => {
+  it('matches and exposes the full action set', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: { start: null, end: null },
+        daysBeforeDeactivation: null,
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBeFalsy();
+    expect(ui?.showWillSuspendInfoText).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'suspension',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+      {
+        key: 'deactivation',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+    ]);
   });
 
-  describe('ACTIVE — no end date, suspension planned', () => {
-    it('matches and shows the will-suspend info text', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-          daysBeforeDeactivation: null,
-        })
-      );
-      expect(ui?.badge).toBe('active');
-      expect(ui?.showWillSuspendInfoText).toBe(true);
-      expect(ui?.showWillDeactivateInfoText).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'suspension',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
+  it('ignores past suspension start when none is in the future', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-02-01T00:00:00Z',
         },
-        {
-          key: 'deactivation',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showWillSuspendInfoText).toBeFalsy();
+  });
+});
+
+describe('Test case: ACTIVE — end date > 15 days, no future suspension', () => {
+  it('matches and shows the will-deactivate info text', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-12-01T00:00:00Z',
         },
-      ]);
-    });
+        daysBeforeDeactivation: 30,
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBe(true);
+    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'suspension',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+      {
+        key: 'deactivation',
+        clickable: true,
+        children: ['immediate', 'modify'],
+      },
+    ]);
   });
 
-  describe('ACTIVE — end date > 15 days + future suspension', () => {
-    it('shows both info texts', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-12-01T00:00:00Z',
-          },
-          suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-          daysBeforeDeactivation: 30,
-        })
-      );
-      expect(ui?.showWillDeactivateInfoText).toBe(true);
-      expect(ui?.showWillSuspendInfoText).toBe(true);
-      expectMenuItems(ui, [
-        {
-          key: 'suspension',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
+  it('treats daysBeforeDeactivation = 16 as more-than-15 (boundary)', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-05-20T00:00:00Z',
         },
-        {
-          key: 'deactivation',
-          clickable: true,
-          children: ['immediate', 'modify'],
+        daysBeforeDeactivation: 16,
+      })
+    );
+    expect(ui?.showWillDeactivateInfoText).toBe(true);
+  });
+});
+
+describe('ACTIVE — end date <= 15 days, no future suspension', () => {
+  it('matches and shows the deactivation warning banner', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-05-15T00:00:00Z',
         },
-      ]);
-    });
+        daysBeforeDeactivation: 11,
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'suspension',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+    ]);
   });
 
-  describe('ACTIVE — end date <= 15 days + future suspension', () => {
-    it('shows the warning banner and the will-suspend info text', () => {
-      const ui = project(
-        buildStatus({
-          status: 'ACTIVE',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-05-12T00:00:00Z',
-          },
-          suspensionPeriod: { start: '2026-05-10T00:00:00Z', end: null },
-          daysBeforeDeactivation: 8,
-        })
-      );
-      expect(ui?.showDeactivationWarningBanner).toBe(true);
-      expect(ui?.showWillSuspendInfoText).toBe(true);
-      expect(ui?.showWillDeactivateInfoText).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'suspension',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
+  it('treats daysBeforeDeactivation = 15 as within-15 (boundary)', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-05-19T00:00:00Z',
         },
-      ]);
-    });
+        daysBeforeDeactivation: 15,
+      })
+    );
+    expect(ui?.showDeactivationWarningBanner).toBe(true);
   });
+});
 
-  describe('SUSPENDED — no validity end, no suspension end', () => {
-    it('shows only the suspended banner', () => {
-      const ui = project(
-        buildStatus({
-          status: 'SUSPENDED',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
-          daysBeforeDeactivation: null,
-        })
-      );
-      expect(ui?.badge).toBeUndefined();
-      expect(ui?.showSuspendedBanner).toBe(true);
-      expect(ui?.showDeactivationWarningBanner).toBeFalsy();
-      expectMenuItems(ui, [
-        {
-          key: 'deactivation',
-          clickable: true,
-          children: ['immediate', 'scheduled'],
+describe('Test case: ACTIVE — no end date, suspension planned', () => {
+  it('matches and shows the will-suspend info text', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        daysBeforeDeactivation: null,
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.showWillSuspendInfoText).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'suspension',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+      {
+        key: 'deactivation',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+    ]);
+  });
+});
+
+describe('Test case: ACTIVE — end date > 15 days + future suspension', () => {
+  it('shows both info texts', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-12-01T00:00:00Z',
         },
-      ]);
-    });
+        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        daysBeforeDeactivation: 30,
+      })
+    );
+    expect(ui?.showWillDeactivateInfoText).toBe(true);
+    expect(ui?.showWillSuspendInfoText).toBe(true);
+    expectMenuItems(ui, [
+      {
+        key: 'suspension',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+      {
+        key: 'deactivation',
+        clickable: true,
+        children: ['immediate', 'modify'],
+      },
+    ]);
   });
+});
 
-  describe('SUSPENDED — no validity end, with suspension end', () => {
-    it('shows only the suspended banner', () => {
-      const ui = project(
-        buildStatus({
-          status: 'SUSPENDED',
-          validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-          suspensionPeriod: {
-            start: '2026-04-01T00:00:00Z',
-            end: '2026-08-01T00:00:00Z',
-          },
-          daysBeforeDeactivation: null,
-        })
-      );
-      expect(ui?.showSuspendedBanner).toBe(true);
-      expect(ui?.showDeactivationWarningBanner).toBeFalsy();
-    });
+describe('Test case: ACTIVE — end date <= 15 days + future suspension', () => {
+  it('shows the warning banner and the will-suspend info text', () => {
+    const ui = project(
+      buildStatus({
+        status: 'ACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-05-12T00:00:00Z',
+        },
+        suspensionPeriod: { start: '2026-05-10T00:00:00Z', end: null },
+        daysBeforeDeactivation: 8,
+      })
+    );
+    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.showWillSuspendInfoText).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'suspension',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+    ]);
   });
+});
 
-  describe('SUSPENDED — end date > 15 days', () => {
-    it('shows the suspended banner and will-deactivate info text', () => {
-      const ui = project(
-        buildStatus({
-          status: 'SUSPENDED',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-12-01T00:00:00Z',
-          },
-          suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
-          daysBeforeDeactivation: 30,
-        })
-      );
-      expect(ui?.badge).toBeUndefined();
-      expect(ui?.showSuspendedBanner).toBe(true);
-      expect(ui?.showWillDeactivateInfoText).toBe(true);
-      expect(ui?.showDeactivationWarningBanner).toBeFalsy();
-    });
+describe('Test case: SUSPENDED — no validity end, no suspension end', () => {
+  it('shows only the suspended banner', () => {
+    const ui = project(
+      buildStatus({
+        status: 'SUSPENDED',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
+        daysBeforeDeactivation: null,
+      })
+    );
+    expect(ui?.showBadge).toBeFalsy();
+    expect(ui?.showSuspendedBanner).toBe(true);
+    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+    expectMenuItems(ui, [
+      {
+        key: 'deactivation',
+        clickable: true,
+        children: ['immediate', 'scheduled'],
+      },
+    ]);
   });
+});
 
-  describe('SUSPENDED — end date <= 15 days', () => {
-    it('shows the suspended banner and the deactivation warning banner', () => {
-      const ui = project(
-        buildStatus({
-          status: 'SUSPENDED',
-          validityPeriod: {
-            start: '2026-01-01T00:00:00Z',
-            end: '2026-05-12T00:00:00Z',
-          },
-          suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
-          daysBeforeDeactivation: 8,
-        })
-      );
-      expect(ui?.showSuspendedBanner).toBe(true);
-      expect(ui?.showDeactivationWarningBanner).toBe(true);
-      expect(ui?.showWillDeactivateInfoText).toBeFalsy();
-    });
+describe('Test case: SUSPENDED — no validity end, with suspension end', () => {
+  it('shows only the suspended banner', () => {
+    const ui = project(
+      buildStatus({
+        status: 'SUSPENDED',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: {
+          start: '2026-04-01T00:00:00Z',
+          end: '2026-08-01T00:00:00Z',
+        },
+        daysBeforeDeactivation: null,
+      })
+    );
+    expect(ui?.showSuspendedBanner).toBe(true);
+    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+  });
+});
+
+describe('Test case: SUSPENDED — end date > 15 days', () => {
+  it('shows the suspended banner and will-deactivate info text', () => {
+    const ui = project(
+      buildStatus({
+        status: 'SUSPENDED',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-12-01T00:00:00Z',
+        },
+        suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
+        daysBeforeDeactivation: 30,
+      })
+    );
+    expect(ui?.showBadge).toBeFalsy();
+    expect(ui?.showSuspendedBanner).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBe(true);
+    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+  });
+});
+
+describe('Test case: SUSPENDED — end date <= 15 days', () => {
+  it('shows the suspended banner and the deactivation warning banner', () => {
+    const ui = project(
+      buildStatus({
+        status: 'SUSPENDED',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-05-12T00:00:00Z',
+        },
+        suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
+        daysBeforeDeactivation: 8,
+      })
+    );
+    expect(ui?.showSuspendedBanner).toBe(true);
+    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.showWillDeactivateInfoText).toBeFalsy();
   });
 });

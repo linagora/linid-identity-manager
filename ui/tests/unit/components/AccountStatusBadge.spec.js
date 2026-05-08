@@ -36,12 +36,34 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useUiDesign: () => ({ ui: uiMock }),
 }));
 
-describe('AccountStatusBadge', () => {
-  it('builds uiProps from the ui design system', () => {
-    const wrapper = shallowMount(AccountStatusBadge, {
-      props: { kind: 'active' },
+describe('Test component: AccountStatusBadge', () => {
+  describe('Test computed: uiProps', () => {
+    it('builds uiProps from the ui design system', () => {
+      const wrapper = shallowMount(AccountStatusBadge, {
+        props: { status: 'ACTIVE' },
+      });
+      expect(uiMock).toHaveBeenCalledWith('account-status-badge', 'q-badge');
+      expect(wrapper.vm.uiProps.badge).toBeDefined();
     });
-    expect(uiMock).toHaveBeenCalledWith('account-status-badge', 'q-badge');
-    expect(wrapper.vm.uiProps.badge).toBeDefined();
+  });
+
+  describe('Test computed: statusKey', () => {
+    it('should return the status key in lowercase', () => {
+      const wrapper = shallowMount(AccountStatusBadge, {
+        props: { status: 'ACTIVE' },
+      });
+      expect(wrapper.vm.statusKey).toBe('active');
+    });
+
+    it('should update when prop changes', async () => {
+      const wrapper = shallowMount(AccountStatusBadge, {
+        props: { status: 'ACTIVE' },
+      });
+      expect(wrapper.vm.statusKey).toBe('active');
+
+      await wrapper.setProps({ status: 'INACTIVE' });
+
+      expect(wrapper.vm.statusKey).toBe('inactive');
+    });
   });
 });

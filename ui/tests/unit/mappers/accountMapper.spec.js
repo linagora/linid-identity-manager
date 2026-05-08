@@ -35,7 +35,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
 
-describe('accountMapper', () => {
+describe('Test mapper: accountMapper', () => {
   const tMock = vi.fn();
 
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('accountMapper', () => {
     ...overrides,
   });
 
-  describe('toAccount', () => {
+  describe('Test function: toAccount', () => {
     it('Map an AccountDTO to Account without lifecycle detail', () => {
       tMock.mockReturnValue('YYYY-MM-DD HH:mm');
       const { toAccount } = useAccountMapper();
@@ -82,8 +82,8 @@ describe('accountMapper', () => {
         updatedBy: dto.updatedBy,
         insertDate: dayjs(dto.insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dto.updateDate).format('YYYY-MM-DD HH:mm'),
-        status: dto.status,
       });
+      expect(account).not.toHaveProperty('status');
       expect(account).not.toHaveProperty('validityPeriod');
       expect(account).not.toHaveProperty('suspensionPeriod');
       expect(account).not.toHaveProperty('activationAt');
@@ -91,7 +91,7 @@ describe('accountMapper', () => {
     });
   });
 
-  describe('toAccountStatus', () => {
+  describe('Test function: toAccountStatus', () => {
     it('Map an AccountDTO to AccountStatus exposing only lifecycle fields', () => {
       const { toAccountStatus } = useAccountMapper();
 
@@ -223,7 +223,6 @@ describe('accountMapper', () => {
           updatedBy: 'admin',
           insertDate: '2024-03-01T00:00:00Z',
           updateDate: '2024-04-01T00:00:00Z',
-          status: 'INACTIVE',
         }),
       ];
 
@@ -240,7 +239,6 @@ describe('accountMapper', () => {
         updatedBy: dtos[0].updatedBy,
         insertDate: dayjs(dtos[0].insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dtos[0].updateDate).format('YYYY-MM-DD HH:mm'),
-        status: dtos[0].status,
       });
       expect(accounts[1]).toEqual({
         id: dtos[1].id,
@@ -252,7 +250,6 @@ describe('accountMapper', () => {
         updatedBy: dtos[1].updatedBy,
         insertDate: dayjs(dtos[1].insertDate).format('YYYY-MM-DD HH:mm'),
         updateDate: dayjs(dtos[1].updateDate).format('YYYY-MM-DD HH:mm'),
-        status: dtos[1].status,
       });
     });
 

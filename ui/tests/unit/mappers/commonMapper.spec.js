@@ -33,7 +33,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
 
-describe('commonMapper', () => {
+describe('Test mapper: commonMapper', () => {
   const tMock = vi.fn();
 
   beforeEach(() => {
@@ -41,7 +41,7 @@ describe('commonMapper', () => {
     useI18n.mockReturnValue({ t: tMock });
   });
 
-  describe('toDate', () => {
+  describe('Test function: toDate', () => {
     it('should return "-" for falsy values (null/undefined/empty)', () => {
       tMock.mockReturnValue('YYYY-MM-DD HH:mm');
       const { toDate } = useCommonMapper();
@@ -70,7 +70,7 @@ describe('commonMapper', () => {
     });
   });
 
-  describe('toDateISO', () => {
+  describe('Test function: toDateISO', () => {
     it('should return "" for falsy values (null/undefined/empty)', () => {
       const { toDateISO } = useCommonMapper();
 
@@ -95,7 +95,7 @@ describe('commonMapper', () => {
     });
   });
 
-  describe('toEmptyRecord', () => {
+  describe('Test function: toEmptyRecord', () => {
     it('should return a record with every declared field set to an empty string', () => {
       const { toEmptyRecord } = useCommonMapper();
       const fields = [
@@ -159,34 +159,34 @@ describe('commonMapper', () => {
     });
   });
 
-  describe('Test function: toDateObject', () => {
-    it('should parse an ISO 8601 string into a Date', () => {
-      const { toDateObject } = useCommonMapper();
+  describe('Test function: toDayJs', () => {
+    it('should parse an ISO 8601 string into a Dayjs object', () => {
+      const { toDayJs } = useCommonMapper();
 
-      const result = toDateObject('2025-07-24T12:34:56.000Z');
+      const result = toDayJs('2025-07-24T12:34:56.000Z');
 
-      expect(result).toBeInstanceOf(Date);
+      expect(result?.isValid()).toBe(true);
       expect(result?.toISOString()).toBe('2025-07-24T12:34:56.000Z');
     });
 
     it('should return null for falsy values (null/undefined/empty)', () => {
-      const { toDateObject } = useCommonMapper();
+      const { toDayJs } = useCommonMapper();
 
-      expect(toDateObject(null)).toBeNull();
-      expect(toDateObject(undefined)).toBeNull();
-      expect(toDateObject('')).toBeNull();
+      expect(toDayJs(null)).toBeNull();
+      expect(toDayJs(undefined)).toBeNull();
+      expect(toDayJs('')).toBeNull();
     });
 
     it('should return null for the placeholder "-"', () => {
-      const { toDateObject } = useCommonMapper();
+      const { toDayJs } = useCommonMapper();
 
-      expect(toDateObject('-')).toBeNull();
+      expect(toDayJs('-')).toBeNull();
     });
 
     it('should return null for an invalid date string', () => {
-      const { toDateObject } = useCommonMapper();
+      const { toDayJs } = useCommonMapper();
 
-      expect(toDateObject('not-a-valid-date')).toBeNull();
+      expect(toDayJs('not-a-valid-date')).toBeNull();
     });
   });
 });

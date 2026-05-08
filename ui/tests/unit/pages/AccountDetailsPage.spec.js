@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount, flushPromises } from '@vue/test-utils';
+import { flushPromises, shallowMount } from '@vue/test-utils';
 import { getAccountById } from 'src/services/AccountService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountDetailsPage from '../../../src/pages/AccountDetailsPage.vue';
@@ -117,7 +117,6 @@ describe('Test component: AccountDetailsPage', () => {
         firstname: 'John',
         lastname: 'Doe',
         email: 'john.doe@example.com',
-        status: 'ACTIVE',
       });
       expect(wrapper.vm.accountStatus).toMatchObject({
         status: 'ACTIVE',
@@ -203,7 +202,7 @@ describe('Test component: AccountDetailsPage', () => {
 
       const ui = wrapper.vm.lifecycleUi;
       expect(ui).not.toBeNull();
-      expect(ui.badge).toBe('active');
+      expect(ui.showBadge).toBe(true);
       expect(ui.menuItems).toEqual([
         {
           key: 'suspension',
@@ -220,29 +219,34 @@ describe('Test component: AccountDetailsPage', () => {
   });
 
   describe('Test function: onLifecycleAction', () => {
-    it('should accept any lifecycle action without throwing', () => {
+    it('should accept a valid lifecycle action string without throwing', () => {
       wrapper = shallowMount(AccountDetailsPage);
       expect(() =>
         wrapper.vm.onLifecycleAction('suspension.immediate')
       ).not.toThrow();
     });
-  });
 
-  describe('Test function: onDropdownItemClick', () => {
-    it('should accept known dotted keys without throwing', () => {
+    it('should silently ignore invalid lifecycle action string', () => {
       wrapper = shallowMount(AccountDetailsPage);
       expect(() =>
-        wrapper.vm.onDropdownItemClick({ key: 'suspension.immediate' })
+        wrapper.vm.onLifecycleAction('invalid-action')
       ).not.toThrow();
     });
 
-    it('should silently ignore unknown click keys', () => {
+    it('should accept a DropdownClickPayload with a known key without throwing', () => {
       wrapper = shallowMount(AccountDetailsPage);
       expect(() =>
-        wrapper.vm.onDropdownItemClick({ key: 'unknown.key' })
+        wrapper.vm.onLifecycleAction({ key: 'suspension.immediate' })
+      ).not.toThrow();
+    });
+
+    it('should silently ignore a DropdownClickPayload with an unknown key', () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      expect(() =>
+        wrapper.vm.onLifecycleAction({ key: 'unknown.key' })
       ).not.toThrow();
       expect(() =>
-        wrapper.vm.onDropdownItemClick({ key: 'suspension' })
+        wrapper.vm.onLifecycleAction({ key: 'suspension' })
       ).not.toThrow();
     });
   });

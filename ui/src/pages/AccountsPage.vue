@@ -129,7 +129,7 @@ import {
   fieldsSearch,
 } from 'assets/accounts/AccountsFilters';
 import axios from 'axios';
-import { useAccountsColumns } from 'src/composables/AccountsColumns';
+import { useAccountsColumns } from 'src/composables/useAccountsColumns';
 import { useAccountMapper } from 'src/mappers/accountMapper';
 import { getAccounts } from 'src/services/AccountsService';
 import type { Account } from 'src/types/accounts';

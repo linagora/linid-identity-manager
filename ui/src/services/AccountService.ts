@@ -24,9 +24,15 @@
  * LinID Identity Manager software.
  */
 
+import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import { useAccountMapper } from 'src/mappers/accountMapper';
-import type { Account, AccountDTO, AccountRecord } from 'src/types/accounts';
+import type {
+  Account,
+  AccountDTO,
+  AccountQueryFilterDTO,
+  AccountRecord,
+} from 'src/types/accounts';
 
 /**
  * Retrieves a single account by its identifier from the backend.
@@ -52,4 +58,21 @@ export async function createAccount(
   return api
     .post<AccountDTO>('/accounts', payload)
     .then((response) => response.data);
+}
+
+/**
+ * Retrieves accounts list from the API.
+ * @param filters Object containing the filter criteria for querying accounts.
+ * @param pagination Object containing pagination parameters.
+ * @returns Promise of paginated accounts.
+ */
+export async function getAccounts(
+  filters: AccountQueryFilterDTO,
+  pagination: Pagination
+): Promise<Page<AccountDTO>> {
+  return api
+    .get<
+      Page<AccountDTO>
+    >(`/accounts`, { params: { ...filters, ...pagination } })
+    .then(({ data }) => data);
 }

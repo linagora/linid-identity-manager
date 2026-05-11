@@ -25,7 +25,7 @@
  */
 
 import { flushPromises, shallowMount } from '@vue/test-utils';
-import { getAccounts } from 'src/services/AccountsService';
+import { getAccounts } from 'src/services/AccountService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountsPage from '../../../src/pages/AccountsPage.vue';
 
@@ -75,7 +75,7 @@ vi.mock('axios', () => ({
   },
 }));
 
-vi.mock('src/services/AccountsService', () => ({
+vi.mock('src/services/AccountService', () => ({
   getAccounts: vi.fn(),
 }));
 

@@ -131,7 +131,7 @@ import {
 import axios from 'axios';
 import { useAccountsColumns } from 'src/composables/useAccountsColumns';
 import { useAccountMapper } from 'src/mappers/accountMapper';
-import { getAccounts } from 'src/services/AccountsService';
+import { getAccounts } from 'src/services/AccountService';
 import type { Account } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';

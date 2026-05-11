@@ -154,6 +154,21 @@
             "q-icon": { "color": "primary", "name": "update" }
           }
         }
+      },
+      "activation-actions": {
+        "dropdown-button": {
+          "q-btn-dropdown": { "color": "positive", "outline": false }
+        }
+      },
+      "suspension-actions": {
+        "dropdown-button": {
+          "q-btn-dropdown": { "color": "warning", "outline": false }
+        }
+      },
+      "deactivation-actions": {
+        "dropdown-button": {
+          "q-btn-dropdown": { "color": "negative", "outline": false }
+        }
       }
     }
   },

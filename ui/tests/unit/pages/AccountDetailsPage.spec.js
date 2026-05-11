@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount, flushPromises } from '@vue/test-utils';
+import { flushPromises, shallowMount } from '@vue/test-utils';
 import { getAccountById } from 'src/services/AccountService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountDetailsPage from '../../../src/pages/AccountDetailsPage.vue';
@@ -67,6 +67,10 @@ vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
 }));
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: vi.fn((v) => v) }),
+}));
+
 describe('Test component: AccountDetailsPage', () => {
   let wrapper;
 
@@ -82,6 +86,14 @@ describe('Test component: AccountDetailsPage', () => {
       updatedBy: 'Bob Updater',
       insertDate: '2026-04-15T12:00:24.814930Z',
       updateDate: '2026-04-16T09:30:00.000000Z',
+      status: 'ACTIVE',
+      validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+      suspensionPeriod: { start: null, end: null },
+      activationAt: '2026-01-01T00:00:00Z',
+      statusReason: null,
+      statusSubreason: null,
+      statusComment: null,
+      daysBeforeDeactivation: null,
     });
   });
 
@@ -94,22 +106,25 @@ describe('Test component: AccountDetailsPage', () => {
   });
 
   describe('Test function: loadAccount', () => {
-    it('should retrieve account data and store it', async () => {
+    it('should retrieve account data and split it between account and accountStatus', async () => {
       wrapper = shallowMount(AccountDetailsPage);
 
       await wrapper.vm.loadAccount();
 
       expect(getAccountById).toHaveBeenCalledWith('test-account-id');
-      expect(wrapper.vm.account).toEqual({
+      expect(wrapper.vm.account).toMatchObject({
         id: 'test-account-id',
         firstname: 'John',
         lastname: 'Doe',
         email: 'john.doe@example.com',
-        createdBy: 'Alice Creator',
-        updatedBy: 'Bob Updater',
-        insertDate: '2026-04-15T12:00:24.814930Z',
-        updateDate: '2026-04-16T09:30:00.000000Z',
       });
+      expect(wrapper.vm.accountStatus).toMatchObject({
+        status: 'ACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: { start: null, end: null },
+        activationAt: '2026-01-01T00:00:00Z',
+      });
+      expect(wrapper.vm.accountStatus).not.toHaveProperty('firstname');
     });
 
     it('should set isLoading to true during data load and false after', async () => {
@@ -172,6 +187,43 @@ describe('Test component: AccountDetailsPage', () => {
       await flushPromises();
 
       expect(getAccountById).toHaveBeenCalledWith('test-account-id');
+    });
+  });
+
+  describe('Test computed: lifecycleUi', () => {
+    it('should be null when no account is loaded', () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      expect(wrapper.vm.lifecycleUi).toBeNull();
+    });
+
+    it('should expose the projected lifecycle UI once the account is loaded', async () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      await wrapper.vm.loadAccount();
+
+      const ui = wrapper.vm.lifecycleUi;
+      expect(ui).not.toBeNull();
+      expect(ui.showBadge).toBe(true);
+      expect(ui.suspensionMenuItems).toEqual([
+        { key: 'suspension.immediate', clickable: true },
+        { key: 'suspension.scheduled', clickable: true },
+      ]);
+      expect(ui.deactivationMenuItems).toEqual([
+        { key: 'deactivation.immediate', clickable: true },
+        { key: 'deactivation.scheduled', clickable: true },
+      ]);
+    });
+  });
+
+  describe('Test computed: hasAnyLifecycleAction', () => {
+    it('should be false when no account is loaded', () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      expect(wrapper.vm.hasAnyLifecycleAction).toBe(false);
+    });
+
+    it('should be true when at least one family exposes menu items', async () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      await wrapper.vm.loadAccount();
+      expect(wrapper.vm.hasAnyLifecycleAction).toBe(true);
     });
   });
 });

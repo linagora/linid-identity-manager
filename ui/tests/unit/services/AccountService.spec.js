@@ -35,16 +35,6 @@ vi.mock('boot/axios', () => ({
   },
 }));
 
-vi.mock('src/mappers/accountMapper', () => ({
-  useAccountMapper: () => ({
-    toAccount: vi.fn((dto) => ({
-      ...dto,
-      insertDate: 'mapped-date',
-      updateDate: 'mapped-date',
-    })),
-  }),
-}));
-
 const USER_1_UUID = '11111111-1111-4111-8111-111111111111';
 
 const buildAccountDTO = (overrides = {}) => ({
@@ -57,6 +47,14 @@ const buildAccountDTO = (overrides = {}) => ({
   updatedBy: USER_1_UUID,
   insertDate: '2026-04-15T12:00:00.000000Z',
   updateDate: '2026-04-15T12:00:00.000000Z',
+  status: 'ACTIVE',
+  validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+  suspensionPeriod: { start: null, end: null },
+  activationAt: '2026-01-01T00:00:00Z',
+  statusReason: null,
+  statusSubreason: null,
+  statusComment: null,
+  daysBeforeDeactivation: null,
   ...overrides,
 });
 
@@ -67,18 +65,21 @@ describe('Test service: accountService', () => {
   });
 
   describe('Test function: getAccountById', () => {
-    it('should call valid endpoint and return mapped account data', async () => {
+    it('should call valid endpoint and return the raw DTO', async () => {
       const dto = buildAccountDTO({ id: USER_1_UUID });
       vi.mocked(api.get).mockResolvedValue({ data: dto });
 
       const result = await getAccountById(USER_1_UUID);
 
       expect(api.get).toHaveBeenCalledWith(`/accounts/${USER_1_UUID}`);
-      expect(result).toEqual({
-        ...dto,
-        insertDate: 'mapped-date',
-        updateDate: 'mapped-date',
-      });
+      expect(result).toEqual(dto);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      const error = new Error('boom');
+      vi.mocked(api.get).mockRejectedValue(error);
+
+      await expect(getAccountById(USER_1_UUID)).rejects.toThrow('boom');
     });
   });
 

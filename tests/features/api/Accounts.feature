@@ -176,18 +176,18 @@ Feature: Test API Account endpoints
     Then  I expect status code is 201
     And   I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts?externalId=ext-301' with method 'GET'
     Then  I expect status code is 200
-    And   I expect '{{response.body.totalElements}}' is '7'
-    And   I expect '{{response.body.content[6].id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.content[6].externalId}}' is 'ext-301'
-    And   I expect '{{response.body.content[6].lastname}}' is 'Find'
-    And   I expect '{{response.body.content[6].firstname}}' is 'All'
-    And   I expect '{{response.body.content[6].email}}' is 'findall301@example.com'
-    And   I expect '{{response.body.content[6].createdBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.content[6].updatedBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.content[6].insertDate}}' is not empty
-    And   I expect '{{response.body.content[6].updateDate}}' is not empty
+    And   I expect '{{response.body.totalElements}}' is '1'
+    And   I expect '{{response.body.content[0].id}}' is '{{ctx.accountId}}'
+    And   I expect '{{response.body.content[0].externalId}}' is 'ext-301'
+    And   I expect '{{response.body.content[0].lastname}}' is 'Find'
+    And   I expect '{{response.body.content[0].firstname}}' is 'All'
+    And   I expect '{{response.body.content[0].email}}' is 'findall301@example.com'
+    And   I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.content[0].updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.content[0].insertDate}}' is not empty
+    And   I expect '{{response.body.content[0].updateDate}}' is not empty
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204

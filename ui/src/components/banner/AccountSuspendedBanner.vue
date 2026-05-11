@@ -28,6 +28,7 @@
   <q-banner
     class="bg-warning text-white account-suspended-banner"
     v-bind="uiProps.banner"
+    data-cy="account-suspended-banner"
   >
     <template
       v-if="uiProps.icon.name"

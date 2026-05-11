@@ -27,6 +27,11 @@
 import type { Period } from 'src/types/common';
 
 /**
+ * Computed account lifecycle status returned by the backend.
+ */
+export type AccountStatusEnum = 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
+
+/**
  * Writable fields of an account, sent to the backend when creating an
  * account. Distinct from {@link AccountDTO}: a record carries only
  * client-provided values, with no server-managed metadata, and may grow
@@ -95,6 +100,40 @@ export interface AccountDTO {
    * Example: 2026-04-15T17:09:36.898493688Z.
    */
   updateDate: string;
+  /**
+   * Computed account lifecycle status.
+   */
+  status: AccountStatusEnum;
+  /**
+   * Period during which the account is considered active.
+   */
+  validityPeriod: Period;
+  /**
+   * Period during which the account is suspended.
+   */
+  suspensionPeriod: Period;
+  /**
+   * ISO 8601 date-time when the account was last activated, or null if never
+   * activated.
+   */
+  activationAt: string | null;
+  /**
+   * High-level reason code explaining the current status.
+   */
+  statusReason: string | null;
+  /**
+   * More detailed classification of the status reason.
+   */
+  statusSubreason: string | null;
+  /**
+   * Free-text comment providing additional context about the status change.
+   */
+  statusComment: string | null;
+  /**
+   * Number of days remaining before the account is deactivated.
+   * Null when the validity period has no upper bound.
+   */
+  daysBeforeDeactivation: number | null;
 }
 
 /**
@@ -177,10 +216,18 @@ export interface Account {
 }
 
 /**
- * Represents the detailed status of an account, including lifecycle periods
- * and optional status metadata such as reasons and comments.
+ * Lifecycle status fields of an account: computed status, validity and
+ * suspension periods, activation timestamp, and optional reason metadata.
+ *
+ * Combine with an {@link Account} when both identity and lifecycle data are
+ * needed (for example on the Account Details page).
  */
-export interface AccountStatus extends Account {
+export interface AccountStatus {
+  /**
+   * Computed account lifecycle status.
+   */
+  status: AccountStatusEnum;
+
   /**
    * Period during which the account is considered active.
    */
@@ -192,8 +239,8 @@ export interface AccountStatus extends Account {
   suspensionPeriod: Period;
 
   /**
-   * ISO 8601 date representing when the user activated their account.
-   * Null if the account has not been activated yet.
+   * ISO 8601 date-time when the account was last activated, or null if never
+   * activated.
    */
   activationAt: string | null;
 

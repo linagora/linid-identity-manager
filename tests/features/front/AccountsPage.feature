@@ -35,7 +35,7 @@ Feature: Test Account homepage display
     And I expect the HTML element '[data-cy="field_createdBy"]' to be visible
     And I expect the HTML element '[data-cy="field_insertDate"]' to be visible
     And I expect the HTML element '[data-cy="account-row"]' to be visible
-    And I expect the HTML element '[data-cy="account-row"]' appear 6 times on screen
+    And I expect the HTML element '[data-cy="account-row"]' appear 10 times on screen
     And I expect the HTML element '[data-cy="cell-firstname"]' to be visible
     And I expect the HTML element '[data-cy="cell-lastname"]' to be visible
     And I expect the HTML element '[data-cy="cell-email"]' to be visible
@@ -57,7 +57,7 @@ Feature: Test Account homepage display
     And I clear the text in the HTML element '[data-cy="field_email"]'
     And I clear the text in the HTML element '[data-cy="field_createdBy"]'
     And I clear the text in the HTML element '[data-cy="field_insertDate"]'
-    Then I expect the HTML element '[data-cy="account-row"]' appear 6 times on screen
+    Then I expect the HTML element '[data-cy="account-row"]' appear 10 times on screen
 
     ## 103 Should go to detail page when click on account detail button
     When I set the text "admin_fn" in the HTML element '[data-cy="field_firstname"]'
@@ -71,7 +71,7 @@ Feature: Test Account homepage display
 
     ## 104 Should have pagination working
     When I visit the "{{ env.E2E_FRONT_URL }}/accounts"
-    Then I expect the HTML element '[data-cy="account-row"]' appear 6 times on screen
+    Then I expect the HTML element '[data-cy="account-row"]' appear 10 times on screen
     # Open the pagination dropdown
     When I click on 'input.q-select__focus-target'
     # Select the option to show 5 items per page
@@ -79,4 +79,4 @@ Feature: Test Account homepage display
     Then I expect the HTML element '[data-cy="account-row"]' appear 5 times on screen
     # Go to the next page
     When I click on 'button[aria-label="Next page"]'
-    Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
+    Then I expect the HTML element '[data-cy="account-row"]' appear 5 times on screen

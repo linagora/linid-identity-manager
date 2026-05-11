@@ -28,6 +28,7 @@
   <q-banner
     class="bg-white text-negative account-deactivated-warning-banner"
     v-bind="uiProps.banner"
+    data-cy="account-deactivated-warning-banner"
   >
     <template
       v-if="uiProps.icon.name"

@@ -26,9 +26,7 @@
 
 import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
-import { useAccountMapper } from 'src/mappers/accountMapper';
 import type {
-  Account,
   AccountDTO,
   AccountQueryFilterDTO,
   AccountRecord,
@@ -37,14 +35,12 @@ import type {
 /**
  * Retrieves a single account by its identifier from the backend.
  * @param id - The unique identifier of the account.
- * @returns A promise resolving to the account data.
+ * @returns A promise resolving to the raw account DTO returned by the API.
  */
-export async function getAccountById(id: string): Promise<Account> {
-  const { toAccount } = useAccountMapper();
-
+export async function getAccountById(id: string): Promise<AccountDTO> {
   return api
     .get<AccountDTO>(`/accounts/${id}`)
-    .then((response) => toAccount(response.data));
+    .then((response) => response.data);
 }
 
 /**

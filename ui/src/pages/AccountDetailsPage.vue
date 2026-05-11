@@ -34,12 +34,18 @@
       <div
         class="row items-center justify-between q-mb-md account-details-page--header"
       >
-        <h1
-          class="q-ma-none text-h5 account-details-page--title"
-          data-cy="account-details-page_title"
-        >
-          {{ t('title') }}
-        </h1>
+        <div class="row items-center q-gutter-x-md">
+          <h1
+            class="q-ma-none text-h5 account-details-page--title"
+            data-cy="account-details-page_title"
+          >
+            {{ t('title') }}
+          </h1>
+          <AccountStatusBadge
+            v-if="lifecycleUi?.showBadge && accountStatus"
+            :status="accountStatus.status"
+          />
+        </div>
         <div class="account-details-page--actions">
           <component
             :is="buttonsCard"
@@ -52,10 +58,71 @@
         </div>
       </div>
 
+      <div
+        v-if="lifecycleUi && accountStatus"
+        class="column q-gutter-y-sm q-mb-md account-details-page--lifecycle"
+        data-cy="account-details-page_lifecycle"
+      >
+        <AccountSuspendedBanner
+          v-if="lifecycleUi.showSuspendedBanner"
+          :account-status="accountStatus"
+        />
+
+        <AccountDeactivatedWarningBanner
+          v-if="lifecycleUi.showDeactivationWarningBanner"
+          :account-status="accountStatus"
+        />
+
+        <AccountDeactivatedInfoText
+          v-if="lifecycleUi.showWillDeactivateInfoText"
+          :account-status="accountStatus"
+        />
+
+        <AccountSuspendedInfoText
+          v-if="lifecycleUi.showWillSuspendInfoText"
+          :account-status="accountStatus"
+        />
+
+        <AccountNotActivatedInfoText
+          v-if="lifecycleUi.showNotActivatedInfoText"
+        />
+
+        <div
+          v-if="hasAnyLifecycleAction"
+          class="row q-gutter-x-sm account-details-page--lifecycle--actions"
+          data-cy="account-lifecycle-actions"
+        >
+          <component
+            :is="dropdownButton"
+            v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
+            :ui-namespace="`${uiNamespace}.activation-actions`"
+            i18n-scope="AccountActivationActions"
+            :items="lifecycleUi.activationMenuItems"
+            data-cy="account-activation-actions"
+          />
+          <component
+            :is="dropdownButton"
+            v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
+            :ui-namespace="`${uiNamespace}.suspension-actions`"
+            i18n-scope="AccountSuspensionActions"
+            :items="lifecycleUi.suspensionMenuItems"
+            data-cy="account-suspension-actions"
+          />
+          <component
+            :is="dropdownButton"
+            v-if="dropdownButton && lifecycleUi.deactivationMenuItems?.length"
+            :ui-namespace="`${uiNamespace}.deactivation-actions`"
+            i18n-scope="AccountDeactivationActions"
+            :items="lifecycleUi.deactivationMenuItems"
+            data-cy="account-deactivation-actions"
+          />
+        </div>
+      </div>
+
       <component
         :is="entityDetailsCard"
         v-if="entityDetailsCard"
-        :entity="account || {}"
+        :entity="account ?? {}"
         :field-order="fieldsOrder"
         :is-loading="isLoading"
         :ui-namespace="uiNamespace"
@@ -76,8 +143,16 @@ import {
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
+import AccountDeactivatedInfoText from 'src/components/AccountDeactivatedInfoText.vue';
+import AccountNotActivatedInfoText from 'src/components/AccountNotActivatedInfoText.vue';
+import AccountStatusBadge from 'src/components/AccountStatusBadge.vue';
+import AccountSuspendedInfoText from 'src/components/AccountSuspendedInfoText.vue';
+import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
+import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
+import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
+import { useAccountMapper } from 'src/mappers/accountMapper';
 import { getAccountById } from 'src/services/AccountService';
-import type { Account } from 'src/types/accounts';
+import { type Account, type AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -89,22 +164,39 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
+const { toAccount, toAccountStatus } = useAccountMapper();
 
 const accountId = computed(() => route.params.id as string);
 
 const account = ref<Account | null>(null);
+const accountStatus = ref<AccountStatus | null>(null);
 const isLoading = ref<boolean>(false);
 
 const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
 const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
+const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
+
+const lifecycleUi = useAccountLifecycleUi(accountStatus);
+
+const hasAnyLifecycleAction = computed(() =>
+  Boolean(
+    lifecycleUi.value?.activationMenuItems?.length ||
+    lifecycleUi.value?.suspensionMenuItems?.length ||
+    lifecycleUi.value?.deactivationMenuItems?.length
+  )
+);
 
 /**
- * Loads the account data from the backend based on the route parameter.
+ * Loads the account data from the backend based on the route parameter and
+ * splits the raw DTO into the page-level identity (`account`) and lifecycle
+ * (`accountStatus`) projections.
  */
 async function loadAccount(): Promise<void> {
   isLoading.value = true;
   try {
-    account.value = await getAccountById(accountId.value);
+    const dto = await getAccountById(accountId.value);
+    account.value = toAccount(dto);
+    accountStatus.value = toAccountStatus(dto);
   } catch (error) {
     const errorMessageKey =
       axios.isAxiosError(error) && error.response?.status === 404

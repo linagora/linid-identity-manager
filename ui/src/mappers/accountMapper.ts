@@ -62,7 +62,7 @@ export function useAccountMapper() {
   };
 
   /**
-   * Transforms advanced search filters from the UI into a format suitable for API filters.
+   * Transforms advanced search filters from the UI into a format suitable for API filters. The `insertDate` value is forwarded as-is: the date field applies a locale-aware input mask, so the value is already formatted in the same `dateFormat` declared in the i18n translations.
    * @param advancedSearchFilters Record containing the raw filter values entered by the user in the advanced search form.
    * @returns AccountQueryFilterDTO with properly formatted filter values for querying accounts in the backend.
    */
@@ -74,7 +74,7 @@ export function useAccountMapper() {
       firstname: toLikeFilter(advancedSearchFilters['firstname']),
       email: toLikeFilter(advancedSearchFilters['email']),
       createdBy: toLikeFilter(advancedSearchFilters['createdBy']),
-      insertDate: toDateFilter(toDate(advancedSearchFilters['insertDate'])),
+      insertDate: toDateFilter(advancedSearchFilters['insertDate']),
       dateFormat: SPRING_QUERY_DATE_FORMAT,
     };
   };

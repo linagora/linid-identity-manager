@@ -16,11 +16,46 @@
   "AuthenticationCallbackPage": {
     "processing": "Processing authentication response..."
   },
+  "AccountStatusBadge": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
   "AccountDeactivatedInfoText": {
     "message": "This account will be deactivated on {date}."
   },
   "AccountSuspendedInfoText": {
     "message": "This account will be suspended on {date}."
+  },
+  "AccountNotActivatedInfoText": {
+    "message": "This account has not been activated yet."
+  },
+  "AccountActivationActions": {
+    "DropdownButton": {
+      "title": "Activation",
+      "activation": {
+        "immediate": "Immediate",
+        "scheduled": "Scheduled"
+      }
+    }
+  },
+  "AccountSuspensionActions": {
+    "DropdownButton": {
+      "title": "Suspension",
+      "suspension": {
+        "immediate": "Immediate",
+        "scheduled": "Scheduled"
+      }
+    }
+  },
+  "AccountDeactivationActions": {
+    "DropdownButton": {
+      "title": "Deactivation",
+      "deactivation": {
+        "immediate": "Immediate",
+        "scheduled": "Scheduled",
+        "modify": "Modify"
+      }
+    }
   },
   "AccountsPage": {
     "menuTitle": "Accounts",

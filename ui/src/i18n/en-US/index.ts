@@ -50,11 +50,46 @@ export default {
   AuthenticationCallbackPage: {
     processing: 'Processing authentication response...',
   },
+  AccountStatusBadge: {
+    active: 'Active',
+    inactive: 'Inactive',
+  },
   AccountDeactivatedInfoText: {
     message: 'This account will be deactivated on {date}.',
   },
   AccountSuspendedInfoText: {
     message: 'This account will be suspended on {date}',
+  },
+  AccountNotActivatedInfoText: {
+    message: 'This user has not activated their account yet.',
+  },
+  AccountActivationActions: {
+    DropdownButton: {
+      title: 'Activation',
+      activation: {
+        immediate: 'Immediate',
+        scheduled: 'Scheduled',
+      },
+    },
+  },
+  AccountSuspensionActions: {
+    DropdownButton: {
+      title: 'Suspension',
+      suspension: {
+        immediate: 'Immediate',
+        scheduled: 'Scheduled',
+      },
+    },
+  },
+  AccountDeactivationActions: {
+    DropdownButton: {
+      title: 'Deactivation',
+      deactivation: {
+        immediate: 'Immediate',
+        scheduled: 'Scheduled',
+        modify: 'Modify',
+      },
+    },
   },
   AccountsPage: {
     menuTitle: 'Accounts',
@@ -149,5 +184,23 @@ export default {
       notFound: 'Account not found',
       generic: 'Unable to load the account. Please try again later.',
     },
+  },
+  AccountDeactivatedBanner: {
+    content: 'This account has been deactivated since {date}.',
+    reactivateImmediateButton: 'Immediate reactivation',
+    reactivateScheduledButton: 'Schedule reactivation',
+  },
+  AccountDeactivatedWarningBanner: {
+    content:
+      'This account will be deactivated tomorrow (on {date}) | This account will be deactivated in {count} days (on {date})',
+    deactivateImmediateButton: 'Immediate deactivation',
+    modifyDeactivationButton: 'Modify deactivation date',
+  },
+  AccountSuspendedBanner: {
+    content: 'This account has been suspended since {date}.',
+    contentWithEndDate:
+      'This account has been suspended from {date} until {endDate}.',
+    clearSuspensionButton: 'Immediate reactivation',
+    modifySuspensionButton: 'Adjust suspension settings',
   },
 };

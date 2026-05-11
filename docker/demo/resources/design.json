@@ -157,6 +157,26 @@
       }
     }
   },
+  "account-status-badge": {
+    "active": {
+      "q-badge": {
+        "color": "positive",
+        "align": "middle"
+      }
+    },
+    "inactive": {
+      "q-badge": {
+        "color": "negative",
+        "align": "middle"
+      }
+    },
+    "suspended": {
+      "q-badge": {
+        "color": "warning",
+        "align": "middle"
+      }
+    }
+  },
   "account-deactivated-info-text": {
     "q-icon": {
       "name": "warning",

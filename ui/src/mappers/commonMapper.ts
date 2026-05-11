@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import type { FormField } from 'src/types/form';
 import { useI18n } from 'vue-i18n';
 
@@ -110,12 +110,28 @@ export function useCommonMapper() {
     return [`${v} 00:00:00_bt_${v} 23:59:59`];
   };
 
+  /**
+   * Parses a date value into a {@link Dayjs} object. Returns null when the
+   * input is falsy, the placeholder "-", or cannot be parsed by dayjs.
+   * @param value Date value to parse (typically an ISO 8601 string from the API).
+   * @returns A Dayjs object, or null when the input is invalid or absent.
+   */
+  const toDayJs = (value: unknown): Dayjs | null => {
+    const v = value?.toString() || '';
+    if (v === '') {
+      return null;
+    }
+    const date = dayjs(v);
+    return date.isValid() ? date : null;
+  };
+
   return {
     toDate,
     toDateISO,
     toEmptyRecord,
     toLikeFilter,
     toDateFilter,
+    toDayJs,
     SPRING_QUERY_DATE_FORMAT,
   };
 }

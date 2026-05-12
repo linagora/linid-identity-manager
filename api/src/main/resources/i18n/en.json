@@ -25,5 +25,11 @@
   "error.account.status.suspension_outside_validity": "Account {id} status cannot be updated: the suspension period must be within the validity period (validity end: {validityEnd}).",
   "error.account.status.validity_period_start_required": "Account {id} status cannot be updated: validity period start date is required.",
   "error.account.creation.validity_period_start_required": "Account for {email} cannot be created: validity period start date is required.",
-  "error.account.creation.validity_period_start_in_past": "Account for {email} cannot be created: the validity period start date ({start}) must be greater than or equal to today."
+  "error.account.creation.validity_period_start_in_past": "Account for {email} cannot be created: the validity period start date ({start}) must be greater than or equal to today.",
+  "error.organizational.unit.root": "The organizational unit name/type 'root' is reserved for system use.",
+  "error.organizational.unit.root.delete": "The 'root' organizational unit cannot be deleted.",
+  "error.organizational.unit.root.update": "The 'root' organizational unit cannot be updated.",
+  "error.organizational.unit.root.not_found": "Organizational unit 'root' is not found",
+  "error.organizational.unit.not_found": "Organizational unit not found: {id}",
+  "error.organizational.unit.already_exists": "Organizational unit already exists for name '{name}' and type '{type}'"
 }

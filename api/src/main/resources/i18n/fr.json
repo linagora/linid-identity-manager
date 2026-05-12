@@ -25,5 +25,11 @@
   "error.account.status.suspension_outside_validity": "Le statut du compte {id} ne peut pas être mis à jour : la période de suspension doit être dans la période de validité (fin de validité : {validityEnd}).",
   "error.account.status.validity_period_start_required": "Le statut du compte {id} ne peut pas être mis à jour : la date de début de la période de validité est requise.",
   "error.account.creation.validity_period_start_required": "Le compte associé à {email} ne peut pas être créé : la date de début de la période de validité est requise.",
-  "error.account.creation.validity_period_start_in_past": "Le compte associé à {email} ne peut pas être créé : la date de début de la période de validité ({start}) doit être supérieure ou égale à la date du jour."
+  "error.account.creation.validity_period_start_in_past": "Le compte associé à {email} ne peut pas être créé : la date de début de la période de validité ({start}) doit être supérieure ou égale à la date du jour.",
+  "error.organizational.unit.root": "Le nom/type d’unité organisationnelle « root » est réservé à un usage système.",
+  "error.organizational.unit.root.delete": "L’unité organisationnelle « root » ne peut pas être supprimée.",
+  "error.organizational.unit.root.update": "L’unité organisationnelle « root » ne peut pas être mise à jour.",
+  "error.organizational.unit.root.not_found": "L’unité organisationnelle « root » est introuvable",
+  "error.organizational.unit.not_found": "Unité organisationnelle introuvable: {id}",
+  "error.organizational.unit.already_exists": "Une unité organisationnelle existe déjà avec le nom '{name}' et le type '{type}'"
 }

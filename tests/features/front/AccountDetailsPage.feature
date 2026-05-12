@@ -15,9 +15,10 @@ Feature: Test Account details page display
   ## 112 Lifecycle case 6 - ACTIVE, no end date, suspension planned
   ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
   ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
-  ## 115 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
-  ## 116 Lifecycle case 11 - SUSPENDED, end > 15 days
-  ## 117 Lifecycle case 12 - SUSPENDED, end <= 15 days
+  ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
+  ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
+  ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
+  ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
 
   Scenario: Roundtrip about Account Details
 
@@ -181,7 +182,17 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
-    ## 115 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
+    ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-0000-0000-0000000000c9"
+    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
+    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
+    And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+    And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+
+    ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-0000-0000-00000000000a"
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
@@ -191,7 +202,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
-    ## 116 Lifecycle case 11 - SUSPENDED, end > 15 days
+    ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-0000-0000-00000000000b"
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
@@ -201,7 +212,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
-    ## 117 Lifecycle case 12 - SUSPENDED, end <= 15 days
+    ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-0000-0000-00000000000c"
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible

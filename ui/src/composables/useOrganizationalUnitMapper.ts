@@ -24,14 +24,17 @@
  * LinID Identity Manager software.
  */
 
+import type { TreeNode } from '@linagora/linid-im-front-corelib';
 import type {
+  OrganizationalUnitDTO,
   OrganizationalUnitForm,
   OrganizationalUnitRecord,
+  OrganizationalUnitRelationDTO,
 } from 'src/types/organizationalUnits';
 
 /**
- * Mapper for organizational-unit-related data transformations.
- * @returns Functions to convert form values to API records.
+ * Composable providing utility functions to work with organizational units.
+ * @returns A.
  */
 export function useOrganizationalUnitMapper() {
   /**
@@ -52,7 +55,87 @@ export function useOrganizationalUnitMapper() {
     };
   };
 
+  /**
+   * Converts an organizational unit DTO into a tree node.
+   * @param organizationalUnitRelation The identifier of the organizational unit to use as the node's value.
+   * @param organizationalUnitDTO The organizational unit data transfer object to convert.
+   * @param childrenNodes A.
+   * @returns A.
+   */
+  function toOrganizationalUnitNode(
+    organizationalUnitRelation: OrganizationalUnitRelationDTO | null,
+    organizationalUnitDTO: OrganizationalUnitDTO,
+    childrenNodes: TreeNode<OrganizationalUnitDTO>[]
+  ): TreeNode<OrganizationalUnitDTO> {
+    return {
+      key: organizationalUnitRelation?.id || 'root',
+      type: organizationalUnitDTO.type,
+      nodes: childrenNodes,
+      extraActions: [],
+      value: organizationalUnitDTO,
+    };
+  }
+
+  /**
+   * A.
+   * @param parentId A.
+   * @param allOrganizationalUnit A.
+   * @returns A.
+   */
+  function getTreeNodeChildren(
+    parentId: string,
+    allOrganizationalUnit: OrganizationalUnitDTO[]
+  ): TreeNode<OrganizationalUnitDTO>[] {
+    console.log('getTreeNodeChildren', allOrganizationalUnit);
+    const result: TreeNode<OrganizationalUnitDTO>[] = [];
+
+    for (const organizationalUnit of allOrganizationalUnit) {
+      const organizationalUnitRelation = organizationalUnit.parents?.find(
+        (parent) => parent.parent === parentId
+      );
+
+      if (!organizationalUnitRelation) {
+        continue;
+      }
+
+      result.push(
+        toOrganizationalUnitNode(
+          organizationalUnitRelation,
+          organizationalUnit,
+          getTreeNodeChildren(organizationalUnit.id, allOrganizationalUnit)
+        )
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Retrieves the organizational unit tree.
+   * @param allOrganizationalUnits The list of all organizational units to build the tree from.
+   * @returns Promise resolving to the organizational unit tree.
+   */
+  function toOrganizationalUnitsTree(
+    allOrganizationalUnits: OrganizationalUnitDTO[]
+  ): TreeNode<OrganizationalUnitDTO>[] {
+    console.log(allOrganizationalUnits);
+    console.log(
+      allOrganizationalUnits.filter(
+        ({ parents }) => !parents?.some((p) => p.parent)
+      )
+    );
+    return allOrganizationalUnits
+      .filter(({ parents }) => !parents?.some((p) => p.parent))
+      .map((root) =>
+        toOrganizationalUnitNode(
+          null,
+          root,
+          getTreeNodeChildren(root.id, allOrganizationalUnits)
+        )
+      );
+  }
+
   return {
     toOrganizationalUnitRecord,
+    toOrganizationalUnitsTree,
   };
 }

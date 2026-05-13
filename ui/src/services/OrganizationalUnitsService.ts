@@ -6,8 +6,8 @@
  * any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
  * LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
  * which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
- * of the interface window, the display of the "You are using the Open Source and free version of LinID™, powered by
- * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!" infobox and in the e-mails
+ * of the interface window, the display of the “You are using the Open Source and free version of LinID™, powered by
+ * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!” infobox and in the e-mails
  * sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
  * as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
  * and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
@@ -24,25 +24,50 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount } from '@vue/test-utils';
-import AccountNotActivatedInfoText from 'src/components/AccountNotActivatedInfoText.vue';
-import { describe, expect, it, vi } from 'vitest';
+import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
+import { api } from 'boot/axios';
+import type {
+  OrganizationalUnitDTO,
+  OrganizationalUnitFilterDTO,
+} from 'src/types/organizationalUnits';
 
-const tMock = vi.fn((key) => key);
-const uiMock = vi.fn(() => ({}));
+/**
+ * Retrieves Organizational Units list from the API.
+ * @param filters Object containing the filter criteria for querying Organizational Units.
+ * @param pagination Object containing pagination parameters.
+ * @returns Promise of paginated Organizational Units.
+ */
+export async function getOrganizationalUnits(
+  filters: OrganizationalUnitFilterDTO,
+  pagination: Pagination
+): Promise<Page<OrganizationalUnitDTO>> {
+  return api
+    .get<
+      Page<OrganizationalUnitDTO>
+    >(`/organizational-units`, { params: { ...filters, ...pagination } })
+    .then(({ data }) => data);
+}
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
-  useScopedI18n: () => ({ t: tMock }),
-  useUiDesign: () => ({ ui: uiMock }),
-}));
+/**
+ * Fetches all organizational units from the API by iterating pages of 50
+ * until the last page is reached.
+ * @returns Promise resolving to the full list of organizational units.
+ */
+export async function getAllOrganizationalUnit(): Promise<OrganizationalUnitDTO[]> {
+  const PAGE_SIZE = 5;
+  const result: OrganizationalUnitDTO[] = [];
+  let page = 0;
+  let isLast = false;
 
-describe('AccountNotActivatedInfoText', () => {
-  it('builds uiProps from the ui design system', () => {
-    const wrapper = shallowMount(AccountNotActivatedInfoText);
-    expect(uiMock).toHaveBeenCalledWith(
-      'account-not-activated-info-text',
-      'q-icon'
+  while (!isLast) {
+    const response = await getOrganizationalUnits(
+      { name: null },
+      { page, size: PAGE_SIZE }
     );
-    expect(wrapper.vm.uiProps.icon).toBeDefined();
-  });
-});
+    result.push(...response.content);
+    isLast = response.last;
+    page++;
+  }
+
+  return result;
+}

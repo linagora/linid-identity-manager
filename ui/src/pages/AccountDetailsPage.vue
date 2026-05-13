@@ -142,15 +142,15 @@ import {
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import AccountStatusBadge from 'components/badge/AccountStatusBadge.vue';
+import AccountDeactivatedInfoText from 'components/text/AccountDeactivatedInfoText.vue';
+import AccountNotActivatedInfoText from 'components/text/AccountNotActivatedInfoText.vue';
+import AccountSuspendedInfoText from 'components/text/AccountSuspendedInfoText.vue';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
-import AccountDeactivatedInfoText from 'src/components/AccountDeactivatedInfoText.vue';
-import AccountNotActivatedInfoText from 'src/components/AccountNotActivatedInfoText.vue';
-import AccountStatusBadge from 'src/components/AccountStatusBadge.vue';
-import AccountSuspendedInfoText from 'src/components/AccountSuspendedInfoText.vue';
 import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
-import { useAccountMapper } from 'src/mappers/accountMapper';
+import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { getAccountById } from 'src/services/AccountService';
 import { type Account, type AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';

@@ -25,48 +25,9 @@
 -->
 
 <template>
-  <div
-    class="text-warning row q-gutter-x-sm account-suspended-info-text"
-    data-cy="account-suspended-info-text"
-  >
-    <q-icon
-      v-bind="uiProps.icon"
-      class="account-suspended-info-text--icon"
-    />
-    <span
-      class="account-suspended-info-text--message"
-      data-cy="account-suspended-info-text_message"
-    >
-      {{ t('message', { date: startDate }) }}
-    </span>
-  </div>
+  <div>Empty</div>
 </template>
 
-<script setup lang="ts">
-import {
-  type LinidQIconProps,
-  useScopedI18n,
-  useUiDesign,
-} from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/mappers/commonMapper';
-import type { AccountStatus } from 'src/types/accounts';
-import { computed } from 'vue';
+<script setup lang="ts"></script>
 
-const localUiNamespace = `account-suspended-info-text`;
-const { toDate } = useCommonMapper();
-const { t } = useScopedI18n('AccountSuspendedInfoText');
-const { ui } = useUiDesign();
-const props = defineProps<{
-  /**
-   * Account lifecycle status, used to display the suspended date.
-   */
-  accountStatus: AccountStatus;
-}>();
-const startDate = computed(() =>
-  toDate(props.accountStatus.suspensionPeriod.start)
-);
-
-const uiProps = {
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
-};
-</script>
+<style scoped></style>

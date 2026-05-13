@@ -59,13 +59,105 @@
       />
       <!-- eslint-enable vue/no-v-text-v-html-on-component vue/no-v-html -->
     </q-card>
+
+    <component
+      :is="treeComponent"
+      v-if="treeComponent"
+      v-model:selected-node="selectedNode"
+      ui-namespace="tree"
+      i18n-scope="Homepage"
+      :nodes="treeNodes"
+      :node-types="treeNodeTypes"
+      @click:edit="handleEdit"
+      @click:delete="handleDelete"
+      @click:view="handleView"
+      @update:selected-node="handleSelected"
+    ></component>
+    <span>TOOTOTO</span>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { useScopedI18n } from '@linagora/linid-im-front-corelib';
+import {
+  loadAsyncComponent,
+  useScopedI18n,
+} from '@linagora/linid-im-front-corelib';
+import type { TreeNodeType, TreeNode } from '@linagora/linid-im-front-corelib';
+import { ref } from 'vue';
+
+const treeComponent = loadAsyncComponent('catalogUI/GenericTree');
 
 const { t } = useScopedI18n('Homepage');
+
+/**
+ * A.
+ * @param props A.
+ */
+function handleEdit(props: TreeNode<string>) {
+  console.log('Edit = ', props);
+}
+
+/**
+ * A.
+ * @param props A.
+ */
+function handleDelete(props: TreeNode<string>) {
+  console.log('Delete = ', props);
+}
+
+/**
+ * A.
+ * @param props A.
+ */
+function handleView(props: TreeNode<string>) {
+  console.log('View = ', props);
+}
+
+/**
+ * A.
+ * @param key A.
+ */
+function handleSelected(key: string) {
+  console.log('Selected HANDLEEE = ', key);
+}
+
+const selectedNode = ref<string>('org-1');
+
+const treeNodeTypes: TreeNodeType[] = [
+  {
+    type: 'Structure',
+    actions: ['edit'],
+  },
+  {
+    type: 'Establishment',
+    actions: ['edit'],
+  },
+];
+
+const treeNodes: TreeNode<string>[] = [
+  {
+    type: 'Structure',
+    key: 'org-1',
+    value: 'Linagora avec une phrasess',
+    extraActions: ['delete', 'view'],
+    nodes: [
+      {
+        type: 'Establishment',
+        key: 'est-1',
+        value: 'Establishement 111',
+        extraActions: ['delete'],
+        nodes: [],
+      },
+      {
+        type: 'Establishment',
+        key: 'est-2',
+        value: 'Establishment 2',
+        extraActions: ['delete'],
+        nodes: [],
+      },
+    ],
+  },
+];
 </script>
 
 <style scoped>

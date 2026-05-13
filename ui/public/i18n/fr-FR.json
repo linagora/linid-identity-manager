@@ -17,6 +17,25 @@
     "menuTitle": "Comptes",
     "title": "Comptes",
     "detailButton": "Voir",
+    "GenericTree": {
+      "types": {
+        "root": {
+          "label": "LinID"
+        },
+        "COMPANY": {
+          "label": "Company: {label}"
+        },
+        "DIVISION": {
+          "label": "Division: {label}"
+        },
+        "DEPARTMENT": {
+          "label": "Departemnt: {label}"
+        },
+        "TEAM": {
+          "label": "Team: {label}"
+        }
+      }
+    },
     "ButtonsCard": {
       "create": "Créer"
     },

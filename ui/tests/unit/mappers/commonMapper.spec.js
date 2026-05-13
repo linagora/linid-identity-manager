@@ -25,7 +25,7 @@
  */
 
 import dayjs from 'dayjs';
-import { useCommonMapper } from 'src/mappers/commonMapper';
+import { useCommonMapper } from 'src/composables/useCommonMapper.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
 

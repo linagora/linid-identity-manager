@@ -25,77 +25,48 @@
 -->
 
 <template>
-  <q-banner
-    class="bg-white text-negative account-deactivated-warning-banner"
-    v-bind="uiProps.banner"
-    data-cy="account-deactivated-warning-banner"
+  <div
+    class="text-warning row q-gutter-x-sm account-suspended-info-text"
+    data-cy="account-suspended-info-text"
   >
-    <template
-      v-if="uiProps.icon.name"
-      #avatar
+    <q-icon
+      v-bind="uiProps.icon"
+      class="account-suspended-info-text--icon"
+    />
+    <span
+      class="account-suspended-info-text--message"
+      data-cy="account-suspended-info-text_message"
     >
-      <q-icon v-bind="uiProps.icon" />
-    </template>
-
-    {{
-      t('content', {
-        count: accountStatus.daysBeforeDeactivation,
-        date: endDate,
-      })
-    }}
-
-    <template #action>
-      <q-btn
-        :label="t('deactivateImmediateButton')"
-        v-bind="uiProps.deactivateImmediateButton"
-        @click="emit('deactivate-immediate')"
-      />
-      <q-btn
-        :label="t('modifyDeactivationButton')"
-        v-bind="uiProps.modifyDeactivationButton"
-        @click="emit('modify-deactivation')"
-      />
-    </template>
-  </q-banner>
+      {{ t('message', { date: startDate }) }}
+    </span>
+  </div>
 </template>
 
-<script lang="ts" setup>
-import type {
-  LinidQBannerProps,
-  LinidQBtnProps,
-  LinidQIconProps,
+<script setup lang="ts">
+import {
+  type LinidQIconProps,
+  useScopedI18n,
+  useUiDesign,
 } from '@linagora/linid-im-front-corelib';
-import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
 import { useCommonMapper } from 'src/composables/useCommonMapper';
-import type {
-  AccountBannerProps,
-  AccountDeactivatedWarningBannerOutputs,
-} from 'src/types/accountBannerProps';
+import type { AccountStatus } from 'src/types/accounts';
 import { computed } from 'vue';
 
-const props = defineProps<AccountBannerProps>();
-const emit = defineEmits<AccountDeactivatedWarningBannerOutputs>();
-
-const localUiNamespace = `account-deactivated-warning-banner`;
-const localI18n = `AccountDeactivatedWarningBanner`;
-
-const { t } = useScopedI18n(localI18n);
-const { ui } = useUiDesign();
+const localUiNamespace = `account-suspended-info-text`;
 const { toDate } = useCommonMapper();
+const { t } = useScopedI18n('AccountSuspendedInfoText');
+const { ui } = useUiDesign();
+const props = defineProps<{
+  /**
+   * Account lifecycle status, used to display the suspended date.
+   */
+  accountStatus: AccountStatus;
+}>();
+const startDate = computed(() =>
+  toDate(props.accountStatus.suspensionPeriod.start)
+);
 
-const endDate = computed(() => toDate(props.accountStatus.validityPeriod.end));
 const uiProps = {
-  banner: ui<LinidQBannerProps>(localUiNamespace, 'q-banner'),
   icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
-  deactivateImmediateButton: ui<LinidQBtnProps>(
-    `${localUiNamespace}.deactivate-immediate-button`,
-    'q-btn'
-  ),
-  modifyDeactivationButton: ui<LinidQBtnProps>(
-    `${localUiNamespace}.modify-deactivation-button`,
-    'q-btn'
-  ),
 };
 </script>
-
-<style scoped></style>

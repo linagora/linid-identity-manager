@@ -273,5 +273,61 @@
         "color": "white"
       }
     }
+  },
+  "tree": {
+    "GenericTree": {
+      "q-tree": {
+        "selectedColor": "primary"
+      },
+      "ButtonActions": {
+        "q-btn": {
+          "flat": true,
+          "round": true,
+          "dense": true,
+          "icon": "more_vert"
+        }
+      },
+      "types": {
+        "Structure": {
+          "q-icon": {
+            "name": "folder"
+          },
+          "actions": {
+            "edit": {
+              "q-icon": {
+                "name": "edit"
+              }
+            },
+            "delete": {
+              "q-icon": {
+                "name": "delete"
+              }
+            },
+            "view": {
+              "q-icon": {
+                "name": "search"
+              }
+            }
+          }
+        },
+        "Establishment": {
+          "q-icon": {
+            "name": "print"
+          },
+          "actions": {
+            "edit": {
+              "q-icon": {
+                "name": "edit"
+              }
+            },
+            "delete": {
+              "q-icon": {
+                "name": "delete"
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }

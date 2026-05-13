@@ -25,7 +25,7 @@
  */
 
 import dayjs from 'dayjs';
-import { useAccountMapper } from 'src/mappers/accountMapper';
+import { useAccountMapper } from 'src/composables/accountMapper.ts';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
 

@@ -36,6 +36,7 @@
       >
         {{ t('title') }}
       </h1>
+
       <div class="accounts-page--actions">
         <component
           :is="buttonsCard"
@@ -58,55 +59,72 @@
       </div>
     </div>
 
-    <component
-      :is="advancedSearchComponent"
-      v-if="advancedSearchComponent"
-      v-model:filters="filters"
-      :ui-namespace="uiNamespace"
-      :i18n-scope="i18nScope"
-      :fields="fieldsSearch"
-      :default-fields-names="defaultFields"
-      :advanced-fields-names="advancedFields"
-      class="q-mb-md"
-      @update:filters="onFiltersChange"
-    />
-    <component
-      :is="tableComponent"
-      v-if="tableComponent"
-      v-model:pagination="pagination"
-      :ui-namespace="uiNamespace"
-      :i18n-scope="i18nScope"
-      :rows="accounts"
-      :columns="accountColumns"
-      :loading="isLoading"
-      @request="onRequest"
-    >
-      <template #body="props">
-        <q-tr
-          :props="props"
-          data-cy="account-row"
-        >
-          <q-td
-            v-for="col in props.cols"
-            :key="col.name"
-            :props="props"
-            :data-cy="`cell-${col.name}`"
-          >
-            <template v-if="col.name === 'actions'">
-              <q-btn
-                v-bind="uiProps.seeButton"
-                :label="t('detailButton')"
-                data-cy="see-button"
-                @click="goToAccountDetails(props.row)"
-              />
-            </template>
-            <template v-else>
-              {{ col.value }}
-            </template>
-          </q-td>
-        </q-tr>
+    <q-splitter v-model="splitterModel">
+      <template #before>
+        <component
+          :is="treeComponent"
+          v-if="treeComponent"
+          v-model:selected-node="treeNodes[0]"
+          ui-namespace="tree"
+          :i18n-scope="i18nScope"
+          :nodes="treeNodes"
+          :node-types="treeNodeTypes"
+          @click:edit="handleEdit"
+          @update:selected-node="handleSelected"
+        ></component>
       </template>
-    </component>
+      <template #after>
+        <component
+          :is="advancedSearchComponent"
+          v-if="advancedSearchComponent"
+          v-model:filters="filters"
+          :ui-namespace="uiNamespace"
+          :i18n-scope="i18nScope"
+          :fields="fieldsSearch"
+          :default-fields-names="defaultFields"
+          :advanced-fields-names="advancedFields"
+          class="q-mb-md"
+          @update:filters="onFiltersChange"
+        />
+        <component
+          :is="tableComponent"
+          v-if="tableComponent"
+          v-model:pagination="pagination"
+          :ui-namespace="uiNamespace"
+          :i18n-scope="i18nScope"
+          :rows="accounts"
+          :columns="accountColumns"
+          :loading="isLoading"
+          @request="onRequest"
+        >
+          <template #body="props">
+            <q-tr
+              :props="props"
+              data-cy="account-row"
+            >
+              <q-td
+                v-for="col in props.cols"
+                :key="col.name"
+                :props="props"
+                :data-cy="`cell-${col.name}`"
+              >
+                <template v-if="col.name === 'actions'">
+                  <q-btn
+                    v-bind="uiProps.seeButton"
+                    :label="t('detailButton')"
+                    data-cy="see-button"
+                    @click="goToAccountDetails(props.row)"
+                  />
+                </template>
+                <template v-else>
+                  {{ col.value }}
+                </template>
+              </q-td>
+            </q-tr>
+          </template>
+        </component>
+      </template>
+    </q-splitter>
   </q-page>
 </template>
 
@@ -115,6 +133,8 @@ import type {
   LinidQBtnProps,
   QTableRequestEvent,
   QuasarPagination,
+  TreeNode,
+  TreeNodeType,
 } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
@@ -129,10 +149,13 @@ import {
   fieldsSearch,
 } from 'assets/accounts/AccountsFilters';
 import axios from 'axios';
+import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { useAccountsColumns } from 'src/composables/useAccountsColumns';
-import { useAccountMapper } from 'src/mappers/accountMapper';
+import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import { getAccounts } from 'src/services/AccountService';
+import { getAllOrganizationalUnit } from 'src/services/OrganizationalUnitsService';
 import type { Account } from 'src/types/accounts';
+import type { OrganizationalUnitDTO } from 'src/types/organizationalUnits';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -146,12 +169,17 @@ const advancedSearchComponent = loadAsyncComponent(
 );
 const tableComponent = loadAsyncComponent('catalogUI/GenericEntityTable');
 const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
+const treeComponent = loadAsyncComponent('catalogUI/GenericTree');
 const filters = ref<Record<string, unknown>>({});
 
 const accounts = ref<Account[]>([]);
 const isLoading = ref<boolean>(false);
+const treeNodes = ref<TreeNode<OrganizationalUnitDTO>[]>([]);
+
+const splitterModel = ref<number>(25);
 
 const { ui } = useUiDesign();
+const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
 const uiProps = computed(() => ({
   createButton: ui<LinidQBtnProps>(`${uiNamespace}.create-button`, 'q-btn'),
   seeButton: ui<LinidQBtnProps>(
@@ -184,6 +212,11 @@ async function loadData(): Promise<void> {
       toAccountQueryFilterDTO(filters.value),
       toPagination(pagination.value)
     );
+
+    treeNodes.value = toOrganizationalUnitsTree(
+      await getAllOrganizationalUnit()
+    );
+
     accounts.value = toAccountList(accountsPage.content);
     pagination.value = toQuasarPagination(accountsPage);
   } catch (error) {
@@ -243,4 +276,31 @@ function onFiltersChange(newFilters: Record<string, unknown>): Promise<void> {
 }
 
 onMounted(loadData);
+
+const treeNodeTypes: TreeNodeType[] = [
+  {
+    type: 'Structure',
+    actions: ['edit'],
+  },
+  {
+    type: 'Establishment',
+    actions: ['edit'],
+  },
+];
+
+/**
+ * A.
+ * @param props A.
+ */
+function handleEdit(props: TreeNode<string>) {
+  console.log('Edit = ', props);
+}
+
+/**
+ * A.
+ * @param node A.
+ */
+function handleSelected(node: TreeNode<string>) {
+  console.log('Selected HANDLEEE = ', node);
+}
 </script>

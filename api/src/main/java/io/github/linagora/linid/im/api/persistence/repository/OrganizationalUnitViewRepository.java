@@ -24,54 +24,22 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.organizationalunit;
+package io.github.linagora.linid.im.api.persistence.repository;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.UUID;
 
 /**
- * MapStruct mapper responsible for converting between
- * {@link OrganizationalUnit} entities and their associated DTO/record models.
+ * Repository for accessing and querying {@link OrganizationalUnitView} entities.
+ *
+ * <p>Provides standard CRUD operations through {@link JpaRepository} and support for specification-based dynamic
+ * queries through {@link JpaSpecificationExecutor}.</p>
+ *
+ * <p>This repository is intended for read operations on the {@code organizational_units_view} database view.</p>
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface OrganizationalUnitMapper {
-
-    /**
-     * Creates an {@link OrganizationalUnit} entity from an
-     * {@link OrganizationalUnitRecord}.
-     * <p>Audit fields and technical metadata are automatically initialized or ignored
-     * during the mapping process.
-     *
-     * @param organizationalUnitRecord the source organizational unit record
-     * @param userPrincipal            the authenticated user used to populate audit fields
-     * @return the mapped organizational unit entity
-     */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "insertDate", ignore = true)
-    @Mapping(target = "updateDate", ignore = true)
-    @Mapping(target = "createdBy", source = "userPrincipal.id")
-    @Mapping(target = "updatedBy", source = "userPrincipal.id")
-    OrganizationalUnit toEntity(OrganizationalUnitRecord organizationalUnitRecord, UserPrincipal userPrincipal);
-
-    /**
-     * Converts an {@link OrganizationalUnit} entity into an
-     * {@link OrganizationalUnitDTO}.
-     *
-     * @param organizationalUnit the source entity
-     * @return the mapped DTO
-     */
-    OrganizationalUnitDTO toDTO(OrganizationalUnit organizationalUnit);
-
-    /**
-     * Converts an {@link OrganizationalUnitView} entity into an
-     * {@link OrganizationalUnitViewDTO}.
-     *
-     * @param organizationalUnit the source entity
-     * @return the mapped DTO
-     */
-    OrganizationalUnitViewDTO toDTO(OrganizationalUnitView organizationalUnit);
+public interface OrganizationalUnitViewRepository extends JpaRepository<OrganizationalUnitView, UUID>,
+    JpaSpecificationExecutor<OrganizationalUnitView> {
 }

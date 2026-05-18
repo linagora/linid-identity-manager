@@ -29,8 +29,9 @@ package io.github.linagora.linid.im.api.controller;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -116,9 +117,9 @@ public class OrganizationalUnitController {
     @Operation(summary = "Get all organizational units with pagination and filtering")
     @ApiResponse(responseCode = "200", description = "Full list of organizational units")
     @ApiResponse(responseCode = "206", description = "Partial list of organizational units (more pages available)")
-    public ResponseEntity<Page<OrganizationalUnitDTO>> findAll(
+    public ResponseEntity<Page<OrganizationalUnitViewDTO>> findAll(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
-        final OrganizationalUnitQueryFilterDto filters,
+        final OrganizationalUnitViewQueryFilterDto filters,
         final Pageable pageable) {
         log.info("[{}] Received GET request to list organizational units with filters {} and pageable {}",
             userPrincipal.getEmail(), filters, pageable);
@@ -139,12 +140,12 @@ public class OrganizationalUnitController {
     @Operation(summary = "Get an organizational unit by ID")
     @ApiResponse(responseCode = "200", description = "Organizational unit found")
     @ApiResponse(responseCode = "404", description = "Organizational unit not found", content = @Content)
-    public ResponseEntity<OrganizationalUnitDTO> findById(
+    public ResponseEntity<OrganizationalUnitViewDTO> findById(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id) {
         log.info("[{}] Received GET request for organizational unit {}", userPrincipal.getEmail(), id);
 
-        var entity = service.findById(userPrincipal, id);
+        var entity = service.findViewById(userPrincipal, id);
 
         return ResponseEntity.ok(mapper.toDTO(entity));
     }

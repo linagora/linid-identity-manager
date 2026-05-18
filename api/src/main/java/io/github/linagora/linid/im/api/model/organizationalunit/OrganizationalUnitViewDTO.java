@@ -26,52 +26,75 @@
 
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
 
 /**
- * MapStruct mapper responsible for converting between
- * {@link OrganizationalUnit} entities and their associated DTO/record models.
+ * Data Transfer Object representing an organizational unit in API responses.
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface OrganizationalUnitMapper {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Organizational unit data transfer object")
+public class OrganizationalUnitViewDTO {
 
     /**
-     * Creates an {@link OrganizationalUnit} entity from an
-     * {@link OrganizationalUnitRecord}.
-     * <p>Audit fields and technical metadata are automatically initialized or ignored
-     * during the mapping process.
-     *
-     * @param organizationalUnitRecord the source organizational unit record
-     * @param userPrincipal            the authenticated user used to populate audit fields
-     * @return the mapped organizational unit entity
+     * Unique identifier of the organizational unit.
      */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "insertDate", ignore = true)
-    @Mapping(target = "updateDate", ignore = true)
-    @Mapping(target = "createdBy", source = "userPrincipal.id")
-    @Mapping(target = "updatedBy", source = "userPrincipal.id")
-    OrganizationalUnit toEntity(OrganizationalUnitRecord organizationalUnitRecord, UserPrincipal userPrincipal);
+    @Schema(description = "Unique identifier of the organizational unit",
+        example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
     /**
-     * Converts an {@link OrganizationalUnit} entity into an
-     * {@link OrganizationalUnitDTO}.
-     *
-     * @param organizationalUnit the source entity
-     * @return the mapped DTO
+     * Human-readable name of the organizational unit.
      */
-    OrganizationalUnitDTO toDTO(OrganizationalUnit organizationalUnit);
+    @Schema(description = "Human-readable name of the organizational unit", example = "Headquarters")
+    private String name;
 
     /**
-     * Converts an {@link OrganizationalUnitView} entity into an
-     * {@link OrganizationalUnitViewDTO}.
-     *
-     * @param organizationalUnit the source entity
-     * @return the mapped DTO
+     * Type of the organizational unit.
      */
-    OrganizationalUnitViewDTO toDTO(OrganizationalUnitView organizationalUnit);
+    @Schema(description = "Type of the organizational unit", example = "TEAM")
+    private String type;
+
+    /**
+     * Identifier of the creator of this record.
+     */
+    @Schema(description = "Creator of the record", example = "John Doe")
+    private String createdBy;
+
+    /**
+     * Identifier of the last updater of this record.
+     */
+    @Schema(description = "Last updater of the record", example = "John Doe")
+    private String updatedBy;
+
+    /**
+     * Timestamp when the record was created.
+     */
+    @Schema(description = "Record creation date")
+    private OffsetDateTime insertDate;
+
+    /**
+     * Timestamp when the record was last updated.
+     */
+    @Schema(description = "Record last update date")
+    private OffsetDateTime updateDate;
+
+    /**
+     * Parent organizational units associated with the current organizational unit.
+     *
+     * <p>Represents the hierarchy path of the organizational unit.
+     * Each entry describes a parent organizational unit linked to the current one.</p>
+     */
+    @Schema(description = "List of parent organizational units linked to the current organizational unit")
+    private List<OrganizationalUnitRelationViewDTO> parents;
 }

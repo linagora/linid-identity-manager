@@ -172,6 +172,17 @@
       }
     }
   },
+  "organizational-units": {
+    "creation-page": {
+      "buttons-card": {
+        "confirm-button": {
+          "q-btn": {
+            "outline": false
+          }
+        }
+      }
+    }
+  },
   "account-status-badge": {
     "active": {
       "q-badge": {

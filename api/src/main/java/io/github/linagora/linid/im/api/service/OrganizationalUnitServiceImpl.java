@@ -31,9 +31,11 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRelationMapper;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -65,6 +67,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Repository used to manage {@link OrganizationalUnit} persistence operations.
      */
     private final OrganizationalUnitRepository organizationalUnitRepository;
+
+    /**
+     * Repository used to manage {@link OrganizationalUnitView} persistence operations.
+     */
+    private final OrganizationalUnitViewRepository organizationalUnitViewRepository;
 
     /**
      * Repository used to manage organizational unit relation persistence operations.
@@ -165,12 +172,21 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public Page<OrganizationalUnit> findAll(final UserPrincipal userPrincipal,
-                                            final OrganizationalUnitQueryFilterDto filters,
-                                            final Pageable pageable) {
-        var specification = new SpringQueryFilterSpecification<>(OrganizationalUnit.class, filters);
+    public OrganizationalUnitView findViewById(final UserPrincipal userPrincipal, final UUID id) {
+        return organizationalUnitViewRepository.findById(id)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
+            ));
+    }
 
-        return organizationalUnitRepository.findAll(specification, pageable);
+    @Override
+    public Page<OrganizationalUnitView> findAll(final UserPrincipal userPrincipal,
+                                            final OrganizationalUnitViewQueryFilterDto filters,
+                                            final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitView.class, filters);
+
+        return organizationalUnitViewRepository.findAll(specification, pageable);
     }
 
     @Override

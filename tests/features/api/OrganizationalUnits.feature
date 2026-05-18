@@ -85,6 +85,9 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.updatedBy}}' is not empty
     And  I expect '{{response.body.insertDate}}' is not empty
     And  I expect '{{response.body.updateDate}}' is not empty
+    And  I expect '{{response.body.parent.length}}' is "1"
+    And  I expect '{{response.body.parent[0].id}}' is not empty
+    And  I expect '{{response.body.parent[0].parent}}' is "{{ctx.rootId}}"
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{response.body.id}}' with method 'DELETE'
     Then I expect status code is 204

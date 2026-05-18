@@ -29,7 +29,8 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -63,16 +64,26 @@ public interface OrganizationalUnitService {
     OrganizationalUnit findById(UserPrincipal userPrincipal, UUID id);
 
     /**
-     * Retrieves all organizational units matching the provided filters in a paginated format.
+     * Retrieves an organizational unit view by its unique identifier.
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param id            the unique identifier of the organizational unit
+     * @return the found {@link OrganizationalUnitView}
+     * @throws jakarta.persistence.EntityNotFoundException if no organizational unit view is found
+     */
+    OrganizationalUnitView findViewById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Retrieves all organizational units view matching the provided filters in a paginated format.
      *
      * @param userPrincipal the authenticated user performing the operation
      * @param filters       filtering criteria applied to the search
      * @param pageable      pagination and sorting information
-     * @return a page of {@link OrganizationalUnit}
+     * @return a page of {@link OrganizationalUnitView}
      */
-    Page<OrganizationalUnit> findAll(
+    Page<OrganizationalUnitView> findAll(
         UserPrincipal userPrincipal,
-        OrganizationalUnitQueryFilterDto filters,
+        OrganizationalUnitViewQueryFilterDto filters,
         Pageable pageable
     );
 

@@ -33,8 +33,11 @@ import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,6 +72,9 @@ import static org.mockito.Mockito.when;
 class OrganizationalUnitServiceImplTest {
     @Mock
     private OrganizationalUnitRepository organizationalUnitRepository;
+
+    @Mock
+    private OrganizationalUnitViewRepository organizationalUnitViewRepository;
 
     @Mock
     private OrganizationalUnitRelationRepository organizationalUnitRelationRepository;
@@ -226,19 +232,19 @@ class OrganizationalUnitServiceImplTest {
     @DisplayName("Should call repository with specification and pageable")
     void testFindAll_shouldDelegateToRepository() {
         var pageable = PageRequest.of(0, 10);
-        var entity = new OrganizationalUnit();
-        var filters = new OrganizationalUnitQueryFilterDto();
-        when(organizationalUnitRepository.findAll(
-            ArgumentMatchers.<Specification<OrganizationalUnit>>any(),
+        var entity = new OrganizationalUnitView();
+        var filters = new OrganizationalUnitViewQueryFilterDto();
+        when(organizationalUnitViewRepository.findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitView>>any(),
             any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(entity)));
 
-        Page<OrganizationalUnit> result = service.findAll(userPrincipal, filters, pageable);
+        Page<OrganizationalUnitView> result = service.findAll(userPrincipal, filters, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(organizationalUnitRepository).findAll(
-            ArgumentMatchers.<Specification<OrganizationalUnit>>any(),
+        verify(organizationalUnitViewRepository).findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitView>>any(),
             any(Pageable.class));
     }
 

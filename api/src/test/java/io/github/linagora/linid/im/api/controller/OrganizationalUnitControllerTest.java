@@ -30,7 +30,8 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -96,7 +97,7 @@ class OrganizationalUnitControllerTest {
         when(service.findAll(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
         when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
 
-        var response = controller.findAll(userPrincipal, new OrganizationalUnitQueryFilterDto(), Pageable.unpaged());
+        var response = controller.findAll(userPrincipal, new OrganizationalUnitViewQueryFilterDto(), Pageable.unpaged());
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -105,7 +106,7 @@ class OrganizationalUnitControllerTest {
     @Test
     @DisplayName("Should find organizational unit by id")
     void testFindById() {
-        when(service.findById(any(), any())).thenReturn(new OrganizationalUnit());
+        when(service.findViewById(any(), any())).thenReturn(new OrganizationalUnitView());
 
         var response = controller.findById(userPrincipal, UUID.randomUUID());
 

@@ -26,52 +26,53 @@
 
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import java.io.Serializable;
+import java.util.UUID;
 
 /**
- * MapStruct mapper responsible for converting between
- * {@link OrganizationalUnit} entities and their associated DTO/record models.
+ * Represents a direct hierarchical relationship between two organizational units.
+ * <p>This entity defines a parent-child association within the organizational
+ * structure graph. Each relation represents a direct edge in the directed
+ * acyclic graph (DAG) used to model organizational hierarchies.
+ *
+ * <p>The entity is mapped to the {@code organizational_unit_relations} table.
+ * A unique constraint at the database level guarantees that the same
+ * parent-child relationship cannot be inserted multiple times.
+ *
+ * <p>This table acts as the source of truth for the hierarchy structure,
+ * while transitive relationships are maintained separately in the
+ * closure table.
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface OrganizationalUnitMapper {
+@Data
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(
+    name = "OrganizationalUnitRelationView",
+    description = "Represents a direct parent-child relationship between two "
+        + "organizational units within the hierarchy graph."
+)
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class OrganizationalUnitRelationViewDTO implements Serializable {
 
     /**
-     * Creates an {@link OrganizationalUnit} entity from an
-     * {@link OrganizationalUnitRecord}.
-     * <p>Audit fields and technical metadata are automatically initialized or ignored
-     * during the mapping process.
-     *
-     * @param organizationalUnitRecord the source organizational unit record
-     * @param userPrincipal            the authenticated user used to populate audit fields
-     * @return the mapped organizational unit entity
+     * Unique identifier of the organizational unit relation, auto-generated as UUID.
      */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "insertDate", ignore = true)
-    @Mapping(target = "updateDate", ignore = true)
-    @Mapping(target = "createdBy", source = "userPrincipal.id")
-    @Mapping(target = "updatedBy", source = "userPrincipal.id")
-    OrganizationalUnit toEntity(OrganizationalUnitRecord organizationalUnitRecord, UserPrincipal userPrincipal);
+    @Schema(description = "Unique identifier of the organizational unit relation",
+        example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
     /**
-     * Converts an {@link OrganizationalUnit} entity into an
-     * {@link OrganizationalUnitDTO}.
-     *
-     * @param organizationalUnit the source entity
-     * @return the mapped DTO
+     * Identifier of the parent organizational unit.
      */
-    OrganizationalUnitDTO toDTO(OrganizationalUnit organizationalUnit);
-
-    /**
-     * Converts an {@link OrganizationalUnitView} entity into an
-     * {@link OrganizationalUnitViewDTO}.
-     *
-     * @param organizationalUnit the source entity
-     * @return the mapped DTO
-     */
-    OrganizationalUnitViewDTO toDTO(OrganizationalUnitView organizationalUnit);
+    @Schema(description = "Identifier of the parent organizational unit",
+        example = "550e8400-e29b-41d4-a716-446655440001")
+    private UUID parent;
 }

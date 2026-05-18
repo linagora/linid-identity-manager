@@ -45,6 +45,7 @@
       "oidcRPMetaDataOptionsAccessTokenJWT": 1,
       "oidcRPMetaDataOptionsAccessTokenSignAlg": "RS256",
       "oidcRPMetaDataOptionsIDTokenSignAlg": "RS256",
+      "oidcRPMetaDataOptionsAllowPasswordGrant": 1,
       "oidcRPMetaDataOptionsPublic": 1,
       "oidcRPMetaDataOptionsRequirePKCE": 1,
       "oidcRPMetaDataOptionsBypassConsent": 1,

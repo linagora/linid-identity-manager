@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,49 +24,35 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import type {
+  OrganizationalUnitForm,
+  OrganizationalUnitRecord,
+} from 'src/types/organizationalUnits';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/create',
-        name: 'OrganizationalUnitCreate',
-        component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Mapper for organizational-unit-related data transformations.
+ * @returns Functions to convert form values to API records.
+ */
+export function useOrganizationalUnitMapper() {
+  /**
+   * Transforms an {@link OrganizationalUnitForm} into an {@link OrganizationalUnitRecord} by attaching the parent
+   * identifier supplied by the navigation context.
+   * @param form OU form carrying the user-editable fields.
+   * @param parent UUID of the parent OU, provided by the route context.
+   * @returns OU record ready to be posted to the backend.
+   */
+  const toOrganizationalUnitRecord = (
+    form: OrganizationalUnitForm,
+    parent: string
+  ): OrganizationalUnitRecord => {
+    return {
+      parent,
+      name: form.name,
+      type: form.type,
+    };
+  };
+
+  return {
+    toOrganizationalUnitRecord,
+  };
+}

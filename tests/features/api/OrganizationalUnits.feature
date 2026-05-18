@@ -67,7 +67,6 @@ Feature: Test API Organizational unit endpoints
   ################################################################
   ################## Create (POST /organizational-units) #########
   ################################################################
-
   Scenario: 201 - Should create an organizational unit with valid data
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
       """
@@ -230,10 +229,13 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
     And  I expect '{{response.body.name}}' is 'test1'
     And  I expect '{{response.body.type}}' is 'test2'
-    And  I expect '{{response.body.createdBy}}' is '00000000-0000-0000-0000-00000000a001'
-    And  I expect '{{response.body.updatedBy}}' is '00000000-0000-0000-0000-00000000a001'
+    And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.insertDate}}' is not empty
     And  I expect '{{response.body.updateDate}}' is not empty
+    And  I expect '{{response.body.parents.length}}' is "1"
+    And  I expect '{{response.body.parents[0].id}}' is not empty
+    And  I expect '{{response.body.parents[0].parent}}' is "{{ctx.rootID}}"
 
     When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then  I expect status code is 204
@@ -305,8 +307,8 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
     And  I expect '{{response.body.name}}' is 'test1'
     And  I expect '{{response.body.type}}' is 'test2'
-    And  I expect '{{response.body.createdBy}}' is '00000000-0000-0000-0000-00000000a001'
-    And  I expect '{{response.body.updatedBy}}' is '00000000-0000-0000-0000-00000000a001'
+    And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.insertDate}}' is not empty
     And  I expect '{{response.body.updateDate}}' is not empty
     And  I store 'lastInsertDate' as '{{response.body.insertDate}}' in context
@@ -326,8 +328,8 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
     And  I expect '{{response.body.name}}' is 'test3'
     And  I expect '{{response.body.type}}' is 'test4'
-    And  I expect '{{response.body.createdBy}}' is '00000000-0000-0000-0000-00000000a001'
-    And  I expect '{{response.body.updatedBy}}' is '00000000-0000-0000-0000-00000000a001'
+    And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.insertDate}}' is "{{ctx.lastInsertDate}}"
     And  I expect '{{response.body.updateDate}}' is not empty
 

@@ -88,13 +88,14 @@
           </q-input>
 
           <q-input
-            v-else
+            v-else-if="field.type === 'text' || field.type === 'email'"
             v-model="form[field.name]"
             :label="field.label"
             :rules="field.rules"
             :type="field.type"
             class="q-mb-sm"
             lazy-rules
+            v-bind="uiProps[field.name]?.input"
           />
         </div>
 
@@ -118,6 +119,7 @@ import type {
   LinidQBtnProps,
   LinidQDateProps,
   LinidQIconProps,
+  LinidQInputProps,
 } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
@@ -184,22 +186,16 @@ async function onSubmit(): Promise<void> {
   }
 }
 
-const uiProps = creationFields
-  .filter((field) => field.type === 'date')
-  .reduce<DatePickerUiProps>((acc, field) => {
-    acc[field.name] = {
-      icon: ui<LinidQIconProps>(
-        `${uiNamespace}.fields.${field.name}`,
-        'q-icon'
-      ),
-      date: ui<LinidQDateProps>(
-        `${uiNamespace}.fields.${field.name}`,
-        'q-date'
-      ),
-      btn: ui<LinidQBtnProps>(`${uiNamespace}.fields.${field.name}`, 'q-btn'),
-    };
-    return acc;
-  }, {});
+const uiProps = creationFields.reduce<DatePickerUiProps>((acc, field) => {
+  const namespace = `${uiNamespace}.fields.${field.name}`;
+  acc[field.name] = {
+    input: ui<LinidQInputProps>(namespace, 'q-input'),
+    icon: ui<LinidQIconProps>(namespace, 'q-icon'),
+    date: ui<LinidQDateProps>(namespace, 'q-date'),
+    btn: ui<LinidQBtnProps>(namespace, 'q-btn'),
+  };
+  return acc;
+}, {});
 
 /**
  * Cancels the account creation and navigates back to the accounts list.

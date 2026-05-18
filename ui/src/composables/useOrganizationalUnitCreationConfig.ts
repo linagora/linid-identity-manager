@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,49 +24,39 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import {
+  useQuasarFieldValidation,
+  useScopedI18n,
+} from '@linagora/linid-im-front-corelib';
+import { appConfig } from 'src/boot/config';
+import type { FormField } from 'src/types/form';
+import type { OrganizationalUnitForm } from 'src/types/organizationalUnits';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/create',
-        name: 'OrganizationalUnitCreate',
-        component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Build the declarative field configuration for the organizational unit creation form. The parent identifier is
+ * supplied by the navigation context and is therefore not part of the editable fields exposed here.
+ * @param i18nScope - I18n scope used for both labels (`fields.<name>`) and validator error messages (`validation.<rule>`).
+ * @returns The ordered list of fields rendered by the creation form.
+ */
+export function useOrganizationalUnitCreationConfig(i18nScope: string) {
+  const { t } = useScopedI18n(i18nScope);
+  const { required } = useQuasarFieldValidation(i18nScope);
+
+  const creationFields: FormField<OrganizationalUnitForm>[] = [
+    {
+      name: 'name',
+      label: t('fields.name'),
+      type: 'text',
+      rules: [required],
+    },
+    {
+      name: 'type',
+      label: t('fields.type'),
+      type: 'select',
+      rules: [required],
+      options: appConfig.organizationalUnitTypes,
+    },
+  ];
+
+  return { creationFields };
+}

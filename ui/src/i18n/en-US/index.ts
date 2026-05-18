@@ -496,4 +496,27 @@ export default {
     clearSuspensionButton: 'Immediate reactivation',
     modifySuspensionButton: 'Adjust suspension settings',
   },
+  OrganizationalUnitCreationPage: {
+    title: 'Create a new organizational unit',
+    fields: {
+      parent: 'Parent organizational unit',
+      name: 'Name',
+      type: 'Type',
+    },
+    validation: {
+      required: 'This field is required',
+    },
+    ButtonsCard: {
+      cancel: 'Cancel',
+      confirm: 'Create',
+      confirmLoading: 'Creating...',
+    },
+    success: 'Organizational unit successfully created',
+    errors: {
+      missingParent: 'A parent organizational unit is required.',
+      validation: 'Invalid data. Please check the form.',
+      generic:
+        'Unable to create the organizational unit. Please try again later.',
+    },
+  },
 };

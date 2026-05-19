@@ -26,6 +26,8 @@
 
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.github.linagora.linid.im.api.model.common.PeriodDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -97,4 +99,36 @@ public class OrganizationalUnitViewDTO {
      */
     @Schema(description = "List of parent organizational units linked to the current organizational unit")
     private List<OrganizationalUnitRelationViewDTO> parents;
+
+    /**
+     * Time range during which the organizational unit is suspended.
+     */
+    @Schema(description = "Time range during which the organizational unit is suspended")
+    private PeriodDTO suspensionPeriod;
+
+    /**
+     * High-level reason code explaining the current suspension status.
+     */
+    @Schema(description = "High-level reason code", example = "REORGANIZATION")
+    private String statusReason;
+
+    /**
+     * More detailed classification of the suspension reason.
+     */
+    @Schema(description = "Detailed classification of the suspension reason", example = "MERGER")
+    private String statusSubreason;
+
+    /**
+     * Free-text comment providing additional context about the status change.
+     */
+    @Schema(description = "Free-text comment", example = "Suspended pending department merger")
+    private String statusComment;
+
+    /**
+     * Whether the organizational unit is currently suspended (the current instant falls within the
+     * suspension period, including open-ended suspensions).
+     */
+    @JsonProperty("isSuspended")
+    @Schema(description = "Whether the organizational unit is currently suspended", example = "false")
+    private boolean suspended;
 }

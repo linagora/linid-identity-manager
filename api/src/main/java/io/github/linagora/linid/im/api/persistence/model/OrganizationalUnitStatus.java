@@ -26,11 +26,7 @@
 
 package io.github.linagora.linid.im.api.persistence.model;
 
-import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRelationViewDTO;
 import io.github.zorin95670.predicate.FilterType;
-import io.github.zorin95670.processor.annotation.QueryFilter;
-import io.github.zorin95670.processor.annotation.QueryFilterField;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import jakarta.persistence.Column;
@@ -40,112 +36,77 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.Type;
 
 /**
- * Represents an organizational unit within the system.
- * <p>An organizational unit is a logical business entity used to structure
- * departments, divisions, teams, subsidiaries, or any hierarchical grouping
- * within an organization.
+ * JPA entity representing the suspension status lifecycle of an organizational unit.
+ *
+ * <p>Maps to the {@code organizational_unit_status} table. There is a one-to-one relationship with
+ * {@link OrganizationalUnit} enforced by the unique index on {@code oun_id}. A status row is
+ * automatically created by a database trigger whenever an organizational unit is inserted, so this
+ * entity is only ever updated, never inserted, by the application layer. Inherits audit fields from
+ * {@link AbstractEntity}.</p>
  */
 @Entity
-@Immutable
-@Table(name = "organizational_units_view")
+@Table(name = "organizational_unit_status")
+@DynamicInsert
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@QueryFilter
-public class OrganizationalUnitView extends AbstractViewEntity {
+public class OrganizationalUnitStatus extends AbstractEntity {
 
     /**
-     * Unique identifier of the organizational unit, auto-generated as UUID.
+     * Unique identifier of the organizational unit status record, auto-generated as UUID.
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "oun_id")
+    @Column(name = "ous_id")
     @FilterType(type = UUID.class)
-    @QueryFilterField(type = UUID.class, description = "Organizational unit unique identifier.")
     private UUID id;
 
     /**
-     * Human-readable name of the organizational unit.
+     * Identifier of the owning organizational unit.
      */
-    @Column(name = "name", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Organizational unit name.")
-    private String name;
+    @Column(name = "oun_id", nullable = false)
+    @FilterType(type = UUID.class)
+    private UUID organizationalUnitId;
 
     /**
-     * Type of the organizational unit.
-     * <p>
-     * This value categorizes the unit according to business rules,
-     * such as {@code DEPARTMENT}, {@code DIVISION}, {@code TEAM},
-     * or other domain-specific classifications.</p>
-     */
-    @Column(name = "type", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Organizational unit type.")
-    private String type;
-
-    /**
-     * List of parent organizational units linked to this organizational unit.
-     *
-     * <p>This field represents the hierarchy path of the current organizational unit.
-     * Each entry describes a direct parent organizational unit.</p>
-     */
-    @Type(JsonType.class)
-    @Column(name = "parents", nullable = false, columnDefinition = "jsonb")
-    private List<OrganizationalUnitRelationViewDTO> parents;
-
-    /**
-     * Time range during which the organizational unit is suspended. {@code null} when no suspension
-     * is configured.
+     * Time range during which the organizational unit is suspended. Stored as {@code TSTZRANGE}.
+     * {@code null} when no suspension is configured.
      */
     @Type(PostgreSQLRangeType.class)
     @Column(name = "suspension_period", columnDefinition = "tstzrange")
     private Range<ZonedDateTime> suspensionPeriod;
 
     /**
-     * High-level reason code explaining the current suspension status. {@code null} when not
-     * provided.
+     * High-level reason code explaining the current status. {@code null} when not provided.
      */
     @Column(name = "status_reason")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Status reason code")
     private String statusReason;
 
     /**
-     * More detailed classification of the suspension reason. {@code null} when not provided.
+     * More detailed classification of the status reason. {@code null} when not provided.
      */
     @Column(name = "status_subreason")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Status sub-reason code")
     private String statusSubreason;
 
     /**
-     * Free-text comment providing additional context about the status change. {@code null} when not
-     * provided.
+     * Free-text comment providing additional context about the status change.
+     * {@code null} when not provided.
      */
     @Column(name = "status_comment")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text status comment")
     private String statusComment;
-
-    /**
-     * Computed flag indicating whether the organizational unit is currently suspended.
-     */
-    @Column(name = "is_suspended", nullable = false)
-    @FilterType(type = Boolean.class)
-    @QueryFilterField(type = Boolean.class, description = "Whether the organizational unit is currently suspended")
-    private boolean suspended;
 }

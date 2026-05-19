@@ -31,5 +31,9 @@
   "error.organizational.unit.root.update": "L’unité organisationnelle « root » ne peut pas être mise à jour.",
   "error.organizational.unit.root.not_found": "L’unité organisationnelle « root » est introuvable",
   "error.organizational.unit.not_found": "Unité organisationnelle introuvable: {id}",
-  "error.organizational.unit.already_exists": "Une unité organisationnelle existe déjà avec le nom '{name}' et le type '{type}'"
+  "error.organizational.unit.already_exists": "Une unité organisationnelle existe déjà avec le nom '{name}' et le type '{type}'",
+  "error.organizational.unit.status.not_found": "Statut de l’unité organisationnelle introuvable pour l’unité organisationnelle : {id}",
+  "error.organizational.unit.status.suspension_period_invalid": "Le statut de l’unité organisationnelle {id} ne peut pas être mis à jour : le début de la période de suspension ({start}) doit être antérieur ou égal à la fin ({end}).",
+  "error.organizational.unit.status.suspension_start_in_past": "Le statut de l’unité organisationnelle {id} ne peut pas être mis à jour : le début de la période de suspension ({start}) doit être supérieur ou égal à aujourd’hui.",
+  "error.organizational.unit.status.suspension_end_in_past": "Le statut de l’unité organisationnelle {id} ne peut pas être mis à jour : la fin de la période de suspension ({end}) doit être supérieure ou égale à aujourd’hui."
 }

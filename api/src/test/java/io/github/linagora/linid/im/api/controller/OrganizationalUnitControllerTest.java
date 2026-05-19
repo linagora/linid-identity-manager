@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
@@ -120,6 +121,18 @@ class OrganizationalUnitControllerTest {
         when(service.update(any(), any(), any())).thenReturn(new OrganizationalUnit());
 
         var response = controller.update(userPrincipal, UUID.randomUUID(), new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test"));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should update organizational unit status")
+    void testUpdateStatus() {
+        when(service.updateStatus(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+
+        var record = new OrganizationalUnitStatusRecord(null, null, null, null);
+        var response = controller.updateStatus(userPrincipal, UUID.randomUUID(), record);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

@@ -29,13 +29,18 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRelationMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitStatusValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -87,6 +92,22 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Mapper used to convert organizational unit relation entities and DTOs.
      */
     private final OrganizationalUnitRelationMapper relationMapper;
+
+    /**
+     * Repository used to manage {@link OrganizationalUnitStatus} persistence operations.
+     */
+    private final OrganizationalUnitStatusRepository organizationalUnitStatusRepository;
+
+    /**
+     * Mapper applying status updates on organizational unit status entities.
+     */
+    private final OrganizationalUnitStatusMapper organizationalUnitStatusMapper;
+
+    /**
+     * Validator enforcing the business rules applied when updating organizational unit status
+     * fields.
+     */
+    private final OrganizationalUnitStatusValidator organizationalUnitStatusValidator;
 
     /**
      * Cached root organizational unit instance.
@@ -249,5 +270,32 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         entity.setType(organizationalUnit.type());
 
         return organizationalUnitRepository.save(entity);
+    }
+
+    @Override
+    public OrganizationalUnitView updateStatus(final UserPrincipal userPrincipal,
+                                               final UUID id,
+                                               final OrganizationalUnitStatusRecord record) {
+        if (!organizationalUnitRepository.existsById(id)) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
+            );
+        }
+
+        organizationalUnitStatusValidator.validate(record, id);
+
+        OrganizationalUnitStatus status = organizationalUnitStatusRepository.findByOrganizationalUnitId(id)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.status.not_found",
+                    Map.of("id", id.toString()))
+            ));
+
+        OrganizationalUnitStatus updatedStatus =
+            organizationalUnitStatusMapper.toOrganizationalUnitStatus(status, record, userPrincipal);
+        organizationalUnitStatusRepository.saveAndFlush(updatedStatus);
+
+        return findViewById(userPrincipal, id);
     }
 }

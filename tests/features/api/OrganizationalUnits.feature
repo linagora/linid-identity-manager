@@ -31,6 +31,16 @@ Feature: Test API Organizational unit endpoints
   ## 603 Should return 400 when trying to update root organizational unit
   ## 604 Should return 400 when trying to update another organizational unit with same name and type
 
+  ################## Update status (PUT /organizational-units/{id}/status) #######
+  ## 701 Should auto-create a non-suspended status when the organizational unit is created
+  ## 702 Should set a future suspension period and expose it in retrieval endpoints
+  ## 703 Should accept an open-ended (permanent) future suspension
+  ## 704 Should return 400 when suspensionPeriod is missing
+  ## 705 Should return 400 when the suspension period start is after its end
+  ## 706 Should return 400 when the suspension period start is in the past
+  ## 707 Should return 400 when the suspension period end is in the past
+  ## 708 Should return 404 when updating the status of an unknown organizational unit
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -417,3 +427,234 @@ Feature: Test API Organizational unit endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou1_ID}}' with method 'DELETE'
     Then I expect status code is 204
+
+  #################################################################
+  ################## Update status (PUT /organizational-units/{id}/status) #######
+  #################################################################
+
+  Scenario: 701 - Should auto-create a non-suspended status when the organizational unit is created
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test1",
+        "type": "status-test1"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.suspensionPeriod}}' is empty
+    And  I expect '{{response.body.statusReason}}' is empty
+    And  I expect '{{response.body.isSuspended}}' is "false"
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 702 - Should set a future suspension period and expose it in retrieval endpoints
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test2",
+        "type": "status-test2"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": "2998-01-01T00:00:00Z",
+          "end": "2999-01-01T00:00:00Z"
+        },
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER",
+        "comment": "Suspended pending department merger"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.statusReason}}' is 'REORGANIZATION'
+    And  I expect '{{response.body.statusSubreason}}' is 'MERGER'
+    And  I expect '{{response.body.statusComment}}' is 'Suspended pending department merger'
+    And  I expect '{{response.body.isSuspended}}' is "false"
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.statusReason}}' is 'REORGANIZATION'
+    And  I expect '{{response.body.statusSubreason}}' is 'MERGER'
+    And  I expect '{{response.body.statusComment}}' is 'Suspended pending department merger'
+    And  I expect '{{response.body.suspensionPeriod.start}}' is not empty
+    And  I expect '{{response.body.suspensionPeriod.end}}' is not empty
+    And  I expect '{{response.body.isSuspended}}' is "false"
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 703 - Should accept an open-ended (permanent) future suspension
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test3",
+        "type": "status-test3"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": "2998-01-01T00:00:00Z",
+          "end": null
+        },
+        "reason": "INVESTIGATION"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.suspensionPeriod.start}}' is not empty
+    And  I expect '{{response.body.suspensionPeriod.end}}' is empty
+    And  I expect '{{response.body.isSuspended}}' is "false"
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 704 - Should return 400 when suspensionPeriod is missing
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test4",
+        "type": "status-test4"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "reason": "REORGANIZATION"
+      }
+      """
+    Then I expect status code is 400
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 705 - Should return 400 when the suspension period start is after its end
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test5",
+        "type": "status-test5"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": "2999-01-01T00:00:00Z",
+          "end": "2998-01-01T00:00:00Z"
+        }
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.status.suspension_period_invalid'
+    And  I expect '{{response.body.status}}' is '400'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 706 - Should return 400 when the suspension period start is in the past
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test6",
+        "type": "status-test6"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": "2020-01-01T00:00:00Z",
+          "end": "2999-01-01T00:00:00Z"
+        }
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.status.suspension_start_in_past'
+    And  I expect '{{response.body.status}}' is '400'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 707 - Should return 400 when the suspension period end is in the past
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test7",
+        "type": "status-test7"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": null,
+          "end": "2020-01-01T00:00:00Z"
+        }
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.status.suspension_end_in_past'
+    And  I expect '{{response.body.status}}' is '400'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 708 - Should return 404 when updating the status of an unknown organizational unit
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test8",
+        "type": "status-test8"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": "2998-01-01T00:00:00Z",
+          "end": "2999-01-01T00:00:00Z"
+        }
+      }
+      """
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.not_found'

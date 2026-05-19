@@ -184,7 +184,8 @@ public class AccountController {
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id,
         @Valid @RequestBody final AccountStatusRecord record) {
-        log.info("[{}] Received PUT /accounts/{}/status with {}", userPrincipal.getEmail(), id, record);
+        log.info("[{}] Received PUT request for account {} to update status with {}",
+            userPrincipal.getEmail(), id, record);
         var view = accountService.updateStatus(userPrincipal, id, record);
         return ResponseEntity.ok(accountMapper.toDTO(view));
     }
@@ -206,7 +207,7 @@ public class AccountController {
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id,
         @Valid @RequestBody final AccountActivationRecord record) {
-        log.info("[{}] Received PUT /accounts/{}/status/activation with {}",
+        log.info("[{}] Received PUT request for account {} to update activation with {}",
             userPrincipal.getEmail(), id, record);
         var view = accountService.updateActivation(userPrincipal, id, record);
         return ResponseEntity.ok(accountMapper.toDTO(view));

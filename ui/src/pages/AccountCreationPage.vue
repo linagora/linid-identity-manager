@@ -129,8 +129,8 @@ import {
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { useAccountCreationConfig } from 'src/composables/useAccountCreationConfig';
-import { useAccountMapper } from 'src/mappers/accountMapper';
-import { useCommonMapper } from 'src/mappers/commonMapper';
+import { useAccountMapper } from 'src/composables/useAccountMapper';
+import { useCommonMapper } from 'src/composables/useCommonMapper';
 import { createAccount } from 'src/services/AccountService';
 import type { AccountForm } from 'src/types/accounts';
 import type { DatePickerUiProps } from 'src/types/form';

@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.controller;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
@@ -169,6 +170,32 @@ public class OrganizationalUnitController {
         log.info("[{}] Received PUT request for organizational unit {} with {}", userPrincipal.getEmail(), id, record);
         var entity = service.update(userPrincipal, id, record);
         return ResponseEntity.ok(mapper.toDTO(entity));
+    }
+
+    /**
+     * Updates the suspension status of an organizational unit (upsert behaviour).
+     *
+     * <p>This is the single entry point for managing suspension. A {@code null}
+     * {@code suspensionPeriod} removes the suspension.</p>
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param id            the organizational unit identifier
+     * @param record        the requested suspension status fields
+     * @return the updated organizational unit including its embedded status
+     */
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Update the suspension status of an organizational unit")
+    @ApiResponse(responseCode = "200", description = "Status successfully updated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Organizational unit not found", content = @Content)
+    public ResponseEntity<OrganizationalUnitViewDTO> updateStatus(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final OrganizationalUnitStatusRecord record) {
+        log.info("[{}] Received PUT request for organizational unit {} to update status with {}",
+            userPrincipal.getEmail(), id, record);
+        var view = service.updateStatus(userPrincipal, id, record);
+        return ResponseEntity.ok(mapper.toDTO(view));
     }
 
     /**

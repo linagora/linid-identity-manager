@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
@@ -110,5 +111,24 @@ public interface OrganizationalUnitService {
         UserPrincipal userPrincipal,
         UUID id,
         OrganizationalUnitRecord record
+    );
+
+    /**
+     * Updates the suspension status of an organizational unit (upsert behaviour over the single
+     * status row that exists per unit).
+     *
+     * <p>A {@code null} {@code suspensionPeriod} on the record removes the suspension: the status
+     * row is kept but its suspension period and metadata (reason, sub-reason, comment) are
+     * cleared.</p>
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param id            the unique identifier of the organizational unit
+     * @param record        the requested suspension status fields
+     * @return the updated {@link OrganizationalUnitView} including the embedded status
+     */
+    OrganizationalUnitView updateStatus(
+        UserPrincipal userPrincipal,
+        UUID id,
+        OrganizationalUnitStatusRecord record
     );
 }

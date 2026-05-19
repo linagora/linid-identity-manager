@@ -26,20 +26,27 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRelationMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitStatusValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
+import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,6 +91,15 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitRelationMapper relationMapper;
+
+    @Mock
+    private OrganizationalUnitStatusRepository organizationalUnitStatusRepository;
+
+    @Mock
+    private OrganizationalUnitStatusMapper organizationalUnitStatusMapper;
+
+    @Mock
+    private OrganizationalUnitStatusValidator organizationalUnitStatusValidator;
 
     @InjectMocks
     private OrganizationalUnitServiceImpl service;
@@ -445,5 +461,100 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(updated, result);
 
         verify(organizationalUnitRepository, times(1)).save(entity);
+    }
+
+    @Test
+    @DisplayName("should throw 404 when updating status of an unknown organizational unit")
+    void testUpdateStatus_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var uuid = UUID.randomUUID();
+        var record = new OrganizationalUnitStatusRecord(
+            new PeriodRecord(OffsetDateTime.now().plusDays(1), OffsetDateTime.now().plusDays(5)),
+            "REORGANIZATION", "MERGER", "comment");
+
+        when(organizationalUnitRepository.existsById(uuid)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.updateStatus(userPrincipal, uuid, record));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+        assertEquals(uuid.toString(), exception.getError().context().get("id"));
+        verify(organizationalUnitStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("should throw 404 when the organizational unit has no status row")
+    void testUpdateStatus_shouldThrowExceptionOnMissingStatusRow() {
+        var uuid = UUID.randomUUID();
+        var record = new OrganizationalUnitStatusRecord(
+            new PeriodRecord(OffsetDateTime.now().plusDays(1), OffsetDateTime.now().plusDays(5)),
+            "REORGANIZATION", "MERGER", "comment");
+
+        when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
+        when(organizationalUnitStatusRepository.findByOrganizationalUnitId(uuid)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.updateStatus(userPrincipal, uuid, record));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.status.not_found", exception.getError().key());
+        assertEquals(uuid.toString(), exception.getError().context().get("id"));
+        verify(organizationalUnitStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("should update suspension status and return the refreshed view")
+    void testUpdateStatus_shouldUpdateAndReturnView() {
+        var uuid = UUID.randomUUID();
+        var record = new OrganizationalUnitStatusRecord(
+            new PeriodRecord(OffsetDateTime.now().plusDays(1), OffsetDateTime.now().plusDays(5)),
+            "REORGANIZATION", "MERGER", "comment");
+        var status = OrganizationalUnitStatus.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(uuid)
+            .build();
+        var updatedStatus = OrganizationalUnitStatus.builder()
+            .id(status.getId())
+            .organizationalUnitId(uuid)
+            .build();
+        var view = new OrganizationalUnitView();
+
+        when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
+        when(organizationalUnitStatusRepository.findByOrganizationalUnitId(uuid)).thenReturn(Optional.of(status));
+        when(organizationalUnitStatusMapper.toOrganizationalUnitStatus(status, record, userPrincipal))
+            .thenReturn(updatedStatus);
+        when(organizationalUnitViewRepository.findById(uuid)).thenReturn(Optional.of(view));
+
+        var result = service.updateStatus(userPrincipal, uuid, record);
+
+        assertEquals(view, result);
+        verify(organizationalUnitStatusValidator).validate(record, uuid);
+        verify(organizationalUnitStatusRepository).saveAndFlush(updatedStatus);
+    }
+
+    @Test
+    @DisplayName("should pass the request record straight to the mapper and validator")
+    void testUpdateStatus_shouldDelegateRecordUnchanged() {
+        var uuid = UUID.randomUUID();
+        var record = new OrganizationalUnitStatusRecord(
+            new PeriodRecord(OffsetDateTime.now().plusDays(2), null),
+            "INVESTIGATION", null, null);
+        var status = OrganizationalUnitStatus.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(uuid)
+            .build();
+        var view = new OrganizationalUnitView();
+
+        when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
+        when(organizationalUnitStatusRepository.findByOrganizationalUnitId(uuid)).thenReturn(Optional.of(status));
+        when(organizationalUnitStatusMapper.toOrganizationalUnitStatus(status, record, userPrincipal))
+            .thenReturn(status);
+        when(organizationalUnitViewRepository.findById(uuid)).thenReturn(Optional.of(view));
+
+        var result = service.updateStatus(userPrincipal, uuid, record);
+
+        assertEquals(view, result);
+        verify(organizationalUnitStatusValidator).validate(record, uuid);
+        verify(organizationalUnitStatusMapper).toOrganizationalUnitStatus(status, record, userPrincipal);
     }
 }

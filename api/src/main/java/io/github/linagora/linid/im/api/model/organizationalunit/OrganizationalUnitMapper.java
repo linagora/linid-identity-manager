@@ -70,6 +70,11 @@ public interface OrganizationalUnitMapper {
      * Converts an {@link OrganizationalUnitView} entity into an
      * {@link OrganizationalUnitViewDTO}.
      *
+     * <p>The suspension fields are mapped flat onto the DTO (mirroring
+     * {@link io.github.linagora.linid.im.api.model.account.AccountViewDTO}); the
+     * {@code suspensionPeriod} range is converted to a
+     * {@link io.github.linagora.linid.im.api.model.common.PeriodDTO} via {@link CommonMapper}.</p>
+     *
      * @param organizationalUnit the source entity
      * @return the mapped DTO
      */

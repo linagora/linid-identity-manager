@@ -25,7 +25,7 @@
  */
 
 import { shallowMount } from '@vue/test-utils';
-import AccountNotActivatedInfoText from 'src/components/AccountNotActivatedInfoText.vue';
+import AccountNotActivatedInfoText from 'components/text/AccountNotActivatedInfoText.vue';
 import { describe, expect, it, vi } from 'vitest';
 
 const tMock = vi.fn((key) => key);

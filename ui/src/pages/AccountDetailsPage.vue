@@ -165,7 +165,7 @@ import AccountDeactivatedInfoText from 'src/components/text/AccountDeactivatedIn
 import AccountNotActivatedInfoText from 'src/components/text/AccountNotActivatedInfoText.vue';
 import AccountSuspendedInfoText from 'src/components/text/AccountSuspendedInfoText.vue';
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
-import { useAccountMapper } from 'src/mappers/accountMapper';
+import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { getAccountById, updateStatus } from 'src/services/AccountService';
 import type { AccountStatusForm } from 'src/types/accounts';
 import { type Account, type AccountStatus } from 'src/types/accounts';

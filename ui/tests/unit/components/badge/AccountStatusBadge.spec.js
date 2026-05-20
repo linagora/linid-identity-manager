@@ -25,7 +25,7 @@
  */
 
 import { shallowMount } from '@vue/test-utils';
-import AccountStatusBadge from 'src/components/AccountStatusBadge.vue';
+import AccountStatusBadge from 'components/badge/AccountStatusBadge.vue';
 import { describe, expect, it, vi } from 'vitest';
 
 const tMock = vi.fn((key) => key);

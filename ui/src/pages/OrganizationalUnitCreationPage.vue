@@ -112,9 +112,9 @@ import {
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { useCommonMapper } from 'src/composables/useCommonMapper';
 import { useOrganizationalUnitCreationConfig } from 'src/composables/useOrganizationalUnitCreationConfig';
-import { useCommonMapper } from 'src/mappers/commonMapper';
-import { useOrganizationalUnitMapper } from 'src/mappers/organizationalUnitMapper';
+import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import {
   createOrganizationalUnit,
   getOrganizationalUnitById,

@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2026 Linagora
+ * Copyright (C) 2020-2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
  * any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
  * LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
  * which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
- * of the interface window, the display of the "You are using the Open Source and free version of LinID™, powered by
- * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!" infobox and in the e-mails
+ * of the interface window, the display of the “You are using the Open Source and free version of LinID™, powered by
+ * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!” infobox and in the e-mails
  * sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
  * as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
  * and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
@@ -24,25 +24,30 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount } from '@vue/test-utils';
-import AccountNotActivatedInfoText from 'src/components/AccountNotActivatedInfoText.vue';
-import { describe, expect, it, vi } from 'vitest';
+package io.github.linagora.linid.im.api.persistence.repository;
 
-const tMock = vi.fn((key) => key);
-const uiMock = vi.fn(() => ({}));
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
-  useScopedI18n: () => ({ t: tMock }),
-  useUiDesign: () => ({ ui: uiMock }),
-}));
+import java.util.Optional;
+import java.util.UUID;
 
-describe('AccountNotActivatedInfoText', () => {
-  it('builds uiProps from the ui design system', () => {
-    const wrapper = shallowMount(AccountNotActivatedInfoText);
-    expect(uiMock).toHaveBeenCalledWith(
-      'account-not-activated-info-text',
-      'q-icon'
-    );
-    expect(wrapper.vm.uiProps.icon).toBeDefined();
-  });
-});
+/**
+ * Repository for managing {@link OrganizationalUnit} entities.
+ * <p>Extends {@link JpaRepository} for standard CRUD operations and
+ * {@link JpaSpecificationExecutor} for dynamic criteria-based queries.
+ */
+public interface OrganizationalUnitRepository extends JpaRepository<OrganizationalUnit, UUID>,
+    JpaSpecificationExecutor<OrganizationalUnit> {
+
+    /**
+     * Finds an organizational unit by its name and type.
+     *
+     * @param name the organizational unit name
+     * @param type the organizational unit type
+     * @return an {@link Optional} containing the matching organizational unit,
+     * or empty if no match is found
+     */
+    Optional<OrganizationalUnit> findByNameAndType(String name, String type);
+}

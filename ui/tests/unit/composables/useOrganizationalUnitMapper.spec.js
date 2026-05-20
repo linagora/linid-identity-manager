@@ -24,60 +24,32 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount } from '@vue/test-utils';
-import AccountStatusBadge from 'src/components/AccountStatusBadge.vue';
-import { describe, expect, it, vi } from 'vitest';
+import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
+import { describe, expect, it } from 'vitest';
 
-const tMock = vi.fn((key) => key);
-const uiMock = vi.fn(() => ({}));
+const PARENT_UUID = '00000000-0000-4000-8000-000000000000';
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
-  useScopedI18n: () => ({ t: tMock }),
-  useUiDesign: () => ({ ui: uiMock }),
-}));
+describe('Test mapper: organizationalUnitMapper', () => {
+  describe('Test function: toOrganizationalUnitRecord', () => {
+    it('should attach the parent identifier to the form values', () => {
+      const { toOrganizationalUnitRecord } = useOrganizationalUnitMapper();
 
-describe('Test component: AccountStatusBadge', () => {
-  describe('Test computed: uiProps', () => {
-    it('builds uiProps from the ui design system for ACTIVE', () => {
-      const wrapper = shallowMount(AccountStatusBadge, {
-        props: { status: 'ACTIVE' },
+      const form = { name: 'Engineering', type: 'DEPARTMENT' };
+
+      expect(toOrganizationalUnitRecord(form, PARENT_UUID)).toEqual({
+        parent: PARENT_UUID,
+        name: 'Engineering',
+        type: 'DEPARTMENT',
       });
-      expect(uiMock).toHaveBeenCalledWith(
-        'account-status-badge.active',
-        'q-badge'
-      );
-      expect(wrapper.vm.uiProps.badge).toBeDefined();
     });
 
-    it('builds uiProps from the ui design system for INACTIVE', () => {
-      const wrapper = shallowMount(AccountStatusBadge, {
-        props: { status: 'INACTIVE' },
-      });
-      expect(uiMock).toHaveBeenCalledWith(
-        'account-status-badge.inactive',
-        'q-badge'
-      );
-      expect(wrapper.vm.uiProps.badge).toBeDefined();
-    });
-  });
+    it('should not mutate the source form', () => {
+      const { toOrganizationalUnitRecord } = useOrganizationalUnitMapper();
 
-  describe('Test computed: statusKey', () => {
-    it('should return the status key in lowercase', () => {
-      const wrapper = shallowMount(AccountStatusBadge, {
-        props: { status: 'ACTIVE' },
-      });
-      expect(wrapper.vm.statusKey).toBe('active');
-    });
+      const form = { name: 'Engineering', type: 'DEPARTMENT' };
+      toOrganizationalUnitRecord(form, PARENT_UUID);
 
-    it('should update when prop changes', async () => {
-      const wrapper = shallowMount(AccountStatusBadge, {
-        props: { status: 'ACTIVE' },
-      });
-      expect(wrapper.vm.statusKey).toBe('active');
-
-      await wrapper.setProps({ status: 'INACTIVE' });
-
-      expect(wrapper.vm.statusKey).toBe('inactive');
+      expect(form).toEqual({ name: 'Engineering', type: 'DEPARTMENT' });
     });
   });
 });

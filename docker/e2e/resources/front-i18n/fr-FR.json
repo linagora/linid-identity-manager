@@ -172,5 +172,27 @@
     "contentWithEndDate": "Ce compte est suspendu depuis le {date} jusqu'au {endDate}.",
     "clearSuspensionButton": "Réactivation immédiate",
     "modifySuspensionButton": "Modifier les paramètres de suspension"
+  },
+  "OrganizationalUnitCreationPage": {
+    "title": "Créer une nouvelle unité organisationnelle",
+    "fields": {
+      "parent": "Unité organisationnelle parente",
+      "name": "Nom",
+      "type": "Type"
+    },
+    "validation": {
+      "required": "Ce champ est requis"
+    },
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Créer",
+      "confirmLoading": "Création..."
+    },
+    "success": "Unité organisationnelle créée avec succès",
+    "errors": {
+      "missingParent": "Une unité organisationnelle parente est requise.",
+      "validation": "Données invalides. Veuillez vérifier le formulaire.",
+      "generic": "Impossible de créer l'unité organisationnelle. Veuillez réessayer plus tard."
+    }
   }
 }

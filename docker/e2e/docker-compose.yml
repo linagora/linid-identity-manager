@@ -82,10 +82,10 @@ services:
     entrypoint: >
       sh -c "
       echo 'Running init script...' &&
-      psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_ADMIN_USER} -d ${DATABASE_NAME} -f /scripts/init_accounts_and_status.sql
+      psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_ADMIN_USER} -d ${DATABASE_NAME} -f /scripts/init_data.sql
       "
     volumes:
-      - ./resources/init_accounts_and_status.sql:/scripts/init_accounts_and_status.sql:ro
+      - ./resources/init_data.sql:/scripts/init_data.sql:ro
 
   ui:
     image: linid-identity-manager-ui
@@ -99,6 +99,7 @@ services:
       - ./resources/selfsigned.crt:/etc/nginx/certs/selfsigned.crt:ro
       - ./resources/selfsigned.key:/etc/nginx/certs/selfsigned.key:ro
       - ./resources/design.json:/usr/share/nginx/html/design.json:ro
+      - ./resources/config.json:/usr/share/nginx/html/config.json:ro
       - ./resources/theme-style.css:/usr/share/nginx/html/theme-style.css:ro
       - ./resources/i18n.json:/usr/share/nginx/html/i18n.json:ro
       - ./resources/front-i18n/en-US.json:/usr/share/nginx/html/i18n/en-US.json:ro

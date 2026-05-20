@@ -30,15 +30,31 @@ import {
   getI18nInstance,
 } from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '@quasar/app-vite/wrappers';
+import type { AppConfig } from 'src/types/appConfig';
 import { Composer } from 'vue-i18n';
+
+/**
+ * Runtime application configuration loaded from `public/config.json` during
+ * boot. Undefined until the boot file has resolved.
+ */
+export let appConfig: AppConfig;
 
 /**
  * Application configuration boot file.
  *
- * This boot file is responsible for registering navigation menu items into
- * the UI store.
+ * Fetches the runtime configuration from `/config.json`, then registers
+ * navigation menu items into the UI store.
+ * @throws {Error} When the config.json file cannot be fetched.
  */
-export default defineBoot((): void => {
+export default defineBoot(async (): Promise<void> => {
+  const response = await fetch('/config.json');
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch app config');
+  }
+
+  appConfig = (await response.json()) as AppConfig;
+
   const uiStore = useLinidUiStore();
   const { t } = getI18nInstance().global as Composer;
 

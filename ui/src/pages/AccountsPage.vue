@@ -129,8 +129,8 @@ import {
   fieldsSearch,
 } from 'assets/accounts/AccountsFilters';
 import axios from 'axios';
+import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { useAccountsColumns } from 'src/composables/useAccountsColumns';
-import { useAccountMapper } from 'src/mappers/accountMapper';
 import { getAccounts } from 'src/services/AccountService';
 import type { Account } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';

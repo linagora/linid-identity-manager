@@ -79,7 +79,7 @@ vi.mock('src/services/AccountService', () => ({
   getAccounts: vi.fn(),
 }));
 
-vi.mock('src/mappers/accountMapper', () => ({
+vi.mock('src/composables/useAccountMapper', () => ({
   useAccountMapper: () => ({
     toAccountQueryFilterDTO: vi.fn((filters) => filters),
     toAccountList: vi.fn((list) => list),

@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from 'src/mappers/commonMapper';
+import { useCommonMapper } from 'src/composables/useCommonMapper';
 import type {
   Account,
   AccountDTO,

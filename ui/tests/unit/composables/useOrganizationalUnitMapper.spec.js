@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { useOrganizationalUnitMapper } from 'src/mappers/organizationalUnitMapper';
+import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import { describe, expect, it } from 'vitest';
 
 const PARENT_UUID = '00000000-0000-4000-8000-000000000000';

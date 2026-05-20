@@ -67,7 +67,7 @@ import type {
   LinidQIconProps,
 } from '@linagora/linid-im-front-corelib';
 import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/mappers/commonMapper';
+import { useCommonMapper } from 'src/composables/useCommonMapper';
 import type {
   AccountBannerProps,
   AccountDeactivatedWarningBannerOutputs,

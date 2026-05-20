@@ -24,14 +24,17 @@
  * LinID Identity Manager software.
  */
 
+import type { TreeNode } from '@linagora/linid-im-front-corelib';
 import type {
+  OrganizationalUnitDTO,
   OrganizationalUnitForm,
   OrganizationalUnitRecord,
+  OrganizationalUnitRelationDTO,
 } from 'src/types/organizationalUnits';
 
 /**
- * Mapper for organizational-unit-related data transformations.
- * @returns Functions to convert form values to API records.
+ * Composable providing utility functions to work with organizational units.
+ * @returns An object containing the mapping functions for organizational units.
  */
 export function useOrganizationalUnitMapper() {
   /**
@@ -52,7 +55,80 @@ export function useOrganizationalUnitMapper() {
     };
   };
 
+  /**
+   * Converts an organizational unit DTO into a tree node.
+   * @param organizationalUnitRelation The parent relation of the organizational unit.
+   * @param organizationalUnitDTO The organizational unit data transfer object to convert.
+   * @param childrenNodes The child nodes to attach to the resulting tree node.
+   * @returns A tree node representing the organizational unit.
+   */
+  function toOrganizationalUnitNode(
+    organizationalUnitRelation: OrganizationalUnitRelationDTO | null,
+    organizationalUnitDTO: OrganizationalUnitDTO,
+    childrenNodes: TreeNode<OrganizationalUnitDTO>[]
+  ): TreeNode<OrganizationalUnitDTO> {
+    return {
+      key: organizationalUnitRelation?.id || organizationalUnitDTO.id,
+      type: organizationalUnitDTO.type,
+      nodes: childrenNodes,
+      extraActions: [],
+      value: organizationalUnitDTO,
+    };
+  }
+
+  /**
+   * Recursively retrieves the child nodes of a given organizational unit to build the tree structure.
+   * @param parentId The identifier of the parent organizational unit for which to find the children.
+   * @param allOrganizationalUnit The list of all organizational units to search through for children.
+   * @returns An array of tree nodes representing the children of the specified parent organizational unit.
+   */
+  function getTreeNodeChildren(
+    parentId: string,
+    allOrganizationalUnit: OrganizationalUnitDTO[]
+  ): TreeNode<OrganizationalUnitDTO>[] {
+    const result: TreeNode<OrganizationalUnitDTO>[] = [];
+
+    for (const organizationalUnit of allOrganizationalUnit) {
+      const organizationalUnitRelation = organizationalUnit.parents?.find(
+        (parent) => parent.parent === parentId
+      );
+
+      if (!organizationalUnitRelation) {
+        continue;
+      }
+
+      result.push(
+        toOrganizationalUnitNode(
+          organizationalUnitRelation,
+          organizationalUnit,
+          getTreeNodeChildren(organizationalUnit.id, allOrganizationalUnit)
+        )
+      );
+    }
+    return result;
+  }
+
+  /**
+   * Retrieves the organizational unit tree.
+   * @param allOrganizationalUnits The list of all organizational units to build the tree from.
+   * @returns The organizational unit tree.
+   */
+  function toOrganizationalUnitsTree(
+    allOrganizationalUnits: OrganizationalUnitDTO[]
+  ): TreeNode<OrganizationalUnitDTO>[] {
+    return allOrganizationalUnits
+      .filter(({ parents }) => !parents?.some((p) => p.parent))
+      .map((root) =>
+        toOrganizationalUnitNode(
+          null,
+          root,
+          getTreeNodeChildren(root.id, allOrganizationalUnits)
+        )
+      );
+  }
+
   return {
     toOrganizationalUnitRecord,
+    toOrganizationalUnitsTree,
   };
 }

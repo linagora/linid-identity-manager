@@ -24,9 +24,13 @@
  * LinID Identity Manager software.
  */
 
+import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
+import { appConfig } from 'boot/config';
+import type { AccountDTO, AccountQueryFilterDTO } from 'src/types/accounts';
 import type {
   OrganizationalUnitDTO,
+  OrganizationalUnitFilterDTO,
   OrganizationalUnitRecord,
 } from 'src/types/organizationalUnits';
 
@@ -54,4 +58,64 @@ export async function createOrganizationalUnit(
   return api
     .post<OrganizationalUnitDTO>('/organizational-units', payload)
     .then((response) => response.data);
+}
+
+/**
+ * Retrieves Organizational Units list from the API.
+ * @param filters Object containing the filter criteria for querying Organizational Units.
+ * @param pagination Object containing pagination parameters.
+ * @returns Promise of paginated Organizational Units.
+ */
+export async function getOrganizationalUnits(
+  filters: OrganizationalUnitFilterDTO,
+  pagination: Pagination
+): Promise<Page<OrganizationalUnitDTO>> {
+  return api
+    .get<
+      Page<OrganizationalUnitDTO>
+    >(`/organizational-units`, { params: { ...filters, ...pagination } })
+    .then(({ data }) => data);
+}
+
+/**
+ * Fetches all organizational units from the API.
+ * @returns Promise resolving to the full list of organizational units.
+ */
+export async function getAllOrganizationalUnit(): Promise<
+  OrganizationalUnitDTO[]
+> {
+  const result: OrganizationalUnitDTO[] = [];
+  let page = 0;
+  let isLast = false;
+
+  while (!isLast) {
+    const response = await getOrganizationalUnits(
+      { name: null },
+      { page, size: appConfig.organizationalUnitQuerySize }
+    );
+    result.push(...response.content);
+    isLast = response.last;
+    page++;
+  }
+
+  return result;
+}
+
+/**
+ * Retrieves accounts list from the API by organizational unit id.
+ * @param id The unique identifier of the organizational unit for which to retrieve accounts.
+ * @param filters Object containing the filter criteria for querying accounts.
+ * @param pagination Object containing pagination parameters.
+ * @returns Promise of paginated accounts.
+ */
+export async function getAccountsByOrganizationalUnitId(
+  id: string,
+  filters: AccountQueryFilterDTO,
+  pagination: Pagination
+): Promise<Page<AccountDTO>> {
+  return api
+    .get<
+      Page<AccountDTO>
+    >(`/organizational-units/${id}/accounts`, { params: { ...filters, ...pagination } })
+    .then(({ data }) => data);
 }

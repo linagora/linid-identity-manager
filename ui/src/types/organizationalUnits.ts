@@ -77,6 +77,35 @@ export interface OrganizationalUnitDTO {
    * Organizational unit last update timestamp in ISO 8601 format.
    */
   updateDate: string;
+  /**
+   * List of parent organizational units, with their identifiers and relation IDs.
+   */
+  parents?: OrganizationalUnitRelationDTO[];
+}
+
+/**
+ * Defines the relationship between an organizational unit and its parent.
+ */
+export interface OrganizationalUnitRelationDTO {
+  /**
+   * Identifier of the relation.
+   */
+  id: string;
+  /**
+   * Identifier of the parent organizational unit.
+   */
+  parent: string;
+}
+
+/**
+ * Shape of the filter object sent to the backend when querying organizational units with filters.
+ */
+export interface OrganizationalUnitFilterDTO {
+  /**
+   * Name filter to apply when querying organizational units.
+   * If null, no filtering is applied on the name.
+   */
+  name: string | null;
 }
 
 /**

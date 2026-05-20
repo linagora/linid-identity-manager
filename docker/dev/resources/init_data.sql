@@ -12,6 +12,17 @@ WITH generated AS (SELECT gen_random_uuid() AS admin_id),
          SELECT gen_random_uuid(), 'user4', 'user4@example.com', 'user4_ln', 'user4_fn', admin_id FROM generated
          UNION ALL
          SELECT gen_random_uuid(), 'user5', 'user5@example.com', 'user5_ln', 'user5_fn', admin_id FROM generated
+         UNION ALL
+         SELECT gen_random_uuid(), 'user6', 'user6@example.com', 'user6_ln', 'user6_fn', admin_id FROM generated
+         UNION ALL
+         SELECT gen_random_uuid(), 'user7', 'user7@example.com', 'user7_ln', 'user7_fn', admin_id FROM generated
+         UNION ALL
+         SELECT gen_random_uuid(), 'user8', 'user8@example.com', 'user8_ln', 'user8_fn', admin_id FROM generated
+         UNION ALL
+         SELECT gen_random_uuid(), 'user9', 'user9@example.com', 'user9_ln', 'user9_fn', admin_id FROM generated
+         UNION ALL
+         SELECT gen_random_uuid(), 'user10', 'user10@example.com', 'user10_ln', 'user10_fn', admin_id FROM generated
+
      ),
      inserted_accounts AS (
          INSERT INTO accounts (act_id, external_id, email, lastname, firstname, payload, checksum, created_by, updated_by)
@@ -357,6 +368,33 @@ DO $$
                    admin_id
                );
 
+        -- Insert all users in OU Team Beta
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        SELECT (SELECT oun_id FROM organizational_units WHERE name = 'Team Beta'),
+               a.act_id,
+               admin_id,
+               admin_id
+        FROM accounts a
+        WHERE a.external_id IN (
+                                'user1', 'user2', 'user3', 'user4', 'user5',
+                                'user6', 'user7', 'user8', 'user9', 'user10'
+            );
+
+        -- Insert all lifecycle and dialog users in OU Team Alpha
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        SELECT (SELECT oun_id FROM organizational_units WHERE name = 'Team Alpha'),
+               a.act_id,
+               admin_id,
+               admin_id
+        FROM accounts a
+        WHERE a.external_id IN (
+                                'lifecycle-c1', 'lifecycle-c2', 'lifecycle-c3', 'lifecycle-c4', 'lifecycle-c5',
+                                'lifecycle-c6', 'lifecycle-c7', 'lifecycle-c8', 'lifecycle-c9', 'lifecycle-c10',
+                                'lifecycle-c11', 'lifecycle-c12',
+                                'dialog-d1', 'dialog-d2', 'dialog-d3', 'dialog-d4', 'dialog-d5', 'dialog-d6',
+                                'dialog-d7', 'dialog-d8', 'dialog-d9'
+            );
+
         -- user5 in OU Division B1
         INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
         VALUES (
@@ -365,4 +403,6 @@ DO $$
                    admin_id,
                    admin_id
                );
-    END $$;
+
+    END
+$$;

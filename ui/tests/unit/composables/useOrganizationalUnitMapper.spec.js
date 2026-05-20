@@ -52,4 +52,147 @@ describe('Test mapper: organizationalUnitMapper', () => {
       expect(form).toEqual({ name: 'Engineering', type: 'DEPARTMENT' });
     });
   });
+
+  describe('Test function: toOrganizationalUnitsTree', () => {
+    const rootOU = {
+      id: 'root-id',
+      name: 'Root',
+      type: 'root',
+      parents: [],
+    };
+
+    const childOU = {
+      id: 'child-id',
+      name: 'Engineering',
+      type: 'DEPARTMENT',
+      parents: [{ id: 'rel-1', parent: 'root-id' }],
+    };
+
+    const grandChildOU = {
+      id: 'grand-id',
+      name: 'Backend',
+      type: 'TEAM',
+      parents: [{ id: 'rel-2', parent: 'child-id' }],
+    };
+
+    const secondRootOU = {
+      id: 'root2-id',
+      name: 'Second Root',
+      type: 'root',
+      parents: [],
+    };
+
+    it('should return an empty array when no OUs are provided', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+      expect(toOrganizationalUnitsTree([])).toEqual([]);
+    });
+
+    it('should return a single root node with no children', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU]);
+
+      expect(result).toEqual([
+        {
+          key: 'root-id',
+          type: 'root',
+          nodes: [],
+          extraActions: [],
+          value: rootOU,
+        },
+      ]);
+    });
+
+    it('should use the OU id as key for root nodes', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU]);
+
+      expect(result[0].key).toBe('root-id');
+    });
+
+    it('should use the relation id as key for child nodes', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU, childOU]);
+
+      expect(result[0].nodes[0].key).toBe('rel-1');
+    });
+
+    it('should attach child nodes under the correct parent', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU, childOU]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].nodes).toHaveLength(1);
+      expect(result[0].nodes[0].value).toEqual(childOU);
+    });
+
+    it('should build a multi-level tree recursively', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU, childOU, grandChildOU]);
+
+      const grandChildNode = result[0].nodes[0].nodes[0];
+      expect(grandChildNode.key).toBe('rel-2');
+      expect(grandChildNode.value).toEqual(grandChildOU);
+      expect(grandChildNode.nodes).toEqual([]);
+    });
+
+    it('should return multiple root nodes when several OUs have no parent', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU, secondRootOU]);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].key).toBe('root-id');
+      expect(result[1].key).toBe('root2-id');
+    });
+
+    it('should attach multiple children under the same parent', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const childOU2 = {
+        id: 'child2-id',
+        name: 'Marketing',
+        type: 'DEPARTMENT',
+        parents: [{ id: 'rel-3', parent: 'root-id' }],
+      };
+
+      const result = toOrganizationalUnitsTree([rootOU, childOU, childOU2]);
+
+      expect(result[0].nodes).toHaveLength(2);
+      expect(result[0].nodes[0].key).toBe('rel-1');
+      expect(result[0].nodes[1].key).toBe('rel-3');
+    });
+
+    it('should set the correct type and empty extraActions on a child node', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU, childOU]);
+
+      const childNode = result[0].nodes[0];
+      expect(childNode.type).toBe('DEPARTMENT');
+      expect(childNode.extraActions).toEqual([]);
+    });
+
+    it('should set the correct type and empty extraActions on a root node', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU]);
+
+      expect(result[0].type).toBe('root');
+      expect(result[0].extraActions).toEqual([]);
+    });
+
+    it('should not include a node as root if it has at least one parent relation', () => {
+      const { toOrganizationalUnitsTree } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitsTree([rootOU, childOU]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].key).toBe('root-id');
+    });
+  });
 });

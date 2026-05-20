@@ -7,6 +7,9 @@
       "noCaps": true,
       "unelevated": true
     },
+    "q-splitter": {
+      "modelValue": 25
+    },
     "q-tabs": {
       "dense": false,
       "align": "left",
@@ -72,7 +75,11 @@
     "q-list": {},
     "q-item": {},
     "q-item-section": {},
-    "q-item-label": {}
+    "q-item-label": {},
+    "q-tree": {
+      "selectedColor": "primary",
+      "defaultExpandAll": true
+    }
   },
   "base-layout": {
     "header": {
@@ -98,6 +105,58 @@
       "create-button": {
         "q-btn": {
           "outline": false
+        }
+      },
+      "advanced-search-card": {
+        "q-icon": { "name": "search", "color": "red" },
+        "default-filters": {
+          "fields": {
+            "firstname": {
+              "EntityAttributeField": {
+                "firstname": {
+                  "q-input": {
+                    "debounce": 600
+                  }
+                }
+              }
+            },
+            "lastname": {
+              "EntityAttributeField": {
+                "lastname": {
+                  "q-input": {
+                    "debounce": 600
+                  }
+                }
+              }
+            },
+            "email": {
+              "EntityAttributeField": {
+                "email": {
+                  "q-input": {
+                    "debounce": 600
+                  }
+                }
+              }
+            },
+            "createdBy": {
+              "EntityAttributeField": {
+                "createdBy": {
+                  "q-input": {
+                    "debounce": 600
+                  }
+                }
+              }
+            },
+            "insertDate": {
+              "EntityAttributeField": {
+                "insertDate": {
+                  "q-input": {
+                    "debounce": 600
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "buttons-card": {

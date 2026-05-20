@@ -62,12 +62,18 @@ describe('Test composable: useOrganizationalUnitCreationConfig', () => {
   it('should scope translations and validators on the given i18n scope', () => {
     useOrganizationalUnitCreationConfig('OrganizationalUnitCreationPage');
 
-    expect(useScopedI18n).toHaveBeenCalledWith('OrganizationalUnitCreationPage');
-    expect(useQuasarFieldValidation).toHaveBeenCalledWith('OrganizationalUnitCreationPage');
+    expect(useScopedI18n).toHaveBeenCalledWith(
+      'OrganizationalUnitCreationPage'
+    );
+    expect(useQuasarFieldValidation).toHaveBeenCalledWith(
+      'OrganizationalUnitCreationPage'
+    );
   });
 
   it('should declare the two expected fields in order with translated labels', () => {
-    const { creationFields } = useOrganizationalUnitCreationConfig('OrganizationalUnitCreationPage');
+    const { creationFields } = useOrganizationalUnitCreationConfig(
+      'OrganizationalUnitCreationPage'
+    );
 
     expect(creationFields.map((field) => field.name)).toEqual(['name', 'type']);
     expect(creationFields.map((field) => field.label)).toEqual([
@@ -77,7 +83,9 @@ describe('Test composable: useOrganizationalUnitCreationConfig', () => {
   });
 
   it('should apply the required rule on the name text field', () => {
-    const { creationFields } = useOrganizationalUnitCreationConfig('OrganizationalUnitCreationPage');
+    const { creationFields } = useOrganizationalUnitCreationConfig(
+      'OrganizationalUnitCreationPage'
+    );
     const nameField = creationFields.find((field) => field.name === 'name');
 
     expect(nameField?.type).toBe('text');
@@ -85,7 +93,9 @@ describe('Test composable: useOrganizationalUnitCreationConfig', () => {
   });
 
   it('should source the type select options from the app config', () => {
-    const { creationFields } = useOrganizationalUnitCreationConfig('OrganizationalUnitCreationPage');
+    const { creationFields } = useOrganizationalUnitCreationConfig(
+      'OrganizationalUnitCreationPage'
+    );
     const typeField = creationFields.find((field) => field.name === 'type');
 
     expect(typeField?.type).toBe('select');

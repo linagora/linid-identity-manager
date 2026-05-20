@@ -7,6 +7,9 @@
       "noCaps": true,
       "unelevated": true
     },
+    "q-splitter": {
+      "modelValue": 25
+    },
     "q-tabs": {
       "dense": false,
       "align": "left",
@@ -271,6 +274,14 @@
     "modify-suspension-button": {
       "q-btn": {
         "color": "white"
+      }
+    }
+  },
+  "tree": {
+    "GenericTree": {
+      "q-tree": {
+        "selectedColor": "primary",
+        "defaultExpandAll": true
       }
     }
   }

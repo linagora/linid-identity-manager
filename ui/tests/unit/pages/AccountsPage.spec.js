@@ -25,11 +25,16 @@
  */
 
 import { flushPromises, shallowMount } from '@vue/test-utils';
-import { getAccounts } from 'src/services/AccountService';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getAccountsByOrganizationalUnitId } from 'src/services/OrganizationalUnitService';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { nextTick, ref } from 'vue';
 import AccountsPage from '../../../src/pages/AccountsPage.vue';
 
-const mockedGetAccounts = vi.mocked(getAccounts);
+const mockedGetAccountsByOrganizationalUnitId = vi.mocked(
+  getAccountsByOrganizationalUnitId
+);
+
+const mockSelectedOrganizationalUnitId = ref('');
 
 const mockRouter = {
   push: vi.fn(),
@@ -75,8 +80,19 @@ vi.mock('axios', () => ({
   },
 }));
 
-vi.mock('src/services/AccountService', () => ({
-  getAccounts: vi.fn(),
+vi.mock('src/services/OrganizationalUnitService', () => ({
+  getAccountsByOrganizationalUnitId: vi.fn(),
+}));
+
+vi.mock('src/stores/useOrganizationalUnitStore', () => ({
+  useOrganizationalUnitStore: () => ({
+    selectedOrganizationalUnitId: mockSelectedOrganizationalUnitId,
+  }),
+}));
+
+vi.mock('pinia', () => ({
+  storeToRefs: (store) => store,
+  defineStore: vi.fn(),
 }));
 
 vi.mock('src/composables/useAccountMapper', () => ({
@@ -101,89 +117,147 @@ vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
 }));
 
-const mockPage = (items = [], total = 0) => ({
+const mockPage = (items = [], total = 0, number = 0, size = 10) => ({
   content: items,
   totalElements: total,
+  number,
+  size,
 });
 
-describe('Test component: Accounts', () => {
+describe('Test component: AccountsPage', () => {
   let wrapper;
+
+  afterEach(() => {
+    wrapper?.unmount();
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockedGetAccounts.mockResolvedValue(mockPage());
+    mockSelectedOrganizationalUnitId.value = '';
+    mockedGetAccountsByOrganizationalUnitId.mockResolvedValue(mockPage());
     wrapper = shallowMount(AccountsPage);
   });
 
   describe('Test function: loadData', () => {
-    it('should call getAccounts and populate accounts', async () => {
+    it('should call getAccountsByOrganizationalUnitId with the given id and populate accounts', async () => {
       const accounts = [
         { id: '1', firstname: 'John', lastname: 'Doe', email: 'j@d.com' },
         { id: '2', firstname: 'Jane', lastname: 'Smith', email: 'j@s.com' },
       ];
-      mockedGetAccounts.mockResolvedValue(mockPage(accounts, 2));
+      mockedGetAccountsByOrganizationalUnitId.mockResolvedValue(
+        mockPage(accounts, 2)
+      );
 
-      await wrapper.vm.loadData();
+      await wrapper.vm.loadData('ou-uuid');
 
-      expect(getAccounts).toHaveBeenCalled();
+      expect(getAccountsByOrganizationalUnitId).toHaveBeenCalledWith(
+        'ou-uuid',
+        expect.anything(),
+        expect.anything()
+      );
       expect(wrapper.vm.accounts).toEqual(accounts);
       expect(wrapper.vm.pagination.rowsNumber).toBe(2);
     });
 
     it('should set isLoading to true during data load and false after', async () => {
-      await flushPromises();
-
-      expect(wrapper.vm.isLoading).toBe(false);
-
-      const loadPromise = wrapper.vm.loadData();
+      const loadPromise = wrapper.vm.loadData('ou-uuid');
       expect(wrapper.vm.isLoading).toBe(true);
 
       await loadPromise;
       expect(wrapper.vm.isLoading).toBe(false);
     });
 
+    it('should set isLoading to false even when an error occurs', async () => {
+      mockedGetAccountsByOrganizationalUnitId.mockRejectedValueOnce(
+        new Error('boom')
+      );
+
+      await wrapper.vm.loadData('ou-uuid');
+
+      expect(wrapper.vm.isLoading).toBe(false);
+    });
+
     it('should notify with notFound message when API returns 404', async () => {
-      mockedGetAccounts.mockRejectedValueOnce({
+      mockedGetAccountsByOrganizationalUnitId.mockRejectedValueOnce({
         isAxiosError: true,
         response: { status: 404 },
       });
 
-      await wrapper.vm.loadData();
+      await wrapper.vm.loadData('ou-uuid');
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
         message: 'errors.notFound',
       });
-      expect(wrapper.vm.isLoading).toBe(false);
     });
 
     it('should notify with generic message when a non-404 error occurs', async () => {
-      mockedGetAccounts.mockRejectedValueOnce(new Error('boom'));
+      mockedGetAccountsByOrganizationalUnitId.mockRejectedValueOnce(
+        new Error('boom')
+      );
 
-      await wrapper.vm.loadData();
+      await wrapper.vm.loadData('ou-uuid');
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
         message: 'errors.generic',
       });
-      expect(wrapper.vm.isLoading).toBe(false);
     });
 
-    it('should use current pagination when calling getAccounts', async () => {
+    it('should pass current pagination to getAccountsByOrganizationalUnitId', async () => {
       wrapper.vm.pagination.page = 2;
       wrapper.vm.pagination.rowsPerPage = 25;
-      await wrapper.vm.loadData();
 
-      expect(getAccounts).toHaveBeenLastCalledWith(
+      await wrapper.vm.loadData('ou-uuid');
+
+      expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
+        'ou-uuid',
         expect.anything(),
         expect.objectContaining({ page: 1, size: 25 })
       );
     });
   });
 
+  describe('Test watcher: selectedOrganizationalUnitId', () => {
+    it('should call loadData with the new OU id when selectedOrganizationalUnitId changes', async () => {
+      mockSelectedOrganizationalUnitId.value = 'new-ou-uuid';
+      await nextTick();
+      await flushPromises();
+
+      expect(getAccountsByOrganizationalUnitId).toHaveBeenCalledWith(
+        'new-ou-uuid',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should call loadData again with the latest OU id on each change', async () => {
+      mockSelectedOrganizationalUnitId.value = 'first-ou-uuid';
+      await nextTick();
+      await flushPromises();
+
+      mockSelectedOrganizationalUnitId.value = 'second-ou-uuid';
+      await nextTick();
+      await flushPromises();
+
+      expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
+        'second-ou-uuid',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
+    it('should not call loadData on mount when selectedOrganizationalUnitId is empty', async () => {
+      await flushPromises();
+
+      expect(getAccountsByOrganizationalUnitId).not.toHaveBeenCalled();
+    });
+  });
+
   describe('Test function: goToCreate', () => {
-    it('should navigate to creation page', () => {
+    it('should navigate to the creation page', () => {
       wrapper.vm.goToCreate();
+
       expect(mockRouter.push).toHaveBeenCalledWith({
         path: '/accounts/create',
       });
@@ -193,6 +267,7 @@ describe('Test component: Accounts', () => {
   describe('Test function: goToAccountDetails', () => {
     it('should navigate to the account detail page', () => {
       wrapper.vm.goToAccountDetails({ id: 'abc-123' });
+
       expect(mockRouter.push).toHaveBeenCalledWith({
         path: '/accounts/abc-123',
       });
@@ -200,7 +275,11 @@ describe('Test component: Accounts', () => {
   });
 
   describe('Test function: onRequest', () => {
-    it('should update pagination and reload data', async () => {
+    it('should update pagination and reload data using the current selectedOrganizationalUnitId', async () => {
+      mockSelectedOrganizationalUnitId.value = 'ou-uuid';
+      await nextTick();
+      await flushPromises();
+
       const newPagination = {
         page: 3,
         rowsPerPage: 20,
@@ -211,8 +290,8 @@ describe('Test component: Accounts', () => {
 
       await wrapper.vm.onRequest({ pagination: newPagination });
 
-      expect(getAccounts).toHaveBeenCalledTimes(2); // onMounted + onRequest
-      expect(getAccounts).toHaveBeenLastCalledWith(
+      expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
+        'ou-uuid',
         expect.anything(),
         expect.objectContaining({
           page: 2,
@@ -225,21 +304,23 @@ describe('Test component: Accounts', () => {
   });
 
   describe('Test function: onFiltersChange', () => {
-    it('should reset page to 1, update filters and reload data', async () => {
+    it('should reset page to 1, update filters and reload data with the current OU id', async () => {
+      mockSelectedOrganizationalUnitId.value = 'ou-uuid';
+      await nextTick();
+      await flushPromises();
+
       wrapper.vm.pagination.page = 5;
       const newFilters = { firstname: 'Alice' };
+
       await wrapper.vm.onFiltersChange(newFilters);
 
       expect(wrapper.vm.filters).toEqual(newFilters);
       expect(wrapper.vm.pagination.page).toBe(1);
-      expect(getAccounts).toHaveBeenCalledTimes(2); // onMounted + onFiltersChange
-    });
-  });
-
-  describe('Test hook: onMounted', () => {
-    it('should call loadData on mount', async () => {
-      await flushPromises();
-      expect(getAccounts).toHaveBeenCalledTimes(1);
+      expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
+        'ou-uuid',
+        expect.objectContaining({ firstname: 'Alice' }),
+        expect.anything()
+      );
     });
   });
 });

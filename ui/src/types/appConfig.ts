@@ -34,4 +34,8 @@ export interface AppConfig {
    * The order is the one rendered in the type selector.
    */
   organizationalUnitTypes: string[];
+  /**
+   * Number of organizational units to fetch per page when querying the API.
+   */
+  organizationalUnitQuerySize: number;
 }

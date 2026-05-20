@@ -13,10 +13,36 @@
     "links": "<ul class=\"q-pl-md\"><li>Code source disponible sur <a href=\"https://github.com/linagora/linid-identity-manager\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>Si vous trouvez un bug, merci de le signaler <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">ici</a>.</li></ul>",
     "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>Un projet de</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
   },
+  "OrganizationalUnitTree": {
+    "GenericTree": {
+      "types": {
+        "root": {
+          "label": "Unités organisationnelles"
+        },
+        "COMPANY": {
+          "label": "{name}"
+        },
+        "DIVISION": {
+          "label": "{name}"
+        },
+        "DEPARTMENT": {
+          "label": "{name}"
+        },
+        "TEAM": {
+          "label": "{name}"
+        }
+      }
+    },
+    "errors": {
+      "notFound": "Unités organisationnelles introuvables",
+      "generic": "Impossible de charger les unités organisationnelles. Veuillez réessayer plus tard."
+    }
+  },
   "AccountsPage": {
     "menuTitle": "Comptes",
     "title": "Comptes",
     "detailButton": "Voir",
+    "noAccount": "Il n’y a aucun compte a afficher.",
     "ButtonsCard": {
       "create": "Créer"
     },

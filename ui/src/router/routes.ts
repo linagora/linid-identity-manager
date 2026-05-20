@@ -50,7 +50,6 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('pages/Homepage.vue') },
-      { path: 'accounts', component: () => import('pages/AccountsPage.vue') },
       {
         path: 'accounts/create',
         name: 'AccountCreate',
@@ -65,6 +64,18 @@ const routes: RouteRecordRaw[] = [
         path: 'organizational-units/create',
         name: 'OrganizationalUnitCreate',
         component: () => import('pages/OrganizationalUnitCreationPage.vue'),
+      },
+    ],
+  },
+  {
+    path: '/accounts',
+    component: () => import('layouts/SplitterLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'AccountsPage',
+        component: () => import('pages/AccountsPage.vue'),
       },
     ],
   },

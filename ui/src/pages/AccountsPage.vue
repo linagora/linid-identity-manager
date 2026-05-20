@@ -57,7 +57,6 @@
         </component>
       </div>
     </div>
-
     <component
       :is="advancedSearchComponent"
       v-if="advancedSearchComponent"
@@ -72,7 +71,7 @@
     />
     <component
       :is="tableComponent"
-      v-if="tableComponent"
+      v-if="tableComponent && accounts.length > 0"
       v-model:pagination="pagination"
       :ui-namespace="uiNamespace"
       :i18n-scope="i18nScope"
@@ -107,6 +106,9 @@
         </q-tr>
       </template>
     </component>
+    <span v-else>
+      {{ t('noAccount') }}
+    </span>
   </q-page>
 </template>
 
@@ -129,12 +131,17 @@ import {
   fieldsSearch,
 } from 'assets/accounts/AccountsFilters';
 import axios from 'axios';
+import { storeToRefs } from 'pinia';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { useAccountsColumns } from 'src/composables/useAccountsColumns';
-import { getAccounts } from 'src/services/AccountService';
+import { getAccountsByOrganizationalUnitId } from 'src/services/OrganizationalUnitService';
+import { useOrganizationalUnitStore } from 'src/stores/useOrganizationalUnitStore';
 import type { Account } from 'src/types/accounts';
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+
+const store = useOrganizationalUnitStore();
+const { selectedOrganizationalUnitId } = storeToRefs(store);
 
 const router = useRouter();
 const route = useRoute();
@@ -173,14 +180,20 @@ const pagination = ref<QuasarPagination>({
 });
 const uiNamespace = 'accounts.homepage';
 
+watch(selectedOrganizationalUnitId, (nodeId: string) => {
+  loadData(nodeId);
+});
+
 /**
  * Loads the account list.
+ * @param id - Organizational unit ID to filter accounts. If empty, loads all accounts.
  */
-async function loadData(): Promise<void> {
+async function loadData(id: string): Promise<void> {
   isLoading.value = true;
 
   try {
-    const accountsPage = await getAccounts(
+    const accountsPage = await getAccountsByOrganizationalUnitId(
+      id,
       toAccountQueryFilterDTO(filters.value),
       toPagination(pagination.value)
     );
@@ -227,7 +240,7 @@ function goToAccountDetails(account: Account) {
  */
 async function onRequest(props: QTableRequestEvent) {
   pagination.value = props.pagination;
-  await loadData();
+  await loadData(selectedOrganizationalUnitId.value);
 }
 
 /**
@@ -239,8 +252,6 @@ async function onRequest(props: QTableRequestEvent) {
 function onFiltersChange(newFilters: Record<string, unknown>): Promise<void> {
   filters.value = newFilters;
   pagination.value.page = 1;
-  return loadData();
+  return loadData(selectedOrganizationalUnitId.value);
 }
-
-onMounted(loadData);
 </script>

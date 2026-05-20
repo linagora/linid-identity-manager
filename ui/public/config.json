@@ -1,3 +1,4 @@
 {
-  "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"]
+  "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
+  "organizationalUnitQuerySize": 5
 }

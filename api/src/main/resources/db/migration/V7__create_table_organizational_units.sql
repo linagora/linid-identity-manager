@@ -14,6 +14,12 @@ CREATE TABLE organizational_units
     CONSTRAINT uk_organizational_units_type_name UNIQUE (type, name)
 );
 
+CREATE TRIGGER tg_organizational_unit_set_update_date
+    BEFORE UPDATE
+    ON organizational_units
+    FOR EACH ROW
+EXECUTE FUNCTION update_timestamp();
+
 COMMENT ON TABLE organizational_units IS 'Stores all organizational units (nodes of the DAG).';
 
 COMMENT ON COLUMN organizational_units.oun_id IS 'Primary key (UUID) of the organizational unit.';
@@ -25,6 +31,8 @@ COMMENT ON COLUMN organizational_units.insert_date IS 'Date and time when the ac
 COMMENT ON COLUMN organizational_units.update_date IS 'Date and time when the account record was last updated. Default is now(). Stored in UTC (TIMESTAMPTZ).';
 
 COMMENT ON CONSTRAINT uk_organizational_units_type_name ON organizational_units IS 'Ensures that an organizational unit name is unique within a given organizational unit type.';
+
+COMMENT ON TRIGGER tg_organizational_unit_set_update_date ON organizational_units IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
 
 -- =========================================================
 -- RELATIONS (DIRECT EDGES)

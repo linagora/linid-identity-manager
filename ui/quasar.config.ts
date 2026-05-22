@@ -86,11 +86,11 @@ export default defineConfig((ctx) => {
             shared: {
               vue: {
                 singleton: true,
-                requiredVersion: '3.5.25',
+                requiredVersion: '3.5.30',
               },
               'vue-router': {
                 singleton: true,
-                requiredVersion: '4.6.4',
+                requiredVersion: '5.0.3',
               },
               quasar: {
                 singleton: true,

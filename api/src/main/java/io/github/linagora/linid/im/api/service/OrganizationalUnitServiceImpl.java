@@ -33,9 +33,12 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
@@ -77,6 +80,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Repository used to manage {@link OrganizationalUnitView} persistence operations.
      */
     private final OrganizationalUnitViewRepository organizationalUnitViewRepository;
+
+    /**
+     * Repository used to manage {@link OrganizationalUnitAccountView} persistence operations.
+     */
+    private final OrganizationalUnitAccountViewRepository organizationalUnitAccountViewRepository;
 
     /**
      * Repository used to manage organizational unit relation persistence operations.
@@ -184,6 +192,18 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
+    public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        if (organizationalUnitRepository.existsById(id)) {
+            return;
+        }
+
+        throw new ApiException(
+            HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
+        );
+    }
+
+    @Override
     public OrganizationalUnit findById(final UserPrincipal userPrincipal, final UUID id) {
         return organizationalUnitRepository.findById(id)
             .orElseThrow(() -> new ApiException(
@@ -203,11 +223,21 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
     @Override
     public Page<OrganizationalUnitView> findAll(final UserPrincipal userPrincipal,
-                                            final OrganizationalUnitViewQueryFilterDto filters,
-                                            final Pageable pageable) {
+                                                final OrganizationalUnitViewQueryFilterDto filters,
+                                                final Pageable pageable) {
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitView.class, filters);
 
         return organizationalUnitViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public Page<OrganizationalUnitAccountView> findAllAccounts(
+        final UserPrincipal userPrincipal,
+        final OrganizationalUnitAccountViewQueryFilterDto filters,
+        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitAccountView.class, filters);
+
+        return organizationalUnitAccountViewRepository.findAll(specification, pageable);
     }
 
     @Override

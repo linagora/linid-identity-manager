@@ -30,6 +30,8 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import org.springframework.data.domain.Page;
@@ -60,9 +62,16 @@ public interface OrganizationalUnitService {
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit
      * @return the found {@link OrganizationalUnit}
-     * @throws jakarta.persistence.EntityNotFoundException if no entity is found
      */
     OrganizationalUnit findById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Checks whether an organizational unit exists for the given identifier.
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param id            the unique identifier of the organizational unit
+     */
+    void existsById(UserPrincipal userPrincipal, UUID id);
 
     /**
      * Retrieves an organizational unit view by its unique identifier.
@@ -85,6 +94,20 @@ public interface OrganizationalUnitService {
     Page<OrganizationalUnitView> findAll(
         UserPrincipal userPrincipal,
         OrganizationalUnitViewQueryFilterDto filters,
+        Pageable pageable
+    );
+
+    /**
+     * Retrieves a paginated list of organizational unit account views matching the provided filters.
+     *
+     * @param userPrincipal the authenticated user performing the request
+     * @param filters       filtering criteria applied to the query
+     * @param pageable      pagination and sorting parameters
+     * @return a page of {@link OrganizationalUnitAccountView}
+     */
+    Page<OrganizationalUnitAccountView> findAllAccounts(
+        UserPrincipal userPrincipal,
+        OrganizationalUnitAccountViewQueryFilterDto filters,
         Pageable pageable
     );
 

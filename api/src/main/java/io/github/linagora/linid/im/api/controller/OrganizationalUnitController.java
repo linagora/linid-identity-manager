@@ -26,12 +26,15 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountViewDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,6 +58,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -78,6 +82,11 @@ public class OrganizationalUnitController {
      * Mapper for entity-to-DTO conversion.
      */
     private final OrganizationalUnitMapper mapper;
+
+    /**
+     * Mapper for entity-to-DTO conversion.
+     */
+    private final OrganizationalUnitAccountMapper accountMapper;
 
     /**
      * Resolver for paginated response HTTP status.
@@ -149,6 +158,38 @@ public class OrganizationalUnitController {
         var entity = service.findViewById(userPrincipal, id);
 
         return ResponseEntity.ok(mapper.toDTO(entity));
+    }
+
+    /**
+     * Retrieves organizational unit accounts using pagination and optional filtering.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param filters              the filtering criteria
+     * @param pageable             pagination information
+     * @return the matching organizational unit
+     */
+    @GetMapping("/{organizationalUnitId}/accounts")
+    @Operation(summary = "Get all organizational unit accounts with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of organizational unit accounts")
+    @ApiResponse(responseCode = "206",
+        description = "Partial list of organizational unit accounts (more pages available)")
+    public ResponseEntity<Page<OrganizationalUnitAccountViewDTO>> findAllAccounts(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        final OrganizationalUnitAccountViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for organizational unit {} accounts with {}", userPrincipal.getEmail(),
+            organizationalUnitId, filters);
+
+        service.existsById(userPrincipal, organizationalUnitId);
+
+        filters.setOrganizationalUnitId(List.of(organizationalUnitId.toString()));
+
+        var pages = service.findAllAccounts(userPrincipal, filters, pageable)
+            .map(accountMapper::toDTO);
+
+        return pagedResponseStatusResolver.resolve(pages);
     }
 
     /**

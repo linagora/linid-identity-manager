@@ -26,11 +26,13 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
@@ -66,6 +68,9 @@ class OrganizationalUnitControllerTest {
     private OrganizationalUnitMapper mapper;
 
     @Mock
+    private OrganizationalUnitAccountMapper accountMapper;
+
+    @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
 
     @InjectMocks
@@ -99,6 +104,27 @@ class OrganizationalUnitControllerTest {
         when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
 
         var response = controller.findAll(userPrincipal, new OrganizationalUnitViewQueryFilterDto(), Pageable.unpaged());
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should find organization unit accounts")
+    void testFindAllAccounts() {
+        var uuid = UUID.randomUUID();
+        var entity = new OrganizationalUnit();
+        entity.setId(uuid);
+        doNothing().when(service).existsById(any(), any());
+        when(service.findAllAccounts(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
+
+        var response = controller.findAllAccounts(
+            userPrincipal,
+            uuid,
+            new OrganizationalUnitAccountViewQueryFilterDto(),
+            Pageable.unpaged()
+        );
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

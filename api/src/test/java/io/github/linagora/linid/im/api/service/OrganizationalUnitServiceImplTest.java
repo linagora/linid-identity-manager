@@ -34,11 +34,13 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
@@ -65,6 +67,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -82,6 +85,9 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitViewRepository organizationalUnitViewRepository;
+
+    @Mock
+    private OrganizationalUnitAccountViewRepository organizationalUnitAccountViewRepository;
 
     @Mock
     private OrganizationalUnitRelationRepository organizationalUnitRelationRepository;
@@ -265,6 +271,26 @@ class OrganizationalUnitServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should call repository with specification and pageable")
+    void testFindAllAccounts_shouldDelegateToRepository() {
+        var pageable = PageRequest.of(0, 10);
+        var entity = new OrganizationalUnitAccountView();
+        var filters = new OrganizationalUnitAccountViewQueryFilterDto();
+        when(organizationalUnitAccountViewRepository.findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitAccountView>>any(),
+            any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        Page<OrganizationalUnitAccountView> result = service.findAllAccounts(userPrincipal, filters, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(organizationalUnitAccountViewRepository).findAll(
+            ArgumentMatchers.any(),
+            any(Pageable.class));
+    }
+
+    @Test
     @DisplayName("should throw exception with trying to delete root")
     void testDeleteById_shouldThrowExceptionOnDeleteRoot() {
         var uuid = UUID.randomUUID();
@@ -301,6 +327,29 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.organizational.unit.not_found", exception.getError().key());
         assertEquals(uuid.toString(), exception.getError().context().get("id"));
+    }
+
+    @Test
+    @DisplayName("should throw exception with unknown entity")
+    void testExistsById_shouldThrowException() {
+        var uuid = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(any())).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.existsById(userPrincipal, uuid));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should not throw exception on valid id")
+    void testDeleteById() {
+        var uuid = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> service.existsById(userPrincipal, uuid));
     }
 
     @Test

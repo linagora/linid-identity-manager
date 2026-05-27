@@ -41,6 +41,9 @@ Feature: Test API Organizational unit endpoints
   ## 707 Should return 400 when the suspension period end is in the past
   ## 708 Should return 404 when updating the status of an unknown organizational unit
 
+  ################## Find accounts of O.U. (GET /organizational-units/{id}/accounts) #######
+  ## 801 Should return wanted users for existing organizational-unit
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -658,3 +661,31 @@ Feature: Test API Organizational unit endpoints
       """
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.not_found'
+
+  #################################################################
+  ################## Find accounts of O.U. (GET /organizational-units/{id}/accounts) #######
+  #################################################################
+  Scenario Outline: 801 - Should return <user> for <ou> organizational-unit
+    When I request '{{env.E2E_API_URL}}/organizational-units?name=<ou>' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I store 'ouID' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts?externalId=<user>' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I store 'userID' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/accounts?id={{ctx.userID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '{{ctx.userID}}'
+
+    Examples:
+      | user  | ou          |
+      | admin | root        |
+      | user1 | Company A   |
+      | user2 | Company B   |
+      | user3 | Division A1 |
+      | user4 | Division A2 |
+      | user5 | Division B1 |

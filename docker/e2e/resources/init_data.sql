@@ -358,4 +358,57 @@ DO $$
           AND t.name = 'Team Delta'
         ON CONFLICT (parent_id, child_id) DO NOTHING;
 
+
+        -- =========================================================
+        -- 6. Add user inside OU
+        -- =========================================================
+        -- Admin in OU root
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        VALUES (root_id, admin_id, admin_id, admin_id);
+
+        -- user1 in OU Company A
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        VALUES (
+                   (SELECT oun_id FROM organizational_units WHERE name = 'Company A'),
+                   (SELECT act_id FROM accounts WHERE external_id = 'user1'),
+                   admin_id,
+                   admin_id
+               );
+
+        -- user2 in OU Company B
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        VALUES (
+                   (SELECT oun_id FROM organizational_units WHERE name = 'Company B'),
+                   (SELECT act_id FROM accounts WHERE external_id = 'user2'),
+                   admin_id,
+                   admin_id
+               );
+
+        -- user3 in OU Division A1
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        VALUES (
+                   (SELECT oun_id FROM organizational_units WHERE name = 'Division A1'),
+                   (SELECT act_id FROM accounts WHERE external_id = 'user3'),
+                   admin_id,
+                   admin_id
+               );
+
+        -- user4 in OU Division A2
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        VALUES (
+                   (SELECT oun_id FROM organizational_units WHERE name = 'Division A2'),
+                   (SELECT act_id FROM accounts WHERE external_id = 'user4'),
+                   admin_id,
+                   admin_id
+               );
+
+        -- user5 in OU Division B1
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        VALUES (
+                   (SELECT oun_id FROM organizational_units WHERE name = 'Division B1'),
+                   (SELECT act_id FROM accounts WHERE external_id = 'user5'),
+                   admin_id,
+                   admin_id
+               );
+
     END $$;

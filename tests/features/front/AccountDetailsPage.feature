@@ -157,9 +157,9 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' contains "Inactif"
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-not-activated-info-text"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
@@ -172,9 +172,9 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' contains "Inactif"
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-not-activated-info-text"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
@@ -187,7 +187,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -203,7 +203,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
@@ -218,7 +218,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
@@ -233,7 +233,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -249,7 +249,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -265,7 +265,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
@@ -282,8 +282,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
@@ -298,8 +298,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
@@ -316,8 +316,8 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
@@ -332,8 +332,8 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 119 Immediate activation - dialog opens correctly

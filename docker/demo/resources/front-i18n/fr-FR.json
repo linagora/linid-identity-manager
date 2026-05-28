@@ -43,9 +43,10 @@
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },
-  "AccountStatusBadge": {
+  "StatusBadge": {
     "active": "Actif",
-    "inactive": "Inactif"
+    "inactive": "Inactif",
+    "suspended": "Suspendu"
   },
   "AccountDeactivatedInfoText": {
     "message": "Ce compte va être désactivé le {date}."
@@ -510,6 +511,159 @@
       "missingParent": "Une unité organisationnelle parente est requise.",
       "validation": "Données invalides. Veuillez vérifier le formulaire.",
       "generic": "Impossible de créer l'unité organisationnelle. Veuillez réessayer plus tard."
+    }
+  },
+  "OrganizationalUnitDetailsPage": {
+    "title": "Détails de l'unité organisationnelle",
+    "EntityDetailsCard": {
+      "title": "Informations de l'unité organisationnelle",
+      "attributes": {
+        "name": "Nom",
+        "type": "Type",
+        "createdBy": "Créé par",
+        "updatedBy": "Mis à jour par",
+        "insertDate": "Date de création",
+        "updateDate": "Dernière mise à jour"
+      }
+    },
+    "success": {
+      "suspended": "Unité organisationnelle suspendue avec succès.",
+      "scheduled": "Suspension planifiée avec succès.",
+      "endUpdated": "Date de fin de suspension mise à jour avec succès.",
+      "reactivated": "Unité organisationnelle réactivée avec succès."
+    },
+    "errors": {
+      "notFound": "Unité organisationnelle introuvable.",
+      "generic": "Impossible de charger l'unité organisationnelle. Veuillez réessayer plus tard.",
+      "validation": "Données invalides. Veuillez vérifier le formulaire."
+    }
+  },
+  "OrganizationalUnitSuspendedBanner": {
+    "content": "Cette unité organisationnelle est suspendue depuis le {date}.",
+    "contentWithEndDate": "Cette unité organisationnelle est suspendue du {date} jusqu'au {endDate}.",
+    "clearSuspensionButton": "Réactivation immédiate",
+    "modifySuspensionEndButton": "Modifier la fin de suspension"
+  },
+  "OrganizationalUnitSuspendedInfoText": {
+    "message": "Cette unité organisationnelle sera suspendue le {date}."
+  },
+  "OrganizationalUnitSuspensionActions": {
+    "DropdownButton": {
+      "title": "Suspension",
+      "suspension": {
+        "immediate": "Suspension immédiate",
+        "scheduled": "Planifier la suspension"
+      }
+    }
+  },
+  "OrganizationalUnitActivationActions": {
+    "DropdownButton": {
+      "title": "Activation",
+      "reactivation": {
+        "immediate": "Réactivation immédiate"
+      }
+    }
+  },
+  "OrganizationalUnitSuspendDialog": {
+    "title": "Suspendre l'unité organisationnelle",
+    "content": "Êtes-vous sûr de vouloir suspendre immédiatement cette unité organisationnelle ?",
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Suspendre"
+    }
+  },
+  "OrganizationalUnitScheduleSuspensionDialog": {
+    "title": "Planifier une suspension",
+    "content": "Choisissez une date de début pour la suspension future. Une date de fin est optionnelle.",
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Planifier",
+      "confirmLoading": "Planification..."
+    },
+    "fields": {
+      "start": {
+        "label": "Date de début de suspension",
+        "close": "Fermer",
+        "validation": {
+          "required": "Ce champ est requis.",
+          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+          "afterDate": "La date ne peut pas être antérieure à la date du jour."
+        }
+      },
+      "end": {
+        "label": "Date de fin de suspension (optionnelle)",
+        "close": "Fermer",
+        "validation": {
+          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+          "afterDate": "La date ne peut pas être antérieure à la date du jour.",
+          "fromDate": "La date de fin doit être postérieure au {compareTo}."
+        }
+      },
+      "reason": {
+        "label": "Motif",
+        "hint": "Sélectionnez un motif pour la suspension.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "subreason": {
+        "label": "Sous-motif",
+        "hint": "Sélectionnez un sous-motif pour la suspension.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "comment": {
+        "label": "Commentaire",
+        "hint": "Ajoutez un commentaire facultatif."
+      }
+    }
+  },
+  "OrganizationalUnitEditSuspensionEndDialog": {
+    "title": "Modifier la fin de suspension",
+    "content": "Définissez une nouvelle date de fin pour la suspension en cours. Laissez vide pour une suspension sans date de fin.",
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Mettre à jour",
+      "confirmLoading": "Mise à jour..."
+    },
+    "fields": {
+      "end": {
+        "label": "Date de fin de suspension (optionnelle)",
+        "close": "Fermer",
+        "validation": {
+          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+          "afterDate": "La date ne peut pas être antérieure à la date du jour.",
+          "fromDate": "La date de fin doit être postérieure au {compareTo}."
+        }
+      },
+      "reason": {
+        "label": "Motif",
+        "hint": "Sélectionnez un motif pour la suspension.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "subreason": {
+        "label": "Sous-motif",
+        "hint": "Sélectionnez un sous-motif pour la suspension.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "comment": {
+        "label": "Commentaire",
+        "hint": "Ajoutez un commentaire facultatif."
+      }
+    }
+  },
+  "OrganizationalUnitReactivateDialog": {
+    "title": "Réactiver l'unité organisationnelle",
+    "content": "Êtes-vous sûr de vouloir réactiver immédiatement cette unité organisationnelle ?",
+    "unavailable": "La réactivation immédiate n'est pas encore disponible côté serveur. Veuillez contacter un administrateur.",
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Réactiver"
     }
   }
 }

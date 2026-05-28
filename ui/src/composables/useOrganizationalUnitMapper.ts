@@ -33,6 +33,8 @@ import type {
   OrganizationalUnitRecord,
   OrganizationalUnitRelationDTO,
   OrganizationalUnitStatus,
+  OrganizationalUnitStatusForm,
+  OrganizationalUnitStatusRecord,
 } from 'src/types/organizationalUnits';
 
 /**
@@ -42,7 +44,7 @@ import type {
  * @returns An object containing the mapping functions for organizational units.
  */
 export function useOrganizationalUnitMapper() {
-  const { toDate } = useCommonMapper();
+  const { toDate, toDateISO } = useCommonMapper();
 
   /**
    * Transforms an {@link OrganizationalUnitForm} into an {@link OrganizationalUnitRecord} by attaching the parent
@@ -171,10 +173,54 @@ export function useOrganizationalUnitMapper() {
     };
   };
 
+  /**
+   * Projects an {@link OrganizationalUnitStatus} into a flattened
+   * {@link OrganizationalUnitStatusForm} used to pre-fill the suspension
+   * dialogs. Dates are converted to the localized display format expected by the
+   * date fields.
+   * @param status Current organizational unit suspension status (nullable).
+   * @returns Pre-filled lifecycle form values.
+   */
+  const toOrganizationalUnitStatusForm = (
+    status: OrganizationalUnitStatus | null
+  ): OrganizationalUnitStatusForm => {
+    return {
+      start: toDate(status?.suspensionPeriod?.start),
+      end: toDate(status?.suspensionPeriod?.end),
+      reason: status?.statusReason ?? null,
+      subreason: status?.statusSubreason ?? null,
+      comment: status?.statusComment ?? null,
+    };
+  };
+
+  /**
+   * Converts an {@link OrganizationalUnitStatusForm} into an
+   * {@link OrganizationalUnitStatusRecord} ready to be sent to the backend.
+   * Localized start / end dates are normalized to ISO 8601 strings; empty values
+   * collapse to `null`.
+   * @param form Flattened lifecycle form values.
+   * @returns Status record with an ISO suspension period.
+   */
+  const toOrganizationalUnitStatusRecord = (
+    form: OrganizationalUnitStatusForm
+  ): OrganizationalUnitStatusRecord => {
+    return {
+      suspensionPeriod: {
+        start: toDateISO(form.start) || null,
+        end: toDateISO(form.end) || null,
+      },
+      reason: form.reason || null,
+      subreason: form.subreason || null,
+      comment: form.comment || null,
+    };
+  };
+
   return {
     toOrganizationalUnitRecord,
     toOrganizationalUnitsTree,
     toOrganizationalUnit,
     toOrganizationalUnitStatus,
+    toOrganizationalUnitStatusForm,
+    toOrganizationalUnitStatusRecord,
   };
 }

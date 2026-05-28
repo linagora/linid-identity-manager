@@ -41,7 +41,7 @@
           >
             {{ t('title') }}
           </h1>
-          <AccountStatusBadge
+          <StatusBadge
             v-if="lifecycleUi?.showBadge && accountStatus"
             :status="accountStatus.status"
           />
@@ -158,7 +158,7 @@ import axios from 'axios';
 import { accountLifecycleUiConfiguration } from 'src/assets/accounts/accountLifecycleUiConfiguration';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
 import { dayjs } from 'src/boot/dayjs';
-import AccountStatusBadge from 'src/components/badge/AccountStatusBadge.vue';
+import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
 import AccountDeactivatedInfoText from 'src/components/text/AccountDeactivatedInfoText.vue';

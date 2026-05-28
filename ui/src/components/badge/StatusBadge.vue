@@ -27,27 +27,25 @@
 <template>
   <q-badge
     v-bind="uiProps.badge"
-    :class="['account-status-badge', `account-status-badge--${statusKey}`]"
+    :class="['status-badge', `status-badge--${statusKey}`]"
     :label="t(statusKey)"
-    :data-cy="`account-status-badge_${statusKey}`"
+    :data-cy="`status-badge_${statusKey}`"
   />
 </template>
 
 <script setup lang="ts">
 import type { LinidQBadgeProps } from '@linagora/linid-im-front-corelib';
 import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import type { AccountStatusBadgeProps } from 'src/types/accountStatusBadgeProps';
+import type { StatusBadgeProps } from 'src/types/statusBadgeProps';
 import { computed } from 'vue';
 
-const props = defineProps<AccountStatusBadgeProps>();
-
-const localUiNamespace = computed(
-  () => `account-status-badge.${statusKey.value}`
-);
-const { t } = useScopedI18n('AccountStatusBadge');
-const { ui } = useUiDesign();
+const props = defineProps<StatusBadgeProps>();
 
 const statusKey = computed(() => props.status.toLowerCase());
+const localUiNamespace = computed(() => `status-badge.${statusKey.value}`);
+
+const { t } = useScopedI18n('StatusBadge');
+const { ui } = useUiDesign();
 
 const uiProps = computed(() => ({
   badge: ui<LinidQBadgeProps>(localUiNamespace.value, 'q-badge'),

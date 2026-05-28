@@ -24,6 +24,22 @@
  * LinID Identity Manager software.
  */
 
+import type { Period } from 'src/types/common';
+
+/**
+ * Relation between an organizational unit and one of its parents in the DAG.
+ */
+export interface OrganizationalUnitRelationDTO {
+  /**
+   * Unique identifier of the relation.
+   */
+  id: string;
+  /**
+   * Unique identifier of the parent organizational unit.
+   */
+  parent: string;
+}
+
 /**
  * Writable fields of an organizational unit, sent to the backend when creating
  * a new OU. Distinct from {@link OrganizationalUnitDTO}: a record carries only
@@ -78,23 +94,31 @@ export interface OrganizationalUnitDTO {
    */
   updateDate: string;
   /**
+   * Period during which the organizational unit is suspended.
+   * Null when no suspension is configured.
+   */
+  suspensionPeriod: Period | null;
+  /**
+   * High-level reason code explaining the current suspension status.
+   */
+  statusReason: string | null;
+  /**
+   * More detailed classification of the suspension status reason.
+   */
+  statusSubreason: string | null;
+  /**
+   * Free-text comment providing additional context about the suspension.
+   */
+  statusComment: string | null;
+  /**
+   * Whether the organizational unit is currently suspended (server-computed
+   * from `suspensionPeriod` against the current instant).
+   */
+  isSuspended: boolean;
+  /**
    * List of parent organizational units, with their identifiers and relation IDs.
    */
   parents?: OrganizationalUnitRelationDTO[];
-}
-
-/**
- * Defines the relationship between an organizational unit and its parent.
- */
-export interface OrganizationalUnitRelationDTO {
-  /**
-   * Identifier of the relation.
-   */
-  id: string;
-  /**
-   * Identifier of the parent organizational unit.
-   */
-  parent: string;
 }
 
 /**
@@ -106,6 +130,127 @@ export interface OrganizationalUnitFilterDTO {
    * If null, no filtering is applied on the name.
    */
   name: string | null;
+}
+
+/**
+ * Identity projection of an organizational unit consumed by Vue components on
+ * the Details page. Identity fields only; combine with
+ * {@link OrganizationalUnitStatus} when both identity and suspension state are
+ * needed.
+ */
+export interface OrganizationalUnit {
+  /**
+   * Unique identifier of the organizational unit.
+   */
+  id: string;
+  /**
+   * Human-readable name of the organizational unit.
+   */
+  name: string;
+  /**
+   * Type of the organizational unit.
+   */
+  type: string;
+  /**
+   * Creator identifier.
+   */
+  createdBy: string;
+  /**
+   * Last updater identifier.
+   */
+  updatedBy: string;
+  /**
+   * Organizational unit creation date converted from API ISO timestamp.
+   */
+  insertDate: string;
+  /**
+   * Organizational unit last update date converted from API ISO timestamp.
+   */
+  updateDate: string;
+}
+
+/**
+ * Suspension status fields of an organizational unit: suspension period,
+ * reason metadata, and the computed `isSuspended` flag.
+ *
+ * Combine with an {@link OrganizationalUnit} when both identity and lifecycle
+ * data are needed (for example on the OU Details page).
+ */
+export interface OrganizationalUnitStatus {
+  /**
+   * Period during which the organizational unit is suspended.
+   * Null when no suspension is configured.
+   */
+  suspensionPeriod: Period | null;
+  /**
+   * High-level reason code explaining the current suspension status.
+   */
+  statusReason: string | null;
+  /**
+   * More detailed classification of the suspension status reason.
+   */
+  statusSubreason: string | null;
+  /**
+   * Free-text comment providing additional context about the suspension.
+   */
+  statusComment: string | null;
+  /**
+   * Whether the organizational unit is currently suspended.
+   */
+  isSuspended: boolean;
+}
+
+/**
+ * Payload for `PUT /organizational-units/{id}/status`. The backend currently
+ * requires `suspensionPeriod` to be non-null (a future-only range).
+ */
+export interface OrganizationalUnitStatusRecord {
+  /**
+   * Suspension period (start mandatory, end optional). Backend rejects a
+   * `start` strictly in the past.
+   */
+  suspensionPeriod: Period;
+  /**
+   * High-level reason code.
+   */
+  reason?: string | null;
+  /**
+   * Detailed classification of the reason.
+   */
+  subreason?: string | null;
+  /**
+   * Free-text comment.
+   */
+  comment?: string | null;
+}
+
+/**
+ * Flattened shape of the organizational unit lifecycle dialogs. Each field maps
+ * to a single form control rendered by the shared form dialog; the suspension
+ * period is split into individual `start` / `end` values that are converted back
+ * into an {@link OrganizationalUnitStatusRecord} before being sent to the API.
+ */
+export interface OrganizationalUnitStatusForm {
+  /**
+   * Localized suspension start date, or an ISO string for immediate actions.
+   */
+  start?: string | null;
+  /**
+   * Localized suspension end date.
+   */
+  end?: string | null;
+  /**
+   * High-level reason code.
+   */
+  reason?: string | null;
+  /**
+   * Detailed classification of the reason.
+   */
+  subreason?: string | null;
+  /**
+   * Free-text comment.
+   */
+  comment?: string | null;
 }
 
 /**

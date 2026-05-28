@@ -32,6 +32,7 @@ import type {
   OrganizationalUnitDTO,
   OrganizationalUnitFilterDTO,
   OrganizationalUnitRecord,
+  OrganizationalUnitStatusRecord,
 } from 'src/types/organizationalUnits';
 
 /**
@@ -118,4 +119,19 @@ export async function getAccountsByOrganizationalUnitId(
       Page<AccountDTO>
     >(`/organizational-units/${id}/accounts`, { params: { ...filters, ...pagination } })
     .then(({ data }) => data);
+}
+
+/**
+ * Updates the suspension status of an organizational unit.
+ * @param id - The unique identifier of the organizational unit.
+ * @param payload - The suspension period and optional reason fields.
+ * @returns A promise resolving to the raw DTO of the updated OU.
+ */
+export async function updateOrganizationalUnitStatus(
+  id: string,
+  payload: OrganizationalUnitStatusRecord
+): Promise<OrganizationalUnitDTO> {
+  return api
+    .put<OrganizationalUnitDTO>(`/organizational-units/${id}/status`, payload)
+    .then((response) => response.data);
 }

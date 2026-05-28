@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,65 +24,17 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import type { OrganizationalUnit } from 'src/types/organizationalUnits';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/callback/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('pages/AuthenticationCallbackPage.vue'),
-    meta: { requiresAuth: false },
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    meta: { requiresAuth: true },
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      {
-        path: 'accounts/create',
-        name: 'AccountCreate',
-        component: () => import('pages/AccountCreationPage.vue'),
-      },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/create',
-        name: 'OrganizationalUnitCreate',
-        component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-      {
-        path: 'organizational-units/:id',
-        name: 'OrganizationalUnitDetails',
-        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/accounts',
-    component: () => import('layouts/SplitterLayout.vue'),
-    meta: { requiresAuth: true },
-    children: [
-      {
-        path: '',
-        name: 'AccountsPage',
-        component: () => import('pages/AccountsPage.vue'),
-      },
-    ],
-  },
+/**
+ * Defines the order of organizational unit fields to be displayed in the
+ * details view.
+ */
+export const fieldsOrder: (keyof OrganizationalUnit)[] = [
+  'name',
+  'type',
+  'createdBy',
+  'updatedBy',
+  'insertDate',
+  'updateDate',
 ];
-export default routes;

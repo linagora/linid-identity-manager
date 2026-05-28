@@ -25,11 +25,43 @@
  */
 
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useI18n } from 'vue-i18n';
 
 const PARENT_UUID = '00000000-0000-4000-8000-000000000000';
+const OU_UUID = '11111111-1111-4111-8111-111111111111';
+const CREATOR_UUID = '22222222-2222-4222-8222-222222222222';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: vi.fn(),
+}));
+
+const buildDto = (overrides = {}) => ({
+  id: OU_UUID,
+  name: 'Engineering',
+  type: 'DEPARTMENT',
+  createdBy: CREATOR_UUID,
+  updatedBy: CREATOR_UUID,
+  insertDate: '2026-05-13T12:00:00Z',
+  updateDate: '2026-05-13T12:00:00Z',
+  suspensionPeriod: null,
+  statusReason: null,
+  statusSubreason: null,
+  statusComment: null,
+  isSuspended: false,
+  parents: [],
+  ...overrides,
+});
 
 describe('Test mapper: organizationalUnitMapper', () => {
+  const tMock = vi.fn();
+
+  beforeEach(() => {
+    tMock.mockReset();
+    tMock.mockReturnValue('YYYY/MM/DD');
+    useI18n.mockReturnValue({ t: tMock });
+  });
+
   describe('Test function: toOrganizationalUnitRecord', () => {
     it('should attach the parent identifier to the form values', () => {
       const { toOrganizationalUnitRecord } = useOrganizationalUnitMapper();
@@ -193,6 +225,74 @@ describe('Test mapper: organizationalUnitMapper', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].key).toBe('root-id');
+    });
+  });
+
+  describe('Test function: toOrganizationalUnit', () => {
+    it('should project identity fields from the DTO', () => {
+      const { toOrganizationalUnit } = useOrganizationalUnitMapper();
+
+      const dto = buildDto();
+      const result = toOrganizationalUnit(dto);
+
+      expect(result).toEqual({
+        id: OU_UUID,
+        name: 'Engineering',
+        type: 'DEPARTMENT',
+        createdBy: CREATOR_UUID,
+        updatedBy: CREATOR_UUID,
+        insertDate: '2026/05/13',
+        updateDate: '2026/05/13',
+      });
+    });
+
+    it('should omit suspension fields from the identity projection', () => {
+      const { toOrganizationalUnit } = useOrganizationalUnitMapper();
+
+      const dto = buildDto({
+        isSuspended: true,
+        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        statusReason: 'AUDIT',
+      });
+      const result = toOrganizationalUnit(dto);
+
+      expect(result).not.toHaveProperty('isSuspended');
+      expect(result).not.toHaveProperty('suspensionPeriod');
+      expect(result).not.toHaveProperty('statusReason');
+    });
+  });
+
+  describe('Test function: toOrganizationalUnitStatus', () => {
+    it('should project suspension fields from the DTO', () => {
+      const { toOrganizationalUnitStatus } = useOrganizationalUnitMapper();
+
+      const dto = buildDto({
+        isSuspended: true,
+        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        statusReason: 'AUDIT',
+        statusSubreason: 'INTERNAL_REVIEW',
+        statusComment: 'Pending verification',
+      });
+      const result = toOrganizationalUnitStatus(dto);
+
+      expect(result).toEqual({
+        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        statusReason: 'AUDIT',
+        statusSubreason: 'INTERNAL_REVIEW',
+        statusComment: 'Pending verification',
+        isSuspended: true,
+      });
+    });
+
+    it('should omit identity fields from the status projection', () => {
+      const { toOrganizationalUnitStatus } = useOrganizationalUnitMapper();
+
+      const dto = buildDto();
+      const result = toOrganizationalUnitStatus(dto);
+
+      expect(result).not.toHaveProperty('id');
+      expect(result).not.toHaveProperty('name');
+      expect(result).not.toHaveProperty('type');
     });
   });
 });

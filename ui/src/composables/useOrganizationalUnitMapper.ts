@@ -25,18 +25,25 @@
  */
 
 import type { TreeNode } from '@linagora/linid-im-front-corelib';
+import { useCommonMapper } from 'src/composables/useCommonMapper';
 import type {
+  OrganizationalUnit,
   OrganizationalUnitDTO,
   OrganizationalUnitForm,
   OrganizationalUnitRecord,
   OrganizationalUnitRelationDTO,
+  OrganizationalUnitStatus,
 } from 'src/types/organizationalUnits';
 
 /**
- * Composable providing utility functions to work with organizational units.
+ * Composable providing utility functions to work with organizational units:
+ * convert form values to API records, build the OU tree, and project an
+ * {@link OrganizationalUnitDTO} into identity / status views.
  * @returns An object containing the mapping functions for organizational units.
  */
 export function useOrganizationalUnitMapper() {
+  const { toDate } = useCommonMapper();
+
   /**
    * Transforms an {@link OrganizationalUnitForm} into an {@link OrganizationalUnitRecord} by attaching the parent
    * identifier supplied by the navigation context.
@@ -127,8 +134,47 @@ export function useOrganizationalUnitMapper() {
       );
   }
 
+  /**
+   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnit},
+   * exposing only the identity fields. Combine with {@link toOrganizationalUnitStatus} when both identity and suspension state are needed.
+   * @param dto OrganizationalUnitDTO to project.
+   * @returns Identity projection with locale-formatted dates.
+   */
+  const toOrganizationalUnit = (
+    dto: OrganizationalUnitDTO
+  ): OrganizationalUnit => {
+    return {
+      id: dto.id,
+      name: dto.name,
+      type: dto.type,
+      createdBy: dto.createdBy,
+      updatedBy: dto.updatedBy,
+      insertDate: toDate(dto.insertDate),
+      updateDate: toDate(dto.updateDate),
+    };
+  };
+
+  /**
+   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnitStatus}, exposing only the suspension lifecycle fields as raw ISO strings.
+   * @param dto OrganizationalUnitDTO to project.
+   * @returns Suspension status projection.
+   */
+  const toOrganizationalUnitStatus = (
+    dto: OrganizationalUnitDTO
+  ): OrganizationalUnitStatus => {
+    return {
+      suspensionPeriod: dto.suspensionPeriod,
+      statusReason: dto.statusReason,
+      statusSubreason: dto.statusSubreason,
+      statusComment: dto.statusComment,
+      isSuspended: dto.isSuspended,
+    };
+  };
+
   return {
     toOrganizationalUnitRecord,
     toOrganizationalUnitsTree,
+    toOrganizationalUnit,
+    toOrganizationalUnitStatus,
   };
 }

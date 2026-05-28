@@ -31,6 +31,7 @@ import {
   getAllOrganizationalUnit,
   getOrganizationalUnitById,
   getOrganizationalUnits,
+  updateOrganizationalUnitStatus,
 } from 'src/services/OrganizationalUnitService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -44,6 +45,7 @@ vi.mock('boot/axios', () => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
+    put: vi.fn(),
   },
 }));
 
@@ -59,6 +61,12 @@ const buildOuDTO = (overrides = {}) => ({
   updatedBy: ROOT_UUID,
   insertDate: '2026-05-13T12:00:00.000000Z',
   updateDate: '2026-05-13T12:00:00.000000Z',
+  suspensionPeriod: null,
+  statusReason: null,
+  statusSubreason: null,
+  statusComment: null,
+  isSuspended: false,
+  parents: [],
   ...overrides,
 });
 
@@ -87,6 +95,7 @@ describe('Test service: organizationalUnitService', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset();
     vi.mocked(api.post).mockReset();
+    vi.mocked(api.put).mockReset();
   });
 
   describe('Test function: getOrganizationalUnitById', () => {
@@ -237,6 +246,41 @@ describe('Test service: organizationalUnitService', () => {
 
       await expect(
         getAccountsByOrganizationalUnitId(OU_UUID, filters, pagination)
+      ).rejects.toThrow('boom');
+    });
+  });
+
+  describe('Test function: updateOrganizationalUnitStatus', () => {
+    const payload = {
+      suspensionPeriod: {
+        start: '2026-06-01T00:00:00.000Z',
+        end: '2026-07-01T00:00:00.000Z',
+      },
+      reason: 'AUDIT',
+    };
+
+    it('should PUT to the status endpoint and return the raw DTO', async () => {
+      const dto = buildOuDTO({
+        isSuspended: false,
+        suspensionPeriod: payload.suspensionPeriod,
+      });
+      vi.mocked(api.put).mockResolvedValue({ data: dto });
+
+      const result = await updateOrganizationalUnitStatus(OU_UUID, payload);
+
+      expect(api.put).toHaveBeenCalledWith(
+        `/organizational-units/${OU_UUID}/status`,
+        payload
+      );
+      expect(result).toEqual(dto);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      const error = new Error('boom');
+      vi.mocked(api.put).mockRejectedValue(error);
+
+      await expect(
+        updateOrganizationalUnitStatus(OU_UUID, payload)
       ).rejects.toThrow('boom');
     });
   });

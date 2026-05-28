@@ -232,6 +232,38 @@ describe('Test component: OrganizationalUnitsTree', () => {
     });
   });
 
+  describe('Test function: filterTreeNode', () => {
+    const makeNode = (name) => ({ value: { name } });
+
+    it('should return true when the node name contains the filter (exact match)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), 'Engineering')).toBe(true);
+    });
+
+    it('should return true when the node name contains the filter (partial match)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), 'Engin')).toBe(true);
+    });
+
+    it('should return true when the filter is case-insensitive (uppercase filter)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), 'ENGINEERING')).toBe(true);
+    });
+
+    it('should return true when the filter is case-insensitive (mixed case node name)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('eNgInEeRiNg'), 'engineering')).toBe(true);
+    });
+
+    it('should return true when the filter is an empty string', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), '')).toBe(true);
+    });
+
+    it('should return false when the node name does not contain the filter', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), 'Marketing')).toBe(false);
+    });
+
+    it('should return false when the filter is longer than the node name', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('IT'), 'IT Department')).toBe(false);
+    });
+  });
+
   describe('Test hook: onMounted', () => {
     it('should call loadData on mount', async () => {
       await flushPromises();

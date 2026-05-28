@@ -15,6 +15,8 @@
   },
   "OrganizationalUnitTree": {
     "GenericTree": {
+      "filterLabel": "Filter organizational units",
+      "filterHint": "Enter text to filter organizational units.",
       "types": {
         "root": {
           "label": "Organizational units"

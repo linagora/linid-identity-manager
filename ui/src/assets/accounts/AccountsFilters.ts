@@ -69,7 +69,7 @@ export const fieldsSearch: LinidAttributeConfiguration[] = [
     hasValidations: false,
     input: 'Date',
     inputSettings: {
-      maskKey: 'application.dateFormat',
+      mask: '{{ t("application.dateFormat") }}',
     },
   },
 ];

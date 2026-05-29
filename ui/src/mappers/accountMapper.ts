@@ -32,6 +32,8 @@ import type {
   AccountQueryFilterDTO,
   AccountRecord,
   AccountStatus,
+  AccountStatusForm,
+  AccountStatusRecord,
 } from 'src/types/accounts';
 
 /**
@@ -130,11 +132,91 @@ export function useAccountMapper() {
     };
   };
 
+  /**
+   * Transforms form data into an AccountStatusRecord, nesting the validity
+   * and suspension period fields into their respective objects.
+   * @param formData - Record containing the raw form data entered by the user
+   *                   for updating account status, with flat fields for validity
+   *                   and suspension periods.
+   * @returns AccountStatusRecord with the validity and suspension periods
+   *          properly structured for API consumption.
+   */
+  const toAccountStatusRecord = (
+    formData: AccountStatusForm
+  ): AccountStatusRecord => {
+    return {
+      validityPeriod: {
+        start: toDateISO(formData.validityPeriodStart) || null,
+        end: toDateISO(formData.validityPeriodEnd) || null,
+      },
+      suspensionPeriod: {
+        start: toDateISO(formData.suspensionPeriodStart) || null,
+        end: toDateISO(formData.suspensionPeriodEnd) || null,
+      },
+      statusReason: formData.statusReason || null,
+      statusSubreason: formData.statusSubreason || null,
+      statusComment: formData.statusComment || null,
+    };
+  };
+
+  /**
+   * Transforms an AccountStatus into an AccountStatusForm, flattening the validity and suspension period
+   * fields into individual start and end date fields. This is useful for populating the account status
+   * update form with existing values.
+   * @param accountStatus - The AccountStatus object containing nested validity and suspension periods.
+   * @param displayedDateFields - Optional array of field keys to determine which date fields should be
+   *                              converted to the locale format. If a field key is included in this
+   *                              array, its value will be formatted using the `toDate` function;
+   *                              otherwise, the original ISO string will be used.
+   *                              This allows flexibility in displaying dates in the form according
+   *                              to specific requirements.
+   * @returns AccountStatusForm with flattened fields suitable for form binding.
+   */
+  const toAccountStatusForm = (
+    accountStatus: AccountStatus,
+    displayedDateFields: (keyof AccountStatusForm)[] = [
+      'validityPeriodStart',
+      'validityPeriodEnd',
+      'suspensionPeriodStart',
+      'suspensionPeriodEnd',
+    ]
+  ): AccountStatusForm => {
+    const form = {
+      validityPeriodStart: accountStatus.validityPeriod?.start || null,
+      validityPeriodEnd: accountStatus.validityPeriod?.end || null,
+      suspensionPeriodStart: accountStatus.suspensionPeriod?.start || null,
+      suspensionPeriodEnd: accountStatus.suspensionPeriod?.end || null,
+      statusReason: accountStatus.statusReason || null,
+      statusSubreason: accountStatus.statusSubreason || null,
+      statusComment: accountStatus.statusComment || null,
+    };
+
+    displayedDateFields.forEach((field) => {
+      if (field === 'validityPeriodStart') {
+        form.validityPeriodStart =
+          toDate(accountStatus.validityPeriod?.start) || null;
+      } else if (field === 'validityPeriodEnd') {
+        form.validityPeriodEnd =
+          toDate(accountStatus.validityPeriod?.end) || null;
+      } else if (field === 'suspensionPeriodStart') {
+        form.suspensionPeriodStart =
+          toDate(accountStatus.suspensionPeriod?.start) || null;
+      } else if (field === 'suspensionPeriodEnd') {
+        form.suspensionPeriodEnd =
+          toDate(accountStatus.suspensionPeriod?.end) || null;
+      }
+    });
+
+    return form;
+  };
+
   return {
     toAccount,
     toAccountStatus,
     toAccountList,
     toAccountQueryFilterDTO,
     toAccountRecord,
+    toAccountStatusRecord,
+    toAccountStatusForm,
   };
 }

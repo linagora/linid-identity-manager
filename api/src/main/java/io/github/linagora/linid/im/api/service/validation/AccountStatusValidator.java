@@ -93,7 +93,7 @@ public class AccountStatusValidator {
         ensureNewValidityStartNotInPast(current, record, now, accountId);
         ensureValidityEndNotInPast(record, now, accountId);
         ensureSuspensionStartAfterValidityStart(record, accountId);
-        ensureSuspensionStartNotInPast(record, now, accountId);
+        ensureSuspensionStartNotInPast(current, record, now, accountId);
         ensureSuspensionWithinValidity(record, accountId);
     }
 
@@ -285,18 +285,31 @@ public class AccountStatusValidator {
 
     /**
      * Rejects a suspension start strictly in the past. {@code null} suspension starts are accepted.
+     * Idempotent calls (requested suspension start equals the persisted suspension start) are
+     * accepted regardless of whether the start is in the past.
      *
+     * @param current   the persisted {@link AccountStatus}
      * @param record    the request record
-     * @param now       the current instant
+     * @param now       the current instant (start of day)
      * @param accountId the account UUID, used in the error message
      * @throws ApiException with key {@code error.account.status.suspension_start_in_past} (HTTP 400)
      */
-    public void ensureSuspensionStartNotInPast(final AccountStatusRecord record,
+    public void ensureSuspensionStartNotInPast(final AccountStatus current,
+                                               final AccountStatusRecord record,
                                                final OffsetDateTime now,
                                                final UUID accountId) {
         OffsetDateTime suspensionStart = commonMapper.startOf(record.suspensionPeriod());
 
-        if (suspensionStart != null && suspensionStart.isBefore(now)) {
+        if (suspensionStart == null) {
+            return;
+        }
+
+        OffsetDateTime persistedSuspensionStart = commonMapper.startOf(current.getSuspensionPeriod());
+        if (persistedSuspensionStart != null && suspensionStart.isEqual(persistedSuspensionStart)) {
+            return;
+        }
+
+        if (suspensionStart.isBefore(now)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.account.status.suspension_start_in_past",

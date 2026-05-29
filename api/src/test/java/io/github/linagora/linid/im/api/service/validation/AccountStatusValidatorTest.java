@@ -356,10 +356,12 @@ class AccountStatusValidatorTest {
     @Test
     @DisplayName("ensureSuspensionStartNotInPast should throw 400 when suspension start is in the past")
     void testEnsureSuspensionStartNotInPast_shouldThrowWhenInPast() {
+        // current has no suspension → persisted start is null → not idempotent → reject
+        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(null, new PeriodRecord(now.minusDays(1), now.plusDays(10)));
 
         ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspensionStartNotInPast(input, now, ACCOUNT_ID));
+            () -> validator.ensureSuspensionStartNotInPast(current, input, now, ACCOUNT_ID));
 
         assertEquals(400, ex.getStatusCode());
         assertEquals("error.account.status.suspension_start_in_past", ex.getError().key());
@@ -368,9 +370,46 @@ class AccountStatusValidatorTest {
     @Test
     @DisplayName("ensureSuspensionStartNotInPast should accept boundary equality (start == now)")
     void testEnsureSuspensionStartNotInPast_shouldAcceptBoundary() {
+        AccountStatus current = new AccountStatus();
         AccountStatusRecord input = record(null, new PeriodRecord(now, now.plusDays(10)));
 
-        assertDoesNotThrow(() -> validator.ensureSuspensionStartNotInPast(input, now, ACCOUNT_ID));
+        assertDoesNotThrow(() -> validator.ensureSuspensionStartNotInPast(current, input, now, ACCOUNT_ID));
+    }
+
+    @Test
+    @DisplayName("ensureSuspensionStartNotInPast should accept null suspension start")
+    void testEnsureSuspensionStartNotInPast_shouldSkipWhenNullSuspensionStart() {
+        AccountStatus current = new AccountStatus();
+        AccountStatusRecord input = record(null, null);
+
+        assertDoesNotThrow(() -> validator.ensureSuspensionStartNotInPast(current, input, now, ACCOUNT_ID));
+    }
+
+    @Test
+    @DisplayName("ensureSuspensionStartNotInPast should accept idempotent past suspension start")
+    void testEnsureSuspensionStartNotInPast_shouldAcceptIdempotentPastStart() {
+        OffsetDateTime pastStart = now.minusDays(5);
+        AccountStatus current = new AccountStatus();
+        current.setSuspensionPeriod(closedOpen(pastStart, now.plusDays(10)));
+        // Same past start echoed back → idempotent → accepted
+        AccountStatusRecord input = record(null, new PeriodRecord(pastStart, now.plusDays(10)));
+
+        assertDoesNotThrow(() -> validator.ensureSuspensionStartNotInPast(current, input, now, ACCOUNT_ID));
+    }
+
+    @Test
+    @DisplayName("ensureSuspensionStartNotInPast should throw when suspension start changes to a different past date")
+    void testEnsureSuspensionStartNotInPast_shouldThrowWhenChangedToAnotherPastDate() {
+        AccountStatus current = new AccountStatus();
+        current.setSuspensionPeriod(closedOpen(now.minusDays(10), now.plusDays(10)));
+        // Different past start → not idempotent → reject
+        AccountStatusRecord input = record(null, new PeriodRecord(now.minusDays(3), now.plusDays(10)));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> validator.ensureSuspensionStartNotInPast(current, input, now, ACCOUNT_ID));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.suspension_start_in_past", ex.getError().key());
     }
 
     @Test

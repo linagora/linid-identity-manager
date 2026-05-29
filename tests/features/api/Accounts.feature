@@ -42,6 +42,7 @@ Feature: Test API Account endpoints
   ## 614 Should return 400 when suspension start is in the past
   ## 615 Should return 400 when suspension is outside validity end
   ## 616 Should accept open-ended validity (end null) without suspension
+  ## 617 Should accept when suspension start equals persisted past suspension start (idempotent)
 
   ################## Activate (PUT /accounts/{id}/status/activation) #####
   ## 701 Should activate account when business rules are satisfied
@@ -890,6 +891,33 @@ Feature: Test API Account endpoints
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
+
+  Scenario: 617 - Should accept when suspension start equals persisted past suspension start (idempotent)
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-0000000000c9' with method 'GET'
+    Then  I expect status code is 200
+    And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
+    And   I store 'suspensionStart' as '{{response.body.suspensionPeriod.start}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-0000000000c9/status' with method 'PUT' with body:
+      """
+      {
+        "validityPeriod": {
+          "start": "{{ctx.validityPeriodStart}}",
+          "end": null
+        },
+        "suspensionPeriod": {
+          "start": "{{ctx.suspensionStart}}",
+          "end": null
+        },
+        "activationAt": null,
+        "statusReason": "Reason2",
+        "statusSubreason": "Subreason2",
+        "statusComment": "E2E case 9"
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.suspensionPeriod.start}}' is '{{ctx.suspensionStart}}'
+    And   I expect '{{response.body.status}}' is 'SUSPENDED'
 
   ####################################################
   ################## Activate (PUT /accounts/{id}/status/activation) ##

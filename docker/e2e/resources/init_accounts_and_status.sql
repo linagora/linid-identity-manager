@@ -122,7 +122,7 @@ VALUES
         tstzrange(now() + interval '30 days', NULL, '[)'),
         NULL,
         NULL,
-        'ONBOARDING', NULL, 'E2E case 1',
+        'Reason1', 'Subreason1', 'E2E case 1',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 2: INACTIVE, validity already started but never activated.
@@ -130,7 +130,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         NULL,
         NULL,
-        'ONBOARDING', NULL, 'E2E case 2',
+        'Reason1', 'Subreason1', 'E2E case 2',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 3: ACTIVE, no end date, no suspension.
@@ -138,7 +138,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         NULL,
         now() - interval '30 days',
-        'ONBOARDING', NULL, 'E2E case 3',
+        'Reason1', 'Subreason1', 'E2E case 3',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 4: ACTIVE, end > 15 days, no suspension.
@@ -146,7 +146,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '30 days', '[)'),
         NULL,
         now() - interval '30 days',
-        'ONBOARDING', NULL, 'E2E case 4',
+        'Reason1', 'Subreason1', 'E2E case 4',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 5: ACTIVE, end <= 15 days, no suspension.
@@ -154,7 +154,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '10 days', '[)'),
         NULL,
         now() - interval '30 days',
-        'ONBOARDING', NULL, 'E2E case 5',
+        'Reason1', 'Subreason1', 'E2E case 5',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 6: ACTIVE, no end date, future suspension planned.
@@ -162,7 +162,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         tstzrange(now() + interval '10 days', now() + interval '20 days', '[)'),
         now() - interval '30 days',
-        'ONBOARDING', NULL, 'E2E case 6',
+        'Reason1', 'Subreason1', 'E2E case 6',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 7: ACTIVE, end > 15 days, future suspension planned.
@@ -170,7 +170,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '30 days', '[)'),
         tstzrange(now() + interval '10 days', now() + interval '20 days', '[)'),
         now() - interval '30 days',
-        'ONBOARDING', NULL, 'E2E case 7',
+        'Reason1', 'Subreason1', 'E2E case 7',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 8: ACTIVE, end <= 15 days, future suspension planned.
@@ -178,7 +178,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '10 days', '[)'),
         tstzrange(now() + interval '5 days', now() + interval '8 days', '[)'),
         now() - interval '30 days',
-        'ONBOARDING', NULL, 'E2E case 8',
+        'Reason1', 'Subreason1', 'E2E case 8',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 9: SUSPENDED, no validity end, no suspension end (permanent suspension).
@@ -186,7 +186,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         tstzrange(now() - interval '5 days', NULL, '[)'),
         now() - interval '30 days',
-        'INVESTIGATION', NULL, 'E2E case 9',
+        'Reason2', 'Subreason2', 'E2E case 9',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 10: SUSPENDED, no validity end, suspension with explicit end.
@@ -194,7 +194,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         tstzrange(now() - interval '5 days', now() + interval '30 days', '[)'),
         now() - interval '30 days',
-        'INVESTIGATION', NULL, 'E2E case 10',
+        'Reason2', 'Subreason2', 'E2E case 10',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 11: SUSPENDED, validity end > 15 days.
@@ -202,7 +202,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '30 days', '[)'),
         tstzrange(now() - interval '5 days', now() + interval '20 days', '[)'),
         now() - interval '30 days',
-        'INVESTIGATION', NULL, 'E2E case 11',
+        'Reason2', 'Subreason2', 'E2E case 11',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001'),
        -- Case 12: SUSPENDED, validity end <= 15 days.
@@ -210,7 +210,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '10 days', '[)'),
         tstzrange(now() - interval '5 days', now() + interval '9 days', '[)'),
         now() - interval '30 days',
-        'INVESTIGATION', NULL, 'E2E case 12',
+        'Reason2', 'Subreason2', 'E2E case 12',
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;
@@ -228,8 +228,13 @@ VALUES ('00000000-0000-4000-8000-0000000000d1', 'dialog-d1',
        ('00000000-0000-4000-8000-0000000000d2', 'dialog-d2',
         'dialog-d2@example.com', 'SuspDeactDialogs', 'Active',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
-        '00000000-0000-0000-0000-00000000a001',
-        '00000000-0000-0000-0000-00000000a001'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d3', 'dialog-d3',
+        'dialog-d3@example.com', 'DeactImmediateDialog', 'Active',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d4', 'dialog-d4',
         'dialog-d4@example.com', 'ReactivImmediate', 'Suspended',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
@@ -237,6 +242,16 @@ VALUES ('00000000-0000-4000-8000-0000000000d1', 'dialog-d1',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d5', 'dialog-d5',
         'dialog-d5@example.com', 'ActScheduledDialog', 'Inactive',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d6', 'dialog-d6',
+        'dialog-d6@example.com', 'DeactScheduled', 'Active',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d7', 'dialog-d7',
+        'dialog-d7@example.com', 'ModifyDeact', 'Active',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
@@ -275,6 +290,15 @@ VALUES
         'Reason1', 'Subreason1', 'Dialog test D2: suspension/deactivation immediate dialogs',
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
+       -- D3: ACTIVE, no end date, no suspension.
+       -- Unlocks: deactivation.immediate
+       ('00000000-0000-4000-8000-0000000000d3',
+        tstzrange(now() - interval '30 days', NULL, '[)'),
+        NULL,
+        now() - interval '30 days',
+        'Reason1', 'Subreason1', 'Dialog test D3: deactivation.immediate dialog',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
        -- D4: SUSPENDED, no validity end, no suspension end.
        -- Unlocks: reactivation.immediate
        ('00000000-0000-4000-8000-0000000000d4',
@@ -291,6 +315,24 @@ VALUES
         NULL,
         NULL,
         'Reason1', 'Subreason1', 'Dialog test D5: activation.scheduled dialog',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       -- D6: ACTIVE, no end date, no suspension.
+       -- Unlocks: deactivation.scheduled
+       ('00000000-0000-4000-8000-0000000000d6',
+        tstzrange(now() - interval '30 days', NULL, '[)'),
+        NULL,
+        now() - interval '30 days',
+        'Reason1', 'Subreason1', 'Dialog test D6: deactivation.scheduled dialog',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       -- D7: ACTIVE, validity end in 7 days, no suspension.
+       -- Unlocks: deactivation.modify (AccountDeactivatedWarningBanner)
+       ('00000000-0000-4000-8000-0000000000d7',
+        tstzrange(now() - interval '30 days', now() + interval '7 days', '[)'),
+        NULL,
+        now() - interval '30 days',
+        'Reason1', 'Subreason1', 'Dialog test D7: modify deactivation dialog',
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        -- D8: ACTIVE, no end date, no suspension.

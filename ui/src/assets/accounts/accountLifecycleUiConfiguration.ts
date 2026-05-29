@@ -50,6 +50,31 @@ export const accountLifecycleUiConfiguration = {
       input: 'TextArea',
     },
   ],
+  'deactivation.immediate': [
+    {
+      name: 'statusReason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Reason1', 'Reason2', 'Reason3'],
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+      },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
+    },
+  ],
   'reactivation.immediate': [
     {
       name: 'statusComment',
@@ -70,6 +95,80 @@ export const accountLifecycleUiConfiguration = {
           afterDate: '{{ today }}',
         },
       },
+    },
+  ],
+  'deactivation.scheduled': [
+    {
+      name: 'validityPeriodEnd',
+      type: 'String',
+      required: true,
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+        },
+      },
+    },
+    {
+      name: 'statusReason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Reason1', 'Reason2', 'Reason3'],
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+      },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
+    },
+  ],
+  'deactivation.modify': [
+    {
+      name: 'validityPeriodEnd',
+      type: 'String',
+      required: true,
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+        },
+      },
+    },
+    {
+      name: 'statusReason',
+      type: 'String',
+      required: true,
+      input: 'List',
+      inputSettings: {
+        values: ['Reason1', 'Reason2', 'Reason3'],
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      required: true,
+      input: 'List',
+      inputSettings: {
+        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+      },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
     },
   ],
   'suspension.modify': [

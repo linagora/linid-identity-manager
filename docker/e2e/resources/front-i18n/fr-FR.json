@@ -208,6 +208,110 @@
         "scheduled": "Planifiée",
         "modify": "Modifier"
       }
+    },
+    "FormDialog": {
+      "immediate": {
+        "title": "Désactivation immédiate du compte",
+        "content": "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?",
+        "fields": {
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de désactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de désactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusComment": {
+            "label": "Commentaire",
+            "hint": "Ajoutez un commentaire optionnel."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Désactiver",
+          "cancel": "Annuler"
+        }
+      },
+      "scheduled": {
+        "title": "Planifier la désactivation du compte",
+        "content": "Sélectionnez une date de désactivation et indiquez un motif.",
+        "fields": {
+          "validityPeriodEnd": {
+            "label": "Date de désactivation",
+            "close": "Fermer",
+            "validation": {
+              "required": "Ce champ est requis.",
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          },
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de désactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de désactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusComment": {
+            "label": "Commentaire",
+            "hint": "Ajoutez un commentaire optionnel."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Planifier",
+          "cancel": "Annuler"
+        }
+      },
+      "modify": {
+        "title": "Modifier la date de désactivation",
+        "content": "Mettez à jour la date de désactivation planifiée pour ce compte.",
+        "fields": {
+          "validityPeriodEnd": {
+            "label": "Nouvelle date de désactivation",
+            "close": "Fermer",
+            "validation": {
+              "required": "Ce champ est requis.",
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          },
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de désactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de désactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusComment": {
+            "label": "Commentaire",
+            "hint": "Ajoutez un commentaire optionnel."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Modifier",
+          "cancel": "Annuler"
+        }
+      }
     }
   },
   "AccountReactivationActions": {
@@ -329,8 +433,11 @@
     "updateStatusSuccess": "Statut du compte mis à jour avec succès",
     "immediateActivationSuccess": "Le compte pourra être activé dans une heure",
     "immediateSuspensionSuccess": "Le compte sera suspendu dans une heure",
+    "immediateDeactivationSuccess": "Le compte sera désactivé dans une heure",
     "immediateReactivationSuccess": "Le compte sera réactivé dans une heure",
     "scheduledActivationSuccess": "Le compte pourra être activé à partir du {date}",
+    "scheduledDeactivationSuccess": "Le compte sera désactivé à partir du {date}",
+    "modifyDeactivationSuccess": "Le compte sera désactivé à partir du {date}",
     "scheduledSuspensionSuccess": "Le compte sera suspendu à partir du {date}",
     "modifySuspensionSuccess": "Le compte sera suspendu à partir du {date}",
     "errors": {

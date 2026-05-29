@@ -53,6 +53,7 @@
       <q-btn
         :label="t('modifyDeactivationButton')"
         v-bind="uiProps.modifyDeactivationButton"
+        data-cy="button_modify-deactivation"
         @click="emit('modify-deactivation')"
       />
     </template>

@@ -73,6 +73,8 @@
         <AccountDeactivatedWarningBanner
           v-if="lifecycleUi.showDeactivationWarningBanner"
           :account-status="accountStatus"
+          @deactivate-immediate="onLifecycleAction('deactivation.immediate')"
+          @modify-deactivation="onLifecycleAction('deactivation.modify')"
         />
 
         <AccountDeactivatedInfoText
@@ -119,6 +121,7 @@
             i18n-scope="AccountDeactivationActions"
             :items="lifecycleUi.deactivationMenuItems"
             data-cy="account-deactivation-actions"
+            @item-click="onLifecycleAction"
           />
         </div>
       </div>
@@ -258,11 +261,20 @@ function onLifecycleAction(action: string | DropdownClickPayload<string>) {
     case 'suspension.immediate':
       immediateSuspension();
       break;
+    case 'deactivation.immediate':
+      immediateDeactivation();
+      break;
     case 'reactivation.immediate':
       immediateReactivation();
       break;
     case 'activation.scheduled':
       scheduledActivation();
+      break;
+    case 'deactivation.scheduled':
+      scheduledDeactivation();
+      break;
+    case 'deactivation.modify':
+      modifyDeactivation();
       break;
     case 'suspension.scheduled':
       scheduledSuspension();
@@ -340,6 +352,42 @@ function immediateSuspension() {
 }
 
 /**
+ * Opens a form dialog for the immediate deactivation action,
+ * allowing the user to provide additional information
+ * (e.g., reason for deactivation) before confirming the action.
+ */
+function immediateDeactivation() {
+  const fieldKeys = accountLifecycleUiConfiguration[
+    'deactivation.immediate'
+  ].map((field) => field.name) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountDeactivationActions.FormDialog.immediate.title`),
+      content: globalT(
+        `AccountDeactivationActions.FormDialog.immediate.content`
+      ),
+      uiNamespace,
+      i18nScope: `AccountDeactivationActions.FormDialog.immediate`,
+      formFields: accountLifecycleUiConfiguration['deactivation.immediate'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          {
+            ...formData,
+            validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
+          },
+          'immediateDeactivationSuccess'
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
  * Opens a form dialog for the immediate reactivation action,
  * allowing the user to provide additional information
  * (e.g., reason for reactivation) before confirming the action.
@@ -404,6 +452,72 @@ function scheduledActivation() {
           formData,
           'scheduledActivationSuccess',
           formData.validityPeriodStart
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
+ * Opens a form dialog for the scheduled deactivation action,
+ * allowing the user to provide additional information
+ * (e.g., deactivation date, reason for deactivation) before confirming the action.
+ */
+function scheduledDeactivation() {
+  const fieldKeys = accountLifecycleUiConfiguration[
+    'deactivation.scheduled'
+  ].map((field) => field.name) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountDeactivationActions.FormDialog.scheduled.title`),
+      content: globalT(
+        `AccountDeactivationActions.FormDialog.scheduled.content`
+      ),
+      uiNamespace,
+      i18nScope: `AccountDeactivationActions.FormDialog.scheduled`,
+      formFields: accountLifecycleUiConfiguration['deactivation.scheduled'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          formData,
+          'scheduledDeactivationSuccess',
+          formData.validityPeriodEnd
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
+ * Opens a form dialog for the modify deactivation action,
+ * allowing the user to update the scheduled deactivation date
+ * and reason before confirming the action.
+ */
+function modifyDeactivation() {
+  const fieldKeys = accountLifecycleUiConfiguration['deactivation.modify'].map(
+    (field) => field.name
+  ) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountDeactivationActions.FormDialog.modify.title`),
+      content: globalT(`AccountDeactivationActions.FormDialog.modify.content`),
+      uiNamespace,
+      i18nScope: `AccountDeactivationActions.FormDialog.modify`,
+      formFields: accountLifecycleUiConfiguration['deactivation.modify'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          formData,
+          'modifyDeactivationSuccess',
+          formData.validityPeriodEnd
         ),
     },
   } as UiEvent);

@@ -77,8 +77,11 @@ vi.mock('src/services/AccountService', () => ({
 vi.mock('src/assets/accounts/accountLifecycleUiConfiguration', () => ({
   accountLifecycleUiConfiguration: {
     'suspension.immediate': [],
+    'deactivation.immediate': [],
     'reactivation.immediate': [],
     'activation.scheduled': [],
+    'deactivation.scheduled': [],
+    'deactivation.modify': [],
     'suspension.scheduled': [],
     'suspension.modify': [],
   },
@@ -253,8 +256,11 @@ describe('Test component: AccountDetailsPage', () => {
     const actionCases = [
       ['activation.immediate', 'confirmation'],
       ['suspension.immediate', 'form'],
+      ['deactivation.immediate', 'form'],
       ['reactivation.immediate', 'form'],
       ['activation.scheduled', 'form'],
+      ['deactivation.scheduled', 'form'],
+      ['deactivation.modify', 'form'],
       ['suspension.scheduled', 'form'],
       ['suspension.modify', 'form'],
     ];
@@ -297,7 +303,20 @@ describe('Test component: AccountDetailsPage', () => {
 
     it.each([
       ['suspension.immediate', 'AccountSuspensionActions.FormDialog.immediate'],
+      [
+        'deactivation.immediate',
+        'AccountDeactivationActions.FormDialog.immediate',
+      ],
+      [
+        'reactivation.immediate',
+        'AccountReactivationActions.FormDialog.immediate',
+      ],
       ['activation.scheduled', 'AccountActivationActions.FormDialog.scheduled'],
+      [
+        'deactivation.scheduled',
+        'AccountDeactivationActions.FormDialog.scheduled',
+      ],
+      ['deactivation.modify', 'AccountDeactivationActions.FormDialog.modify'],
       ['suspension.scheduled', 'AccountSuspensionActions.FormDialog.scheduled'],
       ['suspension.modify', 'AccountSuspensionActions.FormDialog.modify'],
     ])(
@@ -553,6 +572,40 @@ describe('Test component: AccountDetailsPage', () => {
       });
     });
 
+    describe('Test function: immediateDeactivation', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('deactivation.immediate');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountDeactivationActions.FormDialog.immediate.title'
+        );
+        expect(data.content).toBe(
+          'AccountDeactivationActions.FormDialog.immediate.content'
+        );
+      });
+
+      it('should call updateAccountStatus with future validityPeriodEnd on submit', async () => {
+        wrapper.vm.onLifecycleAction('deactivation.immediate');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ statusReason: 'INVESTIGATION' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            validityPeriod: expect.objectContaining({ end: FIXED_NOW_PLUS_1H }),
+            statusReason: 'INVESTIGATION',
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'immediateDeactivationSuccess',
+        });
+      });
+    });
+
     describe('Test function: immediateReactivation', () => {
       it('should open a form dialog with correct title and content', () => {
         wrapper.vm.onLifecycleAction('reactivation.immediate');
@@ -639,6 +692,106 @@ describe('Test component: AccountDetailsPage', () => {
         });
         expect(mockScopedT).toHaveBeenLastCalledWith(
           'scheduledActivationSuccess'
+        );
+      });
+    });
+
+    describe('Test function: scheduledDeactivation', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('deactivation.scheduled');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountDeactivationActions.FormDialog.scheduled.title'
+        );
+        expect(data.content).toBe(
+          'AccountDeactivationActions.FormDialog.scheduled.content'
+        );
+      });
+
+      it('should call updateAccountStatus with form validityPeriodEnd as success date on submit', async () => {
+        wrapper.vm.onLifecycleAction('deactivation.scheduled');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ validityPeriodEnd: '2026-08-01T00:00:00.000Z' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            validityPeriod: expect.objectContaining({
+              end: '2026-08-01T00:00:00.000Z',
+            }),
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'scheduledDeactivationSuccess',
+        });
+      });
+
+      it('should not interpolate a date in the success message when validityPeriodEnd is null', async () => {
+        wrapper.vm.onLifecycleAction('deactivation.scheduled');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ validityPeriodEnd: null });
+
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'scheduledDeactivationSuccess',
+        });
+        expect(mockScopedT).toHaveBeenLastCalledWith(
+          'scheduledDeactivationSuccess'
+        );
+      });
+    });
+
+    describe('Test function: modifyDeactivation', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('deactivation.modify');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountDeactivationActions.FormDialog.modify.title'
+        );
+        expect(data.content).toBe(
+          'AccountDeactivationActions.FormDialog.modify.content'
+        );
+      });
+
+      it('should call updateAccountStatus with form validityPeriodEnd as success date on submit', async () => {
+        wrapper.vm.onLifecycleAction('deactivation.modify');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ validityPeriodEnd: '2026-08-01T00:00:00.000Z' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            validityPeriod: expect.objectContaining({
+              end: '2026-08-01T00:00:00.000Z',
+            }),
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'modifyDeactivationSuccess',
+        });
+      });
+
+      it('should not interpolate a date in the success message when validityPeriodEnd is null', async () => {
+        wrapper.vm.onLifecycleAction('deactivation.modify');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ validityPeriodEnd: null });
+
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'modifyDeactivationSuccess',
+        });
+        expect(mockScopedT).toHaveBeenLastCalledWith(
+          'modifyDeactivationSuccess'
         );
       });
     });

@@ -122,7 +122,7 @@
       "required": "Ce champ est requis",
       "email": "Format d'e-mail invalide",
       "invalidDate": "Format de date invalide. Le format attendu est {format}",
-      "dateInPast": "La date ne peut pas être dans le passé"
+      "fromDate": "La date ne peut pas être antérieure à la date du jour."
     },
     "ButtonsCard": {
       "cancel": "Annuler",

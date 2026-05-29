@@ -225,8 +225,23 @@ VALUES ('00000000-0000-4000-8000-0000000000d1', 'dialog-d1',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d2', 'dialog-d2',
+        'dialog-d2@example.com', 'SuspDeactDialogs', 'Active',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-0000-0000-00000000a001',
+        '00000000-0000-0000-0000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d5', 'dialog-d5',
         'dialog-d5@example.com', 'ActScheduledDialog', 'Inactive',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d8', 'dialog-d8',
+        'dialog-d8@example.com', 'SuspScheduled', 'Active',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d9', 'dialog-d9',
+        'dialog-d9@example.com', 'ModifySusp', 'Suspended',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
@@ -246,6 +261,15 @@ VALUES
         'Reason1', 'Subreason1', 'Dialog test D1: activation dialogs',
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
+       -- D2: ACTIVE, no end date, no suspension.
+       -- Unlocks: suspension.immediate, suspension.scheduled, deactivation.immediate, deactivation.scheduled
+       ('00000000-0000-4000-8000-0000000000d2',
+        tstzrange(now() - interval '30 days', NULL, '[)'),
+        NULL,
+        now() - interval '30 days',
+        'Reason1', 'Subreason1', 'Dialog test D2: suspension/deactivation immediate dialogs',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
        -- D5: INACTIVE, validity start in the future.
        -- Unlocks: activation.immediate, activation.scheduled, suspension.scheduled, deactivation.scheduled
        ('00000000-0000-4000-8000-0000000000d5',
@@ -253,6 +277,24 @@ VALUES
         NULL,
         NULL,
         'Reason1', 'Subreason1', 'Dialog test D5: activation.scheduled dialog',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       -- D8: ACTIVE, no end date, no suspension.
+       -- Unlocks: suspension.scheduled
+       ('00000000-0000-4000-8000-0000000000d8',
+        tstzrange(now() - interval '30 days', NULL, '[)'),
+        NULL,
+        now() - interval '30 days',
+        'Reason1', 'Subreason1', 'Dialog test D8: suspension.scheduled dialog',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       -- D9: SUSPENDED, suspension period with both start and end defined.
+       -- Unlocks: suspension.modify (AccountSuspendedBanner)
+       ('00000000-0000-4000-8000-0000000000d9',
+        tstzrange(now() - interval '30 days', NULL, '[)'),
+        tstzrange(now() - interval '10 days', now() + interval '20 days', '[)'),
+        now() - interval '30 days',
+        'Reason1', 'Subreason1', 'Dialog test D9: modify suspension dialog',
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;

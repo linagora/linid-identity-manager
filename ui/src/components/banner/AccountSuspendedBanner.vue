@@ -43,11 +43,13 @@
       <q-btn
         :label="t('clearSuspensionButton')"
         v-bind="uiProps.clearSuspensionButton"
+        data-cy="button_clear-suspension"
         @click="emit('clear-suspension')"
       />
       <q-btn
         :label="t('modifySuspensionButton')"
         v-bind="uiProps.modifySuspensionButton"
+        data-cy="button_modify-suspension"
         @click="emit('modify-suspension')"
       />
     </template>

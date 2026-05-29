@@ -27,6 +27,26 @@ Feature: Test Account details page display
   ## 124 Scheduled activation - validityPeriodStart invalidDate validation error
   ## 125 Scheduled activation - validityPeriodStart afterDate validation error
   ## 126 Scheduled activation - success, account status updated after form submission
+  ## 127 Immediate suspension - dialog opens correctly
+  ## 128 Immediate suspension - cancel button closes dialog
+  ## 129 Immediate suspension - success, account status updated after form submission
+  ## 130 Scheduled suspension - dialog opens correctly
+  ## 131 Scheduled suspension - cancel button closes dialog
+  ## 132 Scheduled suspension - validation errors on required fields
+  ## 133 Scheduled suspension - suspensionPeriodStart invalidDate validation error
+  ## 134 Scheduled suspension - suspensionPeriodEnd invalidDate validation error
+  ## 135 Scheduled suspension - suspensionPeriodStart afterDate validation error
+  ## 136 Scheduled suspension - suspensionPeriodEnd afterDate validation error
+  ## 137 Scheduled suspension - suspensionPeriodEnd fromDate validation error
+  ## 138 Scheduled suspension - success, account status updated after form submission
+  ## 139 Modify suspension - dialog opens correctly
+  ## 140 Modify suspension - cancel button closes dialog
+  ## 141 Modify suspension - suspensionPeriodStart invalidDate validation error
+  ## 142 Modify suspension - suspensionPeriodStart afterDate validation error
+  ## 143 Modify suspension - suspensionPeriodEnd invalidDate validation error
+  ## 144 Modify suspension - suspensionPeriodEnd afterDate validation error
+  ## 145 Modify suspension - suspensionPeriodEnd fromDate validation error
+  ## 146 Modify suspension - success, account status updated after form submission
 
   Scenario: Roundtrip about Account Details
 
@@ -309,4 +329,224 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé à partir du 01/01/2100"
+
+    ## 127 Immediate suspension - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d2"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
+    When I click on '[data-cy="account-suspension-actions"]'
+    Then I expect the HTML element '[data-cy="dropdown-button_item_suspension.immediate"]' to be visible
+    When I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Suspension immédiate du compte"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Suspendre"
+
+    ## 128 Immediate suspension - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 129 Immediate suspension - success, account status updated after form submission
+    When I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu dans une heure"
+
+    ## 130 Scheduled suspension - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d8"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
+    When I click on '[data-cy="account-suspension-actions"]'
+    Then I expect the HTML element '[data-cy="dropdown-button_item_suspension.scheduled"]' to be visible
+    When I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la suspension du compte"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Configurez la période de suspension du compte."
+    And I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Date de début de suspension"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Date de fin de suspension"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
+
+    ## 131 Scheduled suspension - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 132 Scheduled suspension - validation errors on required fields
+    When I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Ce champ est requis."
+
+    ## 133 Scheduled suspension - suspensionPeriodStart invalidDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 134 Scheduled suspension - suspensionPeriodEnd invalidDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "2100/09/23" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 135 Scheduled suspension - suspensionPeriodStart afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 136 Scheduled suspension - suspensionPeriodEnd afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 137 Scheduled suspension - suspensionPeriodEnd fromDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "01/06/2099" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être postérieure au 01/01/2100."
+
+    ## 138 Scheduled suspension - success, account status updated after form submission
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspension-actions"]'
+    And I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I set the text "Dialog test D8: suspension scheduled" in the HTML element '[data-cy="field_statusComment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
+
+    ## 139 Modify suspension - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d9"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
+    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier les paramètres de suspension"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Mettez à jour les paramètres de suspension de ce compte."
+    And I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Nouvelle date de début de suspension"
+    And I expect the HTML element '[data-cy="field_suspensionPeriodStart"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Nouvelle date de fin de suspension (optionnelle)"
+    And I expect the HTML element '[data-cy="field_suspensionPeriodEnd"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Modifier"
+
+    ## 140 Modify suspension - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 141 Modify suspension - suspensionPeriodStart invalidDate validation error
+    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 142 Modify suspension - suspensionPeriodStart afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 143 Modify suspension - suspensionPeriodEnd invalidDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 144 Modify suspension - suspensionPeriodEnd afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 145 Modify suspension - suspensionPeriodEnd fromDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être postérieure au 01/06/2100."
+
+    ## 146 Modify suspension - success, account status updated after form submission
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I set the text "Dialog test D9: modify suspension" in the HTML element '[data-cy="field_statusComment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
 

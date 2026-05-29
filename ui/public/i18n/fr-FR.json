@@ -125,6 +125,128 @@
         "immediate": "Immédiate",
         "scheduled": "Planifiée"
       }
+    },
+    "FormDialog": {
+      "immediate": {
+        "title": "Suspension immédiate du compte",
+        "content": "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?",
+        "fields": {
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de suspension.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de suspension.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusComment": {
+            "label": "Commentaire",
+            "hint": "Ajoutez un commentaire optionnel."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Suspendre",
+          "cancel": "Annuler"
+        }
+      },
+      "scheduled": {
+        "title": "Planifier la suspension du compte",
+        "content": "Configurez la période de suspension du compte.",
+        "fields": {
+          "suspensionPeriodStart": {
+            "label": "Date de début de suspension",
+            "close": "Fermer",
+            "validation": {
+              "required": "Ce champ est requis.",
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          },
+          "suspensionPeriodEnd": {
+            "label": "Date de fin de suspension (optionnelle)",
+            "close": "Fermer",
+            "validation": {
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour.",
+              "fromDate": "La date de fin doit être postérieure au {compareTo}."
+            }
+          },
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de suspension.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de suspension.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusComment": {
+            "label": "Commentaire",
+            "hint": "Ajoutez un commentaire optionnel."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Planifier",
+          "cancel": "Annuler"
+        }
+      },
+      "modify": {
+        "title": "Modifier les paramètres de suspension",
+        "content": "Mettez à jour les paramètres de suspension de ce compte.",
+        "fields": {
+          "suspensionPeriodStart": {
+            "label": "Nouvelle date de début de suspension",
+            "close": "Fermer",
+            "validation": {
+              "required": "Ce champ est requis.",
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          },
+          "suspensionPeriodEnd": {
+            "label": "Nouvelle date de fin de suspension (optionnelle)",
+            "close": "Fermer",
+            "validation": {
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour.",
+              "fromDate": "La date de fin doit être postérieure au {compareTo}."
+            }
+          },
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de suspension.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de suspension.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "statusComment": {
+            "label": "Commentaire",
+            "hint": "Ajoutez un commentaire optionnel."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Modifier",
+          "cancel": "Annuler"
+        }
+      }
     }
   },
   "AccountDeactivationActions": {
@@ -185,7 +307,10 @@
     },
     "updateStatusSuccess": "Statut du compte mis à jour avec succès",
     "immediateActivationSuccess": "Le compte pourra être activé dans une heure",
+    "immediateSuspensionSuccess": "Le compte sera suspendu dans une heure",
     "scheduledActivationSuccess": "Le compte pourra être activé à partir du {date}",
+    "scheduledSuspensionSuccess": "Le compte sera suspendu à partir du {date}",
+    "modifySuspensionSuccess": "Le compte sera suspendu à partir du {date}",
     "errors": {
       "notFound": "Compte introuvable",
       "generic": "Impossible de charger le compte. Veuillez réessayer plus tard.",

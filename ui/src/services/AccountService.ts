@@ -30,6 +30,7 @@ import type {
   AccountDTO,
   AccountQueryFilterDTO,
   AccountRecord,
+  AccountStatusRecord,
 } from 'src/types/accounts';
 
 /**
@@ -71,4 +72,19 @@ export async function getAccounts(
       Page<AccountDTO>
     >(`/accounts`, { params: { ...filters, ...pagination } })
     .then(({ data }) => data);
+}
+
+/**
+ * Updates the account status, for actions such as activation, suspension, or deactivation.
+ * @param id - The unique identifier of the account to update.
+ * @param accountStatus - The account status payload containing the updated status information.
+ * @returns A promise resolving to the raw DTO of the updated account, reflecting its new status.
+ */
+export function updateStatus(
+  id: string,
+  accountStatus: AccountStatusRecord
+): Promise<AccountDTO> {
+  return api
+    .put<AccountDTO>(`/accounts/${id}/status`, accountStatus)
+    .then((response) => response.data);
 }

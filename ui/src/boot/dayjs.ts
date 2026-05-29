@@ -24,6 +24,7 @@
  * LinID Identity Manager software.
  */
 
+import { setDayjsInstance } from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '@quasar/app-vite/wrappers';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
@@ -37,6 +38,8 @@ export default defineBoot(({ app }) => {
   // Extend Day.js with the necessary plugins
   dayjs.extend(utc);
   dayjs.extend(customParseFormat);
+
+  setDayjsInstance(dayjs);
 
   app.config.globalProperties.$dayjs = dayjs;
   // ^ ^ ^ this will allow you to use this.$dayjs (for Vue Options API form)

@@ -41,15 +41,15 @@ export function useCommonMapper() {
    * Convert ISO date to date with local date time format.
    * @param value Date string in ISO format (e.g., "2024-06-30T12:34:56.789Z") to be converted to a human-readable format.
    * @param formatKey Optional format key to specify the desired date format from the i18n translations (default is "dateFormat").
-   * @returns Formatted date string according to the application's locale settings, or "-" if the input is invalid or falsy.
+   * @returns Formatted date string according to the application's locale settings, or "" if the input is invalid or falsy.
    */
   const toDate = (value: unknown, formatKey: string = 'dateFormat'): string => {
     if (!value) {
-      return '-';
+      return '';
     }
     const date = dayjs(value.toString());
     if (!date.isValid()) {
-      return '-';
+      return '';
     }
     return date.format(t(`application.${formatKey}`));
   };

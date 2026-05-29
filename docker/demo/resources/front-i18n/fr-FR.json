@@ -210,6 +210,27 @@
       }
     }
   },
+  "AccountReactivationActions": {
+    "FormDialog": {
+      "immediate": {
+        "title": "Réactivation immédiate du compte",
+        "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
+        "fields": {
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Réactiver",
+          "cancel": "Annuler"
+        }
+      }
+    }
+  },
   "AccountsPage": {
     "menuTitle": "Comptes",
     "title": "Comptes",
@@ -308,6 +329,7 @@
     "updateStatusSuccess": "Statut du compte mis à jour avec succès",
     "immediateActivationSuccess": "Le compte pourra être activé dans une heure",
     "immediateSuspensionSuccess": "Le compte sera suspendu dans une heure",
+    "immediateReactivationSuccess": "Le compte sera réactivé dans une heure",
     "scheduledActivationSuccess": "Le compte pourra être activé à partir du {date}",
     "scheduledSuspensionSuccess": "Le compte sera suspendu à partir du {date}",
     "modifySuspensionSuccess": "Le compte sera suspendu à partir du {date}",

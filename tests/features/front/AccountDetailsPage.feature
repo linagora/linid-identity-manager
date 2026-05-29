@@ -47,6 +47,9 @@ Feature: Test Account details page display
   ## 144 Modify suspension - suspensionPeriodEnd afterDate validation error
   ## 145 Modify suspension - suspensionPeriodEnd fromDate validation error
   ## 146 Modify suspension - success, account status updated after form submission
+  ## 147 Immediate reactivation - dialog opens correctly
+  ## 148 Immediate reactivation - cancel button closes dialog
+  ## 149 Immediate reactivation - success, account status updated after form submission
 
   Scenario: Roundtrip about Account Details
 
@@ -550,3 +553,30 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
 
+    ## 147 Immediate reactivation - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d4"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
+    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Réactiver"
+
+    ## 148 Immediate reactivation - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 149 Immediate reactivation - success, account status updated after form submission
+    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "Réactivation immédiate pour test e2e" in the HTML element '[data-cy="field_statusComment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé dans une heure"

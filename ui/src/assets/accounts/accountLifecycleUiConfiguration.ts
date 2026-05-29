@@ -50,6 +50,14 @@ export const accountLifecycleUiConfiguration = {
       input: 'TextArea',
     },
   ],
+  'reactivation.immediate': [
+    {
+      name: 'statusComment',
+      type: 'String',
+      required: true,
+      input: 'TextArea',
+    },
+  ],
   'activation.scheduled': [
     {
       name: 'validityPeriodStart',

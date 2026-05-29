@@ -66,6 +66,7 @@
         <AccountSuspendedBanner
           v-if="lifecycleUi.showSuspendedBanner"
           :account-status="accountStatus"
+          @clear-suspension="onLifecycleAction('reactivation.immediate')"
           @modify-suspension="onLifecycleAction('suspension.modify')"
         />
 
@@ -257,6 +258,9 @@ function onLifecycleAction(action: string | DropdownClickPayload<string>) {
     case 'suspension.immediate':
       immediateSuspension();
       break;
+    case 'reactivation.immediate':
+      immediateReactivation();
+      break;
     case 'activation.scheduled':
       scheduledActivation();
       break;
@@ -330,6 +334,44 @@ function immediateSuspension() {
             suspensionPeriodStart: dayjs().add(1, 'hour').toISOString(),
           },
           'immediateSuspensionSuccess'
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
+ * Opens a form dialog for the immediate reactivation action,
+ * allowing the user to provide additional information
+ * (e.g., reason for reactivation) before confirming the action.
+ */
+function immediateReactivation() {
+  const fieldKeys = accountLifecycleUiConfiguration[
+    'reactivation.immediate'
+  ].map((field) => field.name) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountReactivationActions.FormDialog.immediate.title`),
+      content: globalT(
+        `AccountReactivationActions.FormDialog.immediate.content`
+      ),
+      uiNamespace,
+      i18nScope: `AccountReactivationActions.FormDialog.immediate`,
+      formFields: accountLifecycleUiConfiguration['reactivation.immediate'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          {
+            ...formData,
+            suspensionPeriodEnd: dayjs().add(1, 'hour').toISOString(),
+            statusReason: null,
+            statusSubreason: null,
+          },
+          'immediateReactivationSuccess'
         ),
     },
   } as UiEvent);

@@ -53,6 +53,11 @@ VALUES ('00000000-0000-4000-8000-0000000000d1', 'dialog-d1',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-0000000000d2',
         '00000000-0000-4000-8000-0000000000d2'),
+       ('00000000-0000-4000-8000-0000000000d4', 'dialog-d4',
+        'dialog-d4@example.com', 'ReactivImmediate', 'Suspended',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-0000000000d4',
+        '00000000-0000-4000-8000-0000000000d4'),
        ('00000000-0000-4000-8000-0000000000d5', 'dialog-d5',
         'dialog-d5@example.com', 'ActScheduledDialog', 'Inactive',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
@@ -93,6 +98,15 @@ VALUES
         'Reason1', 'Subreason1', 'Dialog test D2: suspension/deactivation immediate dialogs',
         '00000000-0000-4000-8000-0000000000d2',
         '00000000-0000-4000-8000-0000000000d2'),
+       -- D4: SUSPENDED, no validity end, no suspension end.
+       -- Unlocks: reactivation.immediate
+       ('00000000-0000-4000-8000-0000000000d4',
+        tstzrange(now() - interval '30 days', NULL, '[)'),
+        tstzrange(now() - interval '5 days', NULL, '[)'),
+        now() - interval '30 days',
+        'Reason2', 'Subreason2', 'Dialog test D4: reactivation.immediate dialog',
+        '00000000-0000-4000-8000-0000000000d4',
+        '00000000-0000-4000-8000-0000000000d4'),
        -- D5: INACTIVE, validity start in the future.
        -- Unlocks: activation.immediate, activation.scheduled, suspension.scheduled, deactivation.scheduled
        ('00000000-0000-4000-8000-0000000000d5',

@@ -24,7 +24,10 @@
  * LinID Identity Manager software.
  */
 
-import { setPiniaStore } from '@linagora/linid-im-front-corelib';
+import {
+  setPiniaStore,
+  useLinidZoneStore,
+} from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '#q-app/wrappers';
 
 /**
@@ -32,4 +35,12 @@ import { defineBoot } from '#q-app/wrappers';
  */
 export default defineBoot(async ({ app }) => {
   setPiniaStore(app.config.globalProperties.$pinia);
+  const linidZoneStore = useLinidZoneStore();
+
+  linidZoneStore.registerOnce('base-layout.dialogComponent', {
+    plugin: 'catalogUI/ConfirmationDialog',
+  });
+  linidZoneStore.registerOnce('base-layout.dialogComponent', {
+    plugin: 'catalogUI/FormDialog',
+  });
 });

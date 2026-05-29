@@ -271,6 +271,36 @@ export interface AccountStatus {
 }
 
 /**
+ * Shape of the payload sent to the backend when updating an account's status.
+ */
+export interface AccountStatusRecord extends Record<string, unknown> {
+  /**
+   * Period during which the account is considered active.
+   */
+  validityPeriod: Period;
+
+  /**
+   * Period during which the account is suspended.
+   */
+  suspensionPeriod: Period;
+
+  /**
+   * Primary reason for the current account status, if any.
+   */
+  statusReason: string | null;
+
+  /**
+   * More specific sub-reason for the account status, if available.
+   */
+  statusSubreason: string | null;
+
+  /**
+   * Free-text comment providing additional context about the status.
+   */
+  statusComment: string | null;
+}
+
+/**
  * Shape of the account form used for creation and edition. Differs from {@link AccountRecord} as it carries flat keys for nested fields, which is more convenient for form input bindings.
  */
 export interface AccountForm {
@@ -294,4 +324,41 @@ export interface AccountForm {
    * Start date of the account's validity period.
    */
   validityPeriodStart: string;
+}
+
+/**
+ * Shape of the account status form used for edition. Carries flat keys for nested fields,
+ * which is more convenient for form input bindings. Differs from {@link AccountStatusRecord}
+ * as it has separate start and end fields for validity and suspension periods,
+ * instead of nested objects, to facilitate form handling.
+ */
+export interface AccountStatusForm {
+  /**
+   * Start date of the account's validity period.
+   */
+  validityPeriodStart?: string | null;
+  /**
+   * End date of the account's validity period.
+   */
+  validityPeriodEnd?: string | null;
+  /**
+   * Start date of the account's suspension period.
+   */
+  suspensionPeriodStart?: string | null;
+  /**
+   * End date of the account's suspension period.
+   */
+  suspensionPeriodEnd?: string | null;
+  /**
+   * Primary reason for the current account status, if any.
+   */
+  statusReason?: string | null;
+  /**
+   * More specific sub-reason for the account status, if available.
+   */
+  statusSubreason?: string | null;
+  /**
+   * Free-text comment providing additional context about the status.
+   */
+  statusComment?: string | null;
 }

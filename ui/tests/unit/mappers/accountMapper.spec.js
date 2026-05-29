@@ -269,6 +269,175 @@ describe('Test mapper: accountMapper', () => {
     });
   });
 
+  describe('Test function: toAccountStatusRecord', () => {
+    it('should map all form fields into the nested AccountStatusRecord structure', () => {
+      const { toAccountStatusRecord } = useAccountMapper();
+
+      const formData = {
+        validityPeriodStart: '2026-06-01T00:00:00.000Z',
+        validityPeriodEnd: '2027-06-01T00:00:00.000Z',
+        suspensionPeriodStart: '2026-07-01T00:00:00.000Z',
+        suspensionPeriodEnd: '2026-09-01T00:00:00.000Z',
+        activationAt: '2026-06-01T00:00:00.000Z',
+        statusReason: 'INVESTIGATION',
+        statusSubreason: 'FRAUD',
+        statusComment: 'Pending review',
+      };
+
+      const result = toAccountStatusRecord(formData);
+
+      expect(result).toEqual({
+        validityPeriod: {
+          start: formData.validityPeriodStart,
+          end: formData.validityPeriodEnd,
+        },
+        suspensionPeriod: {
+          start: formData.suspensionPeriodStart,
+          end: formData.suspensionPeriodEnd,
+        },
+        statusReason: formData.statusReason,
+        statusSubreason: formData.statusSubreason,
+        statusComment: formData.statusComment,
+      });
+    });
+
+    it('should coerce empty and undefined form fields to null', () => {
+      const { toAccountStatusRecord } = useAccountMapper();
+
+      const result = toAccountStatusRecord({});
+
+      expect(result).toEqual({
+        validityPeriod: { start: null, end: null },
+        suspensionPeriod: { start: null, end: null },
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+      });
+    });
+  });
+
+  describe('Test function: toAccountStatusForm', () => {
+    it('should flatten all periods and apply toDate to all date fields by default', () => {
+      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
+      const { toAccountStatusForm } = useAccountMapper();
+
+      const accountStatus = {
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2027-01-01T00:00:00Z',
+        },
+        suspensionPeriod: {
+          start: '2026-06-01T00:00:00Z',
+          end: '2026-09-01T00:00:00Z',
+        },
+        statusReason: 'INVESTIGATION',
+        statusSubreason: 'FRAUD',
+        statusComment: 'Pending review',
+      };
+
+      const result = toAccountStatusForm(accountStatus);
+
+      expect(result).toEqual({
+        validityPeriodStart: dayjs('2026-01-01T00:00:00Z').format(
+          'YYYY-MM-DD HH:mm'
+        ),
+        validityPeriodEnd: dayjs('2027-01-01T00:00:00Z').format(
+          'YYYY-MM-DD HH:mm'
+        ),
+        suspensionPeriodStart: dayjs('2026-06-01T00:00:00Z').format(
+          'YYYY-MM-DD HH:mm'
+        ),
+        suspensionPeriodEnd: dayjs('2026-09-01T00:00:00Z').format(
+          'YYYY-MM-DD HH:mm'
+        ),
+        statusReason: 'INVESTIGATION',
+        statusSubreason: 'FRAUD',
+        statusComment: 'Pending review',
+      });
+    });
+
+    it('should keep ISO strings when displayedDateFields is empty', () => {
+      const { toAccountStatusForm } = useAccountMapper();
+
+      const accountStatus = {
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2027-01-01T00:00:00Z',
+        },
+        suspensionPeriod: {
+          start: '2026-06-01T00:00:00Z',
+          end: '2026-09-01T00:00:00Z',
+        },
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+      };
+
+      const result = toAccountStatusForm(accountStatus, []);
+
+      expect(result).toEqual({
+        validityPeriodStart: '2026-01-01T00:00:00Z',
+        validityPeriodEnd: '2027-01-01T00:00:00Z',
+        suspensionPeriodStart: '2026-06-01T00:00:00Z',
+        suspensionPeriodEnd: '2026-09-01T00:00:00Z',
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+      });
+    });
+
+    it('should only convert the fields listed in displayedDateFields', () => {
+      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
+      const { toAccountStatusForm } = useAccountMapper();
+
+      const accountStatus = {
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2027-01-01T00:00:00Z',
+        },
+        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+      };
+
+      const result = toAccountStatusForm(accountStatus, [
+        'validityPeriodStart',
+      ]);
+
+      expect(result.validityPeriodStart).toBe(
+        dayjs('2026-01-01T00:00:00Z').format('YYYY-MM-DD HH:mm')
+      );
+      expect(result.validityPeriodEnd).toBe('2027-01-01T00:00:00Z');
+      expect(result.suspensionPeriodStart).toBe('2026-06-01T00:00:00Z');
+      expect(result.suspensionPeriodEnd).toBeNull();
+    });
+
+    it('should set null for missing or null period values', () => {
+      const { toAccountStatusForm } = useAccountMapper();
+
+      const accountStatus = {
+        validityPeriod: { start: null, end: null },
+        suspensionPeriod: { start: null, end: null },
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+      };
+
+      const result = toAccountStatusForm(accountStatus);
+
+      expect(result).toEqual({
+        validityPeriodStart: null,
+        validityPeriodEnd: null,
+        suspensionPeriodStart: null,
+        suspensionPeriodEnd: null,
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+      });
+    });
+  });
+
   describe('Test function: toAccountList', () => {
     it('Map an array of AccountDTOs to Accounts', () => {
       tMock.mockReturnValue('YYYY-MM-DD HH:mm');

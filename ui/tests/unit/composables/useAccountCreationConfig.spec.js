@@ -36,7 +36,7 @@ const requiredRule = (value) =>
 const emailRule = (value) =>
   typeof value === 'string' && value.includes('@') ? true : 'email';
 const validDateRule = vi.fn();
-const dateNotInPastRule = vi.fn();
+const fromDateRule = vi.fn();
 
 vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: vi.fn(() => ({
@@ -46,13 +46,19 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
     required: requiredRule,
     email: emailRule,
     validDate: vi.fn(() => validDateRule),
-    dateNotInPast: vi.fn(() => dateNotInPastRule),
+    fromDate: vi.fn(() => fromDateRule),
   })),
 }));
 
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(() => ({
     t: vi.fn((key) => `global.${key}`),
+  })),
+}));
+
+vi.mock('src/boot/dayjs', () => ({
+  dayjs: vi.fn(() => ({
+    format: vi.fn(() => 'mocked-date'),
   })),
 }));
 
@@ -106,17 +112,19 @@ describe('Test composable: useAccountCreationConfig', () => {
     expect(emailField?.rules).toEqual([requiredRule, emailRule]);
   });
 
-  it('should apply required, validDate and dateNotInPast rules on the validityPeriodStart field', () => {
+  it('should apply required, validDate and a lazy fromDate rule on the validityPeriodStart field', () => {
     const { creationFields } = useAccountCreationConfig('AccountCreationPage');
     const dateField = creationFields.find(
       (field) => field.name === 'validityPeriodStart'
     );
 
     expect(dateField?.type).toBe('date');
-    expect(dateField?.rules).toEqual([
-      requiredRule,
-      validDateRule,
-      dateNotInPastRule,
-    ]);
+    expect(dateField?.rules[0]).toBe(requiredRule);
+    expect(dateField?.rules[1]).toBe(validDateRule);
+
+    const lazyFromDateRule = dateField?.rules[2];
+    expect(typeof lazyFromDateRule).toBe('function');
+    lazyFromDateRule('28/05/2026');
+    expect(fromDateRule).toHaveBeenCalledWith('28/05/2026');
   });
 });

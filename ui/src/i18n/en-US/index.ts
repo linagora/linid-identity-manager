@@ -151,6 +151,8 @@ export default {
     validation: {
       required: 'This field is required',
       email: 'Invalid email format',
+      invalidDate: 'Invalid date format. Expected format is {format}',
+      fromDate: 'The date cannot be before today.',
     },
     ButtonsCard: {
       cancel: 'Cancel',

@@ -56,13 +56,13 @@ Feature: Test Account creation page
     And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/create"
 
     ## 104 Submitting a form with a past validity start date should display date validation message
-    When I set the text "01/01/2020" in the HTML element "[data-cy=\"field_validityPeriodStart\"] input"
+    When I set the text "john.doe@example.com" in the HTML element "[data-cy=\"field_email\"] input"
+    And I set the text "01/01/2020" in the HTML element "[data-cy=\"field_validityPeriodStart\"] input"
     And I click on '[data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="field_validityPeriodStart"]' contains "La date ne peut pas être dans le passé"
+    Then I expect the HTML element '[data-cy="field_validityPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
 
     ## 105 Submitting a valid form should create the account on the backend
-    When I set the text "john.doe@example.com" in the HTML element "[data-cy=\"field_email\"] input"
-    And I set the text "01/01/2080" in the HTML element "[data-cy=\"field_validityPeriodStart\"] input"
+    When I set the text "01/01/2080" in the HTML element "[data-cy=\"field_validityPeriodStart\"] input"
     And I click on '[data-cy="button_confirm"]'
 
     ## 106 Should display a success notification after creation

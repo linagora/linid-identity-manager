@@ -28,6 +28,7 @@ import {
   useQuasarFieldValidation,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
+import { dayjs } from 'src/boot/dayjs';
 import type { AccountForm } from 'src/types/accounts';
 import type { FormField } from 'src/types/form';
 import { useI18n } from 'vue-i18n';
@@ -43,7 +44,7 @@ import { useI18n } from 'vue-i18n';
 export function useAccountCreationConfig(i18nScope: string) {
   const { t: globalT } = useI18n();
   const { t } = useScopedI18n(i18nScope);
-  const { required, email, validDate, dateNotInPast } =
+  const { required, email, validDate, fromDate } =
     useQuasarFieldValidation(i18nScope);
 
   const dateFormat = globalT('application.dateFormat');
@@ -77,7 +78,12 @@ export function useAccountCreationConfig(i18nScope: string) {
       name: 'validityPeriodStart',
       label: t('fields.validityPeriodStart.label'),
       type: 'date',
-      rules: [required, validDate(dateFormat), dateNotInPast(dateFormat)],
+      rules: [
+        required,
+        validDate(dateFormat),
+        (value: unknown) =>
+          fromDate(dayjs().format(dateFormat), dateFormat)(value),
+      ],
     },
   ];
 

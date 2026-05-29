@@ -214,3 +214,45 @@ VALUES
         '00000000-0000-0000-0000-00000000a001',
         '00000000-0000-0000-0000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;
+
+-- One account per dialog group, with deterministic UUIDs for e2e targeting.
+-- Each account exposes the minimum required state to trigger the listed dialogs.
+INSERT
+INTO accounts (act_id, external_id, email, lastname, firstname, payload,
+               checksum, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-0000000000d1', 'dialog-d1',
+        'dialog-d1@example.com', 'ActivationDialogs', 'Inactive',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000d5', 'dialog-d5',
+        'dialog-d5@example.com', 'ActScheduledDialog', 'Inactive',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT
+INTO account_status (act_id, validity_period, suspension_period, activation_at,
+                     status_reason, status_subreason, status_comment,
+                     created_by, updated_by)
+VALUES
+       -- D1: INACTIVE, validity start in the future.
+       -- Unlocks: activation.immediate, activation.scheduled, suspension.scheduled, deactivation.scheduled
+       ('00000000-0000-4000-8000-0000000000d1',
+        tstzrange(now() + interval '30 days', NULL, '[)'),
+        NULL,
+        NULL,
+        'Reason1', 'Subreason1', 'Dialog test D1: activation dialogs',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       -- D5: INACTIVE, validity start in the future.
+       -- Unlocks: activation.immediate, activation.scheduled, suspension.scheduled, deactivation.scheduled
+       ('00000000-0000-4000-8000-0000000000d5',
+        tstzrange(now() + interval '30 days', NULL, '[)'),
+        NULL,
+        NULL,
+        'Reason1', 'Subreason1', 'Dialog test D5: activation.scheduled dialog',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (act_id) DO NOTHING;

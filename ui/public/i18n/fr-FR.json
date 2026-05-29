@@ -85,6 +85,37 @@
         "immediate": "Immédiate",
         "scheduled": "Planifiée"
       }
+    },
+    "ConfirmationDialog": {
+      "immediate": {
+        "title": "Activation immédiate du compte",
+        "content": "Êtes-vous sûr de vouloir activer ce compte immédiatement ?",
+        "ButtonsCard": {
+          "confirm": "Activer",
+          "cancel": "Annuler"
+        }
+      }
+    },
+    "FormDialog": {
+      "scheduled": {
+        "title": "Planifier l'activation du compte",
+        "content": "Veuillez sélectionner une date d'activation.",
+        "fields": {
+          "validityPeriodStart": {
+            "label": "Date d'activation",
+            "close": "Fermer",
+            "validation": {
+              "required": "Ce champ est requis.",
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Planifier",
+          "cancel": "Annuler"
+        }
+      }
     }
   },
   "AccountSuspensionActions": {
@@ -152,9 +183,13 @@
     "ButtonsCard": {
       "cancel": "Retour"
     },
+    "updateStatusSuccess": "Statut du compte mis à jour avec succès",
+    "immediateActivationSuccess": "Le compte pourra être activé dans une heure",
+    "scheduledActivationSuccess": "Le compte pourra être activé à partir du {date}",
     "errors": {
       "notFound": "Compte introuvable",
-      "generic": "Impossible de charger le compte. Veuillez réessayer plus tard."
+      "generic": "Impossible de charger le compte. Veuillez réessayer plus tard.",
+      "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
     }
   },
   "AccountDeactivatedBanner": {

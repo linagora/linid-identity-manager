@@ -244,6 +244,28 @@ export default {
       },
     },
   },
+  AccountReactivationActions: {
+    FormDialog: {
+      immediate: {
+        title: 'Immediate Account Reactivation',
+        content:
+          'Are you sure you want to reactivate this account immediately?',
+        fields: {
+          statusComment: {
+            label: 'Justification',
+            hint: 'Provide a mandatory justification for this reactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Reactivate',
+          cancel: 'Cancel',
+        },
+      },
+    },
+  },
   AccountsPage: {
     menuTitle: 'Accounts',
     title: 'Accounts',
@@ -338,6 +360,7 @@ export default {
     updateStatusSuccess: 'Account status successfully updated',
     immediateActivationSuccess: 'The account can be activated within one hour',
     immediateSuspensionSuccess: 'The account will be suspended in one hour',
+    immediateReactivationSuccess: 'The account will be reactivated in one hour',
     scheduledActivationSuccess: 'The account can be activated from {date}',
     scheduledSuspensionSuccess: 'The account will be suspended from {date}',
     modifySuspensionSuccess: 'The account will be suspended from {date}',

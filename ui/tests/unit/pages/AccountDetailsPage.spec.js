@@ -77,6 +77,7 @@ vi.mock('src/services/AccountService', () => ({
 vi.mock('src/assets/accounts/accountLifecycleUiConfiguration', () => ({
   accountLifecycleUiConfiguration: {
     'suspension.immediate': [],
+    'reactivation.immediate': [],
     'activation.scheduled': [],
     'suspension.scheduled': [],
     'suspension.modify': [],
@@ -252,6 +253,7 @@ describe('Test component: AccountDetailsPage', () => {
     const actionCases = [
       ['activation.immediate', 'confirmation'],
       ['suspension.immediate', 'form'],
+      ['reactivation.immediate', 'form'],
       ['activation.scheduled', 'form'],
       ['suspension.scheduled', 'form'],
       ['suspension.modify', 'form'],
@@ -547,6 +549,46 @@ describe('Test component: AccountDetailsPage', () => {
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'positive',
           message: 'immediateSuspensionSuccess',
+        });
+      });
+    });
+
+    describe('Test function: immediateReactivation', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('reactivation.immediate');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountReactivationActions.FormDialog.immediate.title'
+        );
+        expect(data.content).toBe(
+          'AccountReactivationActions.FormDialog.immediate.content'
+        );
+      });
+
+      it('should call updateAccountStatus with future suspensionPeriodEnd and nullified reason fields on submit', async () => {
+        wrapper.vm.onLifecycleAction('reactivation.immediate');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({
+          statusReason: 'INVESTIGATION',
+          statusSubreason: 'FRAUD',
+        });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            suspensionPeriod: expect.objectContaining({
+              end: FIXED_NOW_PLUS_1H,
+            }),
+            statusReason: null,
+            statusSubreason: null,
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'immediateReactivationSuccess',
         });
       });
     });

@@ -25,6 +25,31 @@
  */
 
 export const accountLifecycleUiConfiguration = {
+  'suspension.immediate': [
+    {
+      name: 'statusReason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Reason1', 'Reason2', 'Reason3'],
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+      },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
+    },
+  ],
   'activation.scheduled': [
     {
       name: 'validityPeriodStart',
@@ -37,6 +62,103 @@ export const accountLifecycleUiConfiguration = {
           afterDate: '{{ today }}',
         },
       },
+    },
+  ],
+  'suspension.modify': [
+    {
+      name: 'suspensionPeriodStart',
+      type: 'String',
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+        },
+      },
+    },
+    {
+      name: 'suspensionPeriodEnd',
+      type: 'String',
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+          fromDate: '{{ entity.suspensionPeriodStart }}',
+        },
+      },
+    },
+    {
+      name: 'statusReason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Reason1', 'Reason2', 'Reason3'],
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+      },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
+    },
+  ],
+  'suspension.scheduled': [
+    {
+      name: 'suspensionPeriodStart',
+      type: 'String',
+      required: true,
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+        },
+      },
+    },
+    {
+      name: 'suspensionPeriodEnd',
+      type: 'String',
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+          fromDate: '{{ entity.suspensionPeriodStart }}',
+        },
+      },
+    },
+    {
+      name: 'statusReason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Reason1', 'Reason2', 'Reason3'],
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+      },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
     },
   ],
 };

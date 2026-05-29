@@ -111,6 +111,128 @@ export default {
         scheduled: 'Scheduled',
       },
     },
+    FormDialog: {
+      immediate: {
+        title: 'Immediate Account Suspension',
+        content: 'Are you sure you want to suspend this account immediately?',
+        fields: {
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reason for the suspension.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusSubreason: {
+            label: 'Subreason',
+            hint: 'Select a subreason for the suspension.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusComment: {
+            label: 'Comment',
+            hint: 'Add an optional comment.',
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Suspend',
+          cancel: 'Cancel',
+        },
+      },
+      scheduled: {
+        title: 'Schedule Account Suspension',
+        content: 'Configure the suspension period for this account.',
+        fields: {
+          suspensionPeriodStart: {
+            label: 'Suspension start date',
+            close: 'Close',
+            validation: {
+              required: 'This field is required.',
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+            },
+          },
+          suspensionPeriodEnd: {
+            label: 'Suspension end date (optional)',
+            close: 'Close',
+            validation: {
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+              fromDate: 'The end date must be after {compareTo}.',
+            },
+          },
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reason for the suspension.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusSubreason: {
+            label: 'Subreason',
+            hint: 'Select a subreason for the suspension.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusComment: {
+            label: 'Comment',
+            hint: 'Add an optional comment.',
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Schedule',
+          cancel: 'Cancel',
+        },
+      },
+      modify: {
+        title: 'Modify Suspension Settings',
+        content: 'Update the suspension period settings for this account.',
+        fields: {
+          suspensionPeriodStart: {
+            label: 'New suspension start date',
+            close: 'Close',
+            validation: {
+              required: 'This field is required.',
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+            },
+          },
+          suspensionPeriodEnd: {
+            label: 'New suspension end date (optional)',
+            close: 'Close',
+            validation: {
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+              fromDate: 'The end date must be after {compareTo}.',
+            },
+          },
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reason for the suspension.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusSubreason: {
+            label: 'Subreason',
+            hint: 'Select a subreason for the suspension.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusComment: {
+            label: 'Comment',
+            hint: 'Add an optional comment.',
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Update',
+          cancel: 'Cancel',
+        },
+      },
+    },
   },
   AccountDeactivationActions: {
     DropdownButton: {
@@ -215,7 +337,10 @@ export default {
     },
     updateStatusSuccess: 'Account status successfully updated',
     immediateActivationSuccess: 'The account can be activated within one hour',
+    immediateSuspensionSuccess: 'The account will be suspended in one hour',
     scheduledActivationSuccess: 'The account can be activated from {date}',
+    scheduledSuspensionSuccess: 'The account will be suspended from {date}',
+    modifySuspensionSuccess: 'The account will be suspended from {date}',
     errors: {
       notFound: 'Account not found',
       generic: 'Unable to load the account. Please try again later.',

@@ -66,6 +66,7 @@
         <AccountSuspendedBanner
           v-if="lifecycleUi.showSuspendedBanner"
           :account-status="accountStatus"
+          @modify-suspension="onLifecycleAction('suspension.modify')"
         />
 
         <AccountDeactivatedWarningBanner
@@ -108,6 +109,7 @@
             i18n-scope="AccountSuspensionActions"
             :items="lifecycleUi.suspensionMenuItems"
             data-cy="account-suspension-actions"
+            @item-click="onLifecycleAction"
           />
           <component
             :is="dropdownButton"
@@ -252,8 +254,17 @@ function onLifecycleAction(action: string | DropdownClickPayload<string>) {
     case 'activation.immediate':
       immediateActivation();
       break;
+    case 'suspension.immediate':
+      immediateSuspension();
+      break;
     case 'activation.scheduled':
       scheduledActivation();
+      break;
+    case 'suspension.scheduled':
+      scheduledSuspension();
+      break;
+    case 'suspension.modify':
+      modifySuspension();
       break;
     default:
       Notify({
@@ -291,6 +302,40 @@ function immediateActivation() {
 }
 
 /**
+ * Opens a form dialog for the immediate suspension action,
+ * allowing the user to provide additional information
+ * (e.g., reason for suspension) before confirming the action.
+ */
+function immediateSuspension() {
+  const fieldKeys = accountLifecycleUiConfiguration['suspension.immediate'].map(
+    (field) => field.name
+  ) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountSuspensionActions.FormDialog.immediate.title`),
+      content: globalT(`AccountSuspensionActions.FormDialog.immediate.content`),
+      uiNamespace,
+      i18nScope: `AccountSuspensionActions.FormDialog.immediate`,
+      formFields: accountLifecycleUiConfiguration['suspension.immediate'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          {
+            ...formData,
+            suspensionPeriodStart: dayjs().add(1, 'hour').toISOString(),
+          },
+          'immediateSuspensionSuccess'
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
  * Opens a form dialog for the scheduled activation action,
  * allowing the user to provide additional information
  * (e.g., activation date, reason for activation) before confirming the action.
@@ -317,6 +362,70 @@ function scheduledActivation() {
           formData,
           'scheduledActivationSuccess',
           formData.validityPeriodStart
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
+ * Opens a form dialog for the scheduled suspension action,
+ * allowing the user to provide additional information
+ * (e.g., suspension date, reason for suspension) before confirming the action.
+ */
+function scheduledSuspension() {
+  const fieldKeys = accountLifecycleUiConfiguration['suspension.scheduled'].map(
+    (field) => field.name
+  ) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountSuspensionActions.FormDialog.scheduled.title`),
+      content: globalT(`AccountSuspensionActions.FormDialog.scheduled.content`),
+      uiNamespace,
+      i18nScope: `AccountSuspensionActions.FormDialog.scheduled`,
+      formFields: accountLifecycleUiConfiguration['suspension.scheduled'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          formData,
+          'scheduledSuspensionSuccess',
+          formData.suspensionPeriodStart
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
+ * Opens a form dialog for the modify suspension action,
+ * allowing the user to update the suspension period settings
+ * before confirming the action.
+ */
+function modifySuspension() {
+  const fieldKeys = accountLifecycleUiConfiguration['suspension.modify'].map(
+    (field) => field.name
+  ) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountSuspensionActions.FormDialog.modify.title`),
+      content: globalT(`AccountSuspensionActions.FormDialog.modify.content`),
+      uiNamespace,
+      i18nScope: `AccountSuspensionActions.FormDialog.modify`,
+      formFields: accountLifecycleUiConfiguration['suspension.modify'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          formData,
+          'modifySuspensionSuccess',
+          formData.suspensionPeriodStart
         ),
     },
   } as UiEvent);

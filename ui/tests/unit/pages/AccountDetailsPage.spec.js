@@ -76,7 +76,10 @@ vi.mock('src/services/AccountService', () => ({
 
 vi.mock('src/assets/accounts/accountLifecycleUiConfiguration', () => ({
   accountLifecycleUiConfiguration: {
+    'suspension.immediate': [],
     'activation.scheduled': [],
+    'suspension.scheduled': [],
+    'suspension.modify': [],
   },
 }));
 
@@ -248,7 +251,10 @@ describe('Test component: AccountDetailsPage', () => {
   describe('Test function: onLifecycleAction', () => {
     const actionCases = [
       ['activation.immediate', 'confirmation'],
+      ['suspension.immediate', 'form'],
       ['activation.scheduled', 'form'],
+      ['suspension.scheduled', 'form'],
+      ['suspension.modify', 'form'],
     ];
 
     it.each(actionCases)(
@@ -288,7 +294,10 @@ describe('Test component: AccountDetailsPage', () => {
     });
 
     it.each([
+      ['suspension.immediate', 'AccountSuspensionActions.FormDialog.immediate'],
       ['activation.scheduled', 'AccountActivationActions.FormDialog.scheduled'],
+      ['suspension.scheduled', 'AccountSuspensionActions.FormDialog.scheduled'],
+      ['suspension.modify', 'AccountSuspensionActions.FormDialog.modify'],
     ])(
       'should pass the correct i18nScope for action "%s"',
       (actionKey, expectedI18nScope) => {
@@ -506,6 +515,42 @@ describe('Test component: AccountDetailsPage', () => {
       });
     });
 
+    describe('Test function: immediateSuspension', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('suspension.immediate');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountSuspensionActions.FormDialog.immediate.title'
+        );
+        expect(data.content).toBe(
+          'AccountSuspensionActions.FormDialog.immediate.content'
+        );
+      });
+
+      it('should call updateAccountStatus with future suspensionPeriodStart on submit', async () => {
+        wrapper.vm.onLifecycleAction('suspension.immediate');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ statusReason: 'INVESTIGATION' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            suspensionPeriod: expect.objectContaining({
+              start: FIXED_NOW_PLUS_1H,
+            }),
+            statusReason: 'INVESTIGATION',
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'immediateSuspensionSuccess',
+        });
+      });
+    });
+
     describe('Test function: scheduledActivation', () => {
       it('should open a form dialog with correct title and content', () => {
         wrapper.vm.onLifecycleAction('activation.scheduled');
@@ -555,4 +600,103 @@ describe('Test component: AccountDetailsPage', () => {
         );
       });
     });
+
+    describe('Test function: scheduledSuspension', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('suspension.scheduled');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountSuspensionActions.FormDialog.scheduled.title'
+        );
+        expect(data.content).toBe(
+          'AccountSuspensionActions.FormDialog.scheduled.content'
+        );
+      });
+
+      it('should call updateAccountStatus with form suspensionPeriodStart as success date on submit', async () => {
+        wrapper.vm.onLifecycleAction('suspension.scheduled');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ suspensionPeriodStart: '2026-07-15T00:00:00.000Z' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            suspensionPeriod: expect.objectContaining({
+              start: '2026-07-15T00:00:00.000Z',
+            }),
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'scheduledSuspensionSuccess',
+        });
+      });
+
+      it('should not interpolate a date in the success message when suspensionPeriodStart is null', async () => {
+        wrapper.vm.onLifecycleAction('suspension.scheduled');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ suspensionPeriodStart: null });
+
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'scheduledSuspensionSuccess',
+        });
+        expect(mockScopedT).toHaveBeenLastCalledWith(
+          'scheduledSuspensionSuccess'
+        );
+      });
+    });
+
+    describe('Test function: modifySuspension', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('suspension.modify');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountSuspensionActions.FormDialog.modify.title'
+        );
+        expect(data.content).toBe(
+          'AccountSuspensionActions.FormDialog.modify.content'
+        );
+      });
+
+      it('should call updateAccountStatus with form suspensionPeriodStart as success date on submit', async () => {
+        wrapper.vm.onLifecycleAction('suspension.modify');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ suspensionPeriodStart: '2026-07-15T00:00:00.000Z' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            suspensionPeriod: expect.objectContaining({
+              start: '2026-07-15T00:00:00.000Z',
+            }),
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'modifySuspensionSuccess',
+        });
+      });
+
+      it('should not interpolate a date in the success message when suspensionPeriodStart is null', async () => {
+        wrapper.vm.onLifecycleAction('suspension.modify');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ suspensionPeriodStart: null });
+
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'modifySuspensionSuccess',
+        });
+        expect(mockScopedT).toHaveBeenLastCalledWith('modifySuspensionSuccess');
+      });
+    });
+  });
 });

@@ -243,6 +243,111 @@ export default {
         modify: 'Modify',
       },
     },
+    FormDialog: {
+      immediate: {
+        title: 'Immediate Account Deactivation',
+        content:
+          'Are you sure you want to deactivate this account immediately?',
+        fields: {
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reason for the deactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusSubreason: {
+            label: 'Subreason',
+            hint: 'Select a subreason for the deactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusComment: {
+            label: 'Comment',
+            hint: 'Add an optional comment.',
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Deactivate',
+          cancel: 'Cancel',
+        },
+      },
+      scheduled: {
+        title: 'Schedule Account Deactivation',
+        content: 'Select a deactivation date and provide a reason.',
+        fields: {
+          validityPeriodEnd: {
+            label: 'Deactivation date',
+            close: 'Close',
+            validation: {
+              required: 'This field is required.',
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+            },
+          },
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reason for the deactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusSubreason: {
+            label: 'Subreason',
+            hint: 'Select a subreason for the deactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusComment: {
+            label: 'Comment',
+            hint: 'Add an optional comment.',
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Schedule',
+          cancel: 'Cancel',
+        },
+      },
+      modify: {
+        title: 'Modify Deactivation Date',
+        content: 'Update the scheduled deactivation date for this account.',
+        fields: {
+          validityPeriodEnd: {
+            label: 'New deactivation date',
+            close: 'Close',
+            validation: {
+              required: 'This field is required.',
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+            },
+          },
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reason for the deactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusSubreason: {
+            label: 'Subreason',
+            hint: 'Select a subreason for the deactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+          statusComment: {
+            label: 'Comment',
+            hint: 'Add an optional comment.',
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Update',
+          cancel: 'Cancel',
+        },
+      },
+    },
   },
   AccountReactivationActions: {
     FormDialog: {
@@ -360,8 +465,11 @@ export default {
     updateStatusSuccess: 'Account status successfully updated',
     immediateActivationSuccess: 'The account can be activated within one hour',
     immediateSuspensionSuccess: 'The account will be suspended in one hour',
+    immediateDeactivationSuccess: 'The account will be deactivated in one hour',
     immediateReactivationSuccess: 'The account will be reactivated in one hour',
     scheduledActivationSuccess: 'The account can be activated from {date}',
+    scheduledDeactivationSuccess: 'The account will be deactivated from {date}',
+    modifyDeactivationSuccess: 'The account will be deactivated from {date}',
     scheduledSuspensionSuccess: 'The account will be suspended from {date}',
     modifySuspensionSuccess: 'The account will be suspended from {date}',
     errors: {

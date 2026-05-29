@@ -50,6 +50,19 @@ Feature: Test Account details page display
   ## 147 Immediate reactivation - dialog opens correctly
   ## 148 Immediate reactivation - cancel button closes dialog
   ## 149 Immediate reactivation - success, account status updated after form submission
+  ## 150 Immediate deactivation - dialog opens correctly
+  ## 151 Immediate deactivation - cancel button closes dialog
+  ## 152 Immediate deactivation - success, account status updated after form submission
+  ## 153 Scheduled deactivation - dialog opens correctly
+  ## 154 Scheduled deactivation - cancel button closes dialog
+  ## 155 Scheduled deactivation - validityPeriodEnd invalidDate validation error
+  ## 156 Scheduled deactivation - validityPeriodEnd afterDate validation error
+  ## 157 Scheduled deactivation - success, account status updated after form submission
+  ## 158 Modify deactivation - dialog opens correctly
+  ## 159 Modify deactivation - cancel button closes dialog
+  ## 160 Modify deactivation - validityPeriodEnd invalidDate validation error
+  ## 161 Modify deactivation - validityPeriodEnd afterDate validation error
+  ## 162 Modify deactivation - success, account status updated after form submission
 
   Scenario: Roundtrip about Account Details
 
@@ -580,3 +593,147 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé dans une heure"
+
+    ## 150 Immediate deactivation - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d3"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
+    When I click on '[data-cy="account-deactivation-actions"]'
+    Then I expect the HTML element '[data-cy="dropdown-button_item_deactivation.immediate"]' to be visible
+    When I click on '[data-cy="dropdown-button_item_deactivation.immediate"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Désactivation immédiate du compte"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Désactiver"
+
+    ## 151 Immediate deactivation - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 152 Immediate deactivation - success, account status updated after form submission
+    When I click on '[data-cy="account-deactivation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_deactivation.immediate"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé dans une heure"
+
+    ## 153 Scheduled deactivation - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d6"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
+    When I click on '[data-cy="account-deactivation-actions"]'
+    Then I expect the HTML element '[data-cy="dropdown-button_item_deactivation.scheduled"]' to be visible
+    When I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la désactivation du compte"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Sélectionnez une date de désactivation et indiquez un motif."
+    And I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Date de désactivation"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
+
+    ## 154 Scheduled deactivation - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 155 Scheduled deactivation - validityPeriodEnd invalidDate validation error
+    When I click on '[data-cy="account-deactivation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 156 Scheduled deactivation - validityPeriodEnd afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-deactivation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 157 Scheduled deactivation - success, account status updated after form submission
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-deactivation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I set the text "Dialog test D6: deactivation scheduled" in the HTML element '[data-cy="field_statusComment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé à partir du 01/01/2100"
+
+    ## 158 Modify deactivation - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d7"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
+    When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier la date de désactivation"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Mettez à jour la date de désactivation planifiée pour ce compte."
+    And I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Nouvelle date de désactivation"
+    And I expect the HTML element '[data-cy="field_validityPeriodEnd"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Modifier"
+
+    ## 159 Modify deactivation - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 160 Modify deactivation - validityPeriodEnd invalidDate validation error
+    When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 161 Modify deactivation - validityPeriodEnd afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 162 Modify deactivation - success, account status updated after form submission
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I click on '[data-cy="form-dialog_title"]'
+    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I set the text "Dialog test D7: modify deactivation" in the HTML element '[data-cy="field_statusComment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé à partir du 01/01/2100"

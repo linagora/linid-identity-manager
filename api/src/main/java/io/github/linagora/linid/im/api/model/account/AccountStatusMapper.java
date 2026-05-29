@@ -83,6 +83,11 @@ public interface AccountStatusMapper {
      * {@code updateDate} after the {@code UPDATE} and Hibernate re-reads it via
      * {@code @Generated}.</p>
      *
+     * <p>{@code activationAt} is always carried over from {@code entity} — it is managed
+     * exclusively by {@code PUT /accounts/{id}/status/activation} and must never be overwritten
+     * by this endpoint (the validator rejects any non-null {@code activationAt} in the record
+     * before the mapper is called).</p>
+     *
      * @param entity        the existing entity whose identity fields are preserved
      * @param record        the request record providing the new field values
      * @param userPrincipal the authenticated principal performing the update
@@ -96,7 +101,7 @@ public interface AccountStatusMapper {
     @Mapping(target = "updatedBy", source = "userPrincipal.id")
     @Mapping(target = "validityPeriod", source = "record.validityPeriod")
     @Mapping(target = "suspensionPeriod", source = "record.suspensionPeriod")
-    @Mapping(target = "activationAt", source = "record.activationAt")
+    @Mapping(target = "activationAt", source = "entity.activationAt")
     @Mapping(target = "statusReason", source = "record.statusReason")
     @Mapping(target = "statusSubreason", source = "record.statusSubreason")
     @Mapping(target = "statusComment", source = "record.statusComment")

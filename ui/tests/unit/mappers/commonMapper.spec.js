@@ -85,17 +85,32 @@ describe('Test mapper: commonMapper', () => {
       expect(toDateISO('not-a-valid-date')).toBe('');
     });
 
-    it('should return "" for an ISO string that does not match the locale format', () => {
+    it('should validate ISO inputs and return them as-is when valid', () => {
       tMock.mockReturnValue('DD/MM/YYYY');
       const { toDateISO } = useCommonMapper();
 
-      expect(toDateISO('2024-06-30T00:00:00.000Z')).toBe('');
+      expect(toDateISO('2024-06-30T00:00:00.000Z')).toBe(
+        '2024-06-30T00:00:00.000Z'
+      );
+      expect(toDateISO('2024-06-30T00:00:00Z')).toBe('2024-06-30T00:00:00Z');
+      expect(toDateISO('2024-06-30T12:00:00+02:00')).toBe(
+        '2024-06-30T12:00:00+02:00'
+      );
+      expect(toDateISO('2024-06-30')).toBe('');
+      expect(toDateISO('2024-06-30T12:00:00')).toBe('');
     });
 
-    it('should convert a valid date string to ISO format', () => {
+    it('should return "" for a structurally valid but semantically invalid ISO date', () => {
       const { toDateISO } = useCommonMapper();
 
-      const input = '2025-07-24T00:00:00Z';
+      expect(toDateISO('2024-99-99T99:99:99Z')).toBe('');
+    });
+
+    it('should convert a locale-formatted date string to ISO format', () => {
+      tMock.mockReturnValue('DD/MM/YYYY');
+      const { toDateISO } = useCommonMapper();
+
+      const input = '24/07/2025';
       const result = toDateISO(input);
 
       expect(result).toBe('2025-07-24T00:00:00.000Z');

@@ -169,6 +169,37 @@
         "dropdown-button": {
           "q-btn-dropdown": { "color": "negative", "outline": false }
         }
+      },
+      "confirmation-dialog": {
+        "buttons-card": {
+          "q-card": {
+            "bordered": false
+          },
+          "confirm-button": {
+            "q-btn": {
+              "outline": false,
+              "unelevated": true,
+              "color": "primary"
+            }
+          }
+        }
+      },
+      "form-dialog": {
+        "q-card-actions": {
+          "align": "right"
+        },
+        "buttons-card": {
+          "q-card": {
+            "bordered": false
+          },
+          "confirm-button": {
+            "q-btn": {
+              "outline": false,
+              "unelevated": true,
+              "color": "primary"
+            }
+          }
+        }
       }
     }
   },

@@ -71,6 +71,37 @@ export default {
         scheduled: 'Scheduled',
       },
     },
+    ConfirmationDialog: {
+      immediate: {
+        title: 'Immediate Account Activation',
+        content: 'Are you sure you want to activate this account immediately?',
+        ButtonsCard: {
+          confirm: 'Activate',
+          cancel: 'Cancel',
+        },
+      },
+    },
+    FormDialog: {
+      scheduled: {
+        title: 'Schedule Account Activation',
+        content: 'Select a start date for activating this account.',
+        fields: {
+          validityPeriodStart: {
+            label: 'Activation date',
+            close: 'Close',
+            validation: {
+              required: 'This field is required.',
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be before today.',
+            },
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Schedule',
+          cancel: 'Cancel',
+        },
+      },
+    },
   },
   AccountSuspensionActions: {
     DropdownButton: {
@@ -182,9 +213,13 @@ export default {
     ButtonsCard: {
       cancel: 'Back',
     },
+    updateStatusSuccess: 'Account status successfully updated',
+    immediateActivationSuccess: 'The account can be activated within one hour',
+    scheduledActivationSuccess: 'The account can be activated from {date}',
     errors: {
       notFound: 'Account not found',
       generic: 'Unable to load the account. Please try again later.',
+      status: 'Unable to update the account status. Please try again later.',
     },
   },
   AccountDeactivatedBanner: {

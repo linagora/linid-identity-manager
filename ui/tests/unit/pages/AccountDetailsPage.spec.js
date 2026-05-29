@@ -25,12 +25,20 @@
  */
 
 import { flushPromises, shallowMount } from '@vue/test-utils';
-import { getAccountById } from 'src/services/AccountService';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { getAccountById, updateStatus } from 'src/services/AccountService';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountDetailsPage from '../../../src/pages/AccountDetailsPage.vue';
 
 const mockedGetAccountById = vi.mocked(getAccountById);
-const mockNotify = vi.fn();
+const mockedUpdateStatus = vi.mocked(updateStatus);
+
+const { mockNotify, mockUiEventSubjectNext, mockGlobalT, mockScopedT } =
+  vi.hoisted(() => ({
+    mockNotify: vi.fn(),
+    mockUiEventSubjectNext: vi.fn(),
+    mockGlobalT: vi.fn((v) => v),
+    mockScopedT: vi.fn((v) => v),
+  }));
 
 const mockRoute = {
   params: {
@@ -48,8 +56,11 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
     Notify: mockNotify,
   }),
   useScopedI18n: () => ({
-    t: vi.fn((v) => v),
+    t: mockScopedT,
   }),
+  getI18nInstance: vi.fn(() => ({ global: { t: mockGlobalT } })),
+  merge: vi.fn((a, b) => ({ ...a, ...b })),
+  uiEventSubject: { next: mockUiEventSubjectNext },
 }));
 
 vi.mock('axios', () => ({
@@ -60,6 +71,13 @@ vi.mock('axios', () => ({
 
 vi.mock('src/services/AccountService', () => ({
   getAccountById: vi.fn(),
+  updateStatus: vi.fn(),
+}));
+
+vi.mock('src/assets/accounts/accountLifecycleUiConfiguration', () => ({
+  accountLifecycleUiConfiguration: {
+    'activation.scheduled': [],
+  },
 }));
 
 vi.mock('vue-router', () => ({
@@ -226,4 +244,315 @@ describe('Test component: AccountDetailsPage', () => {
       expect(wrapper.vm.hasAnyLifecycleAction).toBe(true);
     });
   });
+
+  describe('Test function: onLifecycleAction', () => {
+    const actionCases = [
+      ['activation.immediate', 'confirmation'],
+      ['activation.scheduled', 'form'],
+    ];
+
+    it.each(actionCases)(
+      'should emit a "%s" uiEvent with key "%s" when action is dispatched as string',
+      (actionKey, expectedEventKey) => {
+        wrapper = shallowMount(AccountDetailsPage);
+        mockUiEventSubjectNext.mockClear();
+
+        wrapper.vm.onLifecycleAction(actionKey);
+
+        expect(mockUiEventSubjectNext).toHaveBeenCalledOnce();
+        expect(mockUiEventSubjectNext.mock.calls[0][0].key).toBe(
+          expectedEventKey
+        );
+      }
+    );
+
+    it('should extract the key from a DropdownClickPayload object', () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      mockUiEventSubjectNext.mockClear();
+
+      wrapper.vm.onLifecycleAction({ key: 'activation.immediate' });
+
+      expect(mockUiEventSubjectNext).toHaveBeenCalledOnce();
+    });
+
+    it('should notify with errors.status for an unknown action key', () => {
+      wrapper = shallowMount(AccountDetailsPage);
+
+      wrapper.vm.onLifecycleAction('unknown.action');
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.status',
+      });
+      expect(mockUiEventSubjectNext).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['activation.scheduled', 'AccountActivationActions.FormDialog.scheduled'],
+    ])(
+      'should pass the correct i18nScope for action "%s"',
+      (actionKey, expectedI18nScope) => {
+        wrapper = shallowMount(AccountDetailsPage);
+        mockUiEventSubjectNext.mockClear();
+
+        wrapper.vm.onLifecycleAction(actionKey);
+
+        expect(mockUiEventSubjectNext.mock.calls[0][0].data.i18nScope).toBe(
+          expectedI18nScope
+        );
+      }
+    );
+  });
+
+  describe('Test function: updateAccountStatus', () => {
+    beforeEach(async () => {
+      wrapper = shallowMount(AccountDetailsPage);
+      await wrapper.vm.loadAccount();
+    });
+
+    it('should update account and accountStatus on success', async () => {
+      const updatedDto = {
+        id: 'test-account-id',
+        firstname: 'Jane',
+        lastname: 'Doe',
+        email: 'jane.doe@example.com',
+        createdBy: 'Alice Creator',
+        updatedBy: 'Bob Updater',
+        insertDate: '2026-04-15T12:00:24.814930Z',
+        updateDate: '2026-05-01T00:00:00Z',
+        status: 'SUSPENDED',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: {
+          start: '2026-05-01T00:00:00Z',
+          end: null,
+        },
+        activationAt: '2026-01-01T00:00:00Z',
+        statusReason: 'INVESTIGATION',
+        statusSubreason: null,
+        statusComment: null,
+        daysBeforeDeactivation: null,
+      };
+      mockedUpdateStatus.mockResolvedValueOnce(updatedDto);
+
+      await wrapper.vm.updateAccountStatus({
+        suspensionPeriodStart: '2026-05-01T00:00:00Z',
+      });
+
+      expect(updateStatus).toHaveBeenCalledWith(
+        'test-account-id',
+        expect.any(Object)
+      );
+      expect(wrapper.vm.account).toMatchObject({ firstname: 'Jane' });
+      expect(wrapper.vm.accountStatus).toMatchObject({ status: 'SUSPENDED' });
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'positive',
+        message: 'updateStatusSuccess',
+      });
+    });
+
+    it('should set isLoading to true during the update and false after', async () => {
+      let resolveUpdate;
+      mockedUpdateStatus.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveUpdate = resolve;
+        })
+      );
+
+      const updatePromise = wrapper.vm.updateAccountStatus({});
+      expect(wrapper.vm.isLoading).toBe(true);
+
+      resolveUpdate({
+        id: 'test-account-id',
+        firstname: 'John',
+        lastname: 'Doe',
+        email: 'john.doe@example.com',
+        createdBy: 'Alice Creator',
+        updatedBy: 'Bob Updater',
+        insertDate: '2026-04-15T12:00:24.814930Z',
+        updateDate: '2026-04-16T09:30:00.000000Z',
+        status: 'ACTIVE',
+        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+        suspensionPeriod: { start: null, end: null },
+        activationAt: '2026-01-01T00:00:00Z',
+        statusReason: null,
+        statusSubreason: null,
+        statusComment: null,
+        daysBeforeDeactivation: null,
+      });
+      await updatePromise;
+
+      expect(wrapper.vm.isLoading).toBe(false);
+    });
+
+    it('should notify with the API error message and rethrow on axios error', async () => {
+      const axiosError = {
+        isAxiosError: true,
+        response: { data: { error: 'Conflict detected' } },
+      };
+      mockedUpdateStatus.mockRejectedValueOnce(axiosError);
+
+      await expect(wrapper.vm.updateAccountStatus({})).rejects.toEqual(
+        axiosError
+      );
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'Conflict detected',
+      });
+    });
+
+    it('should fall back to errors.status and rethrow when axios error has no backend message', async () => {
+      const axiosError = {
+        isAxiosError: true,
+        response: { data: {} },
+      };
+      mockedUpdateStatus.mockRejectedValueOnce(axiosError);
+
+      await expect(wrapper.vm.updateAccountStatus({})).rejects.toEqual(
+        axiosError
+      );
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.status',
+      });
+    });
+
+    it('should notify with errors.status and rethrow on non-axios error', async () => {
+      const genericError = new Error('network failure');
+      mockedUpdateStatus.mockRejectedValueOnce(genericError);
+
+      await expect(wrapper.vm.updateAccountStatus({})).rejects.toEqual(
+        genericError
+      );
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.status',
+      });
+    });
+  });
+
+  describe('Test functions: lifecycle action dialogs', () => {
+    const FIXED_NOW = new Date('2026-05-28T10:00:00.000Z');
+    const FIXED_NOW_PLUS_1H = '2026-05-28T11:00:00.000Z';
+
+    const resolvedDto = {
+      id: 'test-account-id',
+      firstname: 'John',
+      lastname: 'Doe',
+      email: 'john.doe@example.com',
+      createdBy: 'Alice Creator',
+      updatedBy: 'Bob Updater',
+      insertDate: '2026-04-15T12:00:24.814930Z',
+      updateDate: '2026-04-16T09:30:00.000000Z',
+      status: 'ACTIVE',
+      validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+      suspensionPeriod: { start: null, end: null },
+      activationAt: '2026-01-01T00:00:00Z',
+      statusReason: null,
+      statusSubreason: null,
+      statusComment: null,
+      daysBeforeDeactivation: null,
+    };
+
+    beforeEach(async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(FIXED_NOW);
+      mockedUpdateStatus.mockResolvedValue(resolvedDto);
+      wrapper = shallowMount(AccountDetailsPage);
+      await wrapper.vm.loadAccount();
+      mockUiEventSubjectNext.mockClear();
+      mockNotify.mockClear();
+      mockScopedT.mockClear();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    describe('Test function: immediateActivation', () => {
+      it('should open a confirmation dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('activation.immediate');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountActivationActions.ConfirmationDialog.immediate.title'
+        );
+        expect(data.content).toBe(
+          'AccountActivationActions.ConfirmationDialog.immediate.content'
+        );
+      });
+
+      it('should call updateAccountStatus with future validityPeriodStart on confirm', async () => {
+        wrapper.vm.onLifecycleAction('activation.immediate');
+        const { onConfirm } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onConfirm();
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            validityPeriod: expect.objectContaining({
+              start: FIXED_NOW_PLUS_1H,
+            }),
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'immediateActivationSuccess',
+        });
+      });
+    });
+
+    describe('Test function: scheduledActivation', () => {
+      it('should open a form dialog with correct title and content', () => {
+        wrapper.vm.onLifecycleAction('activation.scheduled');
+
+        const { data } = mockUiEventSubjectNext.mock.calls[0][0];
+
+        expect(data.title).toBe(
+          'AccountActivationActions.FormDialog.scheduled.title'
+        );
+        expect(data.content).toBe(
+          'AccountActivationActions.FormDialog.scheduled.content'
+        );
+      });
+
+      it('should call updateAccountStatus with form validityPeriodStart as success date on submit', async () => {
+        wrapper.vm.onLifecycleAction('activation.scheduled');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ validityPeriodStart: '2026-07-01T00:00:00.000Z' });
+
+        expect(updateStatus).toHaveBeenCalledWith(
+          'test-account-id',
+          expect.objectContaining({
+            validityPeriod: expect.objectContaining({
+              start: '2026-07-01T00:00:00.000Z',
+            }),
+          })
+        );
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'scheduledActivationSuccess',
+        });
+      });
+
+      it('should not interpolate a date in the success message when validityPeriodStart is null', async () => {
+        wrapper.vm.onLifecycleAction('activation.scheduled');
+        const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
+
+        await onSubmit({ validityPeriodStart: null });
+
+        expect(mockNotify).toHaveBeenCalledWith({
+          type: 'positive',
+          message: 'scheduledActivationSuccess',
+        });
+        expect(mockScopedT).toHaveBeenLastCalledWith(
+          'scheduledActivationSuccess'
+        );
+      });
+    });
 });

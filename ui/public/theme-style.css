@@ -1,4 +1,9 @@
 /* Custom theme overrides - this file can be replaced per deployment */
 .account-deactivated-warning-banner {
-    border: 2px solid var(--q-negative);
+  border: 2px solid var(--q-negative);
+}
+
+.q-dialog .q-card {
+  width: 700px;
+  max-width: 80vw;
 }

@@ -99,6 +99,7 @@
             i18n-scope="AccountActivationActions"
             :items="lifecycleUi.activationMenuItems"
             data-cy="account-activation-actions"
+            @item-click="onLifecycleAction"
           />
           <component
             :is="dropdownButton"
@@ -136,13 +137,21 @@
 </template>
 
 <script setup lang="ts">
+import type {
+  DropdownClickPayload,
+  UiEvent,
+} from '@linagora/linid-im-front-corelib';
 import {
+  getI18nInstance,
   loadAsyncComponent,
+  uiEventSubject,
   useNotify,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { accountLifecycleUiConfiguration } from 'src/assets/accounts/accountLifecycleUiConfiguration';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
+import { dayjs } from 'src/boot/dayjs';
 import AccountDeactivatedInfoText from 'src/components/AccountDeactivatedInfoText.vue';
 import AccountNotActivatedInfoText from 'src/components/AccountNotActivatedInfoText.vue';
 import AccountStatusBadge from 'src/components/AccountStatusBadge.vue';
@@ -151,20 +160,28 @@ import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeacti
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { useAccountMapper } from 'src/mappers/accountMapper';
-import { getAccountById } from 'src/services/AccountService';
+import { getAccountById, updateStatus } from 'src/services/AccountService';
+import type { AccountStatusForm } from 'src/types/accounts';
 import { type Account, type AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
+import { type Composer } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 const pageName = 'AccountDetailsPage';
 const i18nScope = pageName;
 const uiNamespace = 'accounts.details-page';
+const globalT = (getI18nInstance().global as Composer).t;
 
 const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
-const { toAccount, toAccountStatus } = useAccountMapper();
+const {
+  toAccount,
+  toAccountStatus,
+  toAccountStatusForm,
+  toAccountStatusRecord,
+} = useAccountMapper();
 
 const accountId = computed(() => route.params.id as string);
 
@@ -222,4 +239,134 @@ function goBack(): void {
 onMounted(() => {
   loadAccount();
 });
+
+/**
+ * Handles click events on lifecycle action menu items by opening a confirmation
+ * or form dialog before executing the action.
+ * @param action - The lifecycle action associated with the clicked menu item.
+ */
+function onLifecycleAction(action: string | DropdownClickPayload<string>) {
+  const actionKey = typeof action === 'string' ? action : action.key;
+
+  switch (actionKey) {
+    case 'activation.immediate':
+      immediateActivation();
+      break;
+    case 'activation.scheduled':
+      scheduledActivation();
+      break;
+    default:
+      Notify({
+        type: 'negative',
+        message: t('errors.status'),
+      });
+  }
+}
+
+/**
+ * Opens a confirmation dialog for the immediate activation action.
+ */
+function immediateActivation() {
+  uiEventSubject.next({
+    key: 'confirmation',
+    data: {
+      type: 'open',
+      title: globalT(
+        `AccountActivationActions.ConfirmationDialog.immediate.title`
+      ),
+      content: globalT(
+        `AccountActivationActions.ConfirmationDialog.immediate.content`
+      ),
+      uiNamespace,
+      i18nScope: `AccountActivationActions.ConfirmationDialog.immediate`,
+      onConfirm: () =>
+        updateAccountStatus(
+          {
+            validityPeriodStart: dayjs().add(1, 'hour').toISOString(),
+          },
+          'immediateActivationSuccess'
+        ),
+    },
+  });
+}
+
+/**
+ * Opens a form dialog for the scheduled activation action,
+ * allowing the user to provide additional information
+ * (e.g., activation date, reason for activation) before confirming the action.
+ */
+function scheduledActivation() {
+  const fieldKeys = accountLifecycleUiConfiguration['activation.scheduled'].map(
+    (field) => field.name
+  ) as (keyof AccountStatusForm)[];
+
+  uiEventSubject.next({
+    key: 'form',
+    data: {
+      type: 'open',
+      title: globalT(`AccountActivationActions.FormDialog.scheduled.title`),
+      content: globalT(`AccountActivationActions.FormDialog.scheduled.content`),
+      uiNamespace,
+      i18nScope: `AccountActivationActions.FormDialog.scheduled`,
+      formFields: accountLifecycleUiConfiguration['activation.scheduled'],
+      initialFormData: accountStatus.value
+        ? toAccountStatusForm(accountStatus.value, fieldKeys)
+        : undefined,
+      onSubmit: (formData: AccountStatusForm) =>
+        updateAccountStatus(
+          formData,
+          'scheduledActivationSuccess',
+          formData.validityPeriodStart
+        ),
+    },
+  } as UiEvent);
+}
+
+/**
+ * Sends a request to the backend to update the account status based on the provided
+ * form data and the current account status, then updates the page state with the
+ * new account information. Displays a notification in case of an error during the
+ * update process.
+ * @param formData - The data collected from the confirmation dialog form,
+ *                   used to construct the account status update payload.
+ * @param successMsgKey - Optional i18n key for the success message to display upon successful update.
+ * @param dateToDisplayInSuccessMsg - Optional date to display in the success message.
+ * @returns A promise that resolves once the account status has been updated
+ *          and the page state has been refreshed with the new account information.
+ */
+async function updateAccountStatus(
+  formData: AccountStatusForm,
+  successMsgKey = 'updateStatusSuccess',
+  dateToDisplayInSuccessMsg?: string | null
+): Promise<void> {
+  isLoading.value = true;
+
+  try {
+    const dto = await updateStatus(
+      accountId.value,
+      toAccountStatusRecord(formData)
+    );
+    account.value = toAccount(dto);
+    accountStatus.value = toAccountStatus(dto);
+
+    Notify({
+      type: 'positive',
+      message: dateToDisplayInSuccessMsg
+        ? t(successMsgKey, { date: dateToDisplayInSuccessMsg })
+        : t(successMsgKey),
+    });
+  } catch (error) {
+    const errorMsg = axios.isAxiosError(error)
+      ? (error.response?.data?.error ?? t('errors.status'))
+      : t('errors.status');
+
+    Notify({
+      type: 'negative',
+      message: errorMsg,
+    });
+    throw error;
+  } finally {
+    isLoading.value = false;
+  }
+}
 </script>

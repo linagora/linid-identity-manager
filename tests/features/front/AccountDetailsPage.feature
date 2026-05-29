@@ -19,6 +19,14 @@ Feature: Test Account details page display
   ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
   ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
   ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
+  ## 119 Immediate activation - dialog opens correctly
+  ## 120 Immediate activation - cancel button closes dialog
+  ## 121 Immediate activation - success, account status updated after form submission
+  ## 122 Scheduled activation - dialog opens correctly
+  ## 123 Scheduled activation - cancel button closes dialog
+  ## 124 Scheduled activation - validityPeriodStart invalidDate validation error
+  ## 125 Scheduled activation - validityPeriodStart afterDate validation error
+  ## 126 Scheduled activation - success, account status updated after form submission
 
   Scenario: Roundtrip about Account Details
 
@@ -221,3 +229,84 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="account-status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+
+    ## 119 Immediate activation - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d1"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
+    When I click on '[data-cy="account-activation-actions"]'
+    Then I expect the HTML element '[data-cy="dropdown-button_item_activation.immediate"]' to be visible
+    When I click on '[data-cy="dropdown-button_item_activation.immediate"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Activation immédiate du compte"
+    And I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Êtes-vous sûr de vouloir activer ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]' contains "Activer"
+
+    ## 120 Immediate activation - cancel button closes dialog
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+
+    ## 121 Immediate activation - success, account status updated after form submission
+    When I click on '[data-cy="account-activation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_activation.immediate"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé dans une heure"
+
+    ## 122 Scheduled activation - dialog opens correctly
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d5"
+    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
+    And I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
+    When I click on '[data-cy="account-activation-actions"]'
+    Then I expect the HTML element '[data-cy="dropdown-button_item_activation.scheduled"]' to be visible
+    When I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier l'activation du compte"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Veuillez sélectionner une date d'activation."
+    And I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "Date d'activation"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
+
+    ## 123 Scheduled activation - cancel button closes dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 124 Scheduled activation - validityPeriodStart invalidDate validation error
+    When I click on '[data-cy="account-activation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+
+    ## 125 Scheduled activation - validityPeriodStart afterDate validation error
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-activation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
+
+    ## 126 Scheduled activation - success, account status updated after form submission
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    And I click on '[data-cy="account-activation-actions"]'
+    And I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodStart"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé à partir du 01/01/2100"
+

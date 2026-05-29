@@ -42,20 +42,20 @@ describe('Test mapper: commonMapper', () => {
   });
 
   describe('Test function: toDate', () => {
-    it('should return "-" for falsy values (null/undefined/empty)', () => {
+    it('should return "" for falsy values (null/undefined/empty)', () => {
       tMock.mockReturnValue('YYYY-MM-DD HH:mm');
       const { toDate } = useCommonMapper();
 
-      expect(toDate(null)).toBe('-');
-      expect(toDate(undefined)).toBe('-');
-      expect(toDate('')).toBe('-');
+      expect(toDate(null)).toBe('');
+      expect(toDate(undefined)).toBe('');
+      expect(toDate('')).toBe('');
     });
 
-    it('should return "-" for an invalid date string', () => {
+    it('should return "" for an invalid date string', () => {
       tMock.mockReturnValue('YYYY-MM-DD HH:mm');
       const { toDate } = useCommonMapper();
 
-      expect(toDate('not-a-valid-date')).toBe('-');
+      expect(toDate('not-a-valid-date')).toBe('');
     });
 
     it('should format a valid ISO date string', () => {
@@ -67,6 +67,13 @@ describe('Test mapper: commonMapper', () => {
 
       expect(result).toBe(dayjs(iso).format('YYYY-MM-DD'));
       expect(tMock).toHaveBeenCalledWith('application.dateFormat');
+    });
+
+    it('should format a high-precision datetime string using the locale format', () => {
+      tMock.mockReturnValue('DD/MM/YYYY');
+      const { toDate } = useCommonMapper();
+
+      expect(toDate('2024-06-30T12:34:56.789003')).toBe('30/06/2024');
     });
   });
 

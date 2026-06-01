@@ -24,6 +24,39 @@
  * LinID Identity Manager software.
  */
 
+export const accountStatusReasons = {
+  suspension: {
+    reasons: [
+      { value: 'Suspension Reason A' },
+      { value: 'Suspension Reason B' },
+      { value: 'Suspension Reason C' },
+    ],
+    subreasons: [
+      { value: 'Suspension Sub-reason A.1', reason: 'Suspension Reason A' },
+      { value: 'Suspension Sub-reason A.2', reason: 'Suspension Reason A' },
+      { value: 'Suspension Sub-reason B.1', reason: 'Suspension Reason B' },
+      { value: 'Suspension Sub-reason C.1', reason: 'Suspension Reason C' },
+    ],
+  },
+  deactivation: {
+    reasons: [
+      { value: 'Deactivation Reason A' },
+      { value: 'Deactivation Reason B' },
+      { value: 'Deactivation Reason C' },
+    ],
+    subreasons: [
+      { value: 'Deactivation Sub-reason A.1', reason: 'Deactivation Reason A' },
+      { value: 'Deactivation Sub-reason A.2', reason: 'Deactivation Reason A' },
+      { value: 'Deactivation Sub-reason B.1', reason: 'Deactivation Reason B' },
+      { value: 'Deactivation Sub-reason B.2', reason: 'Deactivation Reason B' },
+      { value: 'Deactivation Sub-reason B.3', reason: 'Deactivation Reason B' },
+      { value: 'Deactivation Sub-reason C.1', reason: 'Deactivation Reason C' },
+      { value: 'Deactivation Sub-reason C.2', reason: 'Deactivation Reason C' },
+      { value: 'Deactivation Sub-reason C.3', reason: 'Deactivation Reason C' },
+    ],
+  },
+};
+
 export const accountLifecycleUiConfiguration = {
   'suspension.immediate': [
     {
@@ -32,7 +65,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Reason1', 'Reason2', 'Reason3'],
+        values: accountStatusReasons['suspension'].reasons.map(
+          (reason) => reason.value
+        ),
       },
     },
     {
@@ -41,7 +76,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+        values: accountStatusReasons['suspension'].subreasons.map(
+          (subreason) => subreason.value
+        ),
       },
     },
     {
@@ -57,7 +94,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Reason1', 'Reason2', 'Reason3'],
+        values: accountStatusReasons['deactivation'].reasons.map(
+          (reason) => reason.value
+        ),
       },
     },
     {
@@ -66,7 +105,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+        values: accountStatusReasons['deactivation'].subreasons.map(
+          (subreason) => subreason.value
+        ),
       },
     },
     {
@@ -116,7 +157,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Reason1', 'Reason2', 'Reason3'],
+        values: accountStatusReasons['deactivation'].reasons.map(
+          (reason) => reason.value
+        ),
       },
     },
     {
@@ -125,7 +168,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+        values: accountStatusReasons['deactivation'].subreasons.map(
+          (subreason) => subreason.value
+        ),
       },
     },
     {
@@ -153,7 +198,9 @@ export const accountLifecycleUiConfiguration = {
       required: true,
       input: 'List',
       inputSettings: {
-        values: ['Reason1', 'Reason2', 'Reason3'],
+        values: accountStatusReasons['deactivation'].reasons.map(
+          (reason) => reason.value
+        ),
       },
     },
     {
@@ -162,7 +209,9 @@ export const accountLifecycleUiConfiguration = {
       required: true,
       input: 'List',
       inputSettings: {
-        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+        values: accountStatusReasons['deactivation'].subreasons.map(
+          (subreason) => subreason.value
+        ),
       },
     },
     {
@@ -201,7 +250,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Reason1', 'Reason2', 'Reason3'],
+        values: accountStatusReasons['suspension'].reasons.map(
+          (reason) => reason.value
+        ),
       },
     },
     {
@@ -210,7 +261,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+        values: accountStatusReasons['suspension'].subreasons.map(
+          (subreason) => subreason.value
+        ),
       },
     },
     {
@@ -250,7 +303,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Reason1', 'Reason2', 'Reason3'],
+        values: accountStatusReasons['suspension'].reasons.map(
+          (reason) => reason.value
+        ),
       },
     },
     {
@@ -259,7 +314,9 @@ export const accountLifecycleUiConfiguration = {
       input: 'List',
       required: true,
       inputSettings: {
-        values: ['Subreason1', 'Subreason2', 'Subreason3'],
+        values: accountStatusReasons['suspension'].subreasons.map(
+          (subreason) => subreason.value
+        ),
       },
     },
     {

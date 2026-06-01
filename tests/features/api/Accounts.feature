@@ -299,7 +299,7 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 402 - Should return 404 for unknown account id
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-000000000000' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'GET'
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
     And   I expect '{{response.body.status}}' is '404'
@@ -332,7 +332,7 @@ Feature: Test API Account endpoints
     Then  I expect status code is 404
 
   Scenario: 502 - Should return 404 when deleting unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-000000000000' with method 'DELETE'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'DELETE'
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
     And   I expect '{{response.body.status}}' is '404'
@@ -385,11 +385,11 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 602 - Should update status fields and return updated view when persisted validity start is equal to new validity start
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002' with method 'GET'
     Then  I expect status code is 200
     And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -404,7 +404,7 @@ Feature: Test API Account endpoints
       }
       """
     Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '00000000-0000-0000-0000-00000000a002'
+    And   I expect '{{response.body.id}}' is '00000000-0000-4000-8000-00000000a002'
     And   I expect '{{response.body.statusReason}}' is 'ONBOARDING'
     And   I expect '{{response.body.statusSubreason}}' is 'INITIAL_SETUP'
     And   I expect '{{response.body.statusComment}}' is 'Initial onboarding'
@@ -467,7 +467,7 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 604 - Should return 404 when updating status of unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-000000000000/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -486,7 +486,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.status}}' is '404'
 
   Scenario: 605 - Should return 404 when no status account row exists yet
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a001/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a001/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -660,11 +660,11 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 610 - Should return 400 when persisted validity start is in the past and new validity start is not equal to persisted one
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003' with method 'GET'
     Then  I expect status code is 200
     And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -724,11 +724,11 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 612 - Should return 400 when validity end is in the past
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003' with method 'GET'
     Then  I expect status code is 200
     And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -788,11 +788,11 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 614 - Should return 400 when suspension start is in the past
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003' with method 'GET'
     Then  I expect status code is 200
     And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -893,12 +893,12 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 617 - Should accept when suspension start equals persisted past suspension start (idempotent)
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-0000000000c9' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000c9' with method 'GET'
     Then  I expect status code is 200
     And   I store 'validityPeriodStart' as '{{response.body.validityPeriod.start}}' in context
     And   I store 'suspensionStart' as '{{response.body.suspensionPeriod.start}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-0000000000c9/status' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000c9/status' with method 'PUT' with body:
       """
       {
         "validityPeriod": {
@@ -924,7 +924,7 @@ Feature: Test API Account endpoints
   ####################################################
 
   Scenario: 701 - Should activate account when business rules are satisfied
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2025-06-01T00:00:00Z"
@@ -935,7 +935,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.status}}' is 'ACTIVE'
 
   Scenario: 702 - Should return 404 when no account status row exists yet
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a001/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a001/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
@@ -946,7 +946,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.status}}' is '404'
 
   Scenario: 703 - Should return 400 when account is already activated
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a002/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2025-07-01T00:00:00Z"
@@ -987,7 +987,7 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
 
   Scenario: 705 - Should return 400 when activationAt is before validity start
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a003/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2020-01-01T00:00:00Z"
@@ -998,7 +998,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.status}}' is '400'
 
   Scenario: 706 - Should return 400 when activationAt is in the future
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-00000000a004/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a004/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
@@ -1009,7 +1009,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.status}}' is '400'
 
   Scenario: 707 - Should return 404 when activating unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-0000-0000-000000000000/status/activation' with method 'PUT' with body:
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/activation' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"

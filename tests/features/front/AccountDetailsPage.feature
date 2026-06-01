@@ -404,8 +404,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="account-suspension-actions"]'
     And I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
-    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    When I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
@@ -504,8 +504,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
     And I click on '[data-cy="form-dialog_title"]'
-    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
-    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
     And I set the text "Dialog test D8: suspension scheduled" in the HTML element '[data-cy="field_statusComment"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
@@ -592,8 +592,8 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog_title"]'
     And I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
     And I click on '[data-cy="form-dialog_title"]'
-    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
-    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
     And I set the text "Dialog test D9: modify suspension" in the HTML element '[data-cy="field_statusComment"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
@@ -660,8 +660,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="account-deactivation-actions"]'
     And I click on '[data-cy="dropdown-button_item_deactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
-    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    When I select '.q-menu .q-item:contains("Deactivation Reason A")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Deactivation Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
@@ -718,8 +718,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
     And I click on '[data-cy="form-dialog_title"]'
-    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
-    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I select '.q-menu .q-item:contains("Deactivation Reason A")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Deactivation Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
     And I set the text "Dialog test D6: deactivation scheduled" in the HTML element '[data-cy="field_statusComment"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
@@ -772,8 +772,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
     And I click on '[data-cy="form-dialog_title"]'
-    And I select '.q-menu .q-item:contains("Reason1")' in '[data-cy="field_statusReason"]'
-    And I select '.q-menu .q-item:contains("Subreason1")' in '[data-cy="field_statusSubreason"]'
+    And I select '.q-menu .q-item:contains("Deactivation Reason A")' in '[data-cy="field_statusReason"]'
+    And I select '.q-menu .q-item:contains("Deactivation Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
     And I set the text "Dialog test D7: modify deactivation" in the HTML element '[data-cy="field_statusComment"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists

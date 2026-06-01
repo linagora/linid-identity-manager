@@ -151,7 +151,9 @@ Feature: Test Account details page display
     And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
 
     ## 107 Lifecycle case 1 - INACTIVE, future validity start
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c1"
+    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts"
+    And I set the text "lifecycle-c1@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_inactive"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-not-activated-info-text"]' not exists
@@ -160,7 +162,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 108 Lifecycle case 2 - INACTIVE, not activated yet
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c2"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c2@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_inactive"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-not-activated-info-text"]' to be visible
@@ -169,7 +173,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 109 Lifecycle case 3 - ACTIVE, no end date, no suspension
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c3"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c3@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
@@ -179,7 +185,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 110 Lifecycle case 4 - ACTIVE, end > 15 days, no suspension
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c4"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c4@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
@@ -188,7 +196,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 111 Lifecycle case 5 - ACTIVE, end <= 15 days, no suspension
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c5"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c5@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
@@ -197,7 +207,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 112 Lifecycle case 6 - ACTIVE, no end date, suspension planned
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c6"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c6@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
@@ -207,7 +219,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c7"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c7@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
@@ -217,7 +231,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c8"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c8@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
@@ -227,7 +243,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000c9"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c9@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
@@ -237,7 +255,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000000a"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c10@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-status-badge_active"]' not exists
@@ -247,7 +267,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000000b"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c11@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
@@ -257,7 +279,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000000c"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "lifecycle-c12@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
@@ -267,7 +291,9 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 119 Immediate activation - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d1"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d1@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -297,7 +323,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé dans une heure"
 
     ## 122 Scheduled activation - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d5"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d5@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -347,7 +375,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé à partir du 01/01/2100"
 
     ## 127 Immediate suspension - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d2"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d2@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -382,7 +412,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu dans une heure"
 
     ## 130 Scheduled suspension - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d8"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d8@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -481,7 +513,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
 
     ## 139 Modify suspension - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d9"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d9@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -567,7 +601,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
 
     ## 147 Immediate reactivation - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d4"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d4@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -595,7 +631,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé dans une heure"
 
     ## 150 Immediate deactivation - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d3"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d3@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -630,7 +668,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé dans une heure"
 
     ## 153 Scheduled deactivation - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d6"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d6@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
@@ -687,7 +727,9 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé à partir du 01/01/2100"
 
     ## 158 Modify deactivation - dialog opens correctly
-    Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000d7"
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    And I set the text "dialog-d7@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="see-button"]'
     Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible

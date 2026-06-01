@@ -56,7 +56,9 @@
       "oidcRPMetaDataOptionsIDTokenForceClaims": 1,
       "oidcRPMetaDataOptionsExtraClaims": {
         "roles": "roles"
-      }
+      },
+      "oidcRPMetaDataOptionsAccessTokenExpiration": 7200,
+      "oidcRPMetaDataOptionsIDTokenExpiration": 7200
     }
   },
   "oidcServicePrivateKeySig": "${OIDC_PRIVATE_KEY}",

@@ -101,7 +101,7 @@ VALUES
         tstzrange(now() + interval '30 days', NULL, '[)'),
         NULL,
         NULL,
-        'Reason1', 'Subreason1', 'Dialog test D1: activation dialogs',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D1: activation dialogs',
         '00000000-0000-4000-8000-0000000000d1',
         '00000000-0000-4000-8000-0000000000d1'),
        -- D2: ACTIVE, no end date, no suspension.
@@ -110,7 +110,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         NULL,
         now() - interval '30 days',
-        'Reason1', 'Subreason1', 'Dialog test D2: suspension/deactivation immediate dialogs',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D2: suspension/deactivation immediate dialogs',
         '00000000-0000-4000-8000-0000000000d2',
         '00000000-0000-4000-8000-0000000000d2'),
        -- D3: ACTIVE, no end date, no suspension.
@@ -119,7 +119,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         NULL,
         now() - interval '30 days',
-        'Reason1', 'Subreason1', 'Dialog test D3: deactivation.immediate dialog',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D3: deactivation.immediate dialog',
         '00000000-0000-4000-8000-0000000000d3',
         '00000000-0000-4000-8000-0000000000d3'),
        -- D4: SUSPENDED, no validity end, no suspension end.
@@ -128,7 +128,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         tstzrange(now() - interval '5 days', NULL, '[)'),
         now() - interval '30 days',
-        'Reason2', 'Subreason2', 'Dialog test D4: reactivation.immediate dialog',
+        'Suspension Reason B', 'Suspension Sub-reason B.1', 'Dialog test D4: reactivation.immediate dialog',
         '00000000-0000-4000-8000-0000000000d4',
         '00000000-0000-4000-8000-0000000000d4'),
        -- D5: INACTIVE, validity start in the future.
@@ -137,7 +137,7 @@ VALUES
         tstzrange(now() + interval '30 days', NULL, '[)'),
         NULL,
         NULL,
-        'Reason1', 'Subreason1', 'Dialog test D5: activation.scheduled dialog',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D5: activation.scheduled dialog',
         '00000000-0000-4000-8000-0000000000d5',
         '00000000-0000-4000-8000-0000000000d5'),
        -- D6: ACTIVE, no end date, no suspension.
@@ -146,7 +146,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         NULL,
         now() - interval '30 days',
-        'Reason1', 'Subreason1', 'Dialog test D6: deactivation.scheduled dialog',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D6: deactivation.scheduled dialog',
         '00000000-0000-4000-8000-0000000000d6',
         '00000000-0000-4000-8000-0000000000d6'),
        -- D7: ACTIVE, validity end in 7 days, no suspension.
@@ -155,7 +155,7 @@ VALUES
         tstzrange(now() - interval '30 days', now() + interval '7 days', '[)'),
         NULL,
         now() - interval '30 days',
-        'Reason1', 'Subreason1', 'Dialog test D7: modify deactivation dialog',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D7: modify deactivation dialog',
         '00000000-0000-4000-8000-0000000000d7',
         '00000000-0000-4000-8000-0000000000d7'),
        -- D8: ACTIVE, no end date, no suspension.
@@ -164,7 +164,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         NULL,
         now() - interval '30 days',
-        'Reason1', 'Subreason1', 'Dialog test D8: suspension.scheduled dialog',
+        'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D8: suspension.scheduled dialog',
         '00000000-0000-4000-8000-0000000000d8',
         '00000000-0000-4000-8000-0000000000d8'),
        -- D9: SUSPENDED, suspension period with both start and end defined.
@@ -173,7 +173,7 @@ VALUES
         tstzrange(now() - interval '30 days', NULL, '[)'),
         tstzrange(now() - interval '10 days', now() + interval '20 days', '[)'),
         now() - interval '30 days',
-        'Reason1', 'Subreason1', 'Dialog test D9: modify suspension dialog',
+        'Suspension Reason A', 'Suspension Sub-reason A.1', 'Dialog test D9: modify suspension dialog',
         '00000000-0000-4000-8000-0000000000d9',
         '00000000-0000-4000-8000-0000000000d9')
 ON CONFLICT (act_id) DO NOTHING;

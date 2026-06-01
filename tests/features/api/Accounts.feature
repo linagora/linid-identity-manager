@@ -367,15 +367,15 @@ Feature: Test API Account endpoints
         },
         "suspensionPeriod": null,
         "activationAt": null,
-        "statusReason": "ONBOARDING",
-        "statusSubreason": "INITIAL_SETUP",
+        "statusReason": "Deactivation Reason A",
+        "statusSubreason": "Deactivation Sub-reason A.1",
         "statusComment": "Initial onboarding"
       }
       """
     Then  I expect status code is 200
     And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.statusReason}}' is 'ONBOARDING'
-    And   I expect '{{response.body.statusSubreason}}' is 'INITIAL_SETUP'
+    And   I expect '{{response.body.statusReason}}' is 'Deactivation Reason A'
+    And   I expect '{{response.body.statusSubreason}}' is 'Deactivation Sub-reason A.1'
     And   I expect '{{response.body.statusComment}}' is 'Initial onboarding'
     And   I expect '{{response.body.validityPeriod.start}}' is not empty
     And   I expect '{{response.body.validityPeriod.end}}' is not empty
@@ -398,15 +398,15 @@ Feature: Test API Account endpoints
         },
         "suspensionPeriod": null,
         "activationAt": null,
-        "statusReason": "ONBOARDING",
-        "statusSubreason": "INITIAL_SETUP",
+        "statusReason": "Deactivation Reason A",
+        "statusSubreason": "Deactivation Sub-reason A.1",
         "statusComment": "Initial onboarding"
       }
       """
     Then  I expect status code is 200
     And   I expect '{{response.body.id}}' is '00000000-0000-4000-8000-00000000a002'
-    And   I expect '{{response.body.statusReason}}' is 'ONBOARDING'
-    And   I expect '{{response.body.statusSubreason}}' is 'INITIAL_SETUP'
+    And   I expect '{{response.body.statusReason}}' is 'Deactivation Reason A'
+    And   I expect '{{response.body.statusSubreason}}' is 'Deactivation Sub-reason A.1'
     And   I expect '{{response.body.statusComment}}' is 'Initial onboarding'
     And   I expect '{{response.body.validityPeriod.start}}' is '{{ctx.validityPeriodStart}}'
     And   I expect '{{response.body.validityPeriod.end}}' is '2099-12-31T00:00:00Z'
@@ -438,7 +438,7 @@ Feature: Test API Account endpoints
         },
         "suspensionPeriod": null,
         "activationAt": null,
-        "statusReason": "ONBOARDING",
+        "statusReason": "Deactivation Reason A",
         "statusSubreason": null,
         "statusComment": "first call"
       }
@@ -880,7 +880,7 @@ Feature: Test API Account endpoints
         },
         "suspensionPeriod": null,
         "activationAt": null,
-        "statusReason": "ONBOARDING",
+        "statusReason": "Deactivation Reason A",
         "statusSubreason": null,
         "statusComment": "Open-ended validity, no expiry"
       }

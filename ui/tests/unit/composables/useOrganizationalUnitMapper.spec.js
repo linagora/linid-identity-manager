@@ -53,7 +53,7 @@ const buildDto = (overrides = {}) => ({
   ...overrides,
 });
 
-describe('Test mapper: organizationalUnitMapper', () => {
+describe('Test mapper: useOrganizationalUnitMapper', () => {
   const tMock = vi.fn();
 
   beforeEach(() => {
@@ -293,6 +293,91 @@ describe('Test mapper: organizationalUnitMapper', () => {
       expect(result).not.toHaveProperty('id');
       expect(result).not.toHaveProperty('name');
       expect(result).not.toHaveProperty('type');
+    });
+  });
+
+  describe('Test function: toOrganizationalUnitStatusForm', () => {
+    it('should project a suspended status into a localized form', () => {
+      const { toOrganizationalUnitStatusForm } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitStatusForm({
+        suspensionPeriod: {
+          start: '2099-01-01T00:00:00Z',
+          end: '2099-12-31T00:00:00Z',
+        },
+        statusReason: 'Suspension Reason A',
+        statusSubreason: 'Suspension Sub-reason A.1',
+        statusComment: 'planned',
+        isSuspended: true,
+      });
+
+      expect(result).toEqual({
+        start: '2099/01/01',
+        end: '2099/12/31',
+        reason: 'Suspension Reason A',
+        subreason: 'Suspension Sub-reason A.1',
+        comment: 'planned',
+      });
+    });
+
+    it('should return empty dates and null reasons for a null status', () => {
+      const { toOrganizationalUnitStatusForm } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitStatusForm(null);
+
+      expect(result).toEqual({
+        start: '',
+        end: '',
+        reason: null,
+        subreason: null,
+        comment: null,
+      });
+    });
+  });
+
+  describe('Test function: toOrganizationalUnitStatusRecord', () => {
+    it('should convert localized dates to ISO and keep reason fields', () => {
+      const { toOrganizationalUnitStatusRecord } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitStatusRecord({
+        start: '2099/01/01',
+        end: '2099/12/31',
+        reason: 'Suspension Reason A',
+        subreason: 'Suspension Sub-reason A.1',
+        comment: 'planned',
+      });
+
+      expect(result).toEqual({
+        suspensionPeriod: {
+          start: '2099-01-01T00:00:00.000Z',
+          end: '2099-12-31T00:00:00.000Z',
+        },
+        reason: 'Suspension Reason A',
+        subreason: 'Suspension Sub-reason A.1',
+        comment: 'planned',
+      });
+    });
+
+    it('should keep an already ISO start untouched and collapse empty values to null', () => {
+      const { toOrganizationalUnitStatusRecord } = useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitStatusRecord({
+        start: '2099-01-01T00:00:00Z',
+        end: '',
+        reason: null,
+        subreason: null,
+        comment: null,
+      });
+
+      expect(result).toEqual({
+        suspensionPeriod: {
+          start: '2099-01-01T00:00:00Z',
+          end: null,
+        },
+        reason: null,
+        subreason: null,
+        comment: null,
+      });
     });
   });
 });

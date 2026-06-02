@@ -33,7 +33,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
 
-describe('Test mapper: commonMapper', () => {
+describe('Test mapper: useCommonMapper', () => {
   const tMock = vi.fn();
 
   beforeEach(() => {

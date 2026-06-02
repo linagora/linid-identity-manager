@@ -23,6 +23,7 @@ services:
 
   auth:
     image: lemonldapng/lemonldap-ng:2.22.2
+    container_name: lemon
     networks:
       - linid-dev-network
     environment:

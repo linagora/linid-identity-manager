@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2026-06-02
 
 ### Added
 
@@ -13,26 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The account list has been enhanced with pagination, allowing you to browse results more easily.
 - Filtering options have been added to help you quickly find specific accounts.
 - Input validation has been improved to reduce errors when managing accounts.
+- Add account suspension management feature.
+- Add account deactivation management feature.
 
 ### Fixed
 
 - Fixed an issue that could prevent initial database migrations from running correctly, which might have blocked setup or updates in some cases.
-
-### Changed
-
-- TODO
-
-### Deprecated
-
-- TODO
-
-### Removed
-
-- TODO
-
-### Security
-
-- TODO
 
 ## [0.4.0] - 2026-04-14
 
@@ -207,3 +193,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.2.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.2.0
 [0.3.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.3.0
 [0.4.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.4.0
+[0.5.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.5.0

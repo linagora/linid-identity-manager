@@ -35,7 +35,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
 
-describe('Test mapper: accountMapper', () => {
+describe('Test mapper: useAccountMapper', () => {
   const tMock = vi.fn();
 
   beforeEach(() => {

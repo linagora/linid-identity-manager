@@ -204,6 +204,7 @@ public class OrganizationalUnitController {
     @PutMapping("/{id}")
     @Operation(summary = "Update the organizational unit")
     @ApiResponse(responseCode = "200", description = "Organizational unit successfully updated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
     @ApiResponse(responseCode = "404", description = "Organizational unit not found", content = @Content)
     public ResponseEntity<OrganizationalUnitDTO> update(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,

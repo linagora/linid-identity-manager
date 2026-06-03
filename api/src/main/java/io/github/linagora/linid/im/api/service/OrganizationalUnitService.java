@@ -79,7 +79,6 @@ public interface OrganizationalUnitService {
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit
      * @return the found {@link OrganizationalUnitView}
-     * @throws jakarta.persistence.EntityNotFoundException if no organizational unit view is found
      */
     OrganizationalUnitView findViewById(UserPrincipal userPrincipal, UUID id);
 

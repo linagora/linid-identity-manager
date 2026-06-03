@@ -60,7 +60,7 @@
     <component
       :is="advancedSearchComponent"
       v-if="advancedSearchComponent"
-      v-model:filters="filters"
+      :filters="filters"
       :ui-namespace="uiNamespace"
       :i18n-scope="i18nScope"
       :fields="fieldsSearch"

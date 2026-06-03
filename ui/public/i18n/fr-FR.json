@@ -15,6 +15,8 @@
   },
   "OrganizationalUnitsTree": {
     "GenericTree": {
+      "filterLabel": "Filtrer les unités organisationnelles",
+      "filterHint": "Saisissez un texte pour filtrer les unités organisationnelles.",
       "types": {
         "root": {
           "label": "Unités organisationnelles"

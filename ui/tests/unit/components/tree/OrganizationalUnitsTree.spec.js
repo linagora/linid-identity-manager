@@ -232,6 +232,120 @@ describe('Test component: OrganizationalUnitsTree', () => {
     });
   });
 
+  describe('Test function: filterTreeNode', () => {
+    const makeNode = (name) => ({ value: { name } });
+
+    // --- Basic matching ---
+
+    it('should return true when the node name contains the filter (exact match)', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Engineering'), 'Engineering')
+      ).toBe(true);
+    });
+
+    it('should return true when the node name contains the filter (partial match)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), 'Engin')).toBe(
+        true
+      );
+    });
+
+    it('should return false when no token of the filter matches the node name', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Engineering'), 'Marketing')
+      ).toBe(false);
+    });
+
+    // --- Case insensitivity ---
+
+    it('should return true when the filter is case-insensitive (uppercase filter)', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Engineering'), 'ENGINEERING')
+      ).toBe(true);
+    });
+
+    it('should return true when the filter is case-insensitive (mixed case node name)', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('eNgInEeRiNg'), 'engineering')
+      ).toBe(true);
+    });
+
+    // --- Empty / whitespace-only filter ---
+
+    it('should return false when the filter is an empty string (no tokens to match)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), '')).toBe(
+        false
+      );
+    });
+
+    it('should return false when the filter contains only whitespace (all tokens stripped)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), '   ')).toBe(
+        false
+      );
+    });
+
+    // --- Leading / trailing whitespace in filter ---
+
+    it('should return true when the filter has leading and trailing whitespace around a matching word', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Engineering'), '  Engineering  ')
+      ).toBe(true);
+    });
+
+    it('should return true when the first token of a multi-word filter matches the node name', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('IT'), 'IT Department')).toBe(
+        true
+      );
+    });
+
+    it('should return true when the second token of a multi-word filter matches the node name', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Engineering'), 'HR Engineering')
+      ).toBe(true);
+    });
+
+    it('should return false when no token of a multi-word filter matches the node name', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Finance'), 'HR Engineering')
+      ).toBe(false);
+    });
+
+    // --- Missing / undefined node value ---
+
+    it('should return false when node.value is undefined and filter is non-empty', () => {
+      expect(
+        wrapper.vm.filterTreeNode({ value: undefined }, 'Engineering')
+      ).toBe(false);
+    });
+
+    it('should return false when node.value is undefined and filter is empty (no tokens)', () => {
+      expect(wrapper.vm.filterTreeNode({ value: undefined }, '')).toBe(false);
+    });
+
+    it('should return false when node.value.name is undefined and filter is non-empty', () => {
+      expect(wrapper.vm.filterTreeNode({ value: {} }, 'Engineering')).toBe(
+        false
+      );
+    });
+
+    it('should return false when node.value.name is undefined and filter is empty (no tokens)', () => {
+      expect(wrapper.vm.filterTreeNode({ value: {} }, '')).toBe(false);
+    });
+
+    // --- Null / undefined filter ---
+
+    it('should return false when filter is null (coerced to empty, no tokens)', () => {
+      expect(wrapper.vm.filterTreeNode(makeNode('Engineering'), null)).toBe(
+        false
+      );
+    });
+
+    it('should return false when filter is undefined (coerced to empty, no tokens)', () => {
+      expect(
+        wrapper.vm.filterTreeNode(makeNode('Engineering'), undefined)
+      ).toBe(false);
+    });
+  });
+
   describe('Test hook: onMounted', () => {
     it('should call loadData on mount', async () => {
       await flushPromises();

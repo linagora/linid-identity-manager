@@ -29,6 +29,8 @@
     :is="treeComponent"
     v-if="treeComponent && treeNodes.length > 0"
     v-model:selected-node="selectedNode"
+    :search-enabled="true"
+    :filter-method="filterTreeNode"
     ui-namespace="organizational-units-tree"
     :i18n-scope="i18nScope"
     :nodes="treeNodes"
@@ -65,6 +67,24 @@ const router = useRouter();
 const route = useRoute();
 
 const store = useOrganizationalUnitStore();
+
+/**
+ * Filters a tree node based on a search string.
+ * @param node - Organizational unit tree node to evaluate.
+ * @param filter - Filter text entered by the user.
+ * @returns True if the node name matches the filter, otherwise false.
+ */
+function filterTreeNode(
+  node: TreeNode<OrganizationalUnitDTO>,
+  filter: string
+): boolean {
+  const name = node.value?.name ?? '';
+  const filters = (filter ?? '')
+    .split(' ')
+    .filter((f) => f && f.length > 0)
+    .map((f) => f);
+  return filters.some((f) => name.toLowerCase().includes(f.toLowerCase()));
+}
 
 /**
  * Loads organizational units and maps them to tree nodes. Displays a notification in case of error.

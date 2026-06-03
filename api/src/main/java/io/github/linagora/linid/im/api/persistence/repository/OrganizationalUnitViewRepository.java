@@ -27,19 +27,47 @@
 package io.github.linagora.linid.im.api.persistence.repository;
 
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.Optional;
+import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.Repository;
 
 import java.util.UUID;
 
 /**
- * Repository for accessing and querying {@link OrganizationalUnitView} entities.
+ * Read-only Spring Data repository for {@link OrganizationalUnitView}.
  *
- * <p>Provides standard CRUD operations through {@link JpaRepository} and support for specification-based dynamic
- * queries through {@link JpaSpecificationExecutor}.</p>
+ * <p>Exposes only read operations: mutating methods from {@code JpaRepository} (save, delete,
+ * flush...) are intentionally not inherited, since {@link OrganizationalUnitView} is backed by a database
+ * view.
  *
- * <p>This repository is intended for read operations on the {@code organizational_units_view} database view.</p>
+ * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering via {@code
+ * spring-query-filter} specifications.
  */
-public interface OrganizationalUnitViewRepository extends JpaRepository<OrganizationalUnitView, UUID>,
-    JpaSpecificationExecutor<OrganizationalUnitView> {
+public interface OrganizationalUnitViewRepository
+    extends Repository<OrganizationalUnitView, UUID>, JpaSpecificationExecutor<OrganizationalUnitView> {
+
+    /**
+     * Finds all organizational unit views matching the given specification and pageable.
+     *
+     * @param specification the specification to filter account views.
+     * @param pageable      the pagination information.
+     * @return a page of account views matching the specification and pagination criteria.
+     */
+    @Override
+    @NonNull
+    Page<OrganizationalUnitView> findAll(@NonNull Specification<OrganizationalUnitView> specification,
+                                         @NonNull Pageable pageable);
+
+    /**
+     * Finds an organizational unit view by its ID.
+     *
+     * @param id the UUID of the organizational unit view
+     * @return an Optional containing the found organizational unit view, or empty if not found
+     */
+    @NonNull
+    Optional<OrganizationalUnitView> findById(@NonNull UUID id);
 }

@@ -249,7 +249,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             );
         }
 
-        findById(userPrincipal, id);
+        existsById(userPrincipal, id);
 
         organizationalUnitRepository.deleteById(id);
     }

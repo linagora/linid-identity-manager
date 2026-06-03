@@ -320,7 +320,6 @@ class OrganizationalUnitServiceImplTest {
             .build();
 
         when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
-        when(organizationalUnitRepository.findById(any())).thenReturn(Optional.empty());
 
         var exception = assertThrows(ApiException.class,
             () -> service.deleteById(userPrincipal, uuid));

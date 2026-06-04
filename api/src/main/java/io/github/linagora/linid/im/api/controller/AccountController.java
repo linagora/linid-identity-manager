@@ -38,6 +38,7 @@ import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
+import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -90,6 +91,11 @@ public class AccountController {
     private final PagedResponseStatusResolver pagedResponseStatusResolver;
 
     /**
+     * Service handling organizational unit business logic.
+     */
+    private final OrganizationalUnitService organizationalUnitService;
+
+    /**
      * Creates a new account.
      *
      * @param userPrincipal the authenticated user
@@ -105,6 +111,7 @@ public class AccountController {
         @Valid @RequestBody final AccountRecord account) {
         log.info("[{}] Received POST request to create account with {}", userPrincipal.getEmail(),
             account);
+        organizationalUnitService.existsById(userPrincipal, account.organizationalUnit());
         var entity = accountService.create(userPrincipal, account);
         return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toDTO(entity));
     }

@@ -13,6 +13,7 @@ Feature: Test API Account endpoints
   ## 204 Should return 500 when creating account with duplicate email
   ## 205 Should return 400 when validity period start is null
   ## 206 Should return 400 when validity period start is before current date
+  ## 207 Should create an account link with an organizational unit
 
   ################## Find All (GET /accounts) #############
   ## 301 Should return paginated list of accounts
@@ -81,7 +82,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 401
@@ -101,7 +103,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -116,7 +119,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.id}}' with method 'DELETE'
+    When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.content[0].id}}' with method 'DELETE'
     Then  I expect status code is 204
 
   Scenario: 202 - Should return 400 with missing required fields
@@ -127,7 +130,8 @@ Feature: Test API Account endpoints
         "lastname": "",
         "firstname": "",
         "email": "",
-        "validityPeriod": null
+        "validityPeriod": null,
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 400
@@ -146,7 +150,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 400
@@ -165,7 +170,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -181,7 +187,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 500
@@ -200,7 +207,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": null,
           "end": "2030-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 400
@@ -218,12 +226,47 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2000-01-01T00:00:00Z",
           "end": "2030-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 400
     And   I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_in_past'
     And   I expect '{{response.body.status}}' is '400'
+
+  Scenario: 207 - Should create an account link with an organizational unit
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-207",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john207@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+      }
+      """
+    Then  I expect status code is 207
+    And   I expect '{{response.body | dump}}' as 'json' to have length 9
+    And   I expect '{{response.body.id}}' is not empty
+    And   I expect '{{response.body.externalId}}' is 'ext-207'
+    And   I expect '{{response.body.lastname}}' is 'Doe'
+    And   I expect '{{response.body.firstname}}' is 'John'
+    And   I expect '{{response.body.email}}' is 'john207@example.com'
+    And   I expect '{{response.body.createdBy}}' is not empty
+    And   I expect '{{response.body.updatedBy}}' is not empty
+    And   I expect '{{response.body.insertDate}}' is not empty
+    And   I expect '{{response.body.updateDate}}' is not empty
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000a/accounts?email=john207@example.com' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.content[0].id}}' with method 'DELETE'
+    Then  I expect status code is 204
 
   ####################################################
   ################## Find All (GET /accounts) #########
@@ -240,7 +283,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -277,7 +321,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -319,7 +364,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -352,7 +398,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -392,7 +439,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -427,7 +475,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -461,7 +510,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -495,7 +545,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -548,7 +599,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -584,7 +636,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -615,7 +668,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2090-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -662,7 +716,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -706,7 +761,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -747,7 +803,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -815,7 +872,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -845,7 +903,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2080-01-01T00:00:00Z",
           "end": null
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201
@@ -921,7 +980,8 @@ Feature: Test API Account endpoints
         "validityPeriod": {
           "start": "2099-01-01T00:00:00Z",
           "end": "2099-12-31T00:00:00Z"
-        }
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
       }
       """
     Then  I expect status code is 201

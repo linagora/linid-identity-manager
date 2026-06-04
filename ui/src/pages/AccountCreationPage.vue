@@ -93,6 +93,7 @@
             :label="field.label"
             :rules="field.rules"
             :type="field.type"
+            :disable="field.disabled || false"
             class="q-mb-sm"
             lazy-rules
             v-bind="uiProps[field.name]?.input"
@@ -132,11 +133,16 @@ import { useAccountCreationConfig } from 'src/composables/useAccountCreationConf
 import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { useCommonMapper } from 'src/composables/useCommonMapper';
 import { createAccount } from 'src/services/AccountService';
+import {
+  getOrganizationalUnitById,
+  getOrganizationalUnitRoot,
+} from 'src/services/OrganizationalUnitService';
 import type { AccountForm } from 'src/types/accounts';
 import type { DatePickerUiProps } from 'src/types/form';
-import { reactive, ref } from 'vue';
+import type { OrganizationalUnitDTO } from 'src/types/organizationalUnits';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const pageName = 'AccountCreationPage';
 const i18nScope = pageName;
@@ -151,10 +157,46 @@ const { creationFields } = useAccountCreationConfig(i18nScope);
 const { ui } = useUiDesign();
 const { toAccountRecord } = useAccountMapper();
 
-const form = reactive<AccountForm>(toEmptyRecord(creationFields));
+const form = ref<AccountForm>(toEmptyRecord(creationFields));
 const isLoading = ref<boolean>(false);
-
+const route = useRoute();
 const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
+const ouSelected: string = route.query.ou as string;
+const organizationalUnit = ref<OrganizationalUnitDTO>();
+
+/**
+ * Loads the organizational unit based on the route query parameter.
+ * @returns A promise that resolves when the organizational unit is loaded, or redirects to the accounts list if not found or on error.
+ */
+async function loadOrganizationalUnit() {
+  try {
+    if (!ouSelected) {
+      organizationalUnit.value = await getOrganizationalUnitRoot();
+    } else {
+      organizationalUnit.value = await getOrganizationalUnitById(ouSelected);
+    }
+  } catch (error) {
+    const errorMessageKey =
+      axios.isAxiosError(error) && error.response?.status === 404
+        ? 'errors.notFound'
+        : 'errors.generic';
+    Notify({
+      type: 'negative',
+      message: t(errorMessageKey),
+    });
+    void router.push(`/accounts`);
+  }
+}
+
+/**
+ * Sets the organizational unit name in the form.
+ */
+function setFormData() {
+  form.value = {
+    ...form.value,
+    organizationalUnit: organizationalUnit.value!.name,
+  };
+}
 
 /**
  * Submits the form by creating a new account, then redirects to its details page.
@@ -167,7 +209,9 @@ const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 async function onSubmit(): Promise<void> {
   isLoading.value = true;
   try {
-    const created = await createAccount(toAccountRecord({ ...form }));
+    const created = await createAccount(
+      toAccountRecord({ ...form.value }, organizationalUnit.value!.id)
+    );
     Notify({
       type: 'positive',
       message: t('success'),
@@ -200,6 +244,18 @@ const uiProps = creationFields.reduce<DatePickerUiProps>((acc, field) => {
 
 /** Cancels the account creation and navigates back to the accounts list. */
 function cancel(): void {
-  void router.push('/accounts');
+  const query = { node: '' };
+  if (route.query.node) {
+    query.node = route.query.node as string;
+  }
+  void router.push({ path: '/accounts', query });
 }
+
+onMounted(async () => {
+  await loadOrganizationalUnit();
+  if (!organizationalUnit.value) {
+    return;
+  }
+  await setFormData();
+});
 </script>

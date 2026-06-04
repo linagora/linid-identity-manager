@@ -51,6 +51,13 @@ export function useAccountCreationConfig(i18nScope: string) {
 
   const creationFields: FormField<AccountForm>[] = [
     {
+      name: 'organizationalUnit',
+      label: t('fields.organizationalUnit'),
+      type: 'text',
+      rules: [required],
+      disabled: true,
+    },
+    {
       name: 'externalId',
       label: t('fields.externalId'),
       type: 'text',

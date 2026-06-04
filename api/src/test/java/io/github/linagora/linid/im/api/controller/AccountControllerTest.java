@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,6 +49,7 @@ import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
+import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
@@ -79,6 +81,9 @@ class AccountControllerTest {
 
     @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
+
+    @Mock
+    private OrganizationalUnitService organizationalUnitService;
 
     @InjectMocks
     private AccountController accountController;
@@ -158,7 +163,8 @@ class AccountControllerTest {
     @Test
     @DisplayName("Should create account and return 201")
     void testCreate_shouldReturn201WithAccountDTO() {
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null));
+        UUID ouId = UUID.randomUUID();
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null), ouId);
         var entity = createSampleEntity();
         var dto = createSampleDTO(entity);
         when(accountService.create(userPrincipal, request)).thenReturn(entity);
@@ -177,6 +183,9 @@ class AccountControllerTest {
         assertEquals(ADMIN_ID, response.getBody().getUpdatedBy());
         assertNotNull(response.getBody().getInsertDate());
         assertNotNull(response.getBody().getUpdateDate());
+        var inOrder = inOrder(organizationalUnitService, accountService);
+        inOrder.verify(organizationalUnitService).existsById(userPrincipal, ouId);
+        inOrder.verify(accountService).create(userPrincipal, request);
     }
 
     @Test

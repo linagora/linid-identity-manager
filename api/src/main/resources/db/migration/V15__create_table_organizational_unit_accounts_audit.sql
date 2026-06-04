@@ -41,7 +41,7 @@ BEGIN
                 'changed_by', changed_by_json
                         );
 
-        INSERT INTO organizational_unit_accounts_audit(oaa_id, operation, payload)
+        INSERT INTO organizational_unit_accounts_audit(oua_id, operation, payload)
         VALUES (OLD.oua_id, TG_OP, payload_json);
 
         RETURN OLD;
@@ -53,7 +53,7 @@ BEGIN
                 'changed_by', changed_by_json
                         );
 
-        INSERT INTO organizational_unit_accounts_audit(oaa_id, operation, payload)
+        INSERT INTO organizational_unit_accounts_audit(oua_id, operation, payload)
         VALUES (NEW.oua_id, TG_OP, payload_json);
 
         RETURN NEW;

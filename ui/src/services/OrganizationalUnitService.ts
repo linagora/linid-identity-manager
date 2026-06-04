@@ -25,6 +25,7 @@
  */
 
 import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
+import { usePagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import { appConfig } from 'boot/config';
 import type { AccountDTO, AccountQueryFilterDTO } from 'src/types/accounts';
@@ -83,6 +84,26 @@ export async function getOrganizationalUnits(
       Page<OrganizationalUnitDTO>
     >(`/organizational-units`, { params: { ...filters, ...pagination } })
     .then(({ data }) => data);
+}
+
+/**
+ * Fetches the root organizational unit from the API.
+ * @returns Promise resolving to the root organizational unit.
+ */
+export async function getOrganizationalUnitRoot() {
+  const { toPagination } = usePagination();
+
+  const response = await getOrganizationalUnits(
+    { name: 'root' },
+    toPagination({
+      page: 1,
+      rowsNumber: 0,
+      sortBy: undefined,
+      rowsPerPage: 10,
+      descending: true,
+    })
+  );
+  return response?.content?.[0];
 }
 
 /**

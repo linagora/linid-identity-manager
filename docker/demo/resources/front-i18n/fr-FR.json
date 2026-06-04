@@ -418,6 +418,7 @@
   "AccountCreationPage": {
     "title": "Créer un nouveau compte",
     "fields": {
+      "organizationalUnit": "Unité organisationnelle",
       "externalId": "Identifiant externe",
       "lastname": "Nom",
       "firstname": "Prénom",

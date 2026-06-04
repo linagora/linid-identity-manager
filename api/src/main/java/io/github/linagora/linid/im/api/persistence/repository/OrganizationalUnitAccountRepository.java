@@ -27,17 +27,18 @@
 package io.github.linagora.linid.im.api.persistence.repository;
 
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.repository.Repository;
 
 import java.util.UUID;
 
 /**
  * Spring Data JPA repository for {@link OrganizationalUnitAccount}.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
+ * <p>Extends {@link JpaRepository} to support CRUD operations and
+ * {@link JpaSpecificationExecutor} to support dynamic filtering
  * via {@code spring-query-filter} specifications.</p>
  */
 public interface OrganizationalUnitAccountRepository
-    extends Repository<OrganizationalUnitAccount, UUID>, JpaSpecificationExecutor<OrganizationalUnitAccount> {
+    extends JpaRepository<OrganizationalUnitAccount, UUID>, JpaSpecificationExecutor<OrganizationalUnitAccount> {
 }

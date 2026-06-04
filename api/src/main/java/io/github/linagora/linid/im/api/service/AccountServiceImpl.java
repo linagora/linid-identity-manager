@@ -41,9 +41,12 @@ import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
@@ -119,6 +122,16 @@ public class AccountServiceImpl implements AccountService {
     private final AccountStatusRepository accountStatusRepository;
 
     /**
+     * Repository for organizational unit account link persistence operations.
+     */
+    private final OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    /**
+     * Repository for organizational unit persistence operations.
+     */
+    private final OrganizationalUnitRepository organizationalUnitRepository;
+
+    /**
      * Mapper for converting account records into {@link Account} entities.
      */
     private final AccountMapper accountMapper;
@@ -177,6 +190,14 @@ public class AccountServiceImpl implements AccountService {
 
         AccountStatus statusEntity = accountStatusMapper.toAccountStatus(account, userPrincipal, createdAccount);
         accountStatusRepository.save(statusEntity);
+
+        OrganizationalUnitAccount ouAccount = OrganizationalUnitAccount.builder()
+            .organizationalUnitId(account.organizationalUnit())
+            .accountId(createdAccount.getId())
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+        organizationalUnitAccountRepository.save(ouAccount);
 
         return createdAccount;
     }

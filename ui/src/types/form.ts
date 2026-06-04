@@ -48,6 +48,10 @@ export interface FormField<T> {
   rules: ValidationRule[];
   /** Static list of values offered by `select` fields. Ignored for any other field type. */
   options?: string[];
+  /**
+   * Whether the field is disabled.
+   */
+  disabled?: boolean;
 }
 
 /**

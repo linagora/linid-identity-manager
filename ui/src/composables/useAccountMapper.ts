@@ -128,9 +128,13 @@ export function useAccountMapper() {
    * object.
    *
    * @param account AccountForm containing the flat fields from the account creation form.
+   * @param organizationalUnit The organizational unit to which the account belongs.
    * @returns AccountRecord with the validity period properly structured for API consumption.
    */
-  const toAccountRecord = (account: AccountForm): AccountRecord => {
+  const toAccountRecord = (
+    account: AccountForm,
+    organizationalUnit: string
+  ): AccountRecord => {
     const { validityPeriodStart, ...baseFields } = account;
 
     return {
@@ -139,6 +143,7 @@ export function useAccountMapper() {
         start: toDateISO(validityPeriodStart) || null,
         end: null,
       },
+      organizationalUnit,
     };
   };
 

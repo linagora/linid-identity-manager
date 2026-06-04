@@ -76,10 +76,11 @@ describe('Test composable: useAccountCreationConfig', () => {
     );
   });
 
-  it('should declare the five expected fields in order with translated labels', () => {
+  it('should declare the six expected fields in order with translated labels', () => {
     const { creationFields } = useAccountCreationConfig('AccountCreationPage');
 
     expect(creationFields.map((field) => field.name)).toEqual([
+      'organizationalUnit',
       'externalId',
       'lastname',
       'firstname',
@@ -87,6 +88,7 @@ describe('Test composable: useAccountCreationConfig', () => {
       'validityPeriodStart',
     ]);
     expect(creationFields.map((field) => field.label)).toEqual([
+      'translated.fields.organizationalUnit',
       'translated.fields.externalId',
       'translated.fields.lastname',
       'translated.fields.firstname',

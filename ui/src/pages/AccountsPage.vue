@@ -237,6 +237,10 @@ async function loadData(id: string): Promise<void> {
 function goToCreate() {
   return router.push({
     path: `${route.path}/create`,
+    query: {
+      ou: selectedOrganizationalUnitId.value,
+      node: route.query.node as string,
+    },
   });
 }
 

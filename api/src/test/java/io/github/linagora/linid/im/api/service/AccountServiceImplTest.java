@@ -41,9 +41,12 @@ import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
@@ -96,6 +99,10 @@ class AccountServiceImplTest {
     @Mock
     private AccountStatusRepository accountStatusRepository;
     @Mock
+    private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+    @Mock
+    private OrganizationalUnitRepository organizationalUnitRepository;
+    @Mock
     private AccountMapper accountMapper;
     @Spy
     private AccountStatusMapperImpl accountStatusMapper = new AccountStatusMapperImpl();
@@ -130,8 +137,9 @@ class AccountServiceImplTest {
     @Test
     @DisplayName("Should create account with correct fields and checksum")
     void testCreate_shouldSetAllFieldsAndChecksum() {
+        UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null));
+            new PeriodRecord(START, null), ouId);
         Account mappedAccount = new Account();
         mappedAccount.setExternalId("ext-001");
         mappedAccount.setLastname("Doe");
@@ -143,6 +151,12 @@ class AccountServiceImplTest {
         when(checksumService.compute("{}")).thenReturn(
             "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a");
         when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountStatusMapper.toAccountStatus(any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
+            .thenReturn(new AccountStatus());
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
         Account result = accountService.create(userPrincipal, request);
@@ -162,11 +176,18 @@ class AccountServiceImplTest {
     @Test
     @DisplayName("Should generate consistent SHA-256 checksum for default payload")
     void testCreate_shouldGenerateConsistentChecksum() {
+        UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null));
+            new PeriodRecord(START, null), ouId);
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountStatusMapper.toAccountStatus(any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
+            .thenReturn(new AccountStatus());
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
         Account first = accountService.create(userPrincipal, request);
@@ -178,11 +199,18 @@ class AccountServiceImplTest {
     @Test
     @DisplayName("Should delegate validation to accountCreationValidator")
     void testCreate_shouldCallValidator() {
+        UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null));
+            new PeriodRecord(START, null), ouId);
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountStatusMapper.toAccountStatus(any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
+            .thenReturn(new AccountStatus());
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
         accountService.create(userPrincipal, request);
@@ -194,7 +222,7 @@ class AccountServiceImplTest {
     @DisplayName("Should not save account when validator throws")
     void testCreate_shouldNotSaveWhenValidatorThrows() {
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null));
+            new PeriodRecord(START, null), null);
         doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
             I18nMessage.of("error.account.creation.validity_period_start_in_past")))
             .when(accountCreationValidator).validate(request);
@@ -206,13 +234,15 @@ class AccountServiceImplTest {
         assertEquals("error.account.creation.validity_period_start_in_past", ex.getError().key());
         verify(accountRepository, never()).save(any());
         verify(accountStatusRepository, never()).save(any());
+        verify(organizationalUnitAccountRepository, never()).save(any());
     }
 
     @Test
     @DisplayName("Should save account status with correct accountId, createdBy and updatedBy")
     void testCreate_shouldSaveStatusWithCorrectAuditFields() {
+        UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null));
+            new PeriodRecord(START, null), ouId);
         UUID generatedId = UUID.randomUUID();
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
@@ -226,6 +256,10 @@ class AccountServiceImplTest {
         when(accountStatusMapper.toAccountStatus(
             eq(request), any(UserPrincipal.class), argThat(a -> generatedId.equals(a.getId()))))
             .thenReturn(mockStatus);
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
         accountService.create(userPrincipal, request);
 
@@ -237,8 +271,9 @@ class AccountServiceImplTest {
     @Test
     @DisplayName("create should validate first, then persist the account, then map and persist the status — in that order")
     void testCreate_shouldRespectValidatePersistAccountMapPersistStatusOrder() {
+        UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-002", "Doe", "John", "john2@example.com",
-            new PeriodRecord(START, null));
+            new PeriodRecord(START, null), ouId);
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
         when(accountStatusMapper.toAccountStatus(
@@ -246,6 +281,10 @@ class AccountServiceImplTest {
             .thenReturn(mockStatus);
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
         accountService.create(userPrincipal, request);
@@ -258,6 +297,70 @@ class AccountServiceImplTest {
         inOrder.verify(accountStatusMapper).toAccountStatus(
             eq(request), any(UserPrincipal.class), any(Account.class));
         inOrder.verify(accountStatusRepository).save(mockStatus);
+    }
+
+    @Test
+    @DisplayName("create should create organizational unit account link when organizationalUnitId is provided")
+    void testCreate_shouldCreateOUAccountLinkWhenOUIdProvided() {
+        UUID ouId = UUID.randomUUID();
+        var request = new AccountRecord("ext-003", "Doe", "John", "john3@example.com",
+            new PeriodRecord(START, null), ouId);
+        UUID accountId = UUID.randomUUID();
+        Account createdAccount = new Account();
+        createdAccount.setId(accountId);
+        AccountStatus mockStatus = new AccountStatus();
+
+        when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
+        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
+        when(accountRepository.save(any(Account.class))).thenReturn(createdAccount);
+        when(accountStatusMapper.toAccountStatus(
+            any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
+            .thenReturn(mockStatus);
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.create(userPrincipal, request);
+
+        verify(organizationalUnitAccountRepository).save(argThat(ouAccount ->
+            ouAccount.getOrganizationalUnitId().equals(ouId) &&
+                ouAccount.getAccountId().equals(accountId) &&
+                ouAccount.getCreatedBy().equals(ADMIN_ID) &&
+                ouAccount.getUpdatedBy().equals(ADMIN_ID)
+        ));
+    }
+
+    @Test
+    @DisplayName("create should respect order: validate, persist account, map status, persist status, then create OU link")
+    void testCreate_shouldRespectOrderIncludingOULinkCreation() {
+        UUID ouId = UUID.randomUUID();
+        UUID accountId = UUID.randomUUID();
+        var request = new AccountRecord("ext-006", "Doe", "John", "john6@example.com",
+            new PeriodRecord(START, null), ouId);
+        Account createdAccount = new Account();
+        createdAccount.setId(accountId);
+        AccountStatus mockStatus = new AccountStatus();
+
+        when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
+        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
+        when(accountRepository.save(any(Account.class))).thenReturn(createdAccount);
+        when(accountStatusMapper.toAccountStatus(
+            any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
+            .thenReturn(mockStatus);
+        when(accountStatusRepository.save(any(AccountStatus.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        accountService.create(userPrincipal, request);
+
+        var inOrder = inOrder(accountCreationValidator, accountRepository,
+            accountStatusRepository, organizationalUnitAccountRepository);
+        inOrder.verify(accountCreationValidator).validate(request);
+        inOrder.verify(accountRepository).save(any(Account.class));
+        inOrder.verify(accountStatusRepository).save(mockStatus);
+        inOrder.verify(organizationalUnitAccountRepository).save(any(OrganizationalUnitAccount.class));
     }
 
     @Test

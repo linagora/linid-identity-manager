@@ -36,6 +36,7 @@ import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -65,7 +66,7 @@ class AccountCreationValidatorTest {
 
     private AccountRecord recordWithStart(final OffsetDateTime start) {
         return new AccountRecord("ext-001", "Doe", "John", EMAIL,
-            new PeriodRecord(start, null));
+            new PeriodRecord(start, null), UUID.randomUUID());
     }
 
     // -------------------------------------------------------------------------

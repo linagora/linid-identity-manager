@@ -121,6 +121,7 @@ import {
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { storeToRefs } from 'pinia';
 import { fieldsOrder } from 'src/assets/organizationalUnits/detailsConfiguration';
 import { organizationalUnitLifecycleUiConfiguration } from 'src/assets/organizationalUnits/organizationalUnitLifecycleUiConfiguration';
 import { dayjs } from 'src/boot/dayjs';
@@ -133,21 +134,19 @@ import {
   getOrganizationalUnitById,
   updateOrganizationalUnitStatus,
 } from 'src/services/OrganizationalUnitService';
+import { useOrganizationalUnitStore } from 'src/stores/useOrganizationalUnitStore';
 import type {
   OrganizationalUnit,
   OrganizationalUnitStatus,
   OrganizationalUnitStatusForm,
 } from 'src/types/organizationalUnits';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { type Composer } from 'vue-i18n';
-import { useRoute, useRouter } from 'vue-router';
 
 const pageName = 'OrganizationalUnitDetailsPage';
 const i18nScope = pageName;
 const uiNamespace = 'organizational-units.details-page';
 
-const route = useRoute();
-const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const tGlobal = (getI18nInstance().global as Composer).t;
 const { Notify } = useNotify();
@@ -158,11 +157,14 @@ const {
   toOrganizationalUnitStatusRecord,
 } = useOrganizationalUnitMapper();
 
-const organizationalUnitId = computed(() => route.params.id as string);
+const store = useOrganizationalUnitStore();
+const { selectedOrganizationalUnitId } = storeToRefs(store);
 
 const organizationalUnit = ref<OrganizationalUnit | null>(null);
 const organizationalUnitStatus = ref<OrganizationalUnitStatus | null>(null);
 const isLoading = ref<boolean>(false);
+
+let detailRequestController: AbortController | null = null;
 
 const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
 const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
@@ -177,16 +179,32 @@ const hasAnyLifecycleAction = computed(() =>
 );
 
 /**
- * Loads the OU from the backend based on the route parameter and splits the
- * raw DTO into the page-level identity and lifecycle projections.
+ * Loads the organizational unit selected in the tree (store) and splits the
+ * raw DTO into the identity and lifecycle projections. Clears the panel when
+ * no organizational unit is selected.
+ * @param id - Identifier of the organizational unit to load.
  */
-async function loadOrganizationalUnit(): Promise<void> {
+async function loadOrganizationalUnit(id: string): Promise<void> {
+  if (!id) {
+    organizationalUnit.value = null;
+    organizationalUnitStatus.value = null;
+    return;
+  }
+
+  detailRequestController?.abort();
+  const controller = new AbortController();
+  detailRequestController = controller;
+
   isLoading.value = true;
   try {
-    const dto = await getOrganizationalUnitById(organizationalUnitId.value);
+    const dto = await getOrganizationalUnitById(id, controller.signal);
     organizationalUnit.value = toOrganizationalUnit(dto);
     organizationalUnitStatus.value = toOrganizationalUnitStatus(dto);
   } catch (error) {
+    if (axios.isCancel(error)) {
+      return;
+    }
+
     const errorMessageKey =
       axios.isAxiosError(error) && error.response?.status === 404
         ? 'errors.notFound'
@@ -195,20 +213,16 @@ async function loadOrganizationalUnit(): Promise<void> {
       type: 'negative',
       message: t(errorMessageKey),
     });
-    goHome();
   } finally {
-    isLoading.value = false;
+    if (detailRequestController === controller) {
+      isLoading.value = false;
+    }
   }
 }
 
-/**
- * Navigates back to the home page.
- *
- * No OU listing page exists yet, so the home page acts as the safe fallback.
- */
-function goHome(): void {
-  void router.push('/');
-}
+watch(selectedOrganizationalUnitId, (id: string) => {
+  void loadOrganizationalUnit(id);
+});
 
 /**
  * Dispatches a lifecycle action key (emitted by the dropdown button) to the
@@ -232,21 +246,24 @@ function onLifecycleActionClick(event: DropdownClickPayload): void {
 }
 
 /**
- * Opens the confirmation dialog for an immediate suspension. Submits a
- * suspension period starting now with no end date.
+ * Opens the form dialog for an immediate suspension. Collects a reason,
+ * sub-reason and optional comment, then submits a suspension period starting
+ * one hour from now with no end date.
  */
 function openImmediateSuspensionDialog(): void {
   uiEventSubject.next({
-    key: 'confirmation',
+    key: 'form',
     data: {
       type: 'open',
       uiNamespace: `${uiNamespace}.suspend-dialog`,
       i18nScope: 'OrganizationalUnitSuspendDialog',
       title: tGlobal('OrganizationalUnitSuspendDialog.title'),
       content: tGlobal('OrganizationalUnitSuspendDialog.content'),
-      onConfirm: async () => {
+      formFields:
+        organizationalUnitLifecycleUiConfiguration['suspension.immediate'],
+      onSubmit: async (formData: OrganizationalUnitStatusForm) => {
         await submitStatus(
-          { start: dayjs().add(1, 'hour').toISOString() },
+          { ...formData, start: dayjs().add(1, 'hour').toISOString() },
           'success.suspended'
         );
       },
@@ -279,27 +296,36 @@ function openScheduleSuspensionDialog(): void {
 }
 
 /**
- * Opens the confirmation dialog for clearing the active suspension.
- *
- * The current backend rejects `suspensionPeriod` with a `start` in the past
- * and requires the field to be non-null, so a true reactivation endpoint is
- * not yet available. Pending backend support, the dialog surfaces a notice
- * to the user.
+ * Opens the confirmation dialog for reactivating a suspended organizational
+ * unit. The backend cannot drop a suspension instantly, so the suspension end
+ * is set one hour from now (the unchanged past start is accepted), which lifts
+ * the suspension after that delay.
  */
 function onClearSuspension(): void {
+  const currentStart =
+    organizationalUnitStatus.value?.suspensionPeriod?.start ?? null;
   uiEventSubject.next({
-    key: 'confirmation',
+    key: 'form',
     data: {
       type: 'open',
       uiNamespace: `${uiNamespace}.reactivate-dialog`,
       i18nScope: 'OrganizationalUnitReactivateDialog',
       title: tGlobal('OrganizationalUnitReactivateDialog.title'),
       content: tGlobal('OrganizationalUnitReactivateDialog.content'),
-      onConfirm: async () => {
-        Notify({
-          type: 'warning',
-          message: tGlobal('OrganizationalUnitReactivateDialog.unavailable'),
-        });
+      formFields:
+        organizationalUnitLifecycleUiConfiguration['reactivation.immediate'],
+      onSubmit: async (formData: OrganizationalUnitStatusForm) => {
+        if (currentStart == null) {
+          return;
+        }
+        await submitStatus(
+          {
+            ...formData,
+            start: currentStart,
+            end: dayjs().add(1, 'hour').toISOString(),
+          },
+          'success.reactivated'
+        );
       },
     },
   });
@@ -353,7 +379,7 @@ async function submitStatus(
   isLoading.value = true;
   try {
     const dto = await updateOrganizationalUnitStatus(
-      organizationalUnitId.value,
+      selectedOrganizationalUnitId.value,
       toOrganizationalUnitStatusRecord(form)
     );
     organizationalUnit.value = toOrganizationalUnit(dto);
@@ -372,6 +398,6 @@ async function submitStatus(
 }
 
 onMounted(() => {
-  void loadOrganizationalUnit();
+  void loadOrganizationalUnit(selectedOrganizationalUnitId.value);
 });
 </script>

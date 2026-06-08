@@ -38,13 +38,15 @@ import type {
 /**
  * Retrieves a single organizational unit by its identifier from the backend.
  * @param id - The unique identifier of the organizational unit.
+ * @param signal - Optional abort signal used to cancel a stale request.
  * @returns A promise resolving to the raw OU DTO returned by the API.
  */
 export async function getOrganizationalUnitById(
-  id: string
+  id: string,
+  signal?: AbortSignal
 ): Promise<OrganizationalUnitDTO> {
   return api
-    .get<OrganizationalUnitDTO>(`/organizational-units/${id}`)
+    .get<OrganizationalUnitDTO>(`/organizational-units/${id}`, { signal })
     .then((response) => response.data);
 }
 

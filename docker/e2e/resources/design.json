@@ -342,7 +342,7 @@
         }
       },
       "suspend-dialog": {
-        "confirmation-dialog": {
+        "form-dialog": {
           "buttons-card": {
             "confirm-button": {
               "q-btn": {
@@ -355,7 +355,7 @@
         }
       },
       "reactivate-dialog": {
-        "confirmation-dialog": {
+        "form-dialog": {
           "buttons-card": {
             "confirm-button": {
               "q-btn": {

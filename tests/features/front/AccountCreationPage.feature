@@ -33,14 +33,16 @@ Feature: Test Account creation page
 
     ## 101 Should redirect to Account creation page with informations about organizational unit in the query params
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?"
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-000000000bb1"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-000000000bb1"
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000eee1"
+    And I expect the HTML element '[data-cy="account-row"]' appear 10 times on screen
     When I click on '[data-cy="button_create"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-0000000000b1&node=00000000-0000-4000-8000-000000000bb1"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-000000000ee1&node=00000000-0000-4000-8000-00000000eee1"
     When I click on '[data-cy="button_cancel"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-000000000bb1"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000eee1"
+    And I expect the HTML element '[data-cy="account-row"]' appear 10 times on screen
     When I click on '[data-cy="button_create"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-0000000000b1&node=00000000-0000-4000-8000-000000000bb1"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-000000000ee1&node=00000000-0000-4000-8000-00000000eee1"
 
     ## 102 Should display title, form fields and action buttons
     And I expect the HTML element '[data-cy="account-creation-page"]' to be visible
@@ -56,7 +58,7 @@ Feature: Test Account creation page
     ## 103 Submitting an empty form should display required validation messages
     When I click on '[data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="account-creation-page_form"]' contains "Ce champ est requis"
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-0000000000b1&node=00000000-0000-4000-8000-000000000bb1"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-000000000ee1&node=00000000-0000-4000-8000-00000000eee1"
 
     ## 104 Submitting an invalid email should display email validation message
     When I set the text "external-id-e2e" in the HTML element "[data-cy=\"field_externalId\"] input"
@@ -66,7 +68,7 @@ Feature: Test Account creation page
     And I click on '[data-cy="account-creation-page_title"]'
     And I click on '[data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="field_email"]' contains "Format d'e-mail invalide"
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-0000000000b1&node=00000000-0000-4000-8000-000000000bb1"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/create?ou=00000000-0000-4000-8000-000000000ee1&node=00000000-0000-4000-8000-00000000eee1"
 
     ## 105 Submitting a form with a past validity start date should display date validation message
     When I set the text "john.doe@example.com" in the HTML element "[data-cy=\"field_email\"] input"
@@ -88,10 +90,11 @@ Feature: Test Account creation page
     ## 109 The account should be in the right Organizational Unit
     When I click on '[data-cy="item_accounts"]'
     Then I expect the HTML element '[data-cy="generic-tree"]' to be visible
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-000000000bb1"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-000000000bb1"
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000eee1"
     And I expect the HTML element '[data-cy="account-row"]' to be visible
-    And I expect the HTML element '[data-cy="cell-firstname"]' contains "John"
+    When I set the text "john" in the HTML element '[data-cy="field_firstname"]'
+    Then I expect the HTML element '[data-cy="cell-firstname"]' contains "John"
     And I expect the HTML element '[data-cy="cell-lastname"]' contains "Doe"
     And I expect the HTML element '[data-cy="cell-email"]' contains "john.doe@example.com"
     And I expect the HTML element '[data-cy="cell-createdBy"]' contains "admin_fn admin_ln"

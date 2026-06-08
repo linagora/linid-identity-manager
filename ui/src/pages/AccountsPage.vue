@@ -182,11 +182,18 @@ const pagination = ref<QuasarPagination>({
 });
 const uiNamespace = 'accounts.homepage';
 
-watch(selectedOrganizationalUnitId, (nodeId: string) => {
-  pagination.value.page = 1;
-  filters.value = {};
-  loadData(nodeId);
-});
+watch(
+  selectedOrganizationalUnitId,
+  (nodeId: string) => {
+    if (!nodeId) {
+      return;
+    }
+    pagination.value.page = 1;
+    filters.value = {};
+    loadData(nodeId);
+  },
+  { immediate: true }
+);
 
 /**
  * Loads the account list.

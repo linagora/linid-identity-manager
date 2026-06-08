@@ -416,8 +416,6 @@ function immediateReactivation() {
           {
             ...formData,
             suspensionPeriodEnd: dayjs().add(1, 'hour').toISOString(),
-            statusReason: null,
-            statusSubreason: null,
           },
           'immediateReactivationSuccess'
         ),

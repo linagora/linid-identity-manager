@@ -348,12 +348,17 @@
         "title": "Réactivation immédiate du compte",
         "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
         "fields": {
+          "statusReason": {
+            "label": "Motif",
+            "hint": "Sélectionnez un motif de réactivation."
+          },
+          "statusSubreason": {
+            "label": "Sous-motif",
+            "hint": "Sélectionnez un sous-motif de réactivation."
+          },
           "statusComment": {
             "label": "Justification",
-            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
+            "hint": "Fournissez une justification facultative pour cette réactivation."
           }
         },
         "ButtonsCard": {

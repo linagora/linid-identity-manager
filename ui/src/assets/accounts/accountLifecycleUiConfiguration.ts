@@ -118,9 +118,28 @@ export const accountLifecycleUiConfiguration = {
   ],
   'reactivation.immediate': [
     {
+      name: 'statusReason',
+      type: 'String',
+      input: 'List',
+      inputSettings: {
+        values: accountStatusReasons['suspension'].reasons.map(
+          (reason) => reason.value
+        ),
+      },
+    },
+    {
+      name: 'statusSubreason',
+      type: 'String',
+      input: 'List',
+      inputSettings: {
+        values: accountStatusReasons['suspension'].subreasons.map(
+          (subreason) => subreason.value
+        ),
+      },
+    },
+    {
       name: 'statusComment',
       type: 'String',
-      required: true,
       input: 'TextArea',
     },
   ],

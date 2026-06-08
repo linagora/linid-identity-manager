@@ -537,7 +537,7 @@ export default {
       suspended: 'Organizational unit successfully suspended.',
       scheduled: 'Suspension successfully scheduled.',
       endUpdated: 'Suspension end date successfully updated.',
-      reactivated: 'Organizational unit successfully reactivated.',
+      reactivated: 'The organizational unit will be reactivated in one hour.',
     },
     errors: {
       notFound: 'Organizational unit not found.',
@@ -545,6 +545,9 @@ export default {
         'Unable to load the organizational unit. Please try again later.',
       validation: 'Invalid data. Please check the form.',
     },
+  },
+  OrganizationalUnitsPage: {
+    menuTitle: 'Organizational units',
   },
   OrganizationalUnitSuspendedBanner: {
     content: 'This organizational unit has been suspended since {date}.',
@@ -577,9 +580,30 @@ export default {
     title: 'Suspend the organizational unit',
     content:
       'Are you sure you want to immediately suspend this organizational unit?',
+    fields: {
+      reason: {
+        label: 'Reason',
+        hint: 'Select a suspension reason.',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      subreason: {
+        label: 'Sub-reason',
+        hint: 'Select a suspension sub-reason.',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      comment: {
+        label: 'Comment',
+        hint: 'Add an optional comment.',
+      },
+    },
     ButtonsCard: {
       cancel: 'Cancel',
       confirm: 'Suspend',
+      confirmLoading: 'Suspending...',
     },
   },
   OrganizationalUnitScheduleSuspensionDialog: {
@@ -673,11 +697,24 @@ export default {
     title: 'Reactivate the organizational unit',
     content:
       'Are you sure you want to immediately reactivate this organizational unit?',
-    unavailable:
-      'Immediate reactivation is not yet available on the backend. Please contact an administrator.',
+    fields: {
+      reason: {
+        label: 'Reason',
+        hint: 'Select a reactivation reason.',
+      },
+      subreason: {
+        label: 'Sub-reason',
+        hint: 'Select a reactivation sub-reason.',
+      },
+      comment: {
+        label: 'Comment',
+        hint: 'Add an optional comment.',
+      },
+    },
     ButtonsCard: {
       cancel: 'Cancel',
       confirm: 'Reactivate',
+      confirmLoading: 'Reactivating...',
     },
   },
 };

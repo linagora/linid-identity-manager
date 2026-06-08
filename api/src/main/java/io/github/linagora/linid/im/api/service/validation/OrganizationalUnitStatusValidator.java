@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.service.validation;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.time.OffsetDateTime;
@@ -42,7 +43,8 @@ import org.springframework.stereotype.Component;
  * via {@code PUT /organizational-units/{id}/status}.
  *
  * <p>Each rule is exposed as a public {@code ensureXxx} method so it can be tested in isolation.
- * The {@link #validate(OrganizationalUnitStatusRecord, UUID)} entry point composes them. All rules
+ * The {@link #validate(OrganizationalUnitStatus, OrganizationalUnitStatusRecord, UUID)} entry point
+ * composes them. All rules
  * throw an {@link ApiException} with HTTP 400 when violated. A suspension always lies in the future:
  * both bounds, when provided, must be greater than or equal to now, and the start must be before or
  * equal to the end.</p>
@@ -65,16 +67,18 @@ public class OrganizationalUnitStatusValidator {
     /**
      * Runs every status-update rule against the incoming request record.
      *
+     * @param current              the persisted status, used to accept idempotent updates
      * @param record               the request record carrying the requested suspension fields
      * @param organizationalUnitId the organizational unit UUID, used to enrich error messages
      * @throws ApiException if any rule is violated (HTTP 400)
      */
-    public void validate(final OrganizationalUnitStatusRecord record,
+    public void validate(final OrganizationalUnitStatus current,
+                         final OrganizationalUnitStatusRecord record,
                          final UUID organizationalUnitId) {
         OffsetDateTime now = OffsetDateTime.now();
 
         ensureSuspensionPeriodCoherent(record, organizationalUnitId);
-        ensureSuspensionStartNotInPast(record, now, organizationalUnitId);
+        ensureSuspensionStartNotInPast(current, record, now, organizationalUnitId);
         ensureSuspensionEndNotInPast(record, now, organizationalUnitId);
     }
 
@@ -97,19 +101,33 @@ public class OrganizationalUnitStatusValidator {
 
     /**
      * Rejects a suspension start strictly in the past. {@code null} starts are accepted.
+     * Idempotent calls (requested suspension start equals the persisted suspension start) are
+     * accepted regardless of whether the start is in the past, so editing an ongoing suspension
+     * (e.g. updating only its end date) does not fail.
      *
+     * @param current              the persisted status, used to detect idempotent updates
      * @param record               the request record
      * @param now                  the current instant
      * @param organizationalUnitId the organizational unit UUID, used in the error message
      * @throws ApiException with key
      *     {@code error.organizational.unit.status.suspension_start_in_past} (HTTP 400)
      */
-    public void ensureSuspensionStartNotInPast(final OrganizationalUnitStatusRecord record,
+    public void ensureSuspensionStartNotInPast(final OrganizationalUnitStatus current,
+                                               final OrganizationalUnitStatusRecord record,
                                                final OffsetDateTime now,
                                                final UUID organizationalUnitId) {
         OffsetDateTime suspensionStart = commonMapper.startOf(record.suspensionPeriod());
 
-        if (suspensionStart != null && suspensionStart.isBefore(now)) {
+        if (suspensionStart == null) {
+            return;
+        }
+
+        OffsetDateTime persistedSuspensionStart = commonMapper.startOf(current.getSuspensionPeriod());
+        if (persistedSuspensionStart != null && suspensionStart.isEqual(persistedSuspensionStart)) {
+            return;
+        }
+
+        if (suspensionStart.isBefore(now)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.organizational.unit.status.suspension_start_in_past",

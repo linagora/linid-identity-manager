@@ -576,7 +576,7 @@ class OrganizationalUnitServiceImplTest {
         var result = service.updateStatus(userPrincipal, uuid, record);
 
         assertEquals(view, result);
-        verify(organizationalUnitStatusValidator).validate(record, uuid);
+        verify(organizationalUnitStatusValidator).validate(status, record, uuid);
         verify(organizationalUnitStatusRepository).saveAndFlush(updatedStatus);
     }
 
@@ -602,7 +602,7 @@ class OrganizationalUnitServiceImplTest {
         var result = service.updateStatus(userPrincipal, uuid, record);
 
         assertEquals(view, result);
-        verify(organizationalUnitStatusValidator).validate(record, uuid);
+        verify(organizationalUnitStatusValidator).validate(status, record, uuid);
         verify(organizationalUnitStatusMapper).toOrganizationalUnitStatus(status, record, userPrincipal);
     }
 }

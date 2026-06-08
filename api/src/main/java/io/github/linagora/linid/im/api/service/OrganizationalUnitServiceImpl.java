@@ -313,14 +313,14 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             );
         }
 
-        organizationalUnitStatusValidator.validate(record, id);
-
         OrganizationalUnitStatus status = organizationalUnitStatusRepository.findByOrganizationalUnitId(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.status.not_found",
                     Map.of("id", id.toString()))
             ));
+
+        organizationalUnitStatusValidator.validate(status, record, id);
 
         OrganizationalUnitStatus updatedStatus =
             organizationalUnitStatusMapper.toOrganizationalUnitStatus(status, record, userPrincipal);

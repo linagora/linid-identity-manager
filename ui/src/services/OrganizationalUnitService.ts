@@ -109,17 +109,19 @@ export async function getAllOrganizationalUnit(): Promise<
  * @param id The unique identifier of the organizational unit for which to retrieve accounts.
  * @param filters Object containing the filter criteria for querying accounts.
  * @param pagination Object containing pagination parameters.
+ * @param signal Optional abort signal used to cancel a stale request.
  * @returns Promise of paginated accounts.
  */
 export async function getAccountsByOrganizationalUnitId(
   id: string,
   filters: AccountQueryFilterDTO,
-  pagination: Pagination
+  pagination: Pagination,
+  signal?: AbortSignal
 ): Promise<Page<AccountDTO>> {
   return api
     .get<
       Page<AccountDTO>
-    >(`/organizational-units/${id}/accounts`, { params: { ...filters, ...pagination } })
+    >(`/organizational-units/${id}/accounts`, { params: { ...filters, ...pagination }, signal })
     .then(({ data }) => data);
 }
 

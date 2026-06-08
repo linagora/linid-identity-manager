@@ -77,6 +77,7 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
 vi.mock('axios', () => ({
   default: {
     isAxiosError: (err) => err?.isAxiosError === true,
+    isCancel: (err) => err?.isCanceled === true,
   },
 }));
 
@@ -153,7 +154,8 @@ describe('Test component: AccountsPage', () => {
       expect(getAccountsByOrganizationalUnitId).toHaveBeenCalledWith(
         'ou-uuid',
         expect.anything(),
-        expect.anything()
+        expect.anything(),
+        expect.any(AbortSignal)
       );
       expect(wrapper.vm.accounts).toEqual(accounts);
       expect(wrapper.vm.pagination.rowsNumber).toBe(2);
@@ -204,6 +206,32 @@ describe('Test component: AccountsPage', () => {
       });
     });
 
+    it('should abort the previous request when a new load starts', async () => {
+      let firstSignal;
+      mockedGetAccountsByOrganizationalUnitId.mockImplementationOnce(
+        (id, filters, pagination, signal) => {
+          firstSignal = signal;
+          return new Promise(() => {});
+        }
+      );
+      mockedGetAccountsByOrganizationalUnitId.mockResolvedValueOnce(mockPage());
+
+      void wrapper.vm.loadData('ou-uuid');
+      await wrapper.vm.loadData('second-ou-uuid');
+
+      expect(firstSignal.aborted).toBe(true);
+    });
+
+    it('should not notify when the request is canceled', async () => {
+      mockedGetAccountsByOrganizationalUnitId.mockRejectedValueOnce({
+        isCanceled: true,
+      });
+
+      await wrapper.vm.loadData('ou-uuid');
+
+      expect(mockNotify).not.toHaveBeenCalled();
+    });
+
     it('should pass current pagination to getAccountsByOrganizationalUnitId', async () => {
       wrapper.vm.pagination.page = 2;
       wrapper.vm.pagination.rowsPerPage = 25;
@@ -213,7 +241,8 @@ describe('Test component: AccountsPage', () => {
       expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
         'ou-uuid',
         expect.anything(),
-        expect.objectContaining({ page: 1, size: 25 })
+        expect.objectContaining({ page: 1, size: 25 }),
+        expect.any(AbortSignal)
       );
     });
   });
@@ -227,7 +256,8 @@ describe('Test component: AccountsPage', () => {
       expect(getAccountsByOrganizationalUnitId).toHaveBeenCalledWith(
         'new-ou-uuid',
         expect.anything(),
-        expect.anything()
+        expect.anything(),
+        expect.any(AbortSignal)
       );
     });
 
@@ -243,7 +273,8 @@ describe('Test component: AccountsPage', () => {
       expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
         'second-ou-uuid',
         expect.anything(),
-        expect.anything()
+        expect.anything(),
+        expect.any(AbortSignal)
       );
     });
 
@@ -298,7 +329,8 @@ describe('Test component: AccountsPage', () => {
           size: 20,
           sort: 'lastname',
           direction: 'asc',
-        })
+        }),
+        expect.any(AbortSignal)
       );
     });
   });
@@ -319,7 +351,8 @@ describe('Test component: AccountsPage', () => {
       expect(getAccountsByOrganizationalUnitId).toHaveBeenLastCalledWith(
         'ou-uuid',
         expect.objectContaining({ firstname: 'Alice' }),
-        expect.anything()
+        expect.anything(),
+        expect.any(AbortSignal)
       );
     });
   });

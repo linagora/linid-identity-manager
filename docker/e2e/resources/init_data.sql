@@ -567,5 +567,46 @@ $$
                 admin_id,
                 admin_id);
 
+        -- =========================================================
+        -- 7. SUSPENDED ORGANIZATIONAL UNITS
+        -- Currently-suspended OUs (one open-ended, one with an end date).
+        -- suspension_period is expressed relatively to now() so the cases
+        -- stay valid regardless of when the environment is rebuilt.
+        -- =========================================================
+
+        -- Suspended OU without end date (permanent suspension)
+        INSERT INTO organizational_units (oun_id, name, type, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-0000000000e1', 'SuspendedOuNoEnd', 'COMPANY', admin_id, admin_id)
+        ON CONFLICT (type, name) DO NOTHING;
+
+        INSERT INTO organizational_unit_relations (our_id, parent_id, child_id, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-0000000000e2', root_id,
+                '00000000-0000-4000-8000-0000000000e1', admin_id, admin_id)
+        ON CONFLICT (parent_id, child_id) DO NOTHING;
+
+        UPDATE organizational_unit_status
+        SET suspension_period = tstzrange(now() - interval '5 days', NULL, '[)'),
+            status_reason      = 'OU Suspension Reason',
+            status_subreason   = 'OU Suspension Sub-reason',
+            status_comment     = 'Suspended OU without end date'
+        WHERE oun_id = '00000000-0000-4000-8000-0000000000e1';
+
+        -- Suspended OU with an end date
+        INSERT INTO organizational_units (oun_id, name, type, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-0000000000e3', 'SuspendedOuWithEnd', 'COMPANY', admin_id, admin_id)
+        ON CONFLICT (type, name) DO NOTHING;
+
+        INSERT INTO organizational_unit_relations (our_id, parent_id, child_id, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-0000000000e4', root_id,
+                '00000000-0000-4000-8000-0000000000e3', admin_id, admin_id)
+        ON CONFLICT (parent_id, child_id) DO NOTHING;
+
+        UPDATE organizational_unit_status
+        SET suspension_period = tstzrange(now() - interval '5 days', now() + interval '30 days', '[)'),
+            status_reason      = 'OU Suspension Reason',
+            status_subreason   = 'OU Suspension Sub-reason',
+            status_comment     = 'Suspended OU with end date'
+        WHERE oun_id = '00000000-0000-4000-8000-0000000000e3';
+
     END
 $$;

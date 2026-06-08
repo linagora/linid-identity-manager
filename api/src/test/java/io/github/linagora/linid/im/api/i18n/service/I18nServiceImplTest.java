@@ -27,10 +27,8 @@
 package io.github.linagora.linid.im.api.i18n.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.github.linagora.linid.im.api.i18n.loader.I18nSourceLoader;
-import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.util.List;
 import java.util.Map;
@@ -82,16 +80,10 @@ class I18nServiceImplTest {
     }
 
     @Test
-    @DisplayName("test getTranslations: should return empty translations on invalid language")
+    @DisplayName("test getTranslations: should return empty map on unknown language")
     void testGetTranslationsInvalidLanguage() {
         service.run();
-
-        ApiException exception = assertThrows(ApiException.class, () -> {
-            service.getTranslations("test");
-        });
-
-        assertEquals(404, exception.getStatusCode());
-        assertEquals("error.router.unknown.language", exception.getError().key());
+        assertEquals(Map.of(), service.getTranslations("test"));
     }
 
     @Test

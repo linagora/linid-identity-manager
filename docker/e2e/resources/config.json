@@ -1,4 +1,17 @@
 {
   "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
-  "organizationalUnitQuerySize": 50
+  "organizationalUnitQuerySize": 50,
+  "designFiles": [
+    "design/default.json",
+    "design/splitter-layout.json",
+    "design/base-layout.json",
+    "design/organizational-units-tree.json",
+    "design/accounts.json",
+    "design/organizational-units.json",
+    "design/organizational-unit-info-text.json",
+    "design/organizational-unit-banner.json",
+    "design/status-badge.json",
+    "design/account-banner.json",
+    "design/account-info-text.json"
+  ]
 }

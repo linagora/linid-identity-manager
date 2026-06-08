@@ -30,6 +30,7 @@ import {
   updateOrganizationalUnitStatus,
 } from 'src/services/OrganizationalUnitService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ref } from 'vue';
 import OrganizationalUnitDetailsPage from '../../../src/pages/OrganizationalUnitDetailsPage.vue';
 
 const mockedGetById = vi.mocked(getOrganizationalUnitById);
@@ -39,15 +40,7 @@ const mockUiEventNext = vi.fn();
 
 const OU_ID = 'test-ou-id';
 
-const mockRoute = {
-  params: {
-    id: OU_ID,
-  },
-};
-
-const mockRouter = {
-  push: vi.fn(),
-};
+const mockSelectedOrganizationalUnitId = ref(OU_ID);
 
 vi.mock('@linagora/linid-im-front-corelib', () => ({
   loadAsyncComponent: vi.fn(() => null),
@@ -66,6 +59,7 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
 vi.mock('axios', () => ({
   default: {
     isAxiosError: (err) => err?.isAxiosError === true,
+    isCancel: (err) => err?.isCanceled === true,
   },
 }));
 
@@ -74,9 +68,15 @@ vi.mock('src/services/OrganizationalUnitService', () => ({
   updateOrganizationalUnitStatus: vi.fn(),
 }));
 
-vi.mock('vue-router', () => ({
-  useRoute: () => mockRoute,
-  useRouter: () => mockRouter,
+vi.mock('src/stores/useOrganizationalUnitStore', () => ({
+  useOrganizationalUnitStore: () => ({
+    selectedOrganizationalUnitId: mockSelectedOrganizationalUnitId,
+  }),
+}));
+
+vi.mock('pinia', () => ({
+  storeToRefs: (store) => store,
+  defineStore: vi.fn(),
 }));
 
 vi.mock('vue-i18n', () => ({
@@ -109,26 +109,21 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRoute.params.id = OU_ID;
+    mockSelectedOrganizationalUnitId.value = OU_ID;
     mockedGetById.mockResolvedValue(buildOuDto());
     mockedUpdateStatus.mockResolvedValue(buildOuDto());
-  });
-
-  describe('Test computed: organizationalUnitId', () => {
-    it('should retrieve valid OU id from route params', () => {
-      wrapper = shallowMount(OrganizationalUnitDetailsPage);
-
-      expect(wrapper.vm.organizationalUnitId).toBe(OU_ID);
-    });
   });
 
   describe('Test function: loadOrganizationalUnit', () => {
     it('should retrieve OU data and split it between identity and status', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
 
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
 
-      expect(getOrganizationalUnitById).toHaveBeenCalledWith(OU_ID);
+      expect(getOrganizationalUnitById).toHaveBeenCalledWith(
+        OU_ID,
+        expect.any(AbortSignal)
+      );
       expect(wrapper.vm.organizationalUnit).toMatchObject({
         id: OU_ID,
         name: 'Engineering',
@@ -142,64 +137,108 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       expect(wrapper.vm.organizationalUnitStatus).not.toHaveProperty('name');
     });
 
+    it('should clear the panel and not call the service when no OU is selected', async () => {
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      await flushPromises();
+      vi.clearAllMocks();
+
+      await wrapper.vm.loadOrganizationalUnit('');
+
+      expect(getOrganizationalUnitById).not.toHaveBeenCalled();
+      expect(wrapper.vm.organizationalUnit).toBeNull();
+      expect(wrapper.vm.organizationalUnitStatus).toBeNull();
+    });
+
     it('should toggle isLoading around the API call', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
       await flushPromises();
 
       expect(wrapper.vm.isLoading).toBe(false);
 
-      const loadPromise = wrapper.vm.loadOrganizationalUnit();
+      const loadPromise = wrapper.vm.loadOrganizationalUnit(OU_ID);
       expect(wrapper.vm.isLoading).toBe(true);
 
       await loadPromise;
       expect(wrapper.vm.isLoading).toBe(false);
     });
 
-    it('should notify and redirect home with notFound message on 404', async () => {
+    it('should notify with notFound message on 404', async () => {
       mockedGetById.mockRejectedValueOnce({
         isAxiosError: true,
         response: { status: 404 },
       });
 
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
         message: 'errors.notFound',
       });
-      expect(mockRouter.push).toHaveBeenCalledWith('/');
     });
 
-    it('should notify generic and redirect home on non-404 errors', async () => {
+    it('should notify generic on non-404 errors', async () => {
       mockedGetById.mockRejectedValueOnce(new Error('boom'));
 
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
         message: 'errors.generic',
       });
-      expect(mockRouter.push).toHaveBeenCalledWith('/');
+    });
+
+    it('should abort the previous request when a new load starts', async () => {
+      let firstSignal;
+      mockedGetById.mockImplementationOnce((id, signal) => {
+        firstSignal = signal;
+        return new Promise(() => {});
+      });
+      mockedGetById.mockResolvedValueOnce(buildOuDto({ id: 'second-ou-id' }));
+
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      void wrapper.vm.loadOrganizationalUnit(OU_ID);
+      await wrapper.vm.loadOrganizationalUnit('second-ou-id');
+
+      expect(firstSignal.aborted).toBe(true);
+    });
+
+    it('should not notify when the request is canceled', async () => {
+      mockedGetById.mockRejectedValueOnce({ isCanceled: true });
+
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
+
+      expect(mockNotify).not.toHaveBeenCalled();
     });
   });
 
-  describe('Test function: goHome', () => {
-    it('should navigate to the root path', () => {
+  describe('Test watcher: selectedOrganizationalUnitId', () => {
+    it('should reload the OU when the tree selection changes', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      wrapper.vm.goHome();
+      await flushPromises();
+      vi.clearAllMocks();
 
-      expect(mockRouter.push).toHaveBeenCalledWith('/');
+      mockSelectedOrganizationalUnitId.value = 'another-ou-id';
+      await flushPromises();
+
+      expect(getOrganizationalUnitById).toHaveBeenCalledWith(
+        'another-ou-id',
+        expect.any(AbortSignal)
+      );
     });
   });
 
   describe('Test hook: onMounted', () => {
-    it('should call loadOrganizationalUnit on mount', async () => {
+    it('should load the selected OU on mount', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
       await flushPromises();
 
-      expect(getOrganizationalUnitById).toHaveBeenCalledWith(OU_ID);
+      expect(getOrganizationalUnitById).toHaveBeenCalledWith(
+        OU_ID,
+        expect.any(AbortSignal)
+      );
     });
   });
 
@@ -211,7 +250,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
     it('should project a not-suspended OU into the suspension dropdown UI state', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
 
       const ui = wrapper.vm.lifecycleUi;
       expect(ui.showBadge).toBe(true);
@@ -233,7 +272,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       );
 
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
 
       const ui = wrapper.vm.lifecycleUi;
       expect(ui.showBadge).toBe(true);
@@ -253,7 +292,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
     it('should be true once at least one dropdown exposes menu items', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
       expect(wrapper.vm.hasAnyLifecycleAction).toBe(true);
     });
   });
@@ -261,22 +300,21 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
   describe('Test function: onLifecycleActionClick', () => {
     beforeEach(async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
       mockUiEventNext.mockClear();
     });
 
-    it('should open the immediate suspension confirmation dialog', () => {
+    it('should open the immediate suspension form dialog with reason, subreason and comment fields', () => {
       wrapper.vm.onLifecycleActionClick({ key: 'suspension.immediate' });
 
-      expect(mockUiEventNext).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: 'confirmation',
-          data: expect.objectContaining({
-            i18nScope: 'OrganizationalUnitSuspendDialog',
-            type: 'open',
-          }),
-        })
-      );
+      const call = mockUiEventNext.mock.calls[0][0];
+      expect(call.key).toBe('form');
+      expect(call.data.i18nScope).toBe('OrganizationalUnitSuspendDialog');
+      expect(call.data.formFields.map((f) => f.name)).toEqual([
+        'reason',
+        'subreason',
+        'comment',
+      ]);
     });
 
     it('should submit an immediate suspension starting in the future to avoid a past start', async () => {
@@ -287,17 +325,21 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
       try {
         wrapper.vm.onLifecycleActionClick({ key: 'suspension.immediate' });
-        const { onConfirm } = mockUiEventNext.mock.calls[0][0].data;
-        await onConfirm();
+        const { onSubmit } = mockUiEventNext.mock.calls[0][0].data;
+        await onSubmit({
+          reason: 'Suspension Reason A',
+          subreason: 'Suspension Sub-reason A.1',
+          comment: 'immediate',
+        });
 
         expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
           suspensionPeriod: {
             start: fixedNowPlus1h,
             end: null,
           },
-          reason: null,
-          subreason: null,
-          comment: null,
+          reason: 'Suspension Reason A',
+          subreason: 'Suspension Sub-reason A.1',
+          comment: 'immediate',
         });
       } finally {
         vi.useRealTimers();
@@ -321,17 +363,55 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       ]);
     });
 
-    it('should open the reactivation confirmation dialog on reactivation.immediate', () => {
+    it('should open the reactivation form dialog with reason, subreason and comment fields on reactivation.immediate', () => {
       wrapper.vm.onLifecycleActionClick({ key: 'reactivation.immediate' });
 
-      expect(mockUiEventNext).toHaveBeenCalledWith(
-        expect.objectContaining({
-          key: 'confirmation',
-          data: expect.objectContaining({
-            i18nScope: 'OrganizationalUnitReactivateDialog',
-          }),
+      const call = mockUiEventNext.mock.calls[0][0];
+      expect(call.key).toBe('form');
+      expect(call.data.i18nScope).toBe('OrganizationalUnitReactivateDialog');
+      expect(call.data.formFields.map((f) => f.name)).toEqual([
+        'reason',
+        'subreason',
+        'comment',
+      ]);
+    });
+
+    it('should reactivate by setting the suspension end one hour ahead while keeping the start', async () => {
+      const fixedNow = new Date('2026-05-28T10:00:00.000Z');
+      const fixedNowPlus1h = '2026-05-28T11:00:00.000Z';
+      mockedGetById.mockReset();
+      mockedGetById.mockResolvedValue(
+        buildOuDto({
+          isSuspended: true,
+          suspensionPeriod: {
+            start: '2026-05-23T00:00:00Z',
+            end: null,
+          },
         })
       );
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
+      mockUiEventNext.mockClear();
+
+      vi.useFakeTimers();
+      vi.setSystemTime(fixedNow);
+      try {
+        wrapper.vm.onLifecycleActionClick({ key: 'reactivation.immediate' });
+        const { onSubmit } = mockUiEventNext.mock.calls[0][0].data;
+        await onSubmit({ comment: 'reactivating' });
+
+        expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
+          suspensionPeriod: {
+            start: '2026-05-23T00:00:00Z',
+            end: fixedNowPlus1h,
+          },
+          reason: null,
+          subreason: null,
+          comment: 'reactivating',
+        });
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('should ignore unknown action keys', () => {
@@ -357,7 +437,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
         })
       );
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
       mockUiEventNext.mockClear();
 
       wrapper.vm.onModifySuspensionEnd();
@@ -388,7 +468,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
         })
       );
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
       mockUiEventNext.mockClear();
 
       wrapper.vm.onModifySuspensionEnd();
@@ -410,7 +490,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
   describe('Test function: openScheduleSuspensionDialog', () => {
     it('should convert localized start and end dates to ISO strings before submitting', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
       mockUiEventNext.mockClear();
 
       wrapper.vm.openScheduleSuspensionDialog();
@@ -436,7 +516,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
     it('should send a null end when the end date is left empty', async () => {
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
       mockUiEventNext.mockClear();
 
       wrapper.vm.openScheduleSuspensionDialog();

@@ -105,7 +105,9 @@ describe('Test service: organizationalUnitService', () => {
 
       const result = await getOrganizationalUnitById(OU_UUID);
 
-      expect(api.get).toHaveBeenCalledWith(`/organizational-units/${OU_UUID}`);
+      expect(api.get).toHaveBeenCalledWith(`/organizational-units/${OU_UUID}`, {
+        signal: undefined,
+      });
       expect(result).toEqual(dto);
     });
 
@@ -236,6 +238,7 @@ describe('Test service: organizationalUnitService', () => {
         `/organizational-units/${OU_UUID}/accounts`,
         {
           params: { ...filters, ...pagination },
+          signal: undefined,
         }
       );
       expect(result).toEqual(page);

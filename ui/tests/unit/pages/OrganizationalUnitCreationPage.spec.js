@@ -193,9 +193,10 @@ describe('Test component: OrganizationalUnitCreationPage', () => {
         type: 'positive',
         message: 'success',
       });
-      expect(mockRouter.push).toHaveBeenCalledWith(
-        `/organizational-units/${parentOu.id}`
-      );
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        path: '/organizational-units',
+        query: { node: parentOu.id },
+      });
     });
 
     it('should toggle isLoading around the request', async () => {
@@ -255,9 +256,10 @@ describe('Test component: OrganizationalUnitCreationPage', () => {
 
       wrapper.vm.cancel();
 
-      expect(mockRouter.push).toHaveBeenCalledWith(
-        `/organizational-units/${parentOu.id}`
-      );
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        path: '/organizational-units',
+        query: { node: parentOu.id },
+      });
     });
   });
 });

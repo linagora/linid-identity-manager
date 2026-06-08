@@ -33,8 +33,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.hypersistence.utils.hibernate.type.range.Range;
 import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -58,29 +61,36 @@ class OrganizationalUnitStatusValidatorTest {
         return new OrganizationalUnitStatusRecord(suspension, null, null, null);
     }
 
+    private static Range<ZonedDateTime> closedOpen(final OffsetDateTime start, final OffsetDateTime end) {
+        return Range.closedOpen(start.toZonedDateTime(), end.toZonedDateTime());
+    }
+
     @Test
     @DisplayName("validate should accept a coherent suspension period in the future")
     void testValidate_shouldAcceptCoherentFuturePeriod() {
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
         OrganizationalUnitStatusRecord input = record(new PeriodRecord(now.plusDays(1), now.plusDays(10)));
 
-        assertDoesNotThrow(() -> validator.validate(input, OU_ID));
+        assertDoesNotThrow(() -> validator.validate(current, input, OU_ID));
     }
 
     @Test
     @DisplayName("validate should accept an open-ended (permanent) future suspension (end null)")
     void testValidate_shouldAcceptOpenEndedFuturePeriod() {
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
         OrganizationalUnitStatusRecord input = record(new PeriodRecord(now.plusDays(1), null));
 
-        assertDoesNotThrow(() -> validator.validate(input, OU_ID));
+        assertDoesNotThrow(() -> validator.validate(current, input, OU_ID));
     }
 
     @Test
     @DisplayName("validate should reject a suspension period whose start is after its end")
     void testValidate_shouldRejectInvalidPeriod() {
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
         OrganizationalUnitStatusRecord input = record(new PeriodRecord(now.plusDays(10), now.plusDays(1)));
 
         ApiException exception = assertThrows(ApiException.class,
-            () -> validator.validate(input, OU_ID));
+            () -> validator.validate(current, input, OU_ID));
 
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.organizational.unit.status.suspension_period_invalid", exception.getError().key());
@@ -90,10 +100,11 @@ class OrganizationalUnitStatusValidatorTest {
     @Test
     @DisplayName("validate should reject a suspension start in the past")
     void testValidate_shouldRejectStartInPast() {
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
         OrganizationalUnitStatusRecord input = record(new PeriodRecord(now.minusDays(1), now.plusDays(10)));
 
         ApiException exception = assertThrows(ApiException.class,
-            () -> validator.validate(input, OU_ID));
+            () -> validator.validate(current, input, OU_ID));
 
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.organizational.unit.status.suspension_start_in_past", exception.getError().key());
@@ -103,13 +114,42 @@ class OrganizationalUnitStatusValidatorTest {
     @Test
     @DisplayName("validate should reject a suspension end in the past")
     void testValidate_shouldRejectEndInPast() {
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
         OrganizationalUnitStatusRecord input = record(new PeriodRecord(null, now.minusDays(1)));
 
         ApiException exception = assertThrows(ApiException.class,
-            () -> validator.validate(input, OU_ID));
+            () -> validator.validate(current, input, OU_ID));
 
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.organizational.unit.status.suspension_end_in_past", exception.getError().key());
+        assertEquals(OU_ID.toString(), exception.getError().context().get("id"));
+    }
+
+    @Test
+    @DisplayName("validate should accept an idempotent past suspension start (e.g. editing only the end date)")
+    void testValidate_shouldAcceptIdempotentPastStart() {
+        OffsetDateTime pastStart = now.minusDays(5);
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
+        current.setSuspensionPeriod(closedOpen(pastStart, now.plusDays(10)));
+        // Same past start echoed back, only the end changes → idempotent → accepted
+        OrganizationalUnitStatusRecord input = record(new PeriodRecord(pastStart, now.plusDays(30)));
+
+        assertDoesNotThrow(() -> validator.validate(current, input, OU_ID));
+    }
+
+    @Test
+    @DisplayName("validate should reject a suspension start changed to a different past date")
+    void testValidate_shouldRejectStartChangedToAnotherPastDate() {
+        OrganizationalUnitStatus current = new OrganizationalUnitStatus();
+        current.setSuspensionPeriod(closedOpen(now.minusDays(10), now.plusDays(10)));
+        // Different past start → not idempotent → reject
+        OrganizationalUnitStatusRecord input = record(new PeriodRecord(now.minusDays(3), now.plusDays(10)));
+
+        ApiException exception = assertThrows(ApiException.class,
+            () -> validator.validate(current, input, OU_ID));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.organizational.unit.status.suspension_start_in_past", exception.getError().key());
         assertEquals(OU_ID.toString(), exception.getError().context().get("id"));
     }
 

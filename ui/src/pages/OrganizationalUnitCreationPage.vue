@@ -202,7 +202,10 @@ async function onSubmit(): Promise<void> {
       type: 'positive',
       message: t('success'),
     });
-    void router.push(`/organizational-units/${parentId.value}`);
+    void router.push({
+      path: '/organizational-units',
+      query: { node: parentId.value },
+    });
   } catch (error) {
     const errorMessageKey =
       axios.isAxiosError(error) && error.response?.status === 400
@@ -221,7 +224,10 @@ async function onSubmit(): Promise<void> {
  * Cancels the OU creation and navigates back to the parent OU details.
  */
 function cancel(): void {
-  void router.push(`/organizational-units/${parentId.value}`);
+  void router.push({
+    path: '/organizational-units',
+    query: { node: parentId.value },
+  });
 }
 
 onMounted(() => {

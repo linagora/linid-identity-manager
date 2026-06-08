@@ -65,11 +65,6 @@ const routes: RouteRecordRaw[] = [
         name: 'OrganizationalUnitCreate',
         component: () => import('pages/OrganizationalUnitCreationPage.vue'),
       },
-      {
-        path: 'organizational-units/:id',
-        name: 'OrganizationalUnitDetails',
-        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
-      },
     ],
   },
   {
@@ -81,6 +76,18 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'AccountsPage',
         component: () => import('pages/AccountsPage.vue'),
+      },
+    ],
+  },
+  {
+    path: '/organizational-units',
+    component: () => import('layouts/SplitterLayout.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: 'OrganizationalUnitsPage',
+        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
       },
     ],
   },

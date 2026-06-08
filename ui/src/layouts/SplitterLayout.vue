@@ -90,6 +90,8 @@
       </q-splitter>
     </q-page-container>
 
+    <LinidZoneRenderer zone="base-layout.dialogComponent" />
+
     <!-- zone footer -->
   </q-layout>
   <!-- v8 ignore stop -->
@@ -107,6 +109,7 @@ import type {
 } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
+  LinidZoneRenderer,
   useLinidUiStore,
   useScopedI18n,
   useUiDesign,

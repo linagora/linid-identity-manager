@@ -63,4 +63,10 @@ export default defineBoot(async (): Promise<void> => {
     label: t('AccountsPage.menuTitle'),
     path: '/accounts',
   });
+
+  uiStore.addMainNavigationMenuItems({
+    id: 'organizational-units',
+    label: t('OrganizationalUnitsPage.menuTitle'),
+    path: '/organizational-units',
+  });
 });

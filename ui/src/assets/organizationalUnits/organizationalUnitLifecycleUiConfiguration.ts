@@ -39,6 +39,62 @@ export const organizationalUnitStatusReasons = accountStatusReasons.suspension;
  * shared form dialog. Mirrors {@link accountLifecycleUiConfiguration}.
  */
 export const organizationalUnitLifecycleUiConfiguration = {
+  'suspension.immediate': [
+    {
+      name: 'reason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: organizationalUnitStatusReasons.reasons.map(
+          (reason) => reason.value
+        ),
+      },
+    },
+    {
+      name: 'subreason',
+      type: 'String',
+      input: 'List',
+      required: true,
+      inputSettings: {
+        values: organizationalUnitStatusReasons.subreasons.map(
+          (subreason) => subreason.value
+        ),
+      },
+    },
+    {
+      name: 'comment',
+      type: 'String',
+      input: 'TextArea',
+    },
+  ],
+  'reactivation.immediate': [
+    {
+      name: 'reason',
+      type: 'String',
+      input: 'List',
+      inputSettings: {
+        values: organizationalUnitStatusReasons.reasons.map(
+          (reason) => reason.value
+        ),
+      },
+    },
+    {
+      name: 'subreason',
+      type: 'String',
+      input: 'List',
+      inputSettings: {
+        values: organizationalUnitStatusReasons.subreasons.map(
+          (subreason) => subreason.value
+        ),
+      },
+    },
+    {
+      name: 'comment',
+      type: 'String',
+      input: 'TextArea',
+    },
+  ],
   'suspension.scheduled': [
     {
       name: 'start',

@@ -36,4 +36,6 @@ export interface AppConfig {
   organizationalUnitTypes: string[];
   /** Number of organizational units to fetch per page when querying the API. */
   organizationalUnitQuerySize: number;
+  /** List of design files to be loaded for the UI. */
+  designFiles: string[];
 }

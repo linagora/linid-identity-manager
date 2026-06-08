@@ -620,7 +620,7 @@ describe('Test component: AccountDetailsPage', () => {
         );
       });
 
-      it('should call updateAccountStatus with future suspensionPeriodEnd and nullified reason fields on submit', async () => {
+      it('should call updateAccountStatus with future suspensionPeriodEnd and the submitted reason fields on submit', async () => {
         wrapper.vm.onLifecycleAction('reactivation.immediate');
         const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
 
@@ -635,8 +635,8 @@ describe('Test component: AccountDetailsPage', () => {
             suspensionPeriod: expect.objectContaining({
               end: FIXED_NOW_PLUS_1H,
             }),
-            statusReason: null,
-            statusSubreason: null,
+            statusReason: 'INVESTIGATION',
+            statusSubreason: 'FRAUD',
           })
         );
         expect(mockNotify).toHaveBeenCalledWith({

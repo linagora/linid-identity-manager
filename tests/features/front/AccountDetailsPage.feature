@@ -683,6 +683,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
     And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Réactiver"

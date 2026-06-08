@@ -357,12 +357,17 @@ export default {
         content:
           'Are you sure you want to reactivate this account immediately?',
         fields: {
+          statusReason: {
+            label: 'Reason',
+            hint: 'Select a reactivation reason.',
+          },
+          statusSubreason: {
+            label: 'Sub-reason',
+            hint: 'Select a reactivation sub-reason.',
+          },
           statusComment: {
             label: 'Justification',
-            hint: 'Provide a mandatory justification for this reactivation.',
-            validation: {
-              required: 'This field is required.',
-            },
+            hint: 'Provide an optional justification for this reactivation.',
           },
         },
         ButtonsCard: {

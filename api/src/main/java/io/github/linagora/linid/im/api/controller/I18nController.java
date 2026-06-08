@@ -85,7 +85,6 @@ public class I18nController {
     @Operation(summary = "Get translation file", description = "Retrieves the translation key-value pairs.")
     @ApiResponse(responseCode = "200", description = "Translation map for the specified language",
         content = @Content(mediaType = "application/json", schema = @Schema(implementation = Map.class)))
-    @ApiResponse(responseCode = "404", description = "Language not found", content = @Content)
     public ResponseEntity<Map<String, String>> getTranslationFile(
             final @Parameter(description = "Language code", required = true) @PathVariable("lang") String language) {
         return ResponseEntity.ok(i18nService.getTranslations(language));

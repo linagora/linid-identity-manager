@@ -28,7 +28,6 @@ package io.github.linagora.linid.im.api.i18n.service;
 
 import io.github.linagora.linid.im.api.i18n.collector.I18nMergeCollector;
 import io.github.linagora.linid.im.api.i18n.loader.I18nSourceLoader;
-import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.i18n.I18nService;
 import java.util.HashMap;
@@ -38,7 +37,6 @@ import java.util.Optional;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
@@ -96,13 +94,7 @@ public class I18nServiceImpl implements I18nService, CommandLineRunner {
 
     @Override
     public Map<String, String> getTranslations(final String language) {
-        if (languages.containsKey(language)) {
-            return languages.get(language);
-        }
-
-        throw new ApiException(HttpStatus.NOT_FOUND.value(), I18nMessage.of(
-                "error.router.unknown.language",
-                Map.of("language", language)));
+        return languages.getOrDefault(language, Map.of());
     }
 
     @Override

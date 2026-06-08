@@ -4,7 +4,7 @@ Feature: Test I18nController
   ## 101 Should return available languages
   ## 102 Should return a translation file for a known language (english)
   ## 103 Should return a translation file for a known language (french)
-  ## 104 Should not return a translation file for an unknown language (italian)
+  ## 104 Should return an empty translation file for an unknown language (italian)
 
   #########################################################
   ################ Tests i18N endpoints ###################
@@ -29,7 +29,7 @@ Feature: Test I18nController
     # We check that at least one of the translation exists
     And I expect '{{response.body | json}}' contains '"error.entity.attributes": "Erreurs de validation pour l\'entité: {entity}"'
 
-  Scenario: 104 -  Should not return a translation file for an unknown language (italian)
+  Scenario: 104 - Should return an empty translation file for an unknown language (italian)
     When I request '{{env.E2E_API_URL}}/i18n/it.json' with method 'GET'
-    Then I expect status code is 404
-    And I expect '{{response.body.error}}' contains 'Unknown language: it'
+    Then I expect status code is 200
+    And I expect '{{response.body | json}}' is '{}' as 'json'

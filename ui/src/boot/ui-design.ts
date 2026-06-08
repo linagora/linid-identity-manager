@@ -26,6 +26,7 @@
 
 import { setUiDesign } from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '@quasar/app-vite/wrappers';
+import { appConfig } from 'boot/config';
 
 /**
  * Boot file that registers ui design configuration.
@@ -35,13 +36,16 @@ import { defineBoot } from '@quasar/app-vite/wrappers';
  * @throws {Error} When the design.json file cannot be fetched.
  */
 export default defineBoot(async () => {
-  const response = await fetch('/design.json');
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch ui-design');
-  }
-
-  const uiDesign = await response.json();
+  const results = await Promise.all(
+    appConfig.designFiles.map(async (file) => {
+      const response = await fetch(`/${file}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch ui-design');
+      }
+      return await response.json();
+    })
+  );
+  const uiDesign = Object.assign({}, ...results);
 
   setUiDesign(uiDesign);
 });

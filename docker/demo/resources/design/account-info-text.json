@@ -1,0 +1,14 @@
+{
+  "account-deactivated-info-text": {
+    "q-icon": {
+      "name": "warning",
+      "size": "xs"
+    }
+  },
+  "account-suspended-info-text": {
+    "q-icon": {
+      "name": "warning",
+      "size": "xs"
+    }
+  }
+}

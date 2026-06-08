@@ -158,6 +158,8 @@ const filters = ref<Record<string, unknown>>({});
 const accounts = ref<Account[]>([]);
 const isLoading = ref<boolean>(false);
 
+let listRequestController: AbortController | null = null;
+
 const { ui } = useUiDesign();
 const uiProps = computed(() => ({
   createButton: ui<LinidQBtnProps>(`${uiNamespace}.create-button`, 'q-btn'),
@@ -191,17 +193,26 @@ watch(selectedOrganizationalUnitId, (nodeId: string) => {
  * @param id - Organizational unit ID to filter accounts, if empty load all accounts related to root node.
  */
 async function loadData(id: string): Promise<void> {
+  listRequestController?.abort();
+  const controller = new AbortController();
+  listRequestController = controller;
+
   isLoading.value = true;
 
   try {
     const accountsPage = await getAccountsByOrganizationalUnitId(
       id,
       toAccountQueryFilterDTO(filters.value),
-      toPagination(pagination.value)
+      toPagination(pagination.value),
+      controller.signal
     );
     accounts.value = toAccountList(accountsPage.content);
     pagination.value = toQuasarPagination(accountsPage);
   } catch (error) {
+    if (axios.isCancel(error)) {
+      return;
+    }
+
     const errorMessageKey =
       axios.isAxiosError(error) && error.response?.status === 404
         ? 'errors.notFound'
@@ -211,7 +222,9 @@ async function loadData(id: string): Promise<void> {
       message: t(errorMessageKey),
     });
   } finally {
-    isLoading.value = false;
+    if (listRequestController === controller) {
+      isLoading.value = false;
+    }
   }
 }
 

@@ -114,9 +114,7 @@
 <script setup lang="ts">
 import {
   type DropdownClickPayload,
-  getI18nInstance,
   loadAsyncComponent,
-  uiEventSubject,
   useNotify,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
@@ -128,33 +126,35 @@ import { dayjs } from 'src/boot/dayjs';
 import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import OrganizationalUnitSuspendedBanner from 'src/components/banner/OrganizationalUnitSuspendedBanner.vue';
 import OrganizationalUnitSuspendedInfoText from 'src/components/text/OrganizationalUnitSuspendedInfoText.vue';
+import { useLifecycleDialogs } from 'src/composables/useLifecycleDialogs';
 import { useOrganizationalUnitLifecycleUi } from 'src/composables/useOrganizationalUnitLifecycleUi';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import {
   getOrganizationalUnitById,
-  updateOrganizationalUnitStatus,
+  reactivateOrganizationalUnit,
+  suspendOrganizationalUnit,
 } from 'src/services/OrganizationalUnitService';
 import { useOrganizationalUnitStore } from 'src/stores/useOrganizationalUnitStore';
 import type {
   OrganizationalUnit,
+  OrganizationalUnitDTO,
   OrganizationalUnitStatus,
   OrganizationalUnitStatusForm,
 } from 'src/types/organizationalUnits';
 import { computed, onMounted, ref, watch } from 'vue';
-import { type Composer } from 'vue-i18n';
 
 const pageName = 'OrganizationalUnitDetailsPage';
 const i18nScope = pageName;
 const uiNamespace = 'organizational-units.details-page';
 
 const { t } = useScopedI18n(i18nScope);
-const tGlobal = (getI18nInstance().global as Composer).t;
 const { Notify } = useNotify();
 const {
   toOrganizationalUnit,
   toOrganizationalUnitStatus,
   toOrganizationalUnitStatusForm,
-  toOrganizationalUnitStatusRecord,
+  toOrganizationalUnitSuspensionRecord,
+  toOrganizationalUnitReactivationRecord,
 } = useOrganizationalUnitMapper();
 
 const store = useOrganizationalUnitStore();
@@ -170,6 +170,8 @@ const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
 const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
 
 const lifecycleUi = useOrganizationalUnitLifecycleUi(organizationalUnitStatus);
+
+const { openFormDialog } = useLifecycleDialogs(uiNamespace);
 
 const hasAnyLifecycleAction = computed(() =>
   Boolean(
@@ -251,23 +253,23 @@ function onLifecycleActionClick(event: DropdownClickPayload): void {
  * one hour from now with no end date.
  */
 function openImmediateSuspensionDialog(): void {
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      uiNamespace: `${uiNamespace}.suspend-dialog`,
-      i18nScope: 'OrganizationalUnitSuspendDialog',
-      title: tGlobal('OrganizationalUnitSuspendDialog.title'),
-      content: tGlobal('OrganizationalUnitSuspendDialog.content'),
-      formFields:
-        organizationalUnitLifecycleUiConfiguration['suspension.immediate'],
-      onSubmit: async (formData: OrganizationalUnitStatusForm) => {
-        await submitStatus(
-          { ...formData, start: dayjs().add(1, 'hour').toISOString() },
-          'success.suspended'
-        );
-      },
-    },
+  openFormDialog({
+    uiNamespace: `${uiNamespace}.suspend-dialog`,
+    i18nScope: 'OrganizationalUnitSuspendDialog',
+    formFields:
+      organizationalUnitLifecycleUiConfiguration['suspension.immediate'],
+    onSubmit: (formData: OrganizationalUnitStatusForm) =>
+      submitStatus(
+        () =>
+          suspendOrganizationalUnit(
+            selectedOrganizationalUnitId.value,
+            toOrganizationalUnitSuspensionRecord({
+              ...formData,
+              start: dayjs().add(1, 'hour').toISOString(),
+            })
+          ),
+        'success.suspended'
+      ),
   });
 }
 
@@ -275,113 +277,91 @@ function openImmediateSuspensionDialog(): void {
  * Opens the form dialog for scheduling a future suspension.
  */
 function openScheduleSuspensionDialog(): void {
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      uiNamespace: `${uiNamespace}.schedule-suspension-dialog`,
-      i18nScope: 'OrganizationalUnitScheduleSuspensionDialog',
-      title: tGlobal('OrganizationalUnitScheduleSuspensionDialog.title'),
-      content: tGlobal('OrganizationalUnitScheduleSuspensionDialog.content'),
-      formFields:
-        organizationalUnitLifecycleUiConfiguration['suspension.scheduled'],
-      initialFormData: toOrganizationalUnitStatusForm(
-        organizationalUnitStatus.value
+  openFormDialog({
+    uiNamespace: `${uiNamespace}.schedule-suspension-dialog`,
+    i18nScope: 'OrganizationalUnitScheduleSuspensionDialog',
+    formFields:
+      organizationalUnitLifecycleUiConfiguration['suspension.scheduled'],
+    onSubmit: (formData: OrganizationalUnitStatusForm) =>
+      submitStatus(
+        () =>
+          suspendOrganizationalUnit(
+            selectedOrganizationalUnitId.value,
+            toOrganizationalUnitSuspensionRecord(formData)
+          ),
+        'success.scheduled'
       ),
-      onSubmit: async (formData: OrganizationalUnitStatusForm) => {
-        await submitStatus(formData, 'success.scheduled');
-      },
-    },
   });
 }
 
 /**
- * Opens the confirmation dialog for reactivating a suspended organizational
- * unit. The backend cannot drop a suspension instantly, so the suspension end
- * is set one hour from now (the unchanged past start is accepted), which lifts
- * the suspension after that delay.
+ * Opens the form dialog for reactivating a suspended organizational unit. The
+ * backend lifts the suspension by setting its end to now.
  */
 function onClearSuspension(): void {
-  const currentStart =
-    organizationalUnitStatus.value?.suspensionPeriod?.start ?? null;
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      uiNamespace: `${uiNamespace}.reactivate-dialog`,
-      i18nScope: 'OrganizationalUnitReactivateDialog',
-      title: tGlobal('OrganizationalUnitReactivateDialog.title'),
-      content: tGlobal('OrganizationalUnitReactivateDialog.content'),
-      formFields:
-        organizationalUnitLifecycleUiConfiguration['reactivation.immediate'],
-      onSubmit: async (formData: OrganizationalUnitStatusForm) => {
-        if (currentStart == null) {
-          return;
-        }
-        await submitStatus(
-          {
-            ...formData,
-            start: currentStart,
-            end: dayjs().add(1, 'hour').toISOString(),
-          },
-          'success.reactivated'
-        );
-      },
-    },
+  openFormDialog({
+    uiNamespace: `${uiNamespace}.reactivate-dialog`,
+    i18nScope: 'OrganizationalUnitReactivateDialog',
+    formFields:
+      organizationalUnitLifecycleUiConfiguration['reactivation.immediate'],
+    onSubmit: (formData: OrganizationalUnitStatusForm) =>
+      submitStatus(
+        () =>
+          reactivateOrganizationalUnit(
+            selectedOrganizationalUnitId.value,
+            toOrganizationalUnitReactivationRecord(formData)
+          ),
+        'success.reactivated'
+      ),
   });
 }
 
 /**
- * Opens the form dialog for modifying the suspension end date while the OU
- * is currently suspended.
+ * Opens the form dialog for modifying the suspension end date while the OU is
+ * currently suspended, pre-filled with the existing suspension period bounds.
  */
 function onModifySuspensionEnd(): void {
   const currentStart =
     organizationalUnitStatus.value?.suspensionPeriod?.start ?? null;
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      uiNamespace: `${uiNamespace}.edit-suspension-end-dialog`,
-      i18nScope: 'OrganizationalUnitEditSuspensionEndDialog',
-      title: tGlobal('OrganizationalUnitEditSuspensionEndDialog.title'),
-      content: tGlobal('OrganizationalUnitEditSuspensionEndDialog.content'),
-      formFields:
-        organizationalUnitLifecycleUiConfiguration['suspension.modify'],
-      initialFormData: toOrganizationalUnitStatusForm(
-        organizationalUnitStatus.value
+  if (currentStart == null) {
+    return;
+  }
+
+  openFormDialog({
+    uiNamespace: `${uiNamespace}.edit-suspension-end-dialog`,
+    i18nScope: 'OrganizationalUnitEditSuspensionEndDialog',
+    formFields: organizationalUnitLifecycleUiConfiguration['suspension.modify'],
+    initialFormData: organizationalUnitStatus.value
+      ? toOrganizationalUnitStatusForm(organizationalUnitStatus.value)
+      : undefined,
+    onSubmit: (formData: OrganizationalUnitStatusForm) =>
+      submitStatus(
+        () =>
+          suspendOrganizationalUnit(
+            selectedOrganizationalUnitId.value,
+            toOrganizationalUnitSuspensionRecord({
+              ...formData,
+              start: currentStart,
+            })
+          ),
+        'success.endUpdated'
       ),
-      onSubmit: async (formData: OrganizationalUnitStatusForm) => {
-        if (currentStart == null) {
-          return;
-        }
-        await submitStatus(
-          { ...formData, start: currentStart },
-          'success.endUpdated'
-        );
-      },
-    },
   });
 }
 
 /**
- * Submits a status update to the backend and refreshes the local state.
- * The lifecycle form is converted into an API record (ISO dates) before the
- * call. Surfaces a positive notification on success and a negative one on
- * failure.
- * @param form - The lifecycle form values to convert and PUT to the backend.
+ * Runs a status-update API call and refreshes the local state. Surfaces a
+ * positive notification on success and a negative one on failure.
+ * @param statusUpdate - The status-mutation service call to execute, resolving to the updated OU DTO.
  * @param successKey - The i18n key used for the success notification.
  */
 async function submitStatus(
-  form: OrganizationalUnitStatusForm,
+  statusUpdate: () => Promise<OrganizationalUnitDTO>,
   successKey: string
 ): Promise<void> {
   isLoading.value = true;
   try {
-    const dto = await updateOrganizationalUnitStatus(
-      selectedOrganizationalUnitId.value,
-      toOrganizationalUnitStatusRecord(form)
-    );
+    const dto = await statusUpdate();
     organizationalUnit.value = toOrganizationalUnit(dto);
     organizationalUnitStatus.value = toOrganizationalUnitStatus(dto);
     Notify({ type: 'positive', message: t(successKey as never) as string });

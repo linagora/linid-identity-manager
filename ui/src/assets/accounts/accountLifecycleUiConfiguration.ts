@@ -64,6 +64,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['suspension'].reasons.map(
           (reason) => reason.value
@@ -75,6 +76,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['suspension'].subreasons.map(
           (subreason) => subreason.value
@@ -85,6 +87,9 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'deactivation.immediate': [
@@ -93,6 +98,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['deactivation'].reasons.map(
           (reason) => reason.value
@@ -104,6 +110,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['deactivation'].subreasons.map(
           (subreason) => subreason.value
@@ -114,33 +121,19 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'reactivation.immediate': [
     {
-      name: 'statusReason',
-      type: 'String',
-      input: 'List',
-      inputSettings: {
-        values: accountStatusReasons['suspension'].reasons.map(
-          (reason) => reason.value
-        ),
-      },
-    },
-    {
-      name: 'statusSubreason',
-      type: 'String',
-      input: 'List',
-      inputSettings: {
-        values: accountStatusReasons['suspension'].subreasons.map(
-          (subreason) => subreason.value
-        ),
-      },
-    },
-    {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: true,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'activation.scheduled': [
@@ -148,6 +141,7 @@ export const accountLifecycleUiConfiguration = {
       name: 'validityPeriodStart',
       type: 'String',
       required: true,
+      hasValidations: false,
       input: 'Date',
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
@@ -162,6 +156,7 @@ export const accountLifecycleUiConfiguration = {
       name: 'validityPeriodEnd',
       type: 'String',
       required: true,
+      hasValidations: false,
       input: 'Date',
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
@@ -175,6 +170,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['deactivation'].reasons.map(
           (reason) => reason.value
@@ -186,6 +182,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['deactivation'].subreasons.map(
           (subreason) => subreason.value
@@ -196,6 +193,9 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'deactivation.modify': [
@@ -203,6 +203,7 @@ export const accountLifecycleUiConfiguration = {
       name: 'validityPeriodEnd',
       type: 'String',
       required: true,
+      hasValidations: false,
       input: 'Date',
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
@@ -215,6 +216,7 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusReason',
       type: 'String',
       required: true,
+      hasValidations: false,
       input: 'List',
       inputSettings: {
         values: accountStatusReasons['deactivation'].reasons.map(
@@ -226,6 +228,7 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusSubreason',
       type: 'String',
       required: true,
+      hasValidations: false,
       input: 'List',
       inputSettings: {
         values: accountStatusReasons['deactivation'].subreasons.map(
@@ -237,6 +240,9 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'suspension.modify': [
@@ -244,6 +250,8 @@ export const accountLifecycleUiConfiguration = {
       name: 'suspensionPeriodStart',
       type: 'String',
       input: 'Date',
+      required: false,
+      hasValidations: false,
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
         options: {
@@ -255,6 +263,8 @@ export const accountLifecycleUiConfiguration = {
       name: 'suspensionPeriodEnd',
       type: 'String',
       input: 'Date',
+      required: false,
+      hasValidations: false,
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
         options: {
@@ -268,6 +278,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['suspension'].reasons.map(
           (reason) => reason.value
@@ -279,6 +290,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['suspension'].subreasons.map(
           (subreason) => subreason.value
@@ -289,6 +301,9 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'suspension.scheduled': [
@@ -296,6 +311,7 @@ export const accountLifecycleUiConfiguration = {
       name: 'suspensionPeriodStart',
       type: 'String',
       required: true,
+      hasValidations: false,
       input: 'Date',
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
@@ -308,6 +324,8 @@ export const accountLifecycleUiConfiguration = {
       name: 'suspensionPeriodEnd',
       type: 'String',
       input: 'Date',
+      required: false,
+      hasValidations: false,
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
         options: {
@@ -321,6 +339,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['suspension'].reasons.map(
           (reason) => reason.value
@@ -332,6 +351,7 @@ export const accountLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: accountStatusReasons['suspension'].subreasons.map(
           (subreason) => subreason.value
@@ -342,6 +362,17 @@ export const accountLifecycleUiConfiguration = {
       name: 'statusComment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
 };
+
+/**
+ * Shape of a single lifecycle dialog form field, inferred from the lifecycle UI
+ * configurations. Shared by the account and organizational unit configurations,
+ * which declare fields of the same shape, and consumed by the form dialog.
+ */
+export type LifecycleFormField =
+  (typeof accountLifecycleUiConfiguration)[keyof typeof accountLifecycleUiConfiguration][number];

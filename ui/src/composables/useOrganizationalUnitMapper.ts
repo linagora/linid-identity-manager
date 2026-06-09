@@ -30,11 +30,12 @@ import type {
   OrganizationalUnit,
   OrganizationalUnitDTO,
   OrganizationalUnitForm,
+  OrganizationalUnitReactivationRecord,
   OrganizationalUnitRecord,
   OrganizationalUnitRelationDTO,
   OrganizationalUnitStatus,
   OrganizationalUnitStatusForm,
-  OrganizationalUnitStatusRecord,
+  OrganizationalUnitSuspensionRecord,
 } from 'src/types/organizationalUnits';
 
 /**
@@ -166,52 +167,60 @@ export function useOrganizationalUnitMapper() {
   ): OrganizationalUnitStatus => {
     return {
       suspensionPeriod: dto.suspensionPeriod,
-      statusReason: dto.statusReason,
-      statusSubreason: dto.statusSubreason,
-      statusComment: dto.statusComment,
       isSuspended: dto.isSuspended,
     };
   };
 
   /**
-   * Projects an {@link OrganizationalUnitStatus} into a flattened
-   * {@link OrganizationalUnitStatusForm} used to pre-fill the suspension
-   * dialogs. Dates are converted to the localized display format expected by the
-   * date fields.
-   * @param status Current organizational unit suspension status (nullable).
-   * @returns Pre-filled lifecycle form values.
-   */
-  const toOrganizationalUnitStatusForm = (
-    status: OrganizationalUnitStatus | null
-  ): OrganizationalUnitStatusForm => {
-    return {
-      start: toDate(status?.suspensionPeriod?.start),
-      end: toDate(status?.suspensionPeriod?.end),
-      reason: status?.statusReason ?? null,
-      subreason: status?.statusSubreason ?? null,
-      comment: status?.statusComment ?? null,
-    };
-  };
-
-  /**
    * Converts an {@link OrganizationalUnitStatusForm} into an
-   * {@link OrganizationalUnitStatusRecord} ready to be sent to the backend.
+   * {@link OrganizationalUnitSuspensionRecord} ready to be sent to the backend.
    * Localized start / end dates are normalized to ISO 8601 strings; empty values
    * collapse to `null`.
    * @param form Flattened lifecycle form values.
-   * @returns Status record with an ISO suspension period.
+   * @returns Suspension record with an ISO suspension period.
    */
-  const toOrganizationalUnitStatusRecord = (
+  const toOrganizationalUnitSuspensionRecord = (
     form: OrganizationalUnitStatusForm
-  ): OrganizationalUnitStatusRecord => {
+  ): OrganizationalUnitSuspensionRecord => {
     return {
       suspensionPeriod: {
         start: toDateISO(form.start) || null,
         end: toDateISO(form.end) || null,
       },
-      reason: form.reason || null,
-      subreason: form.subreason || null,
+      reason: form.reason || '',
+      subreason: form.subreason || '',
       comment: form.comment || null,
+    };
+  };
+
+  /**
+   * Converts an {@link OrganizationalUnitStatusForm} into an
+   * {@link OrganizationalUnitReactivationRecord} carrying the mandatory comment.
+   * @param form Flattened lifecycle form values.
+   * @returns Reactivation record ready to be sent to the backend.
+   */
+  const toOrganizationalUnitReactivationRecord = (
+    form: OrganizationalUnitStatusForm
+  ): OrganizationalUnitReactivationRecord => {
+    return {
+      comment: form.comment || '',
+    };
+  };
+
+  /**
+   * Flattens an {@link OrganizationalUnitStatus} into an {@link OrganizationalUnitStatusForm} to pre-fill the
+   * "modify" dialog with the existing suspension period bounds. The reason / sub-reason / comment fields are
+   * intentionally left empty: the read model no longer carries a generic status reason, and a modification
+   * expects a fresh justification.
+   * @param status The current organizational unit status providing the existing period bounds.
+   * @returns The flattened form values with localized suspension period dates.
+   */
+  const toOrganizationalUnitStatusForm = (
+    status: OrganizationalUnitStatus
+  ): OrganizationalUnitStatusForm => {
+    return {
+      start: toDate(status.suspensionPeriod?.start) || null,
+      end: toDate(status.suspensionPeriod?.end) || null,
     };
   };
 
@@ -220,7 +229,8 @@ export function useOrganizationalUnitMapper() {
     toOrganizationalUnitsTree,
     toOrganizationalUnit,
     toOrganizationalUnitStatus,
+    toOrganizationalUnitSuspensionRecord,
+    toOrganizationalUnitReactivationRecord,
     toOrganizationalUnitStatusForm,
-    toOrganizationalUnitStatusRecord,
   };
 }

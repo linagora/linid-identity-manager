@@ -143,14 +143,9 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  DropdownClickPayload,
-  UiEvent,
-} from '@linagora/linid-im-front-corelib';
+import type { DropdownClickPayload } from '@linagora/linid-im-front-corelib';
 import {
-  getI18nInstance,
   loadAsyncComponent,
-  uiEventSubject,
   useNotify,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
@@ -166,17 +161,22 @@ import AccountNotActivatedInfoText from 'src/components/text/AccountNotActivated
 import AccountSuspendedInfoText from 'src/components/text/AccountSuspendedInfoText.vue';
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
-import { getAccountById, updateStatus } from 'src/services/AccountService';
-import type { AccountStatusForm } from 'src/types/accounts';
+import { useLifecycleDialogs } from 'src/composables/useLifecycleDialogs';
+import {
+  deactivateAccount,
+  getAccountById,
+  reactivateAccount,
+  setAccountValidity,
+  suspendAccount,
+} from 'src/services/AccountService';
+import type { AccountDTO, AccountStatusForm } from 'src/types/accounts';
 import { type Account, type AccountStatus } from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
-import { type Composer } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 const pageName = 'AccountDetailsPage';
 const i18nScope = pageName;
 const uiNamespace = 'accounts.details-page';
-const globalT = (getI18nInstance().global as Composer).t;
 
 const route = useRoute();
 const router = useRouter();
@@ -186,7 +186,10 @@ const {
   toAccount,
   toAccountStatus,
   toAccountStatusForm,
-  toAccountStatusRecord,
+  toAccountSuspensionRecord,
+  toAccountDeactivationRecord,
+  toAccountReactivationRecord,
+  toAccountValidityRecord,
 } = useAccountMapper();
 
 const accountId = computed(() => route.params.id as string);
@@ -200,6 +203,9 @@ const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
 
 const lifecycleUi = useAccountLifecycleUi(accountStatus);
+
+const { openFormDialog, openConfirmationDialog } =
+  useLifecycleDialogs(uiNamespace);
 
 const hasAnyLifecycleAction = computed(() =>
   Boolean(
@@ -294,321 +300,206 @@ function onLifecycleAction(action: string | DropdownClickPayload<string>) {
  * Opens a confirmation dialog for the immediate activation action.
  */
 function immediateActivation() {
-  uiEventSubject.next({
-    key: 'confirmation',
-    data: {
-      type: 'open',
-      title: globalT(
-        `AccountActivationActions.ConfirmationDialog.immediate.title`
+  openConfirmationDialog({
+    i18nScope: 'AccountActivationActions.ConfirmationDialog.immediate',
+    onConfirm: () =>
+      updateAccountStatus(
+        () =>
+          setAccountValidity(
+            accountId.value,
+            toAccountValidityRecord({
+              validityPeriodStart: dayjs().add(1, 'hour').toISOString(),
+            })
+          ),
+        'immediateActivationSuccess'
       ),
-      content: globalT(
-        `AccountActivationActions.ConfirmationDialog.immediate.content`
-      ),
-      uiNamespace,
-      i18nScope: `AccountActivationActions.ConfirmationDialog.immediate`,
-      onConfirm: () =>
-        updateAccountStatus(
-          {
-            validityPeriodStart: dayjs().add(1, 'hour').toISOString(),
-          },
-          'immediateActivationSuccess'
-        ),
-    },
   });
 }
 
 /**
- * Opens a form dialog for the immediate suspension action,
- * allowing the user to provide additional information
- * (e.g., reason for suspension) before confirming the action.
+ * Opens a form dialog for the immediate suspension action.
  */
 function immediateSuspension() {
-  const fieldKeys = accountLifecycleUiConfiguration['suspension.immediate'].map(
-    (field) => field.name
-  ) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountSuspensionActions.FormDialog.immediate.title`),
-      content: globalT(`AccountSuspensionActions.FormDialog.immediate.content`),
-      uiNamespace,
-      i18nScope: `AccountSuspensionActions.FormDialog.immediate`,
-      formFields: accountLifecycleUiConfiguration['suspension.immediate'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          {
-            ...formData,
-            suspensionPeriodStart: dayjs().add(1, 'hour').toISOString(),
-          },
-          'immediateSuspensionSuccess'
-        ),
-    },
-  } as UiEvent);
+  openFormDialog({
+    i18nScope: 'AccountSuspensionActions.FormDialog.immediate',
+    formFields: accountLifecycleUiConfiguration['suspension.immediate'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          suspendAccount(
+            accountId.value,
+            toAccountSuspensionRecord({
+              ...formData,
+              suspensionPeriodStart: dayjs().add(1, 'hour').toISOString(),
+            })
+          ),
+        'immediateSuspensionSuccess'
+      ),
+  });
 }
 
 /**
- * Opens a form dialog for the immediate deactivation action,
- * allowing the user to provide additional information
- * (e.g., reason for deactivation) before confirming the action.
+ * Opens a form dialog for the immediate deactivation action.
  */
 function immediateDeactivation() {
-  const fieldKeys = accountLifecycleUiConfiguration[
-    'deactivation.immediate'
-  ].map((field) => field.name) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountDeactivationActions.FormDialog.immediate.title`),
-      content: globalT(
-        `AccountDeactivationActions.FormDialog.immediate.content`
+  openFormDialog({
+    i18nScope: 'AccountDeactivationActions.FormDialog.immediate',
+    formFields: accountLifecycleUiConfiguration['deactivation.immediate'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          deactivateAccount(
+            accountId.value,
+            toAccountDeactivationRecord({
+              ...formData,
+              validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
+            })
+          ),
+        'immediateDeactivationSuccess'
       ),
-      uiNamespace,
-      i18nScope: `AccountDeactivationActions.FormDialog.immediate`,
-      formFields: accountLifecycleUiConfiguration['deactivation.immediate'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          {
-            ...formData,
-            validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
-          },
-          'immediateDeactivationSuccess'
-        ),
-    },
-  } as UiEvent);
+  });
 }
 
 /**
- * Opens a form dialog for the immediate reactivation action,
- * allowing the user to provide additional information
- * (e.g., reason for reactivation) before confirming the action.
+ * Opens a form dialog for the immediate reactivation action.
  */
 function immediateReactivation() {
-  const fieldKeys = accountLifecycleUiConfiguration[
-    'reactivation.immediate'
-  ].map((field) => field.name) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountReactivationActions.FormDialog.immediate.title`),
-      content: globalT(
-        `AccountReactivationActions.FormDialog.immediate.content`
+  openFormDialog({
+    i18nScope: 'AccountReactivationActions.FormDialog.immediate',
+    formFields: accountLifecycleUiConfiguration['reactivation.immediate'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          reactivateAccount(
+            accountId.value,
+            toAccountReactivationRecord(formData)
+          ),
+        'immediateReactivationSuccess'
       ),
-      uiNamespace,
-      i18nScope: `AccountReactivationActions.FormDialog.immediate`,
-      formFields: accountLifecycleUiConfiguration['reactivation.immediate'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          {
-            ...formData,
-            suspensionPeriodEnd: dayjs().add(1, 'hour').toISOString(),
-          },
-          'immediateReactivationSuccess'
-        ),
-    },
-  } as UiEvent);
+  });
 }
 
 /**
- * Opens a form dialog for the scheduled activation action,
- * allowing the user to provide additional information
- * (e.g., activation date, reason for activation) before confirming the action.
+ * Opens a form dialog for the scheduled activation action.
  */
 function scheduledActivation() {
-  const fieldKeys = accountLifecycleUiConfiguration['activation.scheduled'].map(
-    (field) => field.name
-  ) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountActivationActions.FormDialog.scheduled.title`),
-      content: globalT(`AccountActivationActions.FormDialog.scheduled.content`),
-      uiNamespace,
-      i18nScope: `AccountActivationActions.FormDialog.scheduled`,
-      formFields: accountLifecycleUiConfiguration['activation.scheduled'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          formData,
-          'scheduledActivationSuccess',
-          formData.validityPeriodStart
-        ),
-    },
-  } as UiEvent);
+  openFormDialog({
+    i18nScope: 'AccountActivationActions.FormDialog.scheduled',
+    formFields: accountLifecycleUiConfiguration['activation.scheduled'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          setAccountValidity(
+            accountId.value,
+            toAccountValidityRecord(formData)
+          ),
+        'scheduledActivationSuccess',
+        formData.validityPeriodStart
+      ),
+  });
 }
 
 /**
- * Opens a form dialog for the scheduled deactivation action,
- * allowing the user to provide additional information
- * (e.g., deactivation date, reason for deactivation) before confirming the action.
+ * Opens a form dialog for the scheduled deactivation action.
  */
 function scheduledDeactivation() {
-  const fieldKeys = accountLifecycleUiConfiguration[
-    'deactivation.scheduled'
-  ].map((field) => field.name) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountDeactivationActions.FormDialog.scheduled.title`),
-      content: globalT(
-        `AccountDeactivationActions.FormDialog.scheduled.content`
+  openFormDialog({
+    i18nScope: 'AccountDeactivationActions.FormDialog.scheduled',
+    formFields: accountLifecycleUiConfiguration['deactivation.scheduled'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          deactivateAccount(
+            accountId.value,
+            toAccountDeactivationRecord(formData)
+          ),
+        'scheduledDeactivationSuccess',
+        formData.validityPeriodEnd
       ),
-      uiNamespace,
-      i18nScope: `AccountDeactivationActions.FormDialog.scheduled`,
-      formFields: accountLifecycleUiConfiguration['deactivation.scheduled'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          formData,
-          'scheduledDeactivationSuccess',
-          formData.validityPeriodEnd
-        ),
-    },
-  } as UiEvent);
+  });
 }
 
 /**
- * Opens a form dialog for the modify deactivation action,
- * allowing the user to update the scheduled deactivation date
- * and reason before confirming the action.
+ * Opens a form dialog for the modify deactivation action, pre-filled with the
+ * existing validity period bounds.
  */
 function modifyDeactivation() {
-  const fieldKeys = accountLifecycleUiConfiguration['deactivation.modify'].map(
-    (field) => field.name
-  ) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountDeactivationActions.FormDialog.modify.title`),
-      content: globalT(`AccountDeactivationActions.FormDialog.modify.content`),
-      uiNamespace,
-      i18nScope: `AccountDeactivationActions.FormDialog.modify`,
-      formFields: accountLifecycleUiConfiguration['deactivation.modify'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          formData,
-          'modifyDeactivationSuccess',
-          formData.validityPeriodEnd
-        ),
-    },
-  } as UiEvent);
+  openFormDialog({
+    i18nScope: 'AccountDeactivationActions.FormDialog.modify',
+    formFields: accountLifecycleUiConfiguration['deactivation.modify'],
+    initialFormData: accountStatus.value
+      ? toAccountStatusForm(accountStatus.value)
+      : undefined,
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          deactivateAccount(
+            accountId.value,
+            toAccountDeactivationRecord(formData)
+          ),
+        'modifyDeactivationSuccess',
+        formData.validityPeriodEnd
+      ),
+  });
 }
 
 /**
- * Opens a form dialog for the scheduled suspension action,
- * allowing the user to provide additional information
- * (e.g., suspension date, reason for suspension) before confirming the action.
+ * Opens a form dialog for the scheduled suspension action.
  */
 function scheduledSuspension() {
-  const fieldKeys = accountLifecycleUiConfiguration['suspension.scheduled'].map(
-    (field) => field.name
-  ) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountSuspensionActions.FormDialog.scheduled.title`),
-      content: globalT(`AccountSuspensionActions.FormDialog.scheduled.content`),
-      uiNamespace,
-      i18nScope: `AccountSuspensionActions.FormDialog.scheduled`,
-      formFields: accountLifecycleUiConfiguration['suspension.scheduled'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          formData,
-          'scheduledSuspensionSuccess',
-          formData.suspensionPeriodStart
-        ),
-    },
-  } as UiEvent);
+  openFormDialog({
+    i18nScope: 'AccountSuspensionActions.FormDialog.scheduled',
+    formFields: accountLifecycleUiConfiguration['suspension.scheduled'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
+        'scheduledSuspensionSuccess',
+        formData.suspensionPeriodStart
+      ),
+  });
 }
 
 /**
- * Opens a form dialog for the modify suspension action,
- * allowing the user to update the suspension period settings
- * before confirming the action.
+ * Opens a form dialog for the modify suspension action, pre-filled with the
+ * existing suspension period bounds.
  */
 function modifySuspension() {
-  const fieldKeys = accountLifecycleUiConfiguration['suspension.modify'].map(
-    (field) => field.name
-  ) as (keyof AccountStatusForm)[];
-
-  uiEventSubject.next({
-    key: 'form',
-    data: {
-      type: 'open',
-      title: globalT(`AccountSuspensionActions.FormDialog.modify.title`),
-      content: globalT(`AccountSuspensionActions.FormDialog.modify.content`),
-      uiNamespace,
-      i18nScope: `AccountSuspensionActions.FormDialog.modify`,
-      formFields: accountLifecycleUiConfiguration['suspension.modify'],
-      initialFormData: accountStatus.value
-        ? toAccountStatusForm(accountStatus.value, fieldKeys)
-        : undefined,
-      onSubmit: (formData: AccountStatusForm) =>
-        updateAccountStatus(
-          formData,
-          'modifySuspensionSuccess',
-          formData.suspensionPeriodStart
-        ),
-    },
-  } as UiEvent);
+  openFormDialog({
+    i18nScope: 'AccountSuspensionActions.FormDialog.modify',
+    formFields: accountLifecycleUiConfiguration['suspension.modify'],
+    initialFormData: accountStatus.value
+      ? toAccountStatusForm(accountStatus.value)
+      : undefined,
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
+        'modifySuspensionSuccess',
+        formData.suspensionPeriodStart
+      ),
+  });
 }
 
 /**
- * Sends a request to the backend to update the account status based on the provided
- * form data and the current account status, then updates the page state with the
- * new account information. Displays a notification in case of an error during the
+ * Runs a status-update API call, then updates the page state with the refreshed
+ * account information. Displays a notification in case of an error during the
  * update process.
- * @param formData - The data collected from the confirmation dialog form,
- *                   used to construct the account status update payload.
+ * @param statusUpdate - The status-mutation service call to execute, resolving to the updated account DTO.
  * @param successMsgKey - Optional i18n key for the success message to display upon successful update.
  * @param dateToDisplayInSuccessMsg - Optional date to display in the success message.
  * @returns A promise that resolves once the account status has been updated
  *          and the page state has been refreshed with the new account information.
  */
 async function updateAccountStatus(
-  formData: AccountStatusForm,
+  statusUpdate: () => Promise<AccountDTO>,
   successMsgKey = 'updateStatusSuccess',
   dateToDisplayInSuccessMsg?: string | null
 ): Promise<void> {
   isLoading.value = true;
 
   try {
-    const dto = await updateStatus(
-      accountId.value,
-      toAccountStatusRecord(formData)
-    );
+    const dto = await statusUpdate();
     account.value = toAccount(dto);
     accountStatus.value = toAccountStatus(dto);
 

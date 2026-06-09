@@ -262,7 +262,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       expect(ui.activationMenuItems).toBeUndefined();
     });
 
-    it('should project a suspended OU into the reactivation UI state', async () => {
+    it('should project a suspended OU into the banner-only UI state without action dropdown', async () => {
       mockedGetById.mockReset();
       mockedGetById.mockResolvedValue(
         buildOuDto({
@@ -277,9 +277,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       const ui = wrapper.vm.lifecycleUi;
       expect(ui.showBadge).toBe(true);
       expect(ui.showSuspendedBanner).toBe(true);
-      expect(ui.activationMenuItems).toEqual([
-        { key: 'reactivation.immediate', clickable: true },
-      ]);
+      expect(ui.activationMenuItems).toBeUndefined();
       expect(ui.suspensionMenuItems).toBeUndefined();
     });
   });

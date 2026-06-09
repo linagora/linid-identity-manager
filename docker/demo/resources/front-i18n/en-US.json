@@ -125,7 +125,7 @@
             }
           },
           "statusComment": {
-            "label": "Comment",
+            "label": "Justification",
             "hint": "Add an optional comment."
           }
         },
@@ -171,7 +171,7 @@
             }
           },
           "statusComment": {
-            "label": "Comment",
+            "label": "Justification",
             "hint": "Add an optional comment."
           }
         },
@@ -217,7 +217,7 @@
             }
           },
           "statusComment": {
-            "label": "Comment",
+            "label": "Justification",
             "hint": "Add an optional comment."
           }
         },
@@ -257,7 +257,7 @@
             }
           },
           "statusComment": {
-            "label": "Comment",
+            "label": "Justification",
             "hint": "Add an optional comment."
           }
         },
@@ -294,7 +294,7 @@
             }
           },
           "statusComment": {
-            "label": "Comment",
+            "label": "Justification",
             "hint": "Add an optional comment."
           }
         },
@@ -331,7 +331,7 @@
             }
           },
           "statusComment": {
-            "label": "Comment",
+            "label": "Justification",
             "hint": "Add an optional comment."
           }
         },
@@ -348,17 +348,12 @@
         "title": "Immediate Account Reactivation",
         "content": "Are you sure you want to reactivate this account immediately?",
         "fields": {
-          "statusReason": {
-            "label": "Reason",
-            "hint": "Select a reactivation reason."
-          },
-          "statusSubreason": {
-            "label": "Sub-reason",
-            "hint": "Select a reactivation sub-reason."
-          },
           "statusComment": {
             "label": "Justification",
-            "hint": "Provide an optional justification for this reactivation."
+            "hint": "Provide a mandatory justification for this reactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
           }
         },
         "ButtonsCard": {
@@ -596,7 +591,7 @@
         }
       },
       "comment": {
-        "label": "Comment",
+        "label": "Justification",
         "hint": "Add an optional comment."
       }
     }
@@ -643,7 +638,7 @@
         }
       },
       "comment": {
-        "label": "Comment",
+        "label": "Justification",
         "hint": "Add an optional comment."
       }
     }
@@ -681,7 +676,7 @@
         }
       },
       "comment": {
-        "label": "Comment",
+        "label": "Justification",
         "hint": "Add an optional comment."
       }
     }
@@ -695,17 +690,12 @@
       "confirmLoading": "Reactivating..."
     },
     "fields": {
-      "reason": {
-        "label": "Reason",
-        "hint": "Select a reactivation reason."
-      },
-      "subreason": {
-        "label": "Sub-reason",
-        "hint": "Select a reactivation sub-reason."
-      },
       "comment": {
-        "label": "Comment",
-        "hint": "Add an optional comment."
+        "label": "Justification",
+        "hint": "Provide a mandatory comment for this reactivation.",
+        "validation": {
+          "required": "This field is required."
+        }
       }
     }
   }

@@ -122,18 +122,6 @@ export interface AccountDTO {
    */
   activationAt: string | null;
   /**
-   * High-level reason code explaining the current status.
-   */
-  statusReason: string | null;
-  /**
-   * More detailed classification of the status reason.
-   */
-  statusSubreason: string | null;
-  /**
-   * Free-text comment providing additional context about the status change.
-   */
-  statusComment: string | null;
-  /**
    * Number of days remaining before the account is deactivated.
    * Null when the validity period has no upper bound.
    */
@@ -249,21 +237,6 @@ export interface AccountStatus {
   activationAt: string | null;
 
   /**
-   * Primary reason for the current account status, if any.
-   */
-  statusReason: string | null;
-
-  /**
-   * More specific sub-reason for the account status, if available.
-   */
-  statusSubreason: string | null;
-
-  /**
-   * Optional free-text comment providing additional context about the status.
-   */
-  statusComment: string | null;
-
-  /**
    * Number of days remaining before the account is deactivated.
    * Null if not applicable or not scheduled.
    */
@@ -271,33 +244,73 @@ export interface AccountStatus {
 }
 
 /**
- * Shape of the payload sent to the backend when updating an account's status.
+ * Shape of the payload sent to the backend when suspending an account.
  */
-export interface AccountStatusRecord extends Record<string, unknown> {
-  /**
-   * Period during which the account is considered active.
-   */
-  validityPeriod: Period;
-
+export interface AccountSuspensionRecord extends Record<string, unknown> {
   /**
    * Period during which the account is suspended.
    */
   suspensionPeriod: Period;
 
   /**
-   * Primary reason for the current account status, if any.
+   * Primary reason for the suspension.
    */
-  statusReason: string | null;
+  reason: string;
 
   /**
-   * More specific sub-reason for the account status, if available.
+   * More specific sub-reason for the suspension.
    */
-  statusSubreason: string | null;
+  subreason: string;
 
   /**
-   * Free-text comment providing additional context about the status.
+   * Free-text comment providing additional context about the suspension.
    */
-  statusComment: string | null;
+  comment: string | null;
+}
+
+/**
+ * Shape of the payload sent to the backend when deactivating an account.
+ */
+export interface AccountDeactivationRecord extends Record<string, unknown> {
+  /**
+   * Timestamp at which the account is deactivated (validity period end).
+   */
+  deactivationAt: string;
+
+  /**
+   * Primary reason for the deactivation.
+   */
+  reason: string;
+
+  /**
+   * More specific sub-reason for the deactivation.
+   */
+  subreason: string;
+
+  /**
+   * Free-text comment providing additional context about the deactivation.
+   */
+  comment: string | null;
+}
+
+/**
+ * Shape of the payload sent to the backend when reactivating an account.
+ */
+export interface AccountReactivationRecord extends Record<string, unknown> {
+  /**
+   * Mandatory justification for the reactivation.
+   */
+  comment: string;
+}
+
+/**
+ * Shape of the payload sent to the backend when scheduling an account's validity start.
+ */
+export interface AccountValidityRecord extends Record<string, unknown> {
+  /**
+   * Timestamp at which the account becomes valid (validity period start).
+   */
+  validityStart: string;
 }
 
 /**

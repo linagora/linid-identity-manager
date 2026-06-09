@@ -31,7 +31,8 @@ import {
   getAllOrganizationalUnit,
   getOrganizationalUnitById,
   getOrganizationalUnits,
-  updateOrganizationalUnitStatus,
+  reactivateOrganizationalUnit,
+  suspendOrganizationalUnit,
 } from 'src/services/OrganizationalUnitService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -253,37 +254,63 @@ describe('Test service: organizationalUnitService', () => {
     });
   });
 
-  describe('Test function: updateOrganizationalUnitStatus', () => {
+  describe('Test function: suspendOrganizationalUnit', () => {
     const payload = {
       suspensionPeriod: {
         start: '2026-06-01T00:00:00.000Z',
         end: '2026-07-01T00:00:00.000Z',
       },
       reason: 'AUDIT',
+      subreason: null,
+      comment: null,
     };
 
-    it('should PUT to the status endpoint and return the raw DTO', async () => {
+    it('should PUT to the suspension endpoint and return the raw DTO', async () => {
       const dto = buildOuDTO({
-        isSuspended: false,
+        isSuspended: true,
         suspensionPeriod: payload.suspensionPeriod,
       });
       vi.mocked(api.put).mockResolvedValue({ data: dto });
 
-      const result = await updateOrganizationalUnitStatus(OU_UUID, payload);
+      const result = await suspendOrganizationalUnit(OU_UUID, payload);
 
       expect(api.put).toHaveBeenCalledWith(
-        `/organizational-units/${OU_UUID}/status`,
+        `/organizational-units/${OU_UUID}/status/suspend`,
         payload
       );
       expect(result).toEqual(dto);
     });
 
     it('should propagate backend errors to the caller', async () => {
-      const error = new Error('boom');
-      vi.mocked(api.put).mockRejectedValue(error);
+      vi.mocked(api.put).mockRejectedValue(new Error('boom'));
+
+      await expect(suspendOrganizationalUnit(OU_UUID, payload)).rejects.toThrow(
+        'boom'
+      );
+    });
+  });
+
+  describe('Test function: reactivateOrganizationalUnit', () => {
+    const payload = { comment: 'Merger completed' };
+
+    it('should PUT to the reactivation endpoint and return the raw DTO', async () => {
+      const dto = buildOuDTO({ isSuspended: false });
+      vi.mocked(api.put).mockResolvedValue({ data: dto });
+
+      const result = await reactivateOrganizationalUnit(OU_UUID, payload);
+
+      expect(api.put).toHaveBeenCalledWith(
+        `/organizational-units/${OU_UUID}/status/reactivate`,
+        payload
+      );
+      expect(result).toEqual(dto);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      vi.mocked(api.put).mockRejectedValue(new Error('boom'));
 
       await expect(
-        updateOrganizationalUnitStatus(OU_UUID, payload)
+        reactivateOrganizationalUnit(OU_UUID, payload)
       ).rejects.toThrow('boom');
     });
   });

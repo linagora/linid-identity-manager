@@ -27,9 +27,12 @@
 import { api } from 'boot/axios';
 import {
   createAccount,
+  deactivateAccount,
   getAccountById,
   getAccounts,
-  updateStatus,
+  reactivateAccount,
+  setAccountValidity,
+  suspendAccount,
 } from 'src/services/AccountService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -154,34 +157,111 @@ describe('Test service: accountService', () => {
     });
   });
 
-  describe('Test function: updateStatus', () => {
-    const accountStatus = {
-      validityPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-      suspensionPeriod: { start: null, end: null },
-      activationAt: null,
-      statusReason: 'INVESTIGATION',
-      statusSubreason: null,
-      statusComment: null,
+  describe('Test function: suspendAccount', () => {
+    const payload = {
+      suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
+      reason: 'INVESTIGATION',
+      subreason: null,
+      comment: null,
     };
 
-    it('should call valid endpoint with payload and return the updated DTO', async () => {
+    it('should call the suspension endpoint with payload and return the updated DTO', async () => {
       const dto = buildAccountDTO({ id: USER_1_UUID, status: 'SUSPENDED' });
       vi.mocked(api.put).mockResolvedValue({ data: dto });
 
-      const result = await updateStatus(USER_1_UUID, accountStatus);
+      const result = await suspendAccount(USER_1_UUID, payload);
 
       expect(api.put).toHaveBeenCalledWith(
-        `/accounts/${USER_1_UUID}/status`,
-        accountStatus
+        `/accounts/${USER_1_UUID}/status/suspend`,
+        payload
       );
       expect(result).toEqual(dto);
     });
 
     it('should propagate backend errors to the caller', async () => {
-      const error = new Error('boom');
-      vi.mocked(api.put).mockRejectedValue(error);
+      vi.mocked(api.put).mockRejectedValue(new Error('boom'));
 
-      await expect(updateStatus(USER_1_UUID, accountStatus)).rejects.toThrow(
+      await expect(suspendAccount(USER_1_UUID, payload)).rejects.toThrow(
+        'boom'
+      );
+    });
+  });
+
+  describe('Test function: deactivateAccount', () => {
+    const payload = {
+      deactivationAt: '2026-07-01T00:00:00Z',
+      reason: 'OFFBOARDING',
+      subreason: null,
+      comment: null,
+    };
+
+    it('should call the deactivation endpoint with payload and return the updated DTO', async () => {
+      const dto = buildAccountDTO({ id: USER_1_UUID, status: 'INACTIVE' });
+      vi.mocked(api.put).mockResolvedValue({ data: dto });
+
+      const result = await deactivateAccount(USER_1_UUID, payload);
+
+      expect(api.put).toHaveBeenCalledWith(
+        `/accounts/${USER_1_UUID}/status/deactivate`,
+        payload
+      );
+      expect(result).toEqual(dto);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      vi.mocked(api.put).mockRejectedValue(new Error('boom'));
+
+      await expect(deactivateAccount(USER_1_UUID, payload)).rejects.toThrow(
+        'boom'
+      );
+    });
+  });
+
+  describe('Test function: reactivateAccount', () => {
+    const payload = { comment: 'Investigation closed' };
+
+    it('should call the reactivation endpoint with payload and return the updated DTO', async () => {
+      const dto = buildAccountDTO({ id: USER_1_UUID, status: 'ACTIVE' });
+      vi.mocked(api.put).mockResolvedValue({ data: dto });
+
+      const result = await reactivateAccount(USER_1_UUID, payload);
+
+      expect(api.put).toHaveBeenCalledWith(
+        `/accounts/${USER_1_UUID}/status/reactivate`,
+        payload
+      );
+      expect(result).toEqual(dto);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      vi.mocked(api.put).mockRejectedValue(new Error('boom'));
+
+      await expect(reactivateAccount(USER_1_UUID, payload)).rejects.toThrow(
+        'boom'
+      );
+    });
+  });
+
+  describe('Test function: setAccountValidity', () => {
+    const payload = { validityStart: '2026-08-01T00:00:00Z' };
+
+    it('should call the validity endpoint with payload and return the updated DTO', async () => {
+      const dto = buildAccountDTO({ id: USER_1_UUID, status: 'INACTIVE' });
+      vi.mocked(api.put).mockResolvedValue({ data: dto });
+
+      const result = await setAccountValidity(USER_1_UUID, payload);
+
+      expect(api.put).toHaveBeenCalledWith(
+        `/accounts/${USER_1_UUID}/status/schedule-activation`,
+        payload
+      );
+      expect(result).toEqual(dto);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      vi.mocked(api.put).mockRejectedValue(new Error('boom'));
+
+      await expect(setAccountValidity(USER_1_UUID, payload)).rejects.toThrow(
         'boom'
       );
     });

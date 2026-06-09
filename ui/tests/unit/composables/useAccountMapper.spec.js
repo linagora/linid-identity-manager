@@ -118,11 +118,11 @@ describe('Test mapper: useAccountMapper', () => {
         validityPeriod: dto.validityPeriod,
         suspensionPeriod: dto.suspensionPeriod,
         activationAt: dto.activationAt,
-        statusReason: dto.statusReason,
-        statusSubreason: dto.statusSubreason,
-        statusComment: dto.statusComment,
         daysBeforeDeactivation: dto.daysBeforeDeactivation,
       });
+      expect(accountStatus).not.toHaveProperty('statusReason');
+      expect(accountStatus).not.toHaveProperty('statusSubreason');
+      expect(accountStatus).not.toHaveProperty('statusComment');
       expect(accountStatus).not.toHaveProperty('id');
       expect(accountStatus).not.toHaveProperty('firstname');
       expect(accountStatus).not.toHaveProperty('lastname');
@@ -269,172 +269,113 @@ describe('Test mapper: useAccountMapper', () => {
     });
   });
 
-  describe('Test function: toAccountStatusRecord', () => {
-    it('should map all form fields into the nested AccountStatusRecord structure', () => {
-      const { toAccountStatusRecord } = useAccountMapper();
+  describe('Test function: toAccountSuspensionRecord', () => {
+    it('should map form fields into the suspension record structure', () => {
+      const { toAccountSuspensionRecord } = useAccountMapper();
 
       const formData = {
-        validityPeriodStart: '2026-06-01T00:00:00.000Z',
-        validityPeriodEnd: '2027-06-01T00:00:00.000Z',
         suspensionPeriodStart: '2026-07-01T00:00:00.000Z',
         suspensionPeriodEnd: '2026-09-01T00:00:00.000Z',
-        activationAt: '2026-06-01T00:00:00.000Z',
         statusReason: 'INVESTIGATION',
         statusSubreason: 'FRAUD',
         statusComment: 'Pending review',
       };
 
-      const result = toAccountStatusRecord(formData);
+      const result = toAccountSuspensionRecord(formData);
 
       expect(result).toEqual({
-        validityPeriod: {
-          start: formData.validityPeriodStart,
-          end: formData.validityPeriodEnd,
-        },
         suspensionPeriod: {
           start: formData.suspensionPeriodStart,
           end: formData.suspensionPeriodEnd,
         },
-        statusReason: formData.statusReason,
-        statusSubreason: formData.statusSubreason,
-        statusComment: formData.statusComment,
+        reason: formData.statusReason,
+        subreason: formData.statusSubreason,
+        comment: formData.statusComment,
       });
     });
 
     it('should coerce empty and undefined form fields to null', () => {
-      const { toAccountStatusRecord } = useAccountMapper();
+      const { toAccountSuspensionRecord } = useAccountMapper();
 
-      const result = toAccountStatusRecord({});
+      const result = toAccountSuspensionRecord({});
 
       expect(result).toEqual({
-        validityPeriod: { start: null, end: null },
         suspensionPeriod: { start: null, end: null },
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
+        reason: '',
+        subreason: '',
+        comment: null,
       });
     });
   });
 
-  describe('Test function: toAccountStatusForm', () => {
-    it('should flatten all periods and apply toDate to all date fields by default', () => {
-      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
-      const { toAccountStatusForm } = useAccountMapper();
+  describe('Test function: toAccountDeactivationRecord', () => {
+    it('should map the validity end into the deactivation timestamp', () => {
+      const { toAccountDeactivationRecord } = useAccountMapper();
 
-      const accountStatus = {
-        validityPeriod: {
-          start: '2026-01-01T00:00:00Z',
-          end: '2027-01-01T00:00:00Z',
-        },
-        suspensionPeriod: {
-          start: '2026-06-01T00:00:00Z',
-          end: '2026-09-01T00:00:00Z',
-        },
-        statusReason: 'INVESTIGATION',
-        statusSubreason: 'FRAUD',
-        statusComment: 'Pending review',
+      const formData = {
+        validityPeriodEnd: '2027-06-01T00:00:00.000Z',
+        statusReason: 'OFFBOARDING',
+        statusSubreason: 'CONTRACT_END',
+        statusComment: 'End of contract',
       };
 
-      const result = toAccountStatusForm(accountStatus);
+      const result = toAccountDeactivationRecord(formData);
 
       expect(result).toEqual({
-        validityPeriodStart: dayjs('2026-01-01T00:00:00Z').format(
-          'YYYY-MM-DD HH:mm'
-        ),
-        validityPeriodEnd: dayjs('2027-01-01T00:00:00Z').format(
-          'YYYY-MM-DD HH:mm'
-        ),
-        suspensionPeriodStart: dayjs('2026-06-01T00:00:00Z').format(
-          'YYYY-MM-DD HH:mm'
-        ),
-        suspensionPeriodEnd: dayjs('2026-09-01T00:00:00Z').format(
-          'YYYY-MM-DD HH:mm'
-        ),
-        statusReason: 'INVESTIGATION',
-        statusSubreason: 'FRAUD',
-        statusComment: 'Pending review',
+        deactivationAt: formData.validityPeriodEnd,
+        reason: formData.statusReason,
+        subreason: formData.statusSubreason,
+        comment: formData.statusComment,
       });
     });
 
-    it('should keep ISO strings when displayedDateFields is empty', () => {
-      const { toAccountStatusForm } = useAccountMapper();
+    it('should coerce empty fields to empty string / null', () => {
+      const { toAccountDeactivationRecord } = useAccountMapper();
 
-      const accountStatus = {
-        validityPeriod: {
-          start: '2026-01-01T00:00:00Z',
-          end: '2027-01-01T00:00:00Z',
-        },
-        suspensionPeriod: {
-          start: '2026-06-01T00:00:00Z',
-          end: '2026-09-01T00:00:00Z',
-        },
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
-      };
-
-      const result = toAccountStatusForm(accountStatus, []);
+      const result = toAccountDeactivationRecord({});
 
       expect(result).toEqual({
-        validityPeriodStart: '2026-01-01T00:00:00Z',
-        validityPeriodEnd: '2027-01-01T00:00:00Z',
-        suspensionPeriodStart: '2026-06-01T00:00:00Z',
-        suspensionPeriodEnd: '2026-09-01T00:00:00Z',
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
+        deactivationAt: '',
+        reason: '',
+        subreason: '',
+        comment: null,
       });
     });
+  });
 
-    it('should only convert the fields listed in displayedDateFields', () => {
-      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
-      const { toAccountStatusForm } = useAccountMapper();
+  describe('Test function: toAccountReactivationRecord', () => {
+    it('should map the comment into the reactivation record', () => {
+      const { toAccountReactivationRecord } = useAccountMapper();
 
-      const accountStatus = {
-        validityPeriod: {
-          start: '2026-01-01T00:00:00Z',
-          end: '2027-01-01T00:00:00Z',
-        },
-        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
-      };
+      const result = toAccountReactivationRecord({
+        statusComment: 'Cleared after review',
+      });
 
-      const result = toAccountStatusForm(accountStatus, [
-        'validityPeriodStart',
-      ]);
-
-      expect(result.validityPeriodStart).toBe(
-        dayjs('2026-01-01T00:00:00Z').format('YYYY-MM-DD HH:mm')
-      );
-      expect(result.validityPeriodEnd).toBe('2027-01-01T00:00:00Z');
-      expect(result.suspensionPeriodStart).toBe('2026-06-01T00:00:00Z');
-      expect(result.suspensionPeriodEnd).toBeNull();
+      expect(result).toEqual({ comment: 'Cleared after review' });
     });
 
-    it('should set null for missing or null period values', () => {
-      const { toAccountStatusForm } = useAccountMapper();
+    it('should coerce a missing comment to an empty string', () => {
+      const { toAccountReactivationRecord } = useAccountMapper();
 
-      const accountStatus = {
-        validityPeriod: { start: null, end: null },
-        suspensionPeriod: { start: null, end: null },
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
-      };
+      expect(toAccountReactivationRecord({})).toEqual({ comment: '' });
+    });
+  });
 
-      const result = toAccountStatusForm(accountStatus);
+  describe('Test function: toAccountValidityRecord', () => {
+    it('should map the validity start into the validity record', () => {
+      const { toAccountValidityRecord } = useAccountMapper();
 
-      expect(result).toEqual({
-        validityPeriodStart: null,
-        validityPeriodEnd: null,
-        suspensionPeriodStart: null,
-        suspensionPeriodEnd: null,
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
+      const result = toAccountValidityRecord({
+        validityPeriodStart: '2026-08-01T00:00:00.000Z',
       });
+
+      expect(result).toEqual({ validityStart: '2026-08-01T00:00:00.000Z' });
+    });
+
+    it('should coerce a missing validity start to an empty string', () => {
+      const { toAccountValidityRecord } = useAccountMapper();
+
+      expect(toAccountValidityRecord({})).toEqual({ validityStart: '' });
     });
   });
 

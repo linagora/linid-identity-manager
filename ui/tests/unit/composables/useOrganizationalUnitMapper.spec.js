@@ -269,19 +269,16 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
       const dto = buildDto({
         isSuspended: true,
         suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-        statusReason: 'AUDIT',
-        statusSubreason: 'INTERNAL_REVIEW',
-        statusComment: 'Pending verification',
       });
       const result = toOrganizationalUnitStatus(dto);
 
       expect(result).toEqual({
         suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-        statusReason: 'AUDIT',
-        statusSubreason: 'INTERNAL_REVIEW',
-        statusComment: 'Pending verification',
         isSuspended: true,
       });
+      expect(result).not.toHaveProperty('statusReason');
+      expect(result).not.toHaveProperty('statusSubreason');
+      expect(result).not.toHaveProperty('statusComment');
     });
 
     it('should omit identity fields from the status projection', () => {
@@ -296,50 +293,12 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
     });
   });
 
-  describe('Test function: toOrganizationalUnitStatusForm', () => {
-    it('should project a suspended status into a localized form', () => {
-      const { toOrganizationalUnitStatusForm } = useOrganizationalUnitMapper();
-
-      const result = toOrganizationalUnitStatusForm({
-        suspensionPeriod: {
-          start: '2099-01-01T00:00:00Z',
-          end: '2099-12-31T00:00:00Z',
-        },
-        statusReason: 'Suspension Reason A',
-        statusSubreason: 'Suspension Sub-reason A.1',
-        statusComment: 'planned',
-        isSuspended: true,
-      });
-
-      expect(result).toEqual({
-        start: '2099/01/01',
-        end: '2099/12/31',
-        reason: 'Suspension Reason A',
-        subreason: 'Suspension Sub-reason A.1',
-        comment: 'planned',
-      });
-    });
-
-    it('should return empty dates and null reasons for a null status', () => {
-      const { toOrganizationalUnitStatusForm } = useOrganizationalUnitMapper();
-
-      const result = toOrganizationalUnitStatusForm(null);
-
-      expect(result).toEqual({
-        start: '',
-        end: '',
-        reason: null,
-        subreason: null,
-        comment: null,
-      });
-    });
-  });
-
-  describe('Test function: toOrganizationalUnitStatusRecord', () => {
+  describe('Test function: toOrganizationalUnitSuspensionRecord', () => {
     it('should convert localized dates to ISO and keep reason fields', () => {
-      const { toOrganizationalUnitStatusRecord } = useOrganizationalUnitMapper();
+      const { toOrganizationalUnitSuspensionRecord } =
+        useOrganizationalUnitMapper();
 
-      const result = toOrganizationalUnitStatusRecord({
+      const result = toOrganizationalUnitSuspensionRecord({
         start: '2099/01/01',
         end: '2099/12/31',
         reason: 'Suspension Reason A',
@@ -359,9 +318,10 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
     });
 
     it('should keep an already ISO start untouched and collapse empty values to null', () => {
-      const { toOrganizationalUnitStatusRecord } = useOrganizationalUnitMapper();
+      const { toOrganizationalUnitSuspensionRecord } =
+        useOrganizationalUnitMapper();
 
-      const result = toOrganizationalUnitStatusRecord({
+      const result = toOrganizationalUnitSuspensionRecord({
         start: '2099-01-01T00:00:00Z',
         end: '',
         reason: null,
@@ -374,9 +334,31 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
           start: '2099-01-01T00:00:00Z',
           end: null,
         },
-        reason: null,
-        subreason: null,
+        reason: '',
+        subreason: '',
         comment: null,
+      });
+    });
+  });
+
+  describe('Test function: toOrganizationalUnitReactivationRecord', () => {
+    it('should map the comment into the reactivation record', () => {
+      const { toOrganizationalUnitReactivationRecord } =
+        useOrganizationalUnitMapper();
+
+      const result = toOrganizationalUnitReactivationRecord({
+        comment: 'Merger completed',
+      });
+
+      expect(result).toEqual({ comment: 'Merger completed' });
+    });
+
+    it('should coerce a missing comment to an empty string', () => {
+      const { toOrganizationalUnitReactivationRecord } =
+        useOrganizationalUnitMapper();
+
+      expect(toOrganizationalUnitReactivationRecord({})).toEqual({
+        comment: '',
       });
     });
   });

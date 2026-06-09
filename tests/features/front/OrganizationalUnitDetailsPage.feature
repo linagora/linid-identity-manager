@@ -89,7 +89,7 @@ Feature: Test Organizational Unit details panel display
     And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "SuspendedOuNoEnd"
     And I expect the HTML element '[data-cy="status-badge_suspended"]' to be visible
     And I expect the HTML element '[data-cy="organizational-unit-suspended-banner"]' to be visible
-    And I expect the HTML element '[data-cy="organizational-unit-activation-actions"]' to be visible
+    And I expect the HTML element '[data-cy="organizational-unit-activation-actions"]' not exists
     And I expect the HTML element '[data-cy="organizational-unit-suspension-actions"]' not exists
 
     ## 107 Immediate reactivation from the banner should schedule the reactivation once confirmed

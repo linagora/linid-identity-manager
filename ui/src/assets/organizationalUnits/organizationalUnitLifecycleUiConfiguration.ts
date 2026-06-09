@@ -45,6 +45,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: organizationalUnitStatusReasons.reasons.map(
           (reason) => reason.value
@@ -56,6 +57,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: organizationalUnitStatusReasons.subreasons.map(
           (subreason) => subreason.value
@@ -66,33 +68,19 @@ export const organizationalUnitLifecycleUiConfiguration = {
       name: 'comment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'reactivation.immediate': [
     {
-      name: 'reason',
-      type: 'String',
-      input: 'List',
-      inputSettings: {
-        values: organizationalUnitStatusReasons.reasons.map(
-          (reason) => reason.value
-        ),
-      },
-    },
-    {
-      name: 'subreason',
-      type: 'String',
-      input: 'List',
-      inputSettings: {
-        values: organizationalUnitStatusReasons.subreasons.map(
-          (subreason) => subreason.value
-        ),
-      },
-    },
-    {
       name: 'comment',
       type: 'String',
       input: 'TextArea',
+      required: true,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'suspension.scheduled': [
@@ -101,6 +89,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'Date',
       required: true,
+      hasValidations: false,
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
         options: {
@@ -112,6 +101,8 @@ export const organizationalUnitLifecycleUiConfiguration = {
       name: 'end',
       type: 'String',
       input: 'Date',
+      required: false,
+      hasValidations: false,
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
         options: {
@@ -125,6 +116,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: organizationalUnitStatusReasons.reasons.map(
           (reason) => reason.value
@@ -136,6 +128,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: organizationalUnitStatusReasons.subreasons.map(
           (subreason) => subreason.value
@@ -146,6 +139,9 @@ export const organizationalUnitLifecycleUiConfiguration = {
       name: 'comment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'suspension.modify': [
@@ -153,6 +149,8 @@ export const organizationalUnitLifecycleUiConfiguration = {
       name: 'end',
       type: 'String',
       input: 'Date',
+      required: false,
+      hasValidations: false,
       inputSettings: {
         mask: '{{ t("application.dateFormat") }}',
         options: {
@@ -166,6 +164,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: organizationalUnitStatusReasons.reasons.map(
           (reason) => reason.value
@@ -177,6 +176,7 @@ export const organizationalUnitLifecycleUiConfiguration = {
       type: 'String',
       input: 'List',
       required: true,
+      hasValidations: false,
       inputSettings: {
         values: organizationalUnitStatusReasons.subreasons.map(
           (subreason) => subreason.value
@@ -187,6 +187,9 @@ export const organizationalUnitLifecycleUiConfiguration = {
       name: 'comment',
       type: 'String',
       input: 'TextArea',
+      required: false,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
 };

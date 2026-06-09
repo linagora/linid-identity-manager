@@ -27,10 +27,13 @@
 import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import type {
+  AccountDeactivationRecord,
   AccountDTO,
   AccountQueryFilterDTO,
+  AccountReactivationRecord,
   AccountRecord,
-  AccountStatusRecord,
+  AccountSuspensionRecord,
+  AccountValidityRecord,
 } from 'src/types/accounts';
 
 /**
@@ -75,16 +78,64 @@ export async function getAccounts(
 }
 
 /**
- * Updates the account status, for actions such as activation, suspension, or deactivation.
- * @param id - The unique identifier of the account to update.
- * @param accountStatus - The account status payload containing the updated status information.
- * @returns A promise resolving to the raw DTO of the updated account, reflecting its new status.
+ * Suspends an account, immediately or as a scheduled suspension depending on the suspension
+ * period start carried by the payload.
+ * @param id - The unique identifier of the account to suspend.
+ * @param payload - The suspension period and reason fields.
+ * @returns A promise resolving to the raw DTO of the updated account.
  */
-export function updateStatus(
+export function suspendAccount(
   id: string,
-  accountStatus: AccountStatusRecord
+  payload: AccountSuspensionRecord
 ): Promise<AccountDTO> {
   return api
-    .put<AccountDTO>(`/accounts/${id}/status`, accountStatus)
+    .put<AccountDTO>(`/accounts/${id}/status/suspend`, payload)
+    .then((response) => response.data);
+}
+
+/**
+ * Deactivates an account (sets its validity period end), immediately or as a scheduled
+ * deactivation depending on the deactivation timestamp carried by the payload.
+ * @param id - The unique identifier of the account to deactivate.
+ * @param payload - The deactivation timestamp and reason fields.
+ * @returns A promise resolving to the raw DTO of the updated account.
+ */
+export function deactivateAccount(
+  id: string,
+  payload: AccountDeactivationRecord
+): Promise<AccountDTO> {
+  return api
+    .put<AccountDTO>(`/accounts/${id}/status/deactivate`, payload)
+    .then((response) => response.data);
+}
+
+/**
+ * Reactivates an account (lifts its suspension).
+ * @param id - The unique identifier of the account to reactivate.
+ * @param payload - The mandatory justification comment.
+ * @returns A promise resolving to the raw DTO of the updated account.
+ */
+export function reactivateAccount(
+  id: string,
+  payload: AccountReactivationRecord
+): Promise<AccountDTO> {
+  return api
+    .put<AccountDTO>(`/accounts/${id}/status/reactivate`, payload)
+    .then((response) => response.data);
+}
+
+/**
+ * Schedules an account's validity period start (administrative action, distinct from the
+ * activation timestamp set when the user clicks the activation link).
+ * @param id - The unique identifier of the account.
+ * @param payload - The validity period start.
+ * @returns A promise resolving to the raw DTO of the updated account.
+ */
+export function setAccountValidity(
+  id: string,
+  payload: AccountValidityRecord
+): Promise<AccountDTO> {
+  return api
+    .put<AccountDTO>(`/accounts/${id}/status/schedule-activation`, payload)
     .then((response) => response.data);
 }

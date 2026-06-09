@@ -132,7 +132,7 @@ export default {
             },
           },
           statusComment: {
-            label: 'Comment',
+            label: 'Justification',
             hint: 'Add an optional comment.',
           },
         },
@@ -178,7 +178,7 @@ export default {
             },
           },
           statusComment: {
-            label: 'Comment',
+            label: 'Justification',
             hint: 'Add an optional comment.',
           },
         },
@@ -224,7 +224,7 @@ export default {
             },
           },
           statusComment: {
-            label: 'Comment',
+            label: 'Justification',
             hint: 'Add an optional comment.',
           },
         },
@@ -265,7 +265,7 @@ export default {
             },
           },
           statusComment: {
-            label: 'Comment',
+            label: 'Justification',
             hint: 'Add an optional comment.',
           },
         },
@@ -302,7 +302,7 @@ export default {
             },
           },
           statusComment: {
-            label: 'Comment',
+            label: 'Justification',
             hint: 'Add an optional comment.',
           },
         },
@@ -339,7 +339,7 @@ export default {
             },
           },
           statusComment: {
-            label: 'Comment',
+            label: 'Justification',
             hint: 'Add an optional comment.',
           },
         },
@@ -357,17 +357,12 @@ export default {
         content:
           'Are you sure you want to reactivate this account immediately?',
         fields: {
-          statusReason: {
-            label: 'Reason',
-            hint: 'Select a reactivation reason.',
-          },
-          statusSubreason: {
-            label: 'Sub-reason',
-            hint: 'Select a reactivation sub-reason.',
-          },
           statusComment: {
             label: 'Justification',
-            hint: 'Provide an optional justification for this reactivation.',
+            hint: 'Provide a mandatory justification for this reactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
           },
         },
         ButtonsCard: {
@@ -601,7 +596,7 @@ export default {
         },
       },
       comment: {
-        label: 'Comment',
+        label: 'Justification',
         hint: 'Add an optional comment.',
       },
     },
@@ -649,7 +644,7 @@ export default {
         },
       },
       comment: {
-        label: 'Comment',
+        label: 'Justification',
         hint: 'Add an optional comment.',
       },
     },
@@ -688,7 +683,7 @@ export default {
         },
       },
       comment: {
-        label: 'Comment',
+        label: 'Justification',
         hint: 'Add an optional comment.',
       },
     },
@@ -703,17 +698,12 @@ export default {
     content:
       'Are you sure you want to immediately reactivate this organizational unit?',
     fields: {
-      reason: {
-        label: 'Reason',
-        hint: 'Select a reactivation reason.',
-      },
-      subreason: {
-        label: 'Sub-reason',
-        hint: 'Select a reactivation sub-reason.',
-      },
       comment: {
-        label: 'Comment',
-        hint: 'Add an optional comment.',
+        label: 'Justification',
+        hint: 'Provide a mandatory comment for this reactivation.',
+        validation: {
+          required: 'This field is required.',
+        },
       },
     },
     ButtonsCard: {

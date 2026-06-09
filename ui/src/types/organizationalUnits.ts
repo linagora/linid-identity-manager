@@ -99,18 +99,6 @@ export interface OrganizationalUnitDTO {
    */
   suspensionPeriod: Period | null;
   /**
-   * High-level reason code explaining the current suspension status.
-   */
-  statusReason: string | null;
-  /**
-   * More detailed classification of the suspension status reason.
-   */
-  statusSubreason: string | null;
-  /**
-   * Free-text comment providing additional context about the suspension.
-   */
-  statusComment: string | null;
-  /**
    * Whether the organizational unit is currently suspended (server-computed
    * from `suspensionPeriod` against the current instant).
    */
@@ -183,18 +171,6 @@ export interface OrganizationalUnitStatus {
    */
   suspensionPeriod: Period | null;
   /**
-   * High-level reason code explaining the current suspension status.
-   */
-  statusReason: string | null;
-  /**
-   * More detailed classification of the suspension status reason.
-   */
-  statusSubreason: string | null;
-  /**
-   * Free-text comment providing additional context about the suspension.
-   */
-  statusComment: string | null;
-  /**
    * Whether the organizational unit is currently suspended.
    */
   isSuspended: boolean;
@@ -204,7 +180,7 @@ export interface OrganizationalUnitStatus {
  * Payload for `PUT /organizational-units/{id}/status`. The backend currently
  * requires `suspensionPeriod` to be non-null (a future-only range).
  */
-export interface OrganizationalUnitStatusRecord {
+export interface OrganizationalUnitSuspensionRecord {
   /**
    * Suspension period (start mandatory, end optional). Backend rejects a
    * `start` strictly in the past.
@@ -213,15 +189,25 @@ export interface OrganizationalUnitStatusRecord {
   /**
    * High-level reason code.
    */
-  reason?: string | null;
+  reason: string;
   /**
    * Detailed classification of the reason.
    */
-  subreason?: string | null;
+  subreason: string;
   /**
    * Free-text comment.
    */
   comment?: string | null;
+}
+
+/**
+ * Shape of the payload sent to the backend when reactivating an organizational unit.
+ */
+export interface OrganizationalUnitReactivationRecord {
+  /**
+   * Mandatory justification for the reactivation.
+   */
+  comment: string;
 }
 
 /**

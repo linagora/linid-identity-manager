@@ -120,7 +120,7 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
   });
 
   describe('Case: currently suspended', () => {
-    it('shows the badge, the suspended banner and the reactivation dropdown', () => {
+    it('shows the badge and the suspended banner without any action dropdown', () => {
       const ui = project(
         buildStatus({
           isSuspended: true,
@@ -132,7 +132,7 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
         showBadge: true,
         showSuspendedBanner: true,
         suspensionMenuItems: undefined,
-        activationMenuItems: [item('reactivation.immediate')],
+        activationMenuItems: undefined,
       });
     });
 

@@ -31,8 +31,9 @@ import type { AccountDTO, AccountQueryFilterDTO } from 'src/types/accounts';
 import type {
   OrganizationalUnitDTO,
   OrganizationalUnitFilterDTO,
+  OrganizationalUnitReactivationRecord,
   OrganizationalUnitRecord,
-  OrganizationalUnitStatusRecord,
+  OrganizationalUnitSuspensionRecord,
 } from 'src/types/organizationalUnits';
 
 /**
@@ -126,16 +127,38 @@ export async function getAccountsByOrganizationalUnitId(
 }
 
 /**
- * Updates the suspension status of an organizational unit.
+ * Suspends an organizational unit, immediately or as a scheduled suspension depending on the
+ * suspension period start carried by the payload.
  * @param id - The unique identifier of the organizational unit.
- * @param payload - The suspension period and optional reason fields.
+ * @param payload - The suspension period and reason fields.
  * @returns A promise resolving to the raw DTO of the updated OU.
  */
-export async function updateOrganizationalUnitStatus(
+export async function suspendOrganizationalUnit(
   id: string,
-  payload: OrganizationalUnitStatusRecord
+  payload: OrganizationalUnitSuspensionRecord
 ): Promise<OrganizationalUnitDTO> {
   return api
-    .put<OrganizationalUnitDTO>(`/organizational-units/${id}/status`, payload)
+    .put<OrganizationalUnitDTO>(
+      `/organizational-units/${id}/status/suspend`,
+      payload
+    )
+    .then((response) => response.data);
+}
+
+/**
+ * Reactivates an organizational unit (lifts its suspension).
+ * @param id - The unique identifier of the organizational unit.
+ * @param payload - The mandatory justification comment.
+ * @returns A promise resolving to the raw DTO of the updated OU.
+ */
+export async function reactivateOrganizationalUnit(
+  id: string,
+  payload: OrganizationalUnitReactivationRecord
+): Promise<OrganizationalUnitDTO> {
+  return api
+    .put<OrganizationalUnitDTO>(
+      `/organizational-units/${id}/status/reactivate`,
+      payload
+    )
     .then((response) => response.data);
 }

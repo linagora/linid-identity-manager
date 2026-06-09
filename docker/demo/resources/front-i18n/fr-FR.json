@@ -125,7 +125,7 @@
             }
           },
           "statusComment": {
-            "label": "Commentaire",
+            "label": "Justification",
             "hint": "Ajoutez un commentaire optionnel."
           }
         },
@@ -171,7 +171,7 @@
             }
           },
           "statusComment": {
-            "label": "Commentaire",
+            "label": "Justification",
             "hint": "Ajoutez un commentaire optionnel."
           }
         },
@@ -217,7 +217,7 @@
             }
           },
           "statusComment": {
-            "label": "Commentaire",
+            "label": "Justification",
             "hint": "Ajoutez un commentaire optionnel."
           }
         },
@@ -257,7 +257,7 @@
             }
           },
           "statusComment": {
-            "label": "Commentaire",
+            "label": "Justification",
             "hint": "Ajoutez un commentaire optionnel."
           }
         },
@@ -294,7 +294,7 @@
             }
           },
           "statusComment": {
-            "label": "Commentaire",
+            "label": "Justification",
             "hint": "Ajoutez un commentaire optionnel."
           }
         },
@@ -331,7 +331,7 @@
             }
           },
           "statusComment": {
-            "label": "Commentaire",
+            "label": "Justification",
             "hint": "Ajoutez un commentaire optionnel."
           }
         },
@@ -348,17 +348,12 @@
         "title": "Réactivation immédiate du compte",
         "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
         "fields": {
-          "statusReason": {
-            "label": "Motif",
-            "hint": "Sélectionnez un motif de réactivation."
-          },
-          "statusSubreason": {
-            "label": "Sous-motif",
-            "hint": "Sélectionnez un sous-motif de réactivation."
-          },
           "statusComment": {
             "label": "Justification",
-            "hint": "Fournissez une justification facultative pour cette réactivation."
+            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
           }
         },
         "ButtonsCard": {
@@ -596,7 +591,7 @@
         }
       },
       "comment": {
-        "label": "Commentaire",
+        "label": "Justification",
         "hint": "Ajoutez un commentaire facultatif."
       }
     }
@@ -643,7 +638,7 @@
         }
       },
       "comment": {
-        "label": "Commentaire",
+        "label": "Justification",
         "hint": "Ajoutez un commentaire facultatif."
       }
     }
@@ -681,7 +676,7 @@
         }
       },
       "comment": {
-        "label": "Commentaire",
+        "label": "Justification",
         "hint": "Ajoutez un commentaire facultatif."
       }
     }
@@ -695,17 +690,12 @@
       "confirmLoading": "Réactivation..."
     },
     "fields": {
-      "reason": {
-        "label": "Motif",
-        "hint": "Sélectionnez un motif de réactivation."
-      },
-      "subreason": {
-        "label": "Sous-motif",
-        "hint": "Sélectionnez un sous-motif de réactivation."
-      },
       "comment": {
-        "label": "Commentaire",
-        "hint": "Ajoutez un commentaire facultatif."
+        "label": "Justification",
+        "hint": "Fournissez un commentaire obligatoire pour cette réactivation.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
       }
     }
   }

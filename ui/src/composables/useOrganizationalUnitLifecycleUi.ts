@@ -107,8 +107,8 @@ export function useOrganizationalUnitLifecycleUi(
 
   /**
    * Projects an OU currently suspended (server-confirmed via `isSuspended`).
-   * Banner exposes its own clear / modify-end buttons; the dropdown only
-   * offers reactivation as a secondary entry point.
+   * Reactivation and suspension-end editing are exposed by the suspended banner
+   * itself, so no action dropdown is rendered in this state.
    * @param status - The OU status.
    * @returns The UI projection, or undefined when the case does not match.
    */
@@ -116,9 +116,7 @@ export function useOrganizationalUnitLifecycleUi(
     status: OrganizationalUnitStatus
   ): OrganizationalUnitLifecycleUi | undefined {
     if (status.isSuspended) {
-      return withActions({ showBadge: true, showSuspendedBanner: true }, [
-        'reactivation.immediate',
-      ]);
+      return withActions({ showBadge: true, showSuspendedBanner: true }, []);
     }
   }
 

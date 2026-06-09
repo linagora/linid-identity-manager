@@ -3,9 +3,10 @@ CREATE TABLE IF NOT EXISTS organizational_unit_status
     ous_id            UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     oun_id            UUID         NOT NULL UNIQUE REFERENCES organizational_units (oun_id) ON DELETE CASCADE,
     suspension_period TSTZRANGE,
-    status_reason     VARCHAR(250),
-    status_subreason  VARCHAR(250),
-    status_comment    TEXT,
+    suspension_reason     VARCHAR(250),
+    suspension_subreason  VARCHAR(250),
+    suspension_comment    TEXT,
+    reactivation_comment  TEXT,
     created_by        UUID         NOT NULL,
     updated_by        UUID         NOT NULL,
     insert_date       TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -50,14 +51,15 @@ CREATE TRIGGER tg_organizational_unit_status_init
     FOR EACH ROW
 EXECUTE FUNCTION f_init_organizational_unit_status();
 
-COMMENT ON TABLE organizational_unit_status IS 'Table storing the suspension status of an organizational unit: optional suspension time range, status reason / sub-reason / comment, along with audit information (created_by, updated_by, insert_date, update_date). Exactly one row exists per organizational unit.';
+COMMENT ON TABLE organizational_unit_status IS 'Table storing the suspension status of an organizational unit: optional suspension time range, suspension reason / sub-reason / comment and an optional reactivation comment, along with audit information (created_by, updated_by, insert_date, update_date). Exactly one row exists per organizational unit.';
 
 COMMENT ON COLUMN organizational_unit_status.ous_id IS 'Primary key. UUID automatically generated for each organizational unit status record.';
 COMMENT ON COLUMN organizational_unit_status.oun_id IS 'Foreign key referencing organizational_units(oun_id). Links this status record to its organizational unit. The UNIQUE constraint enforces a one-to-one relationship. ON DELETE CASCADE ensures the status is removed if the organizational unit is deleted.';
 COMMENT ON COLUMN organizational_unit_status.suspension_period IS 'Time range during which the organizational unit is suspended. Lower bound represents the suspension start timestamp, and upper bound represents the suspension end timestamp. NULL when no suspension is configured. An open-ended suspension (NULL upper bound) is treated as a permanent suspension. Stored as tstzrange (TIMESTAMPTZ range) in UTC.';
-COMMENT ON COLUMN organizational_unit_status.status_reason IS 'High-level reason explaining a suspension change.';
-COMMENT ON COLUMN organizational_unit_status.status_subreason IS 'More detailed classification of the status reason.';
-COMMENT ON COLUMN organizational_unit_status.status_comment IS 'Optional free-text comment providing additional context about the status change.';
+COMMENT ON COLUMN organizational_unit_status.suspension_reason IS 'High-level reason explaining a suspension.';
+COMMENT ON COLUMN organizational_unit_status.suspension_subreason IS 'More detailed classification of the suspension reason.';
+COMMENT ON COLUMN organizational_unit_status.suspension_comment IS 'Optional free-text comment providing additional context about the suspension.';
+COMMENT ON COLUMN organizational_unit_status.reactivation_comment IS 'Optional free-text comment providing additional context about a reactivation.';
 COMMENT ON COLUMN organizational_unit_status.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_unit_status.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_unit_status.insert_date IS 'Date and time when the organizational unit status record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';

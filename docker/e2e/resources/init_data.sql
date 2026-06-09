@@ -129,12 +129,15 @@ SELECT a.act_id,
        '00000000-0000-4000-8000-00000000a001',
        '00000000-0000-4000-8000-00000000a001'
 FROM accounts a
-WHERE a.external_id IN ('user1', 'user2', 'user3', 'user4', 'user5')
+WHERE a.external_id IN ('user1', 'user2', 'user3', 'user4', 'user5',
+                        'user6', 'user7', 'user8', 'user9', 'user10')
 ON CONFLICT (act_id) DO NOTHING;
 
 INSERT
 INTO account_status (act_id, validity_period, suspension_period, activation_at,
-                     status_reason, status_subreason, status_comment,
+                     suspension_reason, suspension_subreason, suspension_comment,
+                     deactivation_reason, deactivation_subreason, deactivation_comment,
+                     reactivation_comment,
                      created_by, updated_by)
 VALUES
     -- Case 1: INACTIVE, validity start in the future, never activated.
@@ -142,7 +145,9 @@ VALUES
      tstzrange(now() + interval '30 days', NULL, '[)'),
      NULL,
      NULL,
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 1',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 2: INACTIVE, validity already started but never activated.
@@ -150,7 +155,9 @@ VALUES
      tstzrange(now() - interval '30 days', NULL, '[)'),
      NULL,
      NULL,
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 2',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 3: ACTIVE, no end date, no suspension.
@@ -158,7 +165,9 @@ VALUES
      tstzrange(now() - interval '30 days', NULL, '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 3',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 4: ACTIVE, end > 15 days, no suspension.
@@ -166,7 +175,9 @@ VALUES
      tstzrange(now() - interval '30 days', now() + interval '30 days', '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 4',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 5: ACTIVE, end <= 15 days, no suspension.
@@ -174,7 +185,9 @@ VALUES
      tstzrange(now() - interval '30 days', now() + interval '10 days', '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 5',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 6: ACTIVE, no end date, future suspension planned.
@@ -183,6 +196,8 @@ VALUES
      tstzrange(now() + interval '10 days', now() + interval '20 days', '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'E2E case 6',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 7: ACTIVE, end > 15 days, future suspension planned.
@@ -190,7 +205,9 @@ VALUES
      tstzrange(now() - interval '30 days', now() + interval '30 days', '[)'),
      tstzrange(now() + interval '10 days', now() + interval '20 days', '[)'),
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 7',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 8: ACTIVE, end <= 15 days, future suspension planned.
@@ -198,7 +215,9 @@ VALUES
      tstzrange(now() - interval '30 days', now() + interval '10 days', '[)'),
      tstzrange(now() + interval '5 days', now() + interval '8 days', '[)'),
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 8',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 9: SUSPENDED, no validity end, no suspension end (permanent suspension).
@@ -207,6 +226,8 @@ VALUES
      tstzrange(now() - interval '5 days', NULL, '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'E2E case 9',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 10: SUSPENDED, no validity end, suspension with explicit end.
@@ -215,6 +236,8 @@ VALUES
      tstzrange(now() - interval '5 days', now() + interval '30 days', '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'E2E case 10',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 11: SUSPENDED, validity end > 15 days.
@@ -223,6 +246,8 @@ VALUES
      tstzrange(now() - interval '5 days', now() + interval '20 days', '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'E2E case 11',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- Case 12: SUSPENDED, validity end <= 15 days.
@@ -231,6 +256,8 @@ VALUES
      tstzrange(now() - interval '5 days', now() + interval '9 days', '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'E2E case 12',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;
@@ -289,7 +316,9 @@ ON CONFLICT (email) DO NOTHING;
 
 INSERT
 INTO account_status (act_id, validity_period, suspension_period, activation_at,
-                     status_reason, status_subreason, status_comment,
+                     suspension_reason, suspension_subreason, suspension_comment,
+                     deactivation_reason, deactivation_subreason, deactivation_comment,
+                     reactivation_comment,
                      created_by, updated_by)
 VALUES
     -- D1: INACTIVE, validity start in the future.
@@ -298,7 +327,9 @@ VALUES
      tstzrange(now() + interval '30 days', NULL, '[)'),
      NULL,
      NULL,
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D1: activation dialogs',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D2: ACTIVE, no end date, no suspension.
@@ -307,8 +338,9 @@ VALUES
      tstzrange(now() - interval '30 days', NULL, '[)'),
      NULL,
      now() - interval '30 days',
-     'Deactivation Reason A', 'Deactivation Sub-reason A.1',
-     'Dialog test D2: suspension/deactivation immediate dialogs',
+     NULL, NULL, NULL,
+     'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D2: suspension/deactivation immediate dialogs',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D3: ACTIVE, no end date, no suspension.
@@ -317,7 +349,9 @@ VALUES
      tstzrange(now() - interval '30 days', NULL, '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D3: deactivation.immediate dialog',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D4: SUSPENDED, no validity end, no suspension end.
@@ -327,6 +361,8 @@ VALUES
      tstzrange(now() - interval '5 days', NULL, '[)'),
      now() - interval '30 days',
      'Suspension Reason B', 'Suspension Sub-reason B.1', 'Dialog test D4: reactivation.immediate dialog',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D5: INACTIVE, validity start in the future.
@@ -335,7 +371,9 @@ VALUES
      tstzrange(now() + interval '30 days', NULL, '[)'),
      NULL,
      NULL,
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D5: activation.scheduled dialog',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D6: ACTIVE, no end date, no suspension.
@@ -344,7 +382,9 @@ VALUES
      tstzrange(now() - interval '30 days', NULL, '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D6: deactivation.scheduled dialog',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D7: ACTIVE, validity end in 7 days, no suspension.
@@ -353,7 +393,9 @@ VALUES
      tstzrange(now() - interval '30 days', now() + interval '7 days', '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D7: modify deactivation dialog',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D8: ACTIVE, no end date, no suspension.
@@ -362,7 +404,9 @@ VALUES
      tstzrange(now() - interval '30 days', NULL, '[)'),
      NULL,
      now() - interval '30 days',
+     NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'Dialog test D8: suspension.scheduled dialog',
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D9: SUSPENDED, suspension period with both start and end defined.
@@ -372,6 +416,8 @@ VALUES
      tstzrange(now() - interval '10 days', now() + interval '20 days', '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'Dialog test D9: modify suspension dialog',
+     NULL, NULL, NULL,
+     NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;
@@ -586,9 +632,9 @@ $$
 
         UPDATE organizational_unit_status
         SET suspension_period = tstzrange(now() - interval '5 days', NULL, '[)'),
-            status_reason      = 'OU Suspension Reason',
-            status_subreason   = 'OU Suspension Sub-reason',
-            status_comment     = 'Suspended OU without end date'
+            suspension_reason     = 'OU Suspension Reason',
+            suspension_subreason  = 'OU Suspension Sub-reason',
+            suspension_comment    = 'Suspended OU without end date'
         WHERE oun_id = '00000000-0000-4000-8000-0000000000e1';
 
         -- Suspended OU with an end date
@@ -603,9 +649,9 @@ $$
 
         UPDATE organizational_unit_status
         SET suspension_period = tstzrange(now() - interval '5 days', now() + interval '30 days', '[)'),
-            status_reason      = 'OU Suspension Reason',
-            status_subreason   = 'OU Suspension Sub-reason',
-            status_comment     = 'Suspended OU with end date'
+            suspension_reason     = 'OU Suspension Reason',
+            suspension_subreason  = 'OU Suspension Sub-reason',
+            suspension_comment    = 'Suspended OU with end date'
         WHERE oun_id = '00000000-0000-4000-8000-0000000000e3';
 
     END

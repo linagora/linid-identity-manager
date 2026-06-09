@@ -96,14 +96,13 @@ Feature: Test Organizational Unit details panel display
     When I click on '[data-cy="organizational-unit-suspended-banner_clear-suspension-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactiver l'unité organisationnelle"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_reason"]' to be visible
-    And I expect the HTML element '[data-cy="form-dialog_field-container_subreason"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_field-container_comment"]' to be visible
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     When I click on '[data-cy="organizational-unit-suspended-banner_clear-suspension-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    When I set the text "Réactivation e2e" in the HTML element '[data-cy="field_comment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "L'unité organisationnelle sera réactivée dans une heure."

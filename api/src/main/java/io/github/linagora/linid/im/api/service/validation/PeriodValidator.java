@@ -37,7 +37,7 @@ import org.springframework.stereotype.Component;
 /**
  * Reusable temporal-period validation rules. Centralizes generic checks that can apply to any
  * period (validity, suspension, etc.) so each domain validator (e.g.
- * {@link AccountStatusValidator}) can compose them rather than duplicating the logic.
+ * {@link AccountSuspensionValidator}) can compose them rather than duplicating the logic.
  */
 @Component
 public class PeriodValidator {
@@ -81,6 +81,64 @@ public class PeriodValidator {
         if (start.isAfter(end)) {
             Map<String, Object> params = new HashMap<>(initialContext);
             params.put("start", start.toString());
+            params.put("end", end.toString());
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of(errorKey, params)
+            );
+        }
+    }
+
+    /**
+     * Rejects a period start strictly before {@code now}. A {@code null} start (open-ended on the
+     * lower bound) is accepted. Idempotent updates are accepted: when the requested {@code start}
+     * equals {@code persistedStart}, the check is skipped so editing an ongoing period (e.g. only
+     * its end date) does not fail because its start now lies in the past.
+     *
+     * @param start          the requested period start (may be {@code null})
+     * @param persistedStart the currently persisted start, used to detect idempotent updates
+     * @param now            the current instant
+     * @param errorKey       the i18n error key to raise on violation
+     * @param initialContext extra entries to expose in the i18n message
+     * @throws ApiException with the given i18n key (HTTP 400) when start is strictly in the past
+     */
+    public void ensureStartNotInPast(final OffsetDateTime start,
+                                     final OffsetDateTime persistedStart,
+                                     final OffsetDateTime now,
+                                     final String errorKey,
+                                     final Map<String, Object> initialContext) {
+        if (start == null) {
+            return;
+        }
+        if (persistedStart != null && start.isEqual(persistedStart)) {
+            return;
+        }
+        if (start.isBefore(now)) {
+            Map<String, Object> params = new HashMap<>(initialContext);
+            params.put("start", start.toString());
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of(errorKey, params)
+            );
+        }
+    }
+
+    /**
+     * Rejects a period end strictly before {@code now}. A {@code null} end (open-ended on the upper
+     * bound) is accepted.
+     *
+     * @param end            the requested period end (may be {@code null})
+     * @param now            the current instant
+     * @param errorKey       the i18n error key to raise on violation
+     * @param initialContext extra entries to expose in the i18n message
+     * @throws ApiException with the given i18n key (HTTP 400) when end is strictly in the past
+     */
+    public void ensureEndNotInPast(final OffsetDateTime end,
+                                   final OffsetDateTime now,
+                                   final String errorKey,
+                                   final Map<String, Object> initialContext) {
+        if (end != null && end.isBefore(now)) {
+            Map<String, Object> params = new HashMap<>(initialContext);
             params.put("end", end.toString());
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),

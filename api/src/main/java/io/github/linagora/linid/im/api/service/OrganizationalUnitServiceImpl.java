@@ -26,11 +26,14 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRelationMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusMapper;
-import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
@@ -43,7 +46,8 @@ import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnit
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
-import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitStatusValidator;
+import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
+import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -54,6 +58,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -107,15 +112,25 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     private final OrganizationalUnitStatusRepository organizationalUnitStatusRepository;
 
     /**
-     * Mapper applying status updates on organizational unit status entities.
+     * Mapper applying organizational unit status mutations onto the persisted entity.
      */
     private final OrganizationalUnitStatusMapper organizationalUnitStatusMapper;
 
     /**
-     * Validator enforcing the business rules applied when updating organizational unit status
-     * fields.
+     * Shared mapper converting between API period records and persistence ranges, used to compute
+     * the reconstructed periods carried by the status-mutation business logic.
      */
-    private final OrganizationalUnitStatusValidator organizationalUnitStatusValidator;
+    private final CommonMapper commonMapper;
+
+    /**
+     * Validator enforcing the business rules of the organizational unit suspension flow.
+     */
+    private final OrganizationalUnitSuspensionValidator organizationalUnitSuspensionValidator;
+
+    /**
+     * Validator enforcing the business rules of the organizational unit reactivation flow.
+     */
+    private final OrganizationalUnitReactivationValidator organizationalUnitReactivationValidator;
 
     /**
      * Cached root organizational unit instance.
@@ -303,29 +318,77 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public OrganizationalUnitView updateStatus(final UserPrincipal userPrincipal,
-                                               final UUID id,
-                                               final OrganizationalUnitStatusRecord record) {
+    public OrganizationalUnitView suspend(final UserPrincipal userPrincipal,
+                                          final UUID id,
+                                          final OrganizationalUnitSuspensionRecord record) {
+        ensureOrganizationalUnitExists(id);
+        OrganizationalUnitStatus status = loadStatus(id);
+
+        organizationalUnitSuspensionValidator.validate(status, record, id);
+
+        organizationalUnitStatusMapper.applySuspension(status, record, userPrincipal.getId());
+        organizationalUnitStatusRepository.saveAndFlush(status);
+
+        return findViewById(userPrincipal, id);
+    }
+
+    @Override
+    public OrganizationalUnitView reactivate(final UserPrincipal userPrincipal,
+                                             final UUID id,
+                                             final OrganizationalUnitReactivationRecord record) {
+        ensureOrganizationalUnitExists(id);
+        OrganizationalUnitStatus status = loadStatus(id);
+
+        organizationalUnitReactivationValidator.validate(status, record, id);
+
+        // A scheduled (not-yet-started) suspension is cancelled outright, since ending it at now would
+        // produce an invalid range; an already-started one is simply ended now. Its reason fields are cleared.
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime suspensionStart = commonMapper.startOf(status.getSuspensionPeriod());
+        if (suspensionStart != null && suspensionStart.isAfter(now)) {
+            status.setSuspensionPeriod(null);
+        } else {
+            status.setSuspensionPeriod(commonMapper.toRange(new PeriodRecord(suspensionStart, now)));
+        }
+
+        status.setSuspensionReason(null);
+        status.setSuspensionSubreason(null);
+        status.setSuspensionComment(null);
+        organizationalUnitStatusMapper.applyReactivation(status, record, userPrincipal.getId());
+        organizationalUnitStatusRepository.saveAndFlush(status);
+
+        return findViewById(userPrincipal, id);
+    }
+
+    /**
+     * Ensures the organizational unit with the given identifier exists.
+     *
+     * @param id the organizational unit UUID
+     * @throws ApiException with key {@code error.organizational.unit.not_found} (HTTP 404) when absent
+     */
+    private void ensureOrganizationalUnitExists(final UUID id) {
         if (!organizationalUnitRepository.existsById(id)) {
             throw new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
             );
         }
+    }
 
-        OrganizationalUnitStatus status = organizationalUnitStatusRepository.findByOrganizationalUnitId(id)
+    /**
+     * Loads the persisted {@link OrganizationalUnitStatus} of an organizational unit, or throws a 404
+     * when absent.
+     *
+     * @param id the organizational unit UUID
+     * @return the persisted status
+     * @throws ApiException with key {@code error.organizational.unit.status.not_found} (HTTP 404)
+     */
+    private OrganizationalUnitStatus loadStatus(final UUID id) {
+        return organizationalUnitStatusRepository.findByOrganizationalUnitId(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.status.not_found",
                     Map.of("id", id.toString()))
             ));
-
-        organizationalUnitStatusValidator.validate(status, record, id);
-
-        OrganizationalUnitStatus updatedStatus =
-            organizationalUnitStatusMapper.toOrganizationalUnitStatus(status, record, userPrincipal);
-        organizationalUnitStatusRepository.saveAndFlush(updatedStatus);
-
-        return findViewById(userPrincipal, id);
     }
 }

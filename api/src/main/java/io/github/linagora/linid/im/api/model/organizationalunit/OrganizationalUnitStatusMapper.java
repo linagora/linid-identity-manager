@@ -27,52 +27,77 @@
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
+import java.util.UUID;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 /**
- * MapStruct mapper between {@link OrganizationalUnitStatus} entities and their API representations.
+ * Mapper applying organizational unit status mutations onto the persisted entity.
  *
- * <p>Uses {@link CommonMapper} to convert between persistence
- * {@link io.hypersistence.utils.hibernate.type.range.Range Range&lt;ZonedDateTime&gt;}
- * values and the API records / DTOs
- * ({@link io.github.linagora.linid.im.api.model.common.PeriodDTO},
- * {@link io.github.linagora.linid.im.api.model.common.PeriodRecord}).</p>
+ * <p>This mapper is a pure declarative transformation: it only copies fields between records and the
+ * entity. All business logic (period reconstruction, {@code now()} resolution, conditional clearing
+ * of suspension fields) lives in the service layer.</p>
+ *
+ * <p>Uses {@link CommonMapper} to convert the API period record into the persistence
+ * {@link io.hypersistence.utils.hibernate.type.range.Range Range&lt;ZonedDateTime&gt;}.</p>
  */
 @Mapper(componentModel = "spring", uses = CommonMapper.class)
 public interface OrganizationalUnitStatusMapper {
 
     /**
-     * Builds an updated {@link OrganizationalUnitStatus} from an existing entity, a request record
-     * and the calling principal.
+     * Applies a suspension request onto the persisted status: sets the suspension period and its
+     * reason / sub-reason / comment.
      *
-     * <p>The status row is created by a database trigger when the organizational unit is inserted,
-     * so this mapper only ever produces an updated copy. Identity and immutable audit fields
-     * ({@code id}, {@code organizationalUnitId}, {@code createdBy}, {@code insertDate}) are carried
-     * over from {@code entity}, and the optimistic-lock version field ({@code updateDate}, annotated
-     * {@code @Version}) is also copied so that Spring Data JPA's {@code isNew()} check returns
-     * {@code false} — ensuring {@code em.merge()} (UPDATE) is called rather than {@code em.persist()}
-     * (INSERT). The database trigger then refreshes {@code updateDate} after the {@code UPDATE} and
-     * Hibernate re-reads it via {@code @Generated}.</p>
+     * <p>Provisioned from {@code record}: {@code suspensionPeriod}, {@code suspensionReason},
+     * {@code suspensionSubreason}, {@code suspensionComment}.
+     * Provisioned from {@code updatedBy}: the audit field.
+     * All other fields are carried over unchanged from {@code status}.</p>
      *
-     * @param entity        the existing entity whose identity fields are preserved
-     * @param record        the request record providing the new field values
-     * @param userPrincipal the authenticated principal performing the update
-     * @return a new {@link OrganizationalUnitStatus} instance ready to be persisted
+     * @param status    the persisted status to update
+     * @param record    the suspension request
+     * @param updatedBy the identifier of the principal performing the update
      */
-    @Mapping(target = "id", source = "entity.id")
-    @Mapping(target = "organizationalUnitId", source = "entity.organizationalUnitId")
-    @Mapping(target = "createdBy", source = "entity.createdBy")
-    @Mapping(target = "insertDate", source = "entity.insertDate")
-    @Mapping(target = "updateDate", source = "entity.updateDate")
-    @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "insertDate", ignore = true)
+    @Mapping(target = "updateDate", ignore = true)
+    @Mapping(target = "organizationalUnitId", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "reactivationComment", ignore = true)
     @Mapping(target = "suspensionPeriod", source = "record.suspensionPeriod")
-    @Mapping(target = "statusReason", source = "record.reason")
-    @Mapping(target = "statusSubreason", source = "record.subreason")
-    @Mapping(target = "statusComment", source = "record.comment")
-    OrganizationalUnitStatus toOrganizationalUnitStatus(OrganizationalUnitStatus entity,
-                                                        OrganizationalUnitStatusRecord record,
-                                                        UserPrincipal userPrincipal);
+    @Mapping(target = "suspensionReason", source = "record.reason")
+    @Mapping(target = "suspensionSubreason", source = "record.subreason")
+    @Mapping(target = "suspensionComment", source = "record.comment")
+    @Mapping(target = "updatedBy", source = "updatedBy")
+    void applySuspension(@MappingTarget OrganizationalUnitStatus status,
+                         OrganizationalUnitSuspensionRecord record,
+                         UUID updatedBy);
+
+    /**
+     * Applies the reactivation comment and the audit field onto the persisted status.
+     *
+     * <p>Provisioned from {@code record}: {@code reactivationComment}.
+     * Provisioned from {@code updatedBy}: the audit field.
+     * The suspension period closing and the clearing of the suspension reason / sub-reason / comment
+     * are performed by the service. All other fields are carried over unchanged from {@code status}.</p>
+     *
+     * @param status    the persisted status to update
+     * @param record    the reactivation request
+     * @param updatedBy the identifier of the principal performing the update
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "insertDate", ignore = true)
+    @Mapping(target = "updateDate", ignore = true)
+    @Mapping(target = "organizationalUnitId", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "suspensionPeriod", ignore = true)
+    @Mapping(target = "suspensionReason", ignore = true)
+    @Mapping(target = "suspensionSubreason", ignore = true)
+    @Mapping(target = "suspensionComment", ignore = true)
+    @Mapping(target = "reactivationComment", source = "record.comment")
+    @Mapping(target = "updatedBy", source = "updatedBy")
+    void applyReactivation(@MappingTarget OrganizationalUnitStatus status,
+                           OrganizationalUnitReactivationRecord record,
+                           UUID updatedBy);
 }

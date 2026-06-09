@@ -28,28 +28,26 @@ package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * Request payload for the {@code PUT /organizational-units/{id}/status} endpoint.
- *
- * <p>This endpoint is the single entry point for managing an organizational unit's suspension. The
- * {@code suspensionPeriod} is mandatory and its bounds, when provided, must lie in the future.</p>
+ * Request payload for the {@code PUT /organizational-units/{id}/status/suspension} endpoint.
  *
  * @param suspensionPeriod time range during which the organizational unit is suspended
  * @param reason           high-level reason code explaining the suspension
  * @param subreason        detailed classification of the suspension reason
- * @param comment          free-text comment
+ * @param comment          free-text comment about the suspension
  */
-@Schema(description = "Request payload for updating organizational unit suspension status fields")
-public record OrganizationalUnitStatusRecord(
+@Schema(description = "Request payload for suspending an organizational unit")
+public record OrganizationalUnitSuspensionRecord(
     @NotNull @Schema(description = "Time range during which the organizational unit is suspended")
     PeriodRecord suspensionPeriod,
 
-    @Schema(description = "High-level reason code", example = "REORGANIZATION")
+    @NotBlank @Schema(description = "High-level reason code", example = "REORGANIZATION")
     String reason,
 
-    @Schema(description = "Detailed classification of the suspension reason", example = "MERGER")
+    @NotBlank @Schema(description = "Detailed classification of the suspension reason", example = "MERGER")
     String subreason,
 
     @Schema(description = "Free-text comment", example = "Suspended pending department merger")

@@ -104,22 +104,46 @@ public class OrganizationalUnitAccountViewDTO {
     private OffsetDateTime activationAt;
 
     /**
-     * High-level reason code explaining the current status.
+     * High-level reason code explaining the suspension.
      */
-    @Schema(description = "High-level reason code", example = "ONBOARDING")
-    private String statusReason;
+    @Schema(description = "High-level suspension reason code", example = "ONBOARDING")
+    private String suspensionReason;
 
     /**
-     * More detailed classification of the status reason.
+     * More detailed classification of the suspension reason.
      */
-    @Schema(description = "Detailed classification of the status reason", example = "FIRST_ACTIVATION")
-    private String statusSubreason;
+    @Schema(description = "Detailed classification of the suspension reason", example = "FIRST_ACTIVATION")
+    private String suspensionSubreason;
 
     /**
-     * Free-text comment providing additional context about the status change.
+     * Free-text comment providing additional context about the suspension.
      */
-    @Schema(description = "Free-text comment", example = "Manual activation after KYC approval")
-    private String statusComment;
+    @Schema(description = "Free-text suspension comment", example = "Suspended pending investigation")
+    private String suspensionComment;
+
+    /**
+     * High-level reason code explaining the deactivation.
+     */
+    @Schema(description = "High-level deactivation reason code", example = "OFFBOARDING")
+    private String deactivationReason;
+
+    /**
+     * More detailed classification of the deactivation reason.
+     */
+    @Schema(description = "Detailed classification of the deactivation reason", example = "CONTRACT_END")
+    private String deactivationSubreason;
+
+    /**
+     * Free-text comment providing additional context about the deactivation.
+     */
+    @Schema(description = "Free-text deactivation comment", example = "Deactivated after contract termination")
+    private String deactivationComment;
+
+    /**
+     * Free-text comment providing additional context about the reactivation.
+     */
+    @Schema(description = "Free-text reactivation comment", example = "Reactivated after KYC approval")
+    private String reactivationComment;
 
     /**
      * Computed account status (ACTIVE, SUSPENDED or INACTIVE).

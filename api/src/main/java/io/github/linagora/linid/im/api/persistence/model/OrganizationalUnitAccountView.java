@@ -150,29 +150,63 @@ public class OrganizationalUnitAccountView extends AbstractViewEntity {
     private OffsetDateTime activationAt;
 
     /**
-     * High-level reason code explaining the current status. {@code null} when not provided.
+     * High-level reason code explaining the suspension. {@code null} when not provided.
      */
-    @Column(name = "status_reason")
+    @Column(name = "suspension_reason")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Status reason code")
-    private String statusReason;
+    @QueryFilterField(type = String.class, description = "Suspension reason code")
+    private String suspensionReason;
 
     /**
-     * More detailed classification of the status reason. {@code null} when not provided.
+     * More detailed classification of the suspension reason. {@code null} when not provided.
      */
-    @Column(name = "status_subreason")
+    @Column(name = "suspension_subreason")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Status sub-reason code")
-    private String statusSubreason;
+    @QueryFilterField(type = String.class, description = "Suspension sub-reason code")
+    private String suspensionSubreason;
 
     /**
-     * Free-text comment providing additional context about the status change.
+     * Free-text comment providing additional context about the suspension.
      * {@code null} when not provided.
      */
-    @Column(name = "status_comment")
+    @Column(name = "suspension_comment")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text status comment")
-    private String statusComment;
+    @QueryFilterField(type = String.class, description = "Free-text suspension comment")
+    private String suspensionComment;
+
+    /**
+     * High-level reason code explaining the deactivation. {@code null} when not provided.
+     */
+    @Column(name = "deactivation_reason")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Deactivation reason code")
+    private String deactivationReason;
+
+    /**
+     * More detailed classification of the deactivation reason. {@code null} when not provided.
+     */
+    @Column(name = "deactivation_subreason")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Deactivation sub-reason code")
+    private String deactivationSubreason;
+
+    /**
+     * Free-text comment providing additional context about the deactivation.
+     * {@code null} when not provided.
+     */
+    @Column(name = "deactivation_comment")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Free-text deactivation comment")
+    private String deactivationComment;
+
+    /**
+     * Free-text comment providing additional context about the reactivation.
+     * {@code null} when not provided.
+     */
+    @Column(name = "reactivation_comment")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Free-text reactivation comment")
+    private String reactivationComment;
 
     /**
      * Computed account status: {@code ACTIVE}, {@code SUSPENDED} or {@code INACTIVE}.

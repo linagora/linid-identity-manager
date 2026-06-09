@@ -27,10 +27,15 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
+import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
-import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
+import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
+import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
@@ -41,10 +46,14 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepos
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
-import io.github.linagora.linid.im.api.service.validation.AccountStatusValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountReactivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountSuspensionValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountValidityValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -115,9 +124,15 @@ public class AccountServiceImpl implements AccountService {
     private final AccountMapper accountMapper;
 
     /**
-     * Mapper applying status updates on account status entities.
+     * Mapper creating the initial status entity for a newly created account.
      */
     private final AccountStatusMapper accountStatusMapper;
+
+    /**
+     * Shared mapper converting between API period records and persistence ranges, used to compute
+     * the reconstructed periods carried by the status-mutation business logic.
+     */
+    private final CommonMapper commonMapper;
 
     /**
      * Validator enforcing the business rules of the account activation flow.
@@ -125,9 +140,24 @@ public class AccountServiceImpl implements AccountService {
     private final AccountActivationValidator accountActivationValidator;
 
     /**
-     * Validator enforcing the business rules applied when updating account status fields.
+     * Validator enforcing the business rules of the account suspension flow.
      */
-    private final AccountStatusValidator accountStatusValidator;
+    private final AccountSuspensionValidator accountSuspensionValidator;
+
+    /**
+     * Validator enforcing the business rules of the account deactivation flow.
+     */
+    private final AccountDeactivationValidator accountDeactivationValidator;
+
+    /**
+     * Validator enforcing the business rules of the account reactivation flow.
+     */
+    private final AccountReactivationValidator accountReactivationValidator;
+
+    /**
+     * Validator enforcing the business rules of the account validity scheduling flow.
+     */
+    private final AccountValidityValidator accountValidityValidator;
 
     /**
      * Validator enforcing the business rules of the account creation flow.
@@ -188,22 +218,82 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountView updateStatus(final UserPrincipal userPrincipal,
-                                    final UUID accountId,
-                                    final AccountStatusRecord record) {
+    public AccountView suspend(final UserPrincipal userPrincipal,
+                               final UUID accountId,
+                               final AccountSuspensionRecord record) {
         ensureAccountExists(accountId);
+        AccountStatus status = loadStatus(accountId);
 
-        AccountStatus status = accountStatusRepository.findByAccountId(accountId)
-            .orElseThrow(() -> new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.account.status.not_found",
-                    Map.of("id", accountId.toString()))
-            ));
+        accountSuspensionValidator.validate(status, record, accountId);
 
-        accountStatusValidator.validate(status, record, accountId);
+        accountStatusMapper.applySuspension(status, record, userPrincipal.getId());
+        accountStatusRepository.saveAndFlush(status);
 
-        AccountStatus updatedStatus = accountStatusMapper.toAccountStatus(status, record, userPrincipal);
-        accountStatusRepository.saveAndFlush(updatedStatus);
+        return findById(userPrincipal, accountId);
+    }
+
+    @Override
+    public AccountView deactivate(final UserPrincipal userPrincipal,
+                                  final UUID accountId,
+                                  final AccountDeactivationRecord record) {
+        ensureAccountExists(accountId);
+        AccountStatus status = loadStatus(accountId);
+
+        accountDeactivationValidator.validate(status, record, accountId);
+
+        // The deactivation timestamp becomes the validity period end; the existing start is preserved.
+        OffsetDateTime validityStart = commonMapper.startOf(status.getValidityPeriod());
+        status.setValidityPeriod(
+            commonMapper.toRange(new PeriodRecord(validityStart, record.deactivationAt())));
+        accountStatusMapper.applyDeactivation(status, record, userPrincipal.getId());
+        accountStatusRepository.saveAndFlush(status);
+
+        return findById(userPrincipal, accountId);
+    }
+
+    @Override
+    public AccountView reactivate(final UserPrincipal userPrincipal,
+                                  final UUID accountId,
+                                  final AccountReactivationRecord record) {
+        ensureAccountExists(accountId);
+        AccountStatus status = loadStatus(accountId);
+
+        accountReactivationValidator.validate(status, record, accountId);
+
+        // A scheduled (not-yet-started) suspension is cancelled outright, since ending it at now would
+        // produce an invalid range; an already-started one is simply ended now. Its reason fields are cleared.
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime suspensionStart = commonMapper.startOf(status.getSuspensionPeriod());
+        if (suspensionStart != null && suspensionStart.isAfter(now)) {
+            status.setSuspensionPeriod(null);
+        } else {
+            status.setSuspensionPeriod(commonMapper.toRange(new PeriodRecord(suspensionStart, now)));
+        }
+
+        status.setSuspensionReason(null);
+        status.setSuspensionSubreason(null);
+        status.setSuspensionComment(null);
+        accountStatusMapper.applyReactivation(status, record, userPrincipal.getId());
+        accountStatusRepository.saveAndFlush(status);
+
+        return findById(userPrincipal, accountId);
+    }
+
+    @Override
+    public AccountView updateValidity(final UserPrincipal userPrincipal,
+                                      final UUID accountId,
+                                      final AccountValidityRecord record) {
+        ensureAccountExists(accountId);
+        AccountStatus status = loadStatus(accountId);
+
+        accountValidityValidator.validate(status, record, accountId);
+
+        // Only the validity period start is updated; the existing end is preserved.
+        OffsetDateTime validityEnd = commonMapper.endOf(status.getValidityPeriod());
+        status.setValidityPeriod(
+            commonMapper.toRange(new PeriodRecord(record.validityStart(), validityEnd)));
+        status.setUpdatedBy(userPrincipal.getId());
+        accountStatusRepository.saveAndFlush(status);
 
         return findById(userPrincipal, accountId);
     }
@@ -213,13 +303,7 @@ public class AccountServiceImpl implements AccountService {
                                         final UUID accountId,
                                         final AccountActivationRecord record) {
         ensureAccountExists(accountId);
-
-        AccountStatus status = accountStatusRepository.findByAccountId(accountId)
-            .orElseThrow(() -> new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.account.status.not_found",
-                    Map.of("id", accountId.toString()))
-            ));
+        AccountStatus status = loadStatus(accountId);
 
         accountActivationValidator.validate(status, record, accountId);
 
@@ -228,6 +312,22 @@ public class AccountServiceImpl implements AccountService {
         accountStatusRepository.saveAndFlush(status);
 
         return findById(userPrincipal, accountId);
+    }
+
+    /**
+     * Loads the persisted {@link AccountStatus} of an account, or throws a 404 when absent.
+     *
+     * @param accountId the account UUID
+     * @return the persisted status
+     * @throws ApiException with key {@code error.account.status.not_found} (HTTP 404) when no row exists
+     */
+    private AccountStatus loadStatus(final UUID accountId) {
+        return accountStatusRepository.findByAccountId(accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.status.not_found",
+                    Map.of("id", accountId.toString()))
+            ));
     }
 
     /**

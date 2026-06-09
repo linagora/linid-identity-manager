@@ -27,14 +27,16 @@
 import { flushPromises, shallowMount } from '@vue/test-utils';
 import {
   getOrganizationalUnitById,
-  updateOrganizationalUnitStatus,
+  reactivateOrganizationalUnit,
+  suspendOrganizationalUnit,
 } from 'src/services/OrganizationalUnitService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
 import OrganizationalUnitDetailsPage from '../../../src/pages/OrganizationalUnitDetailsPage.vue';
 
 const mockedGetById = vi.mocked(getOrganizationalUnitById);
-const mockedUpdateStatus = vi.mocked(updateOrganizationalUnitStatus);
+const mockedSuspend = vi.mocked(suspendOrganizationalUnit);
+const mockedReactivate = vi.mocked(reactivateOrganizationalUnit);
 const mockNotify = vi.fn();
 const mockUiEventNext = vi.fn();
 
@@ -65,7 +67,8 @@ vi.mock('axios', () => ({
 
 vi.mock('src/services/OrganizationalUnitService', () => ({
   getOrganizationalUnitById: vi.fn(),
-  updateOrganizationalUnitStatus: vi.fn(),
+  suspendOrganizationalUnit: vi.fn(),
+  reactivateOrganizationalUnit: vi.fn(),
 }));
 
 vi.mock('src/stores/useOrganizationalUnitStore', () => ({
@@ -81,9 +84,7 @@ vi.mock('pinia', () => ({
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: vi.fn((key) =>
-      key === 'application.dateFormat' ? 'YYYY/MM/DD' : key
-    ),
+    t: vi.fn((key) => (key === 'application.dateFormat' ? 'YYYY/MM/DD' : key)),
   }),
 }));
 
@@ -111,7 +112,8 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
     vi.clearAllMocks();
     mockSelectedOrganizationalUnitId.value = OU_ID;
     mockedGetById.mockResolvedValue(buildOuDto());
-    mockedUpdateStatus.mockResolvedValue(buildOuDto());
+    mockedSuspend.mockResolvedValue(buildOuDto());
+    mockedReactivate.mockResolvedValue(buildOuDto());
   });
 
   describe('Test function: loadOrganizationalUnit', () => {
@@ -330,7 +332,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
           comment: 'immediate',
         });
 
-        expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
+        expect(suspendOrganizationalUnit).toHaveBeenCalledWith(OU_ID, {
           suspensionPeriod: {
             start: fixedNowPlus1h,
             end: null,
@@ -361,22 +363,16 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       ]);
     });
 
-    it('should open the reactivation form dialog with reason, subreason and comment fields on reactivation.immediate', () => {
+    it('should open the reactivation form dialog with the comment field on reactivation.immediate', () => {
       wrapper.vm.onLifecycleActionClick({ key: 'reactivation.immediate' });
 
       const call = mockUiEventNext.mock.calls[0][0];
       expect(call.key).toBe('form');
       expect(call.data.i18nScope).toBe('OrganizationalUnitReactivateDialog');
-      expect(call.data.formFields.map((f) => f.name)).toEqual([
-        'reason',
-        'subreason',
-        'comment',
-      ]);
+      expect(call.data.formFields.map((f) => f.name)).toEqual(['comment']);
     });
 
-    it('should reactivate by setting the suspension end one hour ahead while keeping the start', async () => {
-      const fixedNow = new Date('2026-05-28T10:00:00.000Z');
-      const fixedNowPlus1h = '2026-05-28T11:00:00.000Z';
+    it('should reactivate by submitting only the comment', async () => {
       mockedGetById.mockReset();
       mockedGetById.mockResolvedValue(
         buildOuDto({
@@ -391,25 +387,13 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       await wrapper.vm.loadOrganizationalUnit(OU_ID);
       mockUiEventNext.mockClear();
 
-      vi.useFakeTimers();
-      vi.setSystemTime(fixedNow);
-      try {
-        wrapper.vm.onLifecycleActionClick({ key: 'reactivation.immediate' });
-        const { onSubmit } = mockUiEventNext.mock.calls[0][0].data;
-        await onSubmit({ comment: 'reactivating' });
+      wrapper.vm.onLifecycleActionClick({ key: 'reactivation.immediate' });
+      const { onSubmit } = mockUiEventNext.mock.calls[0][0].data;
+      await onSubmit({ comment: 'reactivating' });
 
-        expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
-          suspensionPeriod: {
-            start: '2026-05-23T00:00:00Z',
-            end: fixedNowPlus1h,
-          },
-          reason: null,
-          subreason: null,
-          comment: 'reactivating',
-        });
-      } finally {
-        vi.useRealTimers();
-      }
+      expect(reactivateOrganizationalUnit).toHaveBeenCalledWith(OU_ID, {
+        comment: 'reactivating',
+      });
     });
 
     it('should ignore unknown action keys', () => {
@@ -420,7 +404,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
   });
 
   describe('Test function: onModifySuspensionEnd', () => {
-    it('should open the edit-suspension-end form dialog pre-filled with the current suspension', async () => {
+    it('should open the edit-suspension-end form dialog', async () => {
       mockedGetById.mockReset();
       mockedGetById.mockResolvedValue(
         buildOuDto({
@@ -429,9 +413,6 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
             start: '2026-01-01T00:00:00Z',
             end: '2026-12-31T00:00:00Z',
           },
-          statusReason: 'Suspension Reason A',
-          statusSubreason: 'Suspension Sub-reason A.1',
-          statusComment: 'pre-filled',
         })
       );
       wrapper = shallowMount(OrganizationalUnitDetailsPage);
@@ -445,13 +426,25 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       expect(call.data.i18nScope).toBe(
         'OrganizationalUnitEditSuspensionEndDialog'
       );
-      expect(call.data.initialFormData).toEqual({
-        start: '2026/01/01',
-        end: '2026/12/31',
-        reason: 'Suspension Reason A',
-        subreason: 'Suspension Sub-reason A.1',
-        comment: 'pre-filled',
-      });
+      expect(call.data.formFields).toBeDefined();
+      expect(call.data.onSubmit).toBeInstanceOf(Function);
+    });
+
+    it('should not open the dialog when there is no current suspension start', async () => {
+      mockedGetById.mockReset();
+      mockedGetById.mockResolvedValue(
+        buildOuDto({
+          isSuspended: false,
+          suspensionPeriod: { start: null, end: null },
+        })
+      );
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      await wrapper.vm.loadOrganizationalUnit(OU_ID);
+      mockUiEventNext.mockClear();
+
+      wrapper.vm.onModifySuspensionEnd();
+
+      expect(mockUiEventNext).not.toHaveBeenCalled();
     });
 
     it('should convert the localized end date to an ISO string before submitting', async () => {
@@ -473,13 +466,13 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       const { onSubmit } = mockUiEventNext.mock.calls[0][0].data;
       await onSubmit({ end: '2027/06/30' });
 
-      expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
+      expect(suspendOrganizationalUnit).toHaveBeenCalledWith(OU_ID, {
         suspensionPeriod: {
           start: '2026-01-01T00:00:00Z',
           end: '2027-06-30T00:00:00.000Z',
         },
-        reason: null,
-        subreason: null,
+        reason: '',
+        subreason: '',
         comment: null,
       });
     });
@@ -501,7 +494,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
         comment: 'scheduled',
       });
 
-      expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
+      expect(suspendOrganizationalUnit).toHaveBeenCalledWith(OU_ID, {
         suspensionPeriod: {
           start: '2026-07-01T00:00:00.000Z',
           end: '2026-08-15T00:00:00.000Z',
@@ -527,7 +520,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
         comment: null,
       });
 
-      expect(updateOrganizationalUnitStatus).toHaveBeenCalledWith(OU_ID, {
+      expect(suspendOrganizationalUnit).toHaveBeenCalledWith(OU_ID, {
         suspensionPeriod: {
           start: '2026-07-01T00:00:00.000Z',
           end: null,
@@ -535,35 +528,6 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
         reason: 'INVESTIGATION',
         subreason: 'FRAUD',
         comment: null,
-      });
-    });
-
-    it('should pre-fill the form with the already planned suspension', async () => {
-      mockedGetById.mockReset();
-      mockedGetById.mockResolvedValue(
-        buildOuDto({
-          suspensionPeriod: {
-            start: '2099-01-01T00:00:00Z',
-            end: '2099-12-31T00:00:00Z',
-          },
-          statusReason: 'Suspension Reason A',
-          statusSubreason: 'Suspension Sub-reason A.1',
-          statusComment: 'planned',
-        })
-      );
-      wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await wrapper.vm.loadOrganizationalUnit();
-      mockUiEventNext.mockClear();
-
-      wrapper.vm.openScheduleSuspensionDialog();
-
-      const { initialFormData } = mockUiEventNext.mock.calls[0][0].data;
-      expect(initialFormData).toEqual({
-        start: '2099/01/01',
-        end: '2099/12/31',
-        reason: 'Suspension Reason A',
-        subreason: 'Suspension Sub-reason A.1',
-        comment: 'planned',
       });
     });
   });

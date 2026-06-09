@@ -25,12 +25,21 @@
  */
 
 import { flushPromises, shallowMount } from '@vue/test-utils';
-import { getAccountById, updateStatus } from 'src/services/AccountService';
+import {
+  deactivateAccount,
+  getAccountById,
+  reactivateAccount,
+  setAccountValidity,
+  suspendAccount,
+} from 'src/services/AccountService';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountDetailsPage from '../../../src/pages/AccountDetailsPage.vue';
 
 const mockedGetAccountById = vi.mocked(getAccountById);
-const mockedUpdateStatus = vi.mocked(updateStatus);
+const mockedSuspendAccount = vi.mocked(suspendAccount);
+const mockedDeactivateAccount = vi.mocked(deactivateAccount);
+const mockedReactivateAccount = vi.mocked(reactivateAccount);
+const mockedSetAccountValidity = vi.mocked(setAccountValidity);
 
 const { mockNotify, mockUiEventSubjectNext, mockGlobalT, mockScopedT } =
   vi.hoisted(() => ({
@@ -71,7 +80,10 @@ vi.mock('axios', () => ({
 
 vi.mock('src/services/AccountService', () => ({
   getAccountById: vi.fn(),
-  updateStatus: vi.fn(),
+  suspendAccount: vi.fn(),
+  deactivateAccount: vi.fn(),
+  reactivateAccount: vi.fn(),
+  setAccountValidity: vi.fn(),
 }));
 
 vi.mock('src/assets/accounts/accountLifecycleUiConfiguration', () => ({
@@ -362,16 +374,11 @@ describe('Test component: AccountDetailsPage', () => {
         statusComment: null,
         daysBeforeDeactivation: null,
       };
-      mockedUpdateStatus.mockResolvedValueOnce(updatedDto);
+      const statusUpdate = vi.fn().mockResolvedValueOnce(updatedDto);
 
-      await wrapper.vm.updateAccountStatus({
-        suspensionPeriodStart: '2026-05-01T00:00:00Z',
-      });
+      await wrapper.vm.updateAccountStatus(statusUpdate);
 
-      expect(updateStatus).toHaveBeenCalledWith(
-        'test-account-id',
-        expect.any(Object)
-      );
+      expect(statusUpdate).toHaveBeenCalledOnce();
       expect(wrapper.vm.account).toMatchObject({ firstname: 'Jane' });
       expect(wrapper.vm.accountStatus).toMatchObject({ status: 'SUSPENDED' });
       expect(mockNotify).toHaveBeenCalledWith({
@@ -382,13 +389,14 @@ describe('Test component: AccountDetailsPage', () => {
 
     it('should set isLoading to true during the update and false after', async () => {
       let resolveUpdate;
-      mockedUpdateStatus.mockReturnValueOnce(
-        new Promise((resolve) => {
-          resolveUpdate = resolve;
-        })
+      const statusUpdate = vi.fn(
+        () =>
+          new Promise((resolve) => {
+            resolveUpdate = resolve;
+          })
       );
 
-      const updatePromise = wrapper.vm.updateAccountStatus({});
+      const updatePromise = wrapper.vm.updateAccountStatus(statusUpdate);
       expect(wrapper.vm.isLoading).toBe(true);
 
       resolveUpdate({
@@ -419,11 +427,11 @@ describe('Test component: AccountDetailsPage', () => {
         isAxiosError: true,
         response: { data: { error: 'Conflict detected' } },
       };
-      mockedUpdateStatus.mockRejectedValueOnce(axiosError);
+      const statusUpdate = vi.fn().mockRejectedValueOnce(axiosError);
 
-      await expect(wrapper.vm.updateAccountStatus({})).rejects.toEqual(
-        axiosError
-      );
+      await expect(
+        wrapper.vm.updateAccountStatus(statusUpdate)
+      ).rejects.toEqual(axiosError);
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
@@ -436,11 +444,11 @@ describe('Test component: AccountDetailsPage', () => {
         isAxiosError: true,
         response: { data: {} },
       };
-      mockedUpdateStatus.mockRejectedValueOnce(axiosError);
+      const statusUpdate = vi.fn().mockRejectedValueOnce(axiosError);
 
-      await expect(wrapper.vm.updateAccountStatus({})).rejects.toEqual(
-        axiosError
-      );
+      await expect(
+        wrapper.vm.updateAccountStatus(statusUpdate)
+      ).rejects.toEqual(axiosError);
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
@@ -450,11 +458,11 @@ describe('Test component: AccountDetailsPage', () => {
 
     it('should notify with errors.status and rethrow on non-axios error', async () => {
       const genericError = new Error('network failure');
-      mockedUpdateStatus.mockRejectedValueOnce(genericError);
+      const statusUpdate = vi.fn().mockRejectedValueOnce(genericError);
 
-      await expect(wrapper.vm.updateAccountStatus({})).rejects.toEqual(
-        genericError
-      );
+      await expect(
+        wrapper.vm.updateAccountStatus(statusUpdate)
+      ).rejects.toEqual(genericError);
 
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'negative',
@@ -489,7 +497,10 @@ describe('Test component: AccountDetailsPage', () => {
     beforeEach(async () => {
       vi.useFakeTimers();
       vi.setSystemTime(FIXED_NOW);
-      mockedUpdateStatus.mockResolvedValue(resolvedDto);
+      mockedSuspendAccount.mockResolvedValue(resolvedDto);
+      mockedDeactivateAccount.mockResolvedValue(resolvedDto);
+      mockedReactivateAccount.mockResolvedValue(resolvedDto);
+      mockedSetAccountValidity.mockResolvedValue(resolvedDto);
       wrapper = shallowMount(AccountDetailsPage);
       await wrapper.vm.loadAccount();
       mockUiEventSubjectNext.mockClear();
@@ -521,14 +532,9 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onConfirm();
 
-        expect(updateStatus).toHaveBeenCalledWith(
-          'test-account-id',
-          expect.objectContaining({
-            validityPeriod: expect.objectContaining({
-              start: FIXED_NOW_PLUS_1H,
-            }),
-          })
-        );
+        expect(setAccountValidity).toHaveBeenCalledWith('test-account-id', {
+          validityStart: FIXED_NOW_PLUS_1H,
+        });
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'positive',
           message: 'immediateActivationSuccess',
@@ -556,13 +562,13 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ statusReason: 'INVESTIGATION' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
+        expect(suspendAccount).toHaveBeenCalledWith(
           'test-account-id',
           expect.objectContaining({
             suspensionPeriod: expect.objectContaining({
               start: FIXED_NOW_PLUS_1H,
             }),
-            statusReason: 'INVESTIGATION',
+            reason: 'INVESTIGATION',
           })
         );
         expect(mockNotify).toHaveBeenCalledWith({
@@ -592,11 +598,11 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ statusReason: 'INVESTIGATION' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
+        expect(deactivateAccount).toHaveBeenCalledWith(
           'test-account-id',
           expect.objectContaining({
-            validityPeriod: expect.objectContaining({ end: FIXED_NOW_PLUS_1H }),
-            statusReason: 'INVESTIGATION',
+            deactivationAt: FIXED_NOW_PLUS_1H,
+            reason: 'INVESTIGATION',
           })
         );
         expect(mockNotify).toHaveBeenCalledWith({
@@ -620,25 +626,15 @@ describe('Test component: AccountDetailsPage', () => {
         );
       });
 
-      it('should call updateAccountStatus with future suspensionPeriodEnd and the submitted reason fields on submit', async () => {
+      it('should call reactivateAccount with the submitted comment on submit', async () => {
         wrapper.vm.onLifecycleAction('reactivation.immediate');
         const { onSubmit } = mockUiEventSubjectNext.mock.calls[0][0].data;
 
-        await onSubmit({
-          statusReason: 'INVESTIGATION',
-          statusSubreason: 'FRAUD',
-        });
+        await onSubmit({ statusComment: 'Investigation closed' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
-          'test-account-id',
-          expect.objectContaining({
-            suspensionPeriod: expect.objectContaining({
-              end: FIXED_NOW_PLUS_1H,
-            }),
-            statusReason: 'INVESTIGATION',
-            statusSubreason: 'FRAUD',
-          })
-        );
+        expect(reactivateAccount).toHaveBeenCalledWith('test-account-id', {
+          comment: 'Investigation closed',
+        });
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'positive',
           message: 'immediateReactivationSuccess',
@@ -666,14 +662,9 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ validityPeriodStart: '2026-07-01T00:00:00.000Z' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
-          'test-account-id',
-          expect.objectContaining({
-            validityPeriod: expect.objectContaining({
-              start: '2026-07-01T00:00:00.000Z',
-            }),
-          })
-        );
+        expect(setAccountValidity).toHaveBeenCalledWith('test-account-id', {
+          validityStart: '2026-07-01T00:00:00.000Z',
+        });
         expect(mockNotify).toHaveBeenCalledWith({
           type: 'positive',
           message: 'scheduledActivationSuccess',
@@ -716,12 +707,10 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ validityPeriodEnd: '2026-08-01T00:00:00.000Z' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
+        expect(deactivateAccount).toHaveBeenCalledWith(
           'test-account-id',
           expect.objectContaining({
-            validityPeriod: expect.objectContaining({
-              end: '2026-08-01T00:00:00.000Z',
-            }),
+            deactivationAt: '2026-08-01T00:00:00.000Z',
           })
         );
         expect(mockNotify).toHaveBeenCalledWith({
@@ -766,12 +755,10 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ validityPeriodEnd: '2026-08-01T00:00:00.000Z' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
+        expect(deactivateAccount).toHaveBeenCalledWith(
           'test-account-id',
           expect.objectContaining({
-            validityPeriod: expect.objectContaining({
-              end: '2026-08-01T00:00:00.000Z',
-            }),
+            deactivationAt: '2026-08-01T00:00:00.000Z',
           })
         );
         expect(mockNotify).toHaveBeenCalledWith({
@@ -816,7 +803,7 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ suspensionPeriodStart: '2026-07-15T00:00:00.000Z' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
+        expect(suspendAccount).toHaveBeenCalledWith(
           'test-account-id',
           expect.objectContaining({
             suspensionPeriod: expect.objectContaining({
@@ -866,7 +853,7 @@ describe('Test component: AccountDetailsPage', () => {
 
         await onSubmit({ suspensionPeriodStart: '2026-07-15T00:00:00.000Z' });
 
-        expect(updateStatus).toHaveBeenCalledWith(
+        expect(suspendAccount).toHaveBeenCalledWith(
           'test-account-id',
           expect.objectContaining({
             suspensionPeriod: expect.objectContaining({

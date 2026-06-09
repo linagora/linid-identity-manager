@@ -27,10 +27,14 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
+import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
-import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
-import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
+import io.github.linagora.linid.im.api.model.account.AccountStatusMapperImpl;
+import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
+import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
@@ -42,7 +46,10 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepos
 import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
-import io.github.linagora.linid.im.api.service.validation.AccountStatusValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountReactivationValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountSuspensionValidator;
+import io.github.linagora.linid.im.api.service.validation.AccountValidityValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import org.springframework.http.HttpStatus;
@@ -52,6 +59,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.ArgumentMatchers;
 import org.springframework.data.domain.Page;
@@ -60,6 +68,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -88,12 +97,20 @@ class AccountServiceImplTest {
     private AccountStatusRepository accountStatusRepository;
     @Mock
     private AccountMapper accountMapper;
-    @Mock
-    private AccountStatusMapper accountStatusMapper;
+    @Spy
+    private AccountStatusMapperImpl accountStatusMapper = new AccountStatusMapperImpl();
+    @Spy
+    private CommonMapper commonMapper = new CommonMapper();
     @Mock
     private AccountActivationValidator accountActivationValidator;
     @Mock
-    private AccountStatusValidator accountStatusValidator;
+    private AccountSuspensionValidator accountSuspensionValidator;
+    @Mock
+    private AccountDeactivationValidator accountDeactivationValidator;
+    @Mock
+    private AccountReactivationValidator accountReactivationValidator;
+    @Mock
+    private AccountValidityValidator accountValidityValidator;
     @Mock
     private AccountCreationValidator accountCreationValidator;
     @InjectMocks
@@ -101,7 +118,10 @@ class AccountServiceImplTest {
     private UserPrincipal userPrincipal;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws NoSuchFieldException, IllegalAccessException {
+        Field generatedCommonMapper = AccountStatusMapperImpl.class.getDeclaredField("commonMapper");
+        generatedCommonMapper.setAccessible(true);
+        generatedCommonMapper.set(accountStatusMapper, commonMapper);
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(ADMIN_ID);
         userPrincipal.setEmail("admin@example.com");
@@ -337,107 +357,344 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("updateStatus should throw 404 when account status row does not exist")
-    void testUpdateStatus_shouldThrow404WhenStatusNotFound() {
+    @DisplayName("suspend should throw 404 when account not found")
+    void testSuspend_shouldThrow404WhenAccountNotFound() {
         UUID id = UUID.randomUUID();
-        var record = new AccountStatusRecord(null, null, null, "REASON", null, null);
+        var record = new AccountSuspensionRecord(
+            new PeriodRecord(START, null), "REASON", "SUBREASON", "comment");
+
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.suspend(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.not_found", ex.getError().key());
+        verify(accountSuspensionValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("suspend should throw 404 when account status row does not exist")
+    void testSuspend_shouldThrow404WhenStatusNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountSuspensionRecord(
+            new PeriodRecord(START, null), "REASON", "SUBREASON", "comment");
 
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
 
-        ApiException exception = assertThrows(ApiException.class,
-            () -> accountService.updateStatus(userPrincipal, id, record));
-
-        assertEquals(404, exception.getStatusCode());
-        assertEquals("error.account.status.not_found", exception.getError().key());
-        verify(accountStatusMapper, never()).toAccountStatus(
-            any(AccountStatus.class), any(), any(UserPrincipal.class));
-        verify(accountStatusRepository, never()).saveAndFlush(any());
-    }
-
-    @Test
-    @DisplayName("updateStatus should pass the mapper output to saveAndFlush and return the refreshed view")
-    void testUpdateStatus_shouldPersistMapperOutputAndReturnView() {
-        UUID id = UUID.randomUUID();
-        var view = new AccountView();
-        var existing = new AccountStatus();
-        var record = new AccountStatusRecord(null, null, null, null, null, null);
-        var mappedStatus = new AccountStatus();
-
-        when(accountRepository.existsById(id)).thenReturn(true);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
-        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
-        when(accountStatusMapper.toAccountStatus(existing, record, userPrincipal)).thenReturn(mappedStatus);
-        when(accountStatusRepository.saveAndFlush(mappedStatus)).thenReturn(mappedStatus);
-
-        AccountView result = accountService.updateStatus(userPrincipal, id, record);
-
-        assertSame(view, result);
-        verify(accountStatusMapper).toAccountStatus(existing, record, userPrincipal);
-        verify(accountStatusRepository).saveAndFlush(mappedStatus);
-    }
-
-    @Test
-    @DisplayName("updateStatus should throw 404 when account not found")
-    void testUpdateStatus_shouldThrow404WhenAccountNotFound() {
-        UUID id = UUID.randomUUID();
-        when(accountRepository.existsById(id)).thenReturn(false);
-
         ApiException ex = assertThrows(ApiException.class,
-            () -> accountService.updateStatus(userPrincipal, id,
-                new AccountStatusRecord(null, null, null, null, null, null)));
+            () -> accountService.suspend(userPrincipal, id, record));
 
         assertEquals(404, ex.getStatusCode());
-        assertEquals("error.account.not_found", ex.getError().key());
+        assertEquals("error.account.status.not_found", ex.getError().key());
+        verify(accountSuspensionValidator, never()).validate(any(), any(), any());
         verify(accountStatusRepository, never()).saveAndFlush(any());
     }
 
     @Test
-    @DisplayName("updateStatus should propagate the exception thrown by the status validator")
-    void testUpdateStatus_shouldPropagateValidatorFailure() {
+    @DisplayName("suspend should propagate the exception thrown by the suspension validator")
+    void testSuspend_shouldPropagateValidatorFailure() {
         UUID id = UUID.randomUUID();
         var existing = new AccountStatus();
-        var record = new AccountStatusRecord(null, null, null, null, null, null);
+        var record = new AccountSuspensionRecord(
+            new PeriodRecord(START, null), "REASON", "SUBREASON", "comment");
 
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
-            I18nMessage.of("error.account.status.validity_end_in_past",
-                Map.of("id", id.toString(), "end", "x"))))
-            .when(accountStatusValidator).validate(eq(existing), eq(record), eq(id));
+            I18nMessage.of("error.account.status.suspension_start_in_past",
+                Map.of("id", id.toString()))))
+            .when(accountSuspensionValidator).validate(eq(existing), eq(record), eq(id));
 
         ApiException ex = assertThrows(ApiException.class,
-            () -> accountService.updateStatus(userPrincipal, id, record));
+            () -> accountService.suspend(userPrincipal, id, record));
 
         assertEquals(400, ex.getStatusCode());
-        assertEquals("error.account.status.validity_end_in_past", ex.getError().key());
-        verify(accountStatusMapper, never()).toAccountStatus(
-            any(AccountStatus.class), any(), any(UserPrincipal.class));
+        assertEquals("error.account.status.suspension_start_in_past", ex.getError().key());
         verify(accountStatusRepository, never()).saveAndFlush(any());
     }
 
     @Test
-    @DisplayName("updateStatus should invoke the validator before mapping and saving")
-    void testUpdateStatus_shouldInvokeValidatorBeforeMapping() {
+    @DisplayName("suspend should apply suspension fields, save and return the refreshed view")
+    void testSuspend_shouldApplyFieldsSaveAndReturnView() {
         UUID id = UUID.randomUUID();
         var view = new AccountView();
         view.setId(id);
         var existing = new AccountStatus();
-        existing.setAccountId(id);
-        var record = new AccountStatusRecord(null, null, null, null, null, null);
+        var record = new AccountSuspensionRecord(
+            new PeriodRecord(START, null), "REASON", "SUBREASON", "comment");
 
         when(accountRepository.existsById(id)).thenReturn(true);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
-        when(accountStatusMapper.toAccountStatus(existing, record, userPrincipal)).thenReturn(existing);
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
 
-        accountService.updateStatus(userPrincipal, id, record);
+        AccountView result = accountService.suspend(userPrincipal, id, record);
 
-        var inOrder = inOrder(accountStatusValidator, accountStatusMapper, accountStatusRepository);
-        inOrder.verify(accountStatusValidator).validate(existing, record, id);
-        inOrder.verify(accountStatusMapper).toAccountStatus(existing, record, userPrincipal);
-        inOrder.verify(accountStatusRepository).saveAndFlush(existing);
+        assertSame(view, result);
+        assertEquals("REASON", existing.getSuspensionReason());
+        assertEquals("SUBREASON", existing.getSuspensionSubreason());
+        assertEquals("comment", existing.getSuspensionComment());
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountSuspensionValidator).validate(existing, record, id);
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("deactivate should throw 404 when account not found")
+    void testDeactivate_shouldThrow404WhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountDeactivationRecord(START, "REASON", "SUBREASON", "comment");
+
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.deactivate(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.not_found", ex.getError().key());
+        verify(accountDeactivationValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("deactivate should throw 404 when account status row does not exist")
+    void testDeactivate_shouldThrow404WhenStatusNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountDeactivationRecord(START, "REASON", "SUBREASON", "comment");
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.deactivate(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.status.not_found", ex.getError().key());
+        verify(accountDeactivationValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("deactivate should propagate the exception thrown by the deactivation validator")
+    void testDeactivate_shouldPropagateValidatorFailure() {
+        UUID id = UUID.randomUUID();
+        var existing = new AccountStatus();
+        var record = new AccountDeactivationRecord(START, "REASON", "SUBREASON", "comment");
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.account.status.deactivation_in_past",
+                Map.of("id", id.toString()))))
+            .when(accountDeactivationValidator).validate(eq(existing), eq(record), eq(id));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.deactivate(userPrincipal, id, record));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.deactivation_in_past", ex.getError().key());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("deactivate should set validity end to deactivationAt, save and return the refreshed view")
+    void testDeactivate_shouldApplyFieldsSaveAndReturnView() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        existing.setValidityPeriod(commonMapper.toRange(new PeriodRecord(START, null)));
+        OffsetDateTime deactivationAt = START.plusYears(1);
+        var record = new AccountDeactivationRecord(deactivationAt, "REASON", "SUBREASON", "comment");
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+
+        AccountView result = accountService.deactivate(userPrincipal, id, record);
+
+        assertSame(view, result);
+        assertEquals(START, commonMapper.startOf(existing.getValidityPeriod()));
+        assertEquals(deactivationAt, commonMapper.endOf(existing.getValidityPeriod()));
+        assertEquals("REASON", existing.getDeactivationReason());
+        assertEquals("SUBREASON", existing.getDeactivationSubreason());
+        assertEquals("comment", existing.getDeactivationComment());
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountDeactivationValidator).validate(existing, record, id);
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("reactivate should throw 404 when account not found")
+    void testReactivate_shouldThrow404WhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountReactivationRecord("comment");
+
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.reactivate(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.not_found", ex.getError().key());
+        verify(accountReactivationValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("reactivate should throw 404 when account status row does not exist")
+    void testReactivate_shouldThrow404WhenStatusNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountReactivationRecord("comment");
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.reactivate(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.status.not_found", ex.getError().key());
+        verify(accountReactivationValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("reactivate should propagate the exception thrown by the reactivation validator")
+    void testReactivate_shouldPropagateValidatorFailure() {
+        UUID id = UUID.randomUUID();
+        var existing = new AccountStatus();
+        var record = new AccountReactivationRecord("comment");
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.account.status.not_suspended",
+                Map.of("id", id.toString()))))
+            .when(accountReactivationValidator).validate(eq(existing), eq(record), eq(id));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.reactivate(userPrincipal, id, record));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.not_suspended", ex.getError().key());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("reactivate should close the suspension period, save and return the refreshed view")
+    void testReactivate_shouldApplyFieldsSaveAndReturnView() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        OffsetDateTime suspensionStart = OffsetDateTime.now().minusDays(1);
+        existing.setSuspensionPeriod(commonMapper.toRange(new PeriodRecord(suspensionStart, null)));
+        var record = new AccountReactivationRecord("comment");
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+
+        AccountView result = accountService.reactivate(userPrincipal, id, record);
+
+        assertSame(view, result);
+        assertEquals(suspensionStart.toInstant(),
+            commonMapper.startOf(existing.getSuspensionPeriod()).toInstant());
+        assertNotNull(commonMapper.endOf(existing.getSuspensionPeriod()));
+        assertEquals("comment", existing.getReactivationComment());
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountReactivationValidator).validate(existing, record, id);
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("updateValidity should throw 404 when account not found")
+    void testUpdateValidity_shouldThrow404WhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountValidityRecord(OffsetDateTime.now().plusDays(10));
+
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateValidity(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.not_found", ex.getError().key());
+        verify(accountValidityValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("updateValidity should throw 404 when account status row does not exist")
+    void testUpdateValidity_shouldThrow404WhenStatusNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountValidityRecord(OffsetDateTime.now().plusDays(10));
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateValidity(userPrincipal, id, record));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.account.status.not_found", ex.getError().key());
+        verify(accountValidityValidator, never()).validate(any(), any(), any());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("updateValidity should set the validity start, preserve the end, save and return the refreshed view")
+    void testUpdateValidity_shouldApplyFieldsSaveAndReturnView() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        OffsetDateTime existingEnd = START.plusYears(2);
+        existing.setValidityPeriod(commonMapper.toRange(new PeriodRecord(START, existingEnd)));
+        OffsetDateTime newStart = START.plusDays(10);
+        var record = new AccountValidityRecord(newStart);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+
+        AccountView result = accountService.updateValidity(userPrincipal, id, record);
+
+        assertSame(view, result);
+        assertEquals(newStart, commonMapper.startOf(existing.getValidityPeriod()));
+        assertEquals(existingEnd, commonMapper.endOf(existing.getValidityPeriod()));
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountValidityValidator).validate(existing, record, id);
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("updateValidity should propagate the exception thrown by the validity validator")
+    void testUpdateValidity_shouldPropagateValidatorFailure() {
+        UUID id = UUID.randomUUID();
+        var existing = new AccountStatus();
+        var record = new AccountValidityRecord(OffsetDateTime.now().plusDays(10));
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.account.status.validity_start_not_in_future",
+                Map.of("id", id.toString()))))
+            .when(accountValidityValidator).validate(eq(existing), eq(record), eq(id));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.updateValidity(userPrincipal, id, record));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.validity_start_not_in_future", ex.getError().key());
+        verify(accountStatusRepository, never()).saveAndFlush(any());
     }
 
     @Test

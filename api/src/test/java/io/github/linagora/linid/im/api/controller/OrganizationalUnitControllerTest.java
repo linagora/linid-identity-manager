@@ -26,16 +26,19 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
-import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
+import jakarta.validation.Valid;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,13 +51,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -153,15 +160,56 @@ class OrganizationalUnitControllerTest {
     }
 
     @Test
-    @DisplayName("Should update organizational unit status")
-    void testUpdateStatus() {
-        when(service.updateStatus(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+    @DisplayName("Should suspend organizational unit")
+    void testSuspend() {
+        var id = UUID.randomUUID();
+        when(service.suspend(any(), any(), any())).thenReturn(new OrganizationalUnitView());
 
-        var record = new OrganizationalUnitStatusRecord(null, null, null, null);
-        var response = controller.updateStatus(userPrincipal, UUID.randomUUID(), record);
+        var record = new OrganizationalUnitSuspensionRecord(
+            new PeriodRecord(OffsetDateTime.parse("2100-01-01T00:00:00Z"), null), "REASON", null, null);
+        var response = controller.suspend(userPrincipal, id, record);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service).suspend(userPrincipal, id, record);
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on suspend request parameter")
+    void testSuspend_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = OrganizationalUnitController.class.getMethod("suspend", UserPrincipal.class,
+            UUID.class, OrganizationalUnitSuspensionRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "suspend() request parameter must have @Valid annotation"
+        );
+    }
+
+    @Test
+    @DisplayName("Should reactivate organizational unit")
+    void testReactivate() {
+        var id = UUID.randomUUID();
+        when(service.reactivate(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+
+        var record = new OrganizationalUnitReactivationRecord("Merger completed");
+        var response = controller.reactivate(userPrincipal, id, record);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(service).reactivate(userPrincipal, id, record);
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on reactivate request parameter")
+    void testReactivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = OrganizationalUnitController.class.getMethod("reactivate", UserPrincipal.class,
+            UUID.class, OrganizationalUnitReactivationRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "reactivate() request parameter must have @Valid annotation"
+        );
     }
 
     @Test

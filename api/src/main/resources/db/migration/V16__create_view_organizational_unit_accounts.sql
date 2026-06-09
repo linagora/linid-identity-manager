@@ -8,9 +8,13 @@ SELECT DISTINCT
     accounts_view.validity_period,
     accounts_view.suspension_period,
     accounts_view.activation_at,
-    accounts_view.status_reason,
-    accounts_view.status_subreason,
-    accounts_view.status_comment,
+    accounts_view.suspension_reason,
+    accounts_view.suspension_subreason,
+    accounts_view.suspension_comment,
+    accounts_view.deactivation_reason,
+    accounts_view.deactivation_subreason,
+    accounts_view.deactivation_comment,
+    accounts_view.reactivation_comment,
     accounts_view.status,
     accounts_view.days_before_deactivation,
     accounts_view.created_by,
@@ -33,9 +37,13 @@ COMMENT ON COLUMN organizational_unit_accounts_view.firstname IS 'First name of 
 COMMENT ON COLUMN organizational_unit_accounts_view.validity_period IS 'Time period during which the account is considered valid.';
 COMMENT ON COLUMN organizational_unit_accounts_view.suspension_period IS 'Time period during which the account is suspended.';
 COMMENT ON COLUMN organizational_unit_accounts_view.activation_at IS 'Timestamp when the account was activated.';
-COMMENT ON COLUMN organizational_unit_accounts_view.status_reason IS 'Primary reason for the current account status.';
-COMMENT ON COLUMN organizational_unit_accounts_view.status_subreason IS 'Secondary reason providing additional context for the account status.';
-COMMENT ON COLUMN organizational_unit_accounts_view.status_comment IS 'Free-text comment explaining the account status.';
+COMMENT ON COLUMN organizational_unit_accounts_view.suspension_reason IS 'High-level reason code explaining the suspension (inherited from accounts_view).';
+COMMENT ON COLUMN organizational_unit_accounts_view.suspension_subreason IS 'More detailed classification of the suspension reason (inherited from accounts_view).';
+COMMENT ON COLUMN organizational_unit_accounts_view.suspension_comment IS 'Free-text comment about the suspension (inherited from accounts_view).';
+COMMENT ON COLUMN organizational_unit_accounts_view.deactivation_reason IS 'High-level reason code explaining the deactivation (inherited from accounts_view).';
+COMMENT ON COLUMN organizational_unit_accounts_view.deactivation_subreason IS 'More detailed classification of the deactivation reason (inherited from accounts_view).';
+COMMENT ON COLUMN organizational_unit_accounts_view.deactivation_comment IS 'Free-text comment about the deactivation (inherited from accounts_view).';
+COMMENT ON COLUMN organizational_unit_accounts_view.reactivation_comment IS 'Free-text comment about a reactivation (inherited from accounts_view).';
 COMMENT ON COLUMN organizational_unit_accounts_view.status IS 'Current status of the account.';
 COMMENT ON COLUMN organizational_unit_accounts_view.days_before_deactivation IS 'Number of days before the account is automatically deactivated.';
 COMMENT ON COLUMN organizational_unit_accounts_view.created_by IS 'Identifier of the creator of the account record.';

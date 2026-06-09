@@ -5,9 +5,13 @@ CREATE TABLE IF NOT EXISTS account_status
     validity_period   TSTZRANGE,
     suspension_period TSTZRANGE,
     activation_at     TIMESTAMPTZ,
-    status_reason     VARCHAR(250),
-    status_subreason  VARCHAR(250),
-    status_comment    TEXT,
+    suspension_reason     VARCHAR(250),
+    suspension_subreason  VARCHAR(250),
+    suspension_comment    TEXT,
+    deactivation_reason     VARCHAR(250),
+    deactivation_subreason  VARCHAR(250),
+    deactivation_comment    TEXT,
+    reactivation_comment    TEXT,
     created_by        UUID         NOT NULL,
     updated_by        UUID         NOT NULL,
     insert_date       TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -24,16 +28,20 @@ CREATE TRIGGER tg_account_status_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
-COMMENT ON TABLE account_status IS 'Table storing the lifecycle status of an account: validity and suspension time ranges, activation timestamp, status reason / sub-reason / comment, along with audit information (created_by, updated_by, insert_date, update_date).';
+COMMENT ON TABLE account_status IS 'Table storing the lifecycle status of an account: validity and suspension time ranges, activation timestamp, per-action reason / sub-reason / comment (suspension, deactivation, reactivation), along with audit information (created_by, updated_by, insert_date, update_date).';
 
 COMMENT ON COLUMN account_status.ast_id IS 'Primary key. UUID automatically generated for each account status record.';
 COMMENT ON COLUMN account_status.act_id IS 'Foreign key referencing accounts(act_id). Links this status record to its account. ON DELETE CASCADE ensures the status is removed if the account is deleted.';
 COMMENT ON COLUMN account_status.validity_period IS 'Time range during which the account is active. Lower bound represents the activation timestamp, and upper bound represents the deactivation timestamp. Stored as tstzrange (TIMESTAMPTZ range) in UTC.';
 COMMENT ON COLUMN account_status.suspension_period IS 'Time range during which the account is suspended. Lower bound represents the suspension start timestamp, and upper bound represents the suspension end timestamp. Stored as tstzrange (TIMESTAMPTZ range) in UTC.';
 COMMENT ON COLUMN account_status.activation_at IS 'Timestamp when the account was activated or reactivated. Stored in UTC (TIMESTAMPTZ).';
-COMMENT ON COLUMN account_status.status_reason IS 'High-level reason explaining a status change (activation, suspension, or deactivation).';
-COMMENT ON COLUMN account_status.status_subreason IS 'More detailed classification of the status reason.';
-COMMENT ON COLUMN account_status.status_comment IS 'Optional free-text comment providing additional context about the status change.';
+COMMENT ON COLUMN account_status.suspension_reason IS 'High-level reason explaining a suspension.';
+COMMENT ON COLUMN account_status.suspension_subreason IS 'More detailed classification of the suspension reason.';
+COMMENT ON COLUMN account_status.suspension_comment IS 'Optional free-text comment providing additional context about the suspension.';
+COMMENT ON COLUMN account_status.deactivation_reason IS 'High-level reason explaining a deactivation.';
+COMMENT ON COLUMN account_status.deactivation_subreason IS 'More detailed classification of the deactivation reason.';
+COMMENT ON COLUMN account_status.deactivation_comment IS 'Optional free-text comment providing additional context about the deactivation.';
+COMMENT ON COLUMN account_status.reactivation_comment IS 'Optional free-text comment providing additional context about a reactivation.';
 COMMENT ON COLUMN account_status.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN account_status.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN account_status.insert_date IS 'Date and time when the account status record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';

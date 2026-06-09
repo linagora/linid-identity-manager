@@ -7,9 +7,13 @@ SELECT a.act_id,
        s.validity_period,
        s.suspension_period,
        s.activation_at,
-       s.status_reason,
-       s.status_subreason,
-       s.status_comment,
+       s.suspension_reason,
+       s.suspension_subreason,
+       s.suspension_comment,
+       s.deactivation_reason,
+       s.deactivation_subreason,
+       s.deactivation_comment,
+       s.reactivation_comment,
        CASE
            WHEN s.activation_at IS NOT NULL
                 AND lower(s.validity_period) IS NOT NULL
@@ -60,9 +64,13 @@ COMMENT ON COLUMN accounts_view.firstname IS 'First name of the account holder.'
 COMMENT ON COLUMN accounts_view.validity_period IS 'Time range during which the account is considered valid. NULL when no status row exists for the account.';
 COMMENT ON COLUMN accounts_view.suspension_period IS 'Time range during which the account is suspended. NULL when no suspension is configured. An open-ended suspension (NULL upper bound) is treated as a permanent suspension.';
 COMMENT ON COLUMN accounts_view.activation_at IS 'Timestamp when the account was activated or reactivated. NULL until the account is activated.';
-COMMENT ON COLUMN accounts_view.status_reason IS 'High-level reason code explaining the current status.';
-COMMENT ON COLUMN accounts_view.status_subreason IS 'More detailed classification of the status reason.';
-COMMENT ON COLUMN accounts_view.status_comment IS 'Free-text comment providing additional context about the status change.';
+COMMENT ON COLUMN accounts_view.suspension_reason IS 'High-level reason code explaining the suspension.';
+COMMENT ON COLUMN accounts_view.suspension_subreason IS 'More detailed classification of the suspension reason.';
+COMMENT ON COLUMN accounts_view.suspension_comment IS 'Free-text comment providing additional context about the suspension.';
+COMMENT ON COLUMN accounts_view.deactivation_reason IS 'High-level reason code explaining the deactivation.';
+COMMENT ON COLUMN accounts_view.deactivation_subreason IS 'More detailed classification of the deactivation reason.';
+COMMENT ON COLUMN accounts_view.deactivation_comment IS 'Free-text comment providing additional context about the deactivation.';
+COMMENT ON COLUMN accounts_view.reactivation_comment IS 'Free-text comment providing additional context about a reactivation.';
 COMMENT ON COLUMN accounts_view.status IS 'Computed account status: ACTIVE when activated and inside the validity period outside any suspension; SUSPENDED when activated, inside validity, and inside a suspension period (including suspensions with no upper bound); INACTIVE otherwise.';
 COMMENT ON COLUMN accounts_view.days_before_deactivation IS 'Integer number of calendar days between today and the upper bound of the validity period. Can be negative. NULL when the validity period has no upper bound.';
 COMMENT ON COLUMN accounts_view.created_by IS 'Full name ("firstname lastname") of the account that created this record. Resolved via LEFT OUTER JOIN on accounts.act_id; NULL if the referenced account no longer exists.';

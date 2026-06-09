@@ -27,7 +27,8 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
-import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
@@ -136,21 +137,32 @@ public interface OrganizationalUnitService {
     );
 
     /**
-     * Updates the suspension status of an organizational unit (upsert behaviour over the single
-     * status row that exists per unit).
-     *
-     * <p>A {@code null} {@code suspensionPeriod} on the record removes the suspension: the status
-     * row is kept but its suspension period and metadata (reason, sub-reason, comment) are
-     * cleared.</p>
+     * Suspends an organizational unit, either immediately or as a scheduled suspension, after
+     * enforcing the business rules delegated to {@code OrganizationalUnitSuspensionValidator}.
      *
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit
-     * @param record        the requested suspension status fields
+     * @param record        the suspension request (suspension period and reason fields)
      * @return the updated {@link OrganizationalUnitView} including the embedded status
      */
-    OrganizationalUnitView updateStatus(
+    OrganizationalUnitView suspend(
         UserPrincipal userPrincipal,
         UUID id,
-        OrganizationalUnitStatusRecord record
+        OrganizationalUnitSuspensionRecord record
+    );
+
+    /**
+     * Reactivates an organizational unit (lifts its suspension), after enforcing the business rules
+     * delegated to {@code OrganizationalUnitReactivationValidator}.
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param id            the unique identifier of the organizational unit
+     * @param record        the reactivation request (mandatory justification comment)
+     * @return the updated {@link OrganizationalUnitView} including the embedded status
+     */
+    OrganizationalUnitView reactivate(
+        UserPrincipal userPrincipal,
+        UUID id,
+        OrganizationalUnitReactivationRecord record
     );
 }

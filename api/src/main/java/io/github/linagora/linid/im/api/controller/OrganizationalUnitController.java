@@ -31,7 +31,8 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
-import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
@@ -216,28 +217,48 @@ public class OrganizationalUnitController {
     }
 
     /**
-     * Updates the suspension status of an organizational unit (upsert behaviour).
-     *
-     * <p>This is the single entry point for managing suspension. A {@code null}
-     * {@code suspensionPeriod} removes the suspension.</p>
+     * Suspends an organizational unit (immediate or scheduled suspension).
      *
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the organizational unit identifier
-     * @param record        the requested suspension status fields
+     * @param record        the suspension request (suspension period and reason fields)
      * @return the updated organizational unit including its embedded status
      */
-    @PutMapping("/{id}/status")
-    @Operation(summary = "Update the suspension status of an organizational unit")
-    @ApiResponse(responseCode = "200", description = "Status successfully updated")
+    @PutMapping("/{id}/status/suspend")
+    @Operation(summary = "Suspend an organizational unit (immediate or scheduled)")
+    @ApiResponse(responseCode = "200", description = "Organizational unit successfully suspended")
     @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
     @ApiResponse(responseCode = "404", description = "Organizational unit not found", content = @Content)
-    public ResponseEntity<OrganizationalUnitViewDTO> updateStatus(
+    public ResponseEntity<OrganizationalUnitViewDTO> suspend(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id,
-        @Valid @RequestBody final OrganizationalUnitStatusRecord record) {
-        log.info("[{}] Received PUT request for organizational unit {} to update status with {}",
+        @Valid @RequestBody final OrganizationalUnitSuspensionRecord record) {
+        log.info("[{}] Received PUT request for organizational unit {} to suspend with {}",
             userPrincipal.getEmail(), id, record);
-        var view = service.updateStatus(userPrincipal, id, record);
+        var view = service.suspend(userPrincipal, id, record);
+        return ResponseEntity.ok(mapper.toDTO(view));
+    }
+
+    /**
+     * Reactivates an organizational unit (lifts its suspension).
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param id            the organizational unit identifier
+     * @param record        the reactivation request (mandatory justification comment)
+     * @return the updated organizational unit including its embedded status
+     */
+    @PutMapping("/{id}/status/reactivate")
+    @Operation(summary = "Reactivate an organizational unit (lifts its suspension)")
+    @ApiResponse(responseCode = "200", description = "Organizational unit successfully reactivated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Organizational unit not found", content = @Content)
+    public ResponseEntity<OrganizationalUnitViewDTO> reactivate(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final OrganizationalUnitReactivationRecord record) {
+        log.info("[{}] Received PUT request for organizational unit {} to reactivate with {}",
+            userPrincipal.getEmail(), id, record);
+        var view = service.reactivate(userPrincipal, id, record);
         return ResponseEntity.ok(mapper.toDTO(view));
     }
 

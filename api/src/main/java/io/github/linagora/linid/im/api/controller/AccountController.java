@@ -28,9 +28,12 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
+import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
+import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
-import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
+import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
@@ -167,26 +170,71 @@ public class AccountController {
     }
 
     /**
-     * Update of the account's status fields.
+     * Suspends the account (immediate or scheduled suspension).
      *
      * @param userPrincipal the authenticated user
      * @param id            the account UUID
-     * @param record        the new status values; {@code null} fields clear the corresponding column.
-     *                      except for {@code validityPeriod} which is mandatory and must be provided with
-     *                      a non-{@code null} value.
+     * @param record        the suspension request (suspension period and reason fields)
      * @return the refreshed account view with computed {@code status} and {@code daysBeforeDeactivation}
      */
-    @PutMapping("/{id}/status")
-    @Operation(summary = "Update the status fields of an account")
-    @ApiResponse(responseCode = "200", description = "Status successfully updated")
+    @PutMapping("/{id}/status/suspend")
+    @Operation(summary = "Suspend the account (immediate or scheduled)")
+    @ApiResponse(responseCode = "200", description = "Account successfully suspended")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
     @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
-    public ResponseEntity<AccountViewDTO> updateStatus(
+    public ResponseEntity<AccountViewDTO> suspend(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id,
-        @Valid @RequestBody final AccountStatusRecord record) {
-        log.info("[{}] Received PUT request for account {} to update status with {}",
+        @Valid @RequestBody final AccountSuspensionRecord record) {
+        log.info("[{}] Received PUT request for account {} to suspend with {}",
             userPrincipal.getEmail(), id, record);
-        var view = accountService.updateStatus(userPrincipal, id, record);
+        var view = accountService.suspend(userPrincipal, id, record);
+        return ResponseEntity.ok(accountMapper.toDTO(view));
+    }
+
+    /**
+     * Deactivates the account (immediate or scheduled deactivation, sets its validity period end).
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @param record        the deactivation request (deactivation timestamp and reason fields)
+     * @return the refreshed account view with computed {@code status} and {@code daysBeforeDeactivation}
+     */
+    @PutMapping("/{id}/status/deactivate")
+    @Operation(summary = "Deactivate the account (immediate or scheduled)")
+    @ApiResponse(responseCode = "200", description = "Account successfully deactivated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<AccountViewDTO> deactivate(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final AccountDeactivationRecord record) {
+        log.info("[{}] Received PUT request for account {} to deactivate with {}",
+            userPrincipal.getEmail(), id, record);
+        var view = accountService.deactivate(userPrincipal, id, record);
+        return ResponseEntity.ok(accountMapper.toDTO(view));
+    }
+
+    /**
+     * Reactivates the account (lifts its suspension).
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @param record        the reactivation request (mandatory justification comment)
+     * @return the refreshed account view with computed {@code status} and {@code daysBeforeDeactivation}
+     */
+    @PutMapping("/{id}/status/reactivate")
+    @Operation(summary = "Reactivate the account (lifts its suspension)")
+    @ApiResponse(responseCode = "200", description = "Account successfully reactivated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<AccountViewDTO> reactivate(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final AccountReactivationRecord record) {
+        log.info("[{}] Received PUT request for account {} to reactivate with {}",
+            userPrincipal.getEmail(), id, record);
+        var view = accountService.reactivate(userPrincipal, id, record);
         return ResponseEntity.ok(accountMapper.toDTO(view));
     }
 
@@ -198,7 +246,7 @@ public class AccountController {
      * @param record        the activation request carrying the new {@code activationAt}
      * @return the refreshed account view
      */
-    @PutMapping("/{id}/status/activation")
+    @PutMapping("/{id}/status/activate")
     @Operation(summary = "Activate the account when business rules are met")
     @ApiResponse(responseCode = "200", description = "Account successfully activated")
     @ApiResponse(responseCode = "400", description = "Activation rules violated", content = @Content)
@@ -210,6 +258,30 @@ public class AccountController {
         log.info("[{}] Received PUT request for account {} to update activation with {}",
             userPrincipal.getEmail(), id, record);
         var view = accountService.updateActivation(userPrincipal, id, record);
+        return ResponseEntity.ok(accountMapper.toDTO(view));
+    }
+
+    /**
+     * Schedules the validity period start of the account (administrative action, distinct from the
+     * {@code activationAt} timestamp set by {@code /status/activate}).
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @param record        the validity request (validity period start)
+     * @return the refreshed account view with computed {@code status} and {@code daysBeforeDeactivation}
+     */
+    @PutMapping("/{id}/status/schedule-activation")
+    @Operation(summary = "Schedule the validity period start of the account")
+    @ApiResponse(responseCode = "200", description = "Validity successfully updated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<AccountViewDTO> scheduleActivation(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final AccountValidityRecord record) {
+        log.info("[{}] Received PUT request for account {} to schedule activation with {}",
+            userPrincipal.getEmail(), id, record);
+        var view = accountService.updateValidity(userPrincipal, id, record);
         return ResponseEntity.ok(accountMapper.toDTO(view));
     }
 }

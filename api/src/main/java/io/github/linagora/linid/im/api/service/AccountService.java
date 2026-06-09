@@ -27,8 +27,11 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
-import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
+import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
@@ -75,7 +78,6 @@ public interface AccountService {
      * @param userPrincipal the authenticated user
      * @param id            the account UUID
      * @return the account entity
-     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
      */
     AccountView findById(UserPrincipal userPrincipal, UUID id);
 
@@ -84,7 +86,6 @@ public interface AccountService {
      *
      * @param userPrincipal the authenticated user
      * @param id            the account UUID
-     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if not found
      */
     void deleteById(UserPrincipal userPrincipal, UUID id);
 
@@ -98,44 +99,51 @@ public interface AccountService {
     Optional<Account> getAccountByEmail(String email);
 
     /**
-     * Updates the status fields of the account with the given identifier, after enforcing the
-     * business rules delegated to {@code AccountStatusValidator}. Validated fields are then
-     * persisted as-is.
-     *
-     * <p>Business rules enforced (delegated to {@code AccountStatusValidator}):</p>
-     * <ul>
-     *   <li>{@code activationAt} must be {@code null} (managed exclusively by
-     *       {@code PUT /accounts/{id}/status/activation}).</li>
-     *   <li>The validity period must carry a finite lower bound ({@code validityPeriod.start} is
-     *       mandatory).</li>
-     *   <li>The validity period must be internally coherent: when both bounds are provided,
-     *       {@code validityPeriod.start <= validityPeriod.end}.</li>
-     *   <li>The suspension period must be internally coherent: when both bounds are provided,
-     *       {@code suspensionPeriod.start <= suspensionPeriod.end}.</li>
-     *   <li>If the persisted {@code validityPeriod.start} is already in the past, it cannot be
-     *       changed (frozen — only idempotent echo of the same value is accepted).</li>
-     *   <li>Otherwise, the new {@code validityPeriod.start} must be greater than or equal to
-     *       {@code now()}.</li>
-     *   <li>If provided, {@code validityPeriod.end} must be greater than or equal to
-     *       {@code now()}.</li>
-     *   <li>If provided, {@code suspensionPeriod.start} must be greater than or equal to
-     *       {@code validityPeriod.start}.</li>
-     *   <li>If provided, {@code suspensionPeriod.start} must be greater than or equal to
-     *       {@code now()}.</li>
-     *   <li>If {@code validityPeriod.end} is defined (request or persisted fallback), both
-     *       {@code suspensionPeriod.start} and {@code suspensionPeriod.end} must be less than
-     *       or equal to {@code validityPeriod.end}.</li>
-     * </ul>
+     * Suspends the account with the given identifier, either immediately or as a scheduled suspension,
+     * after enforcing the business rules delegated to {@code AccountSuspensionValidator}.
      *
      * @param userPrincipal the authenticated user
      * @param accountId     the account UUID
-     * @param record        the new status values
-     * @return the refreshed account view, including computed {@code status} and
-     *         {@code daysBeforeDeactivation}
-     * @throws io.github.linagora.linid.im.corelib.exception.ApiException 404 if the account or its
-     *         companion status row is not found; 400 if any business rule is violated
+     * @param record        the suspension request (suspension period and reason fields)
+     * @return the refreshed account view
      */
-    AccountView updateStatus(UserPrincipal userPrincipal, UUID accountId, AccountStatusRecord record);
+    AccountView suspend(UserPrincipal userPrincipal, UUID accountId, AccountSuspensionRecord record);
+
+    /**
+     * Deactivates the account with the given identifier (sets its validity period end), either
+     * immediately or as a scheduled deactivation, after enforcing the business rules delegated to
+     * {@code AccountDeactivationValidator}.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param record        the deactivation request (deactivation timestamp and reason fields)
+     * @return the refreshed account view
+     */
+    AccountView deactivate(UserPrincipal userPrincipal, UUID accountId, AccountDeactivationRecord record);
+
+    /**
+     * Reactivates the account with the given identifier (lifts its suspension), after enforcing the
+     * business rules delegated to {@code AccountReactivationValidator}.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param record        the reactivation request (mandatory justification comment)
+     * @return the refreshed account view
+     */
+    AccountView reactivate(UserPrincipal userPrincipal, UUID accountId, AccountReactivationRecord record);
+
+    /**
+     * Schedules the validity period start of the account with the given identifier, after enforcing
+     * the business rules delegated to {@code AccountValidityValidator}. The existing validity period
+     * end is preserved. This is distinct from {@link #updateActivation} which records the
+     * {@code activationAt} timestamp.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param record        the validity request (validity period start)
+     * @return the refreshed account view
+     */
+    AccountView updateValidity(UserPrincipal userPrincipal, UUID accountId, AccountValidityRecord record);
 
     /**
      * Sets the {@code activationAt} timestamp of the account with the given identifier.
@@ -153,8 +161,6 @@ public interface AccountService {
      * @param accountId     the account UUID
      * @param record        the activation request carrying the new {@code activationAt}
      * @return the refreshed account view
-     * @throws io.github.linagora.linid.im.corelib.exception.ApiException 404 if the account or its
-     *         companion status row is not found; 400 if any business rule is violated
      */
     AccountView updateActivation(UserPrincipal userPrincipal, UUID accountId, AccountActivationRecord record);
 }

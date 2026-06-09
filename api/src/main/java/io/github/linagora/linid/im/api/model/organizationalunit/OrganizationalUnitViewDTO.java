@@ -107,22 +107,28 @@ public class OrganizationalUnitViewDTO {
     private PeriodDTO suspensionPeriod;
 
     /**
-     * High-level reason code explaining the current suspension status.
+     * High-level reason code explaining the suspension.
      */
-    @Schema(description = "High-level reason code", example = "REORGANIZATION")
-    private String statusReason;
+    @Schema(description = "High-level suspension reason code", example = "REORGANIZATION")
+    private String suspensionReason;
 
     /**
      * More detailed classification of the suspension reason.
      */
     @Schema(description = "Detailed classification of the suspension reason", example = "MERGER")
-    private String statusSubreason;
+    private String suspensionSubreason;
 
     /**
-     * Free-text comment providing additional context about the status change.
+     * Free-text comment providing additional context about the suspension.
      */
-    @Schema(description = "Free-text comment", example = "Suspended pending department merger")
-    private String statusComment;
+    @Schema(description = "Free-text suspension comment", example = "Suspended pending department merger")
+    private String suspensionComment;
+
+    /**
+     * Free-text comment providing additional context about the reactivation.
+     */
+    @Schema(description = "Free-text reactivation comment", example = "Reactivated after merger completion")
+    private String reactivationComment;
 
     /**
      * Whether the organizational unit is currently suspended (the current instant falls within the

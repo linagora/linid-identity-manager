@@ -89,24 +89,33 @@ public class OrganizationalUnitStatus extends AbstractEntity {
     private Range<ZonedDateTime> suspensionPeriod;
 
     /**
-     * High-level reason code explaining the current status. {@code null} when not provided.
+     * High-level reason code explaining a suspension. {@code null} when the organizational unit is not suspended and
+     * no suspension is scheduled.
      */
-    @Column(name = "status_reason")
+    @Column(name = "suspension_reason")
     @FilterType(type = String.class)
-    private String statusReason;
+    private String suspensionReason;
 
     /**
-     * More detailed classification of the status reason. {@code null} when not provided.
+     * More detailed classification of the suspension reason. {@code null} when the organizational unit is not
+     * suspended and no suspension is scheduled.
      */
-    @Column(name = "status_subreason")
+    @Column(name = "suspension_subreason")
     @FilterType(type = String.class)
-    private String statusSubreason;
+    private String suspensionSubreason;
 
     /**
-     * Free-text comment providing additional context about the status change.
-     * {@code null} when not provided.
+     * Free-text comment providing additional context about a suspension. {@code null} when not provided.
      */
-    @Column(name = "status_comment")
+    @Column(name = "suspension_comment")
     @FilterType(type = String.class)
-    private String statusComment;
+    private String suspensionComment;
+
+    /**
+     * Free-text comment providing additional context about a reactivation. {@code null} when the organizational unit
+     * has never been reactivated.
+     */
+    @Column(name = "reactivation_comment")
+    @FilterType(type = String.class)
+    private String reactivationComment;
 }

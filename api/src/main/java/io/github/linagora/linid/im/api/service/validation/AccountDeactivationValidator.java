@@ -24,40 +24,55 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.account;
+package io.github.linagora.linid.im.api.service.validation;
 
-import io.github.linagora.linid.im.api.model.common.PeriodRecord;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
+import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
+import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
 /**
- * Request payload for the {@code PUT /accounts/{id}/status} endpoint.
+ * Validates a {@code PUT /accounts/{id}/status/deactivation} request.
  *
- * @param validityPeriod   time range during which the account is valid
- * @param suspensionPeriod time range during which the account is suspended
- * @param activationAt     activation timestamp
- * @param statusReason     high-level reason code explaining the status
- * @param statusSubreason  detailed classification of the status reason
- * @param statusComment    free-text comment
+ * <p>The deactivation timestamp becomes the validity period end; it must not lie before the
+ * existing validity start nor in the past.</p>
  */
-@Schema(description = "Request payload for updating account status fields")
-public record AccountStatusRecord(
-    @NotNull @Schema(description = "Time range during which the account is valid")
-    PeriodRecord validityPeriod,
+@Component
+@RequiredArgsConstructor
+public class AccountDeactivationValidator {
 
-    @Schema(description = "Time range during which the account is suspended")
-    PeriodRecord suspensionPeriod,
+    /**
+     * Shared mapper providing range and period accessor helpers.
+     */
+    private final CommonMapper commonMapper;
 
-    @Schema(description = "Activation timestamp", example = "2025-02-01T00:00:00Z")
-    OffsetDateTime activationAt,
+    /**
+     * Reusable validator for generic temporal-period checks.
+     */
+    private final PeriodValidator periodValidator;
 
-    @Schema(description = "High-level reason code", example = "ONBOARDING")
-    String statusReason,
+    /**
+     * Runs every deactivation rule against the persisted state and the incoming request record.
+     *
+     * @param current   the persisted {@link AccountStatus} of the targeted account
+     * @param record    the deactivation request record
+     * @param accountId the account UUID, used to enrich error messages
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException if any rule is violated (HTTP 400)
+     */
+    public void validate(final AccountStatus current,
+                         final AccountDeactivationRecord record,
+                         final UUID accountId) {
+        OffsetDateTime now = OffsetDateTime.now();
+        Map<String, Object> context = Map.of("id", accountId.toString());
 
-    @Schema(description = "Detailed classification of the status reason", example = "FIRST_ACTIVATION")
-    String statusSubreason,
-
-    @Schema(description = "Free-text comment", example = "Manual activation after KYC approval")
-    String statusComment) {
+        periodValidator.ensureEndNotInPast(record.deactivationAt(), now,
+            "error.account.status.deactivation_in_past", context);
+        periodValidator.ensureCoherent(commonMapper.startOf(current.getValidityPeriod()),
+            record.deactivationAt(),
+            "error.account.status.deactivation_before_validity_start", context);
+    }
 }

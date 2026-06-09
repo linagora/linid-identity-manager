@@ -66,9 +66,9 @@ class OrganizationalUnitMapperTest {
         view.setName("Finance");
         view.setType("DEPARTMENT");
         view.setSuspensionPeriod(Range.closedOpen(start, end));
-        view.setStatusReason("REORGANIZATION");
-        view.setStatusSubreason("MERGER");
-        view.setStatusComment("pending merger");
+        view.setSuspensionReason("REORGANIZATION");
+        view.setSuspensionSubreason("MERGER");
+        view.setSuspensionComment("pending merger");
         view.setSuspended(true);
 
         OrganizationalUnitViewDTO dto = mapper.toDTO(view);
@@ -76,9 +76,9 @@ class OrganizationalUnitMapperTest {
         assertEquals("Finance", dto.getName());
         assertEquals("DEPARTMENT", dto.getType());
         assertNotNull(dto.getSuspensionPeriod());
-        assertEquals("REORGANIZATION", dto.getStatusReason());
-        assertEquals("MERGER", dto.getStatusSubreason());
-        assertEquals("pending merger", dto.getStatusComment());
+        assertEquals("REORGANIZATION", dto.getSuspensionReason());
+        assertEquals("MERGER", dto.getSuspensionSubreason());
+        assertEquals("pending merger", dto.getSuspensionComment());
         assertTrue(dto.isSuspended());
     }
 
@@ -95,7 +95,7 @@ class OrganizationalUnitMapperTest {
         OrganizationalUnitViewDTO dto = mapper.toDTO(view);
 
         assertNull(dto.getSuspensionPeriod());
-        assertNull(dto.getStatusReason());
+        assertNull(dto.getSuspensionReason());
         assertFalse(dto.isSuspended());
     }
 }

@@ -35,9 +35,12 @@ import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
+import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
+import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
-import io.github.linagora.linid.im.api.model.account.AccountStatusRecord;
+import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
@@ -237,20 +240,93 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Should update status and return 200 with AccountViewDTO")
-    void testUpdateStatus_shouldReturn200WithAccountViewDTO() {
+    @DisplayName("Should suspend account and return 200 with AccountViewDTO")
+    void testSuspend_shouldReturn200WithAccountViewDTO() {
         UUID id = UUID.randomUUID();
-        var record = new AccountStatusRecord(null, null, null, "REASON", null, null);
+        var record = new AccountSuspensionRecord(new PeriodRecord(START, null), "REASON", null, null);
         var entity = createSampleViewEntity();
         var dto = createSampleViewDTO(entity);
-        when(accountService.updateStatus(userPrincipal, id, record)).thenReturn(entity);
+        when(accountService.suspend(userPrincipal, id, record)).thenReturn(entity);
         when(accountMapper.toDTO(entity)).thenReturn(dto);
 
-        ResponseEntity<AccountViewDTO> response = accountController.updateStatus(userPrincipal, id, record);
+        ResponseEntity<AccountViewDTO> response = accountController.suspend(userPrincipal, id, record);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(entity.getId(), response.getBody().getId());
+        verify(accountService).suspend(userPrincipal, id, record);
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on suspend request parameter")
+    void testSuspend_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = AccountController.class.getMethod("suspend", UserPrincipal.class,
+            UUID.class, AccountSuspensionRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "suspend() request parameter must have @Valid annotation"
+        );
+    }
+
+    @Test
+    @DisplayName("Should deactivate account and return 200 with AccountViewDTO")
+    void testDeactivate_shouldReturn200WithAccountViewDTO() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountDeactivationRecord(START, "REASON", null, null);
+        var entity = createSampleViewEntity();
+        var dto = createSampleViewDTO(entity);
+        when(accountService.deactivate(userPrincipal, id, record)).thenReturn(entity);
+        when(accountMapper.toDTO(entity)).thenReturn(dto);
+
+        ResponseEntity<AccountViewDTO> response = accountController.deactivate(userPrincipal, id, record);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(entity.getId(), response.getBody().getId());
+        verify(accountService).deactivate(userPrincipal, id, record);
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on deactivate request parameter")
+    void testDeactivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = AccountController.class.getMethod("deactivate", UserPrincipal.class,
+            UUID.class, AccountDeactivationRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "deactivate() request parameter must have @Valid annotation"
+        );
+    }
+
+    @Test
+    @DisplayName("Should reactivate account and return 200 with AccountViewDTO")
+    void testReactivate_shouldReturn200WithAccountViewDTO() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountReactivationRecord("Investigation closed");
+        var entity = createSampleViewEntity();
+        var dto = createSampleViewDTO(entity);
+        when(accountService.reactivate(userPrincipal, id, record)).thenReturn(entity);
+        when(accountMapper.toDTO(entity)).thenReturn(dto);
+
+        ResponseEntity<AccountViewDTO> response = accountController.reactivate(userPrincipal, id, record);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(entity.getId(), response.getBody().getId());
+        verify(accountService).reactivate(userPrincipal, id, record);
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on reactivate request parameter")
+    void testReactivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = AccountController.class.getMethod("reactivate", UserPrincipal.class,
+            UUID.class, AccountReactivationRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "reactivate() request parameter must have @Valid annotation"
+        );
     }
 
     @Test
@@ -279,6 +355,36 @@ class AccountControllerTest {
         assertTrue(
             Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
             "activate() request parameter must have @Valid annotation"
+        );
+    }
+
+    @Test
+    @DisplayName("Should schedule activation and return 200 with AccountViewDTO")
+    void testScheduleActivation_shouldReturn200WithAccountViewDTO() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountValidityRecord(START);
+        var entity = createSampleViewEntity();
+        var dto = createSampleViewDTO(entity);
+        when(accountService.updateValidity(userPrincipal, id, record)).thenReturn(entity);
+        when(accountMapper.toDTO(entity)).thenReturn(dto);
+
+        ResponseEntity<AccountViewDTO> response = accountController.scheduleActivation(userPrincipal, id, record);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(entity.getId(), response.getBody().getId());
+        verify(accountService).updateValidity(userPrincipal, id, record);
+    }
+
+    @Test
+    @DisplayName("Should have @Valid annotation on scheduleActivation request parameter")
+    void testScheduleActivation_shouldHaveValidAnnotation() throws NoSuchMethodException {
+        var method = AccountController.class.getMethod("scheduleActivation", UserPrincipal.class,
+            UUID.class, AccountValidityRecord.class);
+        var annotations = method.getParameterAnnotations()[2];
+        assertTrue(
+            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
+            "scheduleActivation() request parameter must have @Valid annotation"
         );
     }
 }

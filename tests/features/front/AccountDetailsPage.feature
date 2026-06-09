@@ -450,7 +450,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Suspendre"
 
@@ -493,7 +493,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Date de fin de suspension"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
 
@@ -595,9 +595,10 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="field_suspensionPeriodStart"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Nouvelle date de fin de suspension (optionnelle)"
     And I expect the HTML element '[data-cy="field_suspensionPeriodEnd"]' to be visible
+    And I expect the HTML element '[data-cy="field_suspensionPeriodEnd"]' to have value "31/12/2099"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Modifier"
 
@@ -683,8 +684,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
     And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Réactiver"
@@ -724,7 +723,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Désactiver"
 
@@ -766,7 +765,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Date de désactivation"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
 
@@ -827,7 +826,7 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="field_validityPeriodEnd"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Commentaire"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Modifier"
 

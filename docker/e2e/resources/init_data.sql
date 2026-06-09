@@ -410,10 +410,11 @@ VALUES
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001'),
     -- D9: SUSPENDED, suspension period with both start and end defined.
+    -- The end uses a fixed absolute date so the modify dialog pre-fill can be asserted deterministically.
     -- Unlocks: suspension.modify (AccountSuspendedBanner)
     ('00000000-0000-4000-8000-0000000000d9',
      tstzrange(now() - interval '30 days', NULL, '[)'),
-     tstzrange(now() - interval '10 days', now() + interval '20 days', '[)'),
+     tstzrange(now() - interval '10 days', '2099-12-31T00:00:00Z', '[)'),
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'Dialog test D9: modify suspension dialog',
      NULL, NULL, NULL,

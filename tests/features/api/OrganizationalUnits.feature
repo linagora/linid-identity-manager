@@ -41,6 +41,11 @@ Feature: Test API Organizational unit endpoints
   ## 707 Should return 400 when the suspension period end is in the past
   ## 708 Should return 404 when updating the status of an unknown organizational unit
 
+  ################## Reactivate (PUT /organizational-units/{id}/status/reactivate) #######
+  ## 709 Should reactivate a suspended organizational unit with a justification comment
+  ## 710 Should return 400 when reactivating an organizational unit that is not suspended
+  ## 711 Should return 404 when reactivating an unknown organizational unit
+
   ################## Find accounts of O.U. (GET /organizational-units/{id}/accounts) #######
   ## 801 Should return wanted users for existing organizational-unit
 
@@ -468,7 +473,7 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 201
     And  I store 'ouID' as '{{response.body.id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -481,18 +486,20 @@ Feature: Test API Organizational unit endpoints
       }
       """
     Then I expect status code is 200
-    And  I expect '{{response.body.statusReason}}' is 'REORGANIZATION'
-    And  I expect '{{response.body.statusSubreason}}' is 'MERGER'
-    And  I expect '{{response.body.statusComment}}' is 'Suspended pending department merger'
+    And  I expect '{{response.body.suspensionPeriod.start}}' is not empty
+    And  I expect '{{response.body.suspensionPeriod.end}}' is not empty
+    And  I expect '{{response.body.suspensionReason}}' is 'REORGANIZATION'
+    And  I expect '{{response.body.suspensionSubreason}}' is 'MERGER'
+    And  I expect '{{response.body.suspensionComment}}' is 'Suspended pending department merger'
     And  I expect '{{response.body.isSuspended}}' is "false"
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'GET'
     Then I expect status code is 200
-    And  I expect '{{response.body.statusReason}}' is 'REORGANIZATION'
-    And  I expect '{{response.body.statusSubreason}}' is 'MERGER'
-    And  I expect '{{response.body.statusComment}}' is 'Suspended pending department merger'
     And  I expect '{{response.body.suspensionPeriod.start}}' is not empty
     And  I expect '{{response.body.suspensionPeriod.end}}' is not empty
+    And  I expect '{{response.body.suspensionReason}}' is 'REORGANIZATION'
+    And  I expect '{{response.body.suspensionSubreason}}' is 'MERGER'
+    And  I expect '{{response.body.suspensionComment}}' is 'Suspended pending department merger'
     And  I expect '{{response.body.isSuspended}}' is "false"
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
@@ -510,14 +517,15 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 201
     And  I store 'ouID' as '{{response.body.id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
           "start": "2998-01-01T00:00:00Z",
           "end": null
         },
-        "reason": "INVESTIGATION"
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
       }
       """
     Then I expect status code is 200
@@ -540,10 +548,11 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 201
     And  I store 'ouID' as '{{response.body.id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
-        "reason": "REORGANIZATION"
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
       }
       """
     Then I expect status code is 400
@@ -563,13 +572,15 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 201
     And  I store 'ouID' as '{{response.body.id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
           "start": "2999-01-01T00:00:00Z",
           "end": "2998-01-01T00:00:00Z"
-        }
+        },
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
       }
       """
     Then I expect status code is 400
@@ -591,13 +602,15 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 201
     And  I store 'ouID' as '{{response.body.id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
           "start": "2020-01-01T00:00:00Z",
           "end": "2999-01-01T00:00:00Z"
-        }
+        },
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
       }
       """
     Then I expect status code is 400
@@ -619,13 +632,15 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 201
     And  I store 'ouID' as '{{response.body.id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
           "start": null,
           "end": "2020-01-01T00:00:00Z"
-        }
+        },
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
       }
       """
     Then I expect status code is 400
@@ -650,13 +665,92 @@ Feature: Test API Organizational unit endpoints
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then I expect status code is 204
 
-    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
           "start": "2998-01-01T00:00:00Z",
           "end": "2999-01-01T00:00:00Z"
-        }
+        },
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
+      }
+      """
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.not_found'
+
+  #################################################################
+  ################## Reactivate (PUT /organizational-units/{id}/status/reactivate) #######
+  #################################################################
+
+  Scenario: 709 - Should reactivate a suspended organizational unit with a justification comment
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test9",
+        "type": "status-test9"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/suspend' with method 'PUT' with body:
+      """
+      {
+        "suspensionPeriod": {
+          "start": "2998-01-01T00:00:00Z",
+          "end": "2999-01-01T00:00:00Z"
+        },
+        "reason": "REORGANIZATION",
+        "subreason": "MERGER"
+      }
+      """
+    Then I expect status code is 200
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/reactivate' with method 'PUT' with body:
+      """
+      {
+        "comment": "Reactivated after review"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
+    And  I expect '{{response.body.reactivationComment}}' is 'Reactivated after review'
+    And  I expect '{{response.body.isSuspended}}' is "false"
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 710 - Should return 400 when reactivating an organizational unit that is not suspended
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "status-test10",
+        "type": "status-test10"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}/status/reactivate' with method 'PUT' with body:
+      """
+      {
+        "comment": "Trying to reactivate a non-suspended organizational unit"
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.status.not_suspended'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 711 - Should return 404 when reactivating an unknown organizational unit
+    When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-000000000000/status/reactivate' with method 'PUT' with body:
+      """
+      {
+        "comment": "Trying to reactivate an unknown organizational unit"
       }
       """
     Then I expect status code is 404

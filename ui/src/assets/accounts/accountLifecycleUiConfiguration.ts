@@ -151,6 +151,20 @@ export const accountLifecycleUiConfiguration = {
       },
     },
   ],
+  'revalidation.scheduled': [
+    {
+      name: 'validityPeriodEnd',
+      type: 'String',
+      required: true,
+      input: 'Date',
+      inputSettings: {
+        mask: '{{ t("application.dateFormat") }}',
+        options: {
+          afterDate: '{{ today }}',
+        },
+      },
+    },
+  ],
   'deactivation.scheduled': [
     {
       name: 'validityPeriodEnd',

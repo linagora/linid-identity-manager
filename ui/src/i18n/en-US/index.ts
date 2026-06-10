@@ -372,6 +372,40 @@ export default {
       },
     },
   },
+  AccountRevalidationActions: {
+    ConfirmationDialog: {
+      immediate: {
+        title: 'Immediate Account Reactivation',
+        content:
+          'Are you sure you want to reactivate this account immediately?',
+        ButtonsCard: {
+          confirm: 'Reactivate',
+          cancel: 'Cancel',
+        },
+      },
+    },
+    FormDialog: {
+      scheduled: {
+        title: 'Schedule Account Reactivation',
+        content: 'Please select a new validity period end date.',
+        fields: {
+          validityPeriodEnd: {
+            label: 'Validity period end date',
+            close: 'Close',
+            validation: {
+              required: 'This field is required.',
+              invalidDate: 'Invalid date format. Expected format is {format}.',
+              afterDate: 'The date cannot be earlier than today.',
+            },
+          },
+        },
+        ButtonsCard: {
+          confirm: 'Schedule',
+          cancel: 'Cancel',
+        },
+      },
+    },
+  },
   AccountsPage: {
     menuTitle: 'Accounts',
     title: 'Accounts',
@@ -468,7 +502,9 @@ export default {
     immediateSuspensionSuccess: 'The account will be suspended in one hour',
     immediateDeactivationSuccess: 'The account will be deactivated in one hour',
     immediateReactivationSuccess: 'The account will be reactivated in one hour',
+    immediateRevalidationSuccess: 'The account can be reactivated in one hour',
     scheduledActivationSuccess: 'The account can be activated from {date}',
+    scheduledRevalidationSuccess: 'The account will be reactivated from {date}',
     scheduledDeactivationSuccess: 'The account will be deactivated from {date}',
     modifyDeactivationSuccess: 'The account will be deactivated from {date}',
     scheduledSuspensionSuccess: 'The account will be suspended from {date}',

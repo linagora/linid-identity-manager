@@ -50,8 +50,8 @@ Feature: Test Account homepage display
     And I expect the HTML element '[data-cy="cell-actions"]' to be visible
 
     ## 102 Should filter accounts when using advanced search
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000eee1"
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-000123456781"
     When I set the text "user5_fn" in the HTML element '[data-cy="field_firstname"]'
     And I set the text "user5_ln" in the HTML element '[data-cy="field_lastname"]'
     And I set the text "user5@example.com" in the HTML element '[data-cy="field_email"]'
@@ -81,8 +81,8 @@ Feature: Test Account homepage display
     ## 104 Should have pagination working
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?"
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000eee1"
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-000123456781"
     And I expect the HTML element '[data-cy="account-row"]' appear 10 times on screen
     # Open the pagination dropdown
     When I click on 'input.q-select__focus-target'
@@ -112,32 +112,32 @@ Feature: Test Account homepage display
     And I expect the HTML element '[data-cy="cell-createdBy"]' contains "admin_fn admin_ln"
 
     ## 106 Should filter in the Organizational Units tree
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000eee1"
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-000123456781"
     And I expect the HTML element '[data-cy="organizational-unit-filter-input"]' to be visible
 
     When I set the text "company" in the HTML element '[data-cy="organizational-unit-filter-input"]'
     Then I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]' appear 0 times on screen
+    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]' appear 0 times on screen
 
     When I clear the text in the HTML element '[data-cy="organizational-unit-filter-input"]'
     Then I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]' appear 1 times on screen
+    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]' appear 1 times on screen
 
     When I set the text "any comp" in the HTML element '[data-cy="organizational-unit-filter-input"]'
     Then I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]' appear 0 times on screen
+    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]' appear 0 times on screen
 
     When I clear the text in the HTML element '[data-cy="organizational-unit-filter-input"]'
     Then I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]' appear 1 times on screen
+    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]' appear 1 times on screen
 
     When I set the text "beta" in the HTML element '[data-cy="organizational-unit-filter-input"]'
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000eee1"]' appear 1 times on screen
+    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-000123456781"]' appear 1 times on screen
     Then I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-000000000aa1"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000cc"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]' appear 1 times on screen

@@ -70,6 +70,13 @@
           @modify-suspension="onLifecycleAction('suspension.modify')"
         />
 
+        <AccountDeactivatedBanner
+          v-if="lifecycleUi.showDeactivatedBanner"
+          :account-status="accountStatus"
+          @reactivate-immediate="onLifecycleAction('revalidation.immediate')"
+          @reactivate-scheduled="onLifecycleAction('revalidation.scheduled')"
+        />
+
         <AccountDeactivatedWarningBanner
           v-if="lifecycleUi.showDeactivationWarningBanner"
           :account-status="accountStatus"
@@ -154,6 +161,7 @@ import { accountLifecycleUiConfiguration } from 'src/assets/accounts/accountLife
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
 import { dayjs } from 'src/boot/dayjs';
 import StatusBadge from 'src/components/badge/StatusBadge.vue';
+import AccountDeactivatedBanner from 'src/components/banner/AccountDeactivatedBanner.vue';
 import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
 import AccountDeactivatedInfoText from 'src/components/text/AccountDeactivatedInfoText.vue';
@@ -273,6 +281,12 @@ function onLifecycleAction(action: string | DropdownClickPayload<string>) {
     case 'reactivation.immediate':
       immediateReactivation();
       break;
+    case 'revalidation.immediate':
+      immediateRevalidation();
+      break;
+    case 'revalidation.scheduled':
+      scheduledRevalidation();
+      break;
     case 'activation.scheduled':
       scheduledActivation();
       break;
@@ -375,6 +389,49 @@ function immediateReactivation() {
             toAccountReactivationRecord(formData)
           ),
         'immediateReactivationSuccess'
+      ),
+  });
+}
+
+/**
+ * Opens a confirmation dialog for the immediate revalidation action of a
+ * deactivated account. Pushes the validity period end one hour into the future
+ * so the account becomes active again shortly.
+ */
+function immediateRevalidation() {
+  openConfirmationDialog({
+    i18nScope: 'AccountRevalidationActions.ConfirmationDialog.immediate',
+    onConfirm: () =>
+      updateAccountStatus(
+        () =>
+          deactivateAccount(
+            accountId.value,
+            toAccountDeactivationRecord({
+              validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
+            })
+          ),
+        'immediateRevalidationSuccess'
+      ),
+  });
+}
+
+/**
+ * Opens a form dialog for the scheduled revalidation action of a deactivated
+ * account, letting the user pick a new validity period end in the future.
+ */
+function scheduledRevalidation() {
+  openFormDialog({
+    i18nScope: 'AccountRevalidationActions.FormDialog.scheduled',
+    formFields: accountLifecycleUiConfiguration['revalidation.scheduled'],
+    onSubmit: (formData: AccountStatusForm) =>
+      updateAccountStatus(
+        () =>
+          deactivateAccount(
+            accountId.value,
+            toAccountDeactivationRecord(formData)
+          ),
+        'scheduledRevalidationSuccess',
+        formData.validityPeriodEnd
       ),
   });
 }

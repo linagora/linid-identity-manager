@@ -473,7 +473,9 @@
       "notFound": "Compte introuvable",
       "generic": "Impossible de charger le compte. Veuillez réessayer plus tard.",
       "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
-    }
+    },
+    "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une heure",
+    "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
   },
   "AccountDeactivatedBanner": {
     "content": "Ce compte a été désactivé depuis le {date}.",
@@ -695,6 +697,39 @@
         "hint": "Fournissez un commentaire obligatoire pour cette réactivation.",
         "validation": {
           "required": "Ce champ est requis."
+        }
+      }
+    }
+  },
+  "AccountRevalidationActions": {
+    "ConfirmationDialog": {
+      "immediate": {
+        "title": "Réactivation immédiate du compte",
+        "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
+        "ButtonsCard": {
+          "confirm": "Réactiver",
+          "cancel": "Annuler"
+        }
+      }
+    },
+    "FormDialog": {
+      "scheduled": {
+        "title": "Planifier la réactivation du compte",
+        "content": "Veuillez sélectionner une nouvelle date de fin de validité.",
+        "fields": {
+          "validityPeriodEnd": {
+            "label": "Date de fin de validité",
+            "close": "Fermer",
+            "validation": {
+              "required": "Ce champ est requis.",
+              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Planifier",
+          "cancel": "Annuler"
         }
       }
     }

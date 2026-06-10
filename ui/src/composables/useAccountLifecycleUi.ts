@@ -195,6 +195,30 @@ export function useAccountLifecycleUi(
   }
 
   /**
+   * Projects an INACTIVE account that was activated but whose validity period
+   * end is now in the past: the account is deactivated. Surfaces the red
+   * deactivated banner whose actions re-validate the account immediately or
+   * schedule a new validity end.
+   * @param status - The account status.
+   * @param now - The reference time used for time-based comparisons.
+   * @returns The UI projection, or undefined when the case does not match.
+   */
+  function deactivated(
+    status: AccountStatus,
+    now: Date
+  ): AccountLifecycleUi | undefined {
+    const validityEnd = toDayJs(status.validityPeriod?.end);
+    if (
+      status.status === 'INACTIVE' &&
+      toDayJs(status.activationAt) != null &&
+      validityEnd != null &&
+      validityEnd.isBefore(now)
+    ) {
+      return withActions({ showBadge: true, showDeactivatedBanner: true }, []);
+    }
+  }
+
+  /**
    * Projects an ACTIVE account with no end date and no future suspension.
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
@@ -439,6 +463,7 @@ export function useAccountLifecycleUi(
     return (
       futureActivation(value, now) ??
       notActivatedYet(value) ??
+      deactivated(value, now) ??
       activeWithin15DaysWithFutureSuspension(value, now) ??
       activeMoreThan15DaysWithFutureSuspension(value, now) ??
       activeWithoutEndDateAndFutureSuspension(value, now) ??

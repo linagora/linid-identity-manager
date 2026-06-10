@@ -67,6 +67,11 @@ export interface AccountLifecycleUi {
    */
   showSuspendedBanner?: boolean;
   /**
+   * True when the red deactivated banner must be rendered (account already
+   * deactivated: its validity period end is in the past).
+   */
+  showDeactivatedBanner?: boolean;
+  /**
    * True when the light red deactivation warning banner must be rendered.
    */
   showDeactivationWarningBanner?: boolean;

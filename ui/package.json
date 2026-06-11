@@ -78,6 +78,7 @@
     "globals": "17.4.0",
     "happy-dom": "20.8.3",
     "prettier": "3.8.1",
+    "prettier-plugin-jsdoc": "1.8.1",
     "typescript": "5.9.3",
     "vite": "7.3.1",
     "vite-plugin-checker": "0.12.0",

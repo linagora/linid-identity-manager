@@ -115,6 +115,13 @@ export default defineConfigWithVueTs(
       'jsdoc/check-param-names': 'error',
       'jsdoc/require-description': 'warn',
       'jsdoc/require-description-complete-sentence': 'error',
+      'jsdoc/tag-lines': [
+        'warn',
+        'never',
+        {
+          startLines: null,
+        },
+      ],
 
       // General rules
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

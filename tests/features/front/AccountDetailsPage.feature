@@ -19,6 +19,7 @@ Feature: Test Account details page display
   ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
   ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
   ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
+  ## 165 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
   ## 119 Immediate activation - dialog opens correctly
   ## 120 Immediate activation - cancel button closes dialog
   ## 121 Immediate activation - success, account status updated after form submission
@@ -335,6 +336,21 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+
+    ## 165 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?"
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-00000000ddd1"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-00000000ddd1"
+    When I set the text "lifecycle-c13@example.com" in the HTML element '[data-cy="field_email"]'
+    Then I expect the HTML element '[data-cy="account-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button"]'
+    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivated-banner"]' to be visible
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
 
     ## 119 Immediate activation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'

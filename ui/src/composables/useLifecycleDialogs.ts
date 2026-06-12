@@ -32,61 +32,51 @@ import {
 import type { LifecycleFormField } from 'src/assets/accounts/accountLifecycleUiConfiguration';
 import type { Composer } from 'vue-i18n';
 
-/**
- * Options shared by both lifecycle dialog kinds.
- */
+/** Options shared by both lifecycle dialog kinds. */
 interface BaseDialogOptions {
   /**
    * The i18n scope of the dialog (title / content / fields / buttons), e.g.
    * `AccountSuspensionActions.FormDialog.immediate`.
    */
   i18nScope: string;
-  /**
-   * Optional per-dialog UI design namespace, overriding the composable default.
-   */
+  /** Optional per-dialog UI design namespace, overriding the composable default. */
   uiNamespace?: string;
 }
 
 /**
  * Options for a form dialog: the user fills `formFields` before confirming.
+ *
  * @template TForm - The flat form payload type emitted on submit.
  */
 interface FormDialogOptions<TForm> extends BaseDialogOptions {
-  /**
-   * Form fields rendered in the dialog.
-   */
+  /** Form fields rendered in the dialog. */
   formFields: readonly LifecycleFormField[];
   /**
-   * Optional initial values used to pre-fill the form fields, for instance when
-   * editing an existing suspension. Omitted for dialogs that must open empty.
+   * Optional initial values used to pre-fill the form fields, for instance when editing an existing suspension. Omitted
+   * for dialogs that must open empty.
    */
   initialFormData?: TForm;
   /**
-   * Handler invoked with the submitted form data. The caller owns the full
-   * post-submit workflow (update call, notifications, error handling, …).
+   * Handler invoked with the submitted form data. The caller owns the full post-submit workflow (update call,
+   * notifications, error handling, …).
    */
   onSubmit: (formData: TForm) => void;
 }
 
-/**
- * Options for a confirmation dialog: no fields, only a confirm / cancel choice.
- */
+/** Options for a confirmation dialog: no fields, only a confirm / cancel choice. */
 interface ConfirmationDialogOptions extends BaseDialogOptions {
-  /**
-   * Handler invoked once the user confirms. The caller owns the full workflow.
-   */
+  /** Handler invoked once the user confirms. The caller owns the full workflow. */
   onConfirm: () => void;
 }
 
 /**
- * Composable centralizing the lifecycle dialog plumbing shared by the account
- * and organizational unit details pages.
+ * Composable centralizing the lifecycle dialog plumbing shared by the account and organizational unit details pages.
  *
- * It is intentionally limited to opening dialogs and wiring their UI-related
- * properties (title, content, fields, namespace, pre-filled values). The
- * `onSubmit` / `onConfirm` handlers are provided by the caller, so each action
- * keeps full and explicit control over what happens on confirmation (update
- * call, notifications, error handling, side effects).
+ * It is intentionally limited to opening dialogs and wiring their UI-related properties (title, content, fields,
+ * namespace, pre-filled values). The `onSubmit` / `onConfirm` handlers are provided by the caller, so each action keeps
+ * full and explicit control over what happens on confirmation (update call, notifications, error handling, side
+ * effects).
+ *
  * @param defaultNamespace - Default UI design namespace forwarded to the dialog.
  * @returns Helpers to open a form or a confirmation lifecycle dialog.
  */
@@ -95,6 +85,7 @@ export function useLifecycleDialogs(defaultNamespace: string) {
 
   /**
    * Opens a form dialog whose fields the user fills before confirming.
+   *
    * @template TForm - The flat form payload type emitted on submit.
    * @param dialog - The form dialog options.
    */
@@ -116,6 +107,7 @@ export function useLifecycleDialogs(defaultNamespace: string) {
 
   /**
    * Opens a confirmation dialog (no fields).
+   *
    * @param dialog - The confirmation dialog options.
    */
   function openConfirmationDialog(dialog: ConfirmationDialogOptions): void {

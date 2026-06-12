@@ -36,8 +36,8 @@ declare module 'pinia' {
   /**
    * Custom properties interface for Pinia stores.
    *
-   * This interface can be extended to add custom properties or methods
-   * that will be available across all Pinia store instances in the application.
+   * This interface can be extended to add custom properties or methods that will be available across all Pinia store
+   * instances in the application.
    */
   // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   export interface PiniaCustomProperties {
@@ -56,6 +56,7 @@ declare module 'pinia' {
 
 /**
  * Creates and configures the Pinia store instance.
+ *
  * @returns The Pinia instance.
  */
 export default defineStore((/* { ssrContext } */) => {

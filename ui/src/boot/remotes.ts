@@ -34,8 +34,8 @@ import { defineBoot } from '@quasar/app-vite/wrappers';
 /**
  * Boot file that registers remote Module Federation modules.
  *
- * Fetches the remotes configuration from /remotes.json and registers
- * them with the Module Federation runtime.
+ * Fetches the remotes configuration from /remotes.json and registers them with the Module Federation runtime.
+ *
  * @throws {Error} When the remotes.json file cannot be fetched.
  */
 export default defineBoot(async () => {

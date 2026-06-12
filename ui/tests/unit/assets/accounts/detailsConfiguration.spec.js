@@ -28,8 +28,8 @@ import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
 import { describe, expect, it } from 'vitest';
 
 /**
- * Full list of keys on the Account interface.
- * Keep this in sync with src/types/accounts.ts — that is the whole point of this test.
+ * Full list of keys on the Account interface. Keep this in sync with src/types/accounts.ts — that is the whole point of
+ * this test.
  */
 const ALL_ACCOUNT_KEYS = [
   'id',
@@ -43,10 +43,7 @@ const ALL_ACCOUNT_KEYS = [
   'updateDate',
 ];
 
-/**
- * Keys intentionally omitted from the details view.
- * Justify each exclusion with a comment so the decision is auditable.
- */
+/** Keys intentionally omitted from the details view. Justify each exclusion with a comment so the decision is auditable. */
 const NON_DISPLAYABLE_KEYS = new Set([
   'id', // internal identifier, never shown to the user
   'externalId', // business identifier managed externally, not surfaced in the details card

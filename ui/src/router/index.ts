@@ -48,6 +48,7 @@ let unloadListenerRegistered = false;
 
 /**
  * Creates and configures the Vue Router instance.
+ *
  * @returns The Vue Router instance.
  */
 export default defineRouter(function (/* { store, ssrContext } */) {

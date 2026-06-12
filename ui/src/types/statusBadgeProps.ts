@@ -27,17 +27,12 @@
 /**
  * Supported status values for the generic StatusBadge component.
  *
- * Shared between accounts and organizational units to keep a single source of
- * truth for status badges across entities.
+ * Shared between accounts and organizational units to keep a single source of truth for status badges across entities.
  */
 export type StatusBadgeStatus = 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
 
-/**
- * Props for the generic StatusBadge component.
- */
+/** Props for the generic StatusBadge component. */
 export interface StatusBadgeProps {
-  /**
-   * Status of the entity (account, organizational unit, etc.).
-   */
+  /** Status of the entity (account, organizational unit, etc.). */
   status: StatusBadgeStatus;
 }

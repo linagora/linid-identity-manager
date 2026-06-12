@@ -38,6 +38,7 @@ import type {
 
 /**
  * Retrieves a single account by its identifier from the backend.
+ *
  * @param id - The unique identifier of the account.
  * @returns A promise resolving to the raw account DTO returned by the API.
  */
@@ -49,6 +50,7 @@ export async function getAccountById(id: string): Promise<AccountDTO> {
 
 /**
  * Creates a new account on the backend.
+ *
  * @param payload - The account fields submitted by the user.
  * @returns A promise resolving to the raw DTO of the newly created account.
  */
@@ -62,6 +64,7 @@ export async function createAccount(
 
 /**
  * Retrieves accounts list from the API.
+ *
  * @param filters Object containing the filter criteria for querying accounts.
  * @param pagination Object containing pagination parameters.
  * @returns Promise of paginated accounts.
@@ -78,8 +81,9 @@ export async function getAccounts(
 }
 
 /**
- * Suspends an account, immediately or as a scheduled suspension depending on the suspension
- * period start carried by the payload.
+ * Suspends an account, immediately or as a scheduled suspension depending on the suspension period start carried by the
+ * payload.
+ *
  * @param id - The unique identifier of the account to suspend.
  * @param payload - The suspension period and reason fields.
  * @returns A promise resolving to the raw DTO of the updated account.
@@ -94,8 +98,9 @@ export function suspendAccount(
 }
 
 /**
- * Deactivates an account (sets its validity period end), immediately or as a scheduled
- * deactivation depending on the deactivation timestamp carried by the payload.
+ * Deactivates an account (sets its validity period end), immediately or as a scheduled deactivation depending on the
+ * deactivation timestamp carried by the payload.
+ *
  * @param id - The unique identifier of the account to deactivate.
  * @param payload - The deactivation timestamp and reason fields.
  * @returns A promise resolving to the raw DTO of the updated account.
@@ -111,6 +116,7 @@ export function deactivateAccount(
 
 /**
  * Reactivates an account (lifts its suspension).
+ *
  * @param id - The unique identifier of the account to reactivate.
  * @param payload - The mandatory justification comment.
  * @returns A promise resolving to the raw DTO of the updated account.
@@ -125,8 +131,9 @@ export function reactivateAccount(
 }
 
 /**
- * Schedules an account's validity period start (administrative action, distinct from the
- * activation timestamp set when the user clicks the activation link).
+ * Schedules an account's validity period start (administrative action, distinct from the activation timestamp set when
+ * the user clicks the activation link).
+ *
  * @param id - The unique identifier of the account.
  * @param payload - The validity period start.
  * @returns A promise resolving to the raw DTO of the updated account.

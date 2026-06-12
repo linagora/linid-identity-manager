@@ -25,12 +25,10 @@
  */
 
 /**
- * Type definition for i18n messages.
- * This must match the structure in public/i18n/en-US.json for proper type checking.
+ * Type definition for i18n messages. This must match the structure in public/i18n/en-US.json for proper type checking.
  *
- * Note: Only core application translations are defined here.
- * Module-specific translations (e.g., moduleUsers) are loaded dynamically
- * from the public/i18n/*.json files.
+ * Note: Only core application translations are defined here. Module-specific translations (e.g., moduleUsers) are
+ * loaded dynamically from the public/i18n/*.json files.
  */
 export default {
   application: {

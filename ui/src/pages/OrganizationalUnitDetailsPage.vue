@@ -181,9 +181,9 @@ const hasAnyLifecycleAction = computed(() =>
 );
 
 /**
- * Loads the organizational unit selected in the tree (store) and splits the
- * raw DTO into the identity and lifecycle projections. Clears the panel when
- * no organizational unit is selected.
+ * Loads the organizational unit selected in the tree (store) and splits the raw DTO into the identity and lifecycle
+ * projections. Clears the panel when no organizational unit is selected.
+ *
  * @param id - Identifier of the organizational unit to load.
  */
 async function loadOrganizationalUnit(id: string): Promise<void> {
@@ -227,11 +227,10 @@ watch(selectedOrganizationalUnitId, (id: string) => {
 });
 
 /**
- * Dispatches a lifecycle action key (emitted by the dropdown button) to the
- * matching dialog opening function.
+ * Dispatches a lifecycle action key (emitted by the dropdown button) to the matching dialog opening function.
+ *
  * @param event - Click event payload emitted by the dropdown button.
- * @param event.key - Dotted lifecycle action key to dispatch, for example
- *   "suspension.immediate".
+ * @param event.key - Dotted lifecycle action key to dispatch, for example "suspension.immediate".
  */
 function onLifecycleActionClick(event: DropdownClickPayload): void {
   switch (event.key) {
@@ -248,9 +247,8 @@ function onLifecycleActionClick(event: DropdownClickPayload): void {
 }
 
 /**
- * Opens the form dialog for an immediate suspension. Collects a reason,
- * sub-reason and optional comment, then submits a suspension period starting
- * one hour from now with no end date.
+ * Opens the form dialog for an immediate suspension. Collects a reason, sub-reason and optional comment, then submits a
+ * suspension period starting one hour from now with no end date.
  */
 function openImmediateSuspensionDialog(): void {
   openFormDialog({
@@ -273,9 +271,7 @@ function openImmediateSuspensionDialog(): void {
   });
 }
 
-/**
- * Opens the form dialog for scheduling a future suspension.
- */
+/** Opens the form dialog for scheduling a future suspension. */
 function openScheduleSuspensionDialog(): void {
   openFormDialog({
     uiNamespace: `${uiNamespace}.schedule-suspension-dialog`,
@@ -295,8 +291,8 @@ function openScheduleSuspensionDialog(): void {
 }
 
 /**
- * Opens the form dialog for reactivating a suspended organizational unit. The
- * backend lifts the suspension by setting its end to now.
+ * Opens the form dialog for reactivating a suspended organizational unit. The backend lifts the suspension by setting
+ * its end to now.
  */
 function onClearSuspension(): void {
   openFormDialog({
@@ -317,8 +313,8 @@ function onClearSuspension(): void {
 }
 
 /**
- * Opens the form dialog for modifying the suspension end date while the OU is
- * currently suspended, pre-filled with the existing suspension period bounds.
+ * Opens the form dialog for modifying the suspension end date while the OU is currently suspended, pre-filled with the
+ * existing suspension period bounds.
  */
 function onModifySuspensionEnd(): void {
   const currentStart =
@@ -350,8 +346,9 @@ function onModifySuspensionEnd(): void {
 }
 
 /**
- * Runs a status-update API call and refreshes the local state. Surfaces a
- * positive notification on success and a negative one on failure.
+ * Runs a status-update API call and refreshes the local state. Surfaces a positive notification on success and a
+ * negative one on failure.
+ *
  * @param statusUpdate - The status-mutation service call to execute, resolving to the updated OU DTO.
  * @param successKey - The i18n key used for the success notification.
  */

@@ -159,8 +159,9 @@ const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 /**
  * Submits the form by creating a new account, then redirects to its details page.
  *
- * Called by q-form only when the enclosing form validation succeeds, so no
- * extra client-side validation is required here.
+ * Called by q-form only when the enclosing form validation succeeds, so no extra client-side validation is required
+ * here.
+ *
  * @returns A promise that resolves when the creation process is complete.
  */
 async function onSubmit(): Promise<void> {
@@ -197,9 +198,7 @@ const uiProps = creationFields.reduce<DatePickerUiProps>((acc, field) => {
   return acc;
 }, {});
 
-/**
- * Cancels the account creation and navigates back to the accounts list.
- */
+/** Cancels the account creation and navigates back to the accounts list. */
 function cancel(): void {
   void router.push('/accounts');
 }

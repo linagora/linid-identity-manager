@@ -34,11 +34,11 @@ import type { FormField } from 'src/types/form';
 import { useI18n } from 'vue-i18n';
 
 /**
- * Build the declarative field configuration for the account creation
- * form. Each field carries its already-translated label and the concrete
- * Quasar validation rules to apply.
- * @param i18nScope - I18n scope used for both labels (`fields.<name>`)
- * and validator error messages (`validation.<rule>`).
+ * Build the declarative field configuration for the account creation form. Each field carries its already-translated
+ * label and the concrete Quasar validation rules to apply.
+ *
+ * @param i18nScope - I18n scope used for both labels (`fields.<name>`) and validator error messages
+ *   (`validation.<rule>`).
  * @returns The ordered list of fields rendered by the creation form.
  */
 export function useAccountCreationConfig(i18nScope: string) {

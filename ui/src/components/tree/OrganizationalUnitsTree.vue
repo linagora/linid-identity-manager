@@ -70,6 +70,7 @@ const store = useOrganizationalUnitStore();
 
 /**
  * Filters a tree node based on a search string.
+ *
  * @param node - Organizational unit tree node to evaluate.
  * @param filter - Filter text entered by the user.
  * @returns True if the node name matches the filter, otherwise false.
@@ -86,9 +87,7 @@ function filterTreeNode(
   return filters.some((f) => name.toLowerCase().includes(f.toLowerCase()));
 }
 
-/**
- * Loads organizational units and maps them to tree nodes. Displays a notification in case of error.
- */
+/** Loads organizational units and maps them to tree nodes. Displays a notification in case of error. */
 async function loadData(): Promise<void> {
   try {
     organizationalUnits.value = await getAllOrganizationalUnit();

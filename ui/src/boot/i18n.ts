@@ -35,45 +35,31 @@ import type messages from 'src/i18n';
 import { createI18n, type I18n } from 'vue-i18n';
 import { defineBoot } from '#q-app/wrappers';
 
-/**
- *  Type defining the available message languages.
- */
+/** Type defining the available message languages. */
 export type MessageLanguages = keyof typeof messages;
 
-/**
- * Type-define 'en-US' as the master schema for the resource.
- */
+/** Type-define 'en-US' as the master schema for the resource. */
 export type MessageSchema = (typeof messages)['en-US'];
 
 // See https://vue-i18n.intlify.dev/guide/advanced/typescript.html#global-resource-schema-type-definition
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 declare module 'vue-i18n' {
-  /**
-   *  Define the locale messages schema.
-   */
+  /** Define the locale messages schema. */
   export interface DefineLocaleMessage extends MessageSchema {}
 
-  /**
-   *  Define the datetime format schema.
-   */
+  /** Define the datetime format schema. */
   export interface DefineDateTimeFormat {}
 
-  /**
-   *  Define the number format schema.
-   */
+  /** Define the number format schema. */
   export interface DefineNumberFormat {}
 }
 
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 export default defineBoot(async ({ app }) => {
   const i18nConfig: {
-    /**
-     * Array of supported language codes.
-     */
+    /** Array of supported language codes. */
     languages: string[];
-    /**
-     * Default locale of the application.
-     */
+    /** Default locale of the application. */
     locale: string;
   } = await fetch('/i18n.json').then((res) => res.json());
 

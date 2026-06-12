@@ -24,41 +24,23 @@
  * LinID Identity Manager software.
  */
 
-/**
- * Interface representing the theme variables defined in public/theme.json.
- */
+/** Interface representing the theme variables defined in public/theme.json. */
 export interface themeVariable {
-  /**
-   * The primary color of the theme.
-   */
+  /** The primary color of the theme. */
   primary: string;
-  /**
-   * The secondary color of the theme.
-   */
+  /** The secondary color of the theme. */
   secondary: string;
-  /**
-   * The accent color of the theme.
-   */
+  /** The accent color of the theme. */
   accent: string;
-  /**
-   * The dark color of the theme.
-   */
+  /** The dark color of the theme. */
   dark: string;
-  /**
-   * The positive color of the theme.
-   */
+  /** The positive color of the theme. */
   positive: string;
-  /**
-   * The negative color of the theme.
-   */
+  /** The negative color of the theme. */
   negative: string;
-  /**
-   * The info color of the theme.
-   */
+  /** The info color of the theme. */
   info: string;
-  /**
-   * The warning color of the theme.
-   */
+  /** The warning color of the theme. */
   warning: string;
 }
 
@@ -67,9 +49,7 @@ export default async () => {
   const theme: themeVariable = await res.json();
 
   Object.entries(theme).forEach(([key, val]) => {
-    /**
-     * The '--q-' prefix is used to namespace CSS custom properties (variables) related to Quasar framework themes.
-     */
+    /** The '--q-' prefix is used to namespace CSS custom properties (variables) related to Quasar framework themes. */
     document.documentElement.style.setProperty(`--q-${key}`, val);
   });
 };

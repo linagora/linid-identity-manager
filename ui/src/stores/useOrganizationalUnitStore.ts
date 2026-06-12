@@ -27,9 +27,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-/**
- * Pinia store for managing the state of organizational units in the application.
- */
+/** Pinia store for managing the state of organizational units in the application. */
 export const useOrganizationalUnitStore = defineStore(
   'organizationalUnit',
   () => {
@@ -37,6 +35,7 @@ export const useOrganizationalUnitStore = defineStore(
 
     /**
      * Set the selected organizational unit by its ID.
+     *
      * @param id - The ID of the organizational unit.
      */
     function setSelectedOrganizationalUnit(id: string) {

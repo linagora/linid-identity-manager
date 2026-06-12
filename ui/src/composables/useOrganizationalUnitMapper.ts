@@ -39,9 +39,9 @@ import type {
 } from 'src/types/organizationalUnits';
 
 /**
- * Composable providing utility functions to work with organizational units:
- * convert form values to API records, build the OU tree, and project an
- * {@link OrganizationalUnitDTO} into identity / status views.
+ * Composable providing utility functions to work with organizational units: convert form values to API records, build
+ * the OU tree, and project an {@link OrganizationalUnitDTO} into identity / status views.
+ *
  * @returns An object containing the mapping functions for organizational units.
  */
 export function useOrganizationalUnitMapper() {
@@ -50,6 +50,7 @@ export function useOrganizationalUnitMapper() {
   /**
    * Transforms an {@link OrganizationalUnitForm} into an {@link OrganizationalUnitRecord} by attaching the parent
    * identifier supplied by the navigation context.
+   *
    * @param form OU form carrying the user-editable fields.
    * @param parent UUID of the parent OU, provided by the route context.
    * @returns OU record ready to be posted to the backend.
@@ -67,6 +68,7 @@ export function useOrganizationalUnitMapper() {
 
   /**
    * Converts an organizational unit DTO into a tree node.
+   *
    * @param organizationalUnitRelation The parent relation of the organizational unit.
    * @param organizationalUnitDTO The organizational unit data transfer object to convert.
    * @param childrenNodes The child nodes to attach to the resulting tree node.
@@ -88,6 +90,7 @@ export function useOrganizationalUnitMapper() {
 
   /**
    * Recursively retrieves the child nodes of a given organizational unit to build the tree structure.
+   *
    * @param parentId The identifier of the parent organizational unit for which to find the children.
    * @param allOrganizationalUnit The list of all organizational units to search through for children.
    * @returns An array of tree nodes representing the children of the specified parent organizational unit.
@@ -120,6 +123,7 @@ export function useOrganizationalUnitMapper() {
 
   /**
    * Retrieves the organizational unit tree.
+   *
    * @param allOrganizationalUnits The list of all organizational units to build the tree from.
    * @returns The organizational unit tree.
    */
@@ -138,8 +142,9 @@ export function useOrganizationalUnitMapper() {
   }
 
   /**
-   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnit},
-   * exposing only the identity fields. Combine with {@link toOrganizationalUnitStatus} when both identity and suspension state are needed.
+   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnit}, exposing only the identity fields. Combine
+   * with {@link toOrganizationalUnitStatus} when both identity and suspension state are needed.
+   *
    * @param dto OrganizationalUnitDTO to project.
    * @returns Identity projection with locale-formatted dates.
    */
@@ -158,7 +163,9 @@ export function useOrganizationalUnitMapper() {
   };
 
   /**
-   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnitStatus}, exposing only the suspension lifecycle fields as raw ISO strings.
+   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnitStatus}, exposing only the suspension lifecycle
+   * fields as raw ISO strings.
+   *
    * @param dto OrganizationalUnitDTO to project.
    * @returns Suspension status projection.
    */
@@ -172,10 +179,9 @@ export function useOrganizationalUnitMapper() {
   };
 
   /**
-   * Converts an {@link OrganizationalUnitStatusForm} into an
-   * {@link OrganizationalUnitSuspensionRecord} ready to be sent to the backend.
-   * Localized start / end dates are normalized to ISO 8601 strings; empty values
-   * collapse to `null`.
+   * Converts an {@link OrganizationalUnitStatusForm} into an {@link OrganizationalUnitSuspensionRecord} ready to be sent
+   * to the backend. Localized start / end dates are normalized to ISO 8601 strings; empty values collapse to `null`.
+   *
    * @param form Flattened lifecycle form values.
    * @returns Suspension record with an ISO suspension period.
    */
@@ -194,8 +200,9 @@ export function useOrganizationalUnitMapper() {
   };
 
   /**
-   * Converts an {@link OrganizationalUnitStatusForm} into an
-   * {@link OrganizationalUnitReactivationRecord} carrying the mandatory comment.
+   * Converts an {@link OrganizationalUnitStatusForm} into an {@link OrganizationalUnitReactivationRecord} carrying the
+   * mandatory comment.
+   *
    * @param form Flattened lifecycle form values.
    * @returns Reactivation record ready to be sent to the backend.
    */
@@ -208,10 +215,10 @@ export function useOrganizationalUnitMapper() {
   };
 
   /**
-   * Flattens an {@link OrganizationalUnitStatus} into an {@link OrganizationalUnitStatusForm} to pre-fill the
-   * "modify" dialog with the existing suspension period bounds. The reason / sub-reason / comment fields are
-   * intentionally left empty: the read model no longer carries a generic status reason, and a modification
-   * expects a fresh justification.
+   * Flattens an {@link OrganizationalUnitStatus} into an {@link OrganizationalUnitStatusForm} to pre-fill the "modify"
+   * dialog with the existing suspension period bounds. The reason / sub-reason / comment fields are intentionally left
+   * empty: the read model no longer carries a generic status reason, and a modification expects a fresh justification.
+   *
    * @param status The current organizational unit status providing the existing period bounds.
    * @returns The flattened form values with localized suspension period dates.
    */

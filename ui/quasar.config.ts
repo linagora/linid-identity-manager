@@ -295,11 +295,14 @@ export default defineConfig((ctx) => {
       // extendBexManifestJson (json) {},
 
       /**
-       * The list of extra scripts (js/ts) not in your bex manifest that you want to
-       * compile and use in your browser extension. Maybe dynamic use them?
+       * The list of extra scripts (js/ts) not in your bex manifest that you want to compile and use in your browser
+       * extension. Maybe dynamic use them?
        *
        * Each entry in the list should be a relative filename to /src-bex/.
-       * @example [ 'my-script.ts', 'sub-folder/my-other-script.js' ]
+       *
+       * @example
+       *   {undefined} ('my-script.ts',
+       *   'sub-folder/my-other-script.js');
        */
       extraScripts: [],
     },

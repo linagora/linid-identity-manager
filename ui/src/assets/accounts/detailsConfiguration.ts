@@ -26,9 +26,7 @@
 
 import type { Account } from 'src/types/accounts';
 
-/**
- * Defines the order of account fields to be displayed in the details view.
- */
+/** Defines the order of account fields to be displayed in the details view. */
 export const fieldsOrder: (keyof Account)[] = [
   'firstname',
   'lastname',

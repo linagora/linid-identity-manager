@@ -402,9 +402,8 @@ export const accountLifecycleUiConfiguration = {
 };
 
 /**
- * Shape of a single lifecycle dialog form field, inferred from the lifecycle UI
- * configurations. Shared by the account and organizational unit configurations,
- * which declare fields of the same shape, and consumed by the form dialog.
+ * Shape of a single lifecycle dialog form field, inferred from the lifecycle UI configurations. Shared by the account
+ * and organizational unit configurations, which declare fields of the same shape, and consumed by the form dialog.
  */
 export type LifecycleFormField =
   (typeof accountLifecycleUiConfiguration)[keyof typeof accountLifecycleUiConfiguration][number];

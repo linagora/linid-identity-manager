@@ -41,6 +41,7 @@ import type {
 
 /**
  * Mapper for accounts-related data transformations.
+ *
  * @returns Functions to convert API records to UI-friendly formats and to transform search filters for Spring Security.
  */
 export function useAccountMapper() {
@@ -54,6 +55,7 @@ export function useAccountMapper() {
 
   /**
    * Maps an AccountDTO to an Account, converting date to date ISO.
+   *
    * @param account AccountDTO to be transformed into an Account.
    * @returns Account with properly typed fields for UI.
    */
@@ -72,9 +74,9 @@ export function useAccountMapper() {
   };
 
   /**
-   * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status
-   * fields. Identity fields (firstname, lastname, ...) are intentionally not
-   * included; combine with {@link toAccount} when both are needed.
+   * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status fields. Identity fields (firstname,
+   * lastname, ...) are intentionally not included; combine with {@link toAccount} when both are needed.
+   *
    * @param account AccountDTO to be transformed into an AccountStatus.
    * @returns AccountStatus with lifecycle fields preserved as ISO strings.
    */
@@ -89,7 +91,9 @@ export function useAccountMapper() {
   };
 
   /**
-   * Maps an array of AccountDTOs to an array of Accounts, converting dates from date ISO to date with local date format.
+   * Maps an array of AccountDTOs to an array of Accounts, converting dates from date ISO to date with local date
+   * format.
+   *
    * @param accounts Array of AccountDTOs to be transformed into Accounts.
    * @returns Array of Accounts with properly typed fields for UI.
    */
@@ -98,8 +102,12 @@ export function useAccountMapper() {
   };
 
   /**
-   * Transforms advanced search filters from the UI into a format suitable for API filters. The `insertDate` value is forwarded as-is: the date field applies a locale-aware input mask, so the value is already formatted in the same `dateFormat` declared in the i18n translations.
-   * @param advancedSearchFilters Record containing the raw filter values entered by the user in the advanced search form.
+   * Transforms advanced search filters from the UI into a format suitable for API filters. The `insertDate` value is
+   * forwarded as-is: the date field applies a locale-aware input mask, so the value is already formatted in the same
+   * `dateFormat` declared in the i18n translations.
+   *
+   * @param advancedSearchFilters Record containing the raw filter values entered by the user in the advanced search
+   *   form.
    * @returns AccountQueryFilterDTO with properly formatted filter values for querying accounts in the backend.
    */
   const toAccountQueryFilterDTO = (
@@ -116,7 +124,9 @@ export function useAccountMapper() {
   };
 
   /**
-   * Transforms an AccountForm into an AccountRecord, nesting the validity period fields into a single validityPeriod object.
+   * Transforms an AccountForm into an AccountRecord, nesting the validity period fields into a single validityPeriod
+   * object.
+   *
    * @param account AccountForm containing the flat fields from the account creation form.
    * @returns AccountRecord with the validity period properly structured for API consumption.
    */
@@ -133,11 +143,11 @@ export function useAccountMapper() {
   };
 
   /**
-   * Transforms form data into an AccountSuspensionRecord, nesting the flat
-   * suspension start/end fields into a suspension period object.
-   * @param formData - Record containing the raw form data entered by the user
-   *                   for suspending the account (flat suspension period fields
-   *                   plus reason, sub-reason and comment).
+   * Transforms form data into an AccountSuspensionRecord, nesting the flat suspension start/end fields into a
+   * suspension period object.
+   *
+   * @param formData - Record containing the raw form data entered by the user for suspending the account (flat
+   *   suspension period fields plus reason, sub-reason and comment).
    * @returns AccountSuspensionRecord ready for API consumption.
    */
   const toAccountSuspensionRecord = (
@@ -155,8 +165,9 @@ export function useAccountMapper() {
   };
 
   /**
-   * Transforms form data into an AccountDeactivationRecord. The validity period
-   * end date becomes the deactivation timestamp.
+   * Transforms form data into an AccountDeactivationRecord. The validity period end date becomes the deactivation
+   * timestamp.
+   *
    * @param formData - The flattened account status form data.
    * @returns AccountDeactivationRecord ready for API consumption.
    */
@@ -172,8 +183,8 @@ export function useAccountMapper() {
   };
 
   /**
-   * Transforms form data into an AccountReactivationRecord carrying the mandatory
-   * justification comment.
+   * Transforms form data into an AccountReactivationRecord carrying the mandatory justification comment.
+   *
    * @param formData - The flattened account status form data.
    * @returns AccountReactivationRecord ready for API consumption.
    */
@@ -194,6 +205,7 @@ export function useAccountMapper() {
 
   /**
    * Transforms form data into an AccountValidityRecord carrying the validity period start.
+   *
    * @param formData - The flattened account status form data.
    * @returns AccountValidityRecord ready for API consumption.
    */
@@ -209,6 +221,7 @@ export function useAccountMapper() {
    * Flattens an {@link AccountStatus} into an {@link AccountStatusForm} to pre-fill the "modify" dialogs with the
    * existing validity and suspension period bounds. The reason / sub-reason / comment fields are intentionally left
    * empty: the read model no longer carries a generic status reason, and a modification expects a fresh justification.
+   *
    * @param accountStatus - The current account status providing the existing period bounds.
    * @returns The flattened form values with localized period dates.
    */

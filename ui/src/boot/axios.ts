@@ -31,10 +31,7 @@ import { getUser, oidcClient } from './oidc';
 import { defineBoot } from '#q-app/wrappers';
 
 declare module 'vue' {
-  /**
-   *  Augmenting Vue's ComponentCustomProperties interface
-   *  to include $axios and $api properties for Axios instances.
-   */
+  /** Augmenting Vue's ComponentCustomProperties interface to include $axios and $api properties for Axios instances. */
   interface ComponentCustomProperties {
     // eslint-disable-next-line jsdoc/require-jsdoc
     $axios: AxiosInstance;
@@ -91,6 +88,7 @@ api.interceptors.response.use(
 
 /**
  * Boot file to configure Axios and add it to the global Vue properties.
+ *
  * @param app - The Vue application instance.
  */
 export default defineBoot(({ app }) => {

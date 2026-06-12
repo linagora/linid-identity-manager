@@ -25,17 +25,15 @@
  */
 
 /**
- * Runtime application configuration loaded from `public/config.json`. Holds
- * deployment-specific values that must be tunable without rebuilding the UI.
+ * Runtime application configuration loaded from `public/config.json`. Holds deployment-specific values that must be
+ * tunable without rebuilding the UI.
  */
 export interface AppConfig {
   /**
-   * Static list of organizational unit types offered by the OU creation form.
-   * The order is the one rendered in the type selector.
+   * Static list of organizational unit types offered by the OU creation form. The order is the one rendered in the type
+   * selector.
    */
   organizationalUnitTypes: string[];
-  /**
-   * Number of organizational units to fetch per page when querying the API.
-   */
+  /** Number of organizational units to fetch per page when querying the API. */
   organizationalUnitQuerySize: number;
 }

@@ -34,16 +34,16 @@ import type { AppConfig } from 'src/types/appConfig';
 import { Composer } from 'vue-i18n';
 
 /**
- * Runtime application configuration loaded from `public/config.json` during
- * boot. Undefined until the boot file has resolved.
+ * Runtime application configuration loaded from `public/config.json` during boot. Undefined until the boot file has
+ * resolved.
  */
 export let appConfig: AppConfig;
 
 /**
  * Application configuration boot file.
  *
- * Fetches the runtime configuration from `/config.json`, then registers
- * navigation menu items into the UI store.
+ * Fetches the runtime configuration from `/config.json`, then registers navigation menu items into the UI store.
+ *
  * @throws {Error} When the config.json file cannot be fetched.
  */
 export default defineBoot(async (): Promise<void> => {

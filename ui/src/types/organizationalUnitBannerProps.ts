@@ -26,27 +26,16 @@
 
 import type { OrganizationalUnitStatus } from 'src/types/organizationalUnits';
 
-/**
- * Props for OrganizationalUnit banner components.
- */
+/** Props for OrganizationalUnit banner components. */
 export interface OrganizationalUnitBannerProps {
-  /**
-   * Current suspension status of the organizational unit.
-   */
+  /** Current suspension status of the organizational unit. */
   organizationalUnitStatus: OrganizationalUnitStatus;
 }
 
-/**
- * Events emitted by the OrganizationalUnit Suspended Banner component.
- */
+/** Events emitted by the OrganizationalUnit Suspended Banner component. */
 export interface OrganizationalUnitSuspendedBannerOutputs {
-  /**
-   * Emitted when the user chooses to immediately reactivate the OU
-   * (clear the active suspension).
-   */
+  /** Emitted when the user chooses to immediately reactivate the OU (clear the active suspension). */
   'clear-suspension': [];
-  /**
-   * Emitted when the user requests to modify the suspension end date.
-   */
+  /** Emitted when the user requests to modify the suspension end date. */
   'modify-suspension-end': [];
 }

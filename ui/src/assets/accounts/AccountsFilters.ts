@@ -26,9 +26,7 @@
 
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 
-/**
- * Defines the search fields for the accounts page in the UI.
- */
+/** Defines the search fields for the accounts page in the UI. */
 export const fieldsSearch: LinidAttributeConfiguration[] = [
   {
     name: 'firstname',
@@ -74,9 +72,7 @@ export const fieldsSearch: LinidAttributeConfiguration[] = [
   },
 ];
 
-/**
- * Defines the default fields for the AdvancedSearchCard (fields that are shown by default).
- */
+/** Defines the default fields for the AdvancedSearchCard (fields that are shown by default). */
 export const defaultFields: string[] = [
   'firstname',
   'lastname',
@@ -85,7 +81,5 @@ export const defaultFields: string[] = [
   'insertDate',
 ];
 
-/**
- * Defines the advanced fields for the AdvancedSearchCard (fields that are not shown by default).
- */
+/** Defines the advanced fields for the AdvancedSearchCard (fields that are not shown by default). */
 export const advancedFields: string[] = [];

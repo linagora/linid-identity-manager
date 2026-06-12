@@ -33,80 +33,51 @@ import type {
 } from '@linagora/linid-im-front-corelib';
 import type { ValidationRule } from 'quasar';
 
-/**
- * Supported input types on forms.
- */
+/** Supported input types on forms. */
 export type FieldType = 'text' | 'email' | 'date' | 'select';
 
-/**
- * Declarative definition of a single form field.
- */
+/** Declarative definition of a single form field. */
 export interface FormField<T> {
-  /**
-   * Key of the field inside {@link T}.
-   */
+  /** Key of the field inside {@link T}. */
   name: Extract<keyof T, string>;
-  /**
-   * Translated label displayed next to the input.
-   */
+  /** Translated label displayed next to the input. */
   label: string;
-  /**
-   * Input type rendered by the q-input component.
-   */
+  /** Input type rendered by the q-input component. */
   type: FieldType;
-  /**
-   * Validation rules applied to the field in the order they should run.
-   */
+  /** Validation rules applied to the field in the order they should run. */
   rules: ValidationRule[];
-  /**
-   * Static list of values offered by `select` fields. Ignored for any other
-   * field type.
-   */
+  /** Static list of values offered by `select` fields. Ignored for any other field type. */
   options?: string[];
 }
 
 /**
- * UI props for the account creation form, grouped by field name. Each field
- * carries the props for the q-input, plus the icon, date picker and button
- * components used by date fields, so a single object drives every binding.
+ * UI props for the account creation form, grouped by field name. Each field carries the props for the q-input, plus the
+ * icon, date picker and button components used by date fields, so a single object drives every binding.
  */
 export type DatePickerUiProps = Record<
   string,
   {
-    /**
-     * Props applied to the q-input component.
-     */
+    /** Props applied to the q-input component. */
     input: LinidQInputProps;
-    /**
-     * Icon props for the date picker component.
-     */
+    /** Icon props for the date picker component. */
     icon: LinidQIconProps;
-    /**
-     * Date props for the date picker component.
-     */
+    /** Date props for the date picker component. */
     date: LinidQDateProps;
-    /**
-     * Button props for the date picker component.
-     */
+    /** Button props for the date picker component. */
     btn: LinidQBtnProps;
   }
 >;
 
 /**
- * UI props for the organizational unit creation form, grouped by field name.
- * Each field carries the props for the q-input and q-select components so a
- * single object drives every field binding.
+ * UI props for the organizational unit creation form, grouped by field name. Each field carries the props for the
+ * q-input and q-select components so a single object drives every field binding.
  */
 export type FieldUiProps = Record<
   string,
   {
-    /**
-     * Props applied to q-input fields.
-     */
+    /** Props applied to q-input fields. */
     input: LinidQInputProps;
-    /**
-     * Props applied to q-select fields.
-     */
+    /** Props applied to q-select fields. */
     select: LinidQSelectProps;
   }
 >;

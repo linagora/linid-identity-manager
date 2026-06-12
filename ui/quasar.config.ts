@@ -20,11 +20,11 @@ export default defineConfig((ctx) => {
       'nunjucks',
       'i18n',
       'axios',
-      'ui-design',
       'remotes',
       'module-lifecycle',
       'theme',
       'config',
+      'ui-design',
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css

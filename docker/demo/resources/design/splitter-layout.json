@@ -1,0 +1,21 @@
+{
+  "splitter-layout": {
+    "header": {
+      "q-header": {},
+      "q-toolbar": {},
+      "q-avatar": {},
+      "q-badge": {},
+      "navigation-menu": {
+        "q-tabs": {},
+        "route-accounts": {
+          "q-route-tab": {}
+        }
+      },
+      "header-profile": {
+        "q-btn": {},
+        "q-item-section": {},
+        "q-item-label": {}
+      }
+    }
+  }
+}

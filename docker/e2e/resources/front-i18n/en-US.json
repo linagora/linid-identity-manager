@@ -17,6 +17,8 @@
     "GenericTree": {
       "filterLabel": "Filter organizational units",
       "filterHint": "Enter text to filter organizational units.",
+      "noResultsLabel": "No organizational unit matches the filter.",
+      "noNodesLabel": "No organizational unit to display.",
       "types": {
         "root": {
           "label": "Organizational units"

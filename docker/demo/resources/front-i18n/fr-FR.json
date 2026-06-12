@@ -17,6 +17,8 @@
     "GenericTree": {
       "filterLabel": "Filtrer les unités organisationnelles",
       "filterHint": "Saisissez un texte pour filtrer les unités organisationnelles.",
+      "noResultsLabel": "Aucune unité organisationnelle ne correspond au filtre.",
+      "noNodesLabel": "Aucune unité organisationnelle à afficher.",
       "types": {
         "root": {
           "label": "Unités organisationnelles"

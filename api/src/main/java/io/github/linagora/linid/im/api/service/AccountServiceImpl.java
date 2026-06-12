@@ -260,19 +260,31 @@ public class AccountServiceImpl implements AccountService {
 
         accountReactivationValidator.validate(status, record, accountId);
 
-        // A scheduled (not-yet-started) suspension is cancelled outright, since ending it at now would
-        // produce an invalid range; an already-started one is simply ended now. Its reason fields are cleared.
         OffsetDateTime now = OffsetDateTime.now();
-        OffsetDateTime suspensionStart = commonMapper.startOf(status.getSuspensionPeriod());
-        if (suspensionStart != null && suspensionStart.isAfter(now)) {
-            status.setSuspensionPeriod(null);
-        } else {
-            status.setSuspensionPeriod(commonMapper.toRange(new PeriodRecord(suspensionStart, now)));
+
+        // Lift an existing suspension: a scheduled (not-yet-started) one is cancelled outright, since
+        // ending it at now would produce an invalid range; an already-started one is simply ended now.
+        // Its reason fields are cleared.
+        if (status.getSuspensionPeriod() != null) {
+            OffsetDateTime suspensionStart = commonMapper.startOf(status.getSuspensionPeriod());
+            if (suspensionStart != null && suspensionStart.isAfter(now)) {
+                status.setSuspensionPeriod(null);
+            } else {
+                status.setSuspensionPeriod(commonMapper.toRange(new PeriodRecord(suspensionStart, now)));
+            }
+            status.setSuspensionReason(null);
+            status.setSuspensionSubreason(null);
+            status.setSuspensionComment(null);
         }
 
-        status.setSuspensionReason(null);
-        status.setSuspensionSubreason(null);
-        status.setSuspensionComment(null);
+        // Re-validate a deactivated account: push the validity period end to the requested date while
+        // preserving the existing start. The deactivation reason fields are intentionally kept.
+        if (record.validityEnd() != null) {
+            OffsetDateTime validityStart = commonMapper.startOf(status.getValidityPeriod());
+            status.setValidityPeriod(
+                commonMapper.toRange(new PeriodRecord(validityStart, record.validityEnd())));
+        }
+
         accountStatusMapper.applyReactivation(status, record, userPrincipal.getId());
         accountStatusRepository.saveAndFlush(status);
 

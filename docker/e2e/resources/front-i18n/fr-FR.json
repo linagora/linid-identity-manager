@@ -702,20 +702,27 @@
     }
   },
   "AccountRevalidationActions": {
-    "ConfirmationDialog": {
+    "FormDialog": {
       "immediate": {
         "title": "Réactivation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
+        "content": "Veuillez fournir une justification pour réactiver ce compte immédiatement.",
+        "fields": {
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          }
+        },
         "ButtonsCard": {
           "confirm": "Réactiver",
           "cancel": "Annuler"
         }
-      }
-    },
-    "FormDialog": {
+      },
       "scheduled": {
         "title": "Planifier la réactivation du compte",
-        "content": "Veuillez sélectionner une nouvelle date de fin de validité.",
+        "content": "Veuillez sélectionner une nouvelle date de fin de validité et fournir une justification.",
         "fields": {
           "validityPeriodEnd": {
             "label": "Date de fin de validité",
@@ -724,6 +731,13 @@
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
               "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+            "validation": {
+              "required": "Ce champ est requis."
             }
           }
         },

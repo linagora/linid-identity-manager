@@ -373,21 +373,29 @@ export default {
     },
   },
   AccountRevalidationActions: {
-    ConfirmationDialog: {
+    FormDialog: {
       immediate: {
         title: 'Immediate Account Reactivation',
         content:
-          'Are you sure you want to reactivate this account immediately?',
+          'Please provide a justification to reactivate this account immediately.',
+        fields: {
+          statusComment: {
+            label: 'Justification',
+            hint: 'Provide a mandatory justification for this reactivation.',
+            validation: {
+              required: 'This field is required.',
+            },
+          },
+        },
         ButtonsCard: {
           confirm: 'Reactivate',
           cancel: 'Cancel',
         },
       },
-    },
-    FormDialog: {
       scheduled: {
         title: 'Schedule Account Reactivation',
-        content: 'Please select a new validity period end date.',
+        content:
+          'Please select a new validity period end date and provide a justification.',
         fields: {
           validityPeriodEnd: {
             label: 'Validity period end date',
@@ -396,6 +404,13 @@ export default {
               required: 'This field is required.',
               invalidDate: 'Invalid date format. Expected format is {format}.',
               afterDate: 'The date cannot be earlier than today.',
+            },
+          },
+          statusComment: {
+            label: 'Justification',
+            hint: 'Provide a mandatory justification for this reactivation.',
+            validation: {
+              required: 'This field is required.',
             },
           },
         },

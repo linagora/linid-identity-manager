@@ -52,7 +52,7 @@ class AccountReactivationValidatorTest {
 
     @BeforeEach
     void setUp() {
-        this.validator = new AccountReactivationValidator(new CommonMapper());
+        this.validator = new AccountReactivationValidator(new CommonMapper(), new PeriodValidator());
         this.now = OffsetDateTime.now();
     }
 
@@ -69,7 +69,7 @@ class AccountReactivationValidatorTest {
     void testValidate_shouldAcceptWhenSuspended() {
         AccountStatus status = new AccountStatus();
         status.setSuspensionPeriod(closedOpen(now.minusDays(1), now.plusDays(10)));
-        AccountReactivationRecord record = new AccountReactivationRecord("comment");
+        AccountReactivationRecord record = new AccountReactivationRecord("comment", null);
 
         assertDoesNotThrow(() -> validator.validate(status, record, ACCOUNT_ID));
     }
@@ -79,33 +79,59 @@ class AccountReactivationValidatorTest {
     void testValidate_shouldAcceptWhenSuspensionOpenEnded() {
         AccountStatus status = new AccountStatus();
         status.setSuspensionPeriod(closedInfinite(now.minusDays(1)));
-        AccountReactivationRecord record = new AccountReactivationRecord("comment");
+        AccountReactivationRecord record = new AccountReactivationRecord("comment", null);
 
         assertDoesNotThrow(() -> validator.validate(status, record, ACCOUNT_ID));
     }
 
     @Test
-    @DisplayName("ensureSuspended should throw 400 when no suspension period is set")
-    void testEnsureSuspended_shouldThrowWhenNotSuspended() {
+    @DisplayName("validate should accept reactivation when the account is deactivated (validity end in the past)")
+    void testValidate_shouldAcceptWhenDeactivated() {
         AccountStatus status = new AccountStatus();
+        status.setValidityPeriod(closedOpen(now.minusDays(30), now.minusDays(1)));
+        AccountReactivationRecord record = new AccountReactivationRecord("comment", now.plusYears(1));
 
-        ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspended(status, ACCOUNT_ID));
-
-        assertEquals(400, ex.getStatusCode());
-        assertEquals("error.account.status.not_suspended", ex.getError().key());
+        assertDoesNotThrow(() -> validator.validate(status, record, ACCOUNT_ID));
     }
 
     @Test
-    @DisplayName("ensureSuspended should throw 400 when the suspension end is already in the past")
-    void testEnsureSuspended_shouldThrowWhenSuspensionEndInPast() {
+    @DisplayName("ensureReactivatable should throw 400 when neither suspended nor deactivated")
+    void testEnsureReactivatable_shouldThrowWhenNothingToReactivate() {
         AccountStatus status = new AccountStatus();
-        status.setSuspensionPeriod(closedOpen(now.minusDays(10), now.minusDays(1)));
+        status.setValidityPeriod(closedInfinite(now.minusDays(1)));
 
         ApiException ex = assertThrows(ApiException.class,
-            () -> validator.ensureSuspended(status, ACCOUNT_ID));
+            () -> validator.ensureReactivatable(status, ACCOUNT_ID));
 
         assertEquals(400, ex.getStatusCode());
-        assertEquals("error.account.status.not_suspended", ex.getError().key());
+        assertEquals("error.account.status.nothing_to_reactivate", ex.getError().key());
+    }
+
+    @Test
+    @DisplayName("ensureReactivatable should throw 400 when the suspension end is already in the past")
+    void testEnsureReactivatable_shouldThrowWhenSuspensionEndInPast() {
+        AccountStatus status = new AccountStatus();
+        status.setSuspensionPeriod(closedOpen(now.minusDays(10), now.minusDays(1)));
+        status.setValidityPeriod(closedInfinite(now.minusDays(20)));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> validator.ensureReactivatable(status, ACCOUNT_ID));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.nothing_to_reactivate", ex.getError().key());
+    }
+
+    @Test
+    @DisplayName("validate should throw 400 when the provided validity end is in the past")
+    void testValidate_shouldThrowWhenValidityEndInPast() {
+        AccountStatus status = new AccountStatus();
+        status.setValidityPeriod(closedOpen(now.minusDays(30), now.minusDays(1)));
+        AccountReactivationRecord record = new AccountReactivationRecord("comment", now.minusDays(1));
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> validator.validate(status, record, ACCOUNT_ID));
+
+        assertEquals(400, ex.getStatusCode());
+        assertEquals("error.account.status.validity_end_in_past", ex.getError().key());
     }
 }

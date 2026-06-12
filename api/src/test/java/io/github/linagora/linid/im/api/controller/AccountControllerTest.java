@@ -303,7 +303,7 @@ class AccountControllerTest {
     @DisplayName("Should reactivate account and return 200 with AccountViewDTO")
     void testReactivate_shouldReturn200WithAccountViewDTO() {
         UUID id = UUID.randomUUID();
-        var record = new AccountReactivationRecord("Investigation closed");
+        var record = new AccountReactivationRecord("Investigation closed", null);
         var entity = createSampleViewEntity();
         var dto = createSampleViewDTO(entity);
         when(accountService.reactivate(userPrincipal, id, record)).thenReturn(entity);

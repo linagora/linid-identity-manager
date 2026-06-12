@@ -359,6 +359,31 @@ describe('Test mapper: useAccountMapper', () => {
 
       expect(toAccountReactivationRecord({})).toEqual({ comment: '' });
     });
+
+    it('should add the validity end when re-validating a deactivated account', () => {
+      const { toAccountReactivationRecord } = useAccountMapper();
+
+      const result = toAccountReactivationRecord({
+        statusComment: 'Re-validated after appeal',
+        validityPeriodEnd: '2099-12-31T00:00:00.000Z',
+      });
+
+      expect(result).toEqual({
+        comment: 'Re-validated after appeal',
+        validityEnd: '2099-12-31T00:00:00.000Z',
+      });
+    });
+
+    it('should omit the validity end when no end date is provided', () => {
+      const { toAccountReactivationRecord } = useAccountMapper();
+
+      const result = toAccountReactivationRecord({
+        statusComment: 'Lifting suspension only',
+      });
+
+      expect(result).toEqual({ comment: 'Lifting suspension only' });
+      expect(result).not.toHaveProperty('validityEnd');
+    });
   });
 
   describe('Test function: toAccountValidityRecord', () => {

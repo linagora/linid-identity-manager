@@ -224,9 +224,8 @@ const hasAnyLifecycleAction = computed(() =>
 );
 
 /**
- * Loads the account data from the backend based on the route parameter and
- * splits the raw DTO into the page-level identity (`account`) and lifecycle
- * (`accountStatus`) projections.
+ * Loads the account data from the backend based on the route parameter and splits the raw DTO into the page-level
+ * identity (`account`) and lifecycle (`accountStatus`) projections.
  */
 async function loadAccount(): Promise<void> {
   isLoading.value = true;
@@ -249,9 +248,7 @@ async function loadAccount(): Promise<void> {
   }
 }
 
-/**
- * Navigates back to the accounts list.
- */
+/** Navigates back to the accounts list. */
 function goBack(): void {
   router.push('/accounts');
 }
@@ -261,8 +258,9 @@ onMounted(() => {
 });
 
 /**
- * Handles click events on lifecycle action menu items by opening a confirmation
- * or form dialog before executing the action.
+ * Handles click events on lifecycle action menu items by opening a confirmation or form dialog before executing the
+ * action.
+ *
  * @param action - The lifecycle action associated with the clicked menu item.
  */
 function onLifecycleAction(action: string | DropdownClickPayload<string>) {
@@ -310,9 +308,7 @@ function onLifecycleAction(action: string | DropdownClickPayload<string>) {
   }
 }
 
-/**
- * Opens a confirmation dialog for the immediate activation action.
- */
+/** Opens a confirmation dialog for the immediate activation action. */
 function immediateActivation() {
   openConfirmationDialog({
     i18nScope: 'AccountActivationActions.ConfirmationDialog.immediate',
@@ -330,9 +326,7 @@ function immediateActivation() {
   });
 }
 
-/**
- * Opens a form dialog for the immediate suspension action.
- */
+/** Opens a form dialog for the immediate suspension action. */
 function immediateSuspension() {
   openFormDialog({
     i18nScope: 'AccountSuspensionActions.FormDialog.immediate',
@@ -352,9 +346,7 @@ function immediateSuspension() {
   });
 }
 
-/**
- * Opens a form dialog for the immediate deactivation action.
- */
+/** Opens a form dialog for the immediate deactivation action. */
 function immediateDeactivation() {
   openFormDialog({
     i18nScope: 'AccountDeactivationActions.FormDialog.immediate',
@@ -374,9 +366,7 @@ function immediateDeactivation() {
   });
 }
 
-/**
- * Opens a form dialog for the immediate reactivation action.
- */
+/** Opens a form dialog for the immediate reactivation action. */
 function immediateReactivation() {
   openFormDialog({
     i18nScope: 'AccountReactivationActions.FormDialog.immediate',
@@ -394,9 +384,9 @@ function immediateReactivation() {
 }
 
 /**
- * Opens a form dialog for the immediate revalidation action of a deactivated
- * account. The user provides a mandatory justification comment, and the validity
- * period end is pushed one hour into the future so the account becomes active again shortly.
+ * Opens a form dialog for the immediate revalidation action of a deactivated account. The user provides a mandatory
+ * justification comment, and the validity period end is pushed one hour into the future so the account becomes active
+ * again shortly.
  */
 function immediateRevalidation() {
   openFormDialog({
@@ -418,8 +408,8 @@ function immediateRevalidation() {
 }
 
 /**
- * Opens a form dialog for the scheduled revalidation action of a deactivated
- * account, letting the user pick a new validity period end in the future.
+ * Opens a form dialog for the scheduled revalidation action of a deactivated account, letting the user pick a new
+ * validity period end in the future.
  */
 function scheduledRevalidation() {
   openFormDialog({
@@ -438,9 +428,7 @@ function scheduledRevalidation() {
   });
 }
 
-/**
- * Opens a form dialog for the scheduled activation action.
- */
+/** Opens a form dialog for the scheduled activation action. */
 function scheduledActivation() {
   openFormDialog({
     i18nScope: 'AccountActivationActions.FormDialog.scheduled',
@@ -458,9 +446,7 @@ function scheduledActivation() {
   });
 }
 
-/**
- * Opens a form dialog for the scheduled deactivation action.
- */
+/** Opens a form dialog for the scheduled deactivation action. */
 function scheduledDeactivation() {
   openFormDialog({
     i18nScope: 'AccountDeactivationActions.FormDialog.scheduled',
@@ -478,10 +464,7 @@ function scheduledDeactivation() {
   });
 }
 
-/**
- * Opens a form dialog for the modify deactivation action, pre-filled with the
- * existing validity period bounds.
- */
+/** Opens a form dialog for the modify deactivation action, pre-filled with the existing validity period bounds. */
 function modifyDeactivation() {
   openFormDialog({
     i18nScope: 'AccountDeactivationActions.FormDialog.modify',
@@ -502,9 +485,7 @@ function modifyDeactivation() {
   });
 }
 
-/**
- * Opens a form dialog for the scheduled suspension action.
- */
+/** Opens a form dialog for the scheduled suspension action. */
 function scheduledSuspension() {
   openFormDialog({
     i18nScope: 'AccountSuspensionActions.FormDialog.scheduled',
@@ -519,10 +500,7 @@ function scheduledSuspension() {
   });
 }
 
-/**
- * Opens a form dialog for the modify suspension action, pre-filled with the
- * existing suspension period bounds.
- */
+/** Opens a form dialog for the modify suspension action, pre-filled with the existing suspension period bounds. */
 function modifySuspension() {
   openFormDialog({
     i18nScope: 'AccountSuspensionActions.FormDialog.modify',
@@ -541,14 +519,14 @@ function modifySuspension() {
 }
 
 /**
- * Runs a status-update API call, then updates the page state with the refreshed
- * account information. Displays a notification in case of an error during the
- * update process.
+ * Runs a status-update API call, then updates the page state with the refreshed account information. Displays a
+ * notification in case of an error during the update process.
+ *
  * @param statusUpdate - The status-mutation service call to execute, resolving to the updated account DTO.
  * @param successMsgKey - Optional i18n key for the success message to display upon successful update.
  * @param dateToDisplayInSuccessMsg - Optional date to display in the success message.
- * @returns A promise that resolves once the account status has been updated
- *          and the page state has been refreshed with the new account information.
+ * @returns A promise that resolves once the account status has been updated and the page state has been refreshed with
+ *   the new account information.
  */
 async function updateAccountStatus(
   statusUpdate: () => Promise<AccountDTO>,

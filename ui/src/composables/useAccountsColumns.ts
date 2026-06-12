@@ -29,6 +29,7 @@ import { useI18n } from 'vue-i18n';
 
 /**
  * Defines the columns for the accounts table in the UI.
+ *
  * @returns An array of QTableColumn objects representing the columns.
  */
 export function useAccountsColumns() {

@@ -54,9 +54,7 @@ const { toDate } = useCommonMapper();
 const { t } = useScopedI18n('AccountDeactivatedInfoText');
 const { ui } = useUiDesign();
 const props = defineProps<{
-  /**
-   * Account lifecycle status, used to display the deactivation date.
-   */
+  /** Account lifecycle status, used to display the deactivation date. */
   accountStatus: AccountStatus;
 }>();
 const endDate = computed(() => toDate(props.accountStatus.validityPeriod.end));

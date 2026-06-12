@@ -31,6 +31,7 @@ import { useI18n } from 'vue-i18n';
 
 /**
  * Common mapper for data transformations.
+ *
  * @returns Functions to convert datas.
  */
 export function useCommonMapper() {
@@ -39,9 +40,13 @@ export function useCommonMapper() {
 
   /**
    * Convert ISO date to date with local date time format.
-   * @param value Date string in ISO format (e.g., "2024-06-30T12:34:56.789Z") to be converted to a human-readable format.
-   * @param formatKey Optional format key to specify the desired date format from the i18n translations (default is "dateFormat").
-   * @returns Formatted date string according to the application's locale settings, or "" if the input is invalid or falsy.
+   *
+   * @param value Date string in ISO format (e.g., "2024-06-30T12:34:56.789Z") to be converted to a human-readable
+   *   format.
+   * @param formatKey Optional format key to specify the desired date format from the i18n translations (default is
+   *   "dateFormat").
+   * @returns Formatted date string according to the application's locale settings, or "" if the input is invalid or
+   *   falsy.
    */
   const toDate = (value: unknown, formatKey: string = 'dateFormat'): string => {
     if (!value) {
@@ -56,8 +61,10 @@ export function useCommonMapper() {
 
   /**
    * Matches a strict ISO 8601 datetime string of the form `YYYY-MM-DDThh:mm:ss[.sss](Z|±hh:mm)`.
+   *
    * - `^\d{4}-\d{2}-\d{2}` — date part: four-digit year, two-digit month, two-digit day, separated by hyphens.
-   * - `T\d{2}:\d{2}:\d{2}` — time part: two-digit hour, minute, and second, separated by colons, preceded by the literal `T`.
+   * - `T\d{2}:\d{2}:\d{2}` — time part: two-digit hour, minute, and second, separated by colons, preceded by the literal
+   *   `T`.
    * - `(\.\d+)?` — optional fractional seconds (one or more digits after a dot).
    * - `(Z|[+-]\d{2}:\d{2})$` — mandatory timezone: either the UTC designator `Z`, or a signed offset in `±hh:mm` form.
    */
@@ -65,18 +72,19 @@ export function useCommonMapper() {
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/;
 
   /**
-   * Convert a date string to a canonical ISO 8601 UTC string.
-   * If the input matches the ISO 8601 datetime pattern (detected via regex), it is parsed
-   * by dayjs, validated, and normalized to a UTC ISO string. If the input does not match
-   * the ISO pattern, strict parsing is applied using the locale format retrieved from
-   * `application.${formatKey}` (e.g., "DD/MM/YYYY").
-   * @param value Date string to be converted to ISO format for API consumption. The value must
-   * either be a valid ISO 8601 string, or match the format pattern retrieved from
-   * `application.${formatKey}`; strict parsing is enforced in both cases, so any value
-   * that does not exactly match the expected format or is semantically invalid will
-   * return an empty string.
-   * @param formatKey Optional format key to specify the expected input date format from the i18n translations (default is "dateFormat").
-   * @returns Canonical string in ISO 8601 UTC format (e.g., "2024-06-30T00:00:00.000Z"), or an empty string if the input is falsy, does not match the expected format, or represents an invalid date.
+   * Convert a date string to a canonical ISO 8601 UTC string. If the input matches the ISO 8601 datetime pattern
+   * (detected via regex), it is parsed by dayjs, validated, and normalized to a UTC ISO string. If the input does not
+   * match the ISO pattern, strict parsing is applied using the locale format retrieved from `application.${formatKey}`
+   * (e.g., "DD/MM/YYYY").
+   *
+   * @param value Date string to be converted to ISO format for API consumption. The value must either be a valid ISO
+   *   8601 string, or match the format pattern retrieved from `application.${formatKey}`; strict parsing is enforced in
+   *   both cases, so any value that does not exactly match the expected format or is semantically invalid will return
+   *   an empty string.
+   * @param formatKey Optional format key to specify the expected input date format from the i18n translations (default
+   *   is "dateFormat").
+   * @returns Canonical string in ISO 8601 UTC format (e.g., "2024-06-30T00:00:00.000Z"), or an empty string if the
+   *   input is falsy, does not match the expected format, or represents an invalid date.
    */
   const toDateISO = (
     value: unknown,
@@ -97,9 +105,9 @@ export function useCommonMapper() {
   };
 
   /**
-   * Build an empty record seed where every field declared in {@link fields}
-   * is set to an empty string. Generic over the record type {@link T} so it
-   * can be reused by any resource-specific form configuration.
+   * Build an empty record seed where every field declared in {@link fields} is set to an empty string. Generic over the
+   * record type {@link T} so it can be reused by any resource-specific form configuration.
+   *
    * @param fields - The form fields that define the shape of the record.
    * @returns A fresh empty record matching the given field set.
    */
@@ -112,8 +120,9 @@ export function useCommonMapper() {
 
   /**
    * Converts a string value into a "like" filter format expected by the API.
+   *
    * @param value String value to be converted into a like filter.
-   * @returns String formatted as a like filter (e.g., "lk_*value*") for use in API queries.
+   * @returns String formatted as a like filter (e.g., "lk__value_") for use in API queries.
    */
   const toLikeFilter = (value: unknown): string[] | null => {
     const v = value?.toString() || '';
@@ -125,6 +134,7 @@ export function useCommonMapper() {
 
   /**
    * Converts a date string value into an "Equal" filter format expected by the API.
+   *
    * @param value Date string value to be converted into an equal filter.
    * @returns String formatted as an equal filter for use in API queries.
    */
@@ -137,8 +147,9 @@ export function useCommonMapper() {
   };
 
   /**
-   * Parses a date value into a {@link Dayjs} object. Returns null when the
-   * input is falsy, the placeholder "-", or cannot be parsed by dayjs.
+   * Parses a date value into a {@link Dayjs} object. Returns null when the input is falsy, the placeholder "-", or
+   * cannot be parsed by dayjs.
+   *
    * @param value Date value to parse (typically an ISO 8601 string from the API).
    * @returns A Dayjs object, or null when the input is invalid or absent.
    */

@@ -26,10 +26,7 @@
 
 import type { OrganizationalUnit } from 'src/types/organizationalUnits';
 
-/**
- * Defines the order of organizational unit fields to be displayed in the
- * details view.
- */
+/** Defines the order of organizational unit fields to be displayed in the details view. */
 export const fieldsOrder: (keyof OrganizationalUnit)[] = [
   'name',
   'type',

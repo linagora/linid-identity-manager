@@ -26,358 +26,215 @@
 
 import type { Period } from 'src/types/common';
 
-/**
- * Computed account lifecycle status returned by the backend.
- */
+/** Computed account lifecycle status returned by the backend. */
 export type AccountStatusEnum = 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
 
 /**
- * Writable fields of an account, sent to the backend when creating an
- * account. Distinct from {@link AccountDTO}: a record carries only
- * client-provided values, with no server-managed metadata, and may grow
- * write-only fields that never appear in the DTO.
+ * Writable fields of an account, sent to the backend when creating an account. Distinct from {@link AccountDTO}: a
+ * record carries only client-provided values, with no server-managed metadata, and may grow write-only fields that
+ * never appear in the DTO.
  */
 export interface AccountRecord {
-  /**
-   * External business identifier.
-   */
+  /** External business identifier. */
   externalId: string;
-  /**
-   * User last name.
-   */
+  /** User last name. */
   lastname: string;
-  /**
-   * User first name.
-   */
+  /** User first name. */
   firstname: string;
-  /**
-   * User email address.
-   */
+  /** User email address. */
   email: string;
-  /**
-   * Validity period of the account, with start and end dates.
-   */
+  /** Validity period of the account, with start and end dates. */
   validityPeriod: Period;
 }
 
-/**
- * Raw account shape returned by the API.
- */
+/** Raw account shape returned by the API. */
 export interface AccountDTO {
-  /**
-   * Unique account identifier.
-   */
+  /** Unique account identifier. */
   id: string;
-  /**
-   * External business identifier.
-   */
+  /** External business identifier. */
   externalId: string;
-  /**
-   * User last name.
-   */
+  /** User last name. */
   lastname: string;
-  /**
-   * User first name.
-   */
+  /** User first name. */
   firstname: string;
-  /**
-   * User email address.
-   */
+  /** User email address. */
   email: string;
-  /**
-   * Creator identifier.
-   */
+  /** Creator identifier. */
   createdBy: string;
-  /**
-   * Last updater identifier.
-   */
+  /** Last updater identifier. */
   updatedBy: string;
   /**
-   * Account creation timestamp in ISO 8601 / RFC 3339 UTC format
-   * with nanosecond precision.
-   * Example: 2026-04-15T17:09:36.898493688Z.
+   * Account creation timestamp in ISO 8601 / RFC 3339 UTC format with nanosecond precision. Example:
+   * 2026-04-15T17:09:36.898493688Z.
    */
   insertDate: string;
   /**
-   * Account last update timestamp in ISO 8601 / RFC 3339 UTC format
-   * with nanosecond precision.
-   * Example: 2026-04-15T17:09:36.898493688Z.
+   * Account last update timestamp in ISO 8601 / RFC 3339 UTC format with nanosecond precision. Example:
+   * 2026-04-15T17:09:36.898493688Z.
    */
   updateDate: string;
-  /**
-   * Computed account lifecycle status.
-   */
+  /** Computed account lifecycle status. */
   status: AccountStatusEnum;
-  /**
-   * Period during which the account is considered active.
-   */
+  /** Period during which the account is considered active. */
   validityPeriod: Period;
-  /**
-   * Period during which the account is suspended.
-   */
+  /** Period during which the account is suspended. */
   suspensionPeriod: Period;
-  /**
-   * ISO 8601 date-time when the account was last activated, or null if never
-   * activated.
-   */
+  /** ISO 8601 date-time when the account was last activated, or null if never activated. */
   activationAt: string | null;
-  /**
-   * Number of days remaining before the account is deactivated.
-   * Null when the validity period has no upper bound.
-   */
+  /** Number of days remaining before the account is deactivated. Null when the validity period has no upper bound. */
   daysBeforeDeactivation: number | null;
 }
 
-/**
- * Shape of the filter object sent to the backend when querying accounts with filters.
- */
+/** Shape of the filter object sent to the backend when querying accounts with filters. */
 export interface AccountQueryFilterDTO {
-  /**
-   * List of last names to filter by.
-   */
+  /** List of last names to filter by. */
   lastname: string[] | null;
 
-  /**
-   * List of first names to filter by.
-   */
+  /** List of first names to filter by. */
   firstname: string[] | null;
 
-  /**
-   * List of email addresses to filter by.
-   */
+  /** List of email addresses to filter by. */
   email: string[] | null;
 
-  /**
-   * List of createdBy to filter by.
-   */
+  /** List of createdBy to filter by. */
   createdBy: string[] | null;
 
-  /**
-   * List of creation dates to filter by.
-   */
+  /** List of creation dates to filter by. */
   insertDate: string[] | null;
 
-  /**
-   * The date format used in the date filters.
-   */
+  /** The date format used in the date filters. */
   dateFormat: string | null;
 }
 
-/**
- * Account shape consumed by Vue components.
- */
+/** Account shape consumed by Vue components. */
 export interface Account {
-  /**
-   * Unique account identifier.
-   */
+  /** Unique account identifier. */
   id: string;
-  /**
-   * External business identifier.
-   */
+  /** External business identifier. */
   externalId: string;
-  /**
-   * User last name.
-   */
+  /** User last name. */
   lastname: string;
-  /**
-   * User first name.
-   */
+  /** User first name. */
   firstname: string;
-  /**
-   * User email address.
-   */
+  /** User email address. */
   email: string;
-  /**
-   * Creator identifier.
-   */
+  /** Creator identifier. */
   createdBy: string;
-  /**
-   * Last updater identifier.
-   */
+  /** Last updater identifier. */
   updatedBy: string;
-  /**
-   * Account creation date converted from API ISO timestamp.
-   * Display formatting depends on the user's locale.
-   */
+  /** Account creation date converted from API ISO timestamp. Display formatting depends on the user's locale. */
   insertDate: string;
-  /**
-   * Account last update date converted from API ISO timestamp.
-   * Display formatting depends on the user's locale.
-   */
+  /** Account last update date converted from API ISO timestamp. Display formatting depends on the user's locale. */
   updateDate: string;
 }
 
 /**
- * Lifecycle status fields of an account: computed status, validity and
- * suspension periods, activation timestamp, and optional reason metadata.
+ * Lifecycle status fields of an account: computed status, validity and suspension periods, activation timestamp, and
+ * optional reason metadata.
  *
- * Combine with an {@link Account} when both identity and lifecycle data are
- * needed (for example on the Account Details page).
+ * Combine with an {@link Account} when both identity and lifecycle data are needed (for example on the Account Details
+ * page).
  */
 export interface AccountStatus {
-  /**
-   * Computed account lifecycle status.
-   */
+  /** Computed account lifecycle status. */
   status: AccountStatusEnum;
 
-  /**
-   * Period during which the account is considered active.
-   */
+  /** Period during which the account is considered active. */
   validityPeriod: Period;
 
-  /**
-   * Period during which the account is suspended.
-   */
+  /** Period during which the account is suspended. */
   suspensionPeriod: Period;
 
-  /**
-   * ISO 8601 date-time when the account was last activated, or null if never
-   * activated.
-   */
+  /** ISO 8601 date-time when the account was last activated, or null if never activated. */
   activationAt: string | null;
 
-  /**
-   * Number of days remaining before the account is deactivated.
-   * Null if not applicable or not scheduled.
-   */
+  /** Number of days remaining before the account is deactivated. Null if not applicable or not scheduled. */
   daysBeforeDeactivation: number | null;
 }
 
-/**
- * Shape of the payload sent to the backend when suspending an account.
- */
+/** Shape of the payload sent to the backend when suspending an account. */
 export interface AccountSuspensionRecord extends Record<string, unknown> {
-  /**
-   * Period during which the account is suspended.
-   */
+  /** Period during which the account is suspended. */
   suspensionPeriod: Period;
 
-  /**
-   * Primary reason for the suspension.
-   */
+  /** Primary reason for the suspension. */
   reason: string;
 
-  /**
-   * More specific sub-reason for the suspension.
-   */
+  /** More specific sub-reason for the suspension. */
   subreason: string;
 
-  /**
-   * Free-text comment providing additional context about the suspension.
-   */
+  /** Free-text comment providing additional context about the suspension. */
   comment: string | null;
 }
 
-/**
- * Shape of the payload sent to the backend when deactivating an account.
- */
+/** Shape of the payload sent to the backend when deactivating an account. */
 export interface AccountDeactivationRecord extends Record<string, unknown> {
-  /**
-   * Timestamp at which the account is deactivated (validity period end).
-   */
+  /** Timestamp at which the account is deactivated (validity period end). */
   deactivationAt: string;
 
-  /**
-   * Primary reason for the deactivation.
-   */
+  /** Primary reason for the deactivation. */
   reason: string;
 
-  /**
-   * More specific sub-reason for the deactivation.
-   */
+  /** More specific sub-reason for the deactivation. */
   subreason: string;
 
-  /**
-   * Free-text comment providing additional context about the deactivation.
-   */
+  /** Free-text comment providing additional context about the deactivation. */
   comment: string | null;
 }
 
-/**
- * Shape of the payload sent to the backend when reactivating an account.
- */
+/** Shape of the payload sent to the backend when reactivating an account. */
 export interface AccountReactivationRecord extends Record<string, unknown> {
-  /**
-   * Mandatory justification for the reactivation.
-   */
+  /** Mandatory justification for the reactivation. */
   comment: string;
 
   /**
-   * Optional new validity period end used to re-validate a deactivated account.
-   * Omitted when only a suspension is being lifted.
+   * Optional new validity period end used to re-validate a deactivated account. Omitted when only a suspension is being
+   * lifted.
    */
   validityEnd?: string;
 }
 
-/**
- * Shape of the payload sent to the backend when scheduling an account's validity start.
- */
+/** Shape of the payload sent to the backend when scheduling an account's validity start. */
 export interface AccountValidityRecord extends Record<string, unknown> {
-  /**
-   * Timestamp at which the account becomes valid (validity period start).
-   */
+  /** Timestamp at which the account becomes valid (validity period start). */
   validityStart: string;
 }
 
 /**
- * Shape of the account form used for creation and edition. Differs from {@link AccountRecord} as it carries flat keys for nested fields, which is more convenient for form input bindings.
+ * Shape of the account form used for creation and edition. Differs from {@link AccountRecord} as it carries flat keys
+ * for nested fields, which is more convenient for form input bindings.
  */
 export interface AccountForm {
-  /**
-   * External business identifier.
-   */
+  /** External business identifier. */
   externalId: string;
-  /**
-   * User last name.
-   */
+  /** User last name. */
   lastname: string;
-  /**
-   * User first name.
-   */
+  /** User first name. */
   firstname: string;
-  /**
-   * User email address.
-   */
+  /** User email address. */
   email: string;
-  /**
-   * Start date of the account's validity period.
-   */
+  /** Start date of the account's validity period. */
   validityPeriodStart: string;
 }
 
 /**
- * Shape of the account status form used for edition. Carries flat keys for nested fields,
- * which is more convenient for form input bindings. Differs from {@link AccountStatusRecord}
- * as it has separate start and end fields for validity and suspension periods,
- * instead of nested objects, to facilitate form handling.
+ * Shape of the account status form used for edition. Carries flat keys for nested fields, which is more convenient for
+ * form input bindings. Differs from {@link AccountStatusRecord} as it has separate start and end fields for validity and
+ * suspension periods, instead of nested objects, to facilitate form handling.
  */
 export interface AccountStatusForm {
-  /**
-   * Start date of the account's validity period.
-   */
+  /** Start date of the account's validity period. */
   validityPeriodStart?: string | null;
-  /**
-   * End date of the account's validity period.
-   */
+  /** End date of the account's validity period. */
   validityPeriodEnd?: string | null;
-  /**
-   * Start date of the account's suspension period.
-   */
+  /** Start date of the account's suspension period. */
   suspensionPeriodStart?: string | null;
-  /**
-   * End date of the account's suspension period.
-   */
+  /** End date of the account's suspension period. */
   suspensionPeriodEnd?: string | null;
-  /**
-   * Primary reason for the current account status, if any.
-   */
+  /** Primary reason for the current account status, if any. */
   statusReason?: string | null;
-  /**
-   * More specific sub-reason for the account status, if available.
-   */
+  /** More specific sub-reason for the account status, if available. */
   statusSubreason?: string | null;
-  /**
-   * Free-text comment providing additional context about the status.
-   */
+  /** Free-text comment providing additional context about the status. */
   statusComment?: string | null;
 }

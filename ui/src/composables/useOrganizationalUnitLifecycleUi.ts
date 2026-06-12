@@ -34,17 +34,15 @@ import type { OrganizationalUnitStatus } from 'src/types/organizationalUnits';
 import { computed, type ComputedRef, type Ref } from 'vue';
 
 /**
- * Composable that projects an {@link OrganizationalUnitStatus} into a
- * deterministic UI state describing which badge, banner, info text and
- * dropdown menu items must be displayed on the OU Details page.
+ * Composable that projects an {@link OrganizationalUnitStatus} into a deterministic UI state describing which badge,
+ * banner, info text and dropdown menu items must be displayed on the OU Details page.
  *
- * The projection is the single source of truth for OU lifecycle rendering;
- * no other component should reimplement these rules. Three cases are exposed:
- * "not suspended" (badge + suspension dropdown), "future suspension"
- * (badge + info text + suspension dropdown) and "currently suspended"
- * (badge + suspended banner + activation dropdown).
- * @param organizationalUnitStatus - Reactive reference to the OU status, or
- *   null while loading.
+ * The projection is the single source of truth for OU lifecycle rendering; no other component should reimplement these
+ * rules. Three cases are exposed: "not suspended" (badge plus suspension dropdown), "future suspension" (badge plus
+ * info text plus suspension dropdown) and "currently suspended" (badge plus suspended banner plus activation
+ * dropdown).
+ *
+ * @param organizationalUnitStatus - Reactive reference to the OU status, or null while loading.
  * @returns A reactive UI projection, or null when the OU is not loaded.
  */
 export function useOrganizationalUnitLifecycleUi(
@@ -53,8 +51,8 @@ export function useOrganizationalUnitLifecycleUi(
   const { toDayJs } = useCommonMapper();
 
   /**
-   * Result of {@link toMenuItemsByGroup}, exposing one optional menu items
-   * list per action group. Missing properties indicate empty groups.
+   * Result of {@link toMenuItemsByGroup}, exposing one optional menu items list per action group. Missing properties
+   * indicate empty groups.
    */
   interface MenuItemsByGroup {
     /** Menu items for the suspension dropdown. */
@@ -64,8 +62,9 @@ export function useOrganizationalUnitLifecycleUi(
   }
 
   /**
-   * Builds the per-dropdown menu items from the given ordered list of
-   * actions. Reactivation actions are grouped under activation.
+   * Builds the per-dropdown menu items from the given ordered list of actions. Reactivation actions are grouped under
+   * activation.
+   *
    * @param actions - Ordered list of dotted action keys to expose.
    * @returns Menu items split by group; missing entries when a group is empty.
    */
@@ -87,8 +86,8 @@ export function useOrganizationalUnitLifecycleUi(
   }
 
   /**
-   * Helper that builds the UI projection of a case from its base flags and
-   * its ordered action list.
+   * Helper that builds the UI projection of a case from its base flags and its ordered action list.
+   *
    * @param base - Visual flags (badge, banner, info text) for this case.
    * @param actions - Ordered list of dotted action keys.
    * @returns The full UI projection with the dropdown menu item lists.
@@ -106,9 +105,9 @@ export function useOrganizationalUnitLifecycleUi(
   }
 
   /**
-   * Projects an OU currently suspended (server-confirmed via `isSuspended`).
-   * Reactivation and suspension-end editing are exposed by the suspended banner
-   * itself, so no action dropdown is rendered in this state.
+   * Projects an OU currently suspended (server-confirmed via `isSuspended`). Reactivation and suspension-end editing
+   * are exposed by the suspended banner itself, so no action dropdown is rendered in this state.
+   *
    * @param status - The OU status.
    * @returns The UI projection, or undefined when the case does not match.
    */
@@ -122,6 +121,7 @@ export function useOrganizationalUnitLifecycleUi(
 
   /**
    * Projects an OU with a suspension scheduled strictly after `now`.
+   *
    * @param status - The OU status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -145,6 +145,7 @@ export function useOrganizationalUnitLifecycleUi(
 
   /**
    * Projects an OU with no active or scheduled suspension.
+   *
    * @param status - The OU status.
    * @returns The UI projection, or undefined when the case does not match.
    */

@@ -34,12 +34,11 @@ let silentRefresh: Promise<User | null> | null = null;
 /**
  * Returns the current OIDC user with a non-expired access token.
  *
- * If the stored user is expired, a silent refresh is attempted; concurrent
- * callers share the same in-flight refresh promise to avoid stampeding the
- * authorization server.
- * @returns The refreshed user, or `null` if no user is logged in or the
- * silent refresh failed. When `null` is returned, the caller should treat
- * the session as unauthenticated and fall back to a full sign-in flow.
+ * If the stored user is expired, a silent refresh is attempted; concurrent callers share the same in-flight refresh
+ * promise to avoid stampeding the authorization server.
+ *
+ * @returns The refreshed user, or `null` if no user is logged in or the silent refresh failed. When `null` is returned,
+ *   the caller should treat the session as unauthenticated and fall back to a full sign-in flow.
  */
 async function getUser(): Promise<User | null> {
   const user = await oidcClient.getUser();
@@ -58,13 +57,9 @@ async function getUser(): Promise<User | null> {
 }
 
 declare module 'vue' {
-  /**
-   * Augments the Vue component instance properties to include the OIDC UserManager.
-   */
+  /** Augments the Vue component instance properties to include the OIDC UserManager. */
   interface ComponentCustomProperties {
-    /**
-     * The OIDC UserManager instance for handling authentication.
-     */
+    /** The OIDC UserManager instance for handling authentication. */
     $oidc: UserManager;
   }
 }

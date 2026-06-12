@@ -140,9 +140,7 @@ const uiProps = {
   splitter: ui<LinidQSplitterProps>(headerUiNamespace, 'q-splitter'),
 };
 
-/**
- * Navigate to home page.
- */
+/** Navigate to home page. */
 function goHome() {
   router.push('/');
 }

@@ -35,7 +35,9 @@ import type { OrganizationalUnitForm } from 'src/types/organizationalUnits';
 /**
  * Build the declarative field configuration for the organizational unit creation form. The parent identifier is
  * supplied by the navigation context and is therefore not part of the editable fields exposed here.
- * @param i18nScope - I18n scope used for both labels (`fields.<name>`) and validator error messages (`validation.<rule>`).
+ *
+ * @param i18nScope - I18n scope used for both labels (`fields.<name>`) and validator error messages
+ *   (`validation.<rule>`).
  * @returns The ordered list of fields rendered by the creation form.
  */
 export function useOrganizationalUnitCreationConfig(i18nScope: string) {

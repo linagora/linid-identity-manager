@@ -43,15 +43,11 @@ const route = useRoute();
 const { t } = useScopedI18n('AuthenticationCallbackPage');
 
 /**
- * Represents the optional redirect state used during OIDC authentication.
- * This is typically used to preserve the original destination URL
- * so the user can be redirected back after successful login.
+ * Represents the optional redirect state used during OIDC authentication. This is typically used to preserve the
+ * original destination URL so the user can be redirected back after successful login.
  */
 interface OidcRedirectState {
-  /**
-   * The URL to redirect to after authentication.
-   * If not provided, the default route is used.
-   */
+  /** The URL to redirect to after authentication. If not provided, the default route is used. */
   redirectUrl?: string;
 }
 

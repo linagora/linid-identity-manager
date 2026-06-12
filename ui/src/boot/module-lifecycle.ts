@@ -38,19 +38,17 @@ import * as ModuleLifecycleService from 'src/services/ModuleLifecycleService';
 /**
  * Application bootstrapping entry point.
  *
- * This boot function is responsible for orchestrating the lifecycle
- * of all remote federated modules. It performs the following steps:
+ * This boot function is responsible for orchestrating the lifecycle of all remote federated modules. It performs the
+ * following steps:
  *
  * 1. Retrieves module configurations from the lifecycle service.
  * 2. Dynamically loads each remote module’s lifecycle entry point.
- * 3. Executes all lifecycle phases sequentially for each module,
- *    ensuring deterministic and ordered initialization.
+ * 3. Executes all lifecycle phases sequentially for each module, ensuring deterministic and ordered initialization.
  *
- * The boot process is asynchronous and blocks application startup
- * until all lifecycle phases have been completed.
+ * The boot process is asynchronous and blocks application startup until all lifecycle phases have been completed.
  *
- * @param boot - The framework-provided boot context, propagated to all lifecycle phases so modules can register services, routes, stores, or side effects.
- *
+ * @param boot - The framework-provided boot context, propagated to all lifecycle phases so modules can register
+ *   services, routes, stores, or side effects.
  * @returns Resolves once all modules have completed every lifecycle phase.
  */
 export default defineBoot(async (boot: BootFileParams): Promise<void> => {

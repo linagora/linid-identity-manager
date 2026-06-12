@@ -30,9 +30,7 @@ import {
 } from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '#q-app/wrappers';
 
-/**
- * Boot file that initializes Pinia and registers it in the corelib.
- */
+/** Boot file that initializes Pinia and registers it in the corelib. */
 export default defineBoot(async ({ app }) => {
   setPiniaStore(app.config.globalProperties.$pinia);
   const linidZoneStore = useLinidZoneStore();

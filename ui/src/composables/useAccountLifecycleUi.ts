@@ -34,13 +34,13 @@ import type { AccountStatus } from 'src/types/accounts';
 import { computed, type ComputedRef, type Ref } from 'vue';
 
 /**
- * Composable that projects an {@link AccountStatus} into a deterministic UI
- * state describing which badge, banners, info texts and dropdown menu items
- * must be displayed on the Account Details page, following the lifecycle
- * matrix defined by the product.
+ * Composable that projects an {@link AccountStatus} into a deterministic UI state describing which badge, banners, info
+ * texts and dropdown menu items must be displayed on the Account Details page, following the lifecycle matrix defined
+ * by the product.
  *
- * The projection is the single source of truth for lifecycle rendering: no
- * other component should reimplement these rules.
+ * The projection is the single source of truth for lifecycle rendering: no other component should reimplement these
+ * rules.
+ *
  * @param accountStatus - Reactive reference to the account status, or null while loading.
  * @returns A reactive UI projection, or null when the account is not loaded.
  */
@@ -50,8 +50,9 @@ export function useAccountLifecycleUi(
   const { toDayJs } = useCommonMapper();
 
   /**
-   * True when `daysBeforeDeactivation` is set and the deactivation falls
-   * within the 15-day warning window (boundary inclusive).
+   * True when `daysBeforeDeactivation` is set and the deactivation falls within the 15-day warning window (boundary
+   * inclusive).
+   *
    * @param status - The account status.
    * @returns Whether the account is within the 15-day deactivation window.
    */
@@ -63,8 +64,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * True when `daysBeforeDeactivation` is set and the deactivation is still
-   * more than 15 days away.
+   * True when `daysBeforeDeactivation` is set and the deactivation is still more than 15 days away.
+   *
    * @param status - The account status.
    * @returns Whether the account has more than 15 days before deactivation.
    */
@@ -77,6 +78,7 @@ export function useAccountLifecycleUi(
 
   /**
    * True when a suspension is scheduled to start strictly after `now`.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns Whether a future suspension is planned.
@@ -87,8 +89,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Result of {@link toMenuItemsByGroup}, exposing one optional menu items
-   * list per action group. Missing properties indicate empty groups.
+   * Result of {@link toMenuItemsByGroup}, exposing one optional menu items list per action group. Missing properties
+   * indicate empty groups.
    */
   interface MenuItemsByGroup {
     /** Menu items for the activation dropdown. */
@@ -100,10 +102,10 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Builds the per-dropdown menu items from the given ordered list of actions.
-   * Actions are dispatched into three groups (activation, suspension,
-   * deactivation) so the page renders one dropdown per group with its own
-   * label and colour. Reactivation actions are grouped under activation.
+   * Builds the per-dropdown menu items from the given ordered list of actions. Actions are dispatched into three groups
+   * (activation, suspension, deactivation) so the page renders one dropdown per group with its own label and colour.
+   * Reactivation actions are grouped under activation.
+   *
    * @param actions - Ordered list of dotted action keys to expose.
    * @returns Menu items split by group; missing entries when a group is empty.
    */
@@ -132,8 +134,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Helper that builds the UI projection of a case from its base flags and
-   * its ordered action list.
+   * Helper that builds the UI projection of a case from its base flags and its ordered action list.
+   *
    * @param base - Visual flags (badge, banners, info texts) for this case.
    * @param actions - Ordered list of dotted action keys.
    * @returns The full UI projection with the three dropdown menu item lists.
@@ -154,6 +156,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects an INACTIVE account whose validity start is still in the future.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -179,6 +182,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects an INACTIVE account that has never been activated.
+   *
    * @param status - The account status.
    * @returns The UI projection, or undefined when the case does not match.
    */
@@ -195,10 +199,10 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Projects an INACTIVE account that was activated but whose validity period
-   * end is now in the past: the account is deactivated. Surfaces the red
-   * deactivated banner whose actions re-validate the account immediately or
-   * schedule a new validity end.
+   * Projects an INACTIVE account that was activated but whose validity period end is now in the past: the account is
+   * deactivated. Surfaces the red deactivated banner whose actions re-validate the account immediately or schedule a
+   * new validity end.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -220,6 +224,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects an ACTIVE account with no end date and no future suspension.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -243,8 +248,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Projects an ACTIVE account with more than 15 days before deactivation and
-   * no future suspension.
+   * Projects an ACTIVE account with more than 15 days before deactivation and no future suspension.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -271,8 +276,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Projects an ACTIVE account with 15 days or less before deactivation and
-   * no future suspension.
+   * Projects an ACTIVE account with 15 days or less before deactivation and no future suspension.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -295,6 +300,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects an ACTIVE account with no end date and a future suspension.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -318,8 +324,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Projects an ACTIVE account with more than 15 days before deactivation and
-   * a future suspension.
+   * Projects an ACTIVE account with more than 15 days before deactivation and a future suspension.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -350,8 +356,8 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Projects an ACTIVE account with 15 days or less before deactivation and
-   * a future suspension.
+   * Projects an ACTIVE account with 15 days or less before deactivation and a future suspension.
+   *
    * @param status - The account status.
    * @param now - The reference time used for time-based comparisons.
    * @returns The UI projection, or undefined when the case does not match.
@@ -378,6 +384,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects a SUSPENDED account with no validity end and no suspension end.
+   *
    * @param status - The account status.
    * @returns The UI projection, or undefined when the case does not match.
    */
@@ -398,6 +405,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects a SUSPENDED account with no validity end but a suspension end.
+   *
    * @param status - The account status.
    * @returns The UI projection, or undefined when the case does not match.
    */
@@ -418,6 +426,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects a SUSPENDED account more than 15 days away from deactivation.
+   *
    * @param status - The account status.
    * @returns The UI projection, or undefined when the case does not match.
    */
@@ -437,6 +446,7 @@ export function useAccountLifecycleUi(
 
   /**
    * Projects a SUSPENDED account 15 days or less away from deactivation.
+   *
    * @param status - The account status.
    * @returns The UI projection, or undefined when the case does not match.
    */

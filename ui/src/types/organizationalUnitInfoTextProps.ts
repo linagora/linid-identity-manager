@@ -26,13 +26,8 @@
 
 import type { OrganizationalUnitStatus } from 'src/types/organizationalUnits';
 
-/**
- * Props for OrganizationalUnit info-text components.
- */
+/** Props for OrganizationalUnit info-text components. */
 export interface OrganizationalUnitInfoTextProps {
-  /**
-   * Current suspension status of the organizational unit, used to read the
-   * suspension period start date.
-   */
+  /** Current suspension status of the organizational unit, used to read the suspension period start date. */
   organizationalUnitStatus: OrganizationalUnitStatus;
 }

@@ -27,16 +27,14 @@
 import { accountStatusReasons } from 'src/assets/accounts/accountLifecycleUiConfiguration';
 
 /**
- * Suspension reason and subreason values offered in the organizational unit
- * suspension dialogs. Aligned with the account suspension values so the
- * lifecycle vocabulary stays consistent across entities.
+ * Suspension reason and subreason values offered in the organizational unit suspension dialogs. Aligned with the
+ * account suspension values so the lifecycle vocabulary stays consistent across entities.
  */
 export const organizationalUnitStatusReasons = accountStatusReasons.suspension;
 
 /**
- * Form field configuration for the organizational unit lifecycle dialogs,
- * keyed by lifecycle action. Each entry is the list of fields rendered by the
- * shared form dialog. Mirrors {@link accountLifecycleUiConfiguration}.
+ * Form field configuration for the organizational unit lifecycle dialogs, keyed by lifecycle action. Each entry is the
+ * list of fields rendered by the shared form dialog. Mirrors {@link accountLifecycleUiConfiguration}.
  */
 export const organizationalUnitLifecycleUiConfiguration = {
   'suspension.immediate': [

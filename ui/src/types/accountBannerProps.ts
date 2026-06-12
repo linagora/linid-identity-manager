@@ -26,13 +26,9 @@
 
 import type { AccountStatus } from 'src/types/accounts';
 
-/**
- * Props for all AccountBanner components.
- */
+/** Props for all AccountBanner components. */
 export interface AccountBannerProps {
-  /**
-   * Current status of the account (e.g. Active, deactivated, suspended).
-   */
+  /** Current status of the account (e.g. Active, deactivated, suspended). */
   accountStatus: AccountStatus;
 }
 
@@ -42,14 +38,10 @@ export interface AccountBannerProps {
  * Defines user actions related to account reactivation flows.
  */
 export interface AccountDeactivatedBannerOutputs {
-  /**
-   * Triggered when the user chooses to immediately reactivate their account.
-   */
+  /** Triggered when the user chooses to immediately reactivate their account. */
   'reactivate-immediate': [];
 
-  /**
-   * Triggered when the user schedules a future account reactivation.
-   */
+  /** Triggered when the user schedules a future account reactivation. */
   'reactivate-scheduled': [];
 }
 
@@ -59,14 +51,10 @@ export interface AccountDeactivatedBannerOutputs {
  * Represents user actions related to managing account deactivation and reactivation flows.
  */
 export interface AccountDeactivatedWarningBannerOutputs {
-  /**
-   * Emitted when the user chooses to immediately deactivate their account.
-   */
+  /** Emitted when the user chooses to immediately deactivate their account. */
   'deactivate-immediate': [];
 
-  /**
-   * Emitted when the user requests to modify the scheduled deactivation date.
-   */
+  /** Emitted when the user requests to modify the scheduled deactivation date. */
   'modify-deactivation': [];
 }
 
@@ -76,13 +64,9 @@ export interface AccountDeactivatedWarningBannerOutputs {
  * Represents user actions related to managing account suspension and recovery flows.
  */
 export interface AccountSuspendedBannerOutputs {
-  /**
-   * Emitted when the user chooses to immediately clear the account suspension.
-   */
+  /** Emitted when the user chooses to immediately clear the account suspension. */
   'clear-suspension': [];
 
-  /**
-   * Emitted when the user requests to modify the suspension parameters or schedule.
-   */
+  /** Emitted when the user requests to modify the suspension parameters or schedule. */
   'modify-suspension': [];
 }

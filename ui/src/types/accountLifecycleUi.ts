@@ -29,9 +29,8 @@ import type { MenuItem } from '@linagora/linid-im-front-corelib';
 /**
  * Whitelist of dotted lifecycle action keys exposed in the dropdown.
  *
- * The constant is the source of truth for the union {@link AccountLifecycleAction}
- * and for the runtime guard applied when the federated DropdownButton emits a
- * click.
+ * The constant is the source of truth for the union {@link AccountLifecycleAction} and for the runtime guard applied
+ * when the federated DropdownButton emits a click.
  */
 export const ACCOUNT_LIFECYCLE_ACTIONS = [
   'activation.immediate',
@@ -46,61 +45,40 @@ export const ACCOUNT_LIFECYCLE_ACTIONS = [
 ] as const;
 
 /**
- * Union of all valid lifecycle action keys exposed in the dropdown.
- * Derived from {@link ACCOUNT_LIFECYCLE_ACTIONS} so the runtime whitelist
- * and the compile-time type stay in sync automatically.
+ * Union of all valid lifecycle action keys exposed in the dropdown. Derived from {@link ACCOUNT_LIFECYCLE_ACTIONS} so
+ * the runtime whitelist and the compile-time type stay in sync automatically.
  */
 export type AccountLifecycleAction = (typeof ACCOUNT_LIFECYCLE_ACTIONS)[number];
 
 /**
- * UI projection of the account lifecycle state, derived deterministically from
- * an {@link AccountStatus}. All template logic must consume this object only,
- * to avoid recomputing the same rules in multiple places.
+ * UI projection of the account lifecycle state, derived deterministically from an {@link AccountStatus}. All template
+ * logic must consume this object only, to avoid recomputing the same rules in multiple places.
  */
 export interface AccountLifecycleUi {
-  /**
-   * Badge to display, or undefined when a banner replaces the badge.
-   */
+  /** Badge to display, or undefined when a banner replaces the badge. */
   showBadge?: boolean;
-  /**
-   * True when the yellow suspension banner must be rendered.
-   */
+  /** True when the yellow suspension banner must be rendered. */
   showSuspendedBanner?: boolean;
   /**
-   * True when the red deactivated banner must be rendered (account already
-   * deactivated: its validity period end is in the past).
+   * True when the red deactivated banner must be rendered (account already deactivated: its validity period end is in
+   * the past).
    */
   showDeactivatedBanner?: boolean;
-  /**
-   * True when the light red deactivation warning banner must be rendered.
-   */
+  /** True when the light red deactivation warning banner must be rendered. */
   showDeactivationWarningBanner?: boolean;
-  /**
-   * True when the red "will be deactivated" info text must be rendered.
-   */
+  /** True when the red "will be deactivated" info text must be rendered. */
   showWillDeactivateInfoText?: boolean;
-  /**
-   * True when the yellow "will be suspended" info text must be rendered.
-   */
+  /** True when the yellow "will be suspended" info text must be rendered. */
   showWillSuspendInfoText?: boolean;
-  /**
-   * True when the "user has not activated their account yet" info text must
-   * be rendered.
-   */
+  /** True when the "user has not activated their account yet" info text must be rendered. */
   showNotActivatedInfoText?: boolean;
   /**
-   * Menu items for the activation dropdown (activation + reactivation actions).
-   * Undefined when no activation action applies to the current state.
+   * Menu items for the activation dropdown (activation + reactivation actions). Undefined when no activation action
+   * applies to the current state.
    */
   activationMenuItems?: MenuItem[];
-  /**
-   * Menu items for the suspension dropdown.
-   * Undefined when no suspension action applies to the current state.
-   */
+  /** Menu items for the suspension dropdown. Undefined when no suspension action applies to the current state. */
   suspensionMenuItems?: MenuItem[];
-  /**
-   * Menu items for the deactivation dropdown.
-   * Undefined when no deactivation action applies to the current state.
-   */
+  /** Menu items for the deactivation dropdown. Undefined when no deactivation action applies to the current state. */
   deactivationMenuItems?: MenuItem[];
 }

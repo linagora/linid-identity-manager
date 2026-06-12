@@ -190,6 +190,7 @@ watch(selectedOrganizationalUnitId, (nodeId: string) => {
 
 /**
  * Loads the account list.
+ *
  * @param id - Organizational unit ID to filter accounts, if empty load all accounts related to root node.
  */
 async function loadData(id: string): Promise<void> {
@@ -230,6 +231,7 @@ async function loadData(id: string): Promise<void> {
 
 /**
  * Navigates to the account creation page.
+ *
  * @returns A promise resolved once navigation finishes.
  */
 function goToCreate() {
@@ -240,6 +242,7 @@ function goToCreate() {
 
 /**
  * Navigates to the account detail page.
+ *
  * @param account - Account row selected in the table.
  * @returns A promise resolved once navigation finishes.
  */
@@ -251,6 +254,7 @@ function goToAccountDetails(account: Account) {
 
 /**
  * Handles pagination/sort changes requested by QTable.
+ *
  * @param props - QTable request payload.
  */
 async function onRequest(props: QTableRequestEvent) {
@@ -259,8 +263,9 @@ async function onRequest(props: QTableRequestEvent) {
 }
 
 /**
- * Handles filter changes from the AdvancedSearchCard component.
- * Resets pagination to the first page and reloads data with new filters.
+ * Handles filter changes from the AdvancedSearchCard component. Resets pagination to the first page and reloads data
+ * with new filters.
+ *
  * @param newFilters - The updated filters object.
  * @returns A promise that resolves when the data has been loaded.
  */

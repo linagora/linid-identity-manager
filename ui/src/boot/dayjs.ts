@@ -32,6 +32,7 @@ import utc from 'dayjs/plugin/utc';
 
 /**
  * Boot file to configure Day.js and add it to the global Vue properties.
+ *
  * @param app - The Vue application instance.
  */
 export default defineBoot(({ app }) => {

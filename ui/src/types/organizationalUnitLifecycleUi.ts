@@ -27,12 +27,10 @@
 import type { MenuItem } from '@linagora/linid-im-front-corelib';
 
 /**
- * Whitelist of dotted lifecycle action keys exposed in the OU dropdowns and
- * banner buttons.
+ * Whitelist of dotted lifecycle action keys exposed in the OU dropdowns and banner buttons.
  *
- * The constant is the source of truth for the union
- * {@link OrganizationalUnitLifecycleAction} and for the runtime guard applied
- * when the federated DropdownButton emits a click.
+ * The constant is the source of truth for the union {@link OrganizationalUnitLifecycleAction} and for the runtime guard
+ * applied when the federated DropdownButton emits a click.
  */
 export const ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS = [
   'suspension.immediate',
@@ -42,42 +40,32 @@ export const ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS = [
 ] as const;
 
 /**
- * Union of all valid OU lifecycle action keys. Derived from
- * {@link ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS} so the runtime whitelist and
- * the compile-time type stay in sync automatically.
+ * Union of all valid OU lifecycle action keys. Derived from {@link ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS} so the runtime
+ * whitelist and the compile-time type stay in sync automatically.
  */
 export type OrganizationalUnitLifecycleAction =
   (typeof ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS)[number];
 
 /**
  * UI projection of the OU lifecycle state, derived deterministically from an
- * {@link import('src/types/organizationalUnits').OrganizationalUnitStatus}.
- * All template logic must consume this object only, to avoid recomputing the
- * same rules in multiple places.
+ * {@link import('src/types/organizationalUnits').OrganizationalUnitStatus}. All template logic must consume this object
+ * only, to avoid recomputing the same rules in multiple places.
  */
 export interface OrganizationalUnitLifecycleUi {
-  /**
-   * True when the status badge must be rendered next to the page title.
-   */
+  /** True when the status badge must be rendered next to the page title. */
   showBadge?: boolean;
-  /**
-   * True when the yellow suspension banner must be rendered (OU currently
-   * suspended).
-   */
+  /** True when the yellow suspension banner must be rendered (OU currently suspended). */
   showSuspendedBanner?: boolean;
-  /**
-   * True when the yellow "will be suspended on …" info text must be rendered
-   * (suspension scheduled in the future).
-   */
+  /** True when the yellow "will be suspended on …" info text must be rendered (suspension scheduled in the future). */
   showWillSuspendInfoText?: boolean;
   /**
-   * Menu items for the suspension dropdown. Undefined when no suspension
-   * action applies to the current state, for example when already suspended.
+   * Menu items for the suspension dropdown. Undefined when no suspension action applies to the current state, for
+   * example when already suspended.
    */
   suspensionMenuItems?: MenuItem[];
   /**
-   * Menu items for the activation/reactivation dropdown. Undefined when no
-   * activation action applies, for example when the OU is not suspended.
+   * Menu items for the activation/reactivation dropdown. Undefined when no activation action applies, for example when
+   * the OU is not suspended.
    */
   activationMenuItems?: MenuItem[];
 }

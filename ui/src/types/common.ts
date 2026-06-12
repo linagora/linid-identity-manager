@@ -24,19 +24,11 @@
  * LinID Identity Manager software.
  */
 
-/**
- * Represents a time period with a start and end date in ISO 8601 format.
- */
+/** Represents a time period with a start and end date in ISO 8601 format. */
 export interface Period {
-  /**
-   * Start date of the period in ISO 8601 format (e.g. "2026-04-23T10:00:00Z").
-   * Can be null if not defined.
-   */
+  /** Start date of the period in ISO 8601 format (e.g. "2026-04-23T10:00:00Z"). Can be null if not defined. */
   start: string | null;
 
-  /**
-   * End date of the period in ISO 8601 format (e.g. "2026-04-23T18:00:00Z").
-   * Can be null if not defined.
-   */
+  /** End date of the period in ISO 8601 format (e.g. "2026-04-23T18:00:00Z"). Can be null if not defined. */
   end: string | null;
 }

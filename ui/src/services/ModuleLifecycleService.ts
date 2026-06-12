@@ -53,10 +53,10 @@ import type { BootFileParams } from '#q-app';
  * 4. Filters out any modules that failed to load.
  *
  * The function is intentionally fault-tolerant:
- * - A failure to load an individual module configuration does not
- *   abort the overall process.
- * - If the root manifest cannot be loaded, an empty configuration
- *   list is returned.
+ *
+ * - A failure to load an individual module configuration does not abort the overall process.
+ * - If the root manifest cannot be loaded, an empty configuration list is returned.
+ *
  * @returns A promise resolving to the list of successfully loaded module host configurations.
  */
 export async function getModulesConfiguration(): Promise<
@@ -72,9 +72,7 @@ export async function getModulesConfiguration(): Promise<
     const {
       modules,
     }: {
-      /**
-       * Modules files.
-       */
+      /** Modules files. */
       modules: string[];
     } = await response.json();
 
@@ -116,12 +114,11 @@ export async function getModulesConfiguration(): Promise<
 /**
  * Loads route definitions exposed by a remote federated module.
  *
- * This function attempts to dynamically import the remote module's
- * route entry point and extract its default export.
+ * This function attempts to dynamically import the remote module's route entry point and extract its default export.
  *
- * If the remote module does not expose any routes (or the export
- * is missing or empty), the function returns `null` to signal that
- * no routes should be registered for this module.
+ * If the remote module does not expose any routes (or the export is missing or empty), the function returns `null` to
+ * signal that no routes should be registered for this module.
+ *
  * @param config - The host configuration describing the remote module, including its remote name and instance metadata.
  * @returns A promise resolving to the list of routes exposed by the module, or `null` if the module defines no routes.
  */
@@ -141,6 +138,7 @@ async function getRoutes(
 
 /**
  * Fetches i18n messages from a remote module.
+ *
  * @param config - Configuration object for the remote module.
  * @returns A promise that resolves to the i18n messages object. Returns an empty object if no messages are found.
  */
@@ -161,8 +159,8 @@ async function getI18nMessages(
 /**
  * Converts a LinidRoute to a Vue Router RouteRecordRaw.
  *
- * Applies Nunjucks templating to paths and loads components asynchronously
- * via Module Federation.
+ * Applies Nunjucks templating to paths and loads components asynchronously via Module Federation.
+ *
  * @param route - The LinidRoute to convert.
  * @param config - Module host configuration for templating.
  * @returns Promise resolving to Vue Router route record.
@@ -187,8 +185,9 @@ export function toRouteRecordRaw(
 /**
  * Recursively renders all string values in an object or array using Nunjucks templating.
  *
- * This is useful for processing route `meta` objects so that template variables
- * (like `{{ config.basePath }}`) are replaced with actual values from the module host configuration.
+ * This is useful for processing route `meta` objects so that template variables (like `{{ config.basePath }}`) are
+ * replaced with actual values from the module host configuration.
+ *
  * @param obj - The object, array, or string to render. Can be nested.
  * @param config - The ModuleHostConfig object used as the template context.
  * @returns A new object/array/string with all strings rendered using Nunjucks.
@@ -221,15 +220,15 @@ export function renderMeta(
 /**
  * Executes the SETUP lifecycle phase for a remote module.
  *
- * This phase is the earliest point in the module lifecycle and is
- * executed immediately after the module is loaded.
+ * This phase is the earliest point in the module lifecycle and is executed immediately after the module is loaded.
  *
  * Responsibilities of this phase:
+ *
  * - Register the module host configuration for later lifecycle phases.
  * - Perform early validation and preparation logic inside the module.
  *
- * No application artifacts (routes, stores, etc.) should be registered
- * during this phase.
+ * No application artifacts (routes, stores, etc.) should be registered during this phase.
+ *
  * @param module - The remote module lifecycle implementation.
  * @param config - The host configuration associated with this module instance.
  * @param _boot - The application boot context.
@@ -248,15 +247,16 @@ export async function setup(
 /**
  * Executes the CONFIGURE lifecycle phase for a remote module.
  *
- * During this phase, the module is configured with host-provided
- * settings and may contribute application-level artifacts such as
- * routes.
+ * During this phase, the module is configured with host-provided settings and may contribute application-level
+ * artifacts such as routes.
  *
  * Responsibilities of this phase:
+ *
  * - Load and register module routes, if any are exposed.
  * - Pass validated host configuration to the module.
  *
  * This phase is executed after SETUP and before INITIALIZE.
+ *
  * @param module - The remote module lifecycle implementation.
  * @param config - The host configuration associated with this module instance.
  * @param boot - The application boot context, used here to register routes.
@@ -309,15 +309,16 @@ export async function configure(
 /**
  * Executes the INITIALIZE lifecycle phase for a remote module.
  *
- * During this phase, the module should initialize its core
- * functionality and register any required runtime resources.
+ * During this phase, the module should initialize its core functionality and register any required runtime resources.
  *
  * Typical responsibilities include:
+ *
  * - Registering Pinia stores.
  * - Initializing services or SDKs.
  * - Allocating long-lived resources.
  *
  * This phase is executed after CONFIGURE and before READY.
+ *
  * @param module - The remote module lifecycle implementation.
  * @param config - The host configuration associated with this module instance.
  * @param _boot - The application boot context.
@@ -334,16 +335,18 @@ export async function initialize(
 /**
  * Executes the READY lifecycle phase for a remote module.
  *
- * This phase signals that the module is fully initialized and
- * ready for interaction.
+ * This phase signals that the module is fully initialized and ready for interaction.
  *
  * At this point:
+ *
  * - All modules have completed INITIALIZE.
  * - Shared application services are available.
  *
  * Use this phase for:
+ *
  * - Emitting ready events.
  * - Performing final validation.
+ *
  * @param module - The remote module lifecycle implementation.
  * @param config - The host configuration associated with this module instance.
  * @param _boot - The application boot context.
@@ -363,9 +366,11 @@ export async function ready(
  * This phase is executed after all modules have reached READY.
  *
  * Use this phase for:
+ *
  * - Cross-module integrations.
  * - Late-bound dependencies.
  * - Final application wiring that requires all modules to be available.
+ *
  * @param module - The remote module lifecycle implementation.
  * @param config - The host configuration associated with this module instance.
  * @param _boot - The application boot context.

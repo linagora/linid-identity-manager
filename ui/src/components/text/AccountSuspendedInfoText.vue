@@ -57,9 +57,7 @@ const { toDate } = useCommonMapper();
 const { t } = useScopedI18n('AccountSuspendedInfoText');
 const { ui } = useUiDesign();
 const props = defineProps<{
-  /**
-   * Account lifecycle status, used to display the suspended date.
-   */
+  /** Account lifecycle status, used to display the suspended date. */
   accountStatus: AccountStatus;
 }>();
 const startDate = computed(() =>

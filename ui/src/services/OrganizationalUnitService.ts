@@ -38,6 +38,7 @@ import type {
 
 /**
  * Retrieves a single organizational unit by its identifier from the backend.
+ *
  * @param id - The unique identifier of the organizational unit.
  * @param signal - Optional abort signal used to cancel a stale request.
  * @returns A promise resolving to the raw OU DTO returned by the API.
@@ -53,7 +54,9 @@ export async function getOrganizationalUnitById(
 
 /**
  * Creates a new organizational unit on the backend.
- * @param payload - The OU fields submitted by the user, including the parent identifier provided by the navigation context.
+ *
+ * @param payload - The OU fields submitted by the user, including the parent identifier provided by the navigation
+ *   context.
  * @returns A promise resolving to the raw DTO of the newly created OU.
  */
 export async function createOrganizationalUnit(
@@ -66,6 +69,7 @@ export async function createOrganizationalUnit(
 
 /**
  * Retrieves Organizational Units list from the API.
+ *
  * @param filters Object containing the filter criteria for querying Organizational Units.
  * @param pagination Object containing pagination parameters.
  * @returns Promise of paginated Organizational Units.
@@ -83,6 +87,7 @@ export async function getOrganizationalUnits(
 
 /**
  * Fetches all organizational units from the API.
+ *
  * @returns Promise resolving to the full list of organizational units.
  */
 export async function getAllOrganizationalUnit(): Promise<
@@ -107,6 +112,7 @@ export async function getAllOrganizationalUnit(): Promise<
 
 /**
  * Retrieves accounts list from the API by organizational unit id.
+ *
  * @param id The unique identifier of the organizational unit for which to retrieve accounts.
  * @param filters Object containing the filter criteria for querying accounts.
  * @param pagination Object containing pagination parameters.
@@ -127,8 +133,9 @@ export async function getAccountsByOrganizationalUnitId(
 }
 
 /**
- * Suspends an organizational unit, immediately or as a scheduled suspension depending on the
- * suspension period start carried by the payload.
+ * Suspends an organizational unit, immediately or as a scheduled suspension depending on the suspension period start
+ * carried by the payload.
+ *
  * @param id - The unique identifier of the organizational unit.
  * @param payload - The suspension period and reason fields.
  * @returns A promise resolving to the raw DTO of the updated OU.
@@ -147,6 +154,7 @@ export async function suspendOrganizationalUnit(
 
 /**
  * Reactivates an organizational unit (lifts its suspension).
+ *
  * @param id - The unique identifier of the organizational unit.
  * @param payload - The mandatory justification comment.
  * @returns A promise resolving to the raw DTO of the updated OU.

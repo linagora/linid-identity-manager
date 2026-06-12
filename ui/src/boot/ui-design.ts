@@ -31,6 +31,7 @@ import { defineBoot } from '@quasar/app-vite/wrappers';
  * Boot file that registers ui design configuration.
  *
  * Fetches the remotes configuration from /design.json and registers it.
+ *
  * @throws {Error} When the design.json file cannot be fetched.
  */
 export default defineBoot(async () => {

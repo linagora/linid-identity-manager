@@ -190,6 +190,7 @@ async function loadParent(): Promise<void> {
  *
  * Called by q-form only when the enclosing form validation succeeds, so no extra client-side validation is required
  * here.
+ *
  * @returns A promise that resolves when the creation process is complete.
  */
 async function onSubmit(): Promise<void> {
@@ -220,9 +221,7 @@ async function onSubmit(): Promise<void> {
   }
 }
 
-/**
- * Cancels the OU creation and navigates back to the parent OU details.
- */
+/** Cancels the OU creation and navigates back to the parent OU details. */
 function cancel(): void {
   void router.push({
     path: '/organizational-units',

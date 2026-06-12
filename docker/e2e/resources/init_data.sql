@@ -117,6 +117,11 @@ VALUES ('00000000-0000-4000-8000-0000000000c1', 'lifecycle-c1',
         'lifecycle-c12@example.com', 'EndSoon', 'Suspended',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000cd', 'lifecycle-c13',
+        'lifecycle-c13@example.com', 'Deactivated', 'Inactive',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
 
@@ -257,6 +262,16 @@ VALUES
      now() - interval '30 days',
      'Suspension Reason A', 'Suspension Sub-reason A.1', 'E2E case 12',
      NULL, NULL, NULL,
+     NULL,
+     '00000000-0000-4000-8000-00000000a001',
+     '00000000-0000-4000-8000-00000000a001'),
+    -- Case 13: INACTIVE, activated then deactivated (validity end already in the past).
+    ('00000000-0000-4000-8000-0000000000cd',
+     tstzrange(now() - interval '30 days', now() - interval '5 days', '[)'),
+     NULL,
+     now() - interval '30 days',
+     NULL, NULL, NULL,
+     'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 13',
      NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001')
@@ -601,7 +616,7 @@ $$
         WHERE a.external_id IN (
                                 'lifecycle-c1', 'lifecycle-c2', 'lifecycle-c3', 'lifecycle-c4', 'lifecycle-c5',
                                 'lifecycle-c6', 'lifecycle-c7', 'lifecycle-c8', 'lifecycle-c9', 'lifecycle-c10',
-                                'lifecycle-c11', 'lifecycle-c12',
+                                'lifecycle-c11', 'lifecycle-c12', 'lifecycle-c13',
                                 'dialog-d1', 'dialog-d2', 'dialog-d3', 'dialog-d4', 'dialog-d5', 'dialog-d6',
                                 'dialog-d7', 'dialog-d8', 'dialog-d9'
             );

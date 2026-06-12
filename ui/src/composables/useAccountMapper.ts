@@ -180,9 +180,16 @@ export function useAccountMapper() {
   const toAccountReactivationRecord = (
     formData: AccountStatusForm
   ): AccountReactivationRecord => {
-    return {
+    const record: AccountReactivationRecord = {
       comment: formData.statusComment || '',
     };
+
+    const validityEnd = toDateISO(formData.validityPeriodEnd);
+    if (validityEnd) {
+      record.validityEnd = validityEnd;
+    }
+
+    return record;
   };
 
   /**

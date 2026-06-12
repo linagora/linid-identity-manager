@@ -394,19 +394,21 @@ function immediateReactivation() {
 }
 
 /**
- * Opens a confirmation dialog for the immediate revalidation action of a
- * deactivated account. Pushes the validity period end one hour into the future
- * so the account becomes active again shortly.
+ * Opens a form dialog for the immediate revalidation action of a deactivated
+ * account. The user provides a mandatory justification comment, and the validity
+ * period end is pushed one hour into the future so the account becomes active again shortly.
  */
 function immediateRevalidation() {
-  openConfirmationDialog({
-    i18nScope: 'AccountRevalidationActions.ConfirmationDialog.immediate',
-    onConfirm: () =>
+  openFormDialog({
+    i18nScope: 'AccountRevalidationActions.FormDialog.immediate',
+    formFields: accountLifecycleUiConfiguration['revalidation.immediate'],
+    onSubmit: (formData: AccountStatusForm) =>
       updateAccountStatus(
         () =>
-          deactivateAccount(
+          reactivateAccount(
             accountId.value,
-            toAccountDeactivationRecord({
+            toAccountReactivationRecord({
+              ...formData,
               validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
             })
           ),
@@ -426,9 +428,9 @@ function scheduledRevalidation() {
     onSubmit: (formData: AccountStatusForm) =>
       updateAccountStatus(
         () =>
-          deactivateAccount(
+          reactivateAccount(
             accountId.value,
-            toAccountDeactivationRecord(formData)
+            toAccountReactivationRecord(formData)
           ),
         'scheduledRevalidationSuccess',
         formData.validityPeriodEnd

@@ -43,11 +43,13 @@
       <q-btn
         :label="t('reactivateImmediateButton')"
         v-bind="uiProps.reactivateImmediateButton"
+        data-cy="button_reactivate-immediate"
         @click="emit('reactivate-immediate')"
       />
       <q-btn
         :label="t('reactivateScheduledButton')"
         v-bind="uiProps.reactivateScheduledButton"
+        data-cy="button_reactivate-scheduled"
         @click="emit('reactivate-scheduled')"
       />
     </template>

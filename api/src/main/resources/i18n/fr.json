@@ -39,9 +39,9 @@
   "error.account.status.suspension_end_in_past": "Le statut du compte {id} ne peut pas être mis à jour : la fin de la période de suspension ({end}) doit être supérieure ou égale à aujourd'hui.",
   "error.account.status.deactivation_in_past": "Le statut du compte {id} ne peut pas être mis à jour : la date de désactivation ({end}) doit être supérieure ou égale à aujourd'hui.",
   "error.account.status.deactivation_before_validity_start": "Le statut du compte {id} ne peut pas être mis à jour : la date de désactivation ({end}) doit être supérieure ou égale au début de validité ({start}).",
-  "error.account.status.not_suspended": "Le compte {id} ne peut pas être réactivé : il n'est pas actuellement suspendu.",
   "error.organizational.unit.status.not_suspended": "L'unité organisationnelle {id} ne peut pas être réactivée : elle n'est pas actuellement suspendue.",
   "error.account.status.validity_start_not_in_future": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ({start}) doit être dans le futur.",
   "error.account.status.validity_start_after_end": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ({start}) doit être antérieur à la fin de validité ({end}).",
-  "error.account.status.validity_start_locked": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ne peut plus être modifié une fois le compte activé."
+  "error.account.status.validity_start_locked": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ne peut plus être modifié une fois le compte activé.",
+  "error.account.status.nothing_to_reactivate": "Le compte {id} ne peut pas être réactivé : il n'est ni actuellement suspendu ni désactivé."
 }

@@ -301,6 +301,12 @@ export interface AccountReactivationRecord extends Record<string, unknown> {
    * Mandatory justification for the reactivation.
    */
   comment: string;
+
+  /**
+   * Optional new validity period end used to re-validate a deactivated account.
+   * Omitted when only a suspension is being lifted.
+   */
+  validityEnd?: string;
 }
 
 /**

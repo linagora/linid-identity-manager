@@ -28,17 +28,27 @@ package io.github.linagora.linid.im.api.model.account;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import java.time.OffsetDateTime;
 
 /**
- * Request payload for the {@code PUT /accounts/{id}/status/reactivation} endpoint.
+ * Request payload for the {@code PUT /accounts/{id}/status/reactivate} endpoint.
  *
- * <p>Reactivation lifts the current suspension and requires a justification comment.</p>
+ * <p>Reactivation either lifts a current suspension or re-validates a deactivated account
+ * (validity period end in the past). It always requires a justification comment. When
+ * {@code validityEnd} is provided, the account validity period end is pushed to that date,
+ * re-validating a deactivated account.</p>
  *
- * @param comment mandatory free-text justification for the reactivation
+ * @param comment     mandatory free-text justification for the reactivation
+ * @param validityEnd optional new validity period end used to re-validate a deactivated account;
+ *                    {@code null} when only a suspension is being lifted
  */
 @Schema(description = "Request payload for reactivating an account")
 public record AccountReactivationRecord(
     @NotBlank @Schema(description = "Mandatory justification for the reactivation",
         example = "Investigation closed, account cleared")
-    String comment) {
+    String comment,
+
+    @Schema(description = "Optional new validity period end to re-validate a deactivated account",
+        example = "2099-12-31T00:00:00Z")
+    OffsetDateTime validityEnd) {
 }

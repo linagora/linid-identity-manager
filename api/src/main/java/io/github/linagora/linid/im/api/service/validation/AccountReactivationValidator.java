@@ -39,10 +39,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 /**
- * Validates a {@code PUT /accounts/{id}/status/reactivation} request.
+ * Validates a {@code PUT /accounts/{id}/status/reactivate} request.
  *
  * <p>The mandatory justification comment is enforced by {@code @NotBlank} on
- * {@link AccountReactivationRecord}; this validator ensures there is an active suspension to lift.</p>
+ * {@link AccountReactivationRecord}. This validator ensures there is something to reactivate:
+ * either an active suspension to lift, or a deactivated account (validity period end in the past)
+ * to re-validate. When a new {@code validityEnd} is provided, it must not be in the past.</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -54,36 +56,48 @@ public class AccountReactivationValidator {
     private final CommonMapper commonMapper;
 
     /**
-     * Ensures the account currently has a suspension to lift (a suspension period exists and its
-     * end is not already in the past).
+     * Reusable validator for generic temporal-period checks.
+     */
+    private final PeriodValidator periodValidator;
+
+    /**
+     * Runs every reactivation rule: the account must have something to reactivate (an active
+     * suspension or an expired validity), and any provided new validity end must not be in the past.
      *
      * @param current   the persisted {@link AccountStatus} of the targeted account
      * @param record    the reactivation request record
      * @param accountId the account UUID, used to enrich error messages
-     * @throws ApiException with key {@code error.account.status.not_suspended} (HTTP 400) when no
-     *     suspension is set or it has already ended
+     * @throws ApiException if any rule is violated (HTTP 400)
      */
     public void validate(final AccountStatus current,
                          final AccountReactivationRecord record,
                          final UUID accountId) {
-        ensureSuspended(current, accountId);
+        ensureReactivatable(current, accountId);
+        periodValidator.ensureEndNotInPast(record.validityEnd(), OffsetDateTime.now(),
+            "error.account.status.validity_end_in_past", Map.of("id", accountId.toString()));
     }
 
     /**
-     * Rejects reactivation when the account has no suspension period set or when its suspension end
-     * is already in the past (nothing left to lift).
+     * Rejects reactivation when there is nothing to reactivate, i.e. the account is neither currently
+     * suspended (an active suspension period) nor deactivated (a validity period end in the past).
      *
      * @param current   the persisted account status
      * @param accountId the account UUID, used in the error message
-     * @throws ApiException with key {@code error.account.status.not_suspended} (HTTP 400)
+     * @throws ApiException with key {@code error.account.status.nothing_to_reactivate} (HTTP 400)
      */
-    public void ensureSuspended(final AccountStatus current, final UUID accountId) {
+    public void ensureReactivatable(final AccountStatus current, final UUID accountId) {
+        OffsetDateTime now = OffsetDateTime.now();
         OffsetDateTime suspensionEnd = commonMapper.endOf(current.getSuspensionPeriod());
-        if (current.getSuspensionPeriod() == null
-            || (suspensionEnd != null && suspensionEnd.isBefore(OffsetDateTime.now()))) {
+        boolean suspended = current.getSuspensionPeriod() != null
+            && (suspensionEnd == null || !suspensionEnd.isBefore(now));
+
+        OffsetDateTime validityEnd = commonMapper.endOf(current.getValidityPeriod());
+        boolean deactivated = validityEnd != null && validityEnd.isBefore(now);
+
+        if (!suspended && !deactivated) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
-                I18nMessage.of("error.account.status.not_suspended",
+                I18nMessage.of("error.account.status.nothing_to_reactivate",
                     Map.of("id", accountId.toString()))
             );
         }

@@ -151,6 +151,16 @@ export const accountLifecycleUiConfiguration = {
       },
     },
   ],
+  'revalidation.immediate': [
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
+      required: true,
+      hasValidations: false,
+      inputSettings: {},
+    },
+  ],
   'revalidation.scheduled': [
     {
       name: 'validityPeriodEnd',
@@ -163,6 +173,14 @@ export const accountLifecycleUiConfiguration = {
           afterDate: '{{ today }}',
         },
       },
+    },
+    {
+      name: 'statusComment',
+      type: 'String',
+      input: 'TextArea',
+      required: true,
+      hasValidations: false,
+      inputSettings: {},
     },
   ],
   'deactivation.scheduled': [

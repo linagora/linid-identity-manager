@@ -122,6 +122,11 @@ VALUES ('00000000-0000-4000-8000-0000000000c1', 'lifecycle-c1',
         'lifecycle-c13@example.com', 'Deactivated', 'Inactive',
         '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-0000000000ce', 'lifecycle-c14',
+        'lifecycle-c14@example.com', 'DeactivatedReactivatable', 'Inactive',
+        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
 
@@ -272,6 +277,17 @@ VALUES
      now() - interval '30 days',
      NULL, NULL, NULL,
      'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 13',
+     NULL,
+     '00000000-0000-4000-8000-00000000a001',
+     '00000000-0000-4000-8000-00000000a001'),
+    -- Case 14: INACTIVE, deactivated with reason fields, dedicated to the API
+    -- reactivation scenario (re-validating a deactivated account).
+    ('00000000-0000-4000-8000-0000000000ce',
+     tstzrange(now() - interval '30 days', now() - interval '5 days', '[)'),
+     NULL,
+     now() - interval '30 days',
+     NULL, NULL, NULL,
+     'Deactivation Reason A', 'Deactivation Sub-reason A.1', 'E2E case 14',
      NULL,
      '00000000-0000-4000-8000-00000000a001',
      '00000000-0000-4000-8000-00000000a001')

@@ -532,7 +532,7 @@ class AccountServiceImplTest {
     @DisplayName("reactivate should throw 404 when account not found")
     void testReactivate_shouldThrow404WhenAccountNotFound() {
         UUID id = UUID.randomUUID();
-        var record = new AccountReactivationRecord("comment");
+        var record = new AccountReactivationRecord("comment", null);
 
         when(accountRepository.existsById(id)).thenReturn(false);
 
@@ -549,7 +549,7 @@ class AccountServiceImplTest {
     @DisplayName("reactivate should throw 404 when account status row does not exist")
     void testReactivate_shouldThrow404WhenStatusNotFound() {
         UUID id = UUID.randomUUID();
-        var record = new AccountReactivationRecord("comment");
+        var record = new AccountReactivationRecord("comment", null);
 
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.empty());
@@ -568,12 +568,12 @@ class AccountServiceImplTest {
     void testReactivate_shouldPropagateValidatorFailure() {
         UUID id = UUID.randomUUID();
         var existing = new AccountStatus();
-        var record = new AccountReactivationRecord("comment");
+        var record = new AccountReactivationRecord("comment", null);
 
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
-            I18nMessage.of("error.account.status.not_suspended",
+            I18nMessage.of("error.account.status.nothing_to_reactivate",
                 Map.of("id", id.toString()))))
             .when(accountReactivationValidator).validate(eq(existing), eq(record), eq(id));
 
@@ -581,7 +581,7 @@ class AccountServiceImplTest {
             () -> accountService.reactivate(userPrincipal, id, record));
 
         assertEquals(400, ex.getStatusCode());
-        assertEquals("error.account.status.not_suspended", ex.getError().key());
+        assertEquals("error.account.status.nothing_to_reactivate", ex.getError().key());
         verify(accountStatusRepository, never()).saveAndFlush(any());
     }
 
@@ -594,7 +594,7 @@ class AccountServiceImplTest {
         var existing = new AccountStatus();
         OffsetDateTime suspensionStart = OffsetDateTime.now().minusDays(1);
         existing.setSuspensionPeriod(commonMapper.toRange(new PeriodRecord(suspensionStart, null)));
-        var record = new AccountReactivationRecord("comment");
+        var record = new AccountReactivationRecord("comment", null);
 
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
@@ -608,6 +608,43 @@ class AccountServiceImplTest {
             commonMapper.startOf(existing.getSuspensionPeriod()).toInstant());
         assertNotNull(commonMapper.endOf(existing.getSuspensionPeriod()));
         assertEquals("comment", existing.getReactivationComment());
+        assertEquals(ADMIN_ID, existing.getUpdatedBy());
+        verify(accountReactivationValidator).validate(existing, record, id);
+        verify(accountStatusRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("reactivate should push the validity end of a deactivated account and preserve its deactivation fields")
+    void testReactivate_shouldPushValidityEndOfDeactivatedAccount() {
+        UUID id = UUID.randomUUID();
+        var view = new AccountView();
+        view.setId(id);
+        var existing = new AccountStatus();
+        OffsetDateTime validityStart = OffsetDateTime.now().minusDays(30);
+        existing.setValidityPeriod(commonMapper.toRange(
+            new PeriodRecord(validityStart, OffsetDateTime.now().minusDays(1))));
+        existing.setDeactivationReason("REASON");
+        existing.setDeactivationSubreason("SUBREASON");
+        existing.setDeactivationComment("deactivation comment");
+        OffsetDateTime newEnd = OffsetDateTime.now().plusYears(1);
+        var record = new AccountReactivationRecord("comment", newEnd);
+
+        when(accountRepository.existsById(id)).thenReturn(true);
+        when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
+        when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+
+        AccountView result = accountService.reactivate(userPrincipal, id, record);
+
+        assertSame(view, result);
+        assertEquals(validityStart.toInstant(),
+            commonMapper.startOf(existing.getValidityPeriod()).toInstant());
+        assertEquals(newEnd.toInstant(),
+            commonMapper.endOf(existing.getValidityPeriod()).toInstant());
+        assertEquals("comment", existing.getReactivationComment());
+        assertEquals("REASON", existing.getDeactivationReason());
+        assertEquals("SUBREASON", existing.getDeactivationSubreason());
+        assertEquals("deactivation comment", existing.getDeactivationComment());
         assertEquals(ADMIN_ID, existing.getUpdatedBy());
         verify(accountReactivationValidator).validate(existing, record, id);
         verify(accountStatusRepository).saveAndFlush(existing);

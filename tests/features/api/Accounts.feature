@@ -736,7 +736,7 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
 
-  Scenario: 622 - Should return 400 when reactivating an account that is not suspended
+  Scenario: 622 - Should return 400 when reactivating an account that is neither suspended nor deactivated
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
@@ -760,7 +760,7 @@ Feature: Test API Account endpoints
       }
       """
     Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.not_suspended'
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.nothing_to_reactivate'
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then  I expect status code is 204
@@ -774,6 +774,31 @@ Feature: Test API Account endpoints
       """
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+
+  Scenario: 624 - Should re-validate a deactivated account by pushing its validity end while preserving deactivation fields
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000ce/status/reactivate' with method 'PUT' with body:
+      """
+      {
+        "comment": "Re-validated after appeal",
+        "validityEnd": "2099-12-31T00:00:00Z"
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.status}}' is 'ACTIVE'
+    And   I expect '{{response.body.reactivationComment}}' is 'Re-validated after appeal'
+    And   I expect '{{response.body.deactivationReason}}' is 'Deactivation Reason A'
+    And   I expect '{{response.body.deactivationSubreason}}' is 'Deactivation Sub-reason A.1'
+
+  Scenario: 625 - Should return 400 when re-validating a deactivated account with a validity end in the past
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000cd/status/reactivate' with method 'PUT' with body:
+      """
+      {
+        "comment": "Re-validation with a past end",
+        "validityEnd": "2000-01-01T00:00:00Z"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.status.validity_end_in_past'
 
   ####################################################
   ################## Set validity (PUT /accounts/{id}/status/schedule-activation) ##

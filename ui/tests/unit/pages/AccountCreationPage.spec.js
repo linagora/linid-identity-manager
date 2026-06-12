@@ -24,16 +24,26 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount } from '@vue/test-utils';
+import { flushPromises, shallowMount } from '@vue/test-utils';
 import { createAccount } from 'src/services/AccountService';
+import {
+  getOrganizationalUnitById,
+  getOrganizationalUnitRoot,
+} from 'src/services/OrganizationalUnitService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountCreationPage from '../../../src/pages/AccountCreationPage.vue';
 
 const mockedCreateAccount = vi.mocked(createAccount);
+const mockedGetOrganizationalUnitRoot = vi.mocked(getOrganizationalUnitRoot);
+const mockedGetOrganizationalUnitById = vi.mocked(getOrganizationalUnitById);
 const mockNotify = vi.fn();
 
 const mockRouter = {
   push: vi.fn(),
+};
+
+const mockRoute = {
+  query: {},
 };
 
 vi.mock('@linagora/linid-im-front-corelib', () => ({
@@ -47,6 +57,9 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useUiDesign: () => ({
     ui: vi.fn(() => ({})),
   }),
+  usePagination: () => ({
+    toPagination: vi.fn((p) => p),
+  }),
 }));
 
 vi.mock('src/composables/useAccountCreationConfig', () => ({
@@ -56,7 +69,42 @@ vi.mock('src/composables/useAccountCreationConfig', () => ({
       { name: 'lastname', label: 'Last name', type: 'text', rules: [] },
       { name: 'firstname', label: 'First name', type: 'text', rules: [] },
       { name: 'email', label: 'Email', type: 'email', rules: [] },
+      {
+        name: 'validityPeriodStart',
+        label: 'Validity Period Start',
+        type: 'date',
+        rules: [],
+      },
     ],
+  }),
+}));
+
+vi.mock('src/composables/useAccountMapper', () => ({
+  useAccountMapper: () => ({
+    toAccountRecord: (form) => ({
+      externalId: form.externalId,
+      lastname: form.lastname,
+      firstname: form.firstname,
+      email: form.email,
+      validityPeriod: {
+        start: form.validityPeriodStart,
+        end: null,
+      },
+      organizationalUnit: form.organizationalUnit,
+    }),
+  }),
+}));
+
+vi.mock('src/composables/useCommonMapper', () => ({
+  useCommonMapper: () => ({
+    toEmptyRecord: (fields) => ({
+      externalId: '',
+      lastname: '',
+      firstname: '',
+      email: '',
+      validityPeriodStart: '',
+      organizationalUnit: undefined,
+    }),
   }),
 }));
 
@@ -76,8 +124,18 @@ vi.mock('src/services/AccountService', () => ({
   createAccount: vi.fn(),
 }));
 
+vi.mock('src/services/OrganizationalUnitService', () => ({
+  getOrganizationalUnits: vi.fn(),
+  getOrganizationalUnitRoot: vi.fn(),
+  getOrganizationalUnitById: vi.fn(),
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
+  useRoute: () => {
+    // Return the current state of mockRoute to allow test modifications
+    return mockRoute;
+  },
 }));
 
 const createdAccount = {
@@ -92,11 +150,16 @@ const createdAccount = {
   updateDate: '2026-04-15T12:00:00.000000Z',
 };
 
-const fillForm = (wrapper) => {
-  wrapper.vm.form.externalId = 'external-id';
-  wrapper.vm.form.lastname = 'Doe';
-  wrapper.vm.form.firstname = 'John';
-  wrapper.vm.form.email = 'john.doe@example.com';
+const rootOrganizationalUnit = {
+  id: '22222222-2222-4222-8222-222222222222',
+  name: 'root',
+  type: 'ORG_UNIT',
+};
+
+const selectedOrganizationalUnit = {
+  id: '33333333-3333-4333-8333-333333333333',
+  name: 'Engineering',
+  type: 'ORG_UNIT',
 };
 
 describe('Test component: AccountCreationPage', () => {
@@ -104,13 +167,149 @@ describe('Test component: AccountCreationPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRouter.push.mockClear();
+    mockNotify.mockClear();
+    mockRoute.query = {};
     mockedCreateAccount.mockResolvedValue(createdAccount);
+    mockedGetOrganizationalUnitRoot.mockResolvedValue(rootOrganizationalUnit);
+    mockedGetOrganizationalUnitById.mockResolvedValue(
+      selectedOrganizationalUnit
+    );
+  });
+
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.unmount();
+    }
+  });
+
+  describe('Test function: loadOrganizationalUnit', () => {
+    it('should load root organizational unit when ouSelected is undefined', async () => {
+      mockRoute.query = {};
+      wrapper = shallowMount(AccountCreationPage);
+
+      await flushPromises();
+      await wrapper.vm.loadOrganizationalUnit();
+
+      expect(mockedGetOrganizationalUnitRoot).toHaveBeenCalled();
+      expect(wrapper.vm.organizationalUnit).toEqual(rootOrganizationalUnit);
+    });
+
+    it('should notify with notFound message when failing to fetch root OU with 404 error', async () => {
+      mockRoute.query = {};
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+
+      mockNotify.mockClear();
+      mockedGetOrganizationalUnitRoot.mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { status: 404 },
+      });
+
+      await wrapper.vm.loadOrganizationalUnit();
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.notFound',
+      });
+      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
+    });
+
+    it('should notify with validation error when failing to fetch root OU with 400 error', async () => {
+      mockRoute.query = {};
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+
+      mockNotify.mockClear();
+      mockedGetOrganizationalUnitRoot.mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { status: 400 },
+      });
+
+      await wrapper.vm.loadOrganizationalUnit();
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.generic',
+      });
+      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
+    });
+
+    it('should load specific organizational unit when ouSelected is provided', async () => {
+      mockRoute.query = { ou: selectedOrganizationalUnit.id };
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+      await wrapper.vm.loadOrganizationalUnit();
+
+      expect(mockedGetOrganizationalUnitById).toHaveBeenCalledWith(
+        selectedOrganizationalUnit.id
+      );
+      expect(wrapper.vm.organizationalUnit).toEqual(selectedOrganizationalUnit);
+    });
+
+    it('should notify and redirect when failing to fetch selected OU', async () => {
+      mockRoute.query = { ou: selectedOrganizationalUnit.id };
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+
+      mockedGetOrganizationalUnitById.mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { status: 404 },
+      });
+
+      await wrapper.vm.loadOrganizationalUnit();
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.notFound',
+      });
+      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
+    });
+
+    it('should notify with generic error when failing to fetch selected OU', async () => {
+      mockRoute.query = { ou: selectedOrganizationalUnit.id };
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+
+      mockedGetOrganizationalUnitById.mockRejectedValueOnce(
+        new Error('Network error')
+      );
+
+      await wrapper.vm.loadOrganizationalUnit();
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errors.generic',
+      });
+      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
+    });
+  });
+
+  describe('Test function: setFormData', () => {
+    it('should set the organizational unit name in the form', async () => {
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+      wrapper.vm.organizationalUnit = rootOrganizationalUnit;
+
+      await wrapper.vm.setFormData();
+
+      expect(wrapper.vm.form.organizationalUnit).toEqual(
+        rootOrganizationalUnit.name
+      );
+    });
   });
 
   describe('Test function: onSubmit', () => {
-    it('should call createAccount with the current form data', async () => {
+    it('should call createAccount with the current form data including organizationalUnit', async () => {
       wrapper = shallowMount(AccountCreationPage);
-      fillForm(wrapper);
+      await flushPromises();
+      wrapper.vm.organizationalUnit = selectedOrganizationalUnit;
+      wrapper.vm.form.externalId = 'external-id';
+      wrapper.vm.form.lastname = 'Doe';
+      wrapper.vm.form.firstname = 'John';
+      wrapper.vm.form.email = 'john.doe@example.com';
+      wrapper.vm.form.validityPeriodStart = '2026-05-01';
+      wrapper.vm.form.organizationalUnit = selectedOrganizationalUnit.id;
 
       await wrapper.vm.onSubmit();
 
@@ -120,15 +319,22 @@ describe('Test component: AccountCreationPage', () => {
         firstname: 'John',
         email: 'john.doe@example.com',
         validityPeriod: {
-          start: null,
+          start: '2026-05-01',
           end: null,
         },
+        organizationalUnit: selectedOrganizationalUnit.id,
       });
     });
 
     it('should notify the user and redirect to the created account on success', async () => {
       wrapper = shallowMount(AccountCreationPage);
-      fillForm(wrapper);
+      await flushPromises();
+      wrapper.vm.organizationalUnit = selectedOrganizationalUnit;
+      wrapper.vm.form.externalId = 'external-id';
+      wrapper.vm.form.lastname = 'Doe';
+      wrapper.vm.form.firstname = 'John';
+      wrapper.vm.form.email = 'john.doe@example.com';
+      wrapper.vm.form.organizationalUnit = selectedOrganizationalUnit.id;
 
       await wrapper.vm.onSubmit();
 
@@ -143,6 +349,13 @@ describe('Test component: AccountCreationPage', () => {
 
     it('should toggle isLoading around the request', async () => {
       wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+      wrapper.vm.organizationalUnit = selectedOrganizationalUnit;
+      wrapper.vm.form.externalId = 'external-id';
+      wrapper.vm.form.lastname = 'Doe';
+      wrapper.vm.form.firstname = 'John';
+      wrapper.vm.form.email = 'john.doe@example.com';
+      wrapper.vm.form.organizationalUnit = selectedOrganizationalUnit.id;
 
       const submitPromise = wrapper.vm.onSubmit();
       expect(wrapper.vm.isLoading).toBe(true);
@@ -158,6 +371,10 @@ describe('Test component: AccountCreationPage', () => {
       });
 
       wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+      mockRouter.push.mockClear();
+      wrapper.vm.organizationalUnit = selectedOrganizationalUnit;
+      wrapper.vm.form.organizationalUnit = selectedOrganizationalUnit.id;
 
       await wrapper.vm.onSubmit();
 
@@ -173,6 +390,10 @@ describe('Test component: AccountCreationPage', () => {
       mockedCreateAccount.mockRejectedValueOnce(new Error('boom'));
 
       wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+      mockRouter.push.mockClear();
+      wrapper.vm.organizationalUnit = selectedOrganizationalUnit;
+      wrapper.vm.form.organizationalUnit = selectedOrganizationalUnit.id;
 
       await wrapper.vm.onSubmit();
 
@@ -186,11 +407,29 @@ describe('Test component: AccountCreationPage', () => {
   });
 
   describe('Test function: cancel', () => {
-    it('should navigate back to the accounts list', () => {
+    it('should navigate back to the accounts list', async () => {
+      mockRoute.query = {};
       wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
       wrapper.vm.cancel();
 
-      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
+      // The cancel function creates a query object with node: '', then updates it if needed
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        path: '/accounts',
+        query: { node: '' },
+      });
+    });
+
+    it('should include node parameter when navigating back if it was in the query', async () => {
+      mockRoute.query = { node: 'some-node-id' };
+      wrapper = shallowMount(AccountCreationPage);
+      await flushPromises();
+      wrapper.vm.cancel();
+
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        path: '/accounts',
+        query: { node: 'some-node-id' },
+      });
     });
   });
 });

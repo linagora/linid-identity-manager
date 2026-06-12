@@ -170,6 +170,97 @@ describe('Test service: organizationalUnitService', () => {
     });
   });
 
+  describe('Test function: getOrganizationalUnitRoot', () => {
+    it('should return the root organizational unit from the first element of the page content', async () => {
+      const { getOrganizationalUnitRoot } = await import(
+        'src/services/OrganizationalUnitService'
+      );
+      const rootOU = buildOuDTO({
+        id: ROOT_UUID,
+        name: 'root',
+        type: 'ROOT',
+      });
+      const page = buildPage([rootOU]);
+      vi.mocked(api.get).mockResolvedValue({ data: page });
+
+      const result = await getOrganizationalUnitRoot();
+
+      expect(api.get).toHaveBeenCalledWith('/organizational-units', {
+        params: expect.objectContaining({
+          name: 'root',
+        }),
+      });
+      expect(result).toEqual(rootOU);
+    });
+
+    it('should return the root OU even when there are multiple OUs in the page', async () => {
+      const { getOrganizationalUnitRoot } = await import(
+        'src/services/OrganizationalUnitService'
+      );
+      const rootOU = buildOuDTO({
+        id: ROOT_UUID,
+        name: 'root',
+        type: 'ROOT',
+      });
+      const otherOU = buildOuDTO({
+        id: OU_UUID,
+        name: 'Engineering',
+      });
+      const page = buildPage([rootOU, otherOU]);
+      vi.mocked(api.get).mockResolvedValue({ data: page });
+
+      const result = await getOrganizationalUnitRoot();
+
+      expect(result).toEqual(rootOU);
+      expect(result.name).toBe('root');
+    });
+
+    it('should return undefined when the page content is empty', async () => {
+      const { getOrganizationalUnitRoot } = await import(
+        'src/services/OrganizationalUnitService'
+      );
+      const page = buildPage([]);
+      vi.mocked(api.get).mockResolvedValue({ data: page });
+
+      const result = await getOrganizationalUnitRoot();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when the page is null or undefined', async () => {
+      const { getOrganizationalUnitRoot } = await import(
+        'src/services/OrganizationalUnitService'
+      );
+      vi.mocked(api.get).mockResolvedValue({ data: null });
+
+      const result = await getOrganizationalUnitRoot();
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      const { getOrganizationalUnitRoot } = await import(
+        'src/services/OrganizationalUnitService'
+      );
+      vi.mocked(api.get).mockRejectedValue(new Error('boom'));
+
+      await expect(getOrganizationalUnitRoot()).rejects.toThrow('boom');
+    });
+
+    it('should filter the request by name "root"', async () => {
+      const { getOrganizationalUnitRoot } = await import(
+        'src/services/OrganizationalUnitService'
+      );
+      const page = buildPage([buildOuDTO({ name: 'root' })]);
+      vi.mocked(api.get).mockResolvedValue({ data: page });
+
+      await getOrganizationalUnitRoot();
+
+      const callArgs = vi.mocked(api.get).mock.calls[0];
+      expect(callArgs[1].params.name).toBe('root');
+    });
+  });
+
   describe('Test function: getAllOrganizationalUnit', () => {
     it('should return all results when there is a single page', async () => {
       const ou1 = buildOuDTO({ id: OU_UUID });

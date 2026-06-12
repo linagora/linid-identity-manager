@@ -45,6 +45,10 @@ export interface AccountRecord {
   email: string;
   /** Validity period of the account, with start and end dates. */
   validityPeriod: Period;
+  /**
+   * Organizational unit uuid to which the account belongs.
+   */
+  organizationalUnit: string;
 }
 
 /** Raw account shape returned by the API. */
@@ -215,6 +219,10 @@ export interface AccountForm {
   email: string;
   /** Start date of the account's validity period. */
   validityPeriodStart: string;
+  /**
+   * Organizational unit name to which the account belongs.
+   */
+  organizationalUnit: string;
 }
 
 /**

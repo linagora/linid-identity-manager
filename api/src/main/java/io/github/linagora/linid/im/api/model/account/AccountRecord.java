@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 
 /**
  * Request payload for creating a new account.
@@ -39,7 +40,8 @@ import jakarta.validation.constraints.NotNull;
  * @param lastname       last name of the account holder
  * @param firstname      first name of the account holder
  * @param email          email address, must be valid format
- * @param validityPeriod time range during which the account is valid;
+ * @param validityPeriod time range during which the account is valid
+ * @param organizationalUnit Organizational unit uuid to which the account belongs
  */
 @Schema(description = "Request payload for creating a new account")
 public record AccountRecord(
@@ -56,6 +58,9 @@ public record AccountRecord(
     String email,
 
     @NotNull @Schema(description = "Time range during which the account is valid")
-    PeriodRecord validityPeriod
+    PeriodRecord validityPeriod,
+
+    @NotNull @Schema(description = "Organizational unit uuid to which the account belongs")
+    UUID organizationalUnit
 ) {
 }

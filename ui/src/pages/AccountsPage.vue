@@ -182,11 +182,18 @@ const pagination = ref<QuasarPagination>({
 });
 const uiNamespace = 'accounts.homepage';
 
-watch(selectedOrganizationalUnitId, (nodeId: string) => {
-  pagination.value.page = 1;
-  filters.value = {};
-  loadData(nodeId);
-});
+watch(
+  selectedOrganizationalUnitId,
+  (nodeId: string) => {
+    if (!nodeId) {
+      return;
+    }
+    pagination.value.page = 1;
+    filters.value = {};
+    loadData(nodeId);
+  },
+  { immediate: true }
+);
 
 /**
  * Loads the account list.
@@ -237,6 +244,10 @@ async function loadData(id: string): Promise<void> {
 function goToCreate() {
   return router.push({
     path: `${route.path}/create`,
+    query: {
+      ou: selectedOrganizationalUnitId.value,
+      node: route.query.node as string,
+    },
   });
 }
 

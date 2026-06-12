@@ -42,6 +42,7 @@ const mockRouter = {
 
 const mockRoute = {
   path: '/accounts',
+  query: {},
 };
 
 const mockNotify = vi.fn();
@@ -283,14 +284,50 @@ describe('Test component: AccountsPage', () => {
 
       expect(getAccountsByOrganizationalUnitId).not.toHaveBeenCalled();
     });
+
+
+    it('should reset both pagination and filters when selectedOrganizationalUnitId changes', async () => {
+      mockSelectedOrganizationalUnitId.value = 'first-ou-uuid';
+      await nextTick();
+      await flushPromises();
+
+      wrapper.vm.pagination.page = 3;
+      wrapper.vm.filters = { search: 'test' };
+
+      mockSelectedOrganizationalUnitId.value = 'second-ou-uuid';
+      await nextTick();
+      await flushPromises();
+
+      expect(wrapper.vm.pagination.page).toBe(1);
+      expect(wrapper.vm.filters).toEqual({});
+    });
+
+    it('should return early without calling loadData when selectedOrganizationalUnitId is empty string', async () => {
+      mockSelectedOrganizationalUnitId.value = 'ou-uuid';
+      await nextTick();
+      await flushPromises();
+      vi.clearAllMocks();
+
+      mockSelectedOrganizationalUnitId.value = '';
+      await nextTick();
+      await flushPromises();
+
+      expect(getAccountsByOrganizationalUnitId).not.toHaveBeenCalled();
+    });
   });
 
   describe('Test function: goToCreate', () => {
-    it('should navigate to the creation page', () => {
+    it('should navigate to the creation page with selected organizational unit and node', () => {
+      mockSelectedOrganizationalUnitId.value = 'ou-uuid';
+      mockRoute.query = { node: 'node-123' };
       wrapper.vm.goToCreate();
 
       expect(mockRouter.push).toHaveBeenCalledWith({
         path: '/accounts/create',
+        query: {
+          ou: 'ou-uuid',
+          node: 'node-123',
+        },
       });
     });
   });

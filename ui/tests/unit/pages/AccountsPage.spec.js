@@ -285,7 +285,6 @@ describe('Test component: AccountsPage', () => {
       expect(getAccountsByOrganizationalUnitId).not.toHaveBeenCalled();
     });
 
-
     it('should reset both pagination and filters when selectedOrganizationalUnitId changes', async () => {
       mockSelectedOrganizationalUnitId.value = 'first-ou-uuid';
       await nextTick();

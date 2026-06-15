@@ -88,6 +88,7 @@ export async function getOrganizationalUnits(
 
 /**
  * Fetches the root organizational unit from the API.
+ *
  * @returns Promise resolving to the root organizational unit.
  */
 export async function getOrganizationalUnitRoot() {

@@ -108,6 +108,12 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: vi.fn((v) => v) }),
 }));
 
+vi.mock('boot/config', () => ({
+  appConfig: {
+    immediateReactivationDelay: 60,
+  },
+}));
+
 describe('Test component: AccountDetailsPage', () => {
   let wrapper;
 

@@ -88,6 +88,12 @@ vi.mock('vue-i18n', () => ({
   }),
 }));
 
+vi.mock('boot/config', () => ({
+  appConfig: {
+    immediateReactivationDelay: 60,
+  },
+}));
+
 const buildOuDto = (overrides = {}) => ({
   id: OU_ID,
   name: 'Engineering',

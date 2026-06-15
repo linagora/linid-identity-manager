@@ -36,4 +36,6 @@ export interface AppConfig {
   organizationalUnitTypes: string[];
   /** Number of organizational units to fetch per page when querying the API. */
   organizationalUnitQuerySize: number;
+  /** Defines the delay(in minutes) applied when reactivating a suspended or inactive account. */
+  immediateReactivationDelay: number;
 }

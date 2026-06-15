@@ -1,4 +1,5 @@
 {
   "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
-  "organizationalUnitQuerySize": 50
+  "organizationalUnitQuerySize": 50,
+  "immediateReactivationDelay": 60
 }

@@ -119,6 +119,7 @@ import {
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { appConfig } from 'boot/config';
 import { storeToRefs } from 'pinia';
 import { fieldsOrder } from 'src/assets/organizationalUnits/detailsConfiguration';
 import { organizationalUnitLifecycleUiConfiguration } from 'src/assets/organizationalUnits/organizationalUnitLifecycleUiConfiguration';
@@ -179,6 +180,12 @@ const hasAnyLifecycleAction = computed(() =>
     lifecycleUi.value?.suspensionMenuItems?.length
   )
 );
+
+const reactivationDelay: number =
+  appConfig?.immediateReactivationDelay > 0
+    ? appConfig.immediateReactivationDelay
+    : 1;
+
 
 /**
  * Loads the organizational unit selected in the tree (store) and splits the raw DTO into the identity and lifecycle
@@ -263,7 +270,9 @@ function openImmediateSuspensionDialog(): void {
             selectedOrganizationalUnitId.value,
             toOrganizationalUnitSuspensionRecord({
               ...formData,
-              start: dayjs().add(1, 'hour').toISOString(),
+              start: dayjs()
+                .add(reactivationDelay, 'minute')
+                .toISOString(),
             })
           ),
         'success.suspended'

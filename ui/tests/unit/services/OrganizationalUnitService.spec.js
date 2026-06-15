@@ -172,9 +172,8 @@ describe('Test service: organizationalUnitService', () => {
 
   describe('Test function: getOrganizationalUnitRoot', () => {
     it('should return the root organizational unit from the first element of the page content', async () => {
-      const { getOrganizationalUnitRoot } = await import(
-        'src/services/OrganizationalUnitService'
-      );
+      const { getOrganizationalUnitRoot } =
+        await import('src/services/OrganizationalUnitService');
       const rootOU = buildOuDTO({
         id: ROOT_UUID,
         name: 'root',
@@ -194,9 +193,8 @@ describe('Test service: organizationalUnitService', () => {
     });
 
     it('should return the root OU even when there are multiple OUs in the page', async () => {
-      const { getOrganizationalUnitRoot } = await import(
-        'src/services/OrganizationalUnitService'
-      );
+      const { getOrganizationalUnitRoot } =
+        await import('src/services/OrganizationalUnitService');
       const rootOU = buildOuDTO({
         id: ROOT_UUID,
         name: 'root',
@@ -216,9 +214,8 @@ describe('Test service: organizationalUnitService', () => {
     });
 
     it('should return undefined when the page content is empty', async () => {
-      const { getOrganizationalUnitRoot } = await import(
-        'src/services/OrganizationalUnitService'
-      );
+      const { getOrganizationalUnitRoot } =
+        await import('src/services/OrganizationalUnitService');
       const page = buildPage([]);
       vi.mocked(api.get).mockResolvedValue({ data: page });
 
@@ -228,9 +225,8 @@ describe('Test service: organizationalUnitService', () => {
     });
 
     it('should return undefined when the page is null or undefined', async () => {
-      const { getOrganizationalUnitRoot } = await import(
-        'src/services/OrganizationalUnitService'
-      );
+      const { getOrganizationalUnitRoot } =
+        await import('src/services/OrganizationalUnitService');
       vi.mocked(api.get).mockResolvedValue({ data: null });
 
       const result = await getOrganizationalUnitRoot();
@@ -239,18 +235,16 @@ describe('Test service: organizationalUnitService', () => {
     });
 
     it('should propagate backend errors to the caller', async () => {
-      const { getOrganizationalUnitRoot } = await import(
-        'src/services/OrganizationalUnitService'
-      );
+      const { getOrganizationalUnitRoot } =
+        await import('src/services/OrganizationalUnitService');
       vi.mocked(api.get).mockRejectedValue(new Error('boom'));
 
       await expect(getOrganizationalUnitRoot()).rejects.toThrow('boom');
     });
 
     it('should filter the request by name "root"', async () => {
-      const { getOrganizationalUnitRoot } = await import(
-        'src/services/OrganizationalUnitService'
-      );
+      const { getOrganizationalUnitRoot } =
+        await import('src/services/OrganizationalUnitService');
       const page = buildPage([buildOuDTO({ name: 'root' })]);
       vi.mocked(api.get).mockResolvedValue({ data: page });
 

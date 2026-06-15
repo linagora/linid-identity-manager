@@ -338,14 +338,14 @@ tasks:
             -alias lemonldap \
             -file selfsigned.crt \
             -keystore {{.TRUSTSTORE_PATH}}/truststore.jks \
-            -storepass changeit >/dev/null 2>&1
+            -storepass "$SSL_TRUSTSTORE_PASSWORD" >/dev/null 2>&1
       # API keystore
       - cmd: rm -fv {{.ROOT_DIR}}/api/src/main/resources/keystore.jks
       - cmd: |
           keytool -genkeypair -v -alias mykey \
             -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=FR" \
             -keystore {{.ROOT_DIR}}/api/src/main/resources/keystore.jks \
-            -storepass password -keypass password \
+            -storepass "$SSL_KEY_PASSWORD" -keypass "$SSL_KEY_PASSWORD" \
             -keyalg RSA -keysize 2048 -validity 3650 >/dev/null 2>&1
 
   generate:config:oidc:

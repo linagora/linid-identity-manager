@@ -88,6 +88,13 @@ vi.mock('vue-i18n', () => ({
   }),
 }));
 
+vi.mock('boot/config', () => {
+  const mockAppConfig = { immediateActionDelay: 60 };
+  // Make it accessible globally for tests
+  global.mockAppConfig = mockAppConfig;
+  return { appConfig: mockAppConfig };
+});
+
 const buildOuDto = (overrides = {}) => ({
   id: OU_ID,
   name: 'Engineering',
@@ -241,6 +248,35 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
         OU_ID,
         expect.any(AbortSignal)
       );
+    });
+  });
+
+  describe('Test computed: actionDelay', () => {
+    it('should default to 5 when appConfig.immediateActionDelay is 0 or less', () => {
+      const mockAppConfig = global.mockAppConfig;
+      const originalDelay = mockAppConfig.immediateActionDelay;
+      mockAppConfig.immediateActionDelay = 0;
+
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      expect(wrapper.vm.actionDelay).toBe(5);
+
+      mockAppConfig.immediateActionDelay = originalDelay;
+    });
+
+    it('should default to 5 when appConfig.immediateActionDelay is undefined', () => {
+      const mockAppConfig = global.mockAppConfig;
+      const originalDelay = mockAppConfig.immediateActionDelay;
+      mockAppConfig.immediateActionDelay = undefined;
+
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      expect(wrapper.vm.actionDelay).toBe(5);
+
+      mockAppConfig.immediateActionDelay = originalDelay;
+    });
+
+    it('should use the configured value when appConfig.immediateActionDelay is greater than 0', () => {
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      expect(wrapper.vm.actionDelay).toBe(60);
     });
   });
 

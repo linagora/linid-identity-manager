@@ -108,6 +108,13 @@ vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: vi.fn((v) => v) }),
 }));
 
+vi.mock('boot/config', () => {
+  const mockAppConfig = { immediateActionDelay: 60 };
+  // Make it accessible globally for tests
+  global.mockAppConfig = mockAppConfig;
+  return { appConfig: mockAppConfig };
+});
+
 describe('Test component: AccountDetailsPage', () => {
   let wrapper;
 
@@ -510,6 +517,42 @@ describe('Test component: AccountDetailsPage', () => {
 
     afterEach(() => {
       vi.useRealTimers();
+    });
+
+    describe('Test computed: actionDelay', () => {
+      it('should default to 5 minutes when appConfig.immediateActionDelay is 0 or less', () => {
+        // Temporarily set appConfig to have immediateActionDelay = 0
+        const mockAppConfig = global.mockAppConfig;
+        const originalDelay = mockAppConfig.immediateActionDelay;
+        mockAppConfig.immediateActionDelay = 0;
+
+        wrapper = shallowMount(AccountDetailsPage);
+        expect(wrapper.vm.actionDelay).toBe(5);
+
+        // Restore original value
+        mockAppConfig.immediateActionDelay = originalDelay;
+      });
+
+      it('should default to 5 minutes when appConfig.immediateActionDelay is undefined', () => {
+        // Temporarily set appConfig to have immediateActionDelay = undefined
+        const mockAppConfig = global.mockAppConfig;
+        const originalDelay = mockAppConfig.immediateActionDelay;
+        mockAppConfig.immediateActionDelay = undefined;
+
+        wrapper = shallowMount(AccountDetailsPage);
+        expect(wrapper.vm.actionDelay).toBe(5);
+
+        // Restore original value
+        mockAppConfig.immediateActionDelay = originalDelay;
+      });
+
+      it('should use the configured value when appConfig.immediateActionDelay is greater than 0', async () => {
+        wrapper = shallowMount(AccountDetailsPage);
+        await wrapper.vm.loadAccount();
+
+        // The mock is set to immediateActionDelay of 60
+        expect(wrapper.vm.actionDelay).toBe(60);
+      });
     });
 
     describe('Test function: immediateActivation', () => {

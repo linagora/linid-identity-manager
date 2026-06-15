@@ -1,6 +1,7 @@
 {
   "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
   "organizationalUnitQuerySize": 50,
+  "immediateActionDelay": 60,
   "designFiles": [
     "design/default.json",
     "design/splitter-layout.json",

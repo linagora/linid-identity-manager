@@ -157,6 +157,7 @@ import {
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { appConfig } from 'boot/config';
 import { accountLifecycleUiConfiguration } from 'src/assets/accounts/accountLifecycleUiConfiguration';
 import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
 import { dayjs } from 'src/boot/dayjs';
@@ -222,6 +223,9 @@ const hasAnyLifecycleAction = computed(() =>
     lifecycleUi.value?.deactivationMenuItems?.length
   )
 );
+
+const actionDelay: number =
+  appConfig?.immediateActionDelay > 0 ? appConfig.immediateActionDelay : 5;
 
 /**
  * Loads the account data from the backend based on the route parameter and splits the raw DTO into the page-level
@@ -318,7 +322,9 @@ function immediateActivation() {
           setAccountValidity(
             accountId.value,
             toAccountValidityRecord({
-              validityPeriodStart: dayjs().add(1, 'hour').toISOString(),
+              validityPeriodStart: dayjs()
+                .add(actionDelay, 'minute')
+                .toISOString(),
             })
           ),
         'immediateActivationSuccess'
@@ -338,7 +344,9 @@ function immediateSuspension() {
             accountId.value,
             toAccountSuspensionRecord({
               ...formData,
-              suspensionPeriodStart: dayjs().add(1, 'hour').toISOString(),
+              suspensionPeriodStart: dayjs()
+                .add(actionDelay, 'minute')
+                .toISOString(),
             })
           ),
         'immediateSuspensionSuccess'
@@ -358,7 +366,9 @@ function immediateDeactivation() {
             accountId.value,
             toAccountDeactivationRecord({
               ...formData,
-              validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
+              validityPeriodEnd: dayjs()
+                .add(actionDelay, 'minute')
+                .toISOString(),
             })
           ),
         'immediateDeactivationSuccess'
@@ -399,7 +409,9 @@ function immediateRevalidation() {
             accountId.value,
             toAccountReactivationRecord({
               ...formData,
-              validityPeriodEnd: dayjs().add(1, 'hour').toISOString(),
+              validityPeriodEnd: dayjs()
+                .add(actionDelay, 'minute')
+                .toISOString(),
             })
           ),
         'immediateRevalidationSuccess'

@@ -310,6 +310,7 @@ tasks:
     desc: Generate certificates and keys for a specific environment
     internal: true
     dir: "docker/{{.ENV}}/resources"
+    dotenv: ['../{{.ENV_FILE| default ".env"}}']
     vars:
       TRUSTSTORE_PATH: '{{.TRUSTSTORE_PATH | default "."}}'
     cmds:

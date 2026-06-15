@@ -437,8 +437,14 @@ tasks:
     internal: true
     dir: "{{.DIR}}"
     cmd: |
-      if docker compose ps -q 2>/dev/null | grep -q .; then
-        docker compose down 2>/tmp/linid-docker.log && echo "  ✔ {{.SERVICE_NAME}} stopped" || { echo "  ✗ {{.SERVICE_NAME}} not stopped — see /tmp/linid-docker.log"; exit 1; }
-      else
+      running=$(docker compose ps --status running -q 2>/dev/null || true)
+
+      if [ -z "$running" ]; then
         echo "  ○ {{.SERVICE_NAME}} (not running)"
+        exit 0
       fi
+
+      set -o pipefail
+      docker compose down -v --remove-orphans 2>&1 | tee /tmp/linid-docker.log
+
+      echo "  ✔ {{.SERVICE_NAME}} stopped"

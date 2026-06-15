@@ -23,7 +23,7 @@ services:
 
   api:
     image: linid-identity-manager-api
-    container_name: linid-identity-manager-api
+    container_name: api
     networks:
       - linid-integration-network
     extra_hosts:

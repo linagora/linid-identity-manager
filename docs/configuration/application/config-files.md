@@ -56,9 +56,6 @@ AUTH_JWK_SET_URI=https://linid.localtest.me:9000/auth/oauth2/jwks
 # Path to SSL/TLS key store
 SSL_KEY_STORE=classpath:keystore.jks
 
-# Password for accessing the SSL key store
-SSL_KEY_STORE_PASSWORD=password
-
 # Password for the individual SSL key within the key store
 SSL_KEY_PASSWORD=password
 

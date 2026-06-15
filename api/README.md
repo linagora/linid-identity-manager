@@ -98,13 +98,12 @@ The `UserAuthenticationFilter` extracts the user email from the JWT token and cr
 
 ### SSL
 
-| Variable                  | Description         | Required |
-| ------------------------- | ------------------- | -------- |
-| `SSL_KEY_STORE`           | Path to keystore    | Yes      |
-| `SSL_KEY_STORE_PASSWORD`  | Keystore password   | Yes      |
-| `SSL_KEY_PASSWORD`        | Key password        | Yes      |
-| `SSL_TRUSTSTORE_PATH`     | Path to truststore  | Yes      |
-| `SSL_TRUSTSTORE_PASSWORD` | Truststore password | Yes      |
+| Variable                  | Description                           | Required |
+| ------------------------- |---------------------------------------|----------|
+| `SSL_KEY_STORE`           | Path to keystore                      | Yes      |
+| `SSL_KEY_PASSWORD`        | Password for private key and JKS file | Yes      |
+| `SSL_TRUSTSTORE_PATH`     | Path to truststore                    | Yes      |
+| `SSL_TRUSTSTORE_PASSWORD` | Truststore password                   | Yes      |
 
 ### Application
 

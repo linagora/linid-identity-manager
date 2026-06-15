@@ -10,5 +10,5 @@ RUN pnpm build
 FROM nginx:stable-alpine
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/dist/spa /usr/share/nginx/html
-EXPOSE 80
+EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]

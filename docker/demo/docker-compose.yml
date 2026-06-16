@@ -68,6 +68,24 @@ services:
       db:
         condition: service_healthy
 
+  init-db:
+    image: postgres:18.3-alpine
+    container_name: init-db
+    networks:
+      - linid-demo-network
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DATABASE_ADMIN_PASSWORD}
+    entrypoint: >
+      sh -c "
+      echo 'Running init script...' &&
+      psql -h ${DATABASE_HOST} -p ${DATABASE_PORT} -U ${DATABASE_ADMIN_USER} -d ${DATABASE_NAME} -f /scripts/init_data.sql
+      "
+    volumes:
+      - ./resources/init_data.sql:/scripts/init_data.sql:ro
+
   ui:
     image: linid-identity-manager-ui
     container_name: ui

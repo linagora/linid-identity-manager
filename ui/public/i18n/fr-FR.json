@@ -463,10 +463,10 @@
       "cancel": "Retour"
     },
     "updateStatusSuccess": "Statut du compte mis à jour avec succès",
-    "immediateActivationSuccess": "Le compte pourra être activé dans une heure",
-    "immediateSuspensionSuccess": "Le compte sera suspendu dans une heure",
-    "immediateDeactivationSuccess": "Le compte sera désactivé dans une heure",
-    "immediateReactivationSuccess": "Le compte sera réactivé dans une heure",
+    "immediateActivationSuccess": "Le compte pourra être activé dans une minute | Le compte pourra être activé dans {count} minutes",
+    "immediateSuspensionSuccess": "Le compte sera suspendu dans une minute | Le compte sera suspendu dans {count} minutes",
+    "immediateDeactivationSuccess": "Le compte sera désactivé dans une minute | Le compte sera désactivé dans {count} minutes",
+    "immediateReactivationSuccess": "Le compte sera réactivé dans une minute | Le compte sera réactivé dans {count} minutes",
     "scheduledActivationSuccess": "Le compte pourra être activé à partir du {date}",
     "scheduledDeactivationSuccess": "Le compte sera désactivé à partir du {date}",
     "modifyDeactivationSuccess": "Le compte sera désactivé à partir du {date}",
@@ -477,7 +477,7 @@
       "generic": "Impossible de charger le compte. Veuillez réessayer plus tard.",
       "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
     },
-    "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une heure",
+    "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes",
     "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
   },
   "AccountDeactivatedBanner": {

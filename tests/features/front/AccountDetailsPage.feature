@@ -418,7 +418,7 @@ Feature: Test Account details page display
     When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
-    And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé dans une heure"
+    And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé dans 60 minutes"
 
     ## 122 Scheduled activation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
@@ -515,7 +515,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
-    And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu dans une heure"
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu dans 60 minutes"
 
     ## 130 Scheduled suspension - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
@@ -747,7 +747,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
-    And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé dans une heure"
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé dans 60 minutes"
 
     ## 150 Immediate deactivation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
@@ -788,7 +788,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
-    And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé dans une heure"
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé dans 60 minutes"
 
     ## 153 Scheduled deactivation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'

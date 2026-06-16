@@ -725,7 +725,7 @@ describe('Test component: AccountDetailsPage', () => {
           message: 'scheduledActivationSuccess',
         });
         expect(mockScopedT).toHaveBeenLastCalledWith(
-          'scheduledActivationSuccess'
+          'scheduledActivationSuccess', { count: 60 }
         );
       });
     });
@@ -773,7 +773,8 @@ describe('Test component: AccountDetailsPage', () => {
           message: 'scheduledDeactivationSuccess',
         });
         expect(mockScopedT).toHaveBeenLastCalledWith(
-          'scheduledDeactivationSuccess'
+          'scheduledDeactivationSuccess',
+          { count: 60 }
         );
       });
     });
@@ -821,7 +822,8 @@ describe('Test component: AccountDetailsPage', () => {
           message: 'modifyDeactivationSuccess',
         });
         expect(mockScopedT).toHaveBeenLastCalledWith(
-          'modifyDeactivationSuccess'
+          'modifyDeactivationSuccess',
+          { count: 60 }
         );
       });
     });
@@ -871,7 +873,8 @@ describe('Test component: AccountDetailsPage', () => {
           message: 'scheduledSuspensionSuccess',
         });
         expect(mockScopedT).toHaveBeenLastCalledWith(
-          'scheduledSuspensionSuccess'
+          'scheduledSuspensionSuccess',
+          { count: 60 }
         );
       });
     });
@@ -920,7 +923,7 @@ describe('Test component: AccountDetailsPage', () => {
           type: 'positive',
           message: 'modifySuspensionSuccess',
         });
-        expect(mockScopedT).toHaveBeenLastCalledWith('modifySuspensionSuccess');
+        expect(mockScopedT).toHaveBeenLastCalledWith('modifySuspensionSuccess', { count: 60 });
       });
     });
   });

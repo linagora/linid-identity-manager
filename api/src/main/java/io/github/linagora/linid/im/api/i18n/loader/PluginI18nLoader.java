@@ -104,6 +104,7 @@ public class PluginI18nLoader implements I18nSourceLoader {
         Map<String, Map<String, String>> result = new HashMap<>();
 
         if (StringUtils.isBlank(pluginDirectoryPath)) {
+            log.warn("PLUGIN_LOADER_PATH is not defined — no plugin translations will be loaded.");
             return result;
         }
 

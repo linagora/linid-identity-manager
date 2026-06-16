@@ -463,10 +463,10 @@
       "cancel": "Back"
     },
     "updateStatusSuccess": "Account status successfully updated",
-    "immediateActivationSuccess": "The account can be activated within one hour",
-    "immediateSuspensionSuccess": "The account will be suspended in one hour",
-    "immediateDeactivationSuccess": "The account will be deactivated in one hour",
-    "immediateReactivationSuccess": "The account will be reactivated in one hour",
+    "immediateActivationSuccess": "The account can be activated within one minute | The account can be activated within {count} minutes",
+    "immediateSuspensionSuccess": "The account will be suspended in one minute | The account will be suspended in {count} minutes",
+    "immediateDeactivationSuccess": "The account will be deactivated in one minute | The account will be deactivated in {count} minutes",
+    "immediateReactivationSuccess": "The account will be reactivated in one minute | The account will be reactivated in {count} minutes",
     "scheduledActivationSuccess": "The account can be activated from {date}",
     "scheduledDeactivationSuccess": "The account will be deactivated from {date}",
     "modifyDeactivationSuccess": "The account will be deactivated from {date}",
@@ -477,7 +477,7 @@
       "generic": "Unable to load the account. Please try again later.",
       "status": "Unable to update the account status. Please try again later."
     },
-    "immediateRevalidationSuccess": "The account can be reactivated in one hour",
+    "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
     "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
   },
   "AccountDeactivatedBanner": {

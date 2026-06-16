@@ -556,7 +556,7 @@ async function updateAccountStatus(
       type: 'positive',
       message: dateToDisplayInSuccessMsg
         ? t(successMsgKey, { date: dateToDisplayInSuccessMsg })
-        : t(successMsgKey),
+        : t(successMsgKey, { count: actionDelay }),
     });
   } catch (error) {
     const errorMsg = axios.isAxiosError(error)

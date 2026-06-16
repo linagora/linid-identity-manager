@@ -24,7 +24,7 @@ Feature: Test homepage
     Then I expect the HTML element '[data-cy="home-page"]' to be visible
     And I expect the HTML element '[data-cy="application_title"]' contains 'LinID Identity Manager'
     And I expect the HTML element '[data-cy="application_logo"]' to be visible
-    And I expect the HTML element '[data-cy="application_version"]' contains "Version d'intégration"
+    And I expect the HTML element '[data-cy="application_version"]' contains "Version de développement"
     And I expect the HTML element '[data-cy="header_profile_button"]' to be visible
 
   ####################################################

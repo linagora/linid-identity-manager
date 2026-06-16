@@ -90,6 +90,7 @@ public class ExternalPathI18nLoader implements I18nSourceLoader {
         Map<String, Map<String, String>> result = new HashMap<>();
 
         if (i18nExternalPath == null || i18nExternalPath.isBlank()) {
+            log.warn("I18N_EXTERNAL_PATH is not defined — no external translations will be loaded.");
             return result;
         }
 

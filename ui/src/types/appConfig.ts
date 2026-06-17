@@ -25,6 +25,7 @@
  */
 
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
+import type { AccountLifecycleAction } from './accountLifecycleUi';
 
 /** Column descriptor for the accounts list table, serialised in `config.json`. */
 export interface AccountColumnConfig {
@@ -92,4 +93,14 @@ export interface AppConfig {
    * `AccountsPage.accountColumns.{name}` i18n keys.
    */
   accountTableColumns: AccountColumnConfig[];
+
+  /**
+   * Form field configurations for each account lifecycle action dialog, keyed by action identifier (e.g.
+   * `"suspension.immediate"`, `"deactivation.scheduled"`). Each value is the ordered list of fields rendered inside the
+   * dialog.
+   */
+  accountLifecycleFields: Record<
+    AccountLifecycleAction,
+    LinidAttributeConfiguration[]
+  >;
 }

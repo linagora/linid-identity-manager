@@ -75,6 +75,8 @@ describe('Test composable: useAccountLifecycleUi', () => {
       'deactivation.scheduled',
       'deactivation.modify',
       'reactivation.immediate',
+      'revalidation.immediate',
+      'revalidation.scheduled',
     ]);
   });
 

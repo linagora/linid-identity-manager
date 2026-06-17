@@ -1,4 +1,5 @@
 {
+  "environment": "__APP_ENV__",
   "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
   "organizationalUnitQuerySize": 50,
   "immediateActionDelay": 60,

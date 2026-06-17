@@ -40,6 +40,23 @@ import { Composer } from 'vue-i18n';
 export let appConfig: AppConfig;
 
 /**
+ * Returns the current application environment.
+ *
+ * The environment is resolved from the runtime configuration (`appConfig.environment`). If the value is missing, empty,
+ * or still contains the unresolved placeholder (`'__APP_ENV__'`), the function safely falls back to `'DEV'`.
+ *
+ * This is typically used to distinguish between development, integration, pre-production, and production environments
+ * at runtime.
+ *
+ * @returns {string} The resolved environment name (e.g. 'DEV', 'PROD', 'INTEG', 'PREPROD').
+ */
+export function getEnvironment() {
+  return !appConfig?.environment || appConfig.environment === '__APP_ENV__'
+    ? 'DEV'
+    : appConfig.environment;
+}
+
+/**
  * Application configuration boot file.
  *
  * Fetches the runtime configuration from `/config.json`, then registers navigation menu items into the UI store.

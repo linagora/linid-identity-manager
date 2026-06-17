@@ -46,6 +46,13 @@ export interface AccountColumnConfig {
  */
 export interface AppConfig {
   /**
+   * Deployment environment identifier (e.g. 'DEV', 'INTEG', 'PREPROD', 'PROD').
+   *
+   * This value is injected at runtime and may come from server-side substitution (e.g. Nginx env injection). If the
+   * value is missing or invalid, the application may fallback to a default environment such as 'DEV'.
+   */
+  environment: string;
+  /**
    * Static list of organizational unit types offered by the OU creation form. The order is the one rendered in the type
    * selector.
    */

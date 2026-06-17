@@ -5,7 +5,7 @@
       "outline": true,
       "color": "primary",
       "noCaps": true,
-      "unelevated": true
+      "square": true
     },
     "q-splitter": {
       "modelValue": 25
@@ -15,16 +15,21 @@
       "align": "left",
       "noCaps": true,
       "inlineLabel": true,
-      "activeBgColor": "primary"
+      "activeColor": "primary",
+      "indicatorColor": "primary"
     },
     "q-route-tab": {
       "noCaps": true
     },
     "q-table": {
-      "dense": true
+      "dense": false,
+      "flat": true,
+      "bordered": true,
+      "separator": "horizontal"
     },
     "q-header": {
-      "elevated": true
+      "elevated": false,
+      "bordered": false
     },
     "q-toolbar": {
       "inset": false
@@ -71,7 +76,7 @@
       "dense": true
     },
     "q-spinner": {},
-    "q-btn-dropdown": {},
+    "q-btn-dropdown": { "square": true },
     "q-list": {},
     "q-item": {},
     "q-item-section": {},

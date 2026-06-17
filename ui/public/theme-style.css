@@ -1,9 +1,664 @@
 /* Custom theme overrides - this file can be replaced per deployment */
-.account-deactivated-warning-banner {
-  border: 2px solid var(--q-negative);
+/* ================================================================
+   ANAH DSFR-Inspired Theme
+   Quasar component overrides using DSFR design tokens.
+   Colors are injected at runtime via theme.json (--q-* variables).
+   ================================================================ */
+
+/* ===== DESIGN TOKENS ===== */
+
+:root {
+  /* --- Font Families --- */
+  --font-family-primary: 'Marianne', arial, sans-serif;
+  --font-family-secondary: 'Spectral', georgia, serif;
+
+  /* --- Font Weights --- */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* --- Font Sizes --- */
+  --font-size-xs: 0.7rem;
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.375rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.75rem;
+  --font-size-4xl: 2rem;
+
+  /* --- Line Heights --- */
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-heading-sm: 1.75rem;
+  --line-height-heading-md: 2rem;
+  --line-height-heading-lg: 2.25rem;
+  --line-height-heading-xl: 2.5rem;
+
+  /* --- Spacing (DSFR: 1v = 0.25rem = 4px) --- */
+  --spacing-1v: 0.25rem;
+  --spacing-2v: 0.5rem;
+  --spacing-3v: 0.75rem;
+  --spacing-4v: 1rem;
+  --spacing-5v: 1.25rem;
+  --spacing-6v: 1.5rem;
+  --spacing-8v: 2rem;
+  --spacing-10v: 2.5rem;
+
+  /* --- Layout --- */
+  --layout-max-width: 1440px;
+  --header-brand-height: 72px;
+  --header-nav-height: 48px;
+  --card-grid-min-width: 280px;
+  --button-create-min-width: 200px;
+  --dropdown-item-min-height: 40px;
+
+  /* --- Borders --- */
+  --border-thin: 1px;
+  --border-medium: 2px;
+  --border-thick: 3px;
+  --border-radius-sm: 4px;
+  --border-accent: var(--border-thick) solid var(--q-primary);
+
+  /* --- Effects --- */
+  --opacity-icon: 0.5;
+  --opacity-muted: 0.6;
+  --opacity-secondary: 0.7;
+  --opacity-hover: 0.8;
+  --letter-spacing-tight: 0.02em;
+  --letter-spacing-base: 0.04em;
+  --letter-spacing-wide: 0.05em;
+  --hover-background: rgba(0, 0, 0, 0.04);
 }
 
-.q-dialog .q-card {
+/* ===== FONT DECLARATIONS ===== */
+
+/* Marianne (DSFR primary sans-serif) */
+@font-face {
+  font-family: 'Marianne';
+  src: url('/fonts/Marianne-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('/fonts/Marianne-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('/fonts/Marianne-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Marianne';
+  src: url('/fonts/Marianne-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Spectral (DSFR secondary serif — citations, secondary content) */
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/Spectral-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Spectral';
+  src: url('/fonts/Spectral-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ===== BASE TYPOGRAPHY ===== */
+
+body {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-base);
+  color: var(--q-text-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+.text-h1 {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--q-text-title);
+}
+
+h2,
+.text-h2 {
+  font-size: var(--font-size-4xl);
+  line-height: var(--line-height-heading-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--q-text-title);
+}
+
+h3,
+.text-h3 {
+  font-size: var(--font-size-3xl);
+  line-height: var(--line-height-heading-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--q-text-title);
+}
+
+h4,
+.text-h4 {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-heading-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--q-text-title);
+}
+
+h5,
+.text-h5 {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--q-text-title);
+}
+
+h6,
+.text-h6 {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-heading-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--q-text-title);
+}
+
+/* ===== HEADER ===== */
+
+.q-layout .q-header.q-header,
+.q-layout .q-header.q-header--bordered {
+  background-color: var(--q-background-default);
+  color: var(--q-text-default);
+  box-shadow: none;
+  border: none;
+  border-bottom: none;
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Brand bar (first toolbar) */
+.q-header > .q-toolbar:first-child {
+  padding: var(--spacing-4v) var(--spacing-8v);
+  min-height: var(--header-brand-height);
+}
+
+/* Full-width border below brand bar */
+.q-header > .q-toolbar:first-child::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Logo */
+.q-layout .q-header .q-avatar {
+  overflow: visible;
+}
+
+/* Shadow under the toolbar */
+
+.q-layout .q-header .q-avatar .q-img {
+  object-fit: contain;
+}
+
+.q-layout .q-header .q-avatar .q-img__image {
+  object-fit: contain;
+}
+
+/* Toolbar title */
+.q-layout .q-toolbar__title {
+  color: var(--q-text-title);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-lg);
+}
+
+/* Version badge */
+.q-badge {
+  font-size: var(--font-size-xs);
+}
+
+/* ===== NAVIGATION ===== */
+
+.q-layout .q-header > .q-toolbar.block {
+  background-color: var(--q-background-default);
+  min-height: var(--header-nav-height);
+  padding: 0;
+}
+
+/* Full-width border below nav bar */
+.q-header > .q-toolbar.block::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Center navigation content */
+.q-header > .q-toolbar.block .navigation-menu {
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tab labels */
+.q-header .navigation-menu .q-tab__label {
+  color: var(--q-text-default);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+/* Active tab */
+.q-header .navigation-menu .q-tab--active .q-tab__label {
+  color: var(--q-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* Tab indicator */
+.q-header .navigation-menu .q-tab__indicator {
+  background-color: var(--q-primary) !important;
+  height: var(--border-thick);
+}
+
+/* Tab hover */
+.q-header .navigation-menu .q-tab:hover {
+  background-color: var(--hover-background);
+}
+
+/* ===== PAGE CONTENT ===== */
+
+.q-layout .q-page {
+  background-color: var(--q-background-default);
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  width: 100%;
+}
+
+.q-page h1 {
+  text-align: center;
+  margin-bottom: var(--spacing-2v);
+  color: var(--q-text-title);
+}
+
+.q-page h2,
+.q-page h3 {
+  margin-bottom: var(--spacing-6v);
+}
+
+/* ===== CARDS ===== */
+
+.q-card__section--vert {
+  padding: 4px 10px 4px 10px;
+}
+
+/* ===== FORMS ===== */
+
+.q-card-section + .q-card-section {
+  padding-top: var(--spacing-1v);
+}
+
+.q-field {
+  margin-bottom: var(--spacing-1v);
+}
+
+/* Form fields: 2-column grid on md+ screens */
+.form-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+@media (min-width: 1024px) {
+  .form-fields-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Form section titles: DSFR left border */
+h4.text-subtitle1 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-3v);
+  color: var(--q-text-title);
+  border-left: var(--border-accent);
+  padding-left: var(--spacing-3v);
+}
+
+/* Inputs: DSFR style (bottom border only) */
+.q-field--outlined .q-field__control {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: var(--border-medium) solid var(--q-border-default) !important;
+  background-color: var(--q-form-field-bg) !important;
+}
+
+.advanced-search-card .q-field--outlined .q-field__control {
+  background-color: var(--q-background-alt) !important;
+}
+
+.q-field--outlined .q-field__control:hover {
+  border-bottom-color: var(--q-text-default) !important;
+}
+
+.q-field--outlined.q-field--focused .q-field__control {
+  border-bottom-color: var(--q-primary) !important;
+}
+
+/* Remove Quasar outlined fieldset */
+.q-field--outlined .q-field__control::before,
+.q-field--outlined .q-field__control::after {
+  border: none !important;
+}
+
+.q-item[role='option'] {
+  background-color: var(--q-form-field-bg);
+  font-size: var(--font-size-base);
+  padding: var(--spacing-1v) var(--spacing-4v);
+  min-height: var(--dropdown-item-min-height);
+}
+
+/* ===== ENTITY DETAILS CARD ===== */
+
+/* Remove default padding on title section */
+.entity-details-card--title.q-card-section {
+  padding: 0;
+}
+
+/* Align entity details card section padding with form section cards */
+.entity-details-card .q-card-section {
+  padding: var(--spacing-4v);
+}
+
+.entity-details-card--container {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(var(--card-grid-min-width), 1fr)
+  );
+  gap: 0;
+}
+
+/* ===== INFORMATION CARD ===== */
+
+.information-card {
+  min-width: unset !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  border-bottom: var(--border-thin) solid var(--q-border-default) !important;
+  padding: var(--spacing-3v) var(--spacing-4v);
+}
+
+.information-card .information-card--title {
+  font-style: normal !important;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--q-text-default);
+  opacity: var(--opacity-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-base);
+}
+
+.information-card .information-card--content {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-regular);
+  color: var(--q-text-default);
+}
+
+.information-card .q-card__section {
+  padding: var(--spacing-1v) 0 !important;
+}
+
+.information-card .q-icon {
+  font-size: var(--font-size-md) !important;
+  opacity: var(--opacity-icon);
+}
+
+/* ===== ADVANCED SEARCH CARD ===== */
+
+.advanced-search-card {
+  padding: var(--spacing-8v) var(--spacing-2v);
+  background-color: var(--q-background-alt) !important;
+  border: var(--border-thin) solid var(--q-border-default) !important;
+}
+
+.advanced-search-card--title {
+  font-size: var(--font-size-base);
+  color: var(--q-text-default);
+  opacity: var(--opacity-secondary);
+}
+
+/* ===== BUTTONS CARD ===== */
+
+.buttons-card--title {
+  font-size: var(--font-size-base);
+  color: var(--q-text-default);
+  opacity: var(--opacity-secondary);
+}
+
+.buttons-card--create-button {
+  min-width: var(--button-create-min-width);
+}
+
+/* ===== TABLES ===== */
+
+.q-table thead th {
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  font-size: var(--font-size-sm);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--q-text-default);
+  background-color: var(--q-background-alt);
+  padding: var(--spacing-3v) var(--spacing-4v);
+  border-bottom: var(--border-medium) solid var(--q-border-default);
+}
+
+.q-table tbody td {
+  padding: var(--spacing-3v) var(--spacing-4v);
+  font-size: var(--font-size-base);
+  color: var(--q-text-default);
+}
+
+.q-table tbody tr {
+  border-bottom: var(--border-thin) solid var(--q-border-default);
+}
+
+.q-table tbody tr:hover {
+  background-color: var(--q-hover-grey);
+}
+
+/* Pagination */
+.q-table__bottom {
+  font-size: var(--font-size-sm);
+  color: var(--q-text-default);
+  border-top: var(--border-thin) solid var(--q-border-default);
+  padding: var(--spacing-2v) var(--spacing-4v);
+}
+
+.q-table__bottom .q-table__select .q-field__native {
+  font-size: var(--font-size-sm);
+  min-height: unset;
+  padding: var(--spacing-1v) 0;
+}
+
+.q-table__bottom .q-table__select .q-field__append {
+  font-size: var(--font-size-sm);
+}
+
+.q-table__bottom .q-table__separator {
+  min-width: var(--spacing-2v);
+}
+
+/* Pagination dropdown items */
+.q-menu .dropdown-button--list {
+  .q-item {
+    box-shadow: 0 calc(-1rem - 1px) 0 -1rem var(--q-border-default);
+  }
+  border-radius: 0;
+}
+
+/* ===== BUTTONS ===== */
+
+.q-tree {
+  margin-top: 1rem;
+}
+
+/* ===== BUTTONS ===== */
+
+.q-btn {
+  letter-spacing: var(--letter-spacing-tight);
+  font-size: var(--font-size-base);
+  text-transform: none;
+}
+
+.q-btn:before {
+  box-shadow: unset;
+}
+
+.q-btn.q-btn--unelevated.bg-primary {
+  font-weight: var(--font-weight-medium);
+}
+
+.q-btn--outline {
+  font-weight: var(--font-weight-medium);
+}
+
+.q-btn--flat:not(.q-btn--round) {
+  color: var(--q-primary);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===== DETAILS PAGES (account, OU) ===== */
+
+/* Back button: discrete style with arrow */
+:is(.account-details-page--actions) .q-card-actions .q-btn:first-child {
+  color: var(--q-text-default) !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
+  opacity: var(--opacity-hover);
+}
+
+:is(.account-details-page--actions) .q-card-actions .q-btn:first-child::before {
+  content: '\2190\00a0';
+}
+
+:is(.account-details-page--actions) .q-card-actions .q-btn:first-child:hover {
+  opacity: var(--opacity-full, 1);
+}
+
+/* ===== HOMEPAGE ===== */
+
+.home-page--info {
+  padding: var(--spacing-8v) var(--spacing-10v) !important;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--q-text-default);
+}
+
+.home-page--info .q-card__section {
+  padding: 0 0 var(--spacing-4v) 0;
+}
+
+.home-page--info .q-card__section:last-child {
+  padding-bottom: 0;
+}
+
+.home-page--info .q-separator {
+  margin: var(--spacing-2v) 0 var(--spacing-4v) 0;
+}
+
+.home-page--info strong {
+  font-weight: var(--font-weight-bold);
+}
+
+.home-page--info ul {
+  padding-left: var(--spacing-6v);
+  margin: var(--spacing-2v) 0;
+}
+
+.home-page--info ul li {
+  margin-bottom: var(--spacing-1v);
+}
+
+.home-page--info a {
+  color: var(--q-primary);
+}
+
+/* ===== DIALOGS CARDS ===== */
+
+.q-dialog__inner > .q-card {
   width: 700px;
   max-width: 80vw;
+  padding: var(--spacing-4v) var(--spacing-4v) var(--spacing-4v);
+  border-radius: 0;
+}
+
+.confirmation-dialog-title,
+.form-dialog--title {
+  color: var(--q-text-title);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--font-size-3xl);
+}
+
+.q-dialog .q-card > .q-card__section {
+  margin: 0 0 var(--spacing-4v) 0;
+}
+
+.q-dialog .q-card > .q-card__section,
+.q-dialog .form-dialog--form-section--field {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.q-dialog .q-card__actions {
+  padding: 0;
+}
+
+@media (min-width: 48em) {
+  .q-dialog__inner > .q-card {
+    padding: var(--spacing-4v) var(--spacing-8v) var(--spacing-8v);
+  }
+
+  .confirmation-dialog-title,
+  .form-dialog--title {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-heading-md);
+  }
+}
+
+/* ===== BANNERS ===== */
+
+.account-deactivated-warning-banner {
+  border: 2px solid var(--q-negative);
 }

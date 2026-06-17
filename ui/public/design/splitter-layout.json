@@ -3,18 +3,34 @@
     "header": {
       "q-header": {},
       "q-toolbar": {},
-      "q-avatar": {},
-      "q-badge": {},
+      "q-avatar": {
+        "color": "transparent",
+        "size": "5rem"
+      },
+      "q-badge": {
+        "outline": true
+      },
       "navigation-menu": {
         "q-tabs": {},
         "route-accounts": {
           "q-route-tab": {}
         }
       },
+      "q-img": {
+        "src": "/toolbarApplicationLogo.svg"
+      },
+      "q-splitter": {},
       "header-profile": {
-        "q-btn": {},
-        "q-item-section": {},
-        "q-item-label": {}
+        "q-btn": {
+          "flat": true,
+          "textColor": "black"
+        },
+        "q-item-section": {
+          "avatar": true
+        },
+        "q-item-label": {
+          "caption": true
+        }
       }
     }
   }

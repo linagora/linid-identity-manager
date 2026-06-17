@@ -17,7 +17,11 @@
         }
       },
       "advanced-search-card": {
-        "q-icon": { "name": "search", "color": "red" },
+        "q-card": { "flat": true, "bordered": true },
+        "q-icon": { "name": "search", "color": "primary" },
+        "toggle-button": {
+          "q-btn": { "flat": true, "dense": false }
+        },
         "default-filters": {
           "fields": {
             "firstname": {

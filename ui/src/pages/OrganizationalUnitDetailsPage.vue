@@ -121,8 +121,6 @@ import {
 import axios from 'axios';
 import { appConfig } from 'boot/config';
 import { storeToRefs } from 'pinia';
-import { fieldsOrder } from 'src/assets/organizationalUnits/detailsConfiguration';
-import { organizationalUnitLifecycleUiConfiguration } from 'src/assets/organizationalUnits/organizationalUnitLifecycleUiConfiguration';
 import { dayjs } from 'src/boot/dayjs';
 import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import OrganizationalUnitSuspendedBanner from 'src/components/banner/OrganizationalUnitSuspendedBanner.vue';
@@ -147,6 +145,9 @@ import { computed, onMounted, ref, watch } from 'vue';
 const pageName = 'OrganizationalUnitDetailsPage';
 const i18nScope = pageName;
 const uiNamespace = 'organizational-units.details-page';
+const organizationalUnitLifecycleUiConfiguration =
+  appConfig.organizationalUnitLifecycleFields;
+const fieldsOrder = appConfig.organizationalUnitDetailsFieldsOrder;
 
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
@@ -330,7 +331,8 @@ function onModifySuspensionEnd(): void {
   openFormDialog({
     uiNamespace: `${uiNamespace}.edit-suspension-end-dialog`,
     i18nScope: 'OrganizationalUnitEditSuspensionEndDialog',
-    formFields: organizationalUnitLifecycleUiConfiguration['suspension.modify'],
+    formFields:
+      organizationalUnitLifecycleUiConfiguration['suspension.modify-end'],
     initialFormData: organizationalUnitStatus.value
       ? toOrganizationalUnitStatusForm(organizationalUnitStatus.value)
       : undefined,

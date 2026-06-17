@@ -89,8 +89,33 @@ vi.mock('vue-i18n', () => ({
 }));
 
 vi.mock('boot/config', () => {
-  const mockAppConfig = { immediateActionDelay: 60 };
-  // Make it accessible globally for tests
+  const mockAppConfig = {
+    immediateActionDelay: 60,
+    organizationalUnitDetailsFieldsOrder: [],
+    organizationalUnitLifecycleFields: {
+      'suspension.immediate': [
+        { name: 'reason', type: 'String', input: 'List', required: true },
+        { name: 'subreason', type: 'String', input: 'List', required: true },
+        { name: 'comment', type: 'String', input: 'TextArea', required: false },
+      ],
+      'suspension.scheduled': [
+        { name: 'start', type: 'String', input: 'Date', required: true },
+        { name: 'end', type: 'String', input: 'Date', required: false },
+        { name: 'reason', type: 'String', input: 'List', required: true },
+        { name: 'subreason', type: 'String', input: 'List', required: true },
+        { name: 'comment', type: 'String', input: 'TextArea', required: false },
+      ],
+      'suspension.modify-end': [
+        { name: 'end', type: 'String', input: 'Date', required: false },
+        { name: 'reason', type: 'String', input: 'List', required: true },
+        { name: 'subreason', type: 'String', input: 'List', required: true },
+        { name: 'comment', type: 'String', input: 'TextArea', required: false },
+      ],
+      'reactivation.immediate': [
+        { name: 'comment', type: 'String', input: 'TextArea', required: true },
+      ],
+    },
+  };
   global.mockAppConfig = mockAppConfig;
   return { appConfig: mockAppConfig };
 });
@@ -200,7 +225,7 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
     it('should abort the previous request when a new load starts', async () => {
       let firstSignal;
-      mockedGetById.mockImplementationOnce((id, signal) => {
+      mockedGetById.mockImplementationOnce((_id, signal) => {
         firstSignal = signal;
         return new Promise(() => {});
       });

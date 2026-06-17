@@ -158,8 +158,6 @@ import {
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { appConfig } from 'boot/config';
-import { accountLifecycleUiConfiguration } from 'src/assets/accounts/accountLifecycleUiConfiguration';
-import { fieldsOrder } from 'src/assets/accounts/detailsConfiguration';
 import { dayjs } from 'src/boot/dayjs';
 import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import AccountDeactivatedBanner from 'src/components/banner/AccountDeactivatedBanner.vue';
@@ -186,6 +184,8 @@ import { useRoute, useRouter } from 'vue-router';
 const pageName = 'AccountDetailsPage';
 const i18nScope = pageName;
 const uiNamespace = 'accounts.details-page';
+const accountLifecycleUiConfiguration = appConfig.accountLifecycleFields;
+const fieldsOrder = appConfig.accountDetailsFieldsOrder;
 
 const route = useRoute();
 const router = useRouter();

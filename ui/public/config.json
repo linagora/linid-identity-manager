@@ -59,5 +59,14 @@
         }
       }
     }
+  ],
+  "accountDetailsFieldsOrder": [
+    "firstname",
+    "lastname",
+    "email",
+    "createdBy",
+    "updatedBy",
+    "insertDate",
+    "updateDate"
   ]
 }

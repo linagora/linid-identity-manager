@@ -86,19 +86,6 @@ vi.mock('src/services/AccountService', () => ({
   setAccountValidity: vi.fn(),
 }));
 
-vi.mock('src/assets/accounts/accountLifecycleUiConfiguration', () => ({
-  accountLifecycleUiConfiguration: {
-    'suspension.immediate': [],
-    'deactivation.immediate': [],
-    'reactivation.immediate': [],
-    'activation.scheduled': [],
-    'deactivation.scheduled': [],
-    'deactivation.modify': [],
-    'suspension.scheduled': [],
-    'suspension.modify': [],
-  },
-}));
-
 vi.mock('vue-router', () => ({
   useRoute: () => mockRoute,
   useRouter: () => mockRouter,
@@ -109,8 +96,22 @@ vi.mock('vue-i18n', () => ({
 }));
 
 vi.mock('boot/config', () => {
-  const mockAppConfig = { immediateActionDelay: 60 };
-  // Make it accessible globally for tests
+  const mockAppConfig = {
+    immediateActionDelay: 60,
+    accountDetailsFieldsOrder: [],
+    accountLifecycleFields: {
+      'suspension.immediate': [],
+      'suspension.scheduled': [],
+      'suspension.modify': [],
+      'deactivation.immediate': [],
+      'deactivation.scheduled': [],
+      'deactivation.modify': [],
+      'reactivation.immediate': [],
+      'revalidation.immediate': [],
+      'revalidation.scheduled': [],
+      'activation.scheduled': [],
+    },
+  };
   global.mockAppConfig = mockAppConfig;
   return { appConfig: mockAppConfig };
 });
@@ -725,7 +726,8 @@ describe('Test component: AccountDetailsPage', () => {
           message: 'scheduledActivationSuccess',
         });
         expect(mockScopedT).toHaveBeenLastCalledWith(
-          'scheduledActivationSuccess', { count: 60 }
+          'scheduledActivationSuccess',
+          { count: 60 }
         );
       });
     });
@@ -923,7 +925,10 @@ describe('Test component: AccountDetailsPage', () => {
           type: 'positive',
           message: 'modifySuspensionSuccess',
         });
-        expect(mockScopedT).toHaveBeenLastCalledWith('modifySuspensionSuccess', { count: 60 });
+        expect(mockScopedT).toHaveBeenLastCalledWith(
+          'modifySuspensionSuccess',
+          { count: 60 }
+        );
       });
     });
   });

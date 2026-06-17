@@ -32,6 +32,7 @@ export const useOrganizationalUnitStore = defineStore(
   'organizationalUnit',
   () => {
     const selectedOrganizationalUnitId = ref<string>('');
+    const selectedOrganizationalUnitRelationId = ref<string>('');
 
     /**
      * Set the selected organizational unit by its ID.
@@ -42,6 +43,20 @@ export const useOrganizationalUnitStore = defineStore(
       selectedOrganizationalUnitId.value = id;
     }
 
-    return { selectedOrganizationalUnitId, setSelectedOrganizationalUnit };
+    /**
+     * Set the selected organizational unit relation by its ID.
+     *
+     * @param id - The ID of the organizational unit relation.
+     */
+    function setSelectedOrganizationalUnitRelation(id: string) {
+      selectedOrganizationalUnitRelationId.value = id;
+    }
+
+    return {
+      selectedOrganizationalUnitId,
+      selectedOrganizationalUnitRelationId,
+      setSelectedOrganizationalUnit,
+      setSelectedOrganizationalUnitRelation,
+    };
   }
 );

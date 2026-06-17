@@ -57,18 +57,18 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   }),
 }));
 
-vi.mock('src/composables/useOrganizationalUnitCreationConfig', () => ({
-  useOrganizationalUnitCreationConfig: () => ({
-    creationFields: [
-      { name: 'name', label: 'Name', type: 'text', rules: [] },
-      {
-        name: 'type',
-        label: 'Type',
-        type: 'select',
-        rules: [],
-        options: ['COMPANY', 'DEPARTMENT', 'TEAM'],
-      },
+vi.mock('src/boot/config', () => ({
+  appConfig: {
+    organizationalUnitCreationFields: [
+      { name: 'name', type: 'String', input: 'Text', required: true },
+      { name: 'type', type: 'String', input: 'List', required: true },
     ],
+  },
+}));
+
+vi.mock('src/composables/useCommonMapper', () => ({
+  useCommonMapper: () => ({
+    toEmptyRecord: () => ({ name: '', type: '' }),
   }),
 }));
 

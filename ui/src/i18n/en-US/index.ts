@@ -579,11 +579,18 @@ export default {
     title: 'Create a new organizational unit',
     fields: {
       parent: 'Parent organizational unit',
-      name: 'Name',
-      type: 'Type',
-    },
-    validation: {
-      required: 'This field is required',
+      name: {
+        label: 'Name',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      type: {
+        label: 'Type',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
     },
     ButtonsCard: {
       cancel: 'Cancel',

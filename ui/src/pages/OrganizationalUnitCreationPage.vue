@@ -51,7 +51,7 @@
             :label="t('fields.parent')"
             readonly
             class="q-mb-sm"
-            v-bind="uiProps.parent?.input"
+            v-bind="parentUiInputProps"
             bottom-slots
           />
         </div>
@@ -61,27 +61,13 @@
           :key="field.name"
           :data-cy="`field_${field.name}`"
         >
-          <q-select
-            v-if="field.type === 'select'"
-            v-model="form[field.name]"
-            :label="field.label"
-            :options="field.options"
-            :rules="field.rules"
-            class="q-mb-sm"
-            lazy-rules
-            :data-cy="`field_${field.name}_select`"
-            v-bind="uiProps[field.name]?.select"
-          />
-
-          <q-input
-            v-else-if="field.type === 'text' || field.type === 'email'"
-            v-model="form[field.name]"
-            :label="field.label"
-            :rules="field.rules"
-            :type="field.type"
-            class="q-mb-sm"
-            lazy-rules
-            v-bind="uiProps[field.name]?.input"
+          <component
+            :is="fieldComponent"
+            v-if="fieldComponent"
+            v-model:entity="form"
+            :ui-namespace="`${uiNamespace}.fields`"
+            :i18n-scope="i18nScope"
+            :definition="field"
           />
         </div>
 
@@ -101,10 +87,7 @@
 </template>
 
 <script setup lang="ts">
-import type {
-  LinidQInputProps,
-  LinidQSelectProps,
-} from '@linagora/linid-im-front-corelib';
+import type { LinidQInputProps } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
   useNotify,
@@ -112,16 +95,15 @@ import {
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { appConfig } from 'src/boot/config';
 import { useCommonMapper } from 'src/composables/useCommonMapper';
-import { useOrganizationalUnitCreationConfig } from 'src/composables/useOrganizationalUnitCreationConfig';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import {
   createOrganizationalUnit,
   getOrganizationalUnitById,
 } from 'src/services/OrganizationalUnitService';
-import type { FieldUiProps } from 'src/types/form';
 import type { OrganizationalUnitForm } from 'src/types/organizationalUnits';
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const pageName = 'OrganizationalUnitCreationPage';
@@ -132,28 +114,26 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
-const { toEmptyRecord } = useCommonMapper();
-const { creationFields } = useOrganizationalUnitCreationConfig(i18nScope);
 const { toOrganizationalUnitRecord } = useOrganizationalUnitMapper();
+const { toEmptyRecord } = useCommonMapper();
 const { ui } = useUiDesign();
+const creationFields = appConfig.organizationalUnitCreationFields;
 
-const form = reactive<OrganizationalUnitForm>(toEmptyRecord(creationFields));
+const form = ref<OrganizationalUnitForm>(
+  toEmptyRecord<OrganizationalUnitForm>(creationFields)
+);
+
 const isLoading = ref<boolean>(false);
 const parentId = ref<string>('');
 const parentName = ref<string>('');
 
+const fieldComponent = loadAsyncComponent('catalogUI/EntityAttributeField');
 const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 
-const uiProps = [
-  'parent',
-  ...creationFields.map((field) => field.name),
-].reduce<FieldUiProps>((acc, name) => {
-  acc[name] = {
-    input: ui<LinidQInputProps>(`${uiNamespace}.fields.${name}`, 'q-input'),
-    select: ui<LinidQSelectProps>(`${uiNamespace}.fields.${name}`, 'q-select'),
-  };
-  return acc;
-}, {});
+const parentUiInputProps = ui<LinidQInputProps>(
+  `${uiNamespace}.fields.parent`,
+  'q-input'
+);
 
 /**
  * Resolves the parent OU from the route query, fetches its name, and stores both for the lifetime of the page.
@@ -197,7 +177,10 @@ async function onSubmit(): Promise<void> {
   isLoading.value = true;
   try {
     await createOrganizationalUnit(
-      toOrganizationalUnitRecord({ ...form }, parentId.value)
+      toOrganizationalUnitRecord(
+        form.value as unknown as OrganizationalUnitForm,
+        parentId.value
+      )
     );
     Notify({
       type: 'positive',

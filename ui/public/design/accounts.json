@@ -9,7 +9,12 @@
       "buttons-card": {
         "q-card": {},
         "q-icon": {},
-        "q-card-actions": {}
+        "q-card-actions": {},
+        "see-button": {
+          "q-btn": {
+            "flat": true
+          }
+        }
       },
       "advanced-search-card": {
         "q-icon": { "name": "search", "color": "red" },

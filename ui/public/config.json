@@ -601,5 +601,13 @@
         "values": ["COMPANY", "DEPARTMENT", "TEAM"]
       }
     }
+  ],
+  "organizationalUnitDetailsFieldsOrder": [
+    "name",
+    "type",
+    "createdBy",
+    "updatedBy",
+    "insertDate",
+    "updateDate"
   ]
 }

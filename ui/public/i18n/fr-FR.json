@@ -525,11 +525,18 @@
     "title": "Créer une nouvelle unité organisationnelle",
     "fields": {
       "parent": "Unité organisationnelle parente",
-      "name": "Nom",
-      "type": "Type"
-    },
-    "validation": {
-      "required": "Ce champ est requis"
+      "name": {
+        "label": "Nom",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "type": {
+        "label": "Type",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      }
     },
     "ButtonsCard": {
       "cancel": "Annuler",

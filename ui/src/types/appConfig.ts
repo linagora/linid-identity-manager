@@ -103,4 +103,9 @@ export interface AppConfig {
     AccountLifecycleAction,
     LinidAttributeConfiguration[]
   >;
+
+  // ─── Organizational units ────────────────────────────────────────────────────
+
+  /** Ordered list of field definitions rendered in the organizational unit creation form. */
+  organizationalUnitCreationFields: LinidAttributeConfiguration[];
 }

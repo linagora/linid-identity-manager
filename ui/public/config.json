@@ -68,5 +68,76 @@
     "updatedBy",
     "insertDate",
     "updateDate"
+  ],
+  "accountSearchFields": [
+    {
+      "name": "firstname",
+      "type": "String",
+      "required": false,
+      "input": "Text"
+    },
+    {
+      "name": "lastname",
+      "type": "String",
+      "required": false,
+      "input": "Text"
+    },
+    {
+      "name": "email",
+      "type": "String",
+      "required": false,
+      "input": "Text"
+    },
+    {
+      "name": "createdBy",
+      "type": "String",
+      "required": false,
+      "input": "Text"
+    },
+    {
+      "name": "insertDate",
+      "type": "String",
+      "required": false,
+      "input": "Date",
+      "inputSettings": {
+        "maskI18NKey": "application.dateFormat"
+      }
+    }
+  ],
+  "accountSearchDefaultFields": [
+    "firstname",
+    "lastname",
+    "email",
+    "createdBy",
+    "insertDate"
+  ],
+  "accountSearchAdvancedFields": [],
+  "accountTableColumns": [
+    {
+      "name": "firstname",
+      "field": "firstname",
+      "sortable": true,
+      "align": "left"
+    },
+    {
+      "name": "lastname",
+      "field": "lastname",
+      "sortable": true,
+      "align": "left"
+    },
+    { "name": "email", "field": "email", "sortable": true, "align": "left" },
+    {
+      "name": "createdBy",
+      "field": "createdBy",
+      "sortable": true,
+      "align": "left"
+    },
+    {
+      "name": "insertDate",
+      "field": "insertDate",
+      "sortable": true,
+      "align": "left"
+    },
+    { "name": "actions", "field": "", "sortable": false, "align": "center" }
   ]
 }

@@ -26,6 +26,18 @@
 
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 
+/** Column descriptor for the accounts list table, serialised in `config.json`. */
+export interface AccountColumnConfig {
+  /** Column identifier; must match a key under `AccountsPage.accountColumns.*` in i18n. */
+  name: string;
+  /** Account object property to display, or empty string for columns without a data field such as the actions column. */
+  field: string;
+  /** Whether the column header triggers server-side sorting. */
+  sortable: boolean;
+  /** Horizontal text alignment for the column cells. */
+  align: 'left' | 'center' | 'right';
+}
+
 /**
  * Runtime application configuration loaded from `public/config.json`. Holds deployment-specific values that must be
  * tunable without rebuilding the UI.
@@ -56,4 +68,28 @@ export interface AppConfig {
    * details card; the order is preserved.
    */
   accountDetailsFieldsOrder: string[];
+
+  /**
+   * Full list of field definitions available in the account advanced-search panel. Each field follows the
+   * `LinidAttributeConfiguration` shape consumed by `AdvancedSearchCard`.
+   */
+  accountSearchFields: LinidAttributeConfiguration[];
+
+  /**
+   * Names of the account search fields shown by default (before the user expands the advanced panel). Each entry must
+   * match a `name` in `accountSearchFields`.
+   */
+  accountSearchDefaultFields: string[];
+
+  /**
+   * Names of the account search fields shown only after the user expands the advanced panel. Each entry must match a
+   * `name` in `accountSearchFields`.
+   */
+  accountSearchAdvancedFields: string[];
+
+  /**
+   * Ordered list of column descriptors rendered in the accounts list table. Labels are resolved at runtime from
+   * `AccountsPage.accountColumns.{name}` i18n keys.
+   */
+  accountTableColumns: AccountColumnConfig[];
 }

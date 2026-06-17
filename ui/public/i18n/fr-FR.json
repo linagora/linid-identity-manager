@@ -418,21 +418,46 @@
   "AccountCreationPage": {
     "title": "Créer un nouveau compte",
     "fields": {
-      "organizationalUnit": "Unité organisationnelle",
-      "externalId": "Identifiant externe",
-      "lastname": "Nom",
-      "firstname": "Prénom",
-      "email": "E-mail",
+      "organizationalUnit": {
+        "label": "Unité organisationnelle",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "externalId": {
+        "label": "Identifiant externe",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "lastname": {
+        "label": "Nom",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "firstname": {
+        "label": "Prénom",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "email": {
+        "label": "E-mail",
+        "validation": {
+          "required": "Ce champ est requis.",
+          "email": "Format d'e-mail invalide"
+        }
+      },
       "validityPeriodStart": {
         "label": "Date de début de validité",
-        "close": "Fermer"
+        "close": "Fermer",
+        "validation": {
+          "required": "Ce champ est requis.",
+          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+          "fromDate": "La date ne peut pas être antérieure à la date du jour."
+        }
       }
-    },
-    "validation": {
-      "required": "Ce champ est requis",
-      "email": "Format d'e-mail invalide",
-      "invalidDate": "Format de date invalide. Le format attendu est {format}",
-      "fromDate": "La date ne peut pas être antérieure à la date du jour."
     },
     "ButtonsCard": {
       "cancel": "Annuler",

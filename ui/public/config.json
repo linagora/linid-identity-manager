@@ -14,5 +14,50 @@
     "design/status-badge.json",
     "design/account-banner.json",
     "design/account-info-text.json"
+  ],
+  "accountCreationFields": [
+    {
+      "name": "organizationalUnit",
+      "type": "String",
+      "input": "Text",
+      "required": true,
+      "inputSettings": { "disable": true }
+    },
+    {
+      "name": "externalId",
+      "type": "String",
+      "input": "Text",
+      "required": true
+    },
+    {
+      "name": "lastname",
+      "type": "String",
+      "input": "Text",
+      "required": true
+    },
+    {
+      "name": "firstname",
+      "type": "String",
+      "input": "Text",
+      "required": true
+    },
+    {
+      "name": "email",
+      "type": "String",
+      "input": "Email",
+      "required": true
+    },
+    {
+      "name": "validityPeriodStart",
+      "type": "String",
+      "input": "Date",
+      "required": true,
+      "inputSettings": {
+        "maskI18NKey": "application.dateFormat",
+        "options": {
+          "fromDate": "{{ today }}"
+        }
+      }
+    }
   ]
 }

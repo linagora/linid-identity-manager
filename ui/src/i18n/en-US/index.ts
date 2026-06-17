@@ -471,16 +471,45 @@ export default {
   AccountCreationPage: {
     title: 'Create a new account',
     fields: {
-      externalId: 'External ID',
-      lastname: 'Last name',
-      firstname: 'First name',
-      email: 'Email',
-    },
-    validation: {
-      required: 'This field is required',
-      email: 'Invalid email format',
-      invalidDate: 'Invalid date format. Expected format is {format}',
-      fromDate: 'The date cannot be before today.',
+      organizationalUnit: {
+        label: 'Organizational unit',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      externalId: {
+        label: 'External ID',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      lastname: {
+        label: 'Last name',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      firstname: {
+        label: 'First name',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      email: {
+        label: 'Email',
+        validation: {
+          required: 'This field is required.',
+        },
+      },
+      validityPeriodStart: {
+        label: 'Validity period start',
+        close: 'Close',
+        validation: {
+          required: 'This field is required.',
+          invalidDate: 'Invalid date format. Expected format is {format}.',
+          fromDate: 'The date cannot be before today.',
+        },
+      },
     },
     ButtonsCard: {
       cancel: 'Cancel',

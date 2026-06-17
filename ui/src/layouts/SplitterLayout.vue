@@ -54,7 +54,7 @@
         </q-toolbar-title>
         <q-badge
           v-bind="uiProps.badge"
-          :label="t('version')"
+          :label="version"
           data-cy="application_version"
         />
         <q-space />
@@ -114,13 +114,17 @@ import {
   useScopedI18n,
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
+import { getEnvironment } from 'boot/config';
 import OrganizationalUnitsTree from 'components/tree/OrganizationalUnitsTree.vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 const { ui } = useUiDesign();
 const { t } = useScopedI18n('application');
 const uiStore = useLinidUiStore();
 const router = useRouter();
+
+const version = computed(() => t(`${getEnvironment()}.version`));
 
 const navigationMenu = loadAsyncComponent('catalogUI/NavigationMenu');
 const headerProfile = loadAsyncComponent('catalogUI/HeaderProfile');

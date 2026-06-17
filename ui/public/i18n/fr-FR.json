@@ -2,6 +2,21 @@
   "application": {
     "title": "LinID Identity Manager",
     "version": "Version de développement",
+    "DEV": {
+      "version": "Version de développement"
+    },
+    "INTEG": {
+      "version": "Version d'intégration"
+    },
+    "PREPROD": {
+      "version": "Version de pre-production"
+    },
+    "PROD": {
+      "version": "Version de production"
+    },
+    "DEMO": {
+      "version": "Version de demo"
+    },
     "dateTimeFormat": "DD/MM/YYYY HH:mm:ss",
     "dateFormat": "DD/MM/YYYY"
   },

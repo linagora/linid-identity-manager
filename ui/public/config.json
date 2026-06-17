@@ -139,5 +139,450 @@
       "align": "left"
     },
     { "name": "actions", "field": "", "sortable": false, "align": "center" }
-  ]
+  ],
+  "accountLifecycleFields": {
+    "suspension.immediate": [
+      {
+        "name": "statusReason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            "Suspension Reason A",
+            "Suspension Reason B",
+            "Suspension Reason C"
+          ]
+        }
+      },
+      {
+        "name": "statusSubreason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            {
+              "value": "Suspension Sub-reason A.1",
+              "filterContext": { "statusReason": "Suspension Reason A" }
+            },
+            {
+              "value": "Suspension Sub-reason A.2",
+              "filterContext": { "statusReason": "Suspension Reason A" }
+            },
+            {
+              "value": "Suspension Sub-reason B.1",
+              "filterContext": { "statusReason": "Suspension Reason B" }
+            },
+            {
+              "value": "Suspension Sub-reason C.1",
+              "filterContext": { "statusReason": "Suspension Reason C" }
+            }
+          ]
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": false
+      }
+    ],
+    "suspension.scheduled": [
+      {
+        "name": "suspensionPeriodStart",
+        "type": "String",
+        "input": "Date",
+        "required": true,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": { "afterDate": "{{ today }}" }
+        }
+      },
+      {
+        "name": "suspensionPeriodEnd",
+        "type": "String",
+        "input": "Date",
+        "required": false,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": {
+            "afterDate": "{{ today }}",
+            "fromDate": "{{ entity.suspensionPeriodStart }}"
+          }
+        }
+      },
+      {
+        "name": "statusReason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            "Suspension Reason A",
+            "Suspension Reason B",
+            "Suspension Reason C"
+          ]
+        }
+      },
+      {
+        "name": "statusSubreason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            {
+              "value": "Suspension Sub-reason A.1",
+              "filterContext": { "statusReason": "Suspension Reason A" }
+            },
+            {
+              "value": "Suspension Sub-reason A.2",
+              "filterContext": { "statusReason": "Suspension Reason A" }
+            },
+            {
+              "value": "Suspension Sub-reason B.1",
+              "filterContext": { "statusReason": "Suspension Reason B" }
+            },
+            {
+              "value": "Suspension Sub-reason C.1",
+              "filterContext": { "statusReason": "Suspension Reason C" }
+            }
+          ]
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": false,
+        "inputSettings": {}
+      }
+    ],
+    "suspension.modify": [
+      {
+        "name": "suspensionPeriodStart",
+        "type": "String",
+        "input": "Date",
+        "required": false,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": { "afterDate": "{{ today }}" }
+        }
+      },
+      {
+        "name": "suspensionPeriodEnd",
+        "type": "String",
+        "input": "Date",
+        "required": false,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": {
+            "afterDate": "{{ today }}",
+            "fromDate": "{{ entity.suspensionPeriodStart }}"
+          }
+        }
+      },
+      {
+        "name": "statusReason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            "Suspension Reason A",
+            "Suspension Reason B",
+            "Suspension Reason C"
+          ]
+        }
+      },
+      {
+        "name": "statusSubreason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            {
+              "value": "Suspension Sub-reason A.1",
+              "filterContext": { "statusReason": "Suspension Reason A" }
+            },
+            {
+              "value": "Suspension Sub-reason A.2",
+              "filterContext": { "statusReason": "Suspension Reason A" }
+            },
+            {
+              "value": "Suspension Sub-reason B.1",
+              "filterContext": { "statusReason": "Suspension Reason B" }
+            },
+            {
+              "value": "Suspension Sub-reason C.1",
+              "filterContext": { "statusReason": "Suspension Reason C" }
+            }
+          ]
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": false
+      }
+    ],
+    "deactivation.immediate": [
+      {
+        "name": "statusReason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            "Deactivation Reason A",
+            "Deactivation Reason B",
+            "Deactivation Reason C"
+          ]
+        }
+      },
+      {
+        "name": "statusSubreason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            {
+              "value": "Deactivation Sub-reason A.1",
+              "filterContext": { "statusReason": "Deactivation Reason A" }
+            },
+            {
+              "value": "Deactivation Sub-reason A.2",
+              "filterContext": { "statusReason": "Deactivation Reason A" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.1",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.2",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.3",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.1",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.2",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.3",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            }
+          ]
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": false
+      }
+    ],
+    "deactivation.scheduled": [
+      {
+        "name": "validityPeriodEnd",
+        "type": "String",
+        "input": "Date",
+        "required": true,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": { "afterDate": "{{ today }}" }
+        }
+      },
+      {
+        "name": "statusReason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            "Deactivation Reason A",
+            "Deactivation Reason B",
+            "Deactivation Reason C"
+          ]
+        }
+      },
+      {
+        "name": "statusSubreason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            {
+              "value": "Deactivation Sub-reason A.1",
+              "filterContext": { "statusReason": "Deactivation Reason A" }
+            },
+            {
+              "value": "Deactivation Sub-reason A.2",
+              "filterContext": { "statusReason": "Deactivation Reason A" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.1",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.2",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.3",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.1",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.2",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.3",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            }
+          ]
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": false
+      }
+    ],
+    "deactivation.modify": [
+      {
+        "name": "validityPeriodEnd",
+        "type": "String",
+        "input": "Date",
+        "required": true,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": { "afterDate": "{{ today }}" }
+        }
+      },
+      {
+        "name": "statusReason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            "Deactivation Reason A",
+            "Deactivation Reason B",
+            "Deactivation Reason C"
+          ]
+        }
+      },
+      {
+        "name": "statusSubreason",
+        "type": "String",
+        "input": "List",
+        "required": true,
+        "inputSettings": {
+          "values": [
+            {
+              "value": "Deactivation Sub-reason A.1",
+              "filterContext": { "statusReason": "Deactivation Reason A" }
+            },
+            {
+              "value": "Deactivation Sub-reason A.2",
+              "filterContext": { "statusReason": "Deactivation Reason A" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.1",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.2",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason B.3",
+              "filterContext": { "statusReason": "Deactivation Reason B" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.1",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.2",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            },
+            {
+              "value": "Deactivation Sub-reason C.3",
+              "filterContext": { "statusReason": "Deactivation Reason C" }
+            }
+          ]
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": false
+      }
+    ],
+    "reactivation.immediate": [
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": true
+      }
+    ],
+    "activation.scheduled": [
+      {
+        "name": "validityPeriodStart",
+        "type": "String",
+        "input": "Date",
+        "required": true,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": { "afterDate": "{{ today }}" }
+        }
+      }
+    ],
+    "revalidation.immediate": [
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": true
+      }
+    ],
+    "revalidation.scheduled": [
+      {
+        "name": "validityPeriodEnd",
+        "type": "String",
+        "input": "Date",
+        "required": true,
+        "inputSettings": {
+          "maskI18NKey": "application.dateFormat",
+          "options": { "afterDate": "{{ today }}" }
+        }
+      },
+      {
+        "name": "statusComment",
+        "type": "String",
+        "input": "TextArea",
+        "required": true
+      }
+    ]
+  }
 }

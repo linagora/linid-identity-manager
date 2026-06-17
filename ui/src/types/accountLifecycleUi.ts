@@ -42,6 +42,8 @@ export const ACCOUNT_LIFECYCLE_ACTIONS = [
   'deactivation.scheduled',
   'deactivation.modify',
   'reactivation.immediate',
+  'revalidation.immediate',
+  'revalidation.scheduled',
 ] as const;
 
 /**

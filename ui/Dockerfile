@@ -10,5 +10,7 @@ RUN pnpm build
 FROM nginx:stable-alpine
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/dist/spa /usr/share/nginx/html
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 EXPOSE 443
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

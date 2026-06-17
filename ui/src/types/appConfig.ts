@@ -26,6 +26,7 @@
 
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 import type { AccountLifecycleAction } from './accountLifecycleUi';
+import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 
 /** Column descriptor for the accounts list table, serialised in `config.json`. */
 export interface AccountColumnConfig {
@@ -111,4 +112,13 @@ export interface AppConfig {
 
   /** Ordered list of OU attribute keys displayed on the organizational unit details page. */
   organizationalUnitDetailsFieldsOrder: string[];
+
+  /**
+   * Form field configurations for each OU lifecycle action dialog, keyed by action identifier (e.g.
+   * `"suspension.immediate"`, `"suspension.scheduled"`).
+   */
+  organizationalUnitLifecycleFields: Record<
+    OrganizationalUnitLifecycleAction,
+    LinidAttributeConfiguration[]
+  >;
 }

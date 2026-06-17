@@ -5,6 +5,48 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-06-17
+
+### Added
+
+* Introduced full **Organizational Units (OU) management system**, including creation, viewing, and hierarchical tree navigation.
+* Added **OU lifecycle management**, supporting suspension, reactivation, and detailed status tracking.
+* Added **OU details page** with lifecycle dialogs and dedicated actions.
+* Introduced **OU tree view** as the primary navigation model for organizational units.
+* Added **account-to-OU association**, enabling accounts to be linked and filtered by organizational unit.
+* Added ability to retrieve **accounts scoped to an organizational unit**.
+* Introduced **account lifecycle reactivation flow**, requiring mandatory comments for reactivation.
+* Added support for **configurable form fields**, including select-type fields driven by runtime configuration (`config.json`).
+* Added startup warnings for missing **i18n loader paths**.
+* Introduced environment-aware configuration improvements for UI and build system.
+
+### Changed
+
+* Refactored **UI architecture for Organizational Units**, moving from flat pages to a tree-driven model.
+* Externalized multiple UI configuration layers for **accounts and OUs lifecycle pages**, improving modularity and maintainability.
+* Unified and improved **status badge component**, shared across account and OU lifecycle states.
+* Improved **internationalization structure**, including missing labels for tree and lifecycle UI components.
+* Enhanced **accounts page behavior**, including OU-driven filtering and request cancellation on OU changes.
+* Improved Docker and development tooling with better environment variable handling and service lifecycle management.
+* Improved TaskFile and build scripts for more reliable container execution and configuration handling.
+
+### Fixed
+
+* Fixed account visibility when an **organizational unit is present in URL context**.
+* Fixed UI inconsistencies in **account lifecycle dialogs and deactivated account banners**.
+* Fixed incorrect API behavior around **OU updates and suspension status handling**.
+* Fixed i18n issues including missing tree and lifecycle labels.
+* Fixed cancellation of stale API requests when switching organizational units.
+* Fixed edge cases in account reactivation flows (optional justification / reason handling alignment).
+* Fixed UI layout issues in authentication callback page rendering.
+
+### Build
+
+* Improved Docker integration environment configuration.
+* Enhanced TaskFile execution reliability (env handling, service shutdown, port configuration).
+* Reduced container naming verbosity and cleaned up environment variables.
+* Improved handling of secrets (passwords sourced from env files).
+
 ## [0.5.0] - 2026-06-02
 
 ### Added
@@ -194,3 +236,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.3.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.3.0
 [0.4.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.4.0
 [0.5.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.5.0
+[0.6.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.6.0

@@ -62,21 +62,27 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   }),
 }));
 
-vi.mock('src/composables/useAccountCreationConfig', () => ({
-  useAccountCreationConfig: () => ({
-    creationFields: [
-      { name: 'externalId', label: 'External ID', type: 'text', rules: [] },
-      { name: 'lastname', label: 'Last name', type: 'text', rules: [] },
-      { name: 'firstname', label: 'First name', type: 'text', rules: [] },
-      { name: 'email', label: 'Email', type: 'email', rules: [] },
+vi.mock('src/boot/config', () => ({
+  appConfig: {
+    accountCreationFields: [
+      {
+        name: 'organizationalUnit',
+        type: 'String',
+        input: 'Text',
+        required: true,
+      },
+      { name: 'externalId', type: 'String', input: 'Text', required: true },
+      { name: 'lastname', type: 'String', input: 'Text', required: true },
+      { name: 'firstname', type: 'String', input: 'Text', required: true },
+      { name: 'email', type: 'String', input: 'Email', required: true },
       {
         name: 'validityPeriodStart',
-        label: 'Validity Period Start',
-        type: 'date',
-        rules: [],
+        type: 'String',
+        input: 'Date',
+        required: true,
       },
     ],
-  }),
+  },
 }));
 
 vi.mock('src/composables/useAccountMapper', () => ({

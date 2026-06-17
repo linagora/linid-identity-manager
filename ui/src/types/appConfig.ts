@@ -24,6 +24,8 @@
  * LinID Identity Manager software.
  */
 
+import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
+
 /**
  * Runtime application configuration loaded from `public/config.json`. Holds deployment-specific values that must be
  * tunable without rebuilding the UI.
@@ -40,4 +42,12 @@ export interface AppConfig {
   immediateActionDelay: number;
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
+
+  // ─── Accounts ───────────────────────────────────────────────────────────────
+
+  /**
+   * Ordered list of field definitions rendered in the account creation form. Each field follows the
+   * `LinidAttributeConfiguration` shape consumed by the `EntityAttribute*` field components.
+   */
+  accountCreationFields: LinidAttributeConfiguration[];
 }

@@ -24,9 +24,9 @@
  * LinID Identity Manager software.
  */
 
+import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 import { dayjs } from 'boot/dayjs';
 import type { Dayjs } from 'dayjs';
-import type { FormField } from 'src/types/form';
 import { useI18n } from 'vue-i18n';
 
 /**
@@ -105,17 +105,16 @@ export function useCommonMapper() {
   };
 
   /**
-   * Build an empty record seed where every field declared in {@link fields} is set to an empty string. Generic over the
-   * record type {@link T} so it can be reused by any resource-specific form configuration.
+   * Builds an empty record where every field in {@link fields} is initialised to `null`. Use this to seed a reactive
+   * form object whose shape is driven by runtime configuration.
    *
-   * @param fields - The form fields that define the shape of the record.
-   * @returns A fresh empty record matching the given field set.
+   * @param fields - Attribute definitions that describe the form fields.
+   * @returns A plain object with one `null`-valued key per field name.
    */
-  const toEmptyRecord = <T>(fields: FormField<T>[]): T => {
-    return fields.reduce((acc, field) => {
-      acc[field.name] = '' as T[typeof field.name];
-      return acc;
-    }, {} as T);
+  const toEmptyRecord = <T>(fields: LinidAttributeConfiguration[]): T => {
+    return Object.fromEntries(
+      fields.map((field) => [field.name, ''])
+    ) as unknown as T;
   };
 
   /**

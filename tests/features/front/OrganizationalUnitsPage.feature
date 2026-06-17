@@ -8,6 +8,7 @@ Feature: Test Organizational Units page display
   ## 105 Should update the details panel when selecting another company OU node
   ## 106 Should select a nested OU node deeper in the tree
   ## 107 Should select the OU referenced by the node query parameter on load
+  ## 108 Should keep the selected OU node when navigating between accountsPage and organizationalUnitsPage
 
   Scenario: Roundtrip about Organizational Units page
 
@@ -62,7 +63,24 @@ Feature: Test Organizational Units page display
     And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "DIVISION"
 
     ## 107 Should select the OU referenced by the node query parameter on load
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000bb"
-    Then I expect the HTML element '[data-cy="organizational-unit-details-page_cards"]' to be visible
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000bb"
+    And I expect the HTML element '[data-cy="organizational-unit-details-page_cards"]' to be visible
     And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Company B"
     And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"
+
+    ## 108 Should keep the selected OU node when navigating between accountsPage and organizationalUnitsPage
+    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000cc"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000cc"
+    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Division A1"
+    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "DIVISION"
+    When I click on '[data-cy="item_accounts"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-0000000000cc"
+    And I expect the HTML element '[data-cy="cell-firstname"]' contains "user3_fn"
+    And I expect the HTML element '[data-cy="cell-lastname"]' contains "user3_ln"
+    And I expect the HTML element '[data-cy="cell-email"]' contains "user3@example.com"
+    And I expect the HTML element '[data-cy="cell-createdBy"]' contains "admin_fn admin_ln"
+    When I click on '[data-cy="item_organizational-units"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000cc"
+    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Division A1"
+    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "DIVISION"

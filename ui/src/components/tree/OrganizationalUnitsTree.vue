@@ -46,6 +46,7 @@ import {
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import { storeToRefs } from 'pinia';
 import { appConfig } from 'src/boot/config';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import { getAllOrganizationalUnit } from 'src/services/OrganizationalUnitService';
@@ -67,6 +68,7 @@ const router = useRouter();
 const route = useRoute();
 
 const store = useOrganizationalUnitStore();
+const { selectedOrganizationalUnitRelationId } = storeToRefs(store);
 
 /**
  * Filters a tree node based on a search string.
@@ -86,6 +88,17 @@ function filterTreeNode(
     .map((f) => f);
   return filters.some((f) => name.toLowerCase().includes(f.toLowerCase()));
 }
+
+watch(
+  () => route.path,
+  () => {
+    if (selectedOrganizationalUnitRelationId.value) {
+      router.push({
+        query: { node: selectedOrganizationalUnitRelationId.value },
+      });
+    }
+  }
+);
 
 /** Loads organizational units and maps them to tree nodes. Displays a notification in case of error. */
 async function loadData(): Promise<void> {
@@ -126,6 +139,7 @@ watch(selectedNode, (nodeId: string) => {
       ou.id === nodeId || ou.parents?.some((parent) => parent.id === nodeId)
   );
   store.setSelectedOrganizationalUnit(selectedOrganizationUnit?.id || '');
+  store.setSelectedOrganizationalUnitRelation(nodeId);
 });
 
 onMounted(loadData);

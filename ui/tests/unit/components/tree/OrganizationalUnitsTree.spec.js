@@ -35,6 +35,7 @@ const mockedGetAllOrganizationalUnit = vi.mocked(getAllOrganizationalUnit);
 const mockNotify = vi.fn();
 const mockToOrganizationalUnitsTree = vi.fn((ous) => ous);
 const mockSetSelectedOrganizationalUnit = vi.fn();
+const mockSetSelectedOrganizationalUnitRelation = vi.fn();
 
 const mockRouter = {
   push: vi.fn(),
@@ -68,6 +69,8 @@ vi.mock('src/composables/useOrganizationalUnitMapper', () => ({
 vi.mock('src/stores/useOrganizationalUnitStore', () => ({
   useOrganizationalUnitStore: () => ({
     setSelectedOrganizationalUnit: mockSetSelectedOrganizationalUnit,
+    setSelectedOrganizationalUnitRelation:
+      mockSetSelectedOrganizationalUnitRelation,
   }),
 }));
 

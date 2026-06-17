@@ -104,14 +104,13 @@ vi.mock('src/composables/useAccountMapper', () => ({
   }),
 }));
 
-vi.mock('src/composables/useAccountsColumns', () => ({
-  useAccountsColumns: vi.fn(() => []),
-}));
-
-vi.mock('assets/accounts/AccountsFilters', () => ({
-  fieldsSearch: [],
-  defaultFields: [],
-  advancedFields: [],
+vi.mock('src/boot/config', () => ({
+  appConfig: {
+    accountTableColumns: [],
+    accountSearchFields: [],
+    accountSearchDefaultFields: [],
+    accountSearchAdvancedFields: [],
+  },
 }));
 
 vi.mock('vue-router', () => ({

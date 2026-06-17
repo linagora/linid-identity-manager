@@ -125,15 +125,10 @@ import {
   useScopedI18n,
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
-import {
-  advancedFields,
-  defaultFields,
-  fieldsSearch,
-} from 'assets/accounts/AccountsFilters';
 import axios from 'axios';
 import { storeToRefs } from 'pinia';
+import { appConfig } from 'src/boot/config';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
-import { useAccountsColumns } from 'src/composables/useAccountsColumns';
 import { getAccountsByOrganizationalUnitId } from 'src/services/OrganizationalUnitService';
 import { useOrganizationalUnitStore } from 'src/stores/useOrganizationalUnitStore';
 import type { Account } from 'src/types/accounts';
@@ -142,6 +137,9 @@ import { useRoute, useRouter } from 'vue-router';
 
 const store = useOrganizationalUnitStore();
 const { selectedOrganizationalUnitId } = storeToRefs(store);
+const fieldsSearch = appConfig.accountSearchFields;
+const defaultFields = appConfig.accountSearchDefaultFields;
+const advancedFields = appConfig.accountSearchAdvancedFields;
 
 const router = useRouter();
 const route = useRoute();
@@ -171,7 +169,12 @@ const uiProps = computed(() => ({
 
 const { toAccountQueryFilterDTO, toAccountList } = useAccountMapper();
 const { toPagination, toQuasarPagination } = usePagination();
-const accountColumns = computed(() => useAccountsColumns());
+const accountColumns = computed(() =>
+  appConfig.accountTableColumns.map((col) => ({
+    ...col,
+    label: t(`accountColumns.${col.name}`),
+  }))
+);
 
 const pagination = ref<QuasarPagination>({
   page: 1,

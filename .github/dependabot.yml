@@ -1,0 +1,20 @@
+version: 2
+
+updates:
+  - package-ecosystem: "maven"
+    directory: "/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Europe/Paris"
+    open-pull-requests-limit: 1
+    groups:
+      api-dependencies:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "chore(api)"
+    labels:
+      - "dependencies"
+      - "api"

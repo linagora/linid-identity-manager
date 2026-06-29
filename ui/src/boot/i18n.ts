@@ -25,13 +25,15 @@
  */
 
 import {
-  fromDot,
+  fromDot, getI18nInstance,
   merge,
-  setI18nInstance,
+  setI18nInstance, useLinidUiStore,
 } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
+import { appConfig } from 'boot/config';
 import { Quasar } from 'quasar';
 import type messages from 'src/i18n';
+import type { Composer} from 'vue-i18n';
 import { createI18n, type I18n } from 'vue-i18n';
 import { defineBoot } from '#q-app/wrappers';
 
@@ -56,16 +58,9 @@ declare module 'vue-i18n' {
 
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 export default defineBoot(async ({ app }) => {
-  const i18nConfig: {
-    /** Array of supported language codes. */
-    languages: string[];
-    /** Default locale of the application. */
-    locale: string;
-  } = await fetch('/i18n.json').then((res) => res.json());
-
   const messages: Record<string, unknown> = {};
 
-  for (const lang of i18nConfig.languages) {
+  for (const lang of appConfig.i18n.languages) {
     const appMessages = await fetch(`/i18n/${lang}.json`)
       .then((res) => res.json())
       .catch(() => ({}));
@@ -79,9 +74,9 @@ export default defineBoot(async ({ app }) => {
 
   // eslint-disable-next-line jsdoc/require-jsdoc
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: i18nConfig.locale,
+    locale: localStorage.getItem('language') || appConfig.i18n.locale,
     legacy: false,
-    fallbackLocale: i18nConfig.languages[0],
+    fallbackLocale: appConfig.i18n.languages[0],
     // @ts-expect-error 'messages' type is not compatible with the expected type of createI18n,
     // but we know it matches the schema at runtime
     messages,
@@ -93,7 +88,7 @@ export default defineBoot(async ({ app }) => {
   app.use(i18n);
 
   // Load Quasar language pack to translate built-in components (table pagination, etc.)
-  const langIso = i18nConfig.locale.substring(0, 2);
+  const langIso = appConfig.i18n.locale.substring(0, 2);
   try {
     const quasarLang = await import(
       /* @vite-ignore */ `quasar/lang/${langIso}.js`
@@ -102,4 +97,20 @@ export default defineBoot(async ({ app }) => {
   } catch {
     // Fallback: keep default English if language pack not found
   }
+
+  // TODO: Should be removed with the issue 192
+  const uiStore = useLinidUiStore();
+  const { t } = getI18nInstance().global as Composer;
+
+  uiStore.addMainNavigationMenuItems({
+    id: 'accounts',
+    label: t('AccountsPage.menuTitle'),
+    path: '/accounts',
+  });
+
+  uiStore.addMainNavigationMenuItems({
+    id: 'organizational-units',
+    label: t('OrganizationalUnitsPage.menuTitle'),
+    path: '/organizational-units',
+  });
 });

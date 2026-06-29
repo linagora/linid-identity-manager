@@ -52,6 +52,13 @@ export interface AppConfig {
    * value is missing or invalid, the application may fallback to a default environment such as 'DEV'.
    */
   environment: string;
+  /** Internationalization configuration for the application. */
+  i18n: {
+    /** Array of supported language codes. */
+    languages: string[];
+    /** Default locale of the application. */
+    locale: string;
+  };
   /**
    * Static list of organizational unit types offered by the OU creation form. The order is the one rendered in the type
    * selector.

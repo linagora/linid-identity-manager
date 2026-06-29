@@ -71,19 +71,4 @@ export default defineBoot(async (): Promise<void> => {
   }
 
   appConfig = (await response.json()) as AppConfig;
-
-  const uiStore = useLinidUiStore();
-  const { t } = getI18nInstance().global as Composer;
-
-  uiStore.addMainNavigationMenuItems({
-    id: 'accounts',
-    label: t('AccountsPage.menuTitle'),
-    path: '/accounts',
-  });
-
-  uiStore.addMainNavigationMenuItems({
-    id: 'organizational-units',
-    label: t('OrganizationalUnitsPage.menuTitle'),
-    path: '/organizational-units',
-  });
 });

@@ -1,5 +1,9 @@
 {
   "environment": "__APP_ENV__",
+  "i18n": {
+    "languages": ["fr-FR", "en-US"],
+    "locale": "fr-FR"
+  },
   "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
   "organizationalUnitQuerySize": 50,
   "immediateActionDelay": 60,

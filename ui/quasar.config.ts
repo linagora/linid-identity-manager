@@ -18,12 +18,12 @@ export default defineConfig((ctx) => {
       'pinia',
       'nunjucks',
       'oidc',
+      'config',
       'i18n',
       'axios',
       'remotes',
       'module-lifecycle',
       'theme',
-      'config',
       'ui-design',
     ],
 

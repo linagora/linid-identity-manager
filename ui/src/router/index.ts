@@ -26,7 +26,6 @@
 
 import { defineRouter } from '#q-app/wrappers';
 import { useLinidUserStore } from '@linagora/linid-im-front-corelib';
-import { getUser, oidcClient } from 'src/boot/oidc';
 import {
   createMemoryHistory,
   createRouter,
@@ -34,6 +33,7 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
+import { authService } from 'src/services/AuthService';
 
 /*
  * If not building with SSR mode, you can
@@ -43,8 +43,7 @@ import routes from './routes';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-let userReady = false;
-let unloadListenerRegistered = false;
+const PUBLIC_PATHS = ['/callback', '/silent-renew', '/logout'];
 
 /**
  * Creates and configures the Vue Router instance.
@@ -68,41 +67,19 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     history: createHistory(process.env.VUE_ROUTER_BASE),
   });
 
-  Router.beforeEach(async (to, from, next) => {
-    // Registered lazily: the OIDC boot finishes asynchronously after the
-    // router factory, so `oidcClient` may still be undefined at factory
-    // time. The first navigation always happens after all boots resolved.
-    if (!unloadListenerRegistered && oidcClient) {
-      oidcClient.events.addUserUnloaded(() => {
-        userReady = false;
-      });
-      unloadListenerRegistered = true;
+  Router.beforeEach(async (to) => {
+    if (PUBLIC_PATHS.includes(to.path)) {
+      return true;
     }
 
-    const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
-    if (!requiresAuth) {
-      return next();
-    }
-    const user = await getUser();
+    const user = await authService.getUser();
 
-    if (user) {
-      if (!userReady) {
-        const userStore = useLinidUserStore();
-        userStore.setUserFromClaims(user.profile);
-        userReady = true;
-      }
-
-      next();
-    } else {
-      try {
-        await oidcClient.signinRedirect({
-          state: { redirectUrl: to.fullPath },
-        });
-      } catch (error) {
-        console.error('Failed to initiate OIDC sign-in redirect:', error);
-      }
-      next(false);
+    if (!user) {
+      await authService.login(to.fullPath);
+      return false;
     }
+
+    return true;
   });
 
   return Router;

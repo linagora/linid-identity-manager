@@ -32,44 +32,20 @@
   </q-page>
 </template>
 
-<script lang="ts" setup>
-import {
-  useLinidUserStore,
-  useScopedI18n,
-} from '@linagora/linid-im-front-corelib';
+<script setup lang="ts">
+import { useScopedI18n } from '@linagora/linid-im-front-corelib';
 import { authService } from 'src/services/AuthService';
 import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 
-const router = useRouter();
-const { t } = useScopedI18n('AuthenticationCallbackPage');
-const userStore = useLinidUserStore();
-
-/**
- * Represents the optional redirect state used during OIDC authentication. This is typically used to preserve the
- * original destination URL so the user can be redirected back after successful login.
- */
-interface OidcRedirectState {
-  /** The URL to redirect to after authentication. If not provided, the default route is used. */
-  redirectUrl?: string;
-}
+const { t } = useScopedI18n('AuthenticationSilentRenewPage');
 
 onMounted(async () => {
   try {
-    const user = await authService.handleCallback();
-    const state = user.state as OidcRedirectState;
-    let redirectUrl = state?.redirectUrl || '/';
-
-    if (!redirectUrl.startsWith('/') || redirectUrl.startsWith('//')) {
-      redirectUrl = '/';
-    }
-
-    userStore.setUserFromClaims(user.profile);
-
-    await router.replace(redirectUrl);
+    await authService.handleSilentRenewCallback();
   } catch (e) {
-    console.error('Error during OIDC callback processing:', e);
-    await router.replace('/');
+    console.error('Error during OIDC silent renew callback processing:', e);
   }
 });
 </script>
+
+<style scoped></style>

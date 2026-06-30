@@ -32,19 +32,34 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/callback',
+    name: 'AuthenticationCallback',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
         path: '',
-        name: 'AuthenticationCallback',
         component: () => import('pages/AuthenticationCallbackPage.vue'),
-        meta: { requiresAuth: false },
       },
+    ],
+  },
+  {
+    path: '/logout',
+    name: 'AuthenticationLogoutCallback',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
       {
-        path: '/logout',
-        name: 'AuthenticationLogoutCallback',
-        component: () => import('pages/AuthenticationCallbackPage.vue'),
-        meta: { requiresAuth: false },
+        path: '',
+        component: () => import('pages/AuthenticationLogoutPage.vue'),
+      },
+    ],
+  },
+  {
+    path: '/silent-renew',
+    name: 'AuthenticationSilentRenewPage',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/AuthenticationSilentRenewPage.vue'),
       },
     ],
   },
@@ -53,7 +68,6 @@ const routes: RouteRecordRaw[] = [
     component: async () =>
       (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
         .default,
-    meta: { requiresAuth: true },
     children: [
       { path: '', component: () => import('pages/Homepage.vue') },
       {
@@ -76,7 +90,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/accounts',
     component: () => import('layouts/SplitterLayout.vue'),
-    meta: { requiresAuth: true },
     children: [
       {
         path: '',
@@ -88,7 +101,6 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/organizational-units',
     component: () => import('layouts/SplitterLayout.vue'),
-    meta: { requiresAuth: true },
     children: [
       {
         path: '',

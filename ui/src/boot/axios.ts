@@ -27,7 +27,7 @@
 import { setHttpClient } from '@linagora/linid-im-front-corelib';
 import type { AxiosError } from 'axios';
 import axios, { type AxiosInstance } from 'axios';
-import { getUser, oidcClient } from './oidc';
+import { authService } from 'src/services/AuthService';
 import { defineBoot } from '#q-app/wrappers';
 
 declare module 'vue' {
@@ -47,17 +47,12 @@ declare module 'vue' {
 // "export default () => {}" function below (which runs individually
 // for each client)
 const api = axios.create({ baseURL: '/backend', timeout: 30000 });
-let redirecting = false;
 
 api.interceptors.request.use(async (config) => {
-  try {
-    const user = await getUser();
+  const token = await authService.getAccessToken();
 
-    if (user && user.access_token) {
-      config.headers.Authorization = `Bearer ${user.access_token}`;
-    }
-  } catch (error) {
-    console.warn('Error retrieving OIDC token', error);
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
 
   return config;
@@ -66,20 +61,8 @@ api.interceptors.request.use(async (config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error.response?.status === 401 && !redirecting) {
-      redirecting = true;
-      console.warn(
-        'Received 401 on',
-        error.config?.url,
-        '— redirecting to sign-in'
-      );
-      try {
-        await oidcClient.removeUser();
-        await oidcClient.signinRedirect();
-      } catch (redirectError) {
-        redirecting = false;
-        console.warn('OIDC redirect failed', redirectError);
-      }
+    if (error.response?.status === 401) {
+      await authService.login();
     }
 
     return Promise.reject(error);

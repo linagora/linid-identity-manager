@@ -15,9 +15,9 @@ export default defineConfig((ctx) => {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
       'dayjs',
-      'oidc',
       'pinia',
       'nunjucks',
+      'oidc',
       'i18n',
       'axios',
       'remotes',

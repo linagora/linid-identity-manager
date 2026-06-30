@@ -25,59 +25,16 @@
  */
 
 import { useLinidUserStore } from '@linagora/linid-im-front-corelib';
-import { UserManager, type User } from 'oidc-client-ts';
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '@quasar/app-vite/wrappers';
+import { authService } from 'src/services/AuthService';
 
-let oidcClient: UserManager;
-let silentRefresh: Promise<User | null> | null = null;
+export default defineBoot(async () => {
+  await authService.init();
 
-/**
- * Returns the current OIDC user with a non-expired access token.
- *
- * If the stored user is expired, a silent refresh is attempted; concurrent callers share the same in-flight refresh
- * promise to avoid stampeding the authorization server.
- *
- * @returns The refreshed user, or `null` if no user is logged in or the silent refresh failed. When `null` is returned,
- *   the caller should treat the session as unauthenticated and fall back to a full sign-in flow.
- */
-async function getUser(): Promise<User | null> {
-  const user = await oidcClient.getUser();
-  if (!user || !user.expired) {
-    return user;
-  }
-  silentRefresh ??= oidcClient.signinSilent().finally(() => {
-    silentRefresh = null;
-  });
-  try {
-    return await silentRefresh;
-  } catch (error) {
-    console.warn('Silent OIDC refresh failed', error);
-    return null;
-  }
-}
+  const user = await authService.getUser();
 
-declare module 'vue' {
-  /** Augments the Vue component instance properties to include the OIDC UserManager. */
-  interface ComponentCustomProperties {
-    /** The OIDC UserManager instance for handling authentication. */
-    $oidc: UserManager;
-  }
-}
-
-export default defineBoot(async ({ app }) => {
-  const response = await fetch('/oidc-config.json');
-  if (!response.ok) {
-    throw new Error(`Failed to load OIDC config: ${response.status}`);
-  }
-  const config = await response.json();
-  oidcClient = new UserManager(config);
-
-  oidcClient.events.addUserLoaded((user) => {
+  if (user) {
     const userStore = useLinidUserStore();
     userStore.setUserFromClaims(user.profile);
-  });
-
-  app.config.globalProperties.$oidc = oidcClient;
+  }
 });
-
-export { oidcClient, getUser };

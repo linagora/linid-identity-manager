@@ -1,8 +1,9 @@
 {
   "authority": "${LEMONLDAP_PORTAL_URL}",
   "client_id": "linid-im-client",
-  "redirect_uri": "${LEMONLDAP_REDIRECT_URL}",
+  "redirect_uri": "${LEMONLDAP_REDIRECT_URL}/callback",
   "post_logout_redirect_uri": "${LEMONLDAP_PORTAL_URL}/logout",
+  "silent_redirect_uri": "${LEMONLDAP_REDIRECT_URL}/silent-renew",
   "response_type": "code",
   "scope": "openid email profile roles"
 }

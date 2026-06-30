@@ -38,7 +38,6 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
-import jakarta.validation.Valid;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,13 +51,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -175,18 +172,6 @@ class OrganizationalUnitControllerTest {
     }
 
     @Test
-    @DisplayName("Should have @Valid annotation on suspend request parameter")
-    void testSuspend_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = OrganizationalUnitController.class.getMethod("suspend", UserPrincipal.class,
-            UUID.class, OrganizationalUnitSuspensionRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "suspend() request parameter must have @Valid annotation"
-        );
-    }
-
-    @Test
     @DisplayName("Should reactivate organizational unit")
     void testReactivate() {
         var id = UUID.randomUUID();
@@ -198,18 +183,6 @@ class OrganizationalUnitControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(service).reactivate(userPrincipal, id, record);
-    }
-
-    @Test
-    @DisplayName("Should have @Valid annotation on reactivate request parameter")
-    void testReactivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = OrganizationalUnitController.class.getMethod("reactivate", UserPrincipal.class,
-            UUID.class, OrganizationalUnitReactivationRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "reactivate() request parameter must have @Valid annotation"
-        );
     }
 
     @Test

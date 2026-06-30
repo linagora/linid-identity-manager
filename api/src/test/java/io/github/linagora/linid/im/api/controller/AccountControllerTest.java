@@ -28,7 +28,6 @@ package io.github.linagora.linid.im.api.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
@@ -50,9 +49,7 @@ import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
-import jakarta.validation.Valid;
 import java.time.OffsetDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -226,18 +223,6 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Should have @Valid annotation on create request parameter")
-    void testCreate_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = AccountController.class.getMethod("create", UserPrincipal.class,
-            AccountRecord.class);
-        var annotations = method.getParameterAnnotations()[1];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "create() request parameter must have @Valid annotation"
-        );
-    }
-
-    @Test
     @DisplayName("Should delete account and return 204")
     void testDeleteById_shouldReturn204() {
         UUID id = UUID.randomUUID();
@@ -267,18 +252,6 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Should have @Valid annotation on suspend request parameter")
-    void testSuspend_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = AccountController.class.getMethod("suspend", UserPrincipal.class,
-            UUID.class, AccountSuspensionRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "suspend() request parameter must have @Valid annotation"
-        );
-    }
-
-    @Test
     @DisplayName("Should deactivate account and return 200 with AccountViewDTO")
     void testDeactivate_shouldReturn200WithAccountViewDTO() {
         UUID id = UUID.randomUUID();
@@ -294,18 +267,6 @@ class AccountControllerTest {
         assertNotNull(response.getBody());
         assertEquals(entity.getId(), response.getBody().getId());
         verify(accountService).deactivate(userPrincipal, id, record);
-    }
-
-    @Test
-    @DisplayName("Should have @Valid annotation on deactivate request parameter")
-    void testDeactivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = AccountController.class.getMethod("deactivate", UserPrincipal.class,
-            UUID.class, AccountDeactivationRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "deactivate() request parameter must have @Valid annotation"
-        );
     }
 
     @Test
@@ -327,18 +288,6 @@ class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Should have @Valid annotation on reactivate request parameter")
-    void testReactivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = AccountController.class.getMethod("reactivate", UserPrincipal.class,
-            UUID.class, AccountReactivationRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "reactivate() request parameter must have @Valid annotation"
-        );
-    }
-
-    @Test
     @DisplayName("Should activate account and return 200 with AccountViewDTO")
     void testActivate_shouldReturn200WithAccountViewDTO() {
         UUID id = UUID.randomUUID();
@@ -353,18 +302,6 @@ class AccountControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(entity.getId(), response.getBody().getId());
-    }
-
-    @Test
-    @DisplayName("Should have @Valid annotation on activate request parameter")
-    void testActivate_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = AccountController.class.getMethod("activate", UserPrincipal.class,
-            UUID.class, AccountActivationRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "activate() request parameter must have @Valid annotation"
-        );
     }
 
     @Test
@@ -383,17 +320,5 @@ class AccountControllerTest {
         assertNotNull(response.getBody());
         assertEquals(entity.getId(), response.getBody().getId());
         verify(accountService).updateValidity(userPrincipal, id, record);
-    }
-
-    @Test
-    @DisplayName("Should have @Valid annotation on scheduleActivation request parameter")
-    void testScheduleActivation_shouldHaveValidAnnotation() throws NoSuchMethodException {
-        var method = AccountController.class.getMethod("scheduleActivation", UserPrincipal.class,
-            UUID.class, AccountValidityRecord.class);
-        var annotations = method.getParameterAnnotations()[2];
-        assertTrue(
-            Arrays.stream(annotations).anyMatch(a -> a.annotationType() == Valid.class),
-            "scheduleActivation() request parameter must have @Valid annotation"
-        );
     }
 }

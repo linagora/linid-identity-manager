@@ -43,5 +43,7 @@
   "error.account.status.validity_start_not_in_future": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ({start}) doit être dans le futur.",
   "error.account.status.validity_start_after_end": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ({start}) doit être antérieur à la fin de validité ({end}).",
   "error.account.status.validity_start_locked": "La validité du compte {id} ne peut pas être mise à jour : le début de validité ne peut plus être modifié une fois le compte activé.",
-  "error.account.status.nothing_to_reactivate": "Le compte {id} ne peut pas être réactivé : il n'est ni actuellement suspendu ni désactivé."
+  "error.account.status.nothing_to_reactivate": "Le compte {id} ne peut pas être réactivé : il n'est ni actuellement suspendu ni désactivé.",
+  "error.application.not_found": "Application introuvable : {id}",
+  "error.application.code.already_exists": "Une application existe déjà avec le code « {code} »"
 }

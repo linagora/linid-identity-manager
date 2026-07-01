@@ -24,23 +24,55 @@
  * LinID Identity Manager software.
  */
 
-import {
-  useLinidUserStore,
-  useLinidUserPreference,
-} from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
+import { useLinidUserPreference } from '@linagora/linid-im-front-corelib';
+import { appConfig } from 'boot/config';
 import { authService } from 'src/services/AuthService';
 
-export default defineBoot(async () => {
-  await authService.init();
+/**
+ * Tells whether a language candidate is defined and part of the supported languages.
+ *
+ * @param lang - The language candidate to check.
+ * @returns `true` when the candidate is a non-empty, supported language.
+ */
+function isSupportedLanguage(lang?: string | null): lang is string {
+  return !!lang && appConfig.i18n.languages.includes(lang);
+}
 
-  const user = await authService.getUser();
+/**
+ * Resolves the effective locale to apply, without any side effect.
+ *
+ * The locale is resolved by priority: stored user preference, then locally persisted language, falling back to the
+ * configured default locale when none is supported.
+ *
+ * @returns The locale code the caller should apply to its i18n target.
+ */
+export function resolveLocale(): string {
+  const { userPreferenceStore } = useLinidUserPreference();
+  const storedPreference = userPreferenceStore.userPreferences?.language;
 
-  if (user) {
-    const userStore = useLinidUserStore();
-    const { init } = useLinidUserPreference();
+  return (
+    [storedPreference, localStorage.getItem('language')].find(
+      isSupportedLanguage
+    ) ?? appConfig.i18n.locale
+  );
+}
 
-    userStore.setUserFromClaims(user.profile);
-    await init();
+/**
+ * Synchronises the persisted state with the given locale.
+ *
+ * The locale is always written to localStorage. The server-side user preference is updated only when it differs from
+ * the currently stored one and a user is authenticated.
+ *
+ * @param locale - The locale to persist.
+ * @returns A promise that resolves once the persisted state has been synchronised.
+ */
+export async function syncLocale(locale: string): Promise<void> {
+  const { userPreferenceStore, saveUserPreference } = useLinidUserPreference();
+  const storedPreference = userPreferenceStore.userPreferences?.language;
+
+  localStorage.setItem('language', locale);
+
+  if (locale !== storedPreference && (await authService.getUser())) {
+    await saveUserPreference('language', locale);
   }
-});
+}

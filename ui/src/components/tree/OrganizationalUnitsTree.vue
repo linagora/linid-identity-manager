@@ -28,7 +28,7 @@
   <component
     :is="treeComponent"
     v-if="treeComponent && treeNodes.length > 0"
-    v-model:selected-node="selectedNode"
+    v-model:selected="selectedNode"
     :search-enabled="true"
     :filter-method="filterTreeNode"
     ui-namespace="organizational-units-tree"

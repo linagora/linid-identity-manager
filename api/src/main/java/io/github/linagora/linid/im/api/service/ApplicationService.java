@@ -116,4 +116,15 @@ public interface ApplicationService {
      * @param id            the application UUID
      */
     void deleteById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Regenerates and stores the OPA policy of the application with the given identifier.
+     *
+     * <p>Retrieves the active rules of the application, generates the policy script, computes its checksum, stores both
+     * on the application entity and resets the deployment status by setting {@code deployedAt} to {@code null} so the
+     * application is picked up by the next scheduled deployment.</p>
+     *
+     * @param applicationId the identifier of the application whose policy must be regenerated
+     */
+    void regeneratePolicy(UUID applicationId);
 }

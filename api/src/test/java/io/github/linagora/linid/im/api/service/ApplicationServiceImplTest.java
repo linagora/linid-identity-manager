@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,9 +40,11 @@ import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationRolesRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import java.time.OffsetDateTime;
@@ -73,6 +76,15 @@ class ApplicationServiceImplTest {
 
     @Mock
     private ApplicationMapper mapper;
+
+    @Mock
+    private ApplicationRuleRepository applicationRuleRepository;
+
+    @Mock
+    private OpaService opaService;
+
+    @Mock
+    private ChecksumService checksumService;
 
     @InjectMocks
     private ApplicationServiceImpl service;
@@ -243,5 +255,61 @@ class ApplicationServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application.not_found", exception.getError().key());
         verify(applicationRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("regeneratePolicy should generate the script, store checksum and reset the deployment date")
+    void testRegeneratePolicy() {
+        var id = UUID.randomUUID();
+        var application = Application.builder().id(id).code("payroll").build();
+        List<ApplicationRule> activeRules = List.of(ApplicationRule.builder().code("R1").priority(1).build());
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(application));
+        when(applicationRuleRepository.findByApplicationIdAndDisabledFalseOrderByPriorityAsc(id))
+            .thenReturn(activeRules);
+        when(opaService.generate(application, activeRules)).thenReturn("rendered-policy");
+        when(checksumService.compute("rendered-policy")).thenReturn("policy-checksum");
+        when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.regeneratePolicy(id);
+
+        var captor = ArgumentCaptor.forClass(Application.class);
+        verify(applicationRepository).save(captor.capture());
+        var saved = captor.getValue();
+
+        assertEquals("rendered-policy", saved.getScript());
+        assertEquals("policy-checksum", saved.getScriptChecksum());
+        // regeneration must reset the deployment status so the scheduler redeploys the application.
+        assertNull(saved.getDeployedAt());
+    }
+
+    @Test
+    @DisplayName("regeneratePolicy should not update the application when the generated script is unchanged")
+    void testRegeneratePolicy_shouldSkipWhenScriptUnchanged() {
+        var id = UUID.randomUUID();
+        var application = Application.builder().id(id).code("payroll").scriptChecksum("same-checksum").build();
+        List<ApplicationRule> activeRules = List.of(ApplicationRule.builder().code("R1").priority(1).build());
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(application));
+        when(applicationRuleRepository.findByApplicationIdAndDisabledFalseOrderByPriorityAsc(id))
+            .thenReturn(activeRules);
+        when(opaService.generate(application, activeRules)).thenReturn("rendered-policy");
+        when(checksumService.compute("rendered-policy")).thenReturn("same-checksum");
+
+        service.regeneratePolicy(id);
+
+        // The checksum is unchanged: the application must not be saved nor its deployment status reset.
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("regeneratePolicy should throw when the application does not exist")
+    void testRegeneratePolicy_shouldThrowWhenApplicationAbsent() {
+        var id = UUID.randomUUID();
+        when(applicationRepository.findById(id)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class, () -> service.regeneratePolicy(id));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.application.not_found", exception.getError().key());
+        verify(applicationRepository, never()).save(any());
     }
 }

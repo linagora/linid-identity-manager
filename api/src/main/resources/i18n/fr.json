@@ -48,5 +48,7 @@
   "error.application.code.already_exists": "Une application existe déjà avec le code « {code} »",
   "error.application_rule.not_found": "Règle d'application introuvable : {id}",
   "error.application_rule.code.already_exists": "Une règle d'application existe déjà avec le code « {code} »",
-  "error.application_rule.priority.already_exists": "Une règle d'application existe déjà avec la priorité « {priority} »"
+  "error.application_rule.priority.already_exists": "Une règle d'application existe déjà avec la priorité « {priority} »",
+  "error.opa.template.not_readable": "Impossible de lire le modèle de politique OPA (emplacement : {location})",
+  "error.opa.policy.publish_failed": "Impossible de publier la politique OPA sur le serveur OPA (policyId : {policyId})"
 }

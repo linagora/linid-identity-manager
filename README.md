@@ -204,6 +204,64 @@ LinId is highly configurable and supports multiple configuration domains:
 
 ---
 
+### 🧮 Authentication Claims mapping (OPA / Rego rules)
+
+Access decisions and role assignments are computed **per application** by [Open Policy Agent (OPA)](https://www.openpolicyagent.org/).
+For each application, LinId compiles all of its **active rules** into a single OPA policy written in **Rego**, and
+deploys it automatically to the internal OPA server.
+
+#### What is Rego?
+
+Rego is OPA's declarative policy language. Instead of writing imperative code, you **declare rules** that OPA evaluates
+against an `input` document (describing the user) to produce a decision. In LinId, a rule is a small, self-contained
+Rego fragment that contributes to two shared sets:
+
+* **`roles`** — the roles granted to the user.
+* **`signals`** — the access decision signals: `allow`, `force_allow` (wins over `allow`) and `force_disallow` (denies,
+  wins over everything).
+
+#### Writing a rule (mini tutorial)
+
+A rule must only **contribute** to the shared sets with `contains` (it must never reassign them with `:=`):
+
+```rego
+# Grant the "reader" role and allow access to members of the "public" organizational unit.
+roles contains "reader" if {
+    input.user.organizationalUnit == "public"
+}
+
+signals contains "allow" if {
+    input.user.organizationalUnit == "public"
+}
+```
+
+Unconditionally grant access to administrators, overriding any plain `allow`:
+
+```rego
+signals contains "force_allow" if {
+    input.user.admin == true
+}
+```
+
+Always deny suspended users, overriding everything else:
+
+```rego
+signals contains "force_disallow" if {
+    input.user.suspended == true
+}
+```
+
+The generated policy resolves these signals into a single result:
+
+```json
+{ "allow": true, "roles": ["admin", "reader"] }
+```
+
+> See the full rule authoring guide, the fragment contract and more examples in
+> [docs/advanced/policies.md](docs/advanced/policies.md).
+
+---
+
 ### 🔌 Plugins
 
 LinId is designed to support a plugin system.

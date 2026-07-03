@@ -42,6 +42,24 @@ services:
       db:
         condition: service_healthy
 
+  opa:
+    image: openpolicyagent/opa:1.18.1
+    container_name: opa
+    networks:
+      - linid-dev-network
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+    ports:
+      - 8181:8181
+    healthcheck:
+      test: ["CMD", "/opa", "version"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   db-init:
     image: postgres:18.3-alpine
     container_name: init-db

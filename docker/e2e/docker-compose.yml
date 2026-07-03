@@ -21,6 +21,24 @@ services:
       timeout: 5s
       retries: 5
 
+  opa:
+    image: openpolicyagent/opa:1.18.1
+    container_name: opa
+    networks:
+      - linid-integration-network
+    command:
+      - "run"
+      - "--server"
+      - "--addr=0.0.0.0:8181"
+    ports:
+      - 8181:8181
+    healthcheck:
+      test: ["CMD", "/opa", "version"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   api:
     image: linid-identity-manager-api
     container_name: api
@@ -46,6 +64,7 @@ services:
       - SSL_KEY_PASSWORD=${SSL_KEY_PASSWORD}
       - SSL_TRUSTSTORE_PATH=${SSL_TRUSTSTORE_PATH}
       - SSL_TRUSTSTORE_PASSWORD=${SSL_TRUSTSTORE_PASSWORD}
+      - OPA_SERVER_URL=${OPA_SERVER_URL}
     volumes:
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
     healthcheck:
@@ -62,6 +81,8 @@ services:
       auth:
         condition: service_healthy
       db:
+        condition: service_healthy
+      opa:
         condition: service_healthy
 
   init-db:

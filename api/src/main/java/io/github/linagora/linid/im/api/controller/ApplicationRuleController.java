@@ -33,6 +33,7 @@ import io.github.linagora.linid.im.api.model.application.rule.ApplicationRuleVie
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationRuleService;
+import io.github.linagora.linid.im.api.service.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -77,6 +78,11 @@ public class ApplicationRuleController {
     private final ApplicationRuleService applicationRuleService;
 
     /**
+     * Service used to regenerate the owning application OPA policy after a rule change.
+     */
+    private final ApplicationService applicationService;
+
+    /**
      * Mapper for entity-to-DTO conversion.
      */
     private final ApplicationRuleMapper applicationRuleMapper;
@@ -106,6 +112,7 @@ public class ApplicationRuleController {
         log.info("[{}] Received POST request to create rule for application {} with {}",
             userPrincipal.getEmail(), applicationId, rule);
         var entity = applicationRuleService.create(userPrincipal, applicationId, rule);
+        applicationService.regeneratePolicy(applicationId);
         return ResponseEntity.status(HttpStatus.CREATED).body(applicationRuleMapper.toDTO(entity));
     }
 
@@ -181,6 +188,7 @@ public class ApplicationRuleController {
         log.info("[{}] Received PUT request to update rule {} of application {} with {}",
             userPrincipal.getEmail(), ruleId, applicationId, rule);
         var entity = applicationRuleService.update(userPrincipal, applicationId, ruleId, rule);
+        applicationService.regeneratePolicy(applicationId);
         return ResponseEntity.ok(applicationRuleMapper.toDTO(entity));
     }
 
@@ -203,6 +211,7 @@ public class ApplicationRuleController {
         log.info("[{}] Received DELETE request for rule {} of application {}",
             userPrincipal.getEmail(), ruleId, applicationId);
         applicationRuleService.deleteById(userPrincipal, applicationId, ruleId);
+        applicationService.regeneratePolicy(applicationId);
         return ResponseEntity.noContent().build();
     }
 }

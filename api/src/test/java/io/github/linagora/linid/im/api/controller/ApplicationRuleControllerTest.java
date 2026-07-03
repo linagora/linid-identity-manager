@@ -33,6 +33,7 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationRuleService;
+import io.github.linagora.linid.im.api.service.ApplicationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -61,6 +62,9 @@ class ApplicationRuleControllerTest {
 
     @Mock
     private ApplicationRuleService applicationRuleService;
+
+    @Mock
+    private ApplicationService applicationService;
 
     @Mock
     private ApplicationRuleMapper applicationRuleMapper;
@@ -95,6 +99,8 @@ class ApplicationRuleControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        // creating a rule must trigger a regeneration of the owning application policy.
+        verify(applicationService).regeneratePolicy(applicationId);
     }
 
     @Test
@@ -132,6 +138,8 @@ class ApplicationRuleControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(applicationRuleService).update(userPrincipal, applicationId, ruleId, record);
+        // updating a rule must trigger a regeneration of the owning application policy.
+        verify(applicationService).regeneratePolicy(applicationId);
     }
 
     @Test
@@ -143,5 +151,7 @@ class ApplicationRuleControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        // deleting a rule must trigger a regeneration of the owning application policy.
+        verify(applicationService).regeneratePolicy(applicationId);
     }
 }

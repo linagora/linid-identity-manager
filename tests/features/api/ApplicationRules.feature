@@ -30,6 +30,10 @@ Feature: Test API Application Rule endpoints
   ## 503 Should return 400 when updating with a code used by another rule
   ## 504 Should return 400 with a bad request payload (missing required fields)
 
+  ################## OPA policy generation ############################
+  ## 601 Should regenerate the application policy when a rule is toggled active
+  ## 602 Should regenerate the application policy without the fragment when a rule is deleted
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -635,3 +639,128 @@ Feature: Test API Application Rule endpoints
       | priority | "RULE_1" | null     | "return false;" | false    |
       | script   | "RULE_1" | 1        | null            | false    |
       | disabled | "RULE_1" | 1        | "return false;" | null     |
+
+  ####################################################
+  ################## OPA policy generation ############
+  ####################################################
+
+  Scenario: 601 - Should regenerate the application policy when a rule is toggled active
+    Given I setup database with driver "postgres" host "{{env.DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
+
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-rule-601",
+        "name": "Application Rule 601",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'appId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}/rules' with method 'POST' with body:
+      """
+      {
+        "code": "RULE_1",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ruleId' as '{{response.body.id}}' in context
+
+    # Rules are created disabled: while the rule stays disabled its fragment must NOT be in the policy.
+    When I execute sql request "SELECT script FROM applications WHERE code = $1" with values:
+      """
+      ["app-rule-601"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].script}}' not contains 'input.user.admin == true'
+
+    # Enabling the rule must regenerate the policy with its fragment and reset the deployment date.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}/rules/{{ctx.ruleId}}' with method 'PUT' with body:
+      """
+      {
+        "code": "RULE_1",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 200
+
+    When I execute sql request "SELECT script, script_checksum, deployed_at FROM applications WHERE code = $1" with values:
+      """
+      ["app-rule-601"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].script}}' contains 'package authz["app-rule-601"]'
+    And  I expect '{{ctx.dbResults[0].script}}' contains 'signals contains "allow" if input.user.admin == true'
+    And  I expect '{{ctx.dbResults[0].script_checksum}}' is not empty
+    And  I expect '{{ctx.dbResults[0].deployed_at}}' is empty
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 602 - Should regenerate the application policy without the fragment when a rule is deleted
+    Given I setup database with driver "postgres" host "{{env.DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
+
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-rule-602",
+        "name": "Application Rule 602",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'appId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}/rules' with method 'POST' with body:
+      """
+      {
+        "code": "RULE_1",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ruleId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}/rules/{{ctx.ruleId}}' with method 'PUT' with body:
+      """
+      {
+        "code": "RULE_1",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 200
+
+    When I execute sql request "SELECT script FROM applications WHERE code = $1" with values:
+      """
+      ["app-rule-602"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].script}}' contains 'input.user.admin == true'
+
+    # Deleting the rule must regenerate the policy without its fragment.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}/rules/{{ctx.ruleId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I execute sql request "SELECT script, deployed_at FROM applications WHERE code = $1" with values:
+      """
+      ["app-rule-602"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].script}}' not contains 'input.user.admin == true'
+    And  I expect '{{ctx.dbResults[0].script}}' contains 'package authz["app-rule-602"]'
+    And  I expect '{{ctx.dbResults[0].deployed_at}}' is empty
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}' with method 'DELETE'
+    Then I expect status code is 204

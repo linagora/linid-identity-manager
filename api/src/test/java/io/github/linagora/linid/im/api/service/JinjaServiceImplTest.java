@@ -24,41 +24,52 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.service;
 
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-/**
- * Spring Data JPA repository for {@link Application}.
- *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
- */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
+@DisplayName("Test class: JinjaServiceImpl")
+class JinjaServiceImplTest {
 
-    /**
-     * Retrieves an {@link Application} associated with the given code.
-     *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
-     */
-    Optional<Application> findByCode(String code);
+    private final JinjaService service = new JinjaServiceImpl();
 
-    /**
-     * Retrieves all applications that require deployment to OPA.
-     *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
-     */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+    @Test
+    @DisplayName("render should substitute simple variables from the context")
+    void testRender_variable() {
+        var result = service.render("Hello {{ name }}!", Map.of("name", "world"));
+
+        assertEquals("Hello world!", result);
+    }
+
+    @Test
+    @DisplayName("render should support loops over context collections")
+    void testRender_loop() {
+        var template = "{% for item in items %}{{ item }},{% endfor %}";
+
+        var result = service.render(template, Map.of("items", List.of("a", "b", "c")));
+
+        assertEquals("a,b,c,", result);
+    }
+
+    @Test
+    @DisplayName("render should access nested map properties")
+    void testRender_nested() {
+        var result = service.render("{{ user.name }}", Map.of("user", Map.of("name", "alice")));
+
+        assertEquals("alice", result);
+    }
+
+    @Test
+    @DisplayName("render should leave unrelated content untouched when the context is empty")
+    void testRender_noVariable() {
+        var result = service.render("static content", Map.of());
+
+        assertTrue(result.contains("static content"));
+    }
 }

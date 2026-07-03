@@ -24,41 +24,17 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.config;
 
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * Spring Data JPA repository for {@link Application}.
+ * Enables Spring's scheduled task execution capability.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * <p>Required by the OPA deployment scheduler that periodically pushes pending application policies to OPA.</p>
  */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
-
-    /**
-     * Retrieves an {@link Application} associated with the given code.
-     *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
-     */
-    Optional<Application> findByCode(String code);
-
-    /**
-     * Retrieves all applications that require deployment to OPA.
-     *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
-     */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+@Configuration
+@EnableScheduling
+public class SchedulingConfig {
 }

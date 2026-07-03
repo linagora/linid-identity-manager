@@ -24,41 +24,36 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Spring Data JPA repository for {@link Application}.
+ * Service managing the OPA policy workflow for applications.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * <p>It generates the policy script from the active rules of an application and publishes it to the OPA server.
+ * Persisting the generated script on the application entity is the responsibility of the {@code ApplicationService},
+ * not of this service.</p>
  */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
+public interface OpaService {
 
     /**
-     * Retrieves an {@link Application} associated with the given code.
+     * Generates the OPA policy script of an application from its active rules.
      *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
+     * @param application the owning application, used to build the Rego package namespace
+     * @param activeRules the ordered list of active rules whose scripts are concatenated as fragments
+     * @return the rendered Rego policy document
      */
-    Optional<Application> findByCode(String code);
+    String generate(Application application, List<ApplicationRule> activeRules);
 
     /**
-     * Retrieves all applications that require deployment to OPA.
+     * Publishes the policy script of the given application to the OPA server.
      *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
+     * @param application the application whose script must be published
+     * @return the deployment timestamp recorded on success
      */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+    OffsetDateTime publish(Application application);
 }

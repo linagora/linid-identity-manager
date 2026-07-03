@@ -24,41 +24,24 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.service;
 
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
 
 /**
- * Spring Data JPA repository for {@link Application}.
+ * Generic service for rendering Jinja (Jinjava) templates.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * <p>This service is intentionally decoupled from any specific template: callers provide the raw template content and
+ * the variables to bind, and get back the rendered string.</p>
  */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
+public interface JinjaService {
 
     /**
-     * Retrieves an {@link Application} associated with the given code.
+     * Renders the given Jinja template with the provided context variables.
      *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
+     * @param template the raw Jinja template content
+     * @param context  the variables made available to the template
+     * @return the rendered string
      */
-    Optional<Application> findByCode(String code);
-
-    /**
-     * Retrieves all applications that require deployment to OPA.
-     *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
-     */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+    String render(String template, Map<String, Object> context);
 }

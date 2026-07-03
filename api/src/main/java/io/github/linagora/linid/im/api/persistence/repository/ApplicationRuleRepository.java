@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -71,4 +72,14 @@ public interface ApplicationRuleRepository extends JpaRepository<ApplicationRule
      * @return {@code true} if a matching rule exists, {@code false} otherwise
      */
     boolean existsByApplicationIdAndCodeAndIdNot(UUID applicationId, String code, UUID id);
+
+    /**
+     * Retrieves all active (not disabled) rules of the given application, ordered by ascending priority.
+     *
+     * <p>Used to build the application OPA policy from the concatenation of its active rule fragments.</p>
+     *
+     * @param applicationId the identifier of the owning application
+     * @return the ordered list of active rules
+     */
+    List<ApplicationRule> findByApplicationIdAndDisabledFalseOrderByPriorityAsc(UUID applicationId);
 }

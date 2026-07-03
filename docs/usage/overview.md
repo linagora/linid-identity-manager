@@ -64,11 +64,16 @@ Applications represent the systems connected to LinId.
 * Register new applications
 * Configure authentication (OIDC)
 * Define required claims
-* Manage application-specific roles
+* Manage the roles exposed by each application
+* Write **access rules** (OPA/Rego) that decide, per application, which roles a user is granted and whether access is
+  allowed
 
 ### Why it matters:
 
-Each application has its own access model and requirements.
+Each application has its own access model and requirements. Access rules let you express that model declaratively: LinId
+compiles the active rules of an application into a single OPA policy and deploys it automatically.
+
+> See: [docs/advanced/policies.md](../advanced/policies.md) to learn how to write OPA/Rego rules.
 
 ---
 

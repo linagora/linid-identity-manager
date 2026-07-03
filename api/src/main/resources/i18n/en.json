@@ -48,5 +48,7 @@
   "error.application.code.already_exists": "Application already exists for code '{code}'",
   "error.application_rule.not_found": "Application rule not found: {id}",
   "error.application_rule.code.already_exists": "Application rule already exists for code '{code}'",
-  "error.application_rule.priority.already_exists": "Application rule already exists for priority '{priority}'"
+  "error.application_rule.priority.already_exists": "Application rule already exists for priority '{priority}'",
+  "error.opa.template.not_readable": "Unable to read the OPA policy template (location: {location})",
+  "error.opa.policy.publish_failed": "Unable to publish the OPA policy to the OPA server (policyId: {policyId})"
 }

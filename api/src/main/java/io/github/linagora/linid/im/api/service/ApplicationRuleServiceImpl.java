@@ -55,7 +55,8 @@ import java.util.UUID;
  *
  * <p>Enforces the existence of the owning application and the uniqueness of the rule {@code code} within
  * that application. The {@code scriptChecksum} is computed from the {@code script}; rules are always
- * created disabled.</p>
+ * created disabled. Regenerating the owning application OPA policy after a rule change is orchestrated by the
+ * {@code ApplicationRuleController}, not by this service.</p>
  */
 @Service
 @RequiredArgsConstructor

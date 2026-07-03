@@ -34,6 +34,7 @@ import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
@@ -75,6 +76,21 @@ public class ApplicationServiceImpl implements ApplicationService {
      * Mapper used to convert application entities and DTOs.
      */
     private final ApplicationMapper mapper;
+
+    /**
+     * Repository used to load the active rules of an application.
+     */
+    private final ApplicationRuleRepository applicationRuleRepository;
+
+    /**
+     * Service generating the OPA policy script from the active rules.
+     */
+    private final OpaService opaService;
+
+    /**
+     * Service computing the script checksum.
+     */
+    private final ChecksumService checksumService;
 
     @Override
     public Application create(final UserPrincipal userPrincipal, final ApplicationRecord application) {
@@ -168,5 +184,31 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         applicationRepository.deleteById(id);
+    }
+
+    @Override
+    public void regeneratePolicy(final UUID applicationId) {
+        var application = applicationRepository.findById(applicationId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.application.not_found", Map.of("id", applicationId.toString()))
+            ));
+
+        var activeRules = applicationRuleRepository
+            .findByApplicationIdAndDisabledFalseOrderByPriorityAsc(applicationId);
+
+        var script = opaService.generate(application, activeRules);
+        var checksum = checksumService.compute(script);
+
+        if (checksum.equals(application.getScriptChecksum())) {
+            // The generated script is unchanged: skip the update to avoid resetting the deployment status.
+            return;
+        }
+
+        application.setScript(script);
+        application.setScriptChecksum(checksum);
+        application.setDeployedAt(null);
+
+        applicationRepository.save(application);
     }
 }

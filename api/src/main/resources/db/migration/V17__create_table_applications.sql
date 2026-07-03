@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS applications
     claims_template TEXT         NOT NULL,
     script          TEXT,
     script_checksum TEXT,
-    deployed_at     DATE,
+    deployed_at     TIMESTAMPTZ,
     configuration   JSONB,
     roles           JSONB,
     created_by      UUID         NOT NULL,
@@ -35,7 +35,7 @@ COMMENT ON COLUMN applications.type IS 'Type of the application.';
 COMMENT ON COLUMN applications.claims_template IS 'Template used to generate the claims exposed to the application.';
 COMMENT ON COLUMN applications.script IS 'Optional OPA Rego policy script stored to compute the access rights of the application.';
 COMMENT ON COLUMN applications.script_checksum IS 'Deterministic hash (e.g. SHA-256) computed from the script. Used to detect changes to the script. NULL when no script is defined.';
-COMMENT ON COLUMN applications.deployed_at IS 'Optional date when the application script was deployed on OPA.';
+COMMENT ON COLUMN applications.deployed_at IS 'Optional date and time when the application script was deployed on OPA. Stored in UTC (TIMESTAMPTZ). NULL when the application has not yet been deployed or requires redeployment.';
 COMMENT ON COLUMN applications.configuration IS 'JSONB column storing the application-specific configuration.';
 COMMENT ON COLUMN applications.roles IS 'JSONB array of strings storing the application roles.';
 COMMENT ON COLUMN applications.created_by IS 'Identifier of the creator of this record (user, service, or system).';

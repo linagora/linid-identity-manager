@@ -34,7 +34,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -124,11 +124,12 @@ public class Application extends AbstractEntity {
     private String scriptChecksum;
 
     /**
-     * Optional date when the application script was deployed on OPA.
+     * Optional date and time when the application script was deployed on OPA. {@code null} when the
+     * application has not yet been deployed or requires redeployment.
      */
     @Column(name = "deployed_at")
     @FilterType(type = Date.class)
-    private LocalDate deployedAt;
+    private OffsetDateTime deployedAt;
 
     /**
      * JSONB configuration of the application.

@@ -44,7 +44,8 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -159,7 +160,7 @@ class ApplicationServiceImplTest {
             .code("old-code")
             .script("existing-script")
             .scriptChecksum("existing-checksum")
-            .deployedAt(LocalDate.of(2026, 1, 1))
+            .deployedAt(OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC))
             .configuration("existing-config")
             .build();
         when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
@@ -186,7 +187,7 @@ class ApplicationServiceImplTest {
         // and must be left untouched.
         assertEquals("existing-script", saved.getScript());
         assertEquals("existing-checksum", saved.getScriptChecksum());
-        assertEquals(LocalDate.of(2026, 1, 1), saved.getDeployedAt());
+        assertEquals(OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), saved.getDeployedAt());
         assertEquals("existing-config", saved.getConfiguration());
     }
 

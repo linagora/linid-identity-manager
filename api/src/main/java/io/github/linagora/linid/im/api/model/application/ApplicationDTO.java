@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.api.model.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -83,10 +82,11 @@ public class ApplicationDTO {
     private String claimsTemplate;
 
     /**
-     * Date when the application script was deployed on OPA.
+     * Date and time when the application script was deployed on OPA.
      */
-    @Schema(description = "Date when the application script was deployed on OPA", example = "2026-06-29")
-    private LocalDate deployedAt;
+    @Schema(description = "Date and time when the application script was deployed on OPA",
+        example = "2026-06-29T10:15:30+00:00")
+    private OffsetDateTime deployedAt;
 
     /**
      * JSON configuration of the application.

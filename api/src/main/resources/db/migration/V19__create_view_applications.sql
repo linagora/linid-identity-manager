@@ -28,7 +28,7 @@ COMMENT ON COLUMN applications_view.type IS 'Type of the application.';
 COMMENT ON COLUMN applications_view.claims_template IS 'Template used to generate the claims exposed to the application.';
 COMMENT ON COLUMN applications_view.script IS 'Optional OPA Rego policy script stored to compute the access rights of the application.';
 COMMENT ON COLUMN applications_view.script_checksum IS 'Deterministic hash computed from the script. NULL when no script is defined.';
-COMMENT ON COLUMN applications_view.deployed_at IS 'Optional date when the application script was deployed on OPA.';
+COMMENT ON COLUMN applications_view.deployed_at IS 'Optional date and time when the application script was deployed on OPA (UTC). NULL when the application has not yet been deployed or requires redeployment.';
 COMMENT ON COLUMN applications_view.configuration IS 'JSONB column storing the application-specific configuration.';
 COMMENT ON COLUMN applications_view.roles IS 'JSONB array of strings storing the application roles.';
 COMMENT ON COLUMN applications_view.created_by IS 'Full name ("firstname lastname") of the account that created this record. Resolved via LEFT OUTER JOIN on accounts.act_id; NULL if the referenced account no longer exists.';

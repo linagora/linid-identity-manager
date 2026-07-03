@@ -14,7 +14,7 @@ It provides a functional overview of the main workflows.
 Using LinId generally follows this flow:
 
 1. Define your organizational structure (OU)
-2. Create users and assign them to Organizational Units
+2. Assign users to Organizational Units
 3. Register applications
 4. Define application roles
 5. Configure authentication (OIDC)
@@ -29,7 +29,7 @@ Users are the core entities of the platform.
 
 ### What you can do:
 
-* Create and edit users
+* Edit users
 * Assign users to Organizational Units
 * View user attributes and identity data
 

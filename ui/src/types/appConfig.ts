@@ -74,12 +74,6 @@ export interface AppConfig {
   // ─── Accounts ───────────────────────────────────────────────────────────────
 
   /**
-   * Ordered list of field definitions rendered in the account creation form. Each field follows the
-   * `LinidAttributeConfiguration` shape consumed by the `EntityAttribute*` field components.
-   */
-  accountCreationFields: LinidAttributeConfiguration[];
-
-  /**
    * Ordered list of account attribute keys displayed on the account details page. Only keys listed here appear in the
    * details card; the order is preserved.
    */

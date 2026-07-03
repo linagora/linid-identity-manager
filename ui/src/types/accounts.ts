@@ -29,26 +29,6 @@ import type { Period } from 'src/types/common';
 /** Computed account lifecycle status returned by the backend. */
 export type AccountStatusEnum = 'ACTIVE' | 'SUSPENDED' | 'INACTIVE';
 
-/**
- * Writable fields of an account, sent to the backend when creating an account. Distinct from {@link AccountDTO}: a
- * record carries only client-provided values, with no server-managed metadata, and may grow write-only fields that
- * never appear in the DTO.
- */
-export interface AccountRecord {
-  /** External business identifier. */
-  externalId: string;
-  /** User last name. */
-  lastname: string;
-  /** User first name. */
-  firstname: string;
-  /** User email address. */
-  email: string;
-  /** Validity period of the account, with start and end dates. */
-  validityPeriod: Period;
-  /** Organizational unit uuid to which the account belongs. */
-  organizationalUnit: string;
-}
-
 /** Raw account shape returned by the API. */
 export interface AccountDTO {
   /** Unique account identifier. */
@@ -200,25 +180,6 @@ export interface AccountReactivationRecord extends Record<string, unknown> {
 export interface AccountValidityRecord extends Record<string, unknown> {
   /** Timestamp at which the account becomes valid (validity period start). */
   validityStart: string;
-}
-
-/**
- * Shape of the account form used for creation and edition. Differs from {@link AccountRecord} as it carries flat keys
- * for nested fields, which is more convenient for form input bindings.
- */
-export interface AccountForm {
-  /** External business identifier. */
-  externalId: string;
-  /** User last name. */
-  lastname: string;
-  /** User first name. */
-  firstname: string;
-  /** User email address. */
-  email: string;
-  /** Start date of the account's validity period. */
-  validityPeriodStart: string;
-  /** Organizational unit name to which the account belongs. */
-  organizationalUnit: string;
 }
 
 /**

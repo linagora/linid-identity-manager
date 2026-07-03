@@ -29,10 +29,8 @@ import type {
   Account,
   AccountDeactivationRecord,
   AccountDTO,
-  AccountForm,
   AccountQueryFilterDTO,
   AccountReactivationRecord,
-  AccountRecord,
   AccountStatus,
   AccountStatusForm,
   AccountSuspensionRecord,
@@ -120,30 +118,6 @@ export function useAccountMapper() {
       createdBy: toLikeFilter(advancedSearchFilters['createdBy']),
       insertDate: toDateFilter(advancedSearchFilters['insertDate']),
       dateFormat: SPRING_QUERY_DATE_FORMAT,
-    };
-  };
-
-  /**
-   * Transforms an AccountForm into an AccountRecord, nesting the validity period fields into a single validityPeriod
-   * object.
-   *
-   * @param account AccountForm containing the flat fields from the account creation form.
-   * @param organizationalUnit The organizational unit to which the account belongs.
-   * @returns AccountRecord with the validity period properly structured for API consumption.
-   */
-  const toAccountRecord = (
-    account: AccountForm,
-    organizationalUnit: string
-  ): AccountRecord => {
-    const { validityPeriodStart, ...baseFields } = account;
-
-    return {
-      ...baseFields,
-      validityPeriod: {
-        start: toDateISO(validityPeriodStart) || null,
-        end: null,
-      },
-      organizationalUnit,
     };
   };
 
@@ -247,7 +221,6 @@ export function useAccountMapper() {
     toAccountStatus,
     toAccountList,
     toAccountQueryFilterDTO,
-    toAccountRecord,
     toAccountSuspensionRecord,
     toAccountDeactivationRecord,
     toAccountReactivationRecord,

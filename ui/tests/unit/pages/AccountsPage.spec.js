@@ -314,22 +314,6 @@ describe('Test component: AccountsPage', () => {
     });
   });
 
-  describe('Test function: goToCreate', () => {
-    it('should navigate to the creation page with selected organizational unit and node', () => {
-      mockSelectedOrganizationalUnitId.value = 'ou-uuid';
-      mockRoute.query = { node: 'node-123' };
-      wrapper.vm.goToCreate();
-
-      expect(mockRouter.push).toHaveBeenCalledWith({
-        path: '/accounts/create',
-        query: {
-          ou: 'ou-uuid',
-          node: 'node-123',
-        },
-      });
-    });
-  });
-
   describe('Test function: goToAccountDetails', () => {
     it('should navigate to the account detail page', () => {
       wrapper.vm.goToAccountDetails({ id: 'abc-123' });

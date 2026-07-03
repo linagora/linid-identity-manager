@@ -20,7 +20,7 @@ Users represent individual identities within your organization.
 
 They can:
 
-* Be created and managed centrally
+* Be managed centrally
 * Be assigned to organizational units
 * Receive permissions dynamically
 
@@ -102,7 +102,7 @@ With LinId, you can:
 
 At a high level:
 
-1. Users are created and assigned to Organizational Units
+1. Users are assigned to Organizational Units
 2. Applications define roles and required claims
 3. OPA policies determine which roles users receive
 4. Authentication is handled via OIDC

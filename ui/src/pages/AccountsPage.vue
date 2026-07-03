@@ -36,26 +36,6 @@
       >
         {{ t('title') }}
       </h1>
-      <div class="accounts-page--actions">
-        <component
-          :is="buttonsCard"
-          v-if="buttonsCard"
-          :ui-namespace="uiNamespace"
-          :i18n-scope="i18nScope"
-          :show-confirm-button="false"
-          :show-cancel-button="false"
-        >
-          <template #append-buttons>
-            <q-btn
-              v-bind="uiProps.createButton"
-              :label="t('ButtonsCard.create')"
-              class="buttons-card--create-button"
-              data-cy="button_create"
-              @click="goToCreate"
-            />
-          </template>
-        </component>
-      </div>
     </div>
     <component
       :is="advancedSearchComponent"
@@ -150,7 +130,6 @@ const advancedSearchComponent = loadAsyncComponent(
   'catalogUI/AdvancedSearchCard'
 );
 const tableComponent = loadAsyncComponent('catalogUI/GenericEntityTable');
-const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 const filters = ref<Record<string, unknown>>({});
 
 const accounts = ref<Account[]>([]);
@@ -160,7 +139,6 @@ let listRequestController: AbortController | null = null;
 
 const { ui } = useUiDesign();
 const uiProps = computed(() => ({
-  createButton: ui<LinidQBtnProps>(`${uiNamespace}.create-button`, 'q-btn'),
   seeButton: ui<LinidQBtnProps>(
     `${uiNamespace}.buttons-card.see-button`,
     'q-btn'
@@ -237,21 +215,6 @@ async function loadData(id: string): Promise<void> {
       isLoading.value = false;
     }
   }
-}
-
-/**
- * Navigates to the account creation page.
- *
- * @returns A promise resolved once navigation finishes.
- */
-function goToCreate() {
-  return router.push({
-    path: `${route.path}/create`,
-    query: {
-      ou: selectedOrganizationalUnitId.value,
-      node: route.query.node as string,
-    },
-  });
 }
 
 /**

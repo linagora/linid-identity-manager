@@ -38,7 +38,6 @@ Once logged in, here are the key areas you should explore:
 
 ### 👤 User Management
 
-* Create a new user
 * Assign the user to an Organizational Unit
 * View user details and attributes
 
@@ -85,11 +84,10 @@ Once logged in, here are the key areas you should explore:
 
 Try the following workflow:
 
-1. Create a new user
-2. Assign the user to an Organizational Unit
-3. Select an application
-4. Check which roles are assigned
-5. Modify or simulate policy behavior (if available)
+1. Assign the user to an Organizational Unit
+2. Select an application
+3. Check which roles are assigned
+4. Modify or simulate policy behavior (if available)
 
 This will give you a good understanding of how LinId manages access.
 

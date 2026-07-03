@@ -24,41 +24,45 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Spring Data JPA repository for {@link Application}.
+ * Deploys a single application policy to OPA within its own transaction.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * <p>Extracted into a dedicated bean so that {@link Transactional} with {@link Propagation#REQUIRES_NEW} is honored
+ * (it would be ignored on a self-invoked private method). Each application is therefore committed independently: a
+ * failure on one application never rolls back the {@code deployedAt} update of another that was already deployed.</p>
  */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
+@Component
+@RequiredArgsConstructor
+public class OpaApplicationDeployer {
 
     /**
-     * Retrieves an {@link Application} associated with the given code.
-     *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
+     * Repository used to persist the application deployment status.
      */
-    Optional<Application> findByCode(String code);
+    private final ApplicationRepository applicationRepository;
 
     /**
-     * Retrieves all applications that require deployment to OPA.
-     *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
+     * Service publishing the policy to the OPA server.
      */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+    private final OpaService opaService;
+
+    /**
+     * Publishes the application policy to OPA and records its deployment date, in a dedicated transaction.
+     *
+     * @param application the application to deploy
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deploy(final Application application) {
+        var deployedDate = opaService.publish(application);
+        application.setDeployedAt(deployedDate);
+        applicationRepository.save(application);
+    }
 }

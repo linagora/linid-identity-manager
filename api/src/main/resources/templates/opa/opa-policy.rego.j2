@@ -1,0 +1,36 @@
+package authz["{{ application.code }}"]
+
+import rego.v1
+
+# Shared state contributed to by rule fragments through partial set rules.
+# Fragments must only "contains" values into these sets; they must never reassign them.
+signals contains signal if {
+    some signal in []
+}
+
+roles contains role if {
+    some role in []
+}
+
+{% for fragment in fragments %}
+{{ fragment }}
+
+{% endfor %}
+# Fixed resolution block owned by the template. Fragments must not redefine these rules.
+default final_allow := false
+
+final_allow if {
+    not "force_disallow" in signals
+    "force_allow" in signals
+}
+
+final_allow if {
+    not "force_disallow" in signals
+    not "force_allow" in signals
+    "allow" in signals
+}
+
+result := {
+    "allow": final_allow,
+    "roles": roles
+}

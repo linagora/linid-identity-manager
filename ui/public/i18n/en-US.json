@@ -384,9 +384,6 @@
     "title": "Accounts",
     "detailButton": "Details",
     "noAccount": "There are no accounts to display.",
-    "ButtonsCard": {
-      "create": "Create"
-    },
     "AdvancedSearchCard": {
       "fields": {
         "firstname": {
@@ -427,61 +424,6 @@
     "errors": {
       "notFound": "Accounts not found",
       "generic": "Unable to load the accounts. Please try again later."
-    }
-  },
-  "AccountCreationPage": {
-    "title": "Create a new account",
-    "fields": {
-      "organizationalUnit": {
-        "label": "Organizational unit",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "externalId": {
-        "label": "External ID",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "lastname": {
-        "label": "Last name",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "firstname": {
-        "label": "First name",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "email": {
-        "label": "Email",
-        "validation": {
-          "required": "This field is required.",
-          "email": "Invalid email format."
-        }
-      },
-      "validityPeriodStart": {
-        "label": "Start date of validity",
-        "close": "Close",
-        "validation": {
-          "required": "This field is required.",
-          "invalidDate": "Invalid date format. Expected format is {format}.",
-          "fromDate": "The date cannot be before today."
-        }
-      }
-    },
-    "ButtonsCard": {
-      "cancel": "Cancel",
-      "confirm": "Create",
-      "confirmLoading": "Creating..."
-    },
-    "success": "Account successfully created",
-    "errors": {
-      "validation": "Invalid data. Please check the form.",
-      "generic": "Unable to create the account. Please try again later."
     }
   },
   "AccountDetailsPage": {

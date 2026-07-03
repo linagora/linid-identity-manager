@@ -25,7 +25,7 @@ LinId helps organizations:
 
 * 👤 **User Management**
 
-    * Create and manage user accounts
+    * Manage user accounts
     * Assign users to Organizational Units (OU)
     * Manage account status (Active, Inactive, Suspended)
 

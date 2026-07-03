@@ -207,68 +207,6 @@ describe('Test mapper: useAccountMapper', () => {
     });
   });
 
-  describe('Test function: toAccountRecord', () => {
-    it('should convert validityPeriodStart to ISO format and nest it in validityPeriod', () => {
-      tMock.mockReturnValue('YYYY-MM-DD');
-      const { toAccountRecord } = useAccountMapper();
-
-      const form = {
-        externalId: 'ext-1',
-        email: 'john@example.com',
-        firstname: 'John',
-        lastname: 'Doe',
-        validityPeriodStart: '2025-07-24',
-      };
-
-      const result = toAccountRecord(form);
-
-      expect(result.validityPeriod).toEqual({
-        start: '2025-07-24T00:00:00.000Z',
-        end: null,
-      });
-      expect(result).not.toHaveProperty('validityPeriodStart');
-    });
-
-    it('should preserve all other fields', () => {
-      tMock.mockReturnValue('YYYY-MM-DD');
-      const { toAccountRecord } = useAccountMapper();
-
-      const form = {
-        externalId: 'ext-1',
-        email: 'john@example.com',
-        firstname: 'John',
-        lastname: 'Doe',
-        validityPeriodStart: '2025-07-24',
-      };
-
-      const result = toAccountRecord(form);
-
-      expect(result.externalId).toBe('ext-1');
-      expect(result.email).toBe('john@example.com');
-      expect(result.firstname).toBe('John');
-      expect(result.lastname).toBe('Doe');
-    });
-
-    it('should set validityPeriod.start to null when validityPeriodStart is empty', () => {
-      const { toAccountRecord } = useAccountMapper();
-
-      const form = {
-        externalId: 'ext-1',
-        email: 'john@example.com',
-        firstname: 'John',
-        lastname: 'Doe',
-        validityPeriodStart: '',
-      };
-
-      const result = toAccountRecord(form);
-
-      expect(result.validityPeriod).toEqual({
-        start: null,
-        end: null,
-      });
-    });
-  });
-
   describe('Test function: toAccountSuspensionRecord', () => {
     it('should map form fields into the suspension record structure', () => {
       const { toAccountSuspensionRecord } = useAccountMapper();

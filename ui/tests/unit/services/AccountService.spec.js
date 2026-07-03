@@ -26,7 +26,6 @@
 
 import { api } from 'boot/axios';
 import {
-  createAccount,
   deactivateAccount,
   getAccountById,
   getAccounts,
@@ -70,7 +69,6 @@ const buildAccountDTO = (overrides = {}) => ({
 describe('Test service: accountService', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset();
-    vi.mocked(api.post).mockReset();
     vi.mocked(api.put).mockReset();
   });
 
@@ -90,32 +88,6 @@ describe('Test service: accountService', () => {
       vi.mocked(api.get).mockRejectedValue(error);
 
       await expect(getAccountById(USER_1_UUID)).rejects.toThrow('boom');
-    });
-  });
-
-  describe('Test function: createAccount', () => {
-    const payload = {
-      externalId: 'external-id',
-      lastname: 'Doe',
-      firstname: 'John',
-      email: 'john.doe@example.com',
-    };
-
-    it('should call valid endpoint with payload and return the raw DTO', async () => {
-      const dto = buildAccountDTO({ id: USER_1_UUID });
-      vi.mocked(api.post).mockResolvedValue({ data: dto });
-
-      const result = await createAccount(payload);
-
-      expect(api.post).toHaveBeenCalledWith('/accounts', payload);
-      expect(result).toEqual(dto);
-    });
-
-    it('should propagate backend errors to the caller', async () => {
-      const error = new Error('boom');
-      vi.mocked(api.post).mockRejectedValue(error);
-
-      await expect(createAccount(payload)).rejects.toThrow('boom');
     });
   });
 

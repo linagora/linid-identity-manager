@@ -24,41 +24,30 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.config;
 
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
 
 /**
- * Spring Data JPA repository for {@link Application}.
+ * Configuration for the OPA integration.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * <p>Defines the {@link RestClient} targeting the OPA server. The client is built explicitly here rather than relying
+ * on the {@code RestClient.Builder} auto-configuration being present in the application context.</p>
  */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
+@Configuration
+public class OpaConfig {
 
     /**
-     * Retrieves an {@link Application} associated with the given code.
+     * Builds the {@link RestClient} targeting the configured OPA server.
      *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
+     * @param serverUrl the OPA server base URL
+     * @return the configured OPA {@link RestClient}
      */
-    Optional<Application> findByCode(String code);
-
-    /**
-     * Retrieves all applications that require deployment to OPA.
-     *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
-     */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+    @Bean
+    public RestClient opaRestClient(@Value("${opa.deployment.server-url}") final String serverUrl) {
+        return RestClient.builder().baseUrl(serverUrl).build();
+    }
 }

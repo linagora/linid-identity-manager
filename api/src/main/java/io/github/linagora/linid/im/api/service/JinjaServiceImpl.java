@@ -24,41 +24,27 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.service;
 
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import com.hubspot.jinjava.Jinjava;
+import java.util.Map;
+import org.springframework.stereotype.Service;
 
 /**
- * Spring Data JPA repository for {@link Application}.
+ * Jinjava implementation of {@link JinjaService}.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * <p>Wraps a single {@link Jinjava} engine instance and renders any template against the provided context.</p>
  */
-public interface ApplicationRepository extends JpaRepository<Application, UUID>,
-    JpaSpecificationExecutor<Application> {
+@Service
+public class JinjaServiceImpl implements JinjaService {
 
     /**
-     * Retrieves an {@link Application} associated with the given code.
-     *
-     * @param code the code used to search for the application
-     * @return an {@link Optional} containing the matching {@link Application} if found,
-     * or {@link Optional#empty()} if no application exists for the given code
+     * The Jinjava engine instance used to render templates.
      */
-    Optional<Application> findByCode(String code);
+    private final Jinjava jinjava = new Jinjava();
 
-    /**
-     * Retrieves all applications that require deployment to OPA.
-     *
-     * <p>An application requires deployment when it has a generated policy script but has not been deployed yet
-     * (or has been reset for redeployment), i.e. {@code deployed_at IS NULL AND script IS NOT NULL}.</p>
-     *
-     * @return the list of applications pending deployment
-     */
-    List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+    @Override
+    public String render(final String template, final Map<String, Object> context) {
+        return jinjava.render(template, context);
+    }
 }

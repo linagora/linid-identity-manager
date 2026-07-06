@@ -40,7 +40,7 @@ import jakarta.validation.constraints.Pattern;
  * <p>The owning user is resolved server-side from the authenticated security context (JWT) and is
  * never part of this payload, which is why no user field appears here.</p>
  *
- * @param key   the user preference key. Must match ^[a-zA-Z]+([-_.][a-zA-Z]+)*$: letters (upper or lower case),
+ * @param key   the user preference key. Must match ^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*$: letters (upper or lower case),
  *              with {@code -}, {@code _} or {@code .} allowed solely as separators between
  *              letters (no leading, trailing or doubled separator). Unique per user.
  * @param value the user preference value, stored as free-form text (no format constraint beyond being
@@ -49,7 +49,7 @@ import jakarta.validation.constraints.Pattern;
 @Schema(description = "Request payload for creating or updating a user preference")
 public record UserPreferenceRecord(
         @NotBlank
-        @Pattern(regexp = "^[a-zA-Z]+([-_.][a-zA-Z]+)*$")
+        @Pattern(regexp = "^[a-zA-Z0-9]+([-_.][a-zA-Z0-9]+)*$")
         @Schema(description = "User preference key", example = "theme")
         String key,
 

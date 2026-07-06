@@ -55,7 +55,6 @@ Feature: Tests API Users Preferences endpoints
     Examples:
       | case          | body                                    |
       | empty key     | { "key": "", "value": "dark" }          |
-      | digit in key  | { "key": "theme1", "value": "dark" }    |
       | space in key  | { "key": "bad key", "value": "dark" }   |
       | dash leading  | { "key": "-theme", "value": "dark" }    |
       | dash trailing | { "key": "theme-", "value": "dark" }    |

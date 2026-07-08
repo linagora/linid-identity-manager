@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,73 +24,17 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
+import { api } from 'boot/axios';
+import type { ApplicationDTO } from 'src/types/applications';
 
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationCallbackPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationLogoutPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/silent-renew',
-    name: 'AuthenticationSilentRenewPage',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationSilentRenewPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/:id',
-        name: 'OrganizationalUnitsPage',
-        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/create',
-        name: 'OrganizationalUnitCreate',
-        component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-      {
-        path: 'applications/:id',
-        name: 'ApplicationDetails',
-        component: () => import('pages/ApplicationDetailsPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Retrieves a single application by its identifier from the backend.
+ *
+ * @param id - The unique identifier of the application.
+ * @returns A promise resolving to the raw application DTO returned by the API.
+ */
+export async function getApplicationById(id: string): Promise<ApplicationDTO> {
+  return api
+    .get<ApplicationDTO>(`/applications/${id}`)
+    .then((response) => response.data);
+}

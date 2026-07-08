@@ -2,7 +2,7 @@ name: linid_integration
 
 services:
   db:
-    image: postgres:18.3-alpine
+    image: postgres:18.4-alpine
     container_name: db
     networks:
       - linid-integration-network
@@ -69,7 +69,7 @@ services:
         condition: service_healthy
 
   init-db:
-    image: postgres:18.3-alpine
+    image: postgres:18.4-alpine
     container_name: init-db
     networks:
       - linid-integration-network
@@ -138,7 +138,7 @@ services:
       - test
 
   auth:
-    image: lemonldapng/lemonldap-ng:2.22.2
+    image: lemonldapng/lemonldap-ng:2.23
     container_name: lemon
     networks:
       - linid-integration-network

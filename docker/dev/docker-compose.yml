@@ -2,7 +2,7 @@ name: linid_dev
 
 services:
   db:
-    image: postgres:18.3-alpine
+    image: postgres:18.4-alpine
     container_name: db
     networks:
       - linid-dev-network
@@ -22,7 +22,7 @@ services:
       retries: 5
 
   auth:
-    image: lemonldapng/lemonldap-ng:2.22.2
+    image: lemonldapng/lemonldap-ng:2.23
     container_name: lemon
     networks:
       - linid-dev-network
@@ -43,7 +43,7 @@ services:
         condition: service_healthy
 
   db-init:
-    image: postgres:18.3-alpine
+    image: postgres:18.4-alpine
     container_name: init-db
     networks:
       - linid-dev-network

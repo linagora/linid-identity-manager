@@ -95,7 +95,6 @@ services:
       - ./resources/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./resources/selfsigned.crt:/etc/nginx/certs/selfsigned.crt:ro
       - ./resources/selfsigned.key:/etc/nginx/certs/selfsigned.key:ro
-      - ./resources/modules.json:/usr/share/nginx/html/modules.json:ro
       - ./resources/remotes.json:/usr/share/nginx/html/remotes.json:ro
       - ./resources/${CONFIG_DIR}/oidc/conf/oidc-config.json:/usr/share/nginx/html/oidc-config.json:ro
     depends_on:

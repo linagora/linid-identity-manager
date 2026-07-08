@@ -18,7 +18,9 @@
     "design/organizational-unit-info-text.json",
     "design/status-badge.json",
     "design/account-banner.json",
-    "design/account-info-text.json"
+    "design/account-info-text.json",
+    "design/accounts-page.json",
+    "design/organizational-units-page.json"
   ],
   "accountCreationFields": [
     {

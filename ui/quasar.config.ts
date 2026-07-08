@@ -93,15 +93,15 @@ export default defineConfig((ctx) => {
             shared: {
               vue: {
                 singleton: true,
-                requiredVersion: '3.5.30',
+                requiredVersion: '3.5.39',
               },
               'vue-router': {
                 singleton: true,
-                requiredVersion: '5.0.3',
+                requiredVersion: '5.1.0',
               },
               quasar: {
                 singleton: true,
-                requiredVersion: '2.18.6',
+                requiredVersion: '2.21.1',
               },
               '@linagora/linid-im-front-corelib': {
                 singleton: true,

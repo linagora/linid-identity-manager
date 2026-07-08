@@ -519,6 +519,17 @@
     "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
     "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
   },
+  "ApplicationDetailsPage": {
+    "title": "{code} - {name}",
+    "subtitle": "{description}",
+    "ButtonsCard": {
+      "cancel": "Back"
+    },
+    "errors": {
+      "notFound": "Application not found",
+      "generic": "Unable to load the application. Please try again later."
+    }
+  },
   "AccountDeactivatedBanner": {
     "content": "This account has been deactivated since {date}.",
     "reactivateImmediateButton": "Immediate reactivation",

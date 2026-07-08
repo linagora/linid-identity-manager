@@ -26,17 +26,14 @@
 
 import {
   fromDot,
-  getI18nInstance,
   merge,
   setI18nInstance,
-  useLinidUiStore,
 } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import { appConfig } from 'boot/config';
 import { Quasar } from 'quasar';
 import type messages from 'src/i18n';
 import { resolveLocale, syncLocale } from 'src/services/I18nSupportService';
-import type { Composer } from 'vue-i18n';
 import { createI18n, type I18n } from 'vue-i18n';
 import { defineBoot } from '#q-app/wrappers';
 
@@ -103,20 +100,4 @@ export default defineBoot(async ({ app }) => {
   } catch {
     // Fallback: keep default English if language pack not found
   }
-
-  // TODO: Should be removed with the issue 192
-  const uiStore = useLinidUiStore();
-  const { t } = getI18nInstance().global as Composer;
-
-  uiStore.addMainNavigationMenuItems({
-    id: 'accounts',
-    label: t('AccountsPage.menuTitle'),
-    path: '/accounts',
-  });
-
-  uiStore.addMainNavigationMenuItems({
-    id: 'organizational-units',
-    label: t('OrganizationalUnitsPage.menuTitle'),
-    path: '/organizational-units',
-  });
 });

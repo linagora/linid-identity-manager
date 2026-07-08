@@ -57,7 +57,7 @@ export default defineBoot(async (boot: BootFileParams): Promise<void> => {
 
   for (const configuration of configurations) {
     const module = await loadRemote<FederatedModule<RemoteModule<unknown>>>(
-      `${configuration.remoteName}/lifecycle`
+      configuration.lifecycleRemote
     );
 
     modules.set(configuration.instanceId, module?.default);

@@ -126,7 +126,7 @@ async function getRoutes(
   config: ModuleHostConfig<unknown>
 ): Promise<LinidRoute[] | null> {
   const routes = await loadRemote<FederatedModule<LinidRoute[]>>(
-    `${config.remoteName}/routes`
+    config.routesRemote
   );
 
   if (!routes?.default || routes.default.length === 0) {
@@ -145,9 +145,7 @@ async function getRoutes(
 async function getI18nMessages(
   config: ModuleHostConfig<unknown>
 ): Promise<object> {
-  const messages = await loadRemote<FederatedModule<object>>(
-    `${config.remoteName}/i18n`
-  );
+  const messages = await loadRemote<FederatedModule<object>>(config.i18nRemote);
 
   if (!messages?.default) {
     return {};
@@ -173,7 +171,9 @@ export function toRouteRecordRaw(
     name: route.name,
     path: getNunjucksEnv().renderString(route.path, { config }),
     component: async () =>
-      (await loadRemote<FederatedModule<Component>>(route.component))!.default,
+      (await loadRemote<FederatedModule<Component>>(
+        getNunjucksEnv().renderString(route.component, { config })
+      ))!.default,
     children:
       route.children?.map((child) => toRouteRecordRaw(child, config)) || [],
     meta: route.meta

@@ -76,31 +76,14 @@ const routes: RouteRecordRaw[] = [
         component: () => import('pages/AccountDetailsPage.vue'),
       },
       {
+        path: 'organizational-units/:id',
+        name: 'OrganizationalUnitsPage',
+        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
+      },
+      {
         path: 'organizational-units/create',
         name: 'OrganizationalUnitCreate',
         component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/accounts',
-    component: () => import('layouts/SplitterLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'AccountsPage',
-        component: () => import('pages/AccountsPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/organizational-units',
-    component: () => import('layouts/SplitterLayout.vue'),
-    children: [
-      {
-        path: '',
-        name: 'OrganizationalUnitsPage',
-        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
       },
     ],
   },

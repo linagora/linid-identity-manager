@@ -130,7 +130,6 @@ import {
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { appConfig } from 'boot/config';
-import { storeToRefs } from 'pinia';
 import { dayjs } from 'src/boot/dayjs';
 import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import OrganizationalUnitSuspendedBanner from 'src/components/banner/OrganizationalUnitSuspendedBanner.vue';
@@ -143,7 +142,6 @@ import {
   reactivateOrganizationalUnit,
   suspendOrganizationalUnit,
 } from 'src/services/OrganizationalUnitService';
-import { useOrganizationalUnitStore } from 'src/stores/useOrganizationalUnitStore';
 import type {
   OrganizationalUnit,
   OrganizationalUnitDTO,
@@ -151,7 +149,7 @@ import type {
   OrganizationalUnitStatusForm,
 } from 'src/types/organizationalUnits';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const pageName = 'OrganizationalUnitDetailsPage';
 const i18nScope = pageName;
@@ -160,6 +158,7 @@ const organizationalUnitLifecycleUiConfiguration =
   appConfig.organizationalUnitLifecycleFields;
 const fieldsOrder = appConfig.organizationalUnitDetailsFieldsOrder;
 
+const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
@@ -171,12 +170,10 @@ const {
   toOrganizationalUnitReactivationRecord,
 } = useOrganizationalUnitMapper();
 
-const store = useOrganizationalUnitStore();
-const { selectedOrganizationalUnitId } = storeToRefs(store);
-
 const organizationalUnit = ref<OrganizationalUnit | null>(null);
 const organizationalUnitStatus = ref<OrganizationalUnitStatus | null>(null);
 const isLoading = ref<boolean>(false);
+const currentId = computed<string>(() => route.params.id as string);
 
 let detailRequestController: AbortController | null = null;
 
@@ -245,14 +242,17 @@ async function loadOrganizationalUnit(id: string): Promise<void> {
   }
 }
 
-watch(selectedOrganizationalUnitId, (id: string) => {
-  void loadOrganizationalUnit(id);
-});
+watch(
+  () => currentId.value,
+  () => {
+    void loadOrganizationalUnit(currentId.value);
+  }
+);
 
 /**
  * Dispatches a lifecycle action key (emitted by the dropdown button) to the matching dialog opening function.
  *
- * @param event - Click event payload emitted by the dropdown button.
+ * @param event - Click event payload emrouteitted by the dropdown button.
  * @param event.key - Dotted lifecycle action key to dispatch, for example "suspension.immediate".
  */
 function onLifecycleActionClick(event: DropdownClickPayload): void {
@@ -283,7 +283,7 @@ function openImmediateSuspensionDialog(): void {
       submitStatus(
         () =>
           suspendOrganizationalUnit(
-            selectedOrganizationalUnitId.value,
+            currentId.value,
             toOrganizationalUnitSuspensionRecord({
               ...formData,
               start: dayjs().add(actionDelay, 'minute').toISOString(),
@@ -305,7 +305,7 @@ function openScheduleSuspensionDialog(): void {
       submitStatus(
         () =>
           suspendOrganizationalUnit(
-            selectedOrganizationalUnitId.value,
+            currentId.value,
             toOrganizationalUnitSuspensionRecord(formData)
           ),
         'success.scheduled'
@@ -327,7 +327,7 @@ function onClearSuspension(): void {
       submitStatus(
         () =>
           reactivateOrganizationalUnit(
-            selectedOrganizationalUnitId.value,
+            currentId.value,
             toOrganizationalUnitReactivationRecord(formData)
           ),
         'success.reactivated'
@@ -358,7 +358,7 @@ function onModifySuspensionEnd(): void {
       submitStatus(
         () =>
           suspendOrganizationalUnit(
-            selectedOrganizationalUnitId.value,
+            currentId.value,
             toOrganizationalUnitSuspensionRecord({
               ...formData,
               start: currentStart,
@@ -399,6 +399,6 @@ async function submitStatus(
 }
 
 onMounted(() => {
-  void loadOrganizationalUnit(selectedOrganizationalUnitId.value);
+  void loadOrganizationalUnit(currentId.value);
 });
 </script>

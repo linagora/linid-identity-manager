@@ -51,12 +51,8 @@ services:
     healthcheck:
       test:
         [
-          "CMD",
-          "wget",
-          "--spider",
-          "-q",
-          "--no-check-certificate",
-          "https://localhost:8443/actuator/health",
+          "CMD-SHELL",
+          "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"
         ]
       interval: 5s
       timeout: 3s

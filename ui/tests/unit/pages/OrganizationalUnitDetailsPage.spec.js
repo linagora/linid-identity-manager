@@ -62,8 +62,16 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   }),
 }));
 
+const mockRoute = {
+  path: `/organizational-units/${OU_ID}`,
+  params: {
+    id: OU_ID,
+  },
+};
+
 vi.mock('vue-router', () => ({
   useRouter: () => mockRouter,
+  useRoute: () => mockRoute,
 }));
 
 vi.mock('axios', () => ({
@@ -268,22 +276,6 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       wrapper.vm.goBack();
 
       expect(mockRouter.push).toHaveBeenCalledWith('/organizational-units');
-    });
-  });
-
-  describe('Test watcher: selectedOrganizationalUnitId', () => {
-    it('should reload the OU when the tree selection changes', async () => {
-      wrapper = shallowMount(OrganizationalUnitDetailsPage);
-      await flushPromises();
-      vi.clearAllMocks();
-
-      mockSelectedOrganizationalUnitId.value = 'another-ou-id';
-      await flushPromises();
-
-      expect(getOrganizationalUnitById).toHaveBeenCalledWith(
-        'another-ou-id',
-        expect.any(AbortSignal)
-      );
     });
   });
 

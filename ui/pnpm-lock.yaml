@@ -23,6 +23,9 @@ importers:
       dayjs:
         specifier: 1.11.21
         version: 1.11.21
+      interactjs:
+        specifier: 1.10.27
+        version: 1.10.27
       nunjucks:
         specifier: 3.2.4
         version: 3.2.4(chokidar@3.6.0)

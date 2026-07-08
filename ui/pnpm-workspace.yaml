@@ -1,0 +1,24 @@
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - '@module-federation/bridge-react-webpack-plugin@2.7.0'
+  - '@module-federation/cli@2.7.0'
+  - '@module-federation/dts-plugin@2.7.0'
+  - '@module-federation/enhanced@2.7.0'
+  - '@module-federation/error-codes@2.7.0'
+  - '@module-federation/inject-external-runtime-core-plugin@2.7.0'
+  - '@module-federation/managers@2.7.0'
+  - '@module-federation/manifest@2.7.0'
+  - '@module-federation/rspack@2.7.0'
+  - '@module-federation/runtime-core@2.7.0'
+  - '@module-federation/runtime-tools@2.7.0'
+  - '@module-federation/runtime@2.7.0'
+  - '@module-federation/sdk@2.7.0'
+  - '@module-federation/third-party-dts-extractor@2.7.0'
+  - '@module-federation/vite@1.16.13'
+  - '@module-federation/webpack-bundler-runtime@2.7.0'
+  - '@types/node@26.1.1'
+  - '@vue/language-core@3.3.7'
+  - vue-tsc@3.3.7
+  - '@linagora/linid-im-front-corelib@0.0.82'

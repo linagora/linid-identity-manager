@@ -80,9 +80,9 @@ export async function getOrganizationalUnits(
   pagination: Pagination
 ): Promise<Page<OrganizationalUnitDTO>> {
   return api
-    .get<
-      Page<OrganizationalUnitDTO>
-    >(`/organizational-units`, { params: { ...filters, ...pagination } })
+    .get<Page<OrganizationalUnitDTO>>(`/organizational-units`, {
+      params: { ...filters, ...pagination },
+    })
     .then(({ data }) => data);
 }
 
@@ -148,9 +148,10 @@ export async function getAccountsByOrganizationalUnitId(
   signal?: AbortSignal
 ): Promise<Page<AccountDTO>> {
   return api
-    .get<
-      Page<AccountDTO>
-    >(`/organizational-units/${id}/accounts`, { params: { ...filters, ...pagination }, signal })
+    .get<Page<AccountDTO>>(`/organizational-units/${id}/accounts`, {
+      params: { ...filters, ...pagination },
+      signal,
+    })
     .then(({ data }) => data);
 }
 

@@ -59,9 +59,9 @@ export async function getAccounts(
   pagination: Pagination
 ): Promise<Page<AccountDTO>> {
   return api
-    .get<
-      Page<AccountDTO>
-    >(`/accounts`, { params: { ...filters, ...pagination } })
+    .get<Page<AccountDTO>>(`/accounts`, {
+      params: { ...filters, ...pagination },
+    })
     .then(({ data }) => data);
 }
 

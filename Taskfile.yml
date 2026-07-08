@@ -291,9 +291,11 @@ tasks:
     deps: [setup:test]
     dir: tests/e2e
     dotenv: ["../../docker/e2e/local.env"]
+    vars:
+      SPEC: '{{.SPEC | default ""}}'
     cmds:
       - task: start:e2e
-      - npm run start
+      - cmd: '{{if .SPEC}}npx cypress run --spec "{{.SPEC}}"{{else}}npm run start{{end}}'
 
   start:test:ui:
     desc: Open Cypress UI for E2E testing locally

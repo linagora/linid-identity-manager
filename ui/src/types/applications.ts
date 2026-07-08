@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,73 +24,37 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
-import type { Component } from 'vue';
-import type { RouteRecordRaw } from 'vue-router';
-
-const routes: RouteRecordRaw[] = [
-  {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationCallbackPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/logout',
-    name: 'AuthenticationLogoutCallback',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationLogoutPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/silent-renew',
-    name: 'AuthenticationSilentRenewPage',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationSilentRenewPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/',
-    component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
-        .default,
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      {
-        path: 'accounts/:id',
-        name: 'AccountDetails',
-        component: () => import('pages/AccountDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/:id',
-        name: 'OrganizationalUnitsPage',
-        component: () => import('pages/OrganizationalUnitDetailsPage.vue'),
-      },
-      {
-        path: 'organizational-units/create',
-        name: 'OrganizationalUnitCreate',
-        component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-      {
-        path: 'applications/:id',
-        name: 'ApplicationDetails',
-        component: () => import('pages/ApplicationDetailsPage.vue'),
-      },
-    ],
-  },
-];
-export default routes;
+/**
+ * Raw application data transfer object as returned by `GET /applications/{id}`.
+ *
+ * The fields mirror the backend application view, where `createdBy` and `updatedBy` are resolved to human-readable full
+ * names.
+ */
+export interface ApplicationDTO {
+  /** Unique application identifier. */
+  id: string;
+  /** Functional code uniquely identifying the application. */
+  code: string;
+  /** Human-readable application name. */
+  name: string;
+  /** Free-text description of the application, when provided. */
+  description?: string;
+  /** Application protocol type, for example "OIDC". */
+  type: string;
+  /** Template used to build the token claims for the application. */
+  claimsTemplate: string;
+  /** ISO 8601 date-time when the application policy was last deployed, or null if never deployed. */
+  deployedAt: string | null;
+  /** Application configuration serialized as a JSON string. */
+  configuration: string;
+  /** Codes of the roles exposed by the application. */
+  roles: string[];
+  /** Full name of the user who created the application. */
+  createdBy: string;
+  /** Full name of the user who last updated the application. */
+  updatedBy: string;
+  /** Application creation timestamp in ISO 8601 / RFC 3339 UTC format. */
+  insertDate: string;
+  /** Application last update timestamp in ISO 8601 / RFC 3339 UTC format. */
+  updateDate: string;
+}

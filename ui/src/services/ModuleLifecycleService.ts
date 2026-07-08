@@ -288,8 +288,6 @@ export async function configure(
   if (i18nMessages) {
     const i18n = getI18nInstance();
 
-    // @ts-expect-error vue-i18n types expose `global.messages` as `ComputedRef | object`.
-    // At runtime this is always a ComputedRef, but TypeScript cannot infer it safely.
     Object.keys(i18n.global.messages.value).forEach((lang: string) => {
       const messages = merge(
         // @ts-expect-error `i18nMessages` is a dynamically loaded object indexed by locale.

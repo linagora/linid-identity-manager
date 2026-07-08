@@ -28,6 +28,326 @@
     "links": "<ul class=\"q-pl-md\"><li>Code source disponible sur <a href=\"https://github.com/linagora/linid-identity-manager\" target=\"_blank\" rel=\"noopener\">GitHub</a></li><li>Si vous trouvez un bug, merci de le signaler <a href=\"https://github.com/linagora/linid-identity-manager/issues/new?template=bug_report.yml\" target=\"_blank\" rel=\"noopener\">ici</a>.</li></ul>",
     "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>Un projet de</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
   },
+  "moduleAccountsPage": {
+    "NavigationMenu": {
+      "label": "Comptes"
+    },
+    "RemoveFavoriteNotifyMessage": "Le favoris '{name}' a été supprimé.",
+    "CreateFavoriteNotifyMessage": "Le favoris '{name}' a été créé.",
+    "OverrideFavoriteNotifyMessage": "Le favoris  '{name}' a été remplacé.",
+    "seeButton": "Voir",
+    "columns": {
+      "firstname": "Prénom",
+      "lastname": "Nom de famille",
+      "email": "Email",
+      "status": "Statut",
+      "createdBy": "Créé par",
+      "insertDate": "Date de création",
+      "actions": "Actions"
+    },
+    "error": "Erreur pendant la requête",
+    "GenericEntityTable": {
+      "noData": "Aucune donnée disponible",
+      "rowsPerPage": "Éléments par page:",
+      "paginationLabel": "{start}-{end} sur {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Supprimer un favoris?",
+      "content": "Confirmer la suppression du favoris \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "confirmLoading": "Mise à jour..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Remplacer un favoris?",
+      "content": "Selectionner un favoris pour le remplacer par la recherche actuelle.",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Remplacer",
+        "confirmLoading": "Remplacement..."
+      },
+      "fields": {
+        "favorite": {
+          "label": "Favoris"
+        }
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Créer un favoris?",
+      "content": "Créer un favoris à partir de la recherche actuelle.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favoris",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Créer",
+        "confirmLoading": "Création..."
+      }
+    },
+    "LinidSmartFilter": {
+      "label": "Filtre(s) de recherche",
+      "hint": "",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "firstname": {
+          "type": "Prénom",
+          "separator": "ou"
+        },
+        "lastname": {
+          "type": "Nom de famille",
+          "separator": "ou"
+        },
+        "email": {
+          "type": "Email",
+          "separator": "ou"
+        },
+        "status": {
+          "type": "Statut",
+          "separator": "ou"
+        },
+        "createdBy": {
+          "type": "Créé par",
+          "separator": "ou"
+        },
+        "insertDate": {
+          "type": "Date de création",
+          "separator": "ou"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filtrer par:",
+        "columnFilter": {
+          "firstname": "Prénom",
+          "lastname": "Nom de famille",
+          "email": "Email",
+          "status": "Statut",
+          "createdBy": "Créé par",
+          "insertDate": "Date de création"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favoris",
+        "noData": "Aucun favoris disponible",
+        "createFavorite": "Créer un favoris",
+        "overrideFavorite": "Remplacer un favoris",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filtrage par texte",
+        "inputHint": "Entrer un texte à rechercher",
+        "negateLabel": "Négation",
+        "searchButton": "Rechercher",
+        "operators": {
+          "contains": "Contient",
+          "startsWith": "Commence par",
+          "endsWith": "Finit par",
+          "equals": "Strictement égale à",
+          "notContains": "Ne contient pas",
+          "notStartsWith": "Ne commence pas par",
+          "notEndsWith": "Ne finit pas par",
+          "notEquals": "Strictement différent de"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Rechercher"
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filtrage par date",
+        "inputHint": "Entrer/sélectionner une date à rechercher",
+        "negateLabel": "Négation",
+        "close": "Fermer",
+        "searchButton": "Rechercher",
+        "operators": {
+          "inferior": "Inférieure à",
+          "superior": "Supérieure à",
+          "equals": "Strictement égale à",
+          "notInferior": "N'est pas inférieure à",
+          "notSuperior": "N'est pas supérieure à",
+          "notEquals": "N'est pas strictement égale à"
+        },
+        "validation": {
+          "invalidDate": "Date incorrecte. Format attendu: {format}"
+        }
+      }
+    }
+  },
+  "moduleOrganizationalUnitsPage": {
+    "NavigationMenu": {
+      "label": "Unité organisationnelle"
+    },
+    "ButtonsCard": {
+      "create": "Créer"
+    },
+    "RemoveFavoriteNotifyMessage": "Le favoris '{name}' a été supprimé.",
+    "CreateFavoriteNotifyMessage": "Le favoris '{name}' a été créé.",
+    "OverrideFavoriteNotifyMessage": "Le favoris  '{name}' a été remplacé.",
+    "seeButton": "Voir",
+    "columns": {
+      "name": "Nom",
+      "type": "Type",
+      "createdBy": "Créé par",
+      "insertDate": "Date de création",
+      "actions": "Actions"
+    },
+    "error": "Erreur pendant la requête",
+    "GenericEntityTable": {
+      "noData": "Aucune donnée disponible",
+      "rowsPerPage": "Éléments par page:",
+      "paginationLabel": "{start}-{end} sur {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Supprimer un favoris?",
+      "content": "Confirmer la suppression du favoris \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "confirmLoading": "Mise à jour..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Remplacer un favoris?",
+      "content": "Selectionner un favoris pour le remplacer par la recherche actuelle.",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Remplacer",
+        "confirmLoading": "Remplacement..."
+      },
+      "fields": {
+        "favorite": {
+          "label": "Favoris"
+        }
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Créer un favoris?",
+      "content": "Créer un favoris à partir de la recherche actuelle.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favoris",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Créer",
+        "confirmLoading": "Creation..."
+      }
+    },
+    "LinidSmartFilter": {
+      "label": "Filtre(s) de recherche",
+      "hint": "",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "name": {
+          "type": "Nom",
+          "separator": "ou"
+        },
+        "type": {
+          "type": "Type",
+          "separator": "ou"
+        },
+        "createdBy": {
+          "type": "Créé par",
+          "separator": "ou"
+        },
+        "status": {
+          "type": "Statut",
+          "separator": "ou"
+        },
+        "insertDate": {
+          "type": "Date de création",
+          "separator": "ou"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filtrer par:",
+        "columnFilter": {
+          "name": "Nom",
+          "type": "Type",
+          "parents": "Unité organisationnelle",
+          "createdBy": "Créé par",
+          "insertDate": "Date de création"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favoris",
+        "noData": "Aucun favoris disponible",
+        "createFavorite": "Créer un favoris",
+        "overrideFavorite": "Remplacer un favoris",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filtrage par texte",
+        "inputHint": "Entrer un texte à rechercher",
+        "negateLabel": "Négation",
+        "searchButton": "Rechercher",
+        "operators": {
+          "contains": "Contient",
+          "startsWith": "Commence par",
+          "endsWith": "Finis par",
+          "equals": "Strictement égale à",
+          "notContains": "Ne contient pas",
+          "notStartsWith": "Ne commence pas par",
+          "notEndsWith": "Ne finit pas par",
+          "notEquals": "Strictement différent de"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Rechercher"
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Rechercher",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
+        }
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filtrage par date",
+        "inputHint": "Entrer/sélectionner une date à rechercher",
+        "negateLabel": "Négation",
+        "close": "Fermer",
+        "searchButton": "Rechercher",
+        "operators": {
+          "inferior": "Inférieure à",
+          "superior": "Supérieure à",
+          "equals": "Strictement égale à",
+          "notInferior": "N'est pas inférieure à",
+          "notSuperior": "N'est pas supérieure à",
+          "notEquals": "N'est pas strictement égale à"
+        },
+        "validation": {
+          "invalidDate": "Date incorrecte. Format attendu: {format}"
+        }
+      }
+    }
+  },
   "OrganizationalUnitsTree": {
     "GenericTree": {
       "filterLabel": "Filtrer les unités organisationnelles",
@@ -85,8 +405,8 @@
         },
         "insertDate": {
           "close": "Fermer",
-          "label": "Date d'insertion",
-          "hint": "Sélectionnez une date d'insertion pour filtrer les comptes."
+          "label": "Date de création",
+          "hint": "Sélectionnez une date de création pour filtrer les comptes."
         }
       }
     },
@@ -95,7 +415,7 @@
       "lastname": "Nom de famille",
       "email": "Email",
       "createdBy": "Créé par",
-      "insertDate": "Date d'insertion",
+      "insertDate": "Date de création",
       "actions": "Actions"
     },
     "GenericEntityTable": {
@@ -127,6 +447,17 @@
   "AccountActivationActions": {
     "DropdownButton": {
       "title": "Activation",
+      "fields": {
+        "validityPeriodStart": {
+          "label": "Date d'activation",
+          "close": "Fermer",
+          "validation": {
+            "required": "Ce champ est requis.",
+            "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+            "afterDate": "La date ne peut pas être antérieure à la date du jour."
+          }
+        }
+      },
       "activation": {
         "immediate": "Immédiate",
         "scheduled": "Planifiée"

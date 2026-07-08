@@ -1,0 +1,105 @@
+{
+  "instanceId": "moduleOrganizationalUnitsPage",
+  "remoteName": "catalogUI",
+  "entity": "organizational-units",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "organizational-units",
+  "basePath": "/organizational-units",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericTablePage",
+    "pagePath": "",
+    "idKey": "id",
+    "enableActions": true,
+    "creationPagePath": "organizational-units/create",
+    "filters": [
+      {
+        "name": "name",
+        "type": "text"
+      },
+      {
+        "name": "type",
+        "type": "list",
+        "options": {
+          "items": [
+            {
+              "label": "COMPANY",
+              "value": "COMPANY"
+            },
+            {
+              "label": "DIVISION",
+              "value": "DIVISION"
+            },
+            {
+              "label": "DEPARTMENT",
+              "value": "DEPARTMENT"
+            },
+            {
+              "label": "TEAM",
+              "value": "TEAM"
+            }
+          ]
+        }
+      },
+      {
+        "name": "createdBy",
+        "type": "text"
+      },
+      {
+        "name": "parents",
+        "type": "tree",
+        "options": {
+          "url": "/organizational-units",
+          "idKey": "id",
+          "parentsKey": "parents",
+          "parentIdKey": "parent",
+          "nodesQuerySize": 50,
+          "typeKey": "type"
+        }
+      },
+      {
+        "name": "insertDate",
+        "type": "date"
+      }
+    ],
+    "columns": [
+      {
+        "label": "columns.name",
+        "name": "name",
+        "field": "name",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.type",
+        "name": "type",
+        "field": "type",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.createdBy",
+        "name": "createdBy",
+        "field": "createdBy",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.insertDate",
+        "name": "insertDate",
+        "field": "insertDate",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.actions",
+        "name": "table_actions",
+        "field": "",
+        "sortable": false,
+        "align": "center"
+      }
+    ]
+  }
+}

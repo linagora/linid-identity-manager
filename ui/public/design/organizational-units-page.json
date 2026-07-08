@@ -1,0 +1,196 @@
+{
+  "moduleOrganizationalUnitsPage": {
+    "confirmation-dialog": {
+      "q-dialog": { "persistent": false },
+      "q-card": { "flat": true, "bordered": true },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "confirm-button": {
+          "q-btn": { "color": "primary", "icon": "check" }
+        },
+        "cancel-button": {
+          "q-btn": { "color": "negative", "outline": true }
+        }
+      }
+    },
+    "linid-smart-filter": {
+      "q-field": {
+        "dense": false
+      },
+      "q-menu": {},
+      "q-separator": {},
+      "iconSearch": {
+        "q-icon": {
+          "name": "search"
+        }
+      },
+      "iconMenuClose": {
+        "q-icon": {
+          "name": "arrow_drop_up"
+        }
+      },
+      "iconMenuOpen": {
+        "q-icon": {
+          "name": "arrow_drop_down"
+        }
+      },
+      "linid-filter-chip": {
+        "firstname": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "deep-purple-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
+        "lastname": {
+          "q-avatar": {
+            "size": "24px",
+            "color": "red-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
+        "email": {
+          "q-avatar": {
+            "size": "32px",
+            "color": "blue-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
+        "createdBy": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "pink-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": false
+          }
+        },
+        "insertDate": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "deep-orange-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        }
+      },
+      "linid-filter-panel": {
+        "header": {
+          "q-icon": { "name": "filter_alt" },
+          "q-separator": { "inset": false }
+        },
+        "content": {
+          "q-list": { "bordered": false, "separator": true },
+          "q-item": { "dense": true },
+          "q-separator": { "inset": false },
+          "icon-section": {
+            "q-item-section": {}
+          },
+          "label-section": {
+            "q-item-section": {}
+          },
+          "types": {
+            "[FILTER_TYPE]": {
+              "q-icon": { "name": "filter_alt", "size": "sm" }
+            }
+          }
+        }
+      },
+      "text-search-filter-panel": {
+        "q-input": { "outlined": true, "dense": true },
+        "q-checkbox": { "dense": true },
+        "q-option-group": { "color": "primary", "dense": true },
+        "q-btn": { "color": "primary", "unelevated": true }
+      },
+      "number-search-filter-panel": {
+        "q-input": { "outlined": true, "dense": true },
+        "q-checkbox": { "color": "primary", "dense": true },
+        "q-option-group": { "color": "primary", "dense": true },
+        "q-btn": { "color": "primary", "unelevated": true }
+      },
+      "list-search-filter-panel": {
+        "q-list": { "bordered": true },
+        "q-item": { "dense": true },
+        "checkboxSection": {
+          "q-item-section": { "side": true },
+          "q-checkbox": { "dense": true }
+        },
+        "labelSection": {
+          "q-item-section": {}
+        },
+        "q-btn": { "color": "primary", "unelevated": true }
+      },
+      "linid-favorite-panel": {
+        "header": {
+          "q-icon": { "name": "filter_alt" },
+          "q-separator": { "inset": false }
+        },
+        "content": {
+          "q-list": { "bordered": false, "separator": true },
+          "q-item": { "dense": true },
+          "icon-section": {
+            "q-item-section": {},
+            "q-icon": { "name": "filter_alt", "size": "sm" }
+          },
+          "label-section": {
+            "q-item-section": {}
+          },
+          "delete-section": {
+            "q-item-section": {},
+            "q-btn": {
+              "flat": true,
+              "round": true,
+              "icon": "delete",
+              "color": "negative"
+            }
+          },
+          "no-data-icon-section": {
+            "q-item-section": {},
+            "q-icon": { "name": "filter_alt", "size": "sm" }
+          },
+          "no-data-label-section": {
+            "q-item-section": {}
+          },
+          "create-button": {
+            "q-btn": {}
+          },
+          "override-button": {
+            "q-btn": {}
+          }
+        }
+      },
+      "tree-search-filter-panel": {
+        "q-btn": {},
+        "GenericTree": {
+          "q-tree": {
+            "dense": true,
+            "defaultExpandAll": true
+          }
+        }
+      },
+      "date-search-filter-panel": {
+        "q-input": { "outlined": true, "dense": true },
+        "q-icon": { "name": "event" },
+        "q-date": { "today-btn": true },
+        "q-checkbox": { "color": "primary", "dense": true },
+        "q-option-group": { "color": "primary", "dense": true },
+        "q-btn": { "color": "primary", "unelevated": true },
+        "close": {
+          "q-btn": { "flat": true }
+        }
+      }
+    }
+  }
+}

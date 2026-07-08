@@ -1,0 +1,111 @@
+{
+  "instanceId": "moduleAccountsPage",
+  "remoteName": "catalogUI",
+  "entity": "accounts",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "accounts",
+  "basePath": "/accounts",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericTablePage",
+    "pagePath": "",
+    "idKey": "id",
+    "enableActions": false,
+    "creationPagePath": null,
+    "filters": [
+      {
+        "name": "firstname",
+        "type": "text"
+      },
+      {
+        "name": "lastname",
+        "type": "text"
+      },
+      {
+        "name": "email",
+        "type": "text"
+      },
+      {
+        "name": "status",
+        "type": "list",
+        "options": {
+          "items": [
+            {
+              "label": "SUSPENDED",
+              "value": "SUSPENDED"
+            },
+            {
+              "label": "ACTIVE",
+              "value": "ACTIVE"
+            },
+            {
+              "label": "INACTIVE",
+              "value": "INACTIVE"
+            }
+          ]
+        }
+      },
+      {
+        "name": "createdBy",
+        "type": "text"
+      },
+      {
+        "name": "insertDate",
+        "type": "date"
+      }
+    ],
+    "columns": [
+      {
+        "label": "columns.firstname",
+        "name": "firstname",
+        "field": "firstname",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.lastname",
+        "name": "lastname",
+        "field": "lastname",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.email",
+        "name": "email",
+        "field": "email",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.status",
+        "name": "status",
+        "field": "status",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.createdBy",
+        "name": "createdBy",
+        "field": "createdBy",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.insertDate",
+        "name": "insertDate",
+        "field": "insertDate",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.actions",
+        "name": "table_actions",
+        "field": "",
+        "sortable": false,
+        "align": "center"
+      }
+    ]
+  }
+}

@@ -523,6 +523,9 @@
         "updateDate": "Dernière mise à jour"
       }
     },
+    "ButtonsCard": {
+      "cancel": "Retour"
+    },
     "success": {
       "suspended": "Unité organisationnelle suspendue avec succès.",
       "scheduled": "Suspension planifiée avec succès.",

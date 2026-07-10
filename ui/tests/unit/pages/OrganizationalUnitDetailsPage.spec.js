@@ -44,6 +44,10 @@ const OU_ID = 'test-ou-id';
 
 const mockSelectedOrganizationalUnitId = ref(OU_ID);
 
+const mockRouter = {
+  push: vi.fn(),
+};
+
 vi.mock('@linagora/linid-im-front-corelib', () => ({
   loadAsyncComponent: vi.fn(() => null),
   uiEventSubject: { next: (...args) => mockUiEventNext(...args) },
@@ -58,8 +62,18 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   }),
 }));
 
+vi.mock('vue-router', () => ({
+  useRouter: () => mockRouter,
+}));
+
 vi.mock('axios', () => ({
   default: {
+    create: vi.fn(() => ({
+      interceptors: {
+        request: { use: vi.fn() },
+        response: { use: vi.fn() },
+      },
+    })),
     isAxiosError: (err) => err?.isAxiosError === true,
     isCancel: (err) => err?.isCanceled === true,
   },
@@ -245,6 +259,15 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       await wrapper.vm.loadOrganizationalUnit(OU_ID);
 
       expect(mockNotify).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Test function: goBack', () => {
+    it('should navigate to organizational unit list', () => {
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      wrapper.vm.goBack();
+
+      expect(mockRouter.push).toHaveBeenCalledWith('/organizational-units');
     });
   });
 

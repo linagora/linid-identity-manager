@@ -50,6 +50,16 @@
             "
           />
         </div>
+        <div class="organizational-unit-details-page--actions">
+          <component
+            :is="buttonsCard"
+            v-if="buttonsCard"
+            :ui-namespace="uiNamespace"
+            :i18n-scope="i18nScope"
+            :show-confirm-button="false"
+            @cancel="goBack"
+          />
+        </div>
       </div>
 
       <div
@@ -141,6 +151,7 @@ import type {
   OrganizationalUnitStatusForm,
 } from 'src/types/organizationalUnits';
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 
 const pageName = 'OrganizationalUnitDetailsPage';
 const i18nScope = pageName;
@@ -149,6 +160,7 @@ const organizationalUnitLifecycleUiConfiguration =
   appConfig.organizationalUnitLifecycleFields;
 const fieldsOrder = appConfig.organizationalUnitDetailsFieldsOrder;
 
+const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
 const {
@@ -169,6 +181,7 @@ const isLoading = ref<boolean>(false);
 let detailRequestController: AbortController | null = null;
 
 const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
+const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
 
 const lifecycleUi = useOrganizationalUnitLifecycleUi(organizationalUnitStatus);
@@ -184,6 +197,11 @@ const hasAnyLifecycleAction = computed(() =>
 
 const actionDelay: number =
   appConfig?.immediateActionDelay > 0 ? appConfig.immediateActionDelay : 5;
+
+/** Navigates back to the organizational unit list. */
+function goBack(): void {
+  router.push('/organizational-units');
+}
 
 /**
  * Loads the organizational unit selected in the tree (store) and splits the raw DTO into the identity and lifecycle

@@ -36,7 +36,6 @@ import { useI18n } from 'vue-i18n';
  */
 export function useCommonMapper() {
   const { t } = useI18n();
-  const SPRING_QUERY_DATE_FORMAT = 'dd/MM/yyyy HH:mm:ss';
 
   /**
    * Convert ISO date to date with local date time format.
@@ -118,34 +117,6 @@ export function useCommonMapper() {
   };
 
   /**
-   * Converts a string value into a "like" filter format expected by the API.
-   *
-   * @param value String value to be converted into a like filter.
-   * @returns String formatted as a like filter (e.g., "lk__value_") for use in API queries.
-   */
-  const toLikeFilter = (value: unknown): string[] | null => {
-    const v = value?.toString() || '';
-    if (v === '') {
-      return null;
-    }
-    return [`lk_*${v}*`];
-  };
-
-  /**
-   * Converts a date string value into an "Equal" filter format expected by the API.
-   *
-   * @param value Date string value to be converted into an equal filter.
-   * @returns String formatted as an equal filter for use in API queries.
-   */
-  const toDateFilter = (value: unknown): string[] | null => {
-    const v = value?.toString() || '';
-    if (v === '-' || v === '') {
-      return null;
-    }
-    return [`${v} 00:00:00_bt_${v} 23:59:59`];
-  };
-
-  /**
    * Parses a date value into a {@link Dayjs} object. Returns null when the input is falsy, the placeholder "-", or
    * cannot be parsed by dayjs.
    *
@@ -165,9 +136,6 @@ export function useCommonMapper() {
     toDate,
     toDateISO,
     toEmptyRecord,
-    toLikeFilter,
-    toDateFilter,
     toDayJs,
-    SPRING_QUERY_DATE_FORMAT,
   };
 }

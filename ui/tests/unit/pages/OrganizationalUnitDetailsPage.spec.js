@@ -42,7 +42,6 @@ const mockUiEventNext = vi.fn();
 
 const OU_ID = 'test-ou-id';
 
-const mockSelectedOrganizationalUnitId = ref(OU_ID);
 
 const mockRouter = {
   push: vi.fn(),
@@ -91,12 +90,6 @@ vi.mock('src/services/OrganizationalUnitService', () => ({
   getOrganizationalUnitById: vi.fn(),
   suspendOrganizationalUnit: vi.fn(),
   reactivateOrganizationalUnit: vi.fn(),
-}));
-
-vi.mock('src/stores/useOrganizationalUnitStore', () => ({
-  useOrganizationalUnitStore: () => ({
-    selectedOrganizationalUnitId: mockSelectedOrganizationalUnitId,
-  }),
 }));
 
 vi.mock('pinia', () => ({
@@ -164,7 +157,6 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSelectedOrganizationalUnitId.value = OU_ID;
     mockedGetById.mockResolvedValue(buildOuDto());
     mockedSuspend.mockResolvedValue(buildOuDto());
     mockedReactivate.mockResolvedValue(buildOuDto());

@@ -24,12 +24,10 @@
  * LinID Identity Manager software.
  */
 
-import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import type {
   AccountDeactivationRecord,
   AccountDTO,
-  AccountQueryFilterDTO,
   AccountReactivationRecord,
   AccountSuspensionRecord,
   AccountValidityRecord,
@@ -45,24 +43,6 @@ export async function getAccountById(id: string): Promise<AccountDTO> {
   return api
     .get<AccountDTO>(`/accounts/${id}`)
     .then((response) => response.data);
-}
-
-/**
- * Retrieves accounts list from the API.
- *
- * @param filters Object containing the filter criteria for querying accounts.
- * @param pagination Object containing pagination parameters.
- * @returns Promise of paginated accounts.
- */
-export async function getAccounts(
-  filters: AccountQueryFilterDTO,
-  pagination: Pagination
-): Promise<Page<AccountDTO>> {
-  return api
-    .get<Page<AccountDTO>>(`/accounts`, {
-      params: { ...filters, ...pagination },
-    })
-    .then(({ data }) => data);
 }
 
 /**

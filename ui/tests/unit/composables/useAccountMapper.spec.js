@@ -29,7 +29,6 @@ import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
 
-const SPRING_QUERY_DATE_FORMAT = 'dd/MM/yyyy HH:mm:ss';
 
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
@@ -150,60 +149,6 @@ describe('Test mapper: useAccountMapper', () => {
         end: null,
       });
       expect(accountStatus.daysBeforeDeactivation).toBeNull();
-    });
-  });
-
-  describe('Test function: toAccountQueryFilterDTO', () => {
-    it('Convert filters to AccountQueryFilter', () => {
-      const { toAccountQueryFilterDTO } = useAccountMapper();
-
-      // The date field already applies the locale mask, so the value is
-      // already formatted in the same `dateFormat` declared in the i18n
-      // translations (here "DD/MM/YYYY").
-      const filters = {
-        firstname: 'John',
-        lastname: 'doe',
-        email: 'john.doe',
-        createdBy: 'admin',
-        insertDate: '24/07/2025',
-      };
-
-      const result = toAccountQueryFilterDTO(filters);
-
-      expect(result.lastname).toEqual([`lk_*${filters.lastname}*`]);
-      expect(result.firstname).toEqual([`lk_*${filters.firstname}*`]);
-      expect(result.email).toEqual([`lk_*${filters.email}*`]);
-      expect(result.createdBy).toEqual([`lk_*${filters.createdBy}*`]);
-      expect(result.insertDate).toEqual([
-        `${filters.insertDate} 00:00:00_bt_${filters.insertDate} 23:59:59`,
-      ]);
-      expect(result.dateFormat).toBe(SPRING_QUERY_DATE_FORMAT);
-    });
-
-    it('Preserves locale-ambiguous dates instead of swapping day and month', () => {
-      const { toAccountQueryFilterDTO } = useAccountMapper();
-
-      // Without forwarding the value as-is, dayjs would re-parse "04/05/2026"
-      // as 5 April (MM/DD) and produce "05/04/2026" in the filter.
-      const result = toAccountQueryFilterDTO({ insertDate: '04/05/2026' });
-
-      expect(result.insertDate).toEqual([
-        '04/05/2026 00:00:00_bt_04/05/2026 23:59:59',
-      ]);
-    });
-
-    it('Handle empty filters', () => {
-      const { toAccountQueryFilterDTO } = useAccountMapper();
-      tMock.mockReturnValue('DD/MM/YYYY');
-
-      const result = toAccountQueryFilterDTO({});
-
-      expect(result.lastname).toBeNull();
-      expect(result.firstname).toBeNull();
-      expect(result.email).toBeNull();
-      expect(result.createdBy).toBeNull();
-      expect(result.insertDate).toBeNull();
-      expect(result.dateFormat).toBe(SPRING_QUERY_DATE_FORMAT);
     });
   });
 
@@ -339,58 +284,6 @@ describe('Test mapper: useAccountMapper', () => {
       const { toAccountValidityRecord } = useAccountMapper();
 
       expect(toAccountValidityRecord({})).toEqual({ validityStart: '' });
-    });
-  });
-
-  describe('Test function: toAccountList', () => {
-    it('Map an array of AccountDTOs to Accounts', () => {
-      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
-      const { toAccountList } = useAccountMapper();
-
-      const dtos = [
-        buildDto({ id: 1 }),
-        buildDto({
-          id: 2,
-          lastname: 'Smith',
-          firstname: 'Jane',
-          email: 'jane.smith@example.com',
-          externalId: 'ext-2',
-          updatedBy: 'admin',
-          insertDate: '2024-03-01T00:00:00Z',
-          updateDate: '2024-04-01T00:00:00Z',
-        }),
-      ];
-
-      const accounts = toAccountList(dtos);
-
-      expect(accounts).toHaveLength(2);
-      expect(accounts[0]).toEqual({
-        id: dtos[0].id,
-        externalId: dtos[0].externalId,
-        lastname: dtos[0].lastname,
-        firstname: dtos[0].firstname,
-        email: dtos[0].email,
-        createdBy: dtos[0].createdBy,
-        updatedBy: dtos[0].updatedBy,
-        insertDate: dayjs(dtos[0].insertDate).format('YYYY-MM-DD HH:mm'),
-        updateDate: dayjs(dtos[0].updateDate).format('YYYY-MM-DD HH:mm'),
-      });
-      expect(accounts[1]).toEqual({
-        id: dtos[1].id,
-        externalId: dtos[1].externalId,
-        lastname: dtos[1].lastname,
-        firstname: dtos[1].firstname,
-        email: dtos[1].email,
-        createdBy: dtos[1].createdBy,
-        updatedBy: dtos[1].updatedBy,
-        insertDate: dayjs(dtos[1].insertDate).format('YYYY-MM-DD HH:mm'),
-        updateDate: dayjs(dtos[1].updateDate).format('YYYY-MM-DD HH:mm'),
-      });
-    });
-
-    it('Return empty array when given an empty list', () => {
-      const { toAccountList } = useAccountMapper();
-      expect(toAccountList([])).toEqual([]);
     });
   });
 });

@@ -348,85 +348,6 @@
       }
     }
   },
-  "OrganizationalUnitsTree": {
-    "GenericTree": {
-      "filterLabel": "Filtrer les unités organisationnelles",
-      "filterHint": "Saisissez un texte pour filtrer les unités organisationnelles.",
-      "noResultsLabel": "Aucune unité organisationnelle ne correspond au filtre.",
-      "noNodesLabel": "Aucune unité organisationnelle à afficher.",
-      "types": {
-        "root": {
-          "label": "Unités organisationnelles"
-        },
-        "COMPANY": {
-          "label": "{name}"
-        },
-        "DIVISION": {
-          "label": "{name}"
-        },
-        "DEPARTMENT": {
-          "label": "{name}"
-        },
-        "TEAM": {
-          "label": "{name}"
-        }
-      }
-    },
-    "errors": {
-      "notFound": "Unités organisationnelles introuvables",
-      "generic": "Impossible de charger les unités organisationnelles. Veuillez réessayer plus tard."
-    }
-  },
-  "AccountsPage": {
-    "menuTitle": "Comptes",
-    "title": "Comptes",
-    "detailButton": "Voir",
-    "noAccount": "Il n’y a aucun compte a afficher.",
-    "ButtonsCard": {
-      "create": "Créer"
-    },
-    "AdvancedSearchCard": {
-      "fields": {
-        "firstname": {
-          "label": "Prénom",
-          "hint": "Saisissez un prénom pour filtrer les comptes."
-        },
-        "lastname": {
-          "label": "Nom de famille",
-          "hint": "Saisissez un nom de famille pour filtrer les comptes."
-        },
-        "email": {
-          "label": "Email",
-          "hint": "Saisissez une adresse email pour filtrer les comptes."
-        },
-        "createdBy": {
-          "label": "Créé par",
-          "hint": "Saisissez le nom de l'utilisateur qui a créé le compte pour filtrer les comptes."
-        },
-        "insertDate": {
-          "close": "Fermer",
-          "label": "Date de création",
-          "hint": "Sélectionnez une date de création pour filtrer les comptes."
-        }
-      }
-    },
-    "accountColumns": {
-      "firstname": "Prénom",
-      "lastname": "Nom de famille",
-      "email": "Email",
-      "createdBy": "Créé par",
-      "insertDate": "Date de création",
-      "actions": "Actions"
-    },
-    "GenericEntityTable": {
-      "rowsPerPage": "Lignes par page",
-      "paginationLabel": "{start}-{end} sur {total}"
-    },
-    "errors": {
-      "notFound": "Comptes introuvables",
-      "generic": "Impossible de charger les comptes. Veuillez réessayer plus tard."
-    }
-  },
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
   },
@@ -447,17 +368,6 @@
   "AccountActivationActions": {
     "DropdownButton": {
       "title": "Activation",
-      "fields": {
-        "validityPeriodStart": {
-          "label": "Date d'activation",
-          "close": "Fermer",
-          "validation": {
-            "required": "Ce champ est requis.",
-            "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-            "afterDate": "La date ne peut pas être antérieure à la date du jour."
-          }
-        }
-      },
       "activation": {
         "immediate": "Immédiate",
         "scheduled": "Planifiée"

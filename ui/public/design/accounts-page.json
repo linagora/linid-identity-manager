@@ -171,12 +171,6 @@
           }
         }
       },
-      "tree-search-filter-panel": {
-        "q-btn": {},
-        "GenericTree": {
-          "q-tree": {}
-        }
-      },
       "date-search-filter-panel": {
         "q-input": { "outlined": true, "dense": true },
         "q-icon": { "name": "event" },

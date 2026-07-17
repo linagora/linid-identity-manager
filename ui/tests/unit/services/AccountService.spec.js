@@ -28,7 +28,6 @@ import { api } from 'boot/axios';
 import {
   deactivateAccount,
   getAccountById,
-  getAccounts,
   reactivateAccount,
   setAccountValidity,
   suspendAccount,
@@ -88,44 +87,6 @@ describe('Test service: accountService', () => {
       vi.mocked(api.get).mockRejectedValue(error);
 
       await expect(getAccountById(USER_1_UUID)).rejects.toThrow('boom');
-    });
-  });
-
-  describe('Test function: getAccounts', () => {
-    const filters = {
-      lastname: ['lk_*doe*'],
-      firstname: null,
-      email: null,
-      createdBy: null,
-      insertDate: null,
-      dateFormat: 'dd/MM/yyyy HH:mm:ss',
-    };
-    const pagination = { page: 0, size: 10, sort: 'lastname,asc' };
-
-    it('should call valid endpoint with merged params and return the page', async () => {
-      const dto = buildAccountDTO({ id: USER_1_UUID });
-      const page = {
-        content: [dto],
-        totalElements: 1,
-        totalPages: 1,
-        size: 10,
-        number: 0,
-      };
-      vi.mocked(api.get).mockResolvedValue({ data: page });
-
-      const result = await getAccounts(filters, pagination);
-
-      expect(api.get).toHaveBeenCalledWith('/accounts', {
-        params: { ...filters, ...pagination },
-      });
-      expect(result).toEqual(page);
-    });
-
-    it('should propagate backend errors to the caller', async () => {
-      const error = new Error('boom');
-      vi.mocked(api.get).mockRejectedValue(error);
-
-      await expect(getAccounts(filters, pagination)).rejects.toThrow('boom');
     });
   });
 

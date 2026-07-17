@@ -32,10 +32,12 @@ Feature: Test Organizational Units page display
     And I expect the HTML element '[data-cy="linid-smart-filter-field"]' to be visible
     And I expect the HTML element '[data-cy="buttons-card"]' to be visible
     And I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
-    And I expect the HTML element '[data-cy="see-button_00000000-0000-4000-8000-000000000ee1"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="see-button_00000000-0000-4000-8000-0000000000b1"]' appear 1 times on screen
 
     ## 103 Should show the details of a OU when click see button of a OU
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I set the text "Team Beta" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' to be visible
     And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' contains "Team Beta"
     And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' to be visible
@@ -50,6 +52,10 @@ Feature: Test Organizational Units page display
     ## 104 Should show the details of another OU when click see button of a OU
     When I click on '[data-cy="button_cancel"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I set the text "SuspendedOuWithEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' to be visible
     And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' contains "SuspendedOuWithEnd"
     And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' to be visible

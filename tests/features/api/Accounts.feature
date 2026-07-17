@@ -26,24 +26,32 @@ Feature: Test API Account endpoints
   ## 501 Should return 204 when deleting existing account
   ## 502 Should return 404 when deleting unknown account
 
-  ################## Update Status (PUT /accounts/{id}/status) #####
-  ## 601 Should update status fields and return updated view
-  ## 602 Should update status fields and return updated view when persisted validity start is equal to new validity start
-  ## 603 Should clear status fields when null values are provided
-  ## 604 Should return 404 when updating status of unknown account
-  ## 605 Should return 404 when no status account row exists yet
-  ## 606 Should return 400 when activationAt is provided
-  ## 607 Should return 400 when validity period start is null
-  ## 608 Should return 400 when validity period start is after end
-  ## 609 Should return 400 when suspension period start is after end
-  ## 610 Should return 400 when persisted validity start is in the past and new validity start is not equal to persisted one
-  ## 611 Should return 400 when new validity start is in the past
-  ## 612 Should return 400 when validity end is in the past
-  ## 613 Should return 400 when suspension start is before validity start
-  ## 614 Should return 400 when suspension start is in the past
-  ## 615 Should return 400 when suspension is outside validity end
-  ## 616 Should accept open-ended validity (end null) without suspension
-  ## 617 Should accept when suspension start equals persisted past suspension start (idempotent)
+  ################## Suspend (PUT /accounts/{id}/status/suspend) #####
+  ## 601 Should suspend an account with a future period and reason fields
+  ## 602 Should accept an open-ended (permanent) future suspension
+  ## 603 Should return 400 when the suspension period start is after its end
+  ## 604 Should return 400 when the suspension period start is in the past
+  ## 605 Should return 400 when the suspension period end is in the past
+  ## 606 Should return 404 when suspending an unknown account
+
+  ################## Deactivate (PUT /accounts/{id}/status/deactivate) #####
+  ## 610 Should deactivate an account with a future date and reason fields
+  ## 611 Should return 400 when the deactivation date is in the past
+  ## 612 Should return 400 when the deactivation date is before the validity start
+  ## 613 Should return 404 when deactivating an unknown account
+
+  ################## Reactivate (PUT /accounts/{id}/status/reactivate) #####
+  ## 620 Should reactivate a suspended account with a justification comment
+  ## 621 Should return 400 when the reactivation comment is missing
+  ## 622 Should return 400 when reactivating an account that is neither suspended nor deactivated
+  ## 623 Should return 404 when reactivating an unknown account
+  ## 624 Should re-validate a deactivated account by pushing its validity end while preserving deactivation fields
+  ## 625 Should return 400 when re-validating a deactivated account with a validity end in the past
+
+  ################## Schedule Activation (PUT /accounts/{id}/status/schedule-activation) #####
+  ## 630 Should schedule the validity period start
+  ## 631 Should return 400 when the validity start is not in the future
+  ## 632 Should return 404 when setting validity of an unknown account
 
   ################## Activate (PUT /accounts/{id}/status/activate) #####
   ## 701 Should activate account when business rules are satisfied

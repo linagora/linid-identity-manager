@@ -77,12 +77,6 @@ export interface OrganizationalUnitDTO {
   parents?: OrganizationalUnitRelationDTO[];
 }
 
-/** Shape of the filter object sent to the backend when querying organizational units with filters. */
-export interface OrganizationalUnitFilterDTO {
-  /** Name filter to apply when querying organizational units. If null, no filtering is applied on the name. */
-  name: string | null;
-}
-
 /**
  * Identity projection of an organizational unit consumed by Vue components on the Details page. Identity fields only;
  * combine with {@link OrganizationalUnitStatus} when both identity and suspension state are needed.

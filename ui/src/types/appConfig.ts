@@ -28,18 +28,6 @@ import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corel
 import type { AccountLifecycleAction } from './accountLifecycleUi';
 import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 
-/** Column descriptor for the accounts list table, serialised in `config.json`. */
-export interface AccountColumnConfig {
-  /** Column identifier; must match a key under `AccountsPage.accountColumns.*` in i18n. */
-  name: string;
-  /** Account object property to display, or empty string for columns without a data field such as the actions column. */
-  field: string;
-  /** Whether the column header triggers server-side sorting. */
-  sortable: boolean;
-  /** Horizontal text alignment for the column cells. */
-  align: 'left' | 'center' | 'right';
-}
-
 /**
  * Runtime application configuration loaded from `public/config.json`. Holds deployment-specific values that must be
  * tunable without rebuilding the UI.
@@ -59,13 +47,6 @@ export interface AppConfig {
     /** Default locale of the application. */
     locale: string;
   };
-  /**
-   * Static list of organizational unit types offered by the OU creation form. The order is the one rendered in the type
-   * selector.
-   */
-  organizationalUnitTypes: string[];
-  /** Number of organizational units to fetch per page when querying the API. */
-  organizationalUnitQuerySize: number;
   /** Defines the delay(in minutes) applied when reactivating a suspended or inactive account. */
   immediateActionDelay: number;
   /** List of design files to be loaded for the UI. */
@@ -78,30 +59,6 @@ export interface AppConfig {
    * details card; the order is preserved.
    */
   accountDetailsFieldsOrder: string[];
-
-  /**
-   * Full list of field definitions available in the account advanced-search panel. Each field follows the
-   * `LinidAttributeConfiguration` shape consumed by `AdvancedSearchCard`.
-   */
-  accountSearchFields: LinidAttributeConfiguration[];
-
-  /**
-   * Names of the account search fields shown by default (before the user expands the advanced panel). Each entry must
-   * match a `name` in `accountSearchFields`.
-   */
-  accountSearchDefaultFields: string[];
-
-  /**
-   * Names of the account search fields shown only after the user expands the advanced panel. Each entry must match a
-   * `name` in `accountSearchFields`.
-   */
-  accountSearchAdvancedFields: string[];
-
-  /**
-   * Ordered list of column descriptors rendered in the accounts list table. Labels are resolved at runtime from
-   * `AccountsPage.accountColumns.{name}` i18n keys.
-   */
-  accountTableColumns: AccountColumnConfig[];
 
   /**
    * Form field configurations for each account lifecycle action dialog, keyed by action identifier (e.g.

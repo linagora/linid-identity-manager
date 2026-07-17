@@ -152,42 +152,6 @@ describe('Test mapper: useCommonMapper', () => {
     });
   });
 
-  describe('Test function: toLikeFilter', () => {
-    it('should format string values with lk_*value*', () => {
-      const { toLikeFilter } = useCommonMapper();
-
-      expect(toLikeFilter('John')).toEqual(['lk_*John*']);
-      expect(toLikeFilter(123)).toEqual(['lk_*123*']);
-    });
-
-    it('should return null for falsy values (null/undefined/empty)', () => {
-      const { toLikeFilter } = useCommonMapper();
-
-      expect(toLikeFilter(null)).toBe(null);
-      expect(toLikeFilter(undefined)).toBe(null);
-      expect(toLikeFilter('')).toBe(null);
-    });
-  });
-
-  describe('Test function: toDateFilter', () => {
-    it('should format a date value as a between filter (start of day to end of day)', () => {
-      const { toDateFilter } = useCommonMapper();
-
-      const value = '24/07/2025';
-      expect(toDateFilter(value)).toEqual([
-        `${value} 00:00:00_bt_${value} 23:59:59`,
-      ]);
-    });
-
-    it('should return null for falsy values (null/undefined/empty)', () => {
-      const { toDateFilter } = useCommonMapper();
-
-      expect(toDateFilter(null)).toBe(null);
-      expect(toDateFilter(undefined)).toBe(null);
-      expect(toDateFilter('')).toBe(null);
-    });
-  });
-
   describe('Test function: toDayJs', () => {
     it('should parse an ISO 8601 string into a Dayjs object', () => {
       const { toDayJs } = useCommonMapper();

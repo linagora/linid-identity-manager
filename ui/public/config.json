@@ -4,14 +4,10 @@
     "languages": ["fr-FR", "en-US"],
     "locale": "fr-FR"
   },
-  "organizationalUnitTypes": ["COMPANY", "DEPARTMENT", "TEAM"],
-  "organizationalUnitQuerySize": 50,
   "immediateActionDelay": 60,
   "designFiles": [
     "design/default.json",
-    "design/splitter-layout.json",
     "design/base-layout.json",
-    "design/organizational-units-tree.json",
     "design/accounts.json",
     "design/organizational-units.json",
     "design/organizational-unit-banner.json",
@@ -22,51 +18,6 @@
     "design/accounts-page.json",
     "design/organizational-units-page.json"
   ],
-  "accountCreationFields": [
-    {
-      "name": "organizationalUnit",
-      "type": "String",
-      "input": "Text",
-      "required": true,
-      "inputSettings": { "disable": true }
-    },
-    {
-      "name": "externalId",
-      "type": "String",
-      "input": "Text",
-      "required": true
-    },
-    {
-      "name": "lastname",
-      "type": "String",
-      "input": "Text",
-      "required": true
-    },
-    {
-      "name": "firstname",
-      "type": "String",
-      "input": "Text",
-      "required": true
-    },
-    {
-      "name": "email",
-      "type": "String",
-      "input": "Email",
-      "required": true
-    },
-    {
-      "name": "validityPeriodStart",
-      "type": "String",
-      "input": "Date",
-      "required": true,
-      "inputSettings": {
-        "maskI18NKey": "application.dateFormat",
-        "options": {
-          "fromDate": "{{ today }}"
-        }
-      }
-    }
-  ],
   "accountDetailsFieldsOrder": [
     "firstname",
     "lastname",
@@ -75,77 +26,6 @@
     "updatedBy",
     "insertDate",
     "updateDate"
-  ],
-  "accountSearchFields": [
-    {
-      "name": "firstname",
-      "type": "String",
-      "required": false,
-      "input": "Text"
-    },
-    {
-      "name": "lastname",
-      "type": "String",
-      "required": false,
-      "input": "Text"
-    },
-    {
-      "name": "email",
-      "type": "String",
-      "required": false,
-      "input": "Text"
-    },
-    {
-      "name": "createdBy",
-      "type": "String",
-      "required": false,
-      "input": "Text"
-    },
-    {
-      "name": "insertDate",
-      "type": "String",
-      "required": false,
-      "input": "Date",
-      "inputSettings": {
-        "maskI18NKey": "application.dateFormat"
-      }
-    }
-  ],
-  "accountSearchDefaultFields": [
-    "firstname",
-    "lastname",
-    "email",
-    "createdBy",
-    "insertDate"
-  ],
-  "accountSearchAdvancedFields": [],
-  "accountTableColumns": [
-    {
-      "name": "firstname",
-      "field": "firstname",
-      "sortable": true,
-      "align": "left"
-    },
-    {
-      "name": "lastname",
-      "field": "lastname",
-      "sortable": true,
-      "align": "left"
-    },
-    { "name": "email", "field": "email", "sortable": true, "align": "left" },
-    {
-      "name": "createdBy",
-      "field": "createdBy",
-      "sortable": true,
-      "align": "left"
-    },
-    {
-      "name": "insertDate",
-      "field": "insertDate",
-      "sortable": true,
-      "align": "left"
-    },
-    { "name": "actions", "field": "", "sortable": false, "align": "center" }
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

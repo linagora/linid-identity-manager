@@ -24,14 +24,9 @@
  * LinID Identity Manager software.
  */
 
-import type { Page, Pagination } from '@linagora/linid-im-front-corelib';
-import { usePagination } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
-import { appConfig } from 'boot/config';
-import type { AccountDTO, AccountQueryFilterDTO } from 'src/types/accounts';
 import type {
   OrganizationalUnitDTO,
-  OrganizationalUnitFilterDTO,
   OrganizationalUnitReactivationRecord,
   OrganizationalUnitRecord,
   OrganizationalUnitSuspensionRecord,
@@ -66,93 +61,6 @@ export async function createOrganizationalUnit(
   return api
     .post<OrganizationalUnitDTO>('/organizational-units', payload)
     .then((response) => response.data);
-}
-
-/**
- * Retrieves Organizational Units list from the API.
- *
- * @param filters Object containing the filter criteria for querying Organizational Units.
- * @param pagination Object containing pagination parameters.
- * @returns Promise of paginated Organizational Units.
- */
-export async function getOrganizationalUnits(
-  filters: OrganizationalUnitFilterDTO,
-  pagination: Pagination
-): Promise<Page<OrganizationalUnitDTO>> {
-  return api
-    .get<Page<OrganizationalUnitDTO>>(`/organizational-units`, {
-      params: { ...filters, ...pagination },
-    })
-    .then(({ data }) => data);
-}
-
-/**
- * Fetches the root organizational unit from the API.
- *
- * @returns Promise resolving to the root organizational unit.
- */
-export async function getOrganizationalUnitRoot() {
-  const { toPagination } = usePagination();
-
-  const response = await getOrganizationalUnits(
-    { name: 'root' },
-    toPagination({
-      page: 1,
-      rowsNumber: 0,
-      sortBy: undefined,
-      rowsPerPage: 10,
-      descending: true,
-    })
-  );
-  return response?.content?.[0];
-}
-
-/**
- * Fetches all organizational units from the API.
- *
- * @returns Promise resolving to the full list of organizational units.
- */
-export async function getAllOrganizationalUnit(): Promise<
-  OrganizationalUnitDTO[]
-> {
-  const result: OrganizationalUnitDTO[] = [];
-  let page = 0;
-  let isLast = false;
-
-  while (!isLast) {
-    const response = await getOrganizationalUnits(
-      { name: null },
-      { page, size: appConfig.organizationalUnitQuerySize }
-    );
-    result.push(...response.content);
-    isLast = response.last;
-    page++;
-  }
-
-  return result;
-}
-
-/**
- * Retrieves accounts list from the API by organizational unit id.
- *
- * @param id The unique identifier of the organizational unit for which to retrieve accounts.
- * @param filters Object containing the filter criteria for querying accounts.
- * @param pagination Object containing pagination parameters.
- * @param signal Optional abort signal used to cancel a stale request.
- * @returns Promise of paginated accounts.
- */
-export async function getAccountsByOrganizationalUnitId(
-  id: string,
-  filters: AccountQueryFilterDTO,
-  pagination: Pagination,
-  signal?: AbortSignal
-): Promise<Page<AccountDTO>> {
-  return api
-    .get<Page<AccountDTO>>(`/organizational-units/${id}/accounts`, {
-      params: { ...filters, ...pagination },
-      signal,
-    })
-    .then(({ data }) => data);
 }
 
 /**

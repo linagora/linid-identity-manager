@@ -35,36 +35,6 @@
         }
       },
       "linid-filter-chip": {
-        "firstname": {
-          "q-avatar": {
-            "size": "28px",
-            "color": "deep-purple-8",
-            "textColor": "white"
-          },
-          "q-chip": {
-            "square": true
-          }
-        },
-        "lastname": {
-          "q-avatar": {
-            "size": "24px",
-            "color": "red-8",
-            "textColor": "white"
-          },
-          "q-chip": {
-            "square": true
-          }
-        },
-        "email": {
-          "q-avatar": {
-            "size": "32px",
-            "color": "blue-8",
-            "textColor": "white"
-          },
-          "q-chip": {
-            "square": true
-          }
-        },
         "createdBy": {
           "q-avatar": {
             "size": "28px",

@@ -5,8 +5,6 @@ Feature: Test Account homepage display
   ## 102 Should filter accounts when using advanced search
   ## 103 Should go to detail page when click on account detail button
   ## 104 Should have pagination working
-  ## 105 Should display the Organizational Units tree
-  ## 106 Should filter in the Organizational Units tree
 
   Scenario: Roundtrip about Account homepage
 

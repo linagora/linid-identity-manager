@@ -1,7 +1,7 @@
 Feature: Test Copyright Filter
 
   ################## Copyright filter ##########################
-  ## 101 Should include default copyright header on responses
+  ## 101 Should include default copyright header on actuator health
   #############################################################
 
   Scenario: 101 - Should include default copyright header on actuator health

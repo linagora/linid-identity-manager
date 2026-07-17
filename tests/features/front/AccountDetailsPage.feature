@@ -19,7 +19,6 @@ Feature: Test Account details page display
   ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
   ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
   ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
-  ## 165 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
   ## 119 Immediate activation - dialog opens correctly
   ## 120 Immediate activation - cancel button closes dialog
   ## 121 Immediate activation - success, account status updated after form submission
@@ -64,6 +63,11 @@ Feature: Test Account details page display
   ## 160 Modify deactivation - validityPeriodEnd invalidDate validation error
   ## 161 Modify deactivation - validityPeriodEnd afterDate validation error
   ## 162 Modify deactivation - success, account status updated after form submission
+  ## 163 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
+  ## 164 Immediate revalidation - dialog opens with a mandatory justification field
+  ## 165 Immediate revalidation - cancel button closes the dialog
+  ## 166 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
+  ## 167 Scheduled revalidation - success, account re-validated after form submission
 
   Scenario: Roundtrip about Account Details
 
@@ -350,53 +354,6 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-
-    ## 165 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And I click on '[data-cy="linid-filter-panel_item-email"]'
-    And I set the text "lifecycle-c13@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
-    And I click on '[data-cy="text-search-filter-panel_search"]'
-    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
-    When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000cd"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="account-deactivated-banner"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-
-    ## 165 Immediate revalidation - dialog opens with a mandatory justification field
-    When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-immediate"]'
-    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' not exists
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' not exists
-    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Réactiver"
-
-    ## 165 Immediate revalidation - cancel button closes the dialog
-    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
-
-    ## 165 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
-    When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-scheduled"]'
-    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la réactivation du compte"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Date de fin de validité"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' not exists
-    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' not exists
-    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
-
-    ## 165 Scheduled revalidation - success, account re-validated after form submission
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
-    And I set the text "Re-validated by e2e scheduled flow" in the HTML element '[data-cy="field_statusComment"]'
-    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
-    And I expect the HTML element ".q-notification__message" to be visible
-    And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé à partir du"
 
     ## 119 Immediate activation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
@@ -933,3 +890,50 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé à partir du 01/01/2100"
+
+    ## 163 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
+    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-email"]'
+    And I set the text "lifecycle-c13@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000cd"]'
+    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    And I expect the HTML element '[data-cy="account-deactivated-banner"]' to be visible
+    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
+    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+
+    ## 164 Immediate revalidation - dialog opens with a mandatory justification field
+    When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-immediate"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' not exists
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' not exists
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Réactiver"
+
+    ## 165 Immediate revalidation - cancel button closes the dialog
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 166 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
+    When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-scheduled"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la réactivation du compte"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Date de fin de validité"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' not exists
+    And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' not exists
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
+
+    ## 167 Scheduled revalidation - success, account re-validated after form submission
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    And I set the text "Re-validated by e2e scheduled flow" in the HTML element '[data-cy="field_statusComment"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé à partir du"

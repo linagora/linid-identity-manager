@@ -9,7 +9,7 @@ Feature: Test API Organizational unit endpoints
 
   ################## Create (POST /organizational-units) ##############
   ## 201 Should create an organizational unit with valid data
-  ## 202 Should return 400 with missing required fields
+  ## 202 Should return 400 with missing required field "<field>"
   ## 203 Should return 400 with root name/type
   ## 204 Should return 404 with unknown parent
   ## 205 Should return 400 with another organizational unit with same name and type
@@ -18,16 +18,16 @@ Feature: Test API Organizational unit endpoints
   ## 301 Should return paginated list of organizational-units
 
   ################## Find By Id (GET /organizational-units/{id}) ######
-  ## 401 Should return 200 for existing organizational-unit
-  ## 402 Should return 404 for unknown organizational-unit id
+  ## 401 Should return 200 for existing organizational unit
+  ## 402 Should return 404 for unknown organizational unit id
 
   ################## Delete (DELETE /organizational-units/{id}) #######
-  ## 501 Should return 204 when deleting existing organizational-unit
-  ## 502 Should return 400 when deleting root organizational-unit
+  ## 501 Should return 204 when deleting existing organizational unit
+  ## 502 Should return 400 when deleting root organizational unit
 
   ################## Update (PUT /organizational-units/{id}) #######
   ## 601 Should return 200 update only name and type
-  ## 602 Should return 400 when trying to set root as type or name
+  ## 602 Should return 400 when trying to set root as <field>
   ## 603 Should return 400 when trying to update root organizational unit
   ## 604 Should return 400 when trying to update another organizational unit with same name and type
 
@@ -47,7 +47,7 @@ Feature: Test API Organizational unit endpoints
   ## 711 Should return 404 when reactivating an unknown organizational unit
 
   ################## Find accounts of O.U. (GET /organizational-units/{id}/accounts) #######
-  ## 801 Should return wanted users for existing organizational-unit
+  ## 801 Should return <user> for <ou> organizational-unit
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -385,7 +385,7 @@ Feature: Test API Organizational unit endpoints
       | name  | root | test |
       | type  | test | root |
 
-  Scenario: 603 - Should return 400 when trying to update another organizational unit with same name and type
+  Scenario: 603 - Should return 400 when trying to update root organizational unit
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.rootID}}' with method 'PUT' with body:
       """
       {
@@ -398,7 +398,7 @@ Feature: Test API Organizational unit endpoints
     And  I store 'ouID' as '{{response.body.id}}' in context
     And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.root.update'
 
-  Scenario: 604 - Should return 400 when trying to update root organizational unit
+  Scenario: 604 - Should return 400 when trying to update another organizational unit with same name and type
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
       """
       {
@@ -434,6 +434,9 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.already_exists'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou1_ID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou2_ID}}' with method 'DELETE'
     Then I expect status code is 204
 
   #################################################################

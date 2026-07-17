@@ -8,7 +8,7 @@ Feature: Test Organizational Unit creation page
   ## 105 Submitting a valid form should create the organizational unit
   ## 106 Should display a success notification after creation
   ## 107 Visiting the page without a parent should redirect to the home page
-  ## 108 Remove the created organizational unit
+  ## 108 Remove the created organizational unit (looked up by name)
 
   Scenario: Roundtrip about Organizational Unit creation
 

@@ -1,6 +1,6 @@
 Feature: Test Organizational Unit details panel display
 
-  ## 101 Should display the page title, badge and OU information for an active OU
+  ## 101 Should reach the details page from the table and display title, badge and OU information for an active OU
   ## 102 Should display the suspension dropdown for an active OU
   ## 103 Immediate suspension should suspend the OU once confirmed
   ## 104 Schedule suspension should open the form dialog with date and reason fields
@@ -9,7 +9,7 @@ Feature: Test Organizational Unit details panel display
   ## 107 Immediate reactivation from the banner should schedule the reactivation once confirmed
   ## 108 Edit suspension end from the banner should open the form dialog
   ## 109 Edit suspension end should succeed when a localized date is submitted
-  ## 110 Visiting an unknown node should fall back to the root organizational unit
+  ## 110 Visiting an unknown organizational unit should display a not found notification
 
   Scenario: Roundtrip about Organizational Unit details
 
@@ -20,10 +20,17 @@ Feature: Test Organizational Unit details panel display
     And I click on "button.btn-success"
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/"
 
-    ## 101 Should display the page title, badge and OU information for an active OU
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]'
-    Then I expect the HTML element '[data-cy="organizational-unit-details-page"]' to be visible
+    ## 101 Should reach the details page from the table and display title, badge and OU information for an active OU
+    Given I store "company_a_id" as "00000000-0000-4000-8000-00000000000a" in context
+    And I visit the "{{ env.E2E_FRONT_URL }}/organizational-units"
+    Then I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I set the text "Company A" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_{{ctx.company_a_id}}"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.company_a_id}}"
+    And I expect the HTML element '[data-cy="organizational-unit-details-page"]' to be visible
     And I expect the HTML element '[data-cy="organizational-unit-details-page_title"]' contains "Détails de l'unité organisationnelle"
     And I expect the HTML element '[data-cy="status-badge_active"]' to be visible
     And I expect the HTML element '[data-cy="organizational-unit-details-page_cards"]' to be visible
@@ -84,8 +91,8 @@ Feature: Test Organizational Unit details panel display
     And I expect the HTML element '[data-cy="organizational-unit-suspended-info-text"]' to be visible
 
     ## 106 Should display the suspended banner and badge for a currently suspended OU
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000e2"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000e2"
+    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e1"
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e1"
     And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "SuspendedOuNoEnd"
     And I expect the HTML element '[data-cy="status-badge_suspended"]' to be visible
     And I expect the HTML element '[data-cy="organizational-unit-suspended-banner"]' to be visible
@@ -127,7 +134,9 @@ Feature: Test Organizational Unit details panel display
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Date de fin de suspension mise à jour avec succès."
 
-    ## 110 Visiting an unknown node should fall back to the root organizational unit
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-deadbeefdead"
-    Then I expect the HTML element '[data-cy="organizational-unit-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "root"
+    ## 110 Visiting an unknown organizational unit should display a not found notification
+    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-deadbeefdead"
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-deadbeefdead"
+    And I expect the HTML element '[data-cy="organizational-unit-details-page"]' to be visible
+    And I expect the HTML element ".q-notification__message" to be visible
+    And I expect the HTML element ".q-notification__message" contains "Unité organisationnelle introuvable."

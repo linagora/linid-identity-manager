@@ -2,13 +2,9 @@ Feature: Test Organizational Units page display
 
   ################## Organizational Units Page ##################
   ## 101 Should display the Organizational Units tab in the main menu
-  ## 102 Should display the page with the splitter layout and the OU tree
-  ## 103 Should select the root OU by default and display its details
-  ## 104 Should update the details panel when selecting a company OU node
-  ## 105 Should update the details panel when selecting another company OU node
-  ## 106 Should select a nested OU node deeper in the tree
-  ## 107 Should select the OU referenced by the node query parameter on load
-  ## 108 Should keep the selected OU node when navigating between accountsPage and organizationalUnitsPage
+  ## 102 Should display the page with the smart filter and the OU table
+  ## 103 Should show the details of a OU when click see button of a OU
+  ## 104 Should show the details of another OU when click see button of a OU
 
   Scenario: Roundtrip about Organizational Units page
 
@@ -28,59 +24,39 @@ Feature: Test Organizational Units page display
     ####################################################
 
     ## 101 Should display the Organizational Units tab in the main menu
-    When I click on '[data-cy="item_organizational-units"]'
+    When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
 
-    ## 102 Should display the page with the splitter layout and the OU tree
-    And I expect the HTML element '[data-cy="organizational-unit-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="organizational-unit-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="generic-tree"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]' appear 1 times on screen
+    ## 102 Should display the page with the smart filter and the OU table
+    And I expect the HTML element '[data-cy="item-row"]' to be visible
+    And I expect the HTML element '[data-cy="linid-smart-filter-field"]' to be visible
+    And I expect the HTML element '[data-cy="buttons-card"]' to be visible
+    And I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
+    And I expect the HTML element '[data-cy="see-button_00000000-0000-4000-8000-000000000ee1"]' appear 1 times on screen
+    And I expect the HTML element '[data-cy="see-button_00000000-0000-4000-8000-0000000000b1"]' appear 1 times on screen
 
-    ## 103 Should select the root OU by default and display its details
-    And I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units?node="
-    And I expect the HTML element '[data-cy="organizational-unit-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "root"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "root"
+    ## 103 Should show the details of a OU when click see button of a OU
+    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' contains "Team Beta"
+    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' contains "TEAM"
+    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' contains "admin_fn admin_ln"
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-000000000ee1"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-000000000ee1"
+    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Team Beta"
+    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "TEAM"
 
-    ## 104 Should update the details panel when selecting a company OU node
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000aa"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000aa"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Company A"
+    ## 104 Should show the details of another OU when click see button of a OU
+    When I click on '[data-cy="button_cancel"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' contains "SuspendedOuWithEnd"
+    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' contains "COMPANY"
+    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' contains "admin_fn admin_ln"
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000e3"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e3"
+    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "SuspendedOuWithEnd"
     And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"
-
-    ## 105 Should update the details panel when selecting another company OU node
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000bb"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Company B"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"
-
-    ## 106 Should select a nested OU node deeper in the tree
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000cc"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000cc"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Division A1"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "DIVISION"
-
-    ## 107 Should select the OU referenced by the node query parameter on load
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000bb"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000bb"
-    And I expect the HTML element '[data-cy="organizational-unit-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Company B"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"
-
-    ## 108 Should keep the selected OU node when navigating between accountsPage and organizationalUnitsPage
-    When I click on '[data-cy="generic-tree-node-00000000-0000-4000-8000-0000000000cc"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000cc"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Division A1"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "DIVISION"
-    When I click on '[data-cy="item_accounts"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?node=00000000-0000-4000-8000-0000000000cc"
-    And I expect the HTML element '[data-cy="cell-firstname"]' contains "user3_fn"
-    And I expect the HTML element '[data-cy="cell-lastname"]' contains "user3_ln"
-    And I expect the HTML element '[data-cy="cell-email"]' contains "user3@example.com"
-    And I expect the HTML element '[data-cy="cell-createdBy"]' contains "admin_fn admin_ln"
-    When I click on '[data-cy="item_organizational-units"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?node=00000000-0000-4000-8000-0000000000cc"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Division A1"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "DIVISION"

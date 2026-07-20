@@ -6,6 +6,9 @@ Feature: Test Account homepage display
   ## 103 Should go to detail page when click on account detail button
   ## 104 Should have pagination working
   ## 105 Should clear all active filters at once with the clear button
+  ## 106 Should rename a favorite filter set from its rename button
+  ## 107 Should override a favorite filter set from its own override button
+  ## 108 Should disable the favorite override button when no filter is active
 
   Scenario: Roundtrip about Account homepage
 
@@ -110,3 +113,66 @@ Feature: Test Account homepage display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
     And I expect the HTML element '[data-cy="linid-smart-filter-chips"]' not exists
     And I expect the HTML element '[data-cy="linid-smart-filter-clear"]' not exists
+
+    ## 106 Should rename a favorite filter set from its rename button
+    # Apply a filter, then create a favorite out of the current search
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-firstname"]'
+    And I set the text "user5_fn" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    And I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-smart-favorite-panel"] [data-cy="button_create"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "MyFavorite" in the HTML element '[data-cy="field_favoriteName"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element '[data-cy="favorite-label_0"]' contains "MyFavorite"
+
+    # Rename that favorite through its own rename button
+    When I click on '[data-cy="button_rename_0"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Renommer un favori?"
+    When I set the text "RenamedFavorite" in the HTML element '[data-cy="field_favoriteName"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
+    And I expect the HTML element ".q-dialog__backdrop" not exists
+    And I expect the HTML element '[data-cy="favorite-label_0"]' contains "RenamedFavorite"
+
+    ## 107 Should override a favorite filter set from its own override button
+    # Apply the favorite: it still carries its original firstname search
+    When I click on '[data-cy="favorite-label_0"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
+
+    # Close the still-open menu by toggling the field, then replace the search with a lastname filter
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    Then I expect the HTML element '[data-cy="linid-smart-filter-menu"]' not exists
+    When I click on '[data-cy="linid-smart-filter-clear"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-lastname"]'
+    And I set the text "user6_ln" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?lastname=lk_*user6_ln*"
+
+    # Override the favorite with the current search through its own override button
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="button_override_0"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
+    And I expect the HTML element ".q-dialog__backdrop" not exists
+
+    # Apply the favorite again: it now restores the overridden search (lastname, not firstname)
+    When I click on '[data-cy="favorite-label_0"]'
+    Then I expect current url contains "lastname=lk_*user6_ln*"
+    And I expect the current URL no longer contains "firstname"
+
+    ## 108 Should disable the favorite override button when no filter is active
+    # The menu is still open from the previous apply; clear the active filter
+    When I click on '[data-cy="linid-smart-filter-clear"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    # With no active filter, the favorite's own override button is disabled
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    Then I expect the HTML element '[data-cy="button_override_0"]' to be disabled

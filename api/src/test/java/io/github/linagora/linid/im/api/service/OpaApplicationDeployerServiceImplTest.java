@@ -49,8 +49,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Test class: OpaApplicationDeployer")
-class OpaApplicationDeployerTest {
+@DisplayName("Test class: OpaApplicationDeployerServiceImpl")
+class OpaApplicationDeployerServiceImplTest {
 
     @Mock
     private ApplicationRepository applicationRepository;
@@ -59,7 +59,7 @@ class OpaApplicationDeployerTest {
     private OpaService opaService;
 
     @InjectMocks
-    private OpaApplicationDeployer deployer;
+    private OpaApplicationDeployerServiceImpl deployer;
 
     @Test
     @DisplayName("deploy should publish the policy, record the deployment date and persist the application")

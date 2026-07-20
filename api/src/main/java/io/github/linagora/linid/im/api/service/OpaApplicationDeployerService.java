@@ -27,42 +27,17 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.persistence.model.Application;
-import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Deploys a single application policy to OPA within its own transaction.
- *
- * <p>Extracted into a dedicated bean so that {@link Transactional} with {@link Propagation#REQUIRES_NEW} is honored
- * (it would be ignored on a self-invoked private method). Each application is therefore committed independently: a
- * failure on one application never rolls back the {@code deployedAt} update of another that was already deployed.</p>
+ * Service interface for Application deployer management operations.
  */
-@Component
-@RequiredArgsConstructor
-public class OpaApplicationDeployer {
+public interface OpaApplicationDeployerService {
 
     /**
-     * Repository used to persist the application deployment status.
-     */
-    private final ApplicationRepository applicationRepository;
-
-    /**
-     * Service publishing the policy to the OPA server.
-     */
-    private final OpaService opaService;
-
-    /**
-     * Publishes the application policy to OPA and records its deployment date, in a dedicated transaction.
+     * Deploys an application policy to OPA.
      *
      * @param application the application to deploy
+     * @return the deployed application with updated timestamp
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deploy(final Application application) {
-        var deployedDate = opaService.publish(application);
-        application.setDeployedAt(deployedDate);
-        applicationRepository.save(application);
-    }
+    Application deploy(Application application);
 }

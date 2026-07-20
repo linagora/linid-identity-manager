@@ -5,6 +5,7 @@ Feature: Test Account homepage display
   ## 102 Should filter accounts when using advanced search
   ## 103 Should go to detail page when click on account detail button
   ## 104 Should have pagination working
+  ## 105 Should clear all active filters at once with the clear button
 
   Scenario: Roundtrip about Account homepage
 
@@ -80,3 +81,32 @@ Feature: Test Account homepage display
     # Go to the next page
     When I click on 'button[aria-label="Next page"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 5 times on screen
+
+    ## 105 Should clear all active filters at once with the clear button
+    # Reset the query, no filter is active yet so the clear button is not rendered
+    When I click on '[data-cy="item_moduleAccountsPage"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    And I expect the HTML element '[data-cy="linid-smart-filter-clear"]' not exists
+
+    # Apply a first filter on firstname: the clear button becomes available
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-firstname"]'
+    And I set the text "user5_fn" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
+    And I expect the HTML element '[data-cy="linid-smart-filter-chips"]' to be visible
+    And I expect the HTML element '[data-cy="linid-smart-filter-clear"]' to be visible
+
+    # Apply a second filter on lastname: both filters now shape the query
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-lastname"]'
+    And I set the text "user5_ln" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect current url contains "firstname=lk_*user5_fn*"
+    And I expect current url contains "lastname=lk_*user5_ln*"
+
+    # Clear every filter at once: the query, the chips and the clear button are reset
+    When I click on '[data-cy="linid-smart-filter-clear"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    And I expect the HTML element '[data-cy="linid-smart-filter-chips"]' not exists
+    And I expect the HTML element '[data-cy="linid-smart-filter-clear"]' not exists

@@ -91,6 +91,25 @@
         "confirmLoading": "Creating..."
       }
     },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
     "LinidSmartFilter": {
       "label": "Current search filter",
       "hint": "Enter your filter",
@@ -243,6 +262,25 @@
         "confirmLoading": "Creating..."
       }
     },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
     "LinidSmartFilter": {
       "label": "Current search filter",
       "hint": "Enter your filter",

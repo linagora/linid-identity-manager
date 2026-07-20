@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -52,7 +51,7 @@ class OpaDeploymentSchedulerTest {
     private ApplicationRepository applicationRepository;
 
     @Mock
-    private OpaApplicationDeployer opaApplicationDeployer;
+    private OpaApplicationDeployerService opaApplicationDeployerService;
 
     @InjectMocks
     private OpaDeploymentScheduler scheduler;
@@ -63,12 +62,12 @@ class OpaDeploymentSchedulerTest {
         var first = Application.builder().id(UUID.randomUUID()).code("app-a").script("policy-a").build();
         var second = Application.builder().id(UUID.randomUUID()).code("app-b").script("policy-b").build();
         when(applicationRepository.findByDeployedAtIsNullAndScriptIsNotNull()).thenReturn(List.of(first, second));
-        doNothing().when(opaApplicationDeployer).deploy(any());
+        when(opaApplicationDeployerService.deploy(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         scheduler.deployPendingApplications();
 
-        verify(opaApplicationDeployer).deploy(first);
-        verify(opaApplicationDeployer).deploy(second);
+        verify(opaApplicationDeployerService).deploy(first);
+        verify(opaApplicationDeployerService).deploy(second);
     }
 
     @Test
@@ -77,14 +76,14 @@ class OpaDeploymentSchedulerTest {
         var failing = Application.builder().id(UUID.randomUUID()).code("app-fail").script("policy-fail").build();
         var ok = Application.builder().id(UUID.randomUUID()).code("app-ok").script("policy-ok").build();
         when(applicationRepository.findByDeployedAtIsNullAndScriptIsNotNull()).thenReturn(List.of(failing, ok));
-        doThrow(new RuntimeException("deploy failed")).when(opaApplicationDeployer).deploy(failing);
-        doNothing().when(opaApplicationDeployer).deploy(ok);
+        doThrow(new RuntimeException("deploy failed")).when(opaApplicationDeployerService).deploy(failing);
+        when(opaApplicationDeployerService.deploy(ok)).thenReturn(ok);
 
         scheduler.deployPendingApplications();
 
         // A failure on the first application must not prevent the second one from being deployed.
-        verify(opaApplicationDeployer).deploy(failing);
-        verify(opaApplicationDeployer).deploy(ok);
+        verify(opaApplicationDeployerService).deploy(failing);
+        verify(opaApplicationDeployerService).deploy(ok);
     }
 
     @Test
@@ -94,6 +93,6 @@ class OpaDeploymentSchedulerTest {
 
         scheduler.deployPendingApplications();
 
-        verify(opaApplicationDeployer, never()).deploy(any());
+        verify(opaApplicationDeployerService, never()).deploy(any());
     }
 }

@@ -28,67 +28,47 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
+import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Map;
+
+import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
 /**
- * Periodically deploys to OPA every application whose policy is pending deployment.
+ * Deploys a single application policy to OPA within its own transaction.
  *
- * <p>Each application is deployed in its own transaction through the {@link OpaApplicationDeployerService},
- * so that a failure on one application neither rolls back the deployment of the others nor blocks the batch.</p>
+ * <p>Extracted into a dedicated bean so that {@link Transactional} is honored
+ * (it would be ignored on a self-invoked private method). Each application is therefore committed independently: a
+ * failure on one application never rolls back the {@code deployedAt} update of another that was already deployed.</p>
  */
-@Slf4j
-@Component
+@Service
+@Transactional(propagation = REQUIRES_NEW)
 @RequiredArgsConstructor
-public class OpaDeploymentScheduler {
+public class OpaApplicationDeployerServiceImpl implements OpaApplicationDeployerService {
 
     /**
-     * Repository used to list the applications pending deployment.
+     * Repository used to persist the application deployment status.
      */
     private final ApplicationRepository applicationRepository;
 
     /**
-     * Deployer publishing a single application in its own transaction.
+     * Service publishing the policy to the OPA server.
      */
-    private final OpaApplicationDeployerService opaApplicationDeployerService;
+    private final OpaService opaService;
 
-    /**
-     * Deploys all applications that are pending deployment to OPA.
-     *
-     * <p>Retrieves every application with a generated script that has not been deployed yet and deploys each one
-     * independently. A deployment failure on one application is logged and does not block the processing of the
-     * others; it will simply be retried on the next execution.</p>
-     */
-    @Scheduled(fixedDelayString = "${opa.deployment.interval:5m}")
-    public void deployPendingApplications() {
-        var applications = applicationRepository.findByDeployedAtIsNullAndScriptIsNotNull();
-
-        if (applications.isEmpty()) {
-            log.debug("No application pending OPA deployment");
-            return;
+    @Override
+    public Application deploy(final Application application) {
+        if (application.getScript() == null || application.getScript().isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST.value(), I18nMessage.of("error.application.script"
+                    + ".missing"), Map.of("applicationId", application.getId().toString()));
         }
-
-        log.info("Deploying {} application(s) to OPA", applications.size());
-
-        for (Application application : applications) {
-            deploySafely(application);
-        }
-    }
-
-    /**
-     * Deploys a single application, isolating any failure so it does not block the other applications.
-     *
-     * @param application the application to deploy
-     */
-    private void deploySafely(final Application application) {
-        try {
-            opaApplicationDeployerService.deploy(application);
-            log.info("Successfully deployed policy of application {} to OPA", application.getCode());
-        } catch (RuntimeException e) {
-            log.error("Failed to deploy policy of application {} to OPA, it will be retried on the next execution",
-                application.getCode(), e);
-        }
+        var deployedDate = opaService.publish(application);
+        application.setDeployedAt(deployedDate);
+        return applicationRepository.save(application);
     }
 }

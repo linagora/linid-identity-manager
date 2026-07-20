@@ -138,7 +138,33 @@
         "noData": "Aucun favoris disponible",
         "createFavorite": "Créer un favoris",
         "overrideFavorite": "Remplacer un favoris",
-        "deleteButton": ""
+        "deleteButton": "",
+        "LinidFilterChip": {
+          "firstname": {
+            "type": "Prénom",
+            "separator": "ou"
+          },
+          "lastname": {
+            "type": "Nom de famille",
+            "separator": "ou"
+          },
+          "email": {
+            "type": "Email",
+            "separator": "ou"
+          },
+          "status": {
+            "type": "Statut",
+            "separator": "ou"
+          },
+          "createdBy": {
+            "type": "Créé par",
+            "separator": "ou"
+          },
+          "insertDate": {
+            "type": "Date de création",
+            "separator": "ou"
+          }
+        }
       },
       "TextSearchFilterPanel": {
         "inputLabel": "Filtrage par texte",
@@ -285,7 +311,29 @@
         "noData": "Aucun favoris disponible",
         "createFavorite": "Créer un favoris",
         "overrideFavorite": "Remplacer un favoris",
-        "deleteButton": ""
+        "deleteButton": "",
+        "LinidFilterChip": {
+          "name": {
+            "type": "Nom",
+            "separator": "ou"
+          },
+          "type": {
+            "type": "Type",
+            "separator": "ou"
+          },
+          "createdBy": {
+            "type": "Créé par",
+            "separator": "ou"
+          },
+          "status": {
+            "type": "Statut",
+            "separator": "ou"
+          },
+          "insertDate": {
+            "type": "Date de création",
+            "separator": "ou"
+          }
+        }
       },
       "TextSearchFilterPanel": {
         "inputLabel": "Filtrage par texte",

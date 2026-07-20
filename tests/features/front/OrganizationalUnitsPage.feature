@@ -30,7 +30,6 @@ Feature: Test Organizational Units page display
     ## 102 Should display the page with the smart filter and the OU table
     And I expect the HTML element '[data-cy="item-row"]' to be visible
     And I expect the HTML element '[data-cy="linid-smart-filter-field"]' to be visible
-    And I expect the HTML element '[data-cy="buttons-card"]' to be visible
     And I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
 
     ## 103 Should show the details of a OU when click see button of a OU

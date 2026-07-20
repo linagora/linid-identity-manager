@@ -12,8 +12,8 @@
     "page": "catalogUI/GenericTablePage",
     "pagePath": "",
     "idKey": "id",
-    "enableActions": true,
-    "creationPagePath": "organizational-units/create",
+    "enableActions": false,
+    "creationPagePath": null,
     "filters": [
       {
         "name": "name",

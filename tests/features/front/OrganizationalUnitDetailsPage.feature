@@ -10,6 +10,7 @@ Feature: Test Organizational Unit details panel display
   ## 108 Edit suspension end from the banner should open the form dialog
   ## 109 Edit suspension end should succeed when a localized date is submitted
   ## 110 Visiting an unknown organizational unit should display a not found notification
+  ## 111 Create child button should open the creation page with the current OU as parent
 
   Scenario: Roundtrip about Organizational Unit details
 
@@ -22,8 +23,9 @@ Feature: Test Organizational Unit details panel display
 
     ## 101 Should reach the details page from the table and display title, badge and OU information for an active OU
     Given I store "company_a_id" as "00000000-0000-4000-8000-00000000000a" in context
-    And I visit the "{{ env.E2E_FRONT_URL }}/organizational-units"
-    Then I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
+    When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    And I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I set the text "Company A" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
@@ -91,8 +93,15 @@ Feature: Test Organizational Unit details panel display
     And I expect the HTML element '[data-cy="organizational-unit-suspended-info-text"]' to be visible
 
     ## 106 Should display the suspended banner and badge for a currently suspended OU
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e1"
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e1"
+    Given I store "suspended_ou_no_end_id" as "00000000-0000-4000-8000-0000000000e1" in context
+    When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I set the text "SuspendedOuNoEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_{{ctx.suspended_ou_no_end_id}}"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.suspended_ou_no_end_id}}"
     And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "SuspendedOuNoEnd"
     And I expect the HTML element '[data-cy="status-badge_suspended"]' to be visible
     And I expect the HTML element '[data-cy="organizational-unit-suspended-banner"]' to be visible
@@ -140,3 +149,18 @@ Feature: Test Organizational Unit details panel display
     And I expect the HTML element '[data-cy="organizational-unit-details-page"]' to be visible
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Unité organisationnelle introuvable."
+
+    ## 111 Create child button should open the creation page with the current OU as parent
+    When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I set the text "Company A" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_{{ctx.company_a_id}}"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.company_a_id}}"
+    And I expect the HTML element '[data-cy="organizational-unit-details-page_create-child-button"]' to be visible
+    When I click on '[data-cy="organizational-unit-details-page_create-child-button"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/create?parent={{ctx.company_a_id}}"
+    And I expect the HTML element '[data-cy="organizational-unit-creation-page"]' to be visible
+    And I expect the HTML element '[data-cy="field_parent"] input' to have value "Company A"

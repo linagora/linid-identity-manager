@@ -58,7 +58,16 @@
             :i18n-scope="i18nScope"
             :show-confirm-button="false"
             @cancel="goBack"
-          />
+          >
+            <template #extra-buttons>
+              <q-btn
+                v-bind="createChildButtonProps"
+                :label="t('createChild')"
+                data-cy="organizational-unit-details-page_create-child-button"
+                @click="goToCreateChild"
+              />
+            </template>
+          </component>
         </div>
       </div>
 
@@ -124,9 +133,11 @@
 <script setup lang="ts">
 import {
   type DropdownClickPayload,
+  type LinidQBtnProps,
   loadAsyncComponent,
   useNotify,
   useScopedI18n,
+  useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { appConfig } from 'boot/config';
@@ -162,6 +173,12 @@ const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
+const { ui } = useUiDesign();
+
+const createChildButtonProps = ui<LinidQBtnProps>(
+  `${uiNamespace}.create-child-button`,
+  'q-btn'
+);
 const {
   toOrganizationalUnit,
   toOrganizationalUnitStatus,
@@ -198,6 +215,17 @@ const actionDelay: number =
 /** Navigates back to the organizational unit list. */
 function goBack(): void {
   router.push('/organizational-units');
+}
+
+/**
+ * Navigates to the creation page to create a child organizational unit under the current one, which is passed as the
+ * parent through the route query.
+ */
+function goToCreateChild(): void {
+  void router.push({
+    path: '/organizational-units/create',
+    query: { parent: currentId.value },
+  });
 }
 
 /**

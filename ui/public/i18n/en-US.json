@@ -753,6 +753,7 @@
   },
   "OrganizationalUnitDetailsPage": {
     "title": "Organizational unit details",
+    "createChild": "Create a child O.U.",
     "EntityDetailsCard": {
       "title": "Organizational unit information",
       "attributes": {

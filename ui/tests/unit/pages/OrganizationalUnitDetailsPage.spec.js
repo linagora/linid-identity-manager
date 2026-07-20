@@ -59,6 +59,9 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: () => ({
     t: vi.fn((v) => v),
   }),
+  useUiDesign: () => ({
+    ui: vi.fn(() => ({})),
+  }),
 }));
 
 const mockRoute = {
@@ -268,6 +271,18 @@ describe('Test component: OrganizationalUnitDetailsPage', () => {
       wrapper.vm.goBack();
 
       expect(mockRouter.push).toHaveBeenCalledWith('/organizational-units');
+    });
+  });
+
+  describe('Test function: goToCreateChild', () => {
+    it('should navigate to the creation page with the current OU as parent', () => {
+      wrapper = shallowMount(OrganizationalUnitDetailsPage);
+      wrapper.vm.goToCreateChild();
+
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        path: '/organizational-units/create',
+        query: { parent: OU_ID },
+      });
     });
   });
 

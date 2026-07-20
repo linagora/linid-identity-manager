@@ -46,6 +46,7 @@
   "error.account.status.nothing_to_reactivate": "Account {id} cannot be reactivated: it is neither currently suspended nor deactivated.",
   "error.application.not_found": "Application not found: {id}",
   "error.application.code.already_exists": "Application already exists for code '{code}'",
+  "error.application.script.missing": "Unable to deploy application {applicationId}: there is no script in the application.",
   "error.application_rule.not_found": "Application rule not found: {id}",
   "error.application_rule.code.already_exists": "Application rule already exists for code '{code}'",
   "error.application_rule.priority.already_exists": "Application rule already exists for priority '{priority}'",

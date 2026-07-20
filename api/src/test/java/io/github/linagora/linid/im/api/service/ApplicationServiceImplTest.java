@@ -87,6 +87,9 @@ class ApplicationServiceImplTest {
     @Mock
     private ChecksumService checksumService;
 
+    @Mock
+    private OpaApplicationDeployerService opaApplicationDeployerService;
+
     @InjectMocks
     private ApplicationServiceImpl service;
 

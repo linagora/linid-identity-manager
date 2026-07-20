@@ -147,6 +147,24 @@
           "label-section": {
             "q-item-section": {}
           },
+          "override-section": {
+            "q-item-section": {},
+            "q-btn": {
+              "flat": true,
+              "round": true,
+              "icon": "save_alt",
+              "color": "primary"
+            }
+          },
+          "rename-section": {
+            "q-item-section": {},
+            "q-btn": {
+              "flat": true,
+              "round": true,
+              "icon": "edit",
+              "color": "primary"
+            }
+          },
           "delete-section": {
             "q-item-section": {},
             "q-btn": {
@@ -164,9 +182,6 @@
             "q-item-section": {}
           },
           "create-button": {
-            "q-btn": {}
-          },
-          "override-button": {
             "q-btn": {}
           }
         }

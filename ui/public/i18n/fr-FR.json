@@ -32,9 +32,9 @@
     "NavigationMenu": {
       "label": "Comptes"
     },
-    "RemoveFavoriteNotifyMessage": "Le favoris '{name}' a été supprimé.",
-    "CreateFavoriteNotifyMessage": "Le favoris '{name}' a été créé.",
-    "OverrideFavoriteNotifyMessage": "Le favoris  '{name}' a été remplacé.",
+    "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
+    "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
+    "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
     "seeButton": "Voir",
     "columns": {
       "firstname": "Prénom",
@@ -52,8 +52,8 @@
       "paginationLabel": "{start}-{end} sur {total}"
     },
     "DeleteFavoriteDialog": {
-      "title": "Supprimer un favoris?",
-      "content": "Confirmer la suppression du favoris \"{label}\"?",
+      "title": "Supprimer un favori?",
+      "content": "Confirmer la suppression du favori \"{label}\"?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
@@ -61,8 +61,8 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Remplacer un favoris?",
-      "content": "Selectionner un favoris pour le remplacer par la recherche actuelle.",
+      "title": "Remplacer un favori?",
+      "content": "Selectionner un favori pour le remplacer par la recherche actuelle.",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",
@@ -75,11 +75,11 @@
       }
     },
     "CreateFavoriteDialog": {
-      "title": "Créer un favoris?",
-      "content": "Créer un favoris à partir de la recherche actuelle.",
+      "title": "Créer un favori?",
+      "content": "Créer un favori à partir de la recherche actuelle.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favoris",
+          "label": "Nom du favori",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -91,6 +91,25 @@
         "confirmLoading": "Création..."
       }
     },
+    "RenameFavoriteDialog": {
+      "title": "Renommer un favori?",
+      "content": "Renommer le favori avec un nouveau nom.",
+      "duplicateName": "Le favori '{name}' existe déjà.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favori",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Renommer",
+        "confirmLoading": "Renommage..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
     "LinidSmartFilter": {
       "label": "Filtre(s) de recherche",
       "hint": "",
@@ -135,9 +154,9 @@
       },
       "LinidFavoritePanel": {
         "title": "Favoris",
-        "noData": "Aucun favoris disponible",
-        "createFavorite": "Créer un favoris",
-        "overrideFavorite": "Remplacer un favoris",
+        "noData": "Aucun favori disponible",
+        "createFavorite": "Créer un favori",
+        "overrideFavorite": "Remplacer un favori",
         "deleteButton": ""
       },
       "TextSearchFilterPanel": {
@@ -186,9 +205,9 @@
     "ButtonsCard": {
       "create": "Créer"
     },
-    "RemoveFavoriteNotifyMessage": "Le favoris '{name}' a été supprimé.",
-    "CreateFavoriteNotifyMessage": "Le favoris '{name}' a été créé.",
-    "OverrideFavoriteNotifyMessage": "Le favoris  '{name}' a été remplacé.",
+    "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
+    "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
+    "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
     "seeButton": "Voir",
     "columns": {
       "name": "Nom",
@@ -204,8 +223,8 @@
       "paginationLabel": "{start}-{end} sur {total}"
     },
     "DeleteFavoriteDialog": {
-      "title": "Supprimer un favoris?",
-      "content": "Confirmer la suppression du favoris \"{label}\"?",
+      "title": "Supprimer un favori?",
+      "content": "Confirmer la suppression du favori \"{label}\"?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
@@ -213,8 +232,8 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Remplacer un favoris?",
-      "content": "Selectionner un favoris pour le remplacer par la recherche actuelle.",
+      "title": "Remplacer un favori?",
+      "content": "Selectionner un favori pour le remplacer par la recherche actuelle.",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",
@@ -227,11 +246,11 @@
       }
     },
     "CreateFavoriteDialog": {
-      "title": "Créer un favoris?",
-      "content": "Créer un favoris à partir de la recherche actuelle.",
+      "title": "Créer un favori?",
+      "content": "Créer un favori à partir de la recherche actuelle.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favoris",
+          "label": "Nom du favori",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -243,6 +262,25 @@
         "confirmLoading": "Creation..."
       }
     },
+    "RenameFavoriteDialog": {
+      "title": "Renommer un favori?",
+      "content": "Renommer le favori avec un nouveau nom.",
+      "duplicateName": "Le favori '{name}' existe déjà.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favori",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Renommer",
+        "confirmLoading": "Renommage..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
     "LinidSmartFilter": {
       "label": "Filtre(s) de recherche",
       "hint": "",
@@ -282,9 +320,9 @@
       },
       "LinidFavoritePanel": {
         "title": "Favoris",
-        "noData": "Aucun favoris disponible",
-        "createFavorite": "Créer un favoris",
-        "overrideFavorite": "Remplacer un favoris",
+        "noData": "Aucun favori disponible",
+        "createFavorite": "Créer un favori",
+        "overrideFavorite": "Remplacer un favori",
         "deleteButton": ""
       },
       "TextSearchFilterPanel": {

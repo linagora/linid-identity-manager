@@ -77,6 +77,33 @@ resources/i18n/en-US.json
 
 ---
 
+## 🌐 Language Switcher
+
+The header profile menu includes a **language switcher** that lets users change the application language at runtime.
+
+### How the active language is resolved
+
+At startup, the active language is resolved by priority:
+
+1. The **user preference** stored on the server
+2. The language **persisted locally** (browser storage) from a previous selection
+3. The **default locale** from the configuration
+
+When the user selects a language, the choice is applied immediately to the whole UI and persisted (locally and as a server-side user preference).
+
+### Required resources per language
+
+For every language listed in `languages`, the frontend resources must provide:
+
+* the locale messages file (`i18n/{locale}.json`)
+* the translation key `application.language.title` (label of the selector)
+* the translation key `application.languages.{locale}` (display name of the language, written in its own language — must be identical across all locale files)
+* a flag image served at `icons/{locale}.svg`
+
+If any of these is missing, the language renders with a broken flag image or a raw translation key.
+
+---
+
 ## 📝 Best Practices
 
 * Keep backend and plugin translations **modular and organized**

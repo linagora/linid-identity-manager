@@ -27,13 +27,14 @@
 import {
   fromDot,
   merge,
+  resolveLocale,
   setI18nInstance,
+  useLinidUiStore,
 } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import { appConfig } from 'boot/config';
 import { Quasar } from 'quasar';
 import type messages from 'src/i18n';
-import { resolveLocale, syncLocale } from 'src/services/I18nSupportService';
 import { createI18n, type I18n } from 'vue-i18n';
 import { defineBoot } from '#q-app/wrappers';
 
@@ -72,8 +73,14 @@ export default defineBoot(async ({ app }) => {
     messages[lang] = merge(apiMessages, appMessages);
   }
 
+  const uiStore = useLinidUiStore();
+  uiStore.setAvailableLanguages(appConfig.i18n.languages);
+  // Seed the store with the configured default so resolveLocale has a valid
+  // fallback when no user preference or persisted language exists yet.
+  uiStore.setLocale(appConfig.i18n.locale);
+
   const i18nLocale = resolveLocale();
-  await syncLocale(i18nLocale);
+  uiStore.setLocale(i18nLocale);
 
   // eslint-disable-next-line jsdoc/require-jsdoc
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
@@ -91,7 +98,7 @@ export default defineBoot(async ({ app }) => {
   app.use(i18n);
 
   // Load Quasar language pack to translate built-in components (table pagination, etc.)
-  const langIso = appConfig.i18n.locale.substring(0, 2);
+  const langIso = i18nLocale.substring(0, 2);
   try {
     const quasarLang = await import(
       /* @vite-ignore */ `quasar/lang/${langIso}.js`

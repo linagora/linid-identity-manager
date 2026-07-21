@@ -24,6 +24,17 @@
         },
         "q-item-label": {
           "caption": true
+        },
+        "q-select": {
+          "dense": true,
+          "borderless": true
+        },
+        "q-item": {
+          "dense": true
+        },
+        "q-img": {
+          "width": "25px",
+          "fit": "contain"
         }
       }
     }

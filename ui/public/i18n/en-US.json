@@ -18,7 +18,14 @@
       "version": "Demo version"
     },
     "dateTimeFormat": "YYYY/MM/DD hh:mm:ss A",
-    "dateFormat": "YYYY/MM/DD"
+    "dateFormat": "YYYY/MM/DD",
+    "language": {
+      "title": "Language"
+    },
+    "languages": {
+      "fr-FR": "Français",
+      "en-US": "English (US)"
+    }
   },
   "Homepage": {
     "title": "LinID Identity Manager",

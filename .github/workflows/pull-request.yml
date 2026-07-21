@@ -19,8 +19,50 @@ jobs:
           delete_user_name: github-actions[bot]
           issue_number: ${{ github.event.number }}
 
+  validate-source-branch:
+    name: Validate source branch
+    needs: [delete-comments]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check branch name
+        id: check
+        run: |
+          BRANCH="${{ github.head_ref }}"
+          echo "Source branch: $BRANCH"
+
+          if [[ "${{ github.base_ref }}" != "main" ]]; then
+            echo "Target branch is '${{ github.base_ref }}', not main — skipping validation"
+            exit 0
+          fi
+
+          if [[ "$BRANCH" =~ ^(release|hotfix)/.+$ ]]; then
+            echo "✅ Branch '$BRANCH' is allowed"
+            exit 0
+          fi
+
+          echo "❌ Branch '$BRANCH' is not allowed"
+          echo "Only release/* and hotfix/* branches can be merged into main"
+          exit 1
+
+      - name: Comment PR on failure
+        if: failure()
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          message: |
+            ❌ **Merge blocked into `main`**
+
+            The source branch `${{ github.head_ref }}` is not allowed to be merged into `main`.
+
+            Allowed source branches are:
+            - `release/*`
+            - `hotfix/*`
+
+            Please create or rename your branch to follow the required naming convention before merging.
+
   branch-naming-rules:
     name: Check branch name
+    needs: [delete-comments]
     runs-on: ubuntu-latest
     steps:
       - uses: deepakputhraya/action-branch-name@5f1cc199284b75145ec2d13434422e6987cf6af8
@@ -33,6 +75,7 @@ jobs:
 
   commit-checks:
     name: Check commit messages
+    needs: [delete-comments]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -54,6 +97,7 @@ jobs:
 
   ui-build:
     name: UI - Build application
+    needs: [validate-source-branch]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -154,6 +198,7 @@ jobs:
 
   api-check-style:
     name: API - Code style
+    needs: [validate-source-branch]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -174,6 +219,7 @@ jobs:
 
   api-javadoc:
     name: API - Javadoc
+    needs: [validate-source-branch]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -194,6 +240,7 @@ jobs:
 
   api-tests:
     name: API - Unit tests
+    needs: [validate-source-branch]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -226,6 +273,7 @@ jobs:
 
   api-check-dependencies:
     name: API - Check dependencies
+    needs: [validate-source-branch]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -252,6 +300,7 @@ jobs:
 
   e2e-check-style:
     name: E2E - Code style
+    needs: [validate-source-branch]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

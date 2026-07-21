@@ -27,13 +27,14 @@
 import {
   fromDot,
   merge,
+  resolveLocale,
   setI18nInstance,
+  useLinidUiStore,
 } from '@linagora/linid-im-front-corelib';
 import { api } from 'boot/axios';
 import { appConfig } from 'boot/config';
 import { Quasar } from 'quasar';
 import type messages from 'src/i18n';
-import { resolveLocale, syncLocale } from 'src/services/I18nSupportService';
 import { createI18n, type I18n } from 'vue-i18n';
 import { defineBoot } from '#q-app/wrappers';
 
@@ -72,12 +73,15 @@ export default defineBoot(async ({ app }) => {
     messages[lang] = merge(apiMessages, appMessages);
   }
 
+  const uiStore = useLinidUiStore();
+  uiStore.setAvailableLanguages(appConfig.i18n.languages);
+
   const i18nLocale = resolveLocale();
-  await syncLocale(i18nLocale);
+  uiStore.setLocale(i18nLocale);
 
   // eslint-disable-next-line jsdoc/require-jsdoc
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: i18nLocale,
+    locale: appConfig.i18n.locale,
     legacy: false,
     fallbackLocale: appConfig.i18n.locale,
     // @ts-expect-error 'messages' type is not compatible with the expected type of createI18n,

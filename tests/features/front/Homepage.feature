@@ -31,11 +31,27 @@ Feature: Test homepage
   ################## Header Profile Menu #############
   ####################################################
 
-  ## 201 Should display user profile menu
+  ## 201 Should display user's information in the user profile menu
     When I click on '[data-cy="header_profile_button"]'
     Then I expect the HTML element '[data-cy="header_profile_menu"]' to be visible
     And I expect the HTML element '[data-cy="header_profile_name"]' contains "admin name"
     And I expect the HTML element '[data-cy="header_profile_email"]' contains "admin@example.com"
+
+  ## 202 Should display the language switcher in the user profile menu
+    And I expect the HTML element '[data-cy="header_profile_language"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_select"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'Français'
+    And I expect the HTML element '[data-cy="header_profile_language_select"] img' to be visible
+
+  ## 203 Should display the list of available languages and switch the interface language
+    When I click on '[data-cy="header_profile_language_select"]'
+    Then I expect the HTML element '[data-cy="header_profile_language_option_en-US"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"]' to be disabled
+    When I click on '[data-cy="header_profile_language_option_en-US"]'
+    Then I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'English (US)'
+    #When I visit the '{{ env.E2E_FRONT_URL }}/'
+    #Then I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'English (US)'
 
   ####################################################
   ################## Content Sections ################

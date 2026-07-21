@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-07-21
+
+### Added
+
+- Introduced **Generic Resource Pages**, providing a configurable way to build resource home pages from runtime configuration.
+- Added **Smart Filter component** support through community plugins, enabling advanced filtering capabilities on generic resource pages.
+- Added support for **user preference management**, allowing UI preferences to be stored and retrieved dynamically.
+- Added **child Organizational Unit creation** directly from the organizational unit details page.
+
+### Changed
+
+- Migrated the **Accounts home page** to the new Generic Page architecture.
+- Migrated the **Organizational Units home page** to the new Generic Page architecture.
+- Moved internationalization configuration into `config.json`, allowing runtime customization.
+- Updated user preference handling to dynamically manage UI internationalization settings.
+- Updated community plugins dependencies to include the latest generic page and smart filter capabilities.
+
+### Fixed
+
+- Fixed OIDC configuration issues.
+- Fixed SSL certificate handling issues with Alpine-based images.
+- Fixed health checks by replacing unavailable `wget` usage.
+
+### Build
+
+- Added dependency update automation with Dependabot targeting the appropriate branches.
+- Updated frontend core library and community plugins versions.
+- Added content hash versioning for generated assets.
+- Improved environment variable handling for OIDC configuration.
+
 ## [0.6.0] - 2026-06-17
 
 ### Added
@@ -237,3 +267,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.4.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.4.0
 [0.5.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.5.0
 [0.6.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.6.0
+[0.7.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.7.0

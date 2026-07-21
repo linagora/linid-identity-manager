@@ -1,0 +1,49 @@
+{
+  "instanceId": "moduleOrganizationalUnitCreationPage",
+  "remoteName": "catalogUI",
+  "entity": "organizational-units",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "organizational-units",
+  "basePath": "/organizational-units",
+  "zones": [
+    {
+      "zone": "moduleOrganizationalUnitCreationPage.content.form-section-general.prepend",
+      "component": "OrganizationalUnitParentField",
+      "props": {
+        "listPath": "/organizational-units",
+        "emitOnParentLoaded": "ou-parent-loaded"
+      }
+    }
+  ],
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericCreationPage",
+    "pagePath": "new",
+    "parentPath": "/organizational-units/{{ query.parent }}",
+    "successPath": "/organizational-units/{{ entity.id }}",
+    "idKey": "id",
+    "formSections": [
+      {
+        "id": "general",
+        "fields": [
+          {
+            "name": "name",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "type",
+            "input": "List",
+            "required": true,
+            "inputSettings": {
+              "values": ["COMPANY", "DEPARTMENT", "TEAM"]
+            }
+          }
+        ]
+      }
+    ],
+    "updateEntityOn": ["ou-parent-loaded"]
+  }
+}

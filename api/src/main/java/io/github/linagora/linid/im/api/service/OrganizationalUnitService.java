@@ -26,14 +26,17 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,9 +82,9 @@ public interface OrganizationalUnitService {
      *
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit
-     * @return the found {@link OrganizationalUnitView}
+     * @return the found {@link OrganizationalUnitDistinctView}
      */
-    OrganizationalUnitView findViewById(UserPrincipal userPrincipal, UUID id);
+    OrganizationalUnitDistinctView findViewById(UserPrincipal userPrincipal, UUID id);
 
     /**
      * Retrieves all organizational units view matching the provided filters in a paginated format.
@@ -89,9 +92,9 @@ public interface OrganizationalUnitService {
      * @param userPrincipal the authenticated user performing the operation
      * @param filters       filtering criteria applied to the search
      * @param pageable      pagination and sorting information
-     * @return a page of {@link OrganizationalUnitView}
+     * @return a page of {@link OrganizationalUnitDistinctView}
      */
-    Page<OrganizationalUnitView> findAll(
+    Page<OrganizationalUnitDistinctView> findAll(
         UserPrincipal userPrincipal,
         OrganizationalUnitViewQueryFilterDto filters,
         Pageable pageable
@@ -110,6 +113,45 @@ public interface OrganizationalUnitService {
         OrganizationalUnitAccountViewQueryFilterDto filters,
         Pageable pageable
     );
+
+    /**
+     * Attaches an account to an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param record               the attachment payload (account identifier and relationship attributes)
+     * @return the created {@link OrganizationalUnitAccount} relationship
+     */
+    OrganizationalUnitAccount attachAccount(
+        UserPrincipal userPrincipal,
+        UUID organizationalUnitId,
+        OrganizationalUnitAccountRecord record
+    );
+
+    /**
+     * Updates the relationship attributes between an account and an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param accountId            the unique identifier of the attached account
+     * @param record               the update payload (relationship attributes)
+     * @return the updated {@link OrganizationalUnitAccount} relationship
+     */
+    OrganizationalUnitAccount updateAccountRelation(
+        UserPrincipal userPrincipal,
+        UUID organizationalUnitId,
+        UUID accountId,
+        OrganizationalUnitAccountUpdateRecord record
+    );
+
+    /**
+     * Detaches an account from an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param accountId            the unique identifier of the attached account
+     */
+    void detachAccount(UserPrincipal userPrincipal, UUID organizationalUnitId, UUID accountId);
 
     /**
      * Deletes an organizational unit by its unique identifier.
@@ -143,9 +185,9 @@ public interface OrganizationalUnitService {
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit
      * @param record        the suspension request (suspension period and reason fields)
-     * @return the updated {@link OrganizationalUnitView} including the embedded status
+     * @return the updated {@link OrganizationalUnitDistinctView} including the embedded status
      */
-    OrganizationalUnitView suspend(
+    OrganizationalUnitDistinctView suspend(
         UserPrincipal userPrincipal,
         UUID id,
         OrganizationalUnitSuspensionRecord record
@@ -158,9 +200,9 @@ public interface OrganizationalUnitService {
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit
      * @param record        the reactivation request (mandatory justification comment)
-     * @return the updated {@link OrganizationalUnitView} including the embedded status
+     * @return the updated {@link OrganizationalUnitDistinctView} including the embedded status
      */
-    OrganizationalUnitView reactivate(
+    OrganizationalUnitDistinctView reactivate(
         UserPrincipal userPrincipal,
         UUID id,
         OrganizationalUnitReactivationRecord record

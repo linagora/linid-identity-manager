@@ -34,6 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -75,4 +76,10 @@ public class OrganizationalUnitRelationViewDTO implements Serializable {
     @Schema(description = "Identifier of the parent organizational unit",
         example = "550e8400-e29b-41d4-a716-446655440001")
     private UUID parent;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     */
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    private Map<String, Object> extraParameters;
 }

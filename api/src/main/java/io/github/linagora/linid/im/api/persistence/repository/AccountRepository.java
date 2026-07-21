@@ -49,4 +49,13 @@ public interface AccountRepository extends JpaRepository<Account, UUID>,
      * or {@link Optional#empty()} if no account exists for the given email
      */
     Optional<Account> findAccountByEmail(String email);
+
+    /**
+     * Retrieves an {@link Account} associated with the given external identifier.
+     *
+     * @param externalId the external identifier used to search for the account
+     * @return an {@link Optional} containing the matching {@link Account} if found,
+     * or {@link Optional#empty()} if no account exists for the given external identifier
+     */
+    Optional<Account> findAccountByExternalId(String externalId);
 }

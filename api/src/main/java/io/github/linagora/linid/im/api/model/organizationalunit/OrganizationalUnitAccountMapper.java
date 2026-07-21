@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import org.mapstruct.Mapper;
 
@@ -45,4 +46,13 @@ public interface OrganizationalUnitAccountMapper {
      * @return the mapped DTO
      */
     OrganizationalUnitAccountViewDTO toDTO(OrganizationalUnitAccountView organizationalUnitAccountView);
+
+    /**
+     * Converts an {@link OrganizationalUnitAccount} relationship entity into an
+     * {@link OrganizationalUnitAccountDTO}.
+     *
+     * @param organizationalUnitAccount the source entity
+     * @return the mapped DTO
+     */
+    OrganizationalUnitAccountDTO toDTO(OrganizationalUnitAccount organizationalUnitAccount);
 }

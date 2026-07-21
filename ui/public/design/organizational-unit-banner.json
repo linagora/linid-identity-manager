@@ -15,7 +15,8 @@
     },
     "modify-suspension-end-button": {
       "q-btn": {
-        "color": "white"
+        "color": "white",
+        "outline": true
       }
     }
   }

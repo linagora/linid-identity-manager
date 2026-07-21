@@ -43,11 +43,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -225,4 +228,29 @@ public class OrganizationalUnitAccountView extends AbstractViewEntity {
     @FilterType(type = Integer.class)
     @QueryFilterField(type = Integer.class, description = "Days before validity period upper bound")
     private Integer daysBeforeDeactivation;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
+
+    /**
+     * Additional deployment-specific attributes associated with the relationship
+     * between an account and an organizational unit.
+     * <p>
+     * This field allows integrators and customers to extend the standard
+     * account-to-organizational-unit relationship model with custom metadata
+     * required by their environment without modifying the application schema.
+     * Typical examples include assignment roles, business-specific identifiers,
+     * ownership information, or other relationship-specific properties.
+     */
+    @Column(name = "relation_extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> relationExtraParameters;
 }

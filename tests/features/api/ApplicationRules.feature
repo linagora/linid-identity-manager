@@ -645,7 +645,7 @@ Feature: Test API Application Rule endpoints
   ####################################################
 
   Scenario: 601 - Should regenerate the application policy when a rule is toggled active
-    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
 
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """
@@ -709,7 +709,7 @@ Feature: Test API Application Rule endpoints
     Then I expect status code is 204
 
   Scenario: 602 - Should regenerate the application policy without the fragment when a rule is deleted
-    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
 
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """

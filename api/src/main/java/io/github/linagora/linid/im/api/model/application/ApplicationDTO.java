@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.model.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -93,6 +94,11 @@ public class ApplicationDTO {
     @Schema(description = "JSON configuration of the application", example = "{ \"timeout\": 30 }")
     private String configuration;
 
+    /**
+     * Optional domain associated with the application.
+     */
+    @Schema(description = "Domain associated with the application", example = "Security")
+    private String domain;
 
     /**
      * Identifier of the creator of this record.
@@ -117,4 +123,10 @@ public class ApplicationDTO {
      */
     @Schema(description = "Record last update date")
     private OffsetDateTime updateDate;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     */
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    private Map<String, Object> extraParameters;
 }

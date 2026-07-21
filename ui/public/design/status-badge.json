@@ -1,20 +1,26 @@
 {
   "status-badge": {
-    "active": {
+    "ACTIVE": {
       "q-badge": {
         "color": "positive",
         "align": "middle"
       }
     },
-    "inactive": {
+    "INACTIVE": {
       "q-badge": {
         "color": "negative",
         "align": "middle"
       }
     },
-    "suspended": {
+    "SUSPENDED": {
       "q-badge": {
         "color": "warning",
+        "align": "middle"
+      }
+    },
+    "UNKNOWN": {
+      "q-badge": {
+        "color": "grey",
         "align": "middle"
       }
     }

@@ -28,14 +28,17 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,7 +97,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should create organizational unit")
     void testCreate() {
         when(service.create(any(), any())).thenReturn(new OrganizationalUnit());
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test");
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test", Map.of());
 
         var response = controller.create(userPrincipal, record);
 
@@ -135,9 +139,47 @@ class OrganizationalUnitControllerTest {
     }
 
     @Test
+    @DisplayName("Should attach account to organizational unit")
+    void testAttachAccount() {
+        when(service.attachAccount(any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
+        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), Map.of());
+
+        var response = controller.attachAccount(userPrincipal, UUID.randomUUID(), record);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should update account relationship")
+    void testUpdateAccountRelation() {
+        when(service.updateAccountRelation(any(), any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
+        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+
+        var response = controller.updateAccountRelation(userPrincipal, UUID.randomUUID(), UUID.randomUUID(), record);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should detach account from organizational unit")
+    void testDetachAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        doNothing().when(service).detachAccount(any(), any(), any());
+
+        var response = controller.detachAccount(userPrincipal, organizationalUnitId, accountId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(service).detachAccount(userPrincipal, organizationalUnitId, accountId);
+    }
+
+    @Test
     @DisplayName("Should find organizational unit by id")
     void testFindById() {
-        when(service.findViewById(any(), any())).thenReturn(new OrganizationalUnitView());
+        when(service.findViewById(any(), any())).thenReturn(new OrganizationalUnitDistinctView());
 
         var response = controller.findById(userPrincipal, UUID.randomUUID());
 
@@ -150,7 +192,7 @@ class OrganizationalUnitControllerTest {
     void testUpdate() {
         when(service.update(any(), any(), any())).thenReturn(new OrganizationalUnit());
 
-        var response = controller.update(userPrincipal, UUID.randomUUID(), new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test"));
+        var response = controller.update(userPrincipal, UUID.randomUUID(), new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test", Map.of()));
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -160,7 +202,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should suspend organizational unit")
     void testSuspend() {
         var id = UUID.randomUUID();
-        when(service.suspend(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+        when(service.suspend(any(), any(), any())).thenReturn(new OrganizationalUnitDistinctView());
 
         var record = new OrganizationalUnitSuspensionRecord(
             new PeriodRecord(OffsetDateTime.parse("2100-01-01T00:00:00Z"), null), "REASON", null, null);
@@ -175,7 +217,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should reactivate organizational unit")
     void testReactivate() {
         var id = UUID.randomUUID();
-        when(service.reactivate(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+        when(service.reactivate(any(), any(), any())).thenReturn(new OrganizationalUnitDistinctView());
 
         var record = new OrganizationalUnitReactivationRecord("Merger completed");
         var response = controller.reactivate(userPrincipal, id, record);

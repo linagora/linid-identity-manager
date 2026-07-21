@@ -1,37 +1,95 @@
 {
   "moduleApplicationDetailsPage": {
-    "buttons-card": {
-      "edit-button": {
-        "q-btn": {
-          "outline": false
+    "entity-profile-panel": {
+      "q-card": {},
+      "q-img": {},
+      "q-icon": { "name": "apps", "color": "grey-6" },
+      "navigation": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "left" },
+          "back-button": {
+            "q-btn": {
+              "flat": true,
+              "color": "primary",
+              "icon": "arrow_back",
+              "noCaps": true
+            }
+          }
+        }
+      },
+      "actions": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "export": {
+            "q-btn": {
+              "color": "primary",
+              "icon": "download",
+              "outline": false
+            }
+          },
+          "edit-button": {
+            "form-dialog-button": {
+              "q-btn": {
+                "color": "primary",
+                "icon": "edit",
+                "outline": false
+              },
+              "form-dialog": {
+                "q-dialog": { "persistent": false },
+                "q-card": { "flat": true, "bordered": false },
+                "q-card-actions": { "align": "right" },
+                "buttons-card": {
+                  "q-card": { "flat": true },
+                  "q-card-actions": { "align": "right" },
+                  "confirm-button": {
+                    "q-btn": { "color": "primary", "outline": false }
+                  },
+                  "cancel-button": {
+                    "q-btn": { "color": "primary", "outline": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "entity-details-card": {
+        "q-card": {},
+        "type": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "category" },
+            "q-card": {}
+          }
+        },
+        "domain": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "domain" },
+            "q-card": {}
+          }
+        },
+        "description": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "description" },
+            "q-card": {}
+          }
+        },
+        "deployedAt": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "event" },
+            "q-card": {}
+          }
         }
       }
     },
     "sections": {
-      "identity": {
+      "claims": {
         "entity-details-card": {
           "q-card": {},
-          "code": {
+          "claimsTemplate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "tag" },
-              "q-card": {}
-            }
-          },
-          "name": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "apps" },
-              "q-card": {}
-            }
-          },
-          "type": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "category" },
-              "q-card": {}
-            }
-          },
-          "description": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "description" },
+              "q-icon": { "color": "primary", "name": "token" },
               "q-card": {}
             }
           }
@@ -71,8 +129,9 @@
       "q-card": { "flat": true, "bordered": false },
       "buttons-card": {
         "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
         "add-button": {
-          "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+          "q-btn": { "color": "primary", "outline": false }
         }
       },
       "edit-button": {
@@ -96,32 +155,30 @@
       },
       "form-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "color": "primary", "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       },
       "confirmation-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "color": "negative", "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       }
     },
@@ -172,39 +229,37 @@
         }
       },
       "add-button": {
-        "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+        "q-btn": { "color": "primary", "outline": false }
       },
       "save-button": {
-        "q-btn": { "color": "positive", "unelevated": true, "outline": false }
+        "q-btn": { "color": "positive", "outline": false }
       },
       "form-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       },
       "confirmation-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       }
     }

@@ -29,14 +29,20 @@ package io.github.linagora.linid.im.api.model.account;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import java.util.UUID;
+import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 
 /**
  * MapStruct mapper for converting between {@link Account} entity and {@link AccountDTO}.
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
+@Mapper(componentModel = "spring", uses = CommonMapper.class,
+    collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE)
 public interface AccountMapper {
 
     /**
@@ -64,6 +70,35 @@ public interface AccountMapper {
     Account toAccount(AccountRecord record, UserPrincipal userPrincipal);
 
     /**
+     * Applies the editable fields of an {@link AccountUpdateRecord} to an existing {@link Account}
+     * entity.
+     *
+     * <p>Only {@code externalId}, {@code lastname}, {@code firstname}, {@code email},
+     * {@code extraParameters} and the updater's identifier ({@code updatedBy}) are written; every
+     * other field, including the audit timestamps managed by the database, is left untouched.
+     * {@code extraParameters} is only written when present in the record, so callers that do not
+     * send it — such as the profile panel edition dialog — preserve the stored value.</p>
+     *
+     * @param account   the persisted entity to update
+     * @param record    the update request record
+     * @param updatedBy the identifier of the principal performing the update
+     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "extraParameters", source = "record.extraParameters",
+        nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "payload", ignore = true)
+    @Mapping(target = "checksum", ignore = true)
+    @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "insertDate", ignore = true)
+    @Mapping(target = "updateDate", ignore = true)
+    @Mapping(target = "externalId", source = "record.externalId")
+    @Mapping(target = "lastname", source = "record.lastname")
+    @Mapping(target = "firstname", source = "record.firstname")
+    @Mapping(target = "email", source = "record.email")
+    @Mapping(target = "updatedBy", source = "updatedBy")
+    void applyUpdate(@MappingTarget Account account, AccountUpdateRecord record, UUID updatedBy);
+
+    /**
      * Converts an {@link Account} entity to an {@link AccountDTO}.
      *
      * @param account the account entity
@@ -78,4 +113,15 @@ public interface AccountMapper {
      * @return the corresponding DTO
      */
     AccountViewDTO toDTO(AccountView accountView);
+
+    /**
+     * Converts an {@link AccountDistinctView} entity to an {@link AccountViewDTO}.
+     *
+     * <p>This mapping is used for account view queries where the account data may be enriched
+     * with organizational unit information.
+     *
+     * @param accountView the distinct account view entity.
+     * @return the corresponding account view DTO.
+     */
+    AccountViewDTO toDTO(AccountDistinctView accountView);
 }

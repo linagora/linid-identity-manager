@@ -24,29 +24,29 @@ export PLUGIN_LOADER_PATH=/path/to/plugins
 
 2. **Frontend Plugins**
 
-    * Defined in two files:
+    * Configured in `config.json` via three properties:
 
-| File           | Purpose                                                                                |
-|----------------|----------------------------------------------------------------------------------------|
-| `remotes.json` | Lists frontend plugins and their remote entry points                                   |
-| `modules.json` | Lists configuration files for each frontend module to be placed in the `public` folder |
+| Property       | Purpose                                                                                                    |
+|----------------|------------------------------------------------------------------------------------------------------------|
+| `remotes`      | List of remote Module Federation modules                                                                   |
+| `modules`      | List of module files to be loaded for the UI                                                               |
+| `extraZones`   | Optional list of zone definition files (JSON arrays of zone entries) registered after the module zones     |
 
-### Example: `remotes.json`
+### Example: `config.json`
 
-```json id="remotes-example"
-[
-  {
-    "name": "catalogUI",
-    "entry": "http://localhost:5001/mf-manifest.json"
-  }
-]
-```
-
-### Example: `modules.json`
-
-```json id="modules-example"
+```json
 {
-  "modules": []
+  "remotes": [
+    {
+      "name": "catalogUI",
+      "entry": "http://localhost:5001/mf-manifest.json"
+    }
+  ],
+  "modules": [
+    "/modules/AccountsPage.json",
+    "/modules/ApplicationsPage.json"
+  ],
+  "extraZones": ["/zones/supersetGraphs.json"]
 }
 ```
 

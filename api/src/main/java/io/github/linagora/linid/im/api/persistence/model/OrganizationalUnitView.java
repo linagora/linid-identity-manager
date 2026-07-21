@@ -35,12 +35,15 @@ import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +51,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Represents an organizational unit within the system.
@@ -108,6 +113,21 @@ public class OrganizationalUnitView extends AbstractViewEntity {
     private List<OrganizationalUnitRelationViewDTO> parents;
 
     /**
+     * Unique identifier of the parent organizational unit.
+     */
+    @Column(name = "parent_id")
+    @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class, description = "Parent organizational unit unique identifier.")
+    private UUID parentId;
+
+    /**
+     * Comma-separated names of all parent organizational units associated with
+     * this organizational unit.
+     */
+    @Column(name = "parent_names")
+    private String parentNames;
+
+    /**
      * Time range during which the organizational unit is suspended. {@code null} when no suspension
      * is configured.
      */
@@ -157,4 +177,24 @@ public class OrganizationalUnitView extends AbstractViewEntity {
     @FilterType(type = Boolean.class)
     @QueryFilterField(type = Boolean.class, description = "Whether the organizational unit is currently suspended")
     private boolean suspended;
+
+    /**
+     * Computed organizational unit status: {@code ACTIVE} or {@code SUSPENDED}.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Computed organizational unit status (ACTIVE or SUSPENDED)")
+    private OrganizationalUnitStatusEnum status;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
 }

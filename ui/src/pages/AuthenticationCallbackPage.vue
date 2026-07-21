@@ -34,21 +34,20 @@
 
 <script lang="ts" setup>
 import {
+  changeLocale,
+  resolveLocale,
   useLinidUserPreference,
   useLinidUserStore,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import { authService } from 'src/services/AuthService';
-import { resolveLocale, syncLocale } from 'src/services/I18nSupportService';
 import { onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const { t } = useScopedI18n('AuthenticationCallbackPage');
 const userStore = useLinidUserStore();
 const { init } = useLinidUserPreference();
-const { locale } = useI18n({ useScope: 'global' });
 
 /**
  * Represents the optional redirect state used during OIDC authentication. This is typically used to preserve the
@@ -72,9 +71,7 @@ onMounted(async () => {
     userStore.setUserFromClaims(user.profile);
     await init();
 
-    const language = resolveLocale();
-    await syncLocale(language);
-    locale.value = language;
+    await changeLocale(resolveLocale());
     await router.replace(redirectUrl);
   } catch (e) {
     console.error('Error during OIDC callback processing:', e);

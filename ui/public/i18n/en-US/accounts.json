@@ -1,0 +1,760 @@
+{
+  "moduleAccountsPage": {
+    "NavigationMenu": {
+      "label": "Accounts"
+    },
+    "ButtonsCard": {
+      "create": "Add an account"
+    },
+    "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
+    "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
+    "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
+    "seeButton": "See",
+    "columns": {
+      "firstname": "First name",
+      "lastname": "Last name",
+      "email": "Email",
+      "status": "Status",
+      "organizationalUnits": "Linked organizational units",
+      "createdBy": "Created by",
+      "insertDate": "Creation date",
+      "actions": "Actions"
+    },
+    "error": "Unable to load the accounts. Please try again later.",
+    "GenericEntityTable": {
+      "noData": "No data available",
+      "rowsPerPage": "Rows per page:",
+      "paginationLabel": "{start}-{end} of {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Delete a favorite?",
+      "content": "Confirm deleting favorite \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmLoading": "Deleting..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Override the favorite?",
+      "content": "Confirm overriding favorite \"{label}\" with the current search?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Override",
+        "confirmLoading": "Overriding..."
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Create a favorite?",
+      "content": "Create favorite from current search.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name *",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name *",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
+    "LinidSmartFilter": {
+      "label": "Current search filter",
+      "hint": "Enter your filter",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "firstname": {
+          "type": "First name",
+          "separator": "or"
+        },
+        "lastname": {
+          "type": "Last name",
+          "separator": "or"
+        },
+        "email": {
+          "type": "Email",
+          "separator": "or"
+        },
+        "status": {
+          "type": "Status",
+          "separator": "or"
+        },
+        "organizationalUnitId": {
+          "type": "Organizational unit",
+          "separator": "or"
+        },
+        "createdBy": {
+          "type": "Created by",
+          "separator": "or"
+        },
+        "insertDate": {
+          "type": "Creation date",
+          "separator": "or"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filter by:",
+        "columnFilter": {
+          "firstname": "First name",
+          "lastname": "Last name",
+          "email": "Email",
+          "status": "Status",
+          "organizationalUnitId": "Organizational unit",
+          "createdBy": "Created by",
+          "insertDate": "Creation date"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favorites",
+        "noData": "No favorite available",
+        "createFavorite": "Create a favorite",
+        "overrideFavorite": "Override a favorite",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filter by text",
+        "inputHint": "Enter a text to search",
+        "negateLabel": "Negate",
+        "searchButton": "Search",
+        "operators": {
+          "contains": "Contains",
+          "startsWith": "Starts with",
+          "endsWith": "Ends with",
+          "equals": "Equal to",
+          "notContains": "Does not contain",
+          "notStartsWith": "Does not start with",
+          "notEndsWith": "Does not end with",
+          "notEquals": "Not equal to"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Search"
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Search",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
+        }
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filter by date",
+        "inputHint": "Enter/select a date to search",
+        "negateLabel": "Negate",
+        "close": "Close",
+        "searchButton": "Search",
+        "operators": {
+          "inferior": "Before",
+          "superior": "After",
+          "equals": "Equal to",
+          "notInferior": "Not before",
+          "notSuperior": "Not after",
+          "notEquals": "Not equal to"
+        },
+        "validation": {
+          "invalidDate": "Incorrect date. Expected format: {format}"
+        }
+      }
+    }
+  },
+  "AccountDeactivatedInfoText": {
+    "message": "This account will be deactivated on {date}."
+  },
+  "AccountSuspendedInfoText": {
+    "message": "This account will be suspended on {date}."
+  },
+  "AccountNotActivatedInfoText": {
+    "message": "This account has not been activated yet."
+  },
+  "AccountActivationActions": {
+    "DropdownButton": {
+      "title": "Activation",
+      "activation": {
+        "immediate": "Immediate",
+        "scheduled": "Scheduled"
+      }
+    },
+    "ConfirmationDialog": {
+      "immediate": {
+        "title": "Immediate account activation",
+        "content": "Are you sure you want to activate this account immediately?",
+        "ButtonsCard": {
+          "confirm": "Activate",
+          "cancel": "Cancel"
+        }
+      }
+    },
+    "FormDialog": {
+      "scheduled": {
+        "title": "Schedule account activation",
+        "content": "Select a start date for activating this account.",
+        "fields": {
+          "validityPeriodStart": {
+            "label": "Activation date *",
+            "close": "Close",
+            "validation": {
+              "required": "This field is required.",
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Schedule",
+          "confirmLoading": "Scheduling...",
+          "cancel": "Cancel"
+        }
+      }
+    }
+  },
+  "AccountSuspensionActions": {
+    "DropdownButton": {
+      "title": "Suspension",
+      "suspension": {
+        "immediate": "Immediate",
+        "scheduled": "Scheduled"
+      }
+    },
+    "FormDialog": {
+      "immediate": {
+        "title": "Immediate account suspension",
+        "content": "Are you sure you want to suspend this account immediately?",
+        "fields": {
+          "statusReason": {
+            "label": "Reason *",
+            "hint": "Select a reason for the suspension.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sub-reason *",
+            "hint": "Select a sub-reason for the suspension.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Add an optional comment."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Suspend",
+          "confirmLoading": "Suspending...",
+          "cancel": "Cancel"
+        }
+      },
+      "scheduled": {
+        "title": "Schedule account suspension",
+        "content": "Configure the suspension period for this account.",
+        "fields": {
+          "suspensionPeriodStart": {
+            "label": "Suspension start date *",
+            "close": "Close",
+            "validation": {
+              "required": "This field is required.",
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today."
+            }
+          },
+          "suspensionPeriodEnd": {
+            "label": "Suspension end date (optional)",
+            "close": "Close",
+            "validation": {
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today.",
+              "fromDate": "The end date must be on or after {compareTo}."
+            }
+          },
+          "statusReason": {
+            "label": "Reason *",
+            "hint": "Select a reason for the suspension.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sub-reason *",
+            "hint": "Select a sub-reason for the suspension.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Add an optional comment."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Schedule",
+          "confirmLoading": "Scheduling...",
+          "cancel": "Cancel"
+        }
+      },
+      "modify": {
+        "title": "Modify suspension settings",
+        "content": "Update the suspension period settings for this account.",
+        "fields": {
+          "suspensionPeriodStart": {
+            "label": "New suspension start date *",
+            "close": "Close",
+            "validation": {
+              "required": "This field is required.",
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today."
+            }
+          },
+          "suspensionPeriodEnd": {
+            "label": "New suspension end date (optional)",
+            "close": "Close",
+            "validation": {
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today.",
+              "fromDate": "The end date must be on or after {compareTo}."
+            }
+          },
+          "statusReason": {
+            "label": "Reason *",
+            "hint": "Select a reason for the suspension.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sub-reason *",
+            "hint": "Select a sub-reason for the suspension.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Add an optional comment."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Update",
+          "confirmLoading": "Updating...",
+          "cancel": "Cancel"
+        }
+      }
+    }
+  },
+  "AccountDeactivationActions": {
+    "DropdownButton": {
+      "title": "Deactivation",
+      "deactivation": {
+        "immediate": "Immediate",
+        "scheduled": "Scheduled",
+        "modify": "Modify"
+      }
+    },
+    "FormDialog": {
+      "immediate": {
+        "title": "Immediate account deactivation",
+        "content": "Are you sure you want to deactivate this account immediately?",
+        "fields": {
+          "statusReason": {
+            "label": "Reason *",
+            "hint": "Select a reason for the deactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sub-reason *",
+            "hint": "Select a sub-reason for the deactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Add an optional comment."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Deactivate",
+          "confirmLoading": "Deactivating...",
+          "cancel": "Cancel"
+        }
+      },
+      "scheduled": {
+        "title": "Schedule account deactivation",
+        "content": "Select a deactivation date and provide a reason.",
+        "fields": {
+          "validityPeriodEnd": {
+            "label": "Deactivation date *",
+            "close": "Close",
+            "validation": {
+              "required": "This field is required.",
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today."
+            }
+          },
+          "statusReason": {
+            "label": "Reason *",
+            "hint": "Select a reason for the deactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sub-reason *",
+            "hint": "Select a sub-reason for the deactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Add an optional comment."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Schedule",
+          "confirmLoading": "Scheduling...",
+          "cancel": "Cancel"
+        }
+      },
+      "modify": {
+        "title": "Modify deactivation date",
+        "content": "Update the scheduled deactivation date for this account.",
+        "fields": {
+          "validityPeriodEnd": {
+            "label": "New deactivation date *",
+            "close": "Close",
+            "validation": {
+              "required": "This field is required.",
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today."
+            }
+          },
+          "statusReason": {
+            "label": "Reason *",
+            "hint": "Select a reason for the deactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusSubreason": {
+            "label": "Sub-reason *",
+            "hint": "Select a sub-reason for the deactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "statusComment": {
+            "label": "Justification",
+            "hint": "Add an optional comment."
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Update",
+          "confirmLoading": "Updating...",
+          "cancel": "Cancel"
+        }
+      }
+    }
+  },
+  "AccountReactivationActions": {
+    "FormDialog": {
+      "immediate": {
+        "title": "Immediate account reactivation",
+        "content": "Are you sure you want to reactivate this account immediately?",
+        "fields": {
+          "statusComment": {
+            "label": "Justification *",
+            "hint": "Provide a mandatory justification for this reactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Reactivate",
+          "confirmLoading": "Reactivating...",
+          "cancel": "Cancel"
+        }
+      }
+    }
+  },
+  "moduleAccountCreationPage": {
+    "title": "Create an account",
+    "error": "Unable to create the account. Please try again later.",
+    "success": "Account successfully created.",
+    "ButtonsCard": {
+      "cancel": "Back",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "formSections": {
+      "general": {
+        "title": "General information"
+      }
+    },
+    "fields": {
+      "externalId": {
+        "label": "Identifier *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "lastname": {
+        "label": "Last name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "firstname": {
+        "label": "First name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "email": {
+        "label": "Email *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required.",
+          "email": "The email format is invalid."
+        }
+      },
+      "validityPeriod": {
+        "start": {
+          "label": "Validity start date *",
+          "close": "Close",
+          "validation": {
+            "required": "This field is required.",
+            "invalidDate": "Invalid date format. Expected format is {format}.",
+            "afterDate": "The date must be after today."
+          }
+        }
+      },
+      "organizationalUnit": {
+        "label": "Organizational unit *",
+        "validation": {
+          "required": "This field is required."
+        }
+      }
+    }
+  },
+  "moduleAccountDetailsPage": {
+    "error": "Unable to load the account. Please try again later.",
+    "EntityProfilePanel": {
+      "title": "{firstname} {lastname}",
+      "subtitle": "{email}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Accounts list"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "externalId": "Identifier",
+          "email": "Email"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Account successfully updated.",
+              "submitError": "Unable to update the account. Please try again later.",
+              "FormDialog": {
+                "title": "Edit {firstname} {lastname}",
+                "fields": {
+                  "externalId": {
+                    "label": "Identifier *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "firstname": {
+                    "label": "First name *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "lastname": {
+                    "label": "Last name *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "email": {
+                    "label": "Email *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Save",
+                  "confirmLoading": "Saving...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sections": {
+      "lifecycle": {
+        "EntityDetailsCard": {
+          "title": "Lifecycle",
+          "attributes": {
+            "insertDate": "Creation date",
+            "activationAt": "Activation date",
+            "validityPeriod": {
+              "start": "Validity start date",
+              "end": "Validity end date"
+            },
+            "suspensionPeriod": {
+              "start": "Suspension start date",
+              "end": "Suspension end date"
+            }
+          }
+        }
+      }
+    },
+    "GenericEditableTableCard": {
+      "title": "Organizational units",
+      "loadError": "Unable to load the organizational units. Please try again later.",
+      "columns": {
+        "name": "Name",
+        "type": "Type",
+        "status": "Status"
+      },
+      "GenericEntityTable": {
+        "noData": "No organizational unit for this account.",
+        "rowsPerPage": "Rows per page:",
+        "paginationLabel": "{start}-{end} of {total}"
+      }
+    }
+  },
+  "AccountLifecyclePanel": {
+    "updateStatusSuccess": "Account status successfully updated.",
+    "immediateActivationSuccess": "The account can be activated within one minute | The account can be activated within {count} minutes",
+    "immediateSuspensionSuccess": "The account will be suspended in one minute | The account will be suspended in {count} minutes",
+    "immediateDeactivationSuccess": "The account will be deactivated in one minute | The account will be deactivated in {count} minutes",
+    "immediateReactivationSuccess": "The account will be reactivated in one minute | The account will be reactivated in {count} minutes",
+    "scheduledActivationSuccess": "The account can be activated from {date}",
+    "scheduledDeactivationSuccess": "The account will be deactivated from {date}",
+    "modifyDeactivationSuccess": "The account will be deactivated from {date}",
+    "scheduledSuspensionSuccess": "The account will be suspended from {date}",
+    "modifySuspensionSuccess": "The account will be suspended from {date}",
+    "errors": {
+      "status": "Unable to update the account status. Please try again later."
+    },
+    "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
+    "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
+  },
+  "AccountDeactivatedBanner": {
+    "content": "This account has been deactivated since {date}.",
+    "reactivateImmediateButton": "Immediate reactivation",
+    "reactivateScheduledButton": "Schedule reactivation"
+  },
+  "AccountDeactivatedWarningBanner": {
+    "content": "This account will be deactivated tomorrow (on {date}) | This account will be deactivated in {count} days (on {date})",
+    "deactivateImmediateButton": "Immediate deactivation",
+    "modifyDeactivationButton": "Modify deactivation date"
+  },
+  "AccountSuspendedBanner": {
+    "content": "This account has been suspended since {date}.",
+    "contentWithEndDate": "This account has been suspended from {date} until {endDate}.",
+    "clearSuspensionButton": "Immediate reactivation",
+    "modifySuspensionButton": "Adjust suspension settings"
+  },
+  "AccountRevalidationActions": {
+    "FormDialog": {
+      "immediate": {
+        "title": "Immediate account reactivation",
+        "content": "Please provide a justification to reactivate this account immediately.",
+        "fields": {
+          "statusComment": {
+            "label": "Justification *",
+            "hint": "Provide a mandatory justification for this reactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Reactivate",
+          "confirmLoading": "Reactivating...",
+          "cancel": "Cancel"
+        }
+      },
+      "scheduled": {
+        "title": "Schedule account reactivation",
+        "content": "Please select a new validity period end date and provide a justification.",
+        "fields": {
+          "validityPeriodEnd": {
+            "label": "Validity period end date *",
+            "close": "Close",
+            "validation": {
+              "required": "This field is required.",
+              "invalidDate": "Invalid date format. Expected format is {format}.",
+              "afterDate": "The date must be after today."
+            }
+          },
+          "statusComment": {
+            "label": "Justification *",
+            "hint": "Provide a mandatory justification for this reactivation.",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Schedule",
+          "confirmLoading": "Scheduling...",
+          "cancel": "Cancel"
+        }
+      }
+    }
+  }
+}

@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.linagora.linid.im.api.model.common.PeriodDTO;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +37,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -101,6 +103,19 @@ public class OrganizationalUnitViewDTO {
     private List<OrganizationalUnitRelationViewDTO> parents;
 
     /**
+     * Names of all parent organizational units associated with the current organizational unit.
+     *
+     * <p>When multiple parents are associated with the organizational unit, their names are represented as a
+     * comma-separated list.
+     */
+    @Schema(
+        description = "Comma-separated names of all parent organizational units associated with the current "
+            + "organizational unit",
+        example = "Headquarters, Research Department"
+    )
+    private String parentNames;
+
+    /**
      * Time range during which the organizational unit is suspended.
      */
     @Schema(description = "Time range during which the organizational unit is suspended")
@@ -137,4 +152,16 @@ public class OrganizationalUnitViewDTO {
     @JsonProperty("isSuspended")
     @Schema(description = "Whether the organizational unit is currently suspended", example = "false")
     private boolean suspended;
+
+    /**
+     * Computed organizational unit status (ACTIVE or SUSPENDED).
+     */
+    @Schema(description = "Computed organizational unit status", example = "ACTIVE")
+    private OrganizationalUnitStatusEnum status;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     */
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    private Map<String, Object> extraParameters;
 }

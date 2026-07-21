@@ -8,6 +8,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm build
 
 FROM nginx:stable-alpine
+RUN apk upgrade --no-cache
 RUN rm -rf /usr/share/nginx/html/*
 COPY --from=builder /app/dist/spa /usr/share/nginx/html
 COPY docker-entrypoint.sh /docker-entrypoint.sh

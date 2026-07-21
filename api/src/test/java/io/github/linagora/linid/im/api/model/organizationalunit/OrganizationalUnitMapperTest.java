@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatusEnum;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import java.lang.reflect.Field;
@@ -70,6 +71,7 @@ class OrganizationalUnitMapperTest {
         view.setSuspensionSubreason("MERGER");
         view.setSuspensionComment("pending merger");
         view.setSuspended(true);
+        view.setStatus(OrganizationalUnitStatusEnum.SUSPENDED);
 
         OrganizationalUnitViewDTO dto = mapper.toDTO(view);
 
@@ -80,6 +82,7 @@ class OrganizationalUnitMapperTest {
         assertEquals("MERGER", dto.getSuspensionSubreason());
         assertEquals("pending merger", dto.getSuspensionComment());
         assertTrue(dto.isSuspended());
+        assertEquals(OrganizationalUnitStatusEnum.SUSPENDED, dto.getStatus());
     }
 
     @Test
@@ -91,11 +94,13 @@ class OrganizationalUnitMapperTest {
         view.setType("DEPARTMENT");
         view.setSuspensionPeriod(null);
         view.setSuspended(false);
+        view.setStatus(OrganizationalUnitStatusEnum.ACTIVE);
 
         OrganizationalUnitViewDTO dto = mapper.toDTO(view);
 
         assertNull(dto.getSuspensionPeriod());
         assertNull(dto.getSuspensionReason());
         assertFalse(dto.isSuspended());
+        assertEquals(OrganizationalUnitStatusEnum.ACTIVE, dto.getStatus());
     }
 }

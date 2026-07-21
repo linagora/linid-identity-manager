@@ -13,8 +13,8 @@
     "page": "catalogUI/GenericTablePage",
     "pagePath": "",
     "idKey": "id",
-    "enableActions": false,
-    "creationPagePath": null,
+    "enableActions": true,
+    "creationPagePath": "/accounts/new",
     "filters": [
       {
         "name": "firstname",
@@ -46,6 +46,18 @@
               "value": "INACTIVE"
             }
           ]
+        }
+      },
+      {
+        "name": "organizationalUnitId",
+        "type": "tree",
+        "options": {
+          "url": "/organizational-units",
+          "idKey": "id",
+          "parentsKey": "parents",
+          "parentIdKey": "parent",
+          "nodesQuerySize": 50,
+          "typeKey": "type"
         }
       },
       {
@@ -83,6 +95,13 @@
         "label": "columns.status",
         "name": "status",
         "field": "status",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.organizationalUnits",
+        "name": "organizationalUnits",
+        "field": "organizationalUnits",
         "sortable": true,
         "align": "left"
       },

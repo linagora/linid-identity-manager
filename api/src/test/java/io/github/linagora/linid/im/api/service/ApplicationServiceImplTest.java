@@ -54,6 +54,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -98,7 +99,7 @@ class ApplicationServiceImplTest {
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
-        record = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}");
+        record = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}", "Security", Map.of());
     }
 
     @Test
@@ -195,6 +196,7 @@ class ApplicationServiceImplTest {
         assertEquals("desc", saved.getDescription());
         assertEquals("OIDC", saved.getType());
         assertEquals("{}", saved.getClaimsTemplate());
+        assertEquals("Security", saved.getDomain());
         assertEquals(userPrincipal.getId(), saved.getUpdatedBy());
         // The script, checksum, deployedAt and configuration are managed by a separate process
         // and must be left untouched.

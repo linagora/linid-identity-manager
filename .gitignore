@@ -25,3 +25,4 @@ docker/dev/resources/llng
 docker/e2e/resources/local
 docker/e2e/resources/ci
 api/**/*.jks
+api/**/*.p12

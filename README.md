@@ -65,6 +65,7 @@ LinId helps organizations:
 
     * Theme configuration
     * Externalized translations (i18n)
+    * Customizable dashboard (Apache Superset™)
 
 ## 👥 Target Audience
 
@@ -132,6 +133,16 @@ task start:demo
 * **Backend API**: `https://localhost:8443/swagger-ui/index.html`
 * **Frontend UI**: `https://linid.localtest.me:9000`
 * **LemonLDAP portal**: `http://localhost:8080` (pre-configured demo)
+* **Apache Superset™**: `http://localhost:8088`
+
+#### **Demo credentials**
+
+| Application          | Username   | Password    |
+|----------------------|------------|-------------|
+| **LemonLDAP::NG**    | `admin`    | `password`  |
+| **LemonLDAP::NG**    | `user1`    | `password`  |
+| **LemonLDAP::NG**    | `user2`    | `password`  |
+| **Apache Superset™** | `superset` | `password`  |
 
 ---
 
@@ -281,6 +292,7 @@ Planned documentation:
 * Theme customization
 * Branding
 * Externalized translations (i18n)
+* Customizable dashboard (Apache Superset™)
 
 > See: [docs/configuration/ui/](docs/configuration/ui/theming.md)
 
@@ -293,6 +305,7 @@ Planned documentation:
 * **Database**: PostgreSQL
 * **Directory / IAM**: LemonLDAP
 * **Policy Engine**: OPA (Open Policy Agent)
+* **Dashboard engine**: Apache Superset™
 
 ---
 

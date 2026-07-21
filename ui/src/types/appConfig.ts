@@ -26,7 +26,10 @@
 
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 import type { AccountLifecycleAction } from './accountLifecycleUi';
+import type { OidcConfig } from './oidc';
 import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
+import type { Remote } from './remotes';
+import type { ThemeVariables } from './theme';
 
 /**
  * Runtime application configuration loaded from `public/config.json`. Holds deployment-specific values that must be
@@ -46,19 +49,25 @@ export interface AppConfig {
     languages: string[];
     /** Default locale of the application. */
     locale: string;
+    /** Array of internationalization file names. */
+    i18nFiles: string[];
   };
+  /** Theme variables of the project. */
+  themeVariables: ThemeVariables;
+  /** List of remote Module Federation modules. */
+  remotes: Remote[];
   /** Defines the delay(in minutes) applied when reactivating a suspended or inactive account. */
   immediateActionDelay: number;
+  /** List of module files to be loaded for the UI. */
+  modules: string[];
+  /** List of additional zone definition files to be loaded for the UI. */
+  extraZones?: string[];
+  /** OpenID Connect (OIDC) configuration for authentication. */
+  oidc: OidcConfig;
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
 
   // ─── Accounts ───────────────────────────────────────────────────────────────
-
-  /**
-   * Ordered list of account attribute keys displayed on the account details page. Only keys listed here appear in the
-   * details card; the order is preserved.
-   */
-  accountDetailsFieldsOrder: string[];
 
   /**
    * Form field configurations for each account lifecycle action dialog, keyed by action identifier (e.g.
@@ -71,12 +80,6 @@ export interface AppConfig {
   >;
 
   // ─── Organizational units ────────────────────────────────────────────────────
-
-  /** Ordered list of field definitions rendered in the organizational unit creation form. */
-  organizationalUnitCreationFields: LinidAttributeConfiguration[];
-
-  /** Ordered list of OU attribute keys displayed on the organizational unit details page. */
-  organizationalUnitDetailsFieldsOrder: string[];
 
   /**
    * Form field configurations for each OU lifecycle action dialog, keyed by action identifier (e.g.

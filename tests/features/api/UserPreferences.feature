@@ -25,6 +25,11 @@ Feature: Tests API Users Preferences endpoints
     And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And   I set http header 'Content-Type' with 'application/json'
 
+    # Front features may run before this file (the spec order is filesystem-dependent) and any UI
+    # login stores a "language" preference for admin. Delete it (best effort, the status code is
+    # not asserted) so every scenario starts from a clean state.
+    When  I request '{{env.E2E_API_URL}}/user-preferences/language' with method 'DELETE'
+
   ###############################################################
   ################## Create or Update (POST /user-preferences) ##
   ###############################################################

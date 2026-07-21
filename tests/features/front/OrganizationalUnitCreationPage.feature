@@ -7,7 +7,7 @@ Feature: Test Organizational Unit creation page
   ## 104 Submitting an empty form should display required validation messages
   ## 105 Submitting a valid form should create the organizational unit
   ## 106 Should display a success notification after creation
-  ## 107 Visiting the page without a parent should redirect to the home page
+  ## 107 Visiting the page without a parent should redirect to the organizational units list
   ## 108 Remove the created organizational unit (looked up by name)
 
   Scenario: Roundtrip about Organizational Unit creation
@@ -46,15 +46,15 @@ Feature: Test Organizational Unit creation page
     ################## Creation Page  ##################
     ####################################################
 
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/create?parent={{ctx.rootID}}"
+    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/new?parent={{ctx.rootID}}"
 
     ## 101 Should display title, form fields and action buttons
-    Then I expect the HTML element '[data-cy="organizational-unit-creation-page"]' to be visible
-    And I expect the HTML element '[data-cy="organizational-unit-creation-page_title"]' contains "Créer une nouvelle unité organisationnelle"
+    Then I expect the HTML element '[data-cy="generic-creation-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-creation-page_title"]' contains "Création d'une unité organisationnelle"
     And I expect the HTML element '[data-cy="field_parent"]' to be visible
     And I expect the HTML element '[data-cy="field_name"]' to be visible
     And I expect the HTML element '[data-cy="field_type"]' to be visible
-    And I expect the HTML element '[data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 
     ## 102 Parent organizational unit should be displayed with the resolved root name
@@ -68,13 +68,13 @@ Feature: Test Organizational Unit creation page
     And I expect the HTML element '[role="listbox"]' contains "TEAM"
 
     ## 104 Submitting an empty form should display required validation messages
-    When I click on '[data-cy="organizational-unit-creation-page_title"]'
+    When I click on '[data-cy="generic-creation-page_title"]'
     And I click on '[data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="organizational-unit-creation-page_form"]' contains "Ce champ est requis"
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/create?parent={{ctx.rootID}}"
+    Then I expect the HTML element '[role="alert"]' contains "Ce champ est requis"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/new?parent={{ctx.rootID}}"
 
     ## 105 Submitting a valid form should create the organizational unit
-    When I set the text "EngineeringE2E" in the HTML element "[data-cy=\"field_name\"] input"
+    When I set the text "EngineeringE2E" in the HTML element "[data-cy=\"field_name\"]"
     And I click on '[data-cy="field_type"] .q-select__focus-target'
     And I click on '[role="listbox"] [role="option"]:first-child'
     And I click on '[data-cy="button_confirm"]'
@@ -87,10 +87,10 @@ Feature: Test Organizational Unit creation page
     ################## Missing parent ##################
     ####################################################
 
-    ## 107 Visiting the page without a parent should redirect to the home page
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/create"
+    ## 107 Visiting the page without a parent should redirect to the organizational units list
+    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/new"
     Then I expect the HTML element ".q-notification__message" contains "Une unité organisationnelle parente est requise."
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
 
     ####################################################
     ################## Cleanup #########################

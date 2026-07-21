@@ -1,0 +1,164 @@
+{
+  "instanceId": "moduleAccountDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "accounts",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "accounts",
+  "basePath": "/accounts",
+  "zones": [
+    {
+      "zone": "moduleAccountDetailsPage.side-left",
+      "plugin": "catalogUI/EntityProfilePanel",
+      "props": {
+        "statusKey": "status",
+        "parentPath": "/accounts",
+        "fieldOrder": ["externalId", "email"],
+        "avatarOptions": {
+          "seed": ["{{ entity.firstname }}", " ", "{{ entity.lastname }}"],
+          "style": "initials"
+        },
+        "updateEndpoint": "/accounts/{{ entity.id }}",
+        "updateBody": {
+          "externalId": "{{ entity.externalId }}",
+          "lastname": "{{ entity.lastname }}",
+          "firstname": "{{ entity.firstname }}",
+          "email": "{{ entity.email }}"
+        },
+        "formFields": [
+          {
+            "name": "externalId",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "firstname",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "lastname",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "email",
+            "type": "String",
+            "input": "Email",
+            "required": true,
+            "inputSettings": {}
+          }
+        ],
+        "emitOnUpdate": "account-updated"
+      }
+    },
+    {
+      "zone": "moduleAccountDetailsPage.content.before",
+      "component": "AccountLifecyclePanel"
+    },
+    {
+      "zone": "moduleAccountDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "rowKey": "id",
+        "enableActions": false,
+        "enableRowActions": false,
+        "columns": [
+          {
+            "name": "name",
+            "label": "columns.name",
+            "field": "name",
+            "align": "left"
+          },
+          {
+            "name": "type",
+            "label": "columns.type",
+            "field": "type",
+            "align": "left"
+          },
+          {
+            "name": "status",
+            "label": "columns.status",
+            "field": "status",
+            "align": "left"
+          }
+        ],
+        "endpoints": {
+          "find": "/accounts/{{ entity.id }}/organizational-units?sort=name,asc"
+        }
+      }
+    }
+  ],
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "parentPath": "/accounts",
+    "enableActions": false,
+    "reloadDetailsOn": ["account-status-updated", "account-updated"],
+    "sections": [
+      {
+        "key": "lifecycle",
+        "fieldOrder": [
+          "insertDate",
+          "activationAt",
+          "validityPeriod.start",
+          "validityPeriod.end",
+          "suspensionPeriod.start",
+          "suspensionPeriod.end"
+        ],
+        "formatters": [
+          {
+            "field": "insertDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "activationAt",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "validityPeriod.start",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "validityPeriod.end",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "suspensionPeriod.start",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "suspensionPeriod.end",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -27,11 +27,8 @@
 import { useCommonMapper } from '@linagora/linid-im-front-corelib';
 import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
-  OrganizationalUnit,
   OrganizationalUnitDTO,
-  OrganizationalUnitForm,
   OrganizationalUnitReactivationRecord,
-  OrganizationalUnitRecord,
   OrganizationalUnitStatus,
   OrganizationalUnitStatusForm,
   OrganizationalUnitSuspensionRecord,
@@ -39,52 +36,12 @@ import type {
 
 /**
  * Composable providing utility functions to work with organizational units: convert form values to API records, and
- * project an {@link OrganizationalUnitDTO} into identity / status views.
+ * project an {@link OrganizationalUnitDTO} into its status view.
  *
  * @returns An object containing the mapping functions for organizational units.
  */
 export function useOrganizationalUnitMapper() {
   const { toDate, toDateISO } = useCommonMapper();
-
-  /**
-   * Transforms an {@link OrganizationalUnitForm} into an {@link OrganizationalUnitRecord} by attaching the parent
-   * identifier supplied by the navigation context.
-   *
-   * @param form OU form carrying the user-editable fields.
-   * @param parent UUID of the parent OU, provided by the route context.
-   * @returns OU record ready to be posted to the backend.
-   */
-  const toOrganizationalUnitRecord = (
-    form: OrganizationalUnitForm,
-    parent: string
-  ): OrganizationalUnitRecord => {
-    return {
-      parent,
-      name: form.name,
-      type: form.type,
-    };
-  };
-
-  /**
-   * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnit}, exposing only the identity fields. Combine
-   * with {@link toOrganizationalUnitStatus} when both identity and suspension state are needed.
-   *
-   * @param dto OrganizationalUnitDTO to project.
-   * @returns Identity projection with locale-formatted dates.
-   */
-  const toOrganizationalUnit = (
-    dto: OrganizationalUnitDTO
-  ): OrganizationalUnit => {
-    return {
-      id: dto.id,
-      name: dto.name,
-      type: dto.type,
-      createdBy: dto.createdBy,
-      updatedBy: dto.updatedBy,
-      insertDate: toDate(dto.insertDate, DATE_FORMAT_KEY),
-      updateDate: toDate(dto.updateDate, DATE_FORMAT_KEY),
-    };
-  };
 
   /**
    * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnitStatus}, exposing only the suspension lifecycle
@@ -156,8 +113,6 @@ export function useOrganizationalUnitMapper() {
   };
 
   return {
-    toOrganizationalUnitRecord,
-    toOrganizationalUnit,
     toOrganizationalUnitStatus,
     toOrganizationalUnitSuspensionRecord,
     toOrganizationalUnitReactivationRecord,

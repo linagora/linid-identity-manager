@@ -34,3 +34,4 @@ build/
 
 ### Generated secrets ###
 *.jks
+*.p12

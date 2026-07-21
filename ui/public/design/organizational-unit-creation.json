@@ -1,0 +1,28 @@
+{
+  "moduleOrganizationalUnitCreationPage": {
+    "buttons-card": {
+      "q-card": {},
+      "q-card-actions": { "align": "right" },
+      "cancel-button": {
+        "q-btn": { "color": "primary", "outline": true }
+      },
+      "confirm-button": {
+        "q-btn": { "color": "primary", "outline": false }
+      }
+    },
+    "form-section-general": {
+      "q-card": {},
+      "organizational-unit-parent-field": {
+        "q-input": {}
+      },
+      "EntityAttributeField": {
+        "name": {
+          "q-input": {}
+        },
+        "type": {
+          "q-select": {}
+        }
+      }
+    }
+  }
+}

@@ -57,6 +57,8 @@ export interface AccountDTO {
   updateDate: string;
   /** Computed account lifecycle status. */
   status: AccountStatusEnum;
+  /** Names of the organizational units to which the account belongs, represented as a comma-separated list. */
+  organizationalUnits: string;
   /** Period during which the account is considered active. */
   validityPeriod: Period;
   /** Period during which the account is suspended. */
@@ -65,36 +67,13 @@ export interface AccountDTO {
   activationAt: string | null;
   /** Number of days remaining before the account is deactivated. Null when the validity period has no upper bound. */
   daysBeforeDeactivation: number | null;
-}
-
-/** Account shape consumed by Vue components. */
-export interface Account {
-  /** Unique account identifier. */
-  id: string;
-  /** External business identifier. */
-  externalId: string;
-  /** User last name. */
-  lastname: string;
-  /** User first name. */
-  firstname: string;
-  /** User email address. */
-  email: string;
-  /** Creator identifier. */
-  createdBy: string;
-  /** Last updater identifier. */
-  updatedBy: string;
-  /** Account creation date converted from API ISO timestamp. Display formatting depends on the user's locale. */
-  insertDate: string;
-  /** Account last update date converted from API ISO timestamp. Display formatting depends on the user's locale. */
-  updateDate: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /**
  * Lifecycle status fields of an account: computed status, validity and suspension periods, activation timestamp, and
  * optional reason metadata.
- *
- * Combine with an {@link Account} when both identity and lifecycle data are needed (for example on the Account Details
- * page).
  */
 export interface AccountStatus {
   /** Computed account lifecycle status. */

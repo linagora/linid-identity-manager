@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.model.organizationalunit;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -79,4 +80,18 @@ public interface OrganizationalUnitMapper {
      * @return the mapped DTO
      */
     OrganizationalUnitViewDTO toDTO(OrganizationalUnitView organizationalUnit);
+
+    /**
+     * Converts an {@link OrganizationalUnitDistinctView} entity into an
+     * {@link OrganizationalUnitViewDTO}.
+     *
+     * <p>The suspension fields are mapped flat onto the DTO (mirroring
+     * {@link io.github.linagora.linid.im.api.model.account.AccountViewDTO}); the
+     * {@code suspensionPeriod} range is converted to a
+     * {@link io.github.linagora.linid.im.api.model.common.PeriodDTO} via {@link CommonMapper}.</p>
+     *
+     * @param organizationalUnit the source entity
+     * @return the mapped DTO
+     */
+    OrganizationalUnitViewDTO toDTO(OrganizationalUnitDistinctView organizationalUnit);
 }

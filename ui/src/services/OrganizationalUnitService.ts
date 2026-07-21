@@ -28,7 +28,6 @@ import { api } from 'boot/axios';
 import type {
   OrganizationalUnitDTO,
   OrganizationalUnitReactivationRecord,
-  OrganizationalUnitRecord,
   OrganizationalUnitSuspensionRecord,
 } from 'src/types/organizationalUnits';
 
@@ -45,21 +44,6 @@ export async function getOrganizationalUnitById(
 ): Promise<OrganizationalUnitDTO> {
   return api
     .get<OrganizationalUnitDTO>(`/organizational-units/${id}`, { signal })
-    .then((response) => response.data);
-}
-
-/**
- * Creates a new organizational unit on the backend.
- *
- * @param payload - The OU fields submitted by the user, including the parent identifier provided by the navigation
- *   context.
- * @returns A promise resolving to the raw DTO of the newly created OU.
- */
-export async function createOrganizationalUnit(
-  payload: OrganizationalUnitRecord
-): Promise<OrganizationalUnitDTO> {
-  return api
-    .post<OrganizationalUnitDTO>('/organizational-units', payload)
     .then((response) => response.data);
 }
 

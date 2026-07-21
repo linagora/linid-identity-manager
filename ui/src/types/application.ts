@@ -61,4 +61,6 @@ export interface ApplicationDTO {
    * 2026-04-15T17:09:36.898493688Z.
    */
   updateDate: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }

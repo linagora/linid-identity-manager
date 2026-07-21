@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.common.PeriodDTO;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -75,6 +76,14 @@ public class AccountViewDTO {
      */
     @Schema(description = "Email address of the account", example = "john.doe@example.com")
     private String email;
+
+    /**
+     * Names of the organizational units to which the account belongs, represented as a comma-separated list.
+     */
+    @Schema(
+        description = "Names of the organizational units to which the account belongs, "
+                + "represented as a comma-separated list")
+    private String organizationalUnits;
 
     /**
      * Time range during which the account is considered valid.
@@ -172,4 +181,10 @@ public class AccountViewDTO {
      */
     @Schema(description = "Record last update date")
     private OffsetDateTime updateDate;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     */
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    private Map<String, Object> extraParameters;
 }

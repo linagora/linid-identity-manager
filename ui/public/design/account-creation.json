@@ -1,0 +1,42 @@
+{
+  "moduleAccountCreationPage": {
+    "buttons-card": {
+      "q-card": {},
+      "q-card-actions": { "align": "right" },
+      "cancel-button": {
+        "q-btn": { "color": "primary", "outline": true }
+      },
+      "confirm-button": {
+        "q-btn": { "color": "primary", "outline": false }
+      }
+    },
+    "form-section-general": {
+      "q-card": {},
+      "EntityAttributeField": {
+        "externalId": {
+          "q-input": {}
+        },
+        "lastname": {
+          "q-input": {}
+        },
+        "firstname": {
+          "q-input": {}
+        },
+        "email": {
+          "q-input": {}
+        },
+        "validityPeriod": {
+          "start": {
+            "q-input": {},
+            "q-icon": { "name": "event", "color": "primary" },
+            "q-date": {},
+            "q-btn": { "flat": true }
+          }
+        },
+        "organizationalUnit": {
+          "q-select": {}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,486 @@
+{
+  "moduleApplicationCreationPage": {
+    "title": "Create an application",
+    "error": "Unable to create the application. Please try again later.",
+    "success": "Application successfully created.",
+    "ButtonsCard": {
+      "cancel": "Back",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "formSections": {
+      "general": {
+        "title": "General information"
+      },
+      "claims": {
+        "title": "Claims management"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "name": {
+        "label": "Name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "type": {
+        "label": "Type *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "domain": {
+        "label": "Domain"
+      },
+      "description": {
+        "label": "Description"
+      },
+      "claimsTemplate": {
+        "label": "Claims generation template *",
+        "validation": {
+          "required": "This field is required."
+        }
+      }
+    }
+  },
+  "moduleApplicationsPage": {
+    "NavigationMenu": {
+      "label": "Applications"
+    },
+    "ButtonsCard": {
+      "create": "Add new application"
+    },
+    "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
+    "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
+    "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
+    "seeButton": "See",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "domain": "Domain",
+      "description": "Description",
+      "type": "Type",
+      "createdBy": "Created by",
+      "insertDate": "Creation date",
+      "actions": "Actions"
+    },
+    "error": "Unable to load the applications. Please try again later.",
+    "GenericEntityTable": {
+      "noData": "No data available",
+      "rowsPerPage": "Rows per page:",
+      "paginationLabel": "{start}-{end} of {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Delete a favorite?",
+      "content": "Confirm deleting favorite \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmLoading": "Deleting..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Override the favorite?",
+      "content": "Confirm overriding favorite \"{label}\" with the current search?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Override",
+        "confirmLoading": "Overriding..."
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Create a favorite?",
+      "content": "Create favorite from current search.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name *",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name *",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
+    "LinidSmartFilter": {
+      "label": "Current search filter",
+      "hint": "Enter your filter",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "code": {
+          "type": "Code",
+          "separator": "or"
+        },
+        "name": {
+          "type": "Name",
+          "separator": "or"
+        },
+        "domain": {
+          "type": "Domain",
+          "separator": "or"
+        },
+        "description": {
+          "type": "Description",
+          "separator": "or"
+        },
+        "type": {
+          "type": "Type",
+          "separator": "or"
+        },
+        "createdBy": {
+          "type": "Created by",
+          "separator": "or"
+        },
+        "insertDate": {
+          "type": "Creation date",
+          "separator": "or"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filter by:",
+        "columnFilter": {
+          "code": "Code",
+          "name": "Name",
+          "domain": "Domain",
+          "description": "Description",
+          "type": "Type",
+          "createdBy": "Created by",
+          "insertDate": "Creation date"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favorites",
+        "noData": "No favorite available",
+        "createFavorite": "Create a favorite",
+        "overrideFavorite": "Override a favorite",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filter by text",
+        "inputHint": "Enter a text to search",
+        "negateLabel": "Negate",
+        "searchButton": "Search",
+        "operators": {
+          "contains": "Contains",
+          "startsWith": "Starts with",
+          "endsWith": "Ends with",
+          "equals": "Equal to",
+          "notContains": "Does not contain",
+          "notStartsWith": "Does not start with",
+          "notEndsWith": "Does not end with",
+          "notEquals": "Not equal to"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Search"
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filter by date",
+        "inputHint": "Enter/select a date to search",
+        "negateLabel": "Negate",
+        "close": "Close",
+        "searchButton": "Search",
+        "operators": {
+          "inferior": "Before",
+          "superior": "After",
+          "equals": "Equal to",
+          "notInferior": "Not before",
+          "notSuperior": "Not after",
+          "notEquals": "Not equal to"
+        },
+        "validation": {
+          "invalidDate": "Incorrect date. Expected format: {format}"
+        }
+      }
+    }
+  },
+  "moduleApplicationDetailsPage": {
+    "title": "Application details",
+    "error": "Unable to load the application. Please try again later.",
+    "EntityProfilePanel": {
+      "title": "{name}",
+      "subtitle": "{code}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Applications list"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "type": "Type",
+          "domain": "Domain",
+          "description": "Description",
+          "deployedAt": "Deployed at"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "export": {
+            "label": "Export script",
+            "success": "Script successfully exported.",
+            "error": "Error exporting script."
+          },
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Application successfully updated.",
+              "submitError": "Unable to update the application. Please try again later.",
+              "FormDialog": {
+                "title": "Edit {name}",
+                "fields": {
+                  "code": {
+                    "label": "Code *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "name": {
+                    "label": "Name *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "type": {
+                    "label": "Type *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "domain": {
+                    "label": "Domain"
+                  },
+                  "description": {
+                    "label": "Description"
+                  },
+                  "claimsTemplate": {
+                    "label": "Claims generation template *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Save",
+                  "confirmLoading": "Saving...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sections": {
+      "claims": {
+        "EntityDetailsCard": {
+          "title": "Claims",
+          "attributes": {
+            "claimsTemplate": "Claims generation template"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Created by",
+            "updatedBy": "Updated by",
+            "insertDate": "Creation date",
+            "updateDate": "Last update"
+          }
+        }
+      }
+    },
+    "GenericEditableTableCard": {
+      "title": "Roles",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "loadError": "Unable to load the application roles. Please try again later.",
+      "createSuccess": "Role successfully created.",
+      "createError": "Unable to create the role. Please try again later.",
+      "updateSuccess": "Role successfully updated.",
+      "updateError": "Unable to update the role. Please try again later.",
+      "deleteSuccess": "Role successfully deleted.",
+      "deleteError": "Unable to delete the role. Please try again later.",
+      "columns": {
+        "name": "Name",
+        "description": "Description"
+      },
+      "ButtonsCard": {
+        "add": "Add a role"
+      },
+      "CreateFormDialog": {
+        "title": "Add a role",
+        "ButtonsCard": {
+          "confirm": "Add",
+          "confirmLoading": "Adding...",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "name": {
+            "label": "Name *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Edit the role {name}",
+        "ButtonsCard": {
+          "confirm": "Save",
+          "confirmLoading": "Saving...",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "name": {
+            "label": "Name *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Delete the role {name}",
+        "content": "Do you really want to delete the role {name}? This action is irreversible.",
+        "ButtonsCard": {
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "GenericEntityTable": {
+        "noData": "No role for this application.",
+        "rowsPerPage": "Rows per page:",
+        "paginationLabel": "{start}-{end} of {total}"
+      }
+    },
+    "GenericSortableListCard": {
+      "title": "Rules",
+      "noData": "No rule for this application.",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "unsavedChangesHint": "Some rules have been modified. Don't forget to save.",
+      "saveChangesSuccess": "Changes successfully saved.",
+      "saveChangesError": "Unable to save the changes. Please try again later.",
+      "saveChangesPartially": "Some changes could not be saved.",
+      "loadError": "Unable to load the application rules. Please try again later.",
+      "createSuccess": "Rule successfully created.",
+      "createError": "Unable to create the rule. Please try again later.",
+      "ButtonsCard": {
+        "add": "Add a rule",
+        "save": "Save"
+      },
+      "CreateFormDialog": {
+        "title": "Add a rule",
+        "ButtonsCard": {
+          "confirm": "Add",
+          "confirmLoading": "Adding...",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "code": {
+            "label": "Code *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priority *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "script": {
+            "label": "Script *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "disabled": {
+            "label": "Disabled"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Edit the rule {code}",
+        "ButtonsCard": {
+          "confirm": "Save",
+          "confirmLoading": "Saving...",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "code": {
+            "label": "Code *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priority *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "script": {
+            "label": "Script *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "disabled": {
+            "label": "Disabled"
+          }
+        }
+      },
+      "fields": {
+        "code": "Code",
+        "description": "Description",
+        "priority": "Priority",
+        "disabled": "Disabled"
+      }
+    }
+  }
+}

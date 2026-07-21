@@ -70,33 +70,6 @@ describe('Test mapper: useAccountMapper', () => {
     ...overrides,
   });
 
-  describe('Test function: toAccount', () => {
-    it('Map an AccountDTO to Account without lifecycle detail', () => {
-      tMock.mockReturnValue('YYYY-MM-DD HH:mm');
-      const { toAccount } = useAccountMapper();
-
-      const dto = buildDto();
-      const account = toAccount(dto);
-
-      expect(account).toEqual({
-        id: dto.id,
-        externalId: dto.externalId,
-        lastname: dto.lastname,
-        firstname: dto.firstname,
-        email: dto.email,
-        createdBy: dto.createdBy,
-        updatedBy: dto.updatedBy,
-        insertDate: dayjs(dto.insertDate).format('YYYY-MM-DD HH:mm'),
-        updateDate: dayjs(dto.updateDate).format('YYYY-MM-DD HH:mm'),
-      });
-      expect(account).not.toHaveProperty('status');
-      expect(account).not.toHaveProperty('validityPeriod');
-      expect(account).not.toHaveProperty('suspensionPeriod');
-      expect(account).not.toHaveProperty('activationAt');
-      expect(account).not.toHaveProperty('daysBeforeDeactivation');
-    });
-  });
-
   describe('Test function: toAccountStatus', () => {
     it('Map an AccountDTO to AccountStatus exposing only lifecycle fields', () => {
       const { toAccountStatus } = useAccountMapper();

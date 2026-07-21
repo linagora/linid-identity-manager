@@ -32,22 +32,8 @@ export interface OrganizationalUnitRelationDTO {
   id: string;
   /** Unique identifier of the parent organizational unit. */
   parent: string;
-}
-
-/**
- * Writable fields of an organizational unit, sent to the backend when creating a new OU. Distinct from
- * {@link OrganizationalUnitDTO}: a record carries only client-provided values, with no server-managed metadata.
- */
-export interface OrganizationalUnitRecord {
-  /**
-   * Identifier of the parent organizational unit. Always required: the root is the only OU without a parent and is
-   * created by the backend.
-   */
-  parent: string;
-  /** Human-readable name of the organizational unit. */
-  name: string;
-  /** Type of the organizational unit, picked from a fixed list of values. */
-  type: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /** Raw organizational unit shape returned by the API. */
@@ -58,6 +44,8 @@ export interface OrganizationalUnitDTO {
   name: string;
   /** Type of the organizational unit. */
   type: string;
+  /** Names of the organizational units to which it belongs, represented as a comma-separated list. */
+  parentNames: string;
   /** Creator identifier. */
   createdBy: string;
   /** Last updater identifier. */
@@ -73,37 +61,22 @@ export interface OrganizationalUnitDTO {
    * instant).
    */
   isSuspended: boolean;
+  /** Computed organizational unit status, server-derived from the suspension period. */
+  status: 'ACTIVE' | 'SUSPENDED';
   /** List of parent organizational units, with their identifiers and relation IDs. */
   parents?: OrganizationalUnitRelationDTO[];
-}
-
-/**
- * Identity projection of an organizational unit consumed by Vue components on the Details page. Identity fields only;
- * combine with {@link OrganizationalUnitStatus} when both identity and suspension state are needed.
- */
-export interface OrganizationalUnit {
-  /** Unique identifier of the organizational unit. */
-  id: string;
-  /** Human-readable name of the organizational unit. */
-  name: string;
-  /** Type of the organizational unit. */
-  type: string;
-  /** Creator identifier. */
-  createdBy: string;
-  /** Last updater identifier. */
-  updatedBy: string;
-  /** Organizational unit creation date converted from API ISO timestamp. */
-  insertDate: string;
-  /** Organizational unit last update date converted from API ISO timestamp. */
-  updateDate: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
+  /**
+   * Additional deployment-specific attributes associated with the relationship between an account and an organizational
+   * unit.
+   */
+  relationExtraParameters: Record<string, unknown>;
 }
 
 /**
  * Suspension status fields of an organizational unit: suspension period, reason metadata, and the computed
  * `isSuspended` flag.
- *
- * Combine with an {@link OrganizationalUnit} when both identity and lifecycle data are needed (for example on the OU
- * Details page).
  */
 export interface OrganizationalUnitStatus {
   /** Period during which the organizational unit is suspended. Null when no suspension is configured. */
@@ -149,15 +122,4 @@ export interface OrganizationalUnitStatusForm {
   subreason?: string | null;
   /** Free-text comment. */
   comment?: string | null;
-}
-
-/**
- * Shape of the OU creation form. The `parent` value is provided by the navigation context and is therefore not present
- * here; the form only carries user-editable fields.
- */
-export interface OrganizationalUnitForm {
-  /** Human-readable name of the organizational unit. */
-  name: string;
-  /** Type of the organizational unit, picked from a fixed list of values. */
-  type: string;
 }

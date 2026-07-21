@@ -28,6 +28,8 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -36,20 +38,25 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
-import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,12 +91,22 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     /**
      * Repository used to manage {@link OrganizationalUnitView} persistence operations.
      */
-    private final OrganizationalUnitViewRepository organizationalUnitViewRepository;
+    private final OrganizationalUnitDistinctViewRepository organizationalUnitDistinctViewRepository;
 
     /**
      * Repository used to manage {@link OrganizationalUnitAccountView} persistence operations.
      */
     private final OrganizationalUnitAccountViewRepository organizationalUnitAccountViewRepository;
+
+    /**
+     * Repository used to manage {@link OrganizationalUnitAccount} relationship persistence operations.
+     */
+    private final OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    /**
+     * Repository used to check the existence of accounts to attach.
+     */
+    private final AccountRepository accountRepository;
 
     /**
      * Repository used to manage organizational unit relation persistence operations.
@@ -131,6 +148,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Validator enforcing the business rules of the organizational unit reactivation flow.
      */
     private final OrganizationalUnitReactivationValidator organizationalUnitReactivationValidator;
+
+    /**
+     * Executor used to build and execute dynamic Spring Data JPA queries.
+     */
+    private final SpringQueryExecutor executor;
 
     /**
      * Cached root organizational unit instance.
@@ -228,8 +250,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public OrganizationalUnitView findViewById(final UserPrincipal userPrincipal, final UUID id) {
-        return organizationalUnitViewRepository.findById(id)
+    public OrganizationalUnitDistinctView findViewById(final UserPrincipal userPrincipal, final UUID id) {
+        return organizationalUnitDistinctViewRepository.findFirstById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
@@ -237,12 +259,17 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public Page<OrganizationalUnitView> findAll(final UserPrincipal userPrincipal,
-                                                final OrganizationalUnitViewQueryFilterDto filters,
-                                                final Pageable pageable) {
+    public Page<OrganizationalUnitDistinctView> findAll(final UserPrincipal userPrincipal,
+                                                        final OrganizationalUnitViewQueryFilterDto filters,
+                                                        final Pageable pageable) {
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitView.class, filters);
 
-        return organizationalUnitViewRepository.findAll(specification, pageable);
+        return executor.findDistinctPageEntities(
+            OrganizationalUnitView.class,
+            OrganizationalUnitDistinctView.class,
+            specification,
+            pageable
+        );
     }
 
     @Override
@@ -253,6 +280,83 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitAccountView.class, filters);
 
         return organizationalUnitAccountViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public OrganizationalUnitAccount attachAccount(
+        final UserPrincipal userPrincipal,
+        final UUID organizationalUnitId,
+        final OrganizationalUnitAccountRecord record) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        if (!accountRepository.existsById(record.accountId())) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
+            organizationalUnitId, record.accountId())) {
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of("error.organizational.unit.account.already_attached",
+                    Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        var entity = OrganizationalUnitAccount.builder()
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(record.accountId())
+            .extraParameters(record.extraParameters())
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        return organizationalUnitAccountRepository.save(entity);
+    }
+
+    @Override
+    public OrganizationalUnitAccount updateAccountRelation(
+        final UserPrincipal userPrincipal,
+        final UUID organizationalUnitId,
+        final UUID accountId,
+        final OrganizationalUnitAccountUpdateRecord record) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        var entity = findRelation(organizationalUnitId, accountId);
+
+        entity.setExtraParameters(record.extraParameters());
+        entity.setUpdatedBy(userPrincipal.getId());
+
+        return organizationalUnitAccountRepository.save(entity);
+    }
+
+    @Override
+    public void detachAccount(final UserPrincipal userPrincipal,
+                              final UUID organizationalUnitId,
+                              final UUID accountId) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        organizationalUnitAccountRepository.delete(findRelation(organizationalUnitId, accountId));
+    }
+
+    /**
+     * Retrieves the relationship between an organizational unit and an account, throwing a 404
+     * {@link ApiException} when the account is not attached to the organizational unit.
+     *
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the account identifier
+     * @return the {@link OrganizationalUnitAccount} relationship
+     */
+    private OrganizationalUnitAccount findRelation(final UUID organizationalUnitId, final UUID accountId) {
+        return organizationalUnitAccountRepository
+            .findByOrganizationalUnitIdAndAccountId(organizationalUnitId, accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.account.not_attached",
+                    Map.of("id", accountId.toString()))
+            ));
     }
 
     @Override
@@ -306,21 +410,17 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         var entity = findById(userPrincipal, id);
 
-        if (entity.getName().equals(organizationalUnit.name())
-            && entity.getType().equals(organizationalUnit.type())) {
-            return entity;
-        }
-
         entity.setName(organizationalUnit.name());
         entity.setType(organizationalUnit.type());
+        entity.setExtraParameters(organizationalUnit.extraParameters());
 
         return organizationalUnitRepository.save(entity);
     }
 
     @Override
-    public OrganizationalUnitView suspend(final UserPrincipal userPrincipal,
-                                          final UUID id,
-                                          final OrganizationalUnitSuspensionRecord record) {
+    public OrganizationalUnitDistinctView suspend(final UserPrincipal userPrincipal,
+                                                  final UUID id,
+                                                  final OrganizationalUnitSuspensionRecord record) {
         ensureOrganizationalUnitExists(id);
         OrganizationalUnitStatus status = loadStatus(id);
 
@@ -333,9 +433,9 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public OrganizationalUnitView reactivate(final UserPrincipal userPrincipal,
-                                             final UUID id,
-                                             final OrganizationalUnitReactivationRecord record) {
+    public OrganizationalUnitDistinctView reactivate(final UserPrincipal userPrincipal,
+                                                     final UUID id,
+                                                     final OrganizationalUnitReactivationRecord record) {
         ensureOrganizationalUnitExists(id);
         OrganizationalUnitStatus status = loadStatus(id);
 

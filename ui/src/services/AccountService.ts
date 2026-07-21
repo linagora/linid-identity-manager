@@ -34,18 +34,6 @@ import type {
 } from 'src/types/accounts';
 
 /**
- * Retrieves a single account by its identifier from the backend.
- *
- * @param id - The unique identifier of the account.
- * @returns A promise resolving to the raw account DTO returned by the API.
- */
-export async function getAccountById(id: string): Promise<AccountDTO> {
-  return api
-    .get<AccountDTO>(`/accounts/${id}`)
-    .then((response) => response.data);
-}
-
-/**
  * Suspends an account, immediately or as a scheduled suspension depending on the suspension period start carried by the
  * payload.
  *

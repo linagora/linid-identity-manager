@@ -60,7 +60,18 @@ Feature: Test API Account endpoints
   ## 704 Should return 400 when validity period start is in the future
   ## 705 Should return 400 when activationAt is before validity start
   ## 706 Should return 400 when activationAt is in the future
+
+  ################## Update (PUT /accounts/{id}) #####
+  ## 801 Should update the editable attributes of an existing account
+  ## 802 Should return 404 when updating an unknown account
+  ## 803 Should return 400 when updating with an invalid
+  ## 804 Should return 400 when updating with an email or external identifier already used
   ## 707 Should return 404 when activating unknown account
+
+  ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
+  ## 901 Should return <ou> for the <user> account
+  ## 902 Should return 404 for an unknown account
+  ## 903 Should return an empty page for an account without any organizational unit
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -91,7 +102,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 401
@@ -112,11 +124,12 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 9
+    And   I expect '{{response.body | dump}}' as 'json' to have length 10
     And   I expect '{{response.body.id}}' is not empty
     And   I expect '{{response.body.externalId}}' is 'ext-201'
     And   I expect '{{response.body.lastname}}' is 'Doe'
@@ -126,6 +139,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.updatedBy}}' is not empty
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
+    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.id}}' with method 'DELETE'
     Then  I expect status code is 204
@@ -139,7 +153,8 @@ Feature: Test API Account endpoints
         "firstname": "",
         "email": "",
         "validityPeriod": null,
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -159,7 +174,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -179,7 +195,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -196,7 +213,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 500
@@ -216,7 +234,8 @@ Feature: Test API Account endpoints
           "start": null,
           "end": "2030-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -235,7 +254,8 @@ Feature: Test API Account endpoints
           "start": "2000-01-01T00:00:00Z",
           "end": "2030-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -254,11 +274,12 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 9
+    And   I expect '{{response.body | dump}}' as 'json' to have length 10
     And   I expect '{{response.body.id}}' is not empty
     And   I expect '{{response.body.externalId}}' is 'ext-207'
     And   I expect '{{response.body.lastname}}' is 'Doe'
@@ -268,6 +289,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.updatedBy}}' is not empty
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
+    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000a/accounts?email=john207@example.com' with method 'GET'
     Then I expect status code is 200
@@ -292,7 +314,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -308,6 +331,8 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.content[0].email}}' is 'findall301@example.com'
     And   I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.content[0].updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.content[0].organizationalUnits}}' is 'Company A'
+    And   I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
     And   I expect '{{response.body.content[0].insertDate}}' is not empty
     And   I expect '{{response.body.content[0].updateDate}}' is not empty
 
@@ -330,7 +355,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -345,6 +371,8 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.email}}' is 'findbyid401@example.com'
     And   I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.organizationalUnits}}' is 'Company A'
+    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
 
@@ -373,7 +401,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -407,7 +436,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -448,7 +478,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -484,7 +515,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -519,7 +551,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -554,7 +587,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -608,7 +642,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -645,7 +680,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -677,7 +713,8 @@ Feature: Test API Account endpoints
           "start": "2090-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -725,7 +762,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -770,7 +808,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -812,7 +851,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -881,7 +921,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -912,7 +953,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -989,7 +1031,8 @@ Feature: Test API Account endpoints
           "start": "2099-01-01T00:00:00Z",
           "end": "2099-12-31T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -1040,3 +1083,239 @@ Feature: Test API Account endpoints
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
     And   I expect '{{response.body.status}}' is '404'
+
+  ####################################################
+  ################## Update (PUT /accounts/{id}) #####
+  ####################################################
+
+  Scenario: 801 - Should update the editable attributes of an existing account
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-801",
+        "lastname": "Before",
+        "firstname": "Update",
+        "email": "update801@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-801-updated",
+        "lastname": "After",
+        "firstname": "Updated",
+        "email": "updated801@example.com",
+        "extraParameters": {"updated": true}
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And   I expect '{{response.body.externalId}}' is 'ext-801-updated'
+    And   I expect '{{response.body.lastname}}' is 'After'
+    And   I expect '{{response.body.firstname}}' is 'Updated'
+    And   I expect '{{response.body.email}}' is 'updated801@example.com'
+    And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
+
+    # A payload without extraParameters must preserve the stored value
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-801-updated",
+        "lastname": "After",
+        "firstname": "Updated",
+        "email": "updated801@example.com"
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
+  Scenario: 802 - Should return 404 when updating an unknown account
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-802",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update802@example.com"
+      }
+      """
+    Then  I expect status code is 404
+    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And   I expect '{{response.body.status}}' is '404'
+
+  Scenario Outline: 803 - Should return 400 when updating with an invalid <field>
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-803",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update803@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "<externalId>",
+        "lastname": "<lastname>",
+        "firstname": "<firstname>",
+        "email": "<email>"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.error}}' is 'Validation failed'
+    And   I expect '{{response.body.errorKey}}' is 'error.validation'
+    And   I expect '{{response.body.status}}' is '400'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
+    Examples:
+      | field      | externalId | lastname | firstname | email                 |
+      | email      | ext-803    | Doe      | Jane      | not-an-email          |
+      | externalId |            | Doe      | Jane      | update803@example.com |
+      | lastname   | ext-803    |          | Jane      | update803@example.com |
+      | firstname  | ext-803    | Doe      |           | update803@example.com |
+
+  Scenario: 804 - Should return 400 when updating with an email or external identifier already used
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-804-a",
+        "lastname": "Taken",
+        "firstname": "Already",
+        "email": "update804-a@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'firstAccountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-804-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-b@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'secondAccountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-804-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-a@example.com"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.email_already_used'
+    And   I expect '{{response.body.status}}' is '400'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-804-a",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-b@example.com"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.external_id_already_used'
+    And   I expect '{{response.body.status}}' is '400'
+
+    # Updating an account with its own current values must stay allowed
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-804-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-b@example.com"
+      }
+      """
+    Then  I expect status code is 200
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.firstAccountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
+  ####################################################
+  ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
+  ####################################################
+
+  Scenario Outline: 901 - Should return <ou> for the <user> account
+    When I request '{{env.E2E_API_URL}}/accounts?externalId=<user>' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I store 'accountId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/organizational-units?sort=name,asc' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '<totalElements>'
+    And  I expect '{{response.body.content.length}}' is '<totalElements>'
+    And  I expect '{{response.body.content[<indice>].id}}' is not empty
+    And  I expect '{{response.body.content[<indice>].name}}' is '<ou>'
+    And  I expect '{{response.body.content[<indice>].type}}' is '<type>'
+    And  I expect '{{response.body.content[<indice>].status}}' is 'ACTIVE'
+
+    Examples:
+      | user          | ou          | type     | totalElements | indice |
+      | user1         | Company A   | COMPANY  | 2             | 0      |
+      | user1         | Team Beta   | TEAM     | 2             | 1      |
+      | user2         | Company B   | COMPANY  | 2             | 0      |
+      | user2         | Team Beta   | TEAM     | 2             | 1      |
+      | user3         | Division A1 | DIVISION | 2             | 0      |
+      | user3         | Team Beta   | TEAM     | 2             | 1      |
+      | lifecycle-c10 | Team Alpha  | TEAM     | 1             | 0      |
+
+  Scenario: 902 - Should return 404 for an unknown account
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/organizational-units' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'
+
+  Scenario: 903 - Should return an empty page for an account without any organizational unit
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000ce/organizational-units' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '0'
+    And  I expect '{{response.body.content.length}}' is '0'

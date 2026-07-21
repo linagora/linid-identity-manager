@@ -39,6 +39,7 @@ Feature: Test Application creation page
     And  I expect the HTML element '[data-cy="field_code"]' to be visible
     And  I expect the HTML element '[data-cy="field_name"]' to be visible
     And  I expect the HTML element '[data-cy="field_type"]' to be visible
+    And  I expect the HTML element '[data-cy="field_domain"]' to be visible
     And  I expect the HTML element '[data-cy="field_description"]' to be visible
     And  I expect the HTML element '[data-cy="field_claimsTemplate"]' to be visible
     And  I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
@@ -53,6 +54,7 @@ Feature: Test Application creation page
     When I set the text "TEST_APP" in the HTML element "input[data-cy=\"field_code\"]"
     And  I set the text "Test application" in the HTML element "input[data-cy=\"field_name\"]"
     And  I set the text "test" in the HTML element "input[data-cy=\"field_type\"]"
+    And  I set the text "Test application domain" in the HTML element "input[data-cy=\"field_domain\"]"
     And  I set the text "Test application description" in the HTML element "textarea[data-cy=\"field_description\"]"
     And  I set the text "{}" in the HTML element "textarea[data-cy=\"field_claimsTemplate\"]"
     And  I click on '[data-cy="button_confirm"]'

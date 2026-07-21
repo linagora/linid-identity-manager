@@ -26,7 +26,6 @@
 
 import { useCommonMapper } from '@linagora/linid-im-front-corelib';
 import type {
-  Account,
   AccountDeactivationRecord,
   AccountDTO,
   AccountReactivationRecord,
@@ -43,31 +42,11 @@ import { DATE_FORMAT_KEY } from 'src/types/common';
  * @returns Functions to convert API records to UI-friendly formats.
  */
 export function useAccountMapper() {
-  const { toDate, toDateISO } = useCommonMapper();
-
-  /**
-   * Maps an AccountDTO to an Account, converting date to date ISO.
-   *
-   * @param account AccountDTO to be transformed into an Account.
-   * @returns Account with properly typed fields for UI.
-   */
-  const toAccount = (account: AccountDTO): Account => {
-    return {
-      id: account.id,
-      externalId: account.externalId,
-      lastname: account.lastname,
-      firstname: account.firstname,
-      email: account.email,
-      createdBy: account.createdBy,
-      updatedBy: account.updatedBy,
-      insertDate: toDate(account.insertDate, DATE_FORMAT_KEY),
-      updateDate: toDate(account.updateDate, DATE_FORMAT_KEY),
-    };
-  };
+  const { toDateISO } = useCommonMapper();
 
   /**
    * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status fields. Identity fields (firstname,
-   * lastname, ...) are intentionally not included; combine with {@link toAccount} when both are needed.
+   * lastname, ...) are intentionally not included.
    *
    * @param account AccountDTO to be transformed into an AccountStatus.
    * @returns AccountStatus with lifecycle fields preserved as ISO strings.
@@ -170,19 +149,14 @@ export function useAccountMapper() {
     accountStatus: AccountStatus
   ): AccountStatusForm => {
     return {
-      validityPeriodStart:
-        toDate(accountStatus.validityPeriod?.start, DATE_FORMAT_KEY) || null,
-      validityPeriodEnd:
-        toDate(accountStatus.validityPeriod?.end, DATE_FORMAT_KEY) || null,
-      suspensionPeriodStart:
-        toDate(accountStatus.suspensionPeriod?.start, DATE_FORMAT_KEY) || null,
-      suspensionPeriodEnd:
-        toDate(accountStatus.suspensionPeriod?.end, DATE_FORMAT_KEY) || null,
+      validityPeriodStart: accountStatus.validityPeriod?.start,
+      validityPeriodEnd: accountStatus.validityPeriod?.end,
+      suspensionPeriodStart: accountStatus.suspensionPeriod?.start,
+      suspensionPeriodEnd: accountStatus.suspensionPeriod?.end,
     };
   };
 
   return {
-    toAccount,
     toAccountStatus,
     toAccountSuspensionRecord,
     toAccountDeactivationRecord,

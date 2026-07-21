@@ -24,6 +24,7 @@
  * LinID Identity Manager software.
  */
 
+import { appConfig } from 'boot/config';
 import {
   UserManager,
   WebStorageStateStore,
@@ -31,38 +32,12 @@ import {
   type UserManagerSettings,
 } from 'oidc-client-ts';
 
-/** OpenID Connect configuration loaded from `/oidc-config.json`. */
-interface OidcConfig {
-  /** URL of the OpenID Connect authority (Identity Provider). */
-  authority: string;
-
-  /** OAuth 2.0 / OIDC client identifier. */
-  client_id: string;
-
-  /** URI where the Identity Provider redirects the user after a successful login. */
-  redirect_uri: string;
-
-  /** URI where the Identity Provider redirects the user after logout. */
-  post_logout_redirect_uri?: string;
-
-  /** OAuth 2.0 response type used during authentication. Typically set to `code`. */
-  response_type?: string;
-
-  /** Requested OAuth 2.0/OIDC scopes. */
-  scope?: string;
-
-  /** URI used for silent token renewal. */
-  silent_redirect_uri?: string;
-
-  /** Additional OIDC configuration properties. */
-  [key: string]: unknown;
-}
-
 /** Service responsible for authentication and session management using OpenID Connect (OIDC). */
 class AuthService {
   private userManager: UserManager | null = null;
   private initPromise: Promise<UserManager> | null = null;
   private loginPromise: Promise<void> | null = null;
+  private clearPromise: Promise<void> | null = null;
 
   /**
    * Initializes the OIDC client and creates the underlying {@link UserManager} instance.
@@ -81,20 +56,15 @@ class AuthService {
   }
 
   /**
-   * Loads the OIDC configuration and creates a configured {@link UserManager} instance.
+   * Get the OIDC configuration and creates a configured {@link UserManager} instance.
    *
    * This method also registers authentication event handlers for token expiration, silent renewal failures, and remote
    * sign-out.
    *
    * @returns A promise resolving to the configured {@link UserManager}.
-   * @throws {Error} If the OIDC configuration file cannot be loaded.
    */
   private async buildUserManager(): Promise<UserManager> {
-    const response = await fetch('/oidc-config.json');
-    if (!response.ok) {
-      throw new Error(`Unable to load /oidc-config.json (${response.status})`);
-    }
-    const config: OidcConfig = await response.json();
+    const config = appConfig.oidc;
 
     const settings: UserManagerSettings = {
       authority: config.authority,
@@ -235,6 +205,31 @@ class AuthService {
   async getAccessToken(): Promise<string | null> {
     const user = await this.getUser();
     return user?.access_token ?? null;
+  }
+
+  /**
+   * Clears the current user session by removing the user from the OIDC client storage.
+   *
+   * This method does not perform a logout with the Identity Provider; it only clears the local session state.
+   *
+   * @returns A promise that resolves when the user has been removed from storage.
+   */
+  async clearUser(): Promise<void> {
+    if (this.clearPromise) {
+      return this.clearPromise;
+    }
+
+    const manager = this.getManager();
+
+    this.clearPromise = (async () => {
+      try {
+        await manager.removeUser();
+      } finally {
+        this.clearPromise = null;
+      }
+    })();
+
+    return this.clearPromise;
   }
 }
 

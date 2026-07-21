@@ -4,7 +4,10 @@ Feature: Test homepage
   ## 101 Should display application title, icon, and version
 
   ################## Header Profile Menu ##################
-  ## 201 Should display user profile menu
+  ## 201 Should display user's information in the user profile menu
+  ## 202 Should display the language switcher in the user profile menu
+  ## 203 Should display the list of available languages and switch the interface language
+  ## 204 Should keep the selected language after a reload and switch back to French
 
   ################## Content Sections ##################
   ## 301 Should display all home page sections
@@ -31,11 +34,34 @@ Feature: Test homepage
   ################## Header Profile Menu #############
   ####################################################
 
-  ## 201 Should display user profile menu
+  ## 201 Should display user's information in the user profile menu
     When I click on '[data-cy="header_profile_button"]'
     Then I expect the HTML element '[data-cy="header_profile_menu"]' to be visible
     And I expect the HTML element '[data-cy="header_profile_name"]' contains "admin name"
     And I expect the HTML element '[data-cy="header_profile_email"]' contains "admin@example.com"
+
+  ## 202 Should display the language switcher in the user profile menu
+    And I expect the HTML element '[data-cy="header_profile_language"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_select"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'Français'
+    And I expect the HTML element '[data-cy="header_profile_language_select"] img' to be visible
+
+  ## 203 Should display the list of available languages and switch the interface language
+    When I click on '[data-cy="header_profile_language_select"]'
+    Then I expect the HTML element '[data-cy="header_profile_language_option_en-US"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"]' to be visible
+    And I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"][aria-disabled="true"]' exists
+    When I click on '[data-cy="header_profile_language_option_en-US"]'
+    Then I expect the HTML element '[data-cy="application_version"]' contains "Development version"
+
+  ## 204 Should keep the selected language after a reload and switch back to French
+    When I visit the '{{ env.E2E_FRONT_URL }}/'
+    Then I expect the HTML element '[data-cy="application_version"]' contains "Development version"
+    When I click on '[data-cy="header_profile_button"]'
+    Then I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'English (US)'
+    When I click on '[data-cy="header_profile_language_select"]'
+    And I click on '[data-cy="header_profile_language_option_fr-FR"]'
+    Then I expect the HTML element '[data-cy="application_version"]' contains "Version de développement"
 
   ####################################################
   ################## Content Sections ################

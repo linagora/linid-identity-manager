@@ -33,6 +33,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -87,4 +88,10 @@ public class OrganizationalUnitDTO {
      */
     @Schema(description = "Record last update date")
     private OffsetDateTime updateDate;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     */
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    private Map<String, Object> extraParameters;
 }

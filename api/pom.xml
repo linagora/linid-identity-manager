@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.linagora.linid.im</groupId>
 	<artifactId>api</artifactId>
-	<version>0.8.0</version>
+	<version>0.9.0</version>
 	<name>LinID-identity-manager-api</name>
 	<licenses>
 		<license>
@@ -33,7 +33,10 @@
 		<url>https://github.com/linagora/linid-identity-manager</url>
 	</scm>
 	<properties>
+		<!-- Overrides the Spring Boot managed version to fix CVE-2026-65182, CVE-2026-65905 and CVE-2026-68525 -->
+		<tomcat.version>11.0.25</tomcat.version>
 		<java.version>25</java.version>
+		<postgresql.version>42.7.13</postgresql.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -63,6 +66,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.ben-manes.caffeine</groupId>
+			<artifactId>caffeine</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -97,7 +108,7 @@
 		<dependency>
 			<groupId>io.github.zorin95670</groupId>
 			<artifactId>spring-query-filter</artifactId>
-			<version>4.1.0</version>
+			<version>4.3.0</version>
 		</dependency>
 		<dependency>
 			<groupId>io.hypersistence</groupId>

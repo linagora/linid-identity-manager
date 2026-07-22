@@ -26,7 +26,10 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+
+import java.util.UUID;
 
 /**
  * Service interface for Application deployer management operations.
@@ -40,4 +43,14 @@ public interface OpaApplicationDeployerService {
      * @return the deployed application with updated timestamp
      */
     Application deploy(Application application);
+
+    /**
+     * Deploys an application policy to OPA.
+     *
+     * @param userPrincipal the user principal initiating the deployment
+     * @param id            the ID of the application to deploy
+     * @param force         whether to force the deployment
+     * @return the deployed application with updated timestamp
+     */
+    Application deploy(UserPrincipal userPrincipal, UUID id, boolean force);
 }

@@ -337,7 +337,14 @@ jobs:
           task setup:e2e
           task start:test:ci
 
+      - name: Dump docker logs
+        if: failure()
+        working-directory: docker/e2e
+        run: |
+          cat /tmp/linid-docker.log || true
+          docker compose logs || true
+
       - name: Stop docker services
         if: always()
         working-directory: docker/e2e
-        run: echo /tmp/linid-docker.log && docker compose down
+        run: docker compose down

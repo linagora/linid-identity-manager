@@ -30,7 +30,7 @@ COMMENT ON COLUMN applications_view.script IS 'Optional OPA Rego policy script s
 COMMENT ON COLUMN applications_view.script_checksum IS 'Deterministic hash computed from the script. NULL when no script is defined.';
 COMMENT ON COLUMN applications_view.deployed_at IS 'Optional date and time when the application script was deployed on OPA (UTC). NULL when the application has not yet been deployed or requires redeployment.';
 COMMENT ON COLUMN applications_view.configuration IS 'JSONB column storing the application-specific configuration.';
-COMMENT ON COLUMN applications_view.roles IS 'JSONB array of strings storing the application roles.';
+COMMENT ON COLUMN applications_view.roles IS 'JSONB array of role objects (name and optional description) storing the application roles.';
 COMMENT ON COLUMN applications_view.created_by IS 'Full name ("firstname lastname") of the account that created this record. Resolved via LEFT OUTER JOIN on accounts.act_id; NULL if the referenced account no longer exists.';
 COMMENT ON COLUMN applications_view.updated_by IS 'Full name ("firstname lastname") of the account that last updated this record. Resolved via LEFT OUTER JOIN on accounts.act_id; NULL if the referenced account no longer exists.';
 COMMENT ON COLUMN applications_view.insert_date IS 'Date and time when the application record was created (UTC).';

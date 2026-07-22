@@ -29,7 +29,8 @@ package io.github.linagora.linid.im.api.controller;
 import io.github.linagora.linid.im.api.model.application.ApplicationDTO;
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
-import io.github.linagora.linid.im.api.model.application.ApplicationRolesRecord;
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
@@ -39,6 +40,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -54,8 +59,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 /**
  * REST controller for application management endpoints.
@@ -170,26 +173,49 @@ public class ApplicationController {
     }
 
     /**
-     * Updates the roles of an application.
+     * Retrieves the roles of an application.
      *
      * @param userPrincipal the authenticated user
      * @param id            the application UUID
-     * @param record        the roles update record
-     * @return the updated application
+     * @return the full list of roles of the application
+     */
+    @GetMapping("/{id}/roles")
+    @Operation(summary = "Retrieve the roles of an application")
+    @ApiResponse(responseCode = "200", description = "Application roles successfully retrieved")
+    @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    public ResponseEntity<List<ApplicationRoleDTO>> getRoles(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id) {
+        log.info("[{}] Received GET request to retrieve roles of application {}",
+            userPrincipal.getEmail(), id);
+        var entity = applicationService.findById(userPrincipal, id);
+        return ResponseEntity.ok(Objects.requireNonNullElse(entity.getRoles(), List.of()));
+    }
+
+    /**
+     * Updates the roles of an application.
+     *
+     * <p>The response contains the updated full list of roles, which is the single source of truth for the caller:
+     * no additional fetch is required after the update.</p>
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the application UUID
+     * @param roles         the new full list of roles (replaces the existing one)
+     * @return the updated full list of roles of the application
      */
     @PutMapping("/{id}/roles")
     @Operation(summary = "Update the roles of an application")
     @ApiResponse(responseCode = "200", description = "Application roles successfully updated")
     @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
     @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
-    public ResponseEntity<ApplicationDTO> updateRoles(
+    public ResponseEntity<List<ApplicationRoleDTO>> updateRoles(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID id,
-        @Valid @RequestBody final ApplicationRolesRecord record) {
+        @Valid @RequestBody @NotNull final List<ApplicationRoleRecord> roles) {
         log.info("[{}] Received PUT request to update roles of application {} with {}",
-            userPrincipal.getEmail(), id, record);
-        var entity = applicationService.updateRoles(userPrincipal, id, record);
-        return ResponseEntity.ok(applicationMapper.toDTO(entity));
+            userPrincipal.getEmail(), id, roles);
+        var entity = applicationService.updateRoles(userPrincipal, id, roles);
+        return ResponseEntity.ok(Objects.requireNonNullElse(entity.getRoles(), List.of()));
     }
 
     /**

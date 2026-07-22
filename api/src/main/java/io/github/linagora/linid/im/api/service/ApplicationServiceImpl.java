@@ -28,7 +28,7 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
-import io.github.linagora.linid.im.api.model.application.ApplicationRolesRecord;
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
@@ -165,10 +165,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public Application updateRoles(final UserPrincipal userPrincipal, final UUID id,
-                                   final ApplicationRolesRecord record) {
+                                   final List<ApplicationRoleRecord> roles) {
         var entity = findById(userPrincipal, id);
 
-        entity.setRoles(record.roles());
+        entity.setRoles(roles.stream().map(mapper::toRoleDTO).toList());
         entity.setUpdatedBy(userPrincipal.getId());
 
         return applicationRepository.save(entity);

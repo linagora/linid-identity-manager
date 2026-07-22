@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -109,6 +110,39 @@ public class GlobalExceptionHandler {
         Map<String, String> fieldErrors = new LinkedHashMap<>();
         exception.getBindingResult().getFieldErrors()
             .forEach(error -> fieldErrors.put(error.getField(), error.getDefaultMessage()));
+
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("error", "Validation failed");
+        body.put("errorKey", "error.validation");
+        body.put("errorContext", fieldErrors);
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("timestamp", Instant.now().toEpochMilli());
+
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    /**
+     * Handles validation errors thrown when method parameters fail constraint validation, such as element constraints
+     * on a {@code List} request body.
+     *
+     * <p>Returns the same structured response as {@link #handleValidationException}.
+     *
+     * @param exception the method validation exception
+     * @return a {@link ResponseEntity} containing parameter-level error messages and HTTP 400 status
+     */
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleHandlerMethodValidationException(
+        final HandlerMethodValidationException exception) {
+        Map<String, String> fieldErrors = new LinkedHashMap<>();
+        exception.getParameterValidationResults().forEach(result -> {
+            var key = result.getMethodParameter().getParameterName();
+            if (result.getContainerIndex() != null) {
+                key = key + "[" + result.getContainerIndex() + "]";
+            }
+
+            final var fieldKey = key;
+            result.getResolvableErrors().forEach(error -> fieldErrors.put(fieldKey, error.getDefaultMessage()));
+        });
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("error", "Validation failed");

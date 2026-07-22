@@ -27,7 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
-import io.github.linagora.linid.im.api.model.application.ApplicationRolesRecord;
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
@@ -35,6 +35,7 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -104,10 +105,10 @@ public interface ApplicationService {
      *
      * @param userPrincipal the authenticated user
      * @param id            the application UUID
-     * @param record        the roles update record
+     * @param roles         the new full list of roles (replaces the existing one)
      * @return the updated application entity
      */
-    Application updateRoles(UserPrincipal userPrincipal, UUID id, ApplicationRolesRecord record);
+    Application updateRoles(UserPrincipal userPrincipal, UUID id, List<ApplicationRoleRecord> roles);
 
     /**
      * Deletes an application by its unique identifier.

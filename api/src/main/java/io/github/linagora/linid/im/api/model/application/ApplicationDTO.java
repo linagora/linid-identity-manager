@@ -28,7 +28,6 @@ package io.github.linagora.linid.im.api.model.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -94,11 +93,6 @@ public class ApplicationDTO {
     @Schema(description = "JSON configuration of the application", example = "{ \"timeout\": 30 }")
     private String configuration;
 
-    /**
-     * List of application roles.
-     */
-    @Schema(description = "List of application roles", example = "[\"admin\", \"user\"]")
-    private List<String> roles;
 
     /**
      * Identifier of the creator of this record.

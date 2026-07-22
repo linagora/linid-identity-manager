@@ -57,12 +57,12 @@
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
-        "confirmLoading": "Mise à jour..."
+        "confirmLoading": "Suppression..."
       }
     },
     "OverrideFavoriteDialog": {
       "title": "Remplacer un favori?",
-      "content": "Selectionner un favori pour le remplacer par la recherche actuelle.",
+      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",
@@ -198,6 +198,176 @@
       }
     }
   },
+  "moduleApplicationsPage": {
+    "NavigationMenu": {
+      "label": "Applications"
+    },
+    "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
+    "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
+    "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
+    "seeButton": "Voir",
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "description": "Description",
+      "type": "Type",
+      "createdBy": "Créé par",
+      "insertDate": "Date de création",
+      "actions": "Actions"
+    },
+    "error": "Erreur pendant la requête",
+    "GenericEntityTable": {
+      "noData": "Aucune donnée disponible",
+      "rowsPerPage": "Éléments par page:",
+      "paginationLabel": "{start}-{end} sur {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Supprimer un favori?",
+      "content": "Confirmer la suppression du favori \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "confirmLoading": "Suppression..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Remplacer un favori?",
+      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Remplacer",
+        "confirmLoading": "Remplacement..."
+      },
+      "fields": {
+        "favorite": {
+          "label": "Favoris"
+        }
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Créer un favori?",
+      "content": "Créer un favori à partir de la recherche actuelle.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favori",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Créer",
+        "confirmLoading": "Création..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Renommer un favori?",
+      "content": "Renommer le favori avec un nouveau nom.",
+      "duplicateName": "Le favori '{name}' existe déjà.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favori",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Renommer",
+        "confirmLoading": "Renommage..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
+    "LinidSmartFilter": {
+      "label": "Filtre(s) de recherche",
+      "hint": "",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "code": {
+          "type": "Code",
+          "separator": "ou"
+        },
+        "name": {
+          "type": "Name",
+          "separator": "ou"
+        },
+        "description": {
+          "type": "Description",
+          "separator": "ou"
+        },
+        "type": {
+          "type": "Type",
+          "separator": "ou"
+        },
+        "createdBy": {
+          "type": "Créé par",
+          "separator": "ou"
+        },
+        "insertDate": {
+          "type": "Date de création",
+          "separator": "ou"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filtrer par:",
+        "columnFilter": {
+          "code": "Code",
+          "name": "Name",
+          "description": "Description",
+          "type": "Type",
+          "createdBy": "Créé par",
+          "insertDate": "Date de création"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favoris",
+        "noData": "Aucun favori disponible",
+        "createFavorite": "Créer un favori",
+        "overrideFavorite": "Remplacer un favori",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filtrage par texte",
+        "inputHint": "Entrer un texte à rechercher",
+        "negateLabel": "Négation",
+        "searchButton": "Rechercher",
+        "operators": {
+          "contains": "Contient",
+          "startsWith": "Commence par",
+          "endsWith": "Finit par",
+          "equals": "Strictement égale à",
+          "notContains": "Ne contient pas",
+          "notStartsWith": "Ne commence pas par",
+          "notEndsWith": "Ne finit pas par",
+          "notEquals": "Strictement différent de"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Rechercher"
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filtrage par date",
+        "inputHint": "Entrer/sélectionner une date à rechercher",
+        "negateLabel": "Négation",
+        "close": "Fermer",
+        "searchButton": "Rechercher",
+        "operators": {
+          "inferior": "Inférieure à",
+          "superior": "Supérieure à",
+          "equals": "Strictement égale à",
+          "notInferior": "N'est pas inférieure à",
+          "notSuperior": "N'est pas supérieure à",
+          "notEquals": "N'est pas strictement égale à"
+        },
+        "validation": {
+          "invalidDate": "Date incorrecte. Format attendu: {format}"
+        }
+      }
+    }
+  },
   "moduleOrganizationalUnitsPage": {
     "NavigationMenu": {
       "label": "Unité organisationnelle"
@@ -228,12 +398,12 @@
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
-        "confirmLoading": "Mise à jour..."
+        "confirmLoading": "Suppression..."
       }
     },
     "OverrideFavoriteDialog": {
       "title": "Remplacer un favori?",
-      "content": "Selectionner un favori pour le remplacer par la recherche actuelle.",
+      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",

@@ -37,7 +37,7 @@ COMMENT ON COLUMN applications.script IS 'Optional OPA Rego policy script stored
 COMMENT ON COLUMN applications.script_checksum IS 'Deterministic hash (e.g. SHA-256) computed from the script. Used to detect changes to the script. NULL when no script is defined.';
 COMMENT ON COLUMN applications.deployed_at IS 'Optional date and time when the application script was deployed on OPA. Stored in UTC (TIMESTAMPTZ). NULL when the application has not yet been deployed or requires redeployment.';
 COMMENT ON COLUMN applications.configuration IS 'JSONB column storing the application-specific configuration.';
-COMMENT ON COLUMN applications.roles IS 'JSONB array of strings storing the application roles.';
+COMMENT ON COLUMN applications.roles IS 'JSONB array of role objects (name and optional description) storing the application roles.';
 COMMENT ON COLUMN applications.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN applications.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN applications.insert_date IS 'Date and time when the application record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';

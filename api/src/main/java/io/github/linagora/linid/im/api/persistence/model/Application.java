@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.persistence.model;
 
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
 import io.github.zorin95670.predicate.FilterType;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
@@ -140,9 +141,9 @@ public class Application extends AbstractEntity {
     private String configuration;
 
     /**
-     * List of application roles, stored as a JSONB array of strings.
+     * List of application roles, stored as a JSONB array of role objects (name and optional description).
      */
     @Type(JsonType.class)
     @Column(name = "roles", columnDefinition = "jsonb")
-    private List<String> roles;
+    private List<ApplicationRoleDTO> roles;
 }

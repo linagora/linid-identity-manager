@@ -753,6 +753,82 @@
     "errors": {
       "notFound": "Application not found",
       "generic": "Unable to load the application. Please try again later."
+    },
+    "roles": {
+      "title": "Roles",
+      "addButton": "Add Role",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "columns": {
+        "name": "Name",
+        "description": "Description",
+        "actions": "Actions"
+      },
+      "createSuccess": "Role created successfully.",
+      "editSuccess": "Role updated successfully.",
+      "deleteSuccess": "Role deleted successfully.",
+      "errors": {
+        "load": "Unable to load the application roles. Please try again later.",
+        "duplicateName": "A role named \"{name}\" already exists.",
+        "update": "Unable to update the application roles. Please try again later."
+      }
+    },
+    "GenericEntityTable": {
+      "noData": "No role defined for this application.",
+      "rowsPerPage": "Rows per page:",
+      "paginationLabel": "{start}-{end} of {total}"
+    }
+  },
+  "ApplicationRoleActions": {
+    "FormDialog": {
+      "create": {
+        "title": "Add Role",
+        "content": "Define the name and the optional description of the new role.",
+        "fields": {
+          "name": {
+            "label": "Name",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Create",
+          "cancel": "Cancel"
+        }
+      },
+      "edit": {
+        "title": "Edit Role",
+        "content": "Update the name or the description of the role.",
+        "fields": {
+          "name": {
+            "label": "Name",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Save",
+          "cancel": "Cancel"
+        }
+      }
+    },
+    "ConfirmationDialog": {
+      "delete": {
+        "title": "Delete Role",
+        "content": "Are you sure you want to delete the role \"{name}\"?",
+        "ButtonsCard": {
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      }
     }
   },
   "AccountDeactivatedBanner": {

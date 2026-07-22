@@ -7,3 +7,8 @@
   width: 700px;
   max-width: 80vw;
 }
+
+.application-role-dialog .form-dialog--form-section--field {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}

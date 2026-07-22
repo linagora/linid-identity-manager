@@ -60,6 +60,12 @@
           />
         </div>
       </div>
+
+      <ApplicationRolesCard
+        v-if="application"
+        class="q-mt-lg"
+        :application-id="applicationId"
+      />
     </div>
   </q-page>
   <!-- v8 ignore stop -->
@@ -72,6 +78,7 @@ import {
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
+import ApplicationRolesCard from 'src/components/card/ApplicationRolesCard.vue';
 import { getApplicationById } from 'src/services/ApplicationService';
 import type { ApplicationDTO } from 'src/types/applications';
 import { computed, onMounted, ref } from 'vue';

@@ -24,43 +24,8 @@
  * LinID Identity Manager software.
  */
 
-/** Role exposed by an application, as stored in the application `roles` list. */
-export interface ApplicationRole {
-  /** Unique human-readable name of the role. */
-  name: string;
-  /** Optional free-text description of the role. */
-  description?: string;
-}
-
-/**
- * Raw application data transfer object as returned by `GET /applications/{id}`.
- *
- * The fields mirror the backend application view, where `createdBy` and `updatedBy` are resolved to human-readable full
- * names.
- */
-export interface ApplicationDTO {
-  /** Unique application identifier. */
-  id: string;
-  /** Functional code uniquely identifying the application. */
-  code: string;
-  /** Human-readable application name. */
-  name: string;
-  /** Free-text description of the application, when provided. */
-  description?: string;
-  /** Application protocol type, for example "OIDC". */
-  type: string;
-  /** Template used to build the token claims for the application. */
-  claimsTemplate: string;
-  /** ISO 8601 date-time when the application policy was last deployed, or null if never deployed. */
-  deployedAt: string | null;
-  /** Application configuration serialized as a JSON string. */
-  configuration: string;
-  /** Full name of the user who created the application. */
-  createdBy: string;
-  /** Full name of the user who last updated the application. */
-  updatedBy: string;
-  /** Application creation timestamp in ISO 8601 / RFC 3339 UTC format. */
-  insertDate: string;
-  /** Application last update timestamp in ISO 8601 / RFC 3339 UTC format. */
-  updateDate: string;
+/** Props for the ApplicationRolesCard component. */
+export interface ApplicationRolesCardProps {
+  /** Unique identifier of the application whose roles are managed. */
+  applicationId: string;
 }

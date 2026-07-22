@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.model.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
@@ -37,7 +38,9 @@ import java.util.List;
  */
 @Schema(description = "Request payload for updating the roles of an application")
 public record ApplicationRolesRecord(
-    @NotNull @Schema(description = "List of application roles", example = "[\"admin\", \"user\"]")
-    List<String> roles
+    @NotNull
+    @Schema(description = "List of application roles",
+        example = "[{\"name\": \"admin\", \"description\": \"Grants full administrative access\"}]")
+    List<@Valid ApplicationRoleDTO> roles
 ) {
 }

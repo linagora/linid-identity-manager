@@ -25,12 +25,17 @@
  */
 
 import { api } from 'boot/axios';
-import { getApplicationById } from 'src/services/ApplicationService';
+import {
+  getApplicationById,
+  getApplicationRoles,
+  updateApplicationRoles,
+} from 'src/services/ApplicationService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('boot/axios', () => ({
   api: {
     get: vi.fn(),
+    put: vi.fn(),
   },
 }));
 
@@ -45,7 +50,6 @@ const buildApplicationDTO = (overrides = {}) => ({
   claimsTemplate: '|Id|Nom|Prenom|Mail',
   deployedAt: '2026-04-15T12:00:00.000000Z',
   configuration: '{}',
-  roles: ['admin'],
   createdBy: 'Alice Creator',
   updatedBy: 'Bob Updater',
   insertDate: '2026-04-15T12:00:00.000000Z',
@@ -56,6 +60,7 @@ const buildApplicationDTO = (overrides = {}) => ({
 describe('Test service: applicationService', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset();
+    vi.mocked(api.put).mockReset();
   });
 
   describe('Test function: getApplicationById', () => {
@@ -76,6 +81,59 @@ describe('Test service: applicationService', () => {
       await expect(getApplicationById(APPLICATION_UUID)).rejects.toThrow(
         'boom'
       );
+    });
+  });
+
+  describe('Test function: getApplicationRoles', () => {
+    it('should call valid endpoint and return the roles list', async () => {
+      const roles = [
+        { name: 'admin', description: 'Grants full administrative access' },
+        { name: 'user' },
+      ];
+      vi.mocked(api.get).mockResolvedValue({ data: roles });
+
+      const result = await getApplicationRoles(APPLICATION_UUID);
+
+      expect(api.get).toHaveBeenCalledWith(
+        `/applications/${APPLICATION_UUID}/roles`
+      );
+      expect(result).toEqual(roles);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      const error = new Error('boom');
+      vi.mocked(api.get).mockRejectedValue(error);
+
+      await expect(getApplicationRoles(APPLICATION_UUID)).rejects.toThrow(
+        'boom'
+      );
+    });
+  });
+
+  describe('Test function: updateApplicationRoles', () => {
+    it('should call valid endpoint with the full roles list and return the updated list', async () => {
+      const roles = [
+        { name: 'admin', description: 'Grants full administrative access' },
+        { name: 'user' },
+      ];
+      vi.mocked(api.put).mockResolvedValue({ data: roles });
+
+      const result = await updateApplicationRoles(APPLICATION_UUID, roles);
+
+      expect(api.put).toHaveBeenCalledWith(
+        `/applications/${APPLICATION_UUID}/roles`,
+        { roles }
+      );
+      expect(result).toEqual(roles);
+    });
+
+    it('should propagate backend errors to the caller', async () => {
+      const error = new Error('boom');
+      vi.mocked(api.put).mockRejectedValue(error);
+
+      await expect(
+        updateApplicationRoles(APPLICATION_UUID, [])
+      ).rejects.toThrow('boom');
     });
   });
 });

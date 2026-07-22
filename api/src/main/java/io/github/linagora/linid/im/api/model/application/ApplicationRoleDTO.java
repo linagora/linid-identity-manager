@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Linagora
+ * Copyright (C) 2020-2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,43 +24,40 @@
  * LinID Identity Manager software.
  */
 
-/** Role exposed by an application, as stored in the application `roles` list. */
-export interface ApplicationRole {
-  /** Unique human-readable name of the role. */
-  name: string;
-  /** Optional free-text description of the role. */
-  description?: string;
-}
+package io.github.linagora.linid.im.api.model.application;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Raw application data transfer object as returned by `GET /applications/{id}`.
+ * Data Transfer Object representing a role exposed by an application, stored as a JSONB object in the application
+ * {@code roles} list.
  *
- * The fields mirror the backend application view, where `createdBy` and `updatedBy` are resolved to human-readable full
- * names.
+ * <p>Implements {@link Serializable} because the JSONB mapping performed by hypersistence-utils requires entity
+ * attribute values to be serializable.</p>
  */
-export interface ApplicationDTO {
-  /** Unique application identifier. */
-  id: string;
-  /** Functional code uniquely identifying the application. */
-  code: string;
-  /** Human-readable application name. */
-  name: string;
-  /** Free-text description of the application, when provided. */
-  description?: string;
-  /** Application protocol type, for example "OIDC". */
-  type: string;
-  /** Template used to build the token claims for the application. */
-  claimsTemplate: string;
-  /** ISO 8601 date-time when the application policy was last deployed, or null if never deployed. */
-  deployedAt: string | null;
-  /** Application configuration serialized as a JSON string. */
-  configuration: string;
-  /** Full name of the user who created the application. */
-  createdBy: string;
-  /** Full name of the user who last updated the application. */
-  updatedBy: string;
-  /** Application creation timestamp in ISO 8601 / RFC 3339 UTC format. */
-  insertDate: string;
-  /** Application last update timestamp in ISO 8601 / RFC 3339 UTC format. */
-  updateDate: string;
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Role exposed by an application")
+public class ApplicationRoleDTO implements Serializable {
+
+    /**
+     * Unique human-readable name of the role.
+     */
+    @NotBlank
+    @Schema(description = "Name of the role", example = "admin")
+    private String name;
+
+    /**
+     * Optional free-text description of the role.
+     */
+    @Schema(description = "Optional description of the role", example = "Grants full administrative access")
+    private String description;
 }

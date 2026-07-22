@@ -31,10 +31,13 @@ import ApplicationDetailsPage from '../../../src/pages/ApplicationDetailsPage.vu
 
 const mockedGetApplicationById = vi.mocked(getApplicationById);
 
-const { mockNotify, mockScopedT } = vi.hoisted(() => ({
-  mockNotify: vi.fn(),
-  mockScopedT: vi.fn((v) => v),
-}));
+const { mockNotify, mockUiEventSubjectNext, mockGlobalT, mockScopedT } =
+  vi.hoisted(() => ({
+    mockNotify: vi.fn(),
+    mockUiEventSubjectNext: vi.fn(),
+    mockGlobalT: vi.fn((v) => v),
+    mockScopedT: vi.fn((v) => v),
+  }));
 
 const mockRoute = {
   params: {
@@ -54,6 +57,11 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: () => ({
     t: mockScopedT,
   }),
+  useUiDesign: () => ({
+    ui: vi.fn(() => ({})),
+  }),
+  getI18nInstance: vi.fn(() => ({ global: { t: mockGlobalT } })),
+  uiEventSubject: { next: mockUiEventSubjectNext },
 }));
 
 vi.mock('axios', () => ({
@@ -64,11 +72,19 @@ vi.mock('axios', () => ({
 
 vi.mock('src/services/ApplicationService', () => ({
   getApplicationById: vi.fn(),
+  getApplicationRoles: vi.fn(),
+  updateApplicationRoles: vi.fn(),
 }));
 
 vi.mock('vue-router', () => ({
   useRoute: () => mockRoute,
   useRouter: () => mockRouter,
+}));
+
+vi.mock('boot/config', () => ({
+  appConfig: {
+    applicationRoleFields: [],
+  },
 }));
 
 describe('Test component: ApplicationDetailsPage', () => {
@@ -86,7 +102,6 @@ describe('Test component: ApplicationDetailsPage', () => {
       claimsTemplate: '|Id|Nom',
       deployedAt: null,
       configuration: '{}',
-      roles: [],
       createdBy: 'Alice Creator',
       updatedBy: 'Bob Updater',
       insertDate: '2026-04-15T12:00:00.000000Z',

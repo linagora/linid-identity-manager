@@ -41,6 +41,8 @@ interface BaseDialogOptions {
    * `AccountSuspensionActions.FormDialog.immediate`.
    */
   i18nScope: string;
+  /** Optional named parameters interpolated in the dialog title and content translations. */
+  i18nParams?: Record<string, unknown>;
   /** Optional per-dialog UI design namespace, overriding the composable default. */
   uiNamespace?: string;
 }
@@ -96,8 +98,11 @@ export function useLifecycleDialogs(defaultNamespace: string) {
       key: 'form',
       data: {
         type: 'open',
-        title: globalT(`${dialog.i18nScope}.title`),
-        content: globalT(`${dialog.i18nScope}.content`),
+        title: globalT(`${dialog.i18nScope}.title`, dialog.i18nParams ?? {}),
+        content: globalT(
+          `${dialog.i18nScope}.content`,
+          dialog.i18nParams ?? {}
+        ),
         uiNamespace: dialog.uiNamespace ?? defaultNamespace,
         i18nScope: dialog.i18nScope,
         formFields: dialog.formFields,
@@ -117,8 +122,11 @@ export function useLifecycleDialogs(defaultNamespace: string) {
       key: 'confirmation',
       data: {
         type: 'open',
-        title: globalT(`${dialog.i18nScope}.title`),
-        content: globalT(`${dialog.i18nScope}.content`),
+        title: globalT(`${dialog.i18nScope}.title`, dialog.i18nParams ?? {}),
+        content: globalT(
+          `${dialog.i18nScope}.content`,
+          dialog.i18nParams ?? {}
+        ),
         uiNamespace: dialog.uiNamespace ?? defaultNamespace,
         i18nScope: dialog.i18nScope,
         onConfirm: dialog.onConfirm,

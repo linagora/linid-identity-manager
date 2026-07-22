@@ -1,0 +1,47 @@
+{
+  "applications": {
+    "details-page": {
+      "roles": {
+        "add-button": {
+          "q-btn": { "color": "primary", "outline": false }
+        },
+        "edit-button": {
+          "q-btn": {}
+        },
+        "delete-button": {
+          "q-btn": { "color": "negative" }
+        },
+        "generic-entity-table": {
+          "q-table": { "flat": true, "bordered": true }
+        }
+      },
+      "form-dialog": {
+        "q-dialog": {},
+        "q-card": {
+          "class": "application-role-dialog",
+          "style": "min-width: 400px"
+        },
+        "q-card-actions": { "align": "right" },
+        "buttons-card": {
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false, "unelevated": true }
+          },
+          "cancel-button": {
+            "q-btn": {}
+          }
+        }
+      },
+      "confirmation-dialog": {
+        "q-dialog": {},
+        "buttons-card": {
+          "confirm-button": {
+            "q-btn": { "color": "negative", "outline": false, "unelevated": true }
+          },
+          "cancel-button": {
+            "q-btn": {}
+          }
+        }
+      }
+    }
+  }
+}

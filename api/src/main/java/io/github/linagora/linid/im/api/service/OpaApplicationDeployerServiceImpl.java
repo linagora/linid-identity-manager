@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.transaction.annotation.Propagation.REQUIRES_NEW;
 
@@ -61,14 +63,29 @@ public class OpaApplicationDeployerServiceImpl implements OpaApplicationDeployer
      */
     private final OpaService opaService;
 
+    /**
+     * Service used to retrieve the application to deploy.
+     */
+    private final ApplicationService applicationService;
+
+
     @Override
     public Application deploy(final Application application) {
         if (application.getScript() == null || application.getScript().isEmpty()) {
             throw new ApiException(HttpStatus.BAD_REQUEST.value(), I18nMessage.of("error.application.script"
-                    + ".missing"), Map.of("applicationId", application.getId().toString()));
+                    + ".missing", Map.of("applicationId", application.getId().toString())));
         }
         var deployedDate = opaService.publish(application);
         application.setDeployedAt(deployedDate);
         return applicationRepository.save(application);
+    }
+
+    @Override
+    public Application deploy(final UserPrincipal userPrincipal, final UUID id, final boolean force) {
+        var application = applicationService.findById(userPrincipal, id);
+        if (!force && application.getDeployedAt() != null) {
+            return application;
+        }
+        return deploy(application);
     }
 }

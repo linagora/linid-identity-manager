@@ -32,6 +32,11 @@ Feature: Test API Application endpoints
   ## 604 Should retrieve the roles of an application
   ## 605 Should return 404 when retrieving roles of an unknown application
 
+  ################## Deploy (POST /applications/{id}/deploy) ##########
+  ## 701 Should trigger deployment of an application no force
+  ## 702 Should trigger deployment of an application force true
+  ## 703 Should return 404 when deploying an unknown application
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -459,5 +464,85 @@ Feature: Test API Application endpoints
 
   Scenario: 605 - Should return 404 when retrieving roles of an unknown application
     When I request '{{env.E2E_API_URL}}/applications/00000000-0000-0000-0000-000000000000/roles' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'
+
+  ####################################################
+  ################## Deploy (POST /applications/{id}/deploy) ##########
+  ####################################################
+
+  Scenario: 701 - Should trigger deployment of an application no force
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-701-no-force",
+        "name": "Application 701",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'app701Id' as '{{response.body.id}}' in context
+
+    # Create a rule
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app701Id}}/rules' with method 'POST' with body:
+      """
+      {
+        "code": "RULE_ADMIN_701",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.organizationalUnit == \"public\"",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 201
+
+    # Deploy the application (this will publish the generated script to OPA)
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app701Id}}/deploy' with method 'POST'
+    Then I expect status code is 200
+    And  I expect '{{response.body.deployedAt}}' is not empty
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app701Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 702 - Should trigger deployment of an application force true
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-702-force",
+        "name": "Application 702",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'app702Id' as '{{response.body.id}}' in context
+
+    # Create a rule
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}/rules' with method 'POST' with body:
+      """
+      {
+        "code": "RULE_ADMIN_702",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.organizationalUnit == \"public\"",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 201
+
+    # Deploy the application for the first time
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}/deploy' with method 'POST'
+    Then I expect status code is 200
+    And  I expect '{{response.body.deployedAt}}' is not empty
+
+    # Redeploy with force=true to force redeployment
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}/deploy?force=true' with method 'POST'
+    Then I expect status code is 200
+    And  I expect '{{response.body.deployedAt}}' is not empty
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 703 - Should return 404 when deploying an unknown application
+    When I request '{{env.E2E_API_URL}}/applications/00010000-0000-0000-0000-000000000000/deploy' with method 'POST'
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'

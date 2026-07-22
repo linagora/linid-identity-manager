@@ -26,15 +26,6 @@
 
 package io.github.linagora.linid.im.api.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
@@ -48,11 +39,6 @@ import io.github.linagora.linid.im.api.persistence.repository.ApplicationReposit
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,6 +50,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: ApplicationServiceImpl")
@@ -86,9 +82,6 @@ class ApplicationServiceImplTest {
 
     @Mock
     private ChecksumService checksumService;
-
-    @Mock
-    private OpaApplicationDeployerService opaApplicationDeployerService;
 
     @InjectMocks
     private ApplicationServiceImpl service;

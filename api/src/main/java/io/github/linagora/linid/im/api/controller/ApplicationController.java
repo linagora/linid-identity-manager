@@ -35,8 +35,10 @@ import io.github.linagora.linid.im.api.model.application.ApplicationViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
+import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -58,6 +60,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -87,6 +90,11 @@ public class ApplicationController {
      * Resolver for paginated response HTTP status.
      */
     private final PagedResponseStatusResolver pagedResponseStatusResolver;
+
+    /**
+     * Service for deploying OPA application policies.
+     */
+    private final OpaApplicationDeployerService opaApplicationDeployerService;
 
     /**
      * Creates a new application.
@@ -235,5 +243,32 @@ public class ApplicationController {
         log.info("[{}] Received DELETE request for application {}", userPrincipal.getEmail(), id);
         applicationService.deleteById(userPrincipal, id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Triggers deployment of an application's OPA policy script.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the application UUID
+     * @param force         whether to bypass the pending deployment guard (default: false)
+     * @return the updated application with HTTP 201 status
+     */
+    @PostMapping("/{id}/deploy")
+    @Operation(summary = "Trigger deployment of an application's OPA policy")
+    @ApiResponse(responseCode = "201", description = "Application deployment triggered/updated")
+    @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    public ResponseEntity<ApplicationDTO> deploy(
+            @AuthenticationPrincipal final UserPrincipal userPrincipal,
+            @PathVariable final UUID id,
+            @RequestParam(name = "force", defaultValue = "false")
+            @Schema(
+                    defaultValue = "false",
+                    description = "Force the deployment even if the application is already deployed."
+            )
+            final boolean force) {
+        log.info("[{}] Received POST request to deploy application {} with force={}", userPrincipal.getEmail(), id,
+                force);
+        var application = opaApplicationDeployerService.deploy(userPrincipal, id, force);
+        return ResponseEntity.status(HttpStatus.OK).body(applicationMapper.toDTO(application));
     }
 }

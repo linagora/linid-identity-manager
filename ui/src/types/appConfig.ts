@@ -86,4 +86,9 @@ export interface AppConfig {
     OrganizationalUnitLifecycleAction,
     LinidAttributeConfiguration[]
   >;
+
+  // ─── Applications ───────────────────────────────────────────────────────────
+
+  /** Ordered list of field definitions rendered in the application role create / edit dialog. */
+  applicationRoleFields: LinidAttributeConfiguration[];
 }

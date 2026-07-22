@@ -16,7 +16,8 @@
     "design/account-banner.json",
     "design/account-info-text.json",
     "design/accounts-page.json",
-    "design/organizational-units-page.json"
+    "design/organizational-units-page.json",
+    "design/applications.json"
   ],
   "accountDetailsFieldsOrder": [
     "firstname",
@@ -472,6 +473,20 @@
       }
     ]
   },
+  "applicationRoleFields": [
+    {
+      "name": "name",
+      "type": "String",
+      "input": "Text",
+      "required": true
+    },
+    {
+      "name": "description",
+      "type": "String",
+      "input": "TextArea",
+      "required": false
+    }
+  ],
   "organizationalUnitCreationFields": [
     {
       "name": "name",

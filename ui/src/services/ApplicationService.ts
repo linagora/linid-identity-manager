@@ -25,7 +25,7 @@
  */
 
 import { api } from 'boot/axios';
-import type { ApplicationDTO } from 'src/types/applications';
+import type { ApplicationDTO, ApplicationRole } from 'src/types/applications';
 
 /**
  * Retrieves a single application by its identifier from the backend.
@@ -36,5 +36,36 @@ import type { ApplicationDTO } from 'src/types/applications';
 export async function getApplicationById(id: string): Promise<ApplicationDTO> {
   return api
     .get<ApplicationDTO>(`/applications/${id}`)
+    .then((response) => response.data);
+}
+
+/**
+ * Retrieves the full list of roles of an application from the backend.
+ *
+ * @param id - The unique identifier of the application.
+ * @returns A promise resolving to the list of roles returned by the API.
+ */
+export async function getApplicationRoles(
+  id: string
+): Promise<ApplicationRole[]> {
+  return api
+    .get<ApplicationRole[]>(`/applications/${id}/roles`)
+    .then((response) => response.data);
+}
+
+/**
+ * Replaces the full list of roles of an application on the backend.
+ *
+ * @param id - The unique identifier of the application.
+ * @param roles - The new full list of roles.
+ * @returns A promise resolving to the updated full list of roles returned by the API, which is the single source of
+ *   truth after the update (no re-fetch needed).
+ */
+export async function updateApplicationRoles(
+  id: string,
+  roles: ApplicationRole[]
+): Promise<ApplicationRole[]> {
+  return api
+    .put<ApplicationRole[]>(`/applications/${id}/roles`, { roles })
     .then((response) => response.data);
 }

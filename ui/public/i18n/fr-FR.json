@@ -753,6 +753,82 @@
     "errors": {
       "notFound": "Application introuvable",
       "generic": "Impossible de charger l'application. Veuillez réessayer plus tard."
+    },
+    "roles": {
+      "title": "Rôles",
+      "addButton": "Ajouter un rôle",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "columns": {
+        "name": "Nom",
+        "description": "Description",
+        "actions": "Actions"
+      },
+      "createSuccess": "Rôle créé avec succès.",
+      "editSuccess": "Rôle modifié avec succès.",
+      "deleteSuccess": "Rôle supprimé avec succès.",
+      "errors": {
+        "load": "Impossible de charger les rôles de l'application. Veuillez réessayer plus tard.",
+        "duplicateName": "Un rôle nommé « {name} » existe déjà.",
+        "update": "Impossible de mettre à jour les rôles de l'application. Veuillez réessayer plus tard."
+      }
+    },
+    "GenericEntityTable": {
+      "noData": "Aucun rôle défini pour cette application.",
+      "rowsPerPage": "Lignes par page :",
+      "paginationLabel": "{start}-{end} sur {total}"
+    }
+  },
+  "ApplicationRoleActions": {
+    "FormDialog": {
+      "create": {
+        "title": "Ajouter un rôle",
+        "content": "Définissez le nom et la description optionnelle du nouveau rôle.",
+        "fields": {
+          "name": {
+            "label": "Nom",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Créer",
+          "cancel": "Annuler"
+        }
+      },
+      "edit": {
+        "title": "Modifier le rôle",
+        "content": "Modifiez le nom ou la description du rôle.",
+        "fields": {
+          "name": {
+            "label": "Nom",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        },
+        "ButtonsCard": {
+          "confirm": "Enregistrer",
+          "cancel": "Annuler"
+        }
+      }
+    },
+    "ConfirmationDialog": {
+      "delete": {
+        "title": "Supprimer le rôle",
+        "content": "Êtes-vous sûr de vouloir supprimer le rôle « {name} » ?",
+        "ButtonsCard": {
+          "confirm": "Supprimer",
+          "cancel": "Annuler"
+        }
+      }
     }
   },
   "AccountDeactivatedBanner": {

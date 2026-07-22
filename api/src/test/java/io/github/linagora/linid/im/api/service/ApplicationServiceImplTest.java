@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
 import io.github.linagora.linid.im.api.model.application.ApplicationRolesRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
@@ -226,9 +227,12 @@ class ApplicationServiceImplTest {
         when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var result = service.updateRoles(userPrincipal, id, new ApplicationRolesRecord(List.of("admin", "user")));
+        var roles = List.of(
+            new ApplicationRoleDTO("admin", "Grants full administrative access"),
+            new ApplicationRoleDTO("user", null));
+        var result = service.updateRoles(userPrincipal, id, new ApplicationRolesRecord(roles));
 
-        assertEquals(List.of("admin", "user"), result.getRoles());
+        assertEquals(roles, result.getRoles());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
     }
 

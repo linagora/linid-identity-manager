@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
 import io.github.linagora.linid.im.api.model.application.ApplicationRolesRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
@@ -130,16 +131,51 @@ class ApplicationControllerTest {
     }
 
     @Test
-    @DisplayName("Should update application roles")
+    @DisplayName("Should retrieve application roles")
+    void testGetRoles() {
+        var id = UUID.randomUUID();
+        var roles = List.of(
+            new ApplicationRoleDTO("admin", "Grants full administrative access"),
+            new ApplicationRoleDTO("user", null));
+        when(applicationService.findById(any(), any())).thenReturn(Application.builder().roles(roles).build());
+
+        var response = controller.getRoles(userPrincipal, id);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(roles, response.getBody());
+        verify(applicationService).findById(userPrincipal, id);
+    }
+
+    @Test
+    @DisplayName("Should retrieve an empty list when the application has no roles")
+    void testGetRoles_shouldReturnEmptyListWhenNull() {
+        var id = UUID.randomUUID();
+        when(applicationService.findById(any(), any())).thenReturn(new Application());
+
+        var response = controller.getRoles(userPrincipal, id);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(), response.getBody());
+    }
+
+    @Test
+    @DisplayName("Should update application roles and return the updated list")
     void testUpdateRoles() {
         var id = UUID.randomUUID();
-        when(applicationService.updateRoles(any(), any(), any())).thenReturn(new Application());
+        var roles = List.of(
+            new ApplicationRoleDTO("admin", "Grants full administrative access"),
+            new ApplicationRoleDTO("user", null));
+        when(applicationService.updateRoles(any(), any(), any()))
+            .thenReturn(Application.builder().roles(roles).build());
 
-        var rolesRecord = new ApplicationRolesRecord(List.of("admin", "user"));
+        var rolesRecord = new ApplicationRolesRecord(roles);
         var response = controller.updateRoles(userPrincipal, id, rolesRecord);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(roles, response.getBody());
         verify(applicationService).updateRoles(userPrincipal, id, rolesRecord);
     }
 

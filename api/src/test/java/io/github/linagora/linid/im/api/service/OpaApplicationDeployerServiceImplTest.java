@@ -33,6 +33,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -40,6 +41,7 @@ import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,8 +60,20 @@ class OpaApplicationDeployerServiceImplTest {
     @Mock
     private OpaService opaService;
 
+    @Mock
+    private ApplicationService applicationService;
+
     @InjectMocks
     private OpaApplicationDeployerServiceImpl deployer;
+
+    private UserPrincipal userPrincipal;
+
+    @BeforeEach
+    void setUp() {
+        userPrincipal = new UserPrincipal();
+        userPrincipal.setId(UUID.randomUUID());
+        userPrincipal.setEmail("admin@example.com");
+    }
 
     @Test
     @DisplayName("deploy should publish the policy, record the deployment date and persist the application")
@@ -100,5 +114,78 @@ class OpaApplicationDeployerServiceImplTest {
         // The policy is already published to OPA; the exception must propagate so the transaction
         // rolls back and deployedAt remains null — the scheduler will retry on the next tick.
         assertThrows(RuntimeException.class, () -> deployer.deploy(application));
+    }
+
+    @Test
+    @DisplayName("deploy with userPrincipal and force=false should deploy when application not yet deployed")
+    void testDeploy_withUserPrincipal_notDeployed() {
+        var id = UUID.randomUUID();
+        var application = Application.builder().id(id).code("payroll").script("policy").deployedAt(null).build();
+        var deployedAt = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        when(applicationService.findById(userPrincipal, id)).thenReturn(application);
+        when(opaService.publish(application)).thenReturn(deployedAt);
+        when(applicationRepository.save(any())).thenReturn(application);
+
+        var result = deployer.deploy(userPrincipal, id, false);
+
+        verify(applicationService).findById(userPrincipal, id);
+        verify(opaService).publish(application);
+        verify(applicationRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("deploy with userPrincipal and force=true should deploy even if already deployed")
+    void testDeploy_withUserPrincipal_forceTrue_alreadyDeployed() {
+        var id = UUID.randomUUID();
+        var deployedDate = OffsetDateTime.of(2025, 12, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        var application = Application.builder().id(id).code("payroll").script("policy").deployedAt(deployedDate).build();
+        var newDeployedAt = OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        when(applicationService.findById(userPrincipal, id)).thenReturn(application);
+        when(opaService.publish(application)).thenReturn(newDeployedAt);
+        when(applicationRepository.save(any())).thenReturn(application);
+
+        var result = deployer.deploy(userPrincipal, id, true);
+
+        verify(applicationService).findById(userPrincipal, id);
+        verify(opaService).publish(application);
+        verify(applicationRepository).save(any());
+    }
+
+    @Test
+    @DisplayName("deploy with userPrincipal and force=false should return application without redeploying if already deployed")
+    void testDeploy_withUserPrincipal_forceFalse_alreadyDeployed() {
+        var id = UUID.randomUUID();
+        var deployedDate = OffsetDateTime.of(2025, 12, 1, 0, 0, 0, 0, ZoneOffset.UTC);
+        var application = Application.builder().id(id).code("payroll").script("policy").deployedAt(deployedDate).build();
+        when(applicationService.findById(userPrincipal, id)).thenReturn(application);
+
+        var result = deployer.deploy(userPrincipal, id, false);
+
+        assertEquals(application, result);
+        verify(applicationService).findById(userPrincipal, id);
+        verify(opaService, never()).publish(any());
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("deploy should throw exception when script is empty")
+    void testDeploy_emptyScript() {
+        var application = Application.builder().id(UUID.randomUUID()).code("payroll").script("").build();
+
+        assertThrows(ApiException.class, () -> deployer.deploy(application));
+
+        verify(opaService, never()).publish(any());
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("deploy should throw exception when script is null")
+    void testDeploy_nullScript() {
+        var application = Application.builder().id(UUID.randomUUID()).code("payroll").script(null).build();
+
+        assertThrows(ApiException.class, () -> deployer.deploy(application));
+
+        verify(opaService, never()).publish(any());
+        verify(applicationRepository, never()).save(any());
     }
 }

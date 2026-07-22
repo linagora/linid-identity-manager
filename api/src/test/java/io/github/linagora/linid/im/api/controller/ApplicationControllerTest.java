@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.api.controller;
 
-import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
 import io.github.linagora.linid.im.api.model.application.ApplicationRoleRecord;
@@ -35,11 +34,12 @@ import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
+import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
+import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
@@ -53,9 +53,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: ApplicationController")
@@ -65,12 +63,14 @@ class ApplicationControllerTest {
     private ApplicationService applicationService;
 
     @Mock
-    private ApplicationMapper applicationMapper;
-
-    @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
 
-    @InjectMocks
+    @Mock
+    private OpaApplicationDeployerService opaApplicationDeployerService;
+
+    @Mock
+    private ApplicationMapper applicationMapper;
+
     private ApplicationController controller;
 
     private UserPrincipal userPrincipal;
@@ -79,6 +79,12 @@ class ApplicationControllerTest {
 
     @BeforeEach
     void setUp() {
+        controller = new ApplicationController(
+            applicationService,
+            applicationMapper,
+            pagedResponseStatusResolver,
+            opaApplicationDeployerService
+        );
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
@@ -135,8 +141,8 @@ class ApplicationControllerTest {
     void testGetRoles() {
         var id = UUID.randomUUID();
         var roles = List.of(
-            new ApplicationRoleDTO("admin", "Grants full administrative access"),
-            new ApplicationRoleDTO("user", null));
+                new ApplicationRoleDTO("admin", "Grants full administrative access"),
+                new ApplicationRoleDTO("user", null));
         when(applicationService.findById(any(), any())).thenReturn(Application.builder().roles(roles).build());
 
         var response = controller.getRoles(userPrincipal, id);
@@ -165,14 +171,14 @@ class ApplicationControllerTest {
     void testUpdateRoles() {
         var id = UUID.randomUUID();
         var roleDTOs = List.of(
-            new ApplicationRoleDTO("admin", "Grants full administrative access"),
-            new ApplicationRoleDTO("user", null));
+                new ApplicationRoleDTO("admin", "Grants full administrative access"),
+                new ApplicationRoleDTO("user", null));
         when(applicationService.updateRoles(any(), any(), any()))
-            .thenReturn(Application.builder().roles(roleDTOs).build());
+                .thenReturn(Application.builder().roles(roleDTOs).build());
 
         var roles = List.of(
-            new ApplicationRoleRecord("admin", "Grants full administrative access"),
-            new ApplicationRoleRecord("user", null));
+                new ApplicationRoleRecord("admin", "Grants full administrative access"),
+                new ApplicationRoleRecord("user", null));
         var response = controller.updateRoles(userPrincipal, id, roles);
 
         assertNotNull(response);
@@ -190,5 +196,35 @@ class ApplicationControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should deploy application with force=false")
+    void testDeploy_withForceFalse() {
+        var id = UUID.randomUUID();
+        var deployedApplication = new Application();
+
+        when(opaApplicationDeployerService.deploy(userPrincipal, id, false)).thenReturn(deployedApplication);
+
+        var response = controller.deploy(userPrincipal, id, false);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(opaApplicationDeployerService).deploy(userPrincipal, id, false);
+    }
+
+    @Test
+    @DisplayName("Should deploy application with force=true")
+    void testDeploy_withForceTrue() {
+        var id = UUID.randomUUID();
+        var deployedApplication = new Application();
+
+        when(opaApplicationDeployerService.deploy(userPrincipal, id, true)).thenReturn(deployedApplication);
+
+        var response = controller.deploy(userPrincipal, id, true);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(opaApplicationDeployerService).deploy(userPrincipal, id, true);
     }
 }

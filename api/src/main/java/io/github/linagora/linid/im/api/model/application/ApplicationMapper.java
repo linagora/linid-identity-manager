@@ -80,4 +80,12 @@ public interface ApplicationMapper {
      * @return the corresponding DTO
      */
     ApplicationViewDTO toDTO(ApplicationView applicationView);
+
+    /**
+     * Converts an {@link ApplicationRoleRecord} request payload to an {@link ApplicationRoleDTO}.
+     *
+     * @param record the role request payload
+     * @return the corresponding DTO
+     */
+    ApplicationRoleDTO toRoleDTO(ApplicationRoleRecord record);
 }

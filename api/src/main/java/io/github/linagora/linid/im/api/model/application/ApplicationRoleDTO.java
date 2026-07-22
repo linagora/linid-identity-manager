@@ -27,17 +27,37 @@
 package io.github.linagora.linid.im.api.model.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
-import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Request payload for updating the roles of an application.
+ * Data Transfer Object representing a role exposed by an application, stored as a JSONB object in the application
+ * {@code roles} list.
  *
- * @param roles the new list of application roles (replaces the existing one)
+ * <p>Implements {@link Serializable} because the JSONB mapping performed by hypersistence-utils requires entity
+ * attribute values to be serializable.</p>
  */
-@Schema(description = "Request payload for updating the roles of an application")
-public record ApplicationRolesRecord(
-    @NotNull @Schema(description = "List of application roles", example = "[\"admin\", \"user\"]")
-    List<String> roles
-) {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Role exposed by an application")
+public class ApplicationRoleDTO implements Serializable {
+
+    /**
+     * Unique human-readable name of the role.
+     */
+    @NotBlank
+    @Schema(description = "Name of the role", example = "admin")
+    private String name;
+
+    /**
+     * Optional free-text description of the role.
+     */
+    @Schema(description = "Optional description of the role", example = "Grants full administrative access")
+    private String description;
 }

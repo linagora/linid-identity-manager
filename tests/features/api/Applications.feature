@@ -25,10 +25,12 @@ Feature: Test API Application endpoints
   ## 503 Should return 400 when updating with a code used by another application
   ## 504 Should return 400 with a bad request payload (missing required fields)
 
-  ################## Update roles (PUT /applications/{id}/roles) #####
+  ################## Roles (GET/PUT /applications/{id}/roles) ########
   ## 601 Should update the roles of an application
   ## 602 Should return 404 when updating roles of an unknown application
-  ## 603 Should return 400 with an invalid roles payload (object / invalid JSON)
+  ## 603 Should return 400 with an invalid roles payload (object / invalid JSON / invalid role)
+  ## 604 Should retrieve the roles of an application
+  ## 605 Should return 404 when retrieving roles of an unknown application
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -347,7 +349,7 @@ Feature: Test API Application endpoints
       | claimsTemplate | "app-504" | "name" | "OIDC" | null           |
 
   ####################################################
-  ################## Update roles (PUT /applications/{id}/roles) #####
+  ################## Roles (GET/PUT /applications/{id}/roles) ########
   ####################################################
 
   Scenario: 601 - Should update the roles of an application
@@ -365,18 +367,23 @@ Feature: Test API Application endpoints
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}/roles' with method 'PUT' with body:
       """
-      {
-        "roles": ["admin", "user"]
-      }
+      [
+        { "name": "admin", "description": "Grants full administrative access" },
+        { "name": "user" }
+      ]
       """
     Then I expect status code is 200
-    And  I expect '{{response.body.roles.length}}' is "2"
+    And  I expect '{{response.body.length}}' is "2"
+    And  I expect '{{response.body[0].name}}' is 'admin'
+    And  I expect '{{response.body[0].description}}' is 'Grants full administrative access'
+    And  I expect '{{response.body[1].name}}' is 'user'
 
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}' with method 'GET'
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}/roles' with method 'GET'
     Then I expect status code is 200
-    And  I expect '{{response.body.roles.length}}' is "2"
-    And  I expect '{{response.body.roles[0]}}' is 'admin'
-    And  I expect '{{response.body.roles[1]}}' is 'user'
+    And  I expect '{{response.body.length}}' is "2"
+    And  I expect '{{response.body[0].name}}' is 'admin'
+    And  I expect '{{response.body[0].description}}' is 'Grants full administrative access'
+    And  I expect '{{response.body[1].name}}' is 'user'
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}' with method 'DELETE'
     Then I expect status code is 204
@@ -384,9 +391,7 @@ Feature: Test API Application endpoints
   Scenario: 602 - Should return 404 when updating roles of an unknown application
     When I request '{{env.E2E_API_URL}}/applications/00000000-0000-0000-0000-000000000000/roles' with method 'PUT' with body:
       """
-      {
-        "roles": ["admin"]
-      }
+      [{ "name": "admin" }]
       """
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'
@@ -406,9 +411,7 @@ Feature: Test API Application endpoints
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.app603Id}}/roles' with method 'PUT' with body:
       """
-      {
-        "roles": <roles>
-      }
+      <roles>
       """
     Then I expect status code is 400
 
@@ -416,6 +419,45 @@ Feature: Test API Application endpoints
     Then I expect status code is 204
 
     Examples:
-      | case                       | code        | roles |
-      | object instead of array    | app-603-obj | {}    |
-      | invalid JSON               | app-603-json | [    |
+      | case                       | code          | roles                  |
+      | object instead of array    | app-603-obj   | {}                     |
+      | invalid JSON               | app-603-json  | [                      |
+      | role without name          | app-603-name  | [{ "description": "x" }] |
+      | role with blank name       | app-603-blank | [{ "name": "  " }]     |
+
+  Scenario: 604 - Should retrieve the roles of an application
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-604",
+        "name": "Application 604",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'app604Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app604Id}}/roles' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.length}}' is "0"
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app604Id}}/roles' with method 'PUT' with body:
+      """
+      [{ "name": "auditor", "description": "Read-only access" }]
+      """
+    Then I expect status code is 200
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app604Id}}/roles' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.length}}' is "1"
+    And  I expect '{{response.body[0].name}}' is 'auditor'
+    And  I expect '{{response.body[0].description}}' is 'Read-only access'
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app604Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 605 - Should return 404 when retrieving roles of an unknown application
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-0000-0000-000000000000/roles' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'

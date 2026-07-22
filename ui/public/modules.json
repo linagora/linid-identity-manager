@@ -1,6 +1,7 @@
 {
   "modules": [
     "/modules/AccountsPage.json",
+    "/modules/ApplicationCreationPage.json",
     "/modules/OrganizationalUnitPage.json"
   ]
 }

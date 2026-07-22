@@ -1,0 +1,26 @@
+{
+  "instanceId": "moduleApplicationCreationPage",
+  "remoteName": "catalogUI",
+  "entity": "applications",
+  "lifecycleRemote": "catalogUI/EmptyLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "applications",
+  "basePath": "/applications/create",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericCreationPage",
+    "idKey": "id",
+    "formSections": [{
+      "id": "general",
+      "fields": [{
+        "name": "code",
+        "type": "string",
+        "required": true,
+        "hasValidations": true,
+        "input": "Text",
+        "inputSettings": {}
+      }]
+    }]
+  }
+}

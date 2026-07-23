@@ -1,0 +1,64 @@
+{
+  "moduleApplicationDetailsPage": {
+    "sections": {
+      "identity": {
+        "entity-details-card": {
+          "q-card": {},
+          "code": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "tag" },
+              "q-card": {}
+            }
+          },
+          "name": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "apps" },
+              "q-card": {}
+            }
+          },
+          "type": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "category" },
+              "q-card": {}
+            }
+          },
+          "description": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "description" },
+              "q-card": {}
+            }
+          }
+        }
+      },
+      "audit": {
+        "entity-details-card": {
+          "q-card": {},
+          "createdBy": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "person_add" },
+              "q-card": {}
+            }
+          },
+          "updatedBy": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "manage_accounts" },
+              "q-card": {}
+            }
+          },
+          "insertDate": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-card": {}
+            }
+          },
+          "updateDate": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "update" },
+              "q-card": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

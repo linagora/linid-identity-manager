@@ -9,6 +9,7 @@
   "basePath": "/applications",
   "options": {
     "layout": "catalogUI/BaseLayout",
+    "addNavigationMenu": true,
     "page": "catalogUI/GenericTablePage",
     "pagePath": "",
     "idKey": "id",

@@ -24,6 +24,17 @@
         },
         "q-item-label": {
           "caption": true
+        },
+        "language-dropdown": {
+          "q-btn-dropdown": {
+            "flat": true,
+            "noCaps": true,
+            "dense": true
+          }
+        },
+        "q-img": {
+          "width": "25px",
+          "fit": "contain"
         }
       }
     }

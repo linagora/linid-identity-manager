@@ -16,6 +16,7 @@
     "design/account-banner.json",
     "design/account-info-text.json",
     "design/accounts-page.json",
+    "design/applications-page.json",
     "design/organizational-units-page.json"
   ],
   "accountDetailsFieldsOrder": [

@@ -86,3 +86,11 @@ i18n:
 plugin:
   loader:
     path: ${PLUGIN_LOADER_PATH:}
+
+opa:
+  script:
+    location: ${OPA_SCRIPT_LOCATION:classpath:templates/opa/opa-policy.rego.j2}
+    policy-path: ${OPA_POLICY_PATH:/v1/policies/{id}}
+  deployment:
+    server-url: ${OPA_SERVER_URL:http://opa:8181}
+    interval: ${OPA_DEPLOYMENT_INTERVAL:5m}

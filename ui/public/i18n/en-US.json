@@ -18,7 +18,14 @@
       "version": "Demo version"
     },
     "dateTimeFormat": "YYYY/MM/DD hh:mm:ss A",
-    "dateFormat": "YYYY/MM/DD"
+    "dateFormat": "YYYY/MM/DD",
+    "language": {
+      "title": "Language"
+    },
+    "languages": {
+      "fr-FR": "Français",
+      "en-US": "English (US)"
+    }
   },
   "Homepage": {
     "title": "LinID Identity Manager",
@@ -62,7 +69,7 @@
     },
     "OverrideFavoriteDialog": {
       "title": "Override a favorite?",
-      "content": "Select an favorite to override with current search.",
+      "content": "Select a favorite to override with current search.",
       "ButtonsCard": {
         "cancel": "Cancel",
         "confirm": "Override",
@@ -176,7 +183,177 @@
         }
       },
       "ListSearchFilterPanel": {
-        "searchButton": "Rechercher"
+        "searchButton": "Search"
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filter by date",
+        "inputHint": "Enter/select a date to search",
+        "negateLabel": "Negate",
+        "close": "Close",
+        "searchButton": "Search",
+        "operators": {
+          "inferior": "Inferior to",
+          "superior": "Superior to",
+          "equals": "Equals to",
+          "notInferior": "Not inferior to",
+          "notSuperior": "Not superior to",
+          "notEquals": "Not equals to"
+        },
+        "validation": {
+          "invalidDate": "Incorrect date. Attempt format: {format}"
+        }
+      }
+    }
+  },
+  "moduleApplicationsPage": {
+    "NavigationMenu": {
+      "label": "Applications"
+    },
+    "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
+    "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
+    "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
+    "seeButton": "See",
+    "columns": {
+      "code": "Code",
+      "name": "Name",
+      "description": "Description",
+      "type": "Type",
+      "createdBy": "Created by",
+      "insertDate": "Creation date",
+      "actions": "Actions"
+    },
+    "error": "Error during request",
+    "GenericEntityTable": {
+      "noData": "No data available",
+      "rowsPerPage": "Rows per page:",
+      "paginationLabel": "{start}-{end} of {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Delete a favorite?",
+      "content": "Confirm deleting favorite \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmLoading": "Deleting..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Override a favorite?",
+      "content": "Select a favorite to override with current search.",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Override",
+        "confirmLoading": "Overriding..."
+      },
+      "fields": {
+        "favorite": {
+          "label": "Favorites"
+        }
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Create a favorite?",
+      "content": "Create favorite from current search.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
+    "LinidSmartFilter": {
+      "label": "Current search filter",
+      "hint": "Enter your filter",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "code": {
+          "type": "Code",
+          "separator": "or"
+        },
+        "name": {
+          "type": "Name",
+          "separator": "or"
+        },
+        "description": {
+          "type": "Description",
+          "separator": "or"
+        },
+        "type": {
+          "type": "Type",
+          "separator": "or"
+        },
+        "createdBy": {
+          "type": "Created by",
+          "separator": "or"
+        },
+        "insertDate": {
+          "type": "Creation date",
+          "separator": "or"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filter by:",
+        "columnFilter": {
+          "code": "Code",
+          "name": "Name",
+          "description": "Description",
+          "type": "Type",
+          "createdBy": "Created by",
+          "insertDate": "Creation date"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favorite",
+        "noData": "No favorite available",
+        "createFavorite": "Create a favorite",
+        "overrideFavorite": "Override a favorite",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filter by text",
+        "inputHint": "Enter a text to search",
+        "negateLabel": "Negate",
+        "searchButton": "Search",
+        "operators": {
+          "contains": "Contains",
+          "startsWith": "Start with",
+          "endsWith": "End with",
+          "equals": "Equals to",
+          "notContains": "Not contains",
+          "notStartsWith": "Not start with",
+          "notEndsWith": "Not end with",
+          "notEquals": "Not equals to"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Search"
       },
       "DateSearchFilterPanel": {
         "inputLabel": "Filter by date",
@@ -233,7 +410,7 @@
     },
     "OverrideFavoriteDialog": {
       "title": "Override a favorite?",
-      "content": "Select an favorite to override with current search.",
+      "content": "Select a favorite to override with current search.",
       "ButtonsCard": {
         "cancel": "Cancel",
         "confirm": "Override",
@@ -743,6 +920,17 @@
     },
     "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
     "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
+  },
+  "ApplicationDetailsPage": {
+    "title": "{code} - {name}",
+    "subtitle": "{description}",
+    "ButtonsCard": {
+      "cancel": "Back"
+    },
+    "errors": {
+      "notFound": "Application not found",
+      "generic": "Unable to load the application. Please try again later."
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "This account has been deactivated since {date}.",

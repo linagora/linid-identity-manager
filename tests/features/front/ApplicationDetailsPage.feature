@@ -1,11 +1,11 @@
 Feature: Test Application details page display
 
   ################## Application Details ##################
-  ## 101 Should display the application details page (title, subtitle and back button)
+  ## 101 Should display the application details page with its sections
   ## 102 Back button should come back at applications list page
   ## 103 Remove the application
-  ## 104 Should display a not found notification when navigating to a non-existent application
-  ## 105 Should display a generic error notification when navigating to an application with a malformed ID
+  ## 104 Should display an error notification when navigating to a non-existent application
+  ## 105 Should display an error notification when navigating to an application with a malformed ID
 
   Scenario: Roundtrip about Application Details
 
@@ -51,12 +51,17 @@ Feature: Test Application details page display
     ################## Application Details #############
     ####################################################
 
-    ## 101 Should display the application details page (title, subtitle and back button)
+    ## 101 Should display the application details page with its sections
     Given I visit the "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
-    Then I expect the HTML element '[data-cy="application-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="application-details-page_title"]' contains "app-detail-101 - Application Detail 101"
-    And I expect the HTML element '[data-cy="application-details-page_subtitle"]' contains "An application for the details page tests"
-    And I expect the HTML element '[data-cy="buttons-card"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' contains "Détails de l'application"
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "app-detail-101"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--name"]' contains "Application Detail 101"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--description"]' contains "An application for the details page tests"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--type"]' contains "OIDC"
+    And I expect the HTML element '[data-cy="details-section_audit"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"]' contains "admin_fn admin_ln"
     And I expect the HTML element '[data-cy="buttons-card"] [data-cy="button_cancel"]' contains "Retour"
 
     ## 102 Back button should come back at applications list page
@@ -67,12 +72,12 @@ Feature: Test Application details page display
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}' with method 'DELETE'
     Then I expect status code is 204
 
-    ## 104 Should display a not found notification when navigating to a non-existent application
+    ## 104 Should display an error notification when navigating to a non-existent application
     Given I visit the "{{ env.E2E_FRONT_URL }}/applications/00000000-0000-4000-8000-000000000000"
-    Then I expect the HTML element '.q-notification__message' contains "Application introuvable"
+    Then I expect the HTML element '.q-notification__message' contains "Impossible de charger l'application. Veuillez réessayer plus tard."
     And I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
 
-    ## 105 Should display a generic error notification when navigating to an application with a malformed ID
+    ## 105 Should display an error notification when navigating to an application with a malformed ID
     Given I visit the "{{ env.E2E_FRONT_URL }}/applications/not-a-valid-uuid"
     Then I expect the HTML element '.q-notification__message' contains "Impossible de charger l'application. Veuillez réessayer plus tard."
     And I expect current url is "{{ env.E2E_FRONT_URL }}/applications"

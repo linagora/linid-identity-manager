@@ -914,15 +914,35 @@
     "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes",
     "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
   },
-  "ApplicationDetailsPage": {
-    "title": "{code} - {name}",
-    "subtitle": "{description}",
+  "moduleApplicationDetailsPage": {
+    "title": "Détails de l'application",
+    "error": "Impossible de charger l'application. Veuillez réessayer plus tard.",
     "ButtonsCard": {
       "cancel": "Retour"
     },
-    "errors": {
-      "notFound": "Application introuvable",
-      "generic": "Impossible de charger l'application. Veuillez réessayer plus tard."
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "Informations générales",
+          "attributes": {
+            "code": "Code",
+            "name": "Nom",
+            "description": "Description",
+            "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Créé par",
+            "updatedBy": "Modifié par",
+            "insertDate": "Date de création",
+            "updateDate": "Dernière modification"
+          }
+        }
+      }
     }
   },
   "AccountDeactivatedBanner": {

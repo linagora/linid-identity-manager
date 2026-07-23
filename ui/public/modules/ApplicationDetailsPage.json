@@ -1,0 +1,35 @@
+{
+  "instanceId": "moduleApplicationDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "applications",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "applications",
+  "basePath": "/applications",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "sections": [
+      {
+        "key": "identity",
+        "fieldOrder": [
+          "code",
+          "name",
+          "type",
+          "description"
+        ]
+      },
+      {
+        "key": "audit",
+        "fieldOrder": [
+          "createdBy",
+          "updatedBy",
+          "insertDate",
+          "updateDate"
+        ]
+      }
+    ]
+  }
+}

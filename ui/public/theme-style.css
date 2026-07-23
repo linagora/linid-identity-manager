@@ -7,3 +7,58 @@
   width: 700px;
   max-width: 80vw;
 }
+
+/* ===== Generic details page ===== */
+
+.generic-details-page .entity-details-card--title.q-card__section {
+  padding: 0 0 8px;
+}
+
+.generic-details-page .entity-details-card--title h4 {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 4px solid var(--q-primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.generic-details-page .entity-details-card--container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0 32px;
+}
+
+.generic-details-page .information-card {
+  min-width: unset;
+  margin: 0;
+  padding: 12px 4px;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+  background: transparent;
+}
+
+.generic-details-page .information-card .q-card__section {
+  padding: 2px 0;
+}
+
+.generic-details-page .information-card--title {
+  font-style: normal;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.generic-details-page .information-card--content {
+  font-weight: 400;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.generic-details-page .information-card .q-icon {
+  opacity: 0.75;
+}

@@ -85,11 +85,6 @@ const routes: RouteRecordRaw[] = [
         name: 'OrganizationalUnitCreate',
         component: () => import('pages/OrganizationalUnitCreationPage.vue'),
       },
-      {
-        path: 'applications/:id',
-        name: 'ApplicationDetails',
-        component: () => import('pages/ApplicationDetailsPage.vue'),
-      },
     ],
   },
 ];

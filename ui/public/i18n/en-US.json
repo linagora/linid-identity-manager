@@ -914,15 +914,35 @@
     "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
     "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
   },
-  "ApplicationDetailsPage": {
-    "title": "{code} - {name}",
-    "subtitle": "{description}",
+  "moduleApplicationDetailsPage": {
+    "title": "Application details",
+    "error": "Unable to load the application. Please try again later.",
     "ButtonsCard": {
       "cancel": "Back"
     },
-    "errors": {
-      "notFound": "Application not found",
-      "generic": "Unable to load the application. Please try again later."
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "General information",
+          "attributes": {
+            "code": "Code",
+            "name": "Name",
+            "description": "Description",
+            "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Created by",
+            "updatedBy": "Updated by",
+            "insertDate": "Creation date",
+            "updateDate": "Last update"
+          }
+        }
+      }
     }
   },
   "AccountDeactivatedBanner": {

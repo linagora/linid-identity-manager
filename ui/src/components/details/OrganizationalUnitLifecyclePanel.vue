@@ -25,178 +25,105 @@
 -->
 
 <template>
-  <!-- v8 ignore start -->
-  <q-page
-    class="row justify-center q-pa-md organizational-unit-details-page"
-    data-cy="organizational-unit-details-page"
+  <div
+    v-if="lifecycleUi && organizationalUnitStatus"
+    class="column q-gutter-y-sm q-mb-md organizational-unit-details-page--lifecycle"
+    data-cy="organizational-unit-details-page_lifecycle"
   >
+    <OrganizationalUnitSuspendedBanner
+      v-if="lifecycleUi.showSuspendedBanner"
+      :organizational-unit-status="organizationalUnitStatus"
+      @clear-suspension="onClearSuspension"
+      @modify-suspension-end="onModifySuspensionEnd"
+    />
+
+    <OrganizationalUnitSuspendedInfoText
+      v-if="lifecycleUi.showWillSuspendInfoText"
+      :organizational-unit-status="organizationalUnitStatus"
+    />
+
     <div
-      class="col-12 col-md-10 col-lg-10 organizational-unit-details-page--content"
+      v-if="hasAnyLifecycleAction"
+      class="row q-gutter-x-sm organizational-unit-details-page--lifecycle--actions"
+      data-cy="organizational-unit-lifecycle-actions"
     >
-      <div
-        class="row items-center justify-between q-mb-md organizational-unit-details-page--header"
-      >
-        <div class="row items-center q-gutter-x-md">
-          <h1
-            class="q-ma-none text-h5 organizational-unit-details-page--title"
-            data-cy="organizational-unit-details-page_title"
-          >
-            {{ t('title') }}
-          </h1>
-          <StatusBadge
-            v-if="lifecycleUi?.showBadge && organizationalUnitStatus"
-            :status="
-              organizationalUnitStatus.isSuspended ? 'SUSPENDED' : 'ACTIVE'
-            "
-          />
-        </div>
-        <div class="organizational-unit-details-page--actions">
-          <component
-            :is="buttonsCard"
-            v-if="buttonsCard"
-            :ui-namespace="uiNamespace"
-            :i18n-scope="i18nScope"
-            :show-confirm-button="false"
-            @cancel="goBack"
-          >
-            <template #extra-buttons>
-              <q-btn
-                v-bind="createChildButtonProps"
-                :label="t('createChild')"
-                data-cy="organizational-unit-details-page_create-child-button"
-                @click="goToCreateChild"
-              />
-            </template>
-          </component>
-        </div>
-      </div>
-
-      <div
-        v-if="lifecycleUi && organizationalUnitStatus"
-        class="column q-gutter-y-sm q-mb-md organizational-unit-details-page--lifecycle"
-        data-cy="organizational-unit-details-page_lifecycle"
-      >
-        <OrganizationalUnitSuspendedBanner
-          v-if="lifecycleUi.showSuspendedBanner"
-          :organizational-unit-status="organizationalUnitStatus"
-          @clear-suspension="onClearSuspension"
-          @modify-suspension-end="onModifySuspensionEnd"
-        />
-
-        <OrganizationalUnitSuspendedInfoText
-          v-if="lifecycleUi.showWillSuspendInfoText"
-          :organizational-unit-status="organizationalUnitStatus"
-        />
-
-        <div
-          v-if="hasAnyLifecycleAction"
-          class="row q-gutter-x-sm organizational-unit-details-page--lifecycle--actions"
-          data-cy="organizational-unit-lifecycle-actions"
-        >
-          <component
-            :is="dropdownButton"
-            v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
-            :ui-namespace="`${uiNamespace}.activation-actions`"
-            i18n-scope="OrganizationalUnitActivationActions"
-            :items="lifecycleUi.activationMenuItems"
-            data-cy="organizational-unit-activation-actions"
-            @item-click="onLifecycleActionClick"
-          />
-          <component
-            :is="dropdownButton"
-            v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
-            :ui-namespace="`${uiNamespace}.suspension-actions`"
-            i18n-scope="OrganizationalUnitSuspensionActions"
-            :items="lifecycleUi.suspensionMenuItems"
-            data-cy="organizational-unit-suspension-actions"
-            @item-click="onLifecycleActionClick"
-          />
-        </div>
-      </div>
-
       <component
-        :is="entityDetailsCard"
-        v-if="entityDetailsCard"
-        :entity="organizationalUnit ?? {}"
-        :field-order="fieldsOrder"
-        :is-loading="isLoading"
-        :ui-namespace="uiNamespace"
-        :i18n-scope="i18nScope"
-        class="q-mb-md organizational-unit-details-page--cards"
-        data-cy="organizational-unit-details-page_cards"
+        :is="dropdownButton"
+        v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
+        :ui-namespace="`${uiNamespace}.activation-actions`"
+        i18n-scope="OrganizationalUnitActivationActions"
+        :items="lifecycleUi.activationMenuItems"
+        data-cy="organizational-unit-activation-actions"
+        @item-click="onLifecycleActionClick"
+      />
+      <component
+        :is="dropdownButton"
+        v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
+        :ui-namespace="`${uiNamespace}.suspension-actions`"
+        i18n-scope="OrganizationalUnitSuspensionActions"
+        :items="lifecycleUi.suspensionMenuItems"
+        data-cy="organizational-unit-suspension-actions"
+        @item-click="onLifecycleActionClick"
       />
     </div>
-  </q-page>
-  <!-- v8 ignore stop -->
+  </div>
 </template>
 
 <script setup lang="ts">
+import type { DropdownClickPayload } from '@linagora/linid-im-front-corelib';
 import {
-  type DropdownClickPayload,
-  type LinidQBtnProps,
   loadAsyncComponent,
+  uiEventSubject,
   useNotify,
   useScopedI18n,
-  useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { appConfig } from 'boot/config';
 import { dayjs } from 'src/boot/dayjs';
-import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import OrganizationalUnitSuspendedBanner from 'src/components/banner/OrganizationalUnitSuspendedBanner.vue';
 import OrganizationalUnitSuspendedInfoText from 'src/components/text/OrganizationalUnitSuspendedInfoText.vue';
 import { useLifecycleDialogs } from 'src/composables/useLifecycleDialogs';
 import { useOrganizationalUnitLifecycleUi } from 'src/composables/useOrganizationalUnitLifecycleUi';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
+import { ORGANIZATIONAL_UNIT_STATUS_UPDATED_EVENT } from 'src/constants/detailsEvents';
 import {
-  getOrganizationalUnitById,
   reactivateOrganizationalUnit,
   suspendOrganizationalUnit,
 } from 'src/services/OrganizationalUnitService';
+import type { DetailsContentZoneProps } from 'src/types/detailsZoneProps';
 import type {
-  OrganizationalUnit,
   OrganizationalUnitDTO,
   OrganizationalUnitStatus,
   OrganizationalUnitStatusForm,
 } from 'src/types/organizationalUnits';
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { computed } from 'vue';
 
-const pageName = 'OrganizationalUnitDetailsPage';
-const i18nScope = pageName;
+const props = defineProps<DetailsContentZoneProps>();
+
+const i18nScope = 'OrganizationalUnitDetailsPage';
 const uiNamespace = 'organizational-units.details-page';
 const organizationalUnitLifecycleUiConfiguration =
   appConfig.organizationalUnitLifecycleFields;
-const fieldsOrder = appConfig.organizationalUnitDetailsFieldsOrder;
 
-const route = useRoute();
-const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
-const { ui } = useUiDesign();
-
-const createChildButtonProps = ui<LinidQBtnProps>(
-  `${uiNamespace}.create-child-button`,
-  'q-btn'
-);
 const {
-  toOrganizationalUnit,
   toOrganizationalUnitStatus,
   toOrganizationalUnitStatusForm,
   toOrganizationalUnitSuspensionRecord,
   toOrganizationalUnitReactivationRecord,
 } = useOrganizationalUnitMapper();
 
-const organizationalUnit = ref<OrganizationalUnit | null>(null);
-const organizationalUnitStatus = ref<OrganizationalUnitStatus | null>(null);
-const isLoading = ref<boolean>(false);
-const currentId = computed<string>(() => route.params.id as string);
-
-let detailRequestController: AbortController | null = null;
-
-const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
-const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
+
+const organizationalUnitStatus = computed<OrganizationalUnitStatus | null>(
+  () =>
+    props.entity.id
+      ? toOrganizationalUnitStatus(
+          props.entity as unknown as OrganizationalUnitDTO
+        )
+      : null
+);
 
 const lifecycleUi = useOrganizationalUnitLifecycleUi(organizationalUnitStatus);
 
@@ -212,75 +139,10 @@ const hasAnyLifecycleAction = computed(() =>
 const actionDelay: number =
   appConfig?.immediateActionDelay > 0 ? appConfig.immediateActionDelay : 5;
 
-/** Navigates back to the organizational unit list. */
-function goBack(): void {
-  router.push('/organizational-units');
-}
-
-/**
- * Navigates to the creation page to create a child organizational unit under the current one, which is passed as the
- * parent through the route query.
- */
-function goToCreateChild(): void {
-  void router.push({
-    path: '/organizational-units/create',
-    query: { parent: currentId.value },
-  });
-}
-
-/**
- * Loads the organizational unit selected in the tree (store) and splits the raw DTO into the identity and lifecycle
- * projections. Clears the panel when no organizational unit is selected.
- *
- * @param id - Identifier of the organizational unit to load.
- */
-async function loadOrganizationalUnit(id: string): Promise<void> {
-  if (!id) {
-    organizationalUnit.value = null;
-    organizationalUnitStatus.value = null;
-    return;
-  }
-
-  detailRequestController?.abort();
-  const controller = new AbortController();
-  detailRequestController = controller;
-
-  isLoading.value = true;
-  try {
-    const dto = await getOrganizationalUnitById(id, controller.signal);
-    organizationalUnit.value = toOrganizationalUnit(dto);
-    organizationalUnitStatus.value = toOrganizationalUnitStatus(dto);
-  } catch (error) {
-    if (axios.isCancel(error)) {
-      return;
-    }
-
-    const errorMessageKey =
-      axios.isAxiosError(error) && error.response?.status === 404
-        ? 'errors.notFound'
-        : 'errors.generic';
-    Notify({
-      type: 'negative',
-      message: t(errorMessageKey),
-    });
-  } finally {
-    if (detailRequestController === controller) {
-      isLoading.value = false;
-    }
-  }
-}
-
-watch(
-  () => currentId.value,
-  () => {
-    void loadOrganizationalUnit(currentId.value);
-  }
-);
-
 /**
  * Dispatches a lifecycle action key (emitted by the dropdown button) to the matching dialog opening function.
  *
- * @param event - Click event payload emrouteitted by the dropdown button.
+ * @param event - Click event payload emitted by the dropdown button.
  * @param event.key - Dotted lifecycle action key to dispatch, for example "suspension.immediate".
  */
 function onLifecycleActionClick(event: DropdownClickPayload): void {
@@ -311,7 +173,7 @@ function openImmediateSuspensionDialog(): void {
       submitStatus(
         () =>
           suspendOrganizationalUnit(
-            currentId.value,
+            props.entityId,
             toOrganizationalUnitSuspensionRecord({
               ...formData,
               start: dayjs().add(actionDelay, 'minute').toISOString(),
@@ -333,7 +195,7 @@ function openScheduleSuspensionDialog(): void {
       submitStatus(
         () =>
           suspendOrganizationalUnit(
-            currentId.value,
+            props.entityId,
             toOrganizationalUnitSuspensionRecord(formData)
           ),
         'success.scheduled'
@@ -355,7 +217,7 @@ function onClearSuspension(): void {
       submitStatus(
         () =>
           reactivateOrganizationalUnit(
-            currentId.value,
+            props.entityId,
             toOrganizationalUnitReactivationRecord(formData)
           ),
         'success.reactivated'
@@ -386,7 +248,7 @@ function onModifySuspensionEnd(): void {
       submitStatus(
         () =>
           suspendOrganizationalUnit(
-            currentId.value,
+            props.entityId,
             toOrganizationalUnitSuspensionRecord({
               ...formData,
               start: currentStart,
@@ -398,8 +260,8 @@ function onModifySuspensionEnd(): void {
 }
 
 /**
- * Runs a status-update API call and refreshes the local state. Surfaces a positive notification on success and a
- * negative one on failure.
+ * Runs a status-update API call, then notifies the generic details page through the UI event bus so it reloads the
+ * displayed entity. Surfaces a positive notification on success and a negative one on failure.
  *
  * @param statusUpdate - The status-mutation service call to execute, resolving to the updated OU DTO.
  * @param successKey - The i18n key used for the success notification.
@@ -408,12 +270,13 @@ async function submitStatus(
   statusUpdate: () => Promise<OrganizationalUnitDTO>,
   successKey: string
 ): Promise<void> {
-  isLoading.value = true;
   try {
-    const dto = await statusUpdate();
-    organizationalUnit.value = toOrganizationalUnit(dto);
-    organizationalUnitStatus.value = toOrganizationalUnitStatus(dto);
+    await statusUpdate();
     Notify({ type: 'positive', message: t(successKey as never) as string });
+    uiEventSubject.next({
+      key: ORGANIZATIONAL_UNIT_STATUS_UPDATED_EVENT,
+      data: null,
+    });
   } catch (error) {
     const errorMessageKey =
       axios.isAxiosError(error) && error.response?.status === 400
@@ -421,12 +284,6 @@ async function submitStatus(
         : 'errors.generic';
     Notify({ type: 'negative', message: t(errorMessageKey) });
     throw error;
-  } finally {
-    isLoading.value = false;
   }
 }
-
-onMounted(() => {
-  void loadOrganizationalUnit(currentId.value);
-});
 </script>

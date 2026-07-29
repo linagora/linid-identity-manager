@@ -4,6 +4,7 @@
     "/modules/AccountDetailsPage.json",
     "/modules/ApplicationsPage.json",
     "/modules/OrganizationalUnitPage.json",
+    "/modules/OrganizationalUnitDetailsPage.json",
     "/modules/ApplicationDetailsPage.json"
   ]
 }

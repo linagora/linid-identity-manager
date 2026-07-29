@@ -19,7 +19,8 @@
     "design/applications-page.json",
     "design/organizational-units-page.json",
     "design/application-details.json",
-    "design/accounts-details.json"
+    "design/accounts-details.json",
+    "design/organizational-units-details.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [
@@ -482,14 +483,6 @@
         "values": ["COMPANY", "DEPARTMENT", "TEAM"]
       }
     }
-  ],
-  "organizationalUnitDetailsFieldsOrder": [
-    "name",
-    "type",
-    "createdBy",
-    "updatedBy",
-    "insertDate",
-    "updateDate"
   ],
   "organizationalUnitLifecycleFields": {
     "suspension.immediate": [

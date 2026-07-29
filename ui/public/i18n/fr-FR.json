@@ -927,6 +927,97 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Règles d'accès",
+      "ButtonsCard": {
+        "add": "Ajouter une règle"
+      },
+      "deleteButton": "Supprimer",
+      "loadError": "Impossible de charger les règles. Veuillez réessayer plus tard.",
+      "createSuccess": "La règle a été créée.",
+      "createError": "Impossible de créer la règle. Veuillez réessayer plus tard.",
+      "deleteSuccess": "La règle a été supprimée.",
+      "deleteError": "Impossible de supprimer la règle. Veuillez réessayer plus tard.",
+      "columns": {
+        "code": "Code",
+        "description": "Description",
+        "priority": "Priorité"
+      },
+      "GenericEntityTable": {
+        "noData": "Aucune règle disponible",
+        "rowsPerPage": "Éléments par page:",
+        "paginationLabel": "{start}-{end} sur {total}"
+      },
+      "CreateFormDialog": {
+        "title": "Ajouter une règle",
+        "content": "Renseigner les informations de la règle d'accès.",
+        "fields": {
+          "code": {
+            "label": "Code",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priorité",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "script": {
+            "label": "Script Rego",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "cancel": "Annuler",
+          "confirm": "Créer",
+          "confirmLoading": "Création..."
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Supprimer la règle?",
+        "content": "Confirmer la suppression de la règle \"{code}\"?",
+        "ButtonsCard": {
+          "cancel": "Annuler",
+          "confirm": "Confirmer"
+        }
+      }
+    }
+  },
+  "moduleOrganizationalUnitDetailsPage": {
+    "title": "Détails de l'unité organisationnelle",
+    "error": "Impossible de charger l'unité organisationnelle. Veuillez réessayer plus tard.",
+    "ButtonsCard": {
+      "cancel": "Retour"
+    },
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "Informations générales",
+          "attributes": {
+            "name": "Nom",
+            "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Créé par",
+            "updatedBy": "Mis à jour par",
+            "insertDate": "Date de création",
+            "updateDate": "Dernière mise à jour"
+          }
+        }
+      }
     }
   },
   "moduleAccountDetailsPage": {
@@ -1005,22 +1096,7 @@
     }
   },
   "OrganizationalUnitDetailsPage": {
-    "title": "Détails de l'unité organisationnelle",
     "createChild": "Créer une O.U. enfant",
-    "EntityDetailsCard": {
-      "title": "Informations de l'unité organisationnelle",
-      "attributes": {
-        "name": "Nom",
-        "type": "Type",
-        "createdBy": "Créé par",
-        "updatedBy": "Mis à jour par",
-        "insertDate": "Date de création",
-        "updateDate": "Dernière mise à jour"
-      }
-    },
-    "ButtonsCard": {
-      "cancel": "Retour"
-    },
     "success": {
       "suspended": "Unité organisationnelle suspendue avec succès.",
       "scheduled": "Suspension planifiée avec succès.",

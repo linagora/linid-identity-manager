@@ -1,0 +1,36 @@
+{
+  "instanceId": "moduleOrganizationalUnitDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "organizational-units",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "organizational-units",
+  "basePath": "/organizational-units",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "sections": [
+      {
+        "key": "identity",
+        "fieldOrder": [
+          "name",
+          "type"
+        ]
+      },
+      {
+        "key": "audit",
+        "fieldOrder": [
+          "createdBy",
+          "updatedBy",
+          "insertDate",
+          "updateDate"
+        ]
+      }
+    ],
+    "reloadDetailsOn": [
+      "organizational-unit-status-updated"
+    ]
+  }
+}

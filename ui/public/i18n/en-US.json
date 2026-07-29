@@ -927,6 +927,97 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Access rules",
+      "ButtonsCard": {
+        "add": "Add a rule"
+      },
+      "deleteButton": "Delete",
+      "loadError": "Unable to load the rules. Please try again later.",
+      "createSuccess": "The rule has been created.",
+      "createError": "Unable to create the rule. Please try again later.",
+      "deleteSuccess": "The rule has been deleted.",
+      "deleteError": "Unable to delete the rule. Please try again later.",
+      "columns": {
+        "code": "Code",
+        "description": "Description",
+        "priority": "Priority"
+      },
+      "GenericEntityTable": {
+        "noData": "No rule available",
+        "rowsPerPage": "Rows per page:",
+        "paginationLabel": "{start}-{end} of {total}"
+      },
+      "CreateFormDialog": {
+        "title": "Add a rule",
+        "content": "Fill in the access rule information.",
+        "fields": {
+          "code": {
+            "label": "Code",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priority",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "script": {
+            "label": "Rego script",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        },
+        "ButtonsCard": {
+          "cancel": "Cancel",
+          "confirm": "Create",
+          "confirmLoading": "Creating..."
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Delete the rule?",
+        "content": "Confirm the deletion of rule \"{code}\"?",
+        "ButtonsCard": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        }
+      }
+    }
+  },
+  "moduleOrganizationalUnitDetailsPage": {
+    "title": "Organizational unit details",
+    "error": "Unable to load the organizational unit. Please try again later.",
+    "ButtonsCard": {
+      "cancel": "Back"
+    },
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "General information",
+          "attributes": {
+            "name": "Name",
+            "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Created by",
+            "updatedBy": "Updated by",
+            "insertDate": "Creation date",
+            "updateDate": "Last update"
+          }
+        }
+      }
     }
   },
   "moduleAccountDetailsPage": {
@@ -1005,22 +1096,7 @@
     }
   },
   "OrganizationalUnitDetailsPage": {
-    "title": "Organizational unit details",
     "createChild": "Create a child O.U.",
-    "EntityDetailsCard": {
-      "title": "Organizational unit information",
-      "attributes": {
-        "name": "Name",
-        "type": "Type",
-        "createdBy": "Created by",
-        "updatedBy": "Updated by",
-        "insertDate": "Creation date",
-        "updateDate": "Last update"
-      }
-    },
-    "ButtonsCard": {
-      "cancel": "Back"
-    },
     "success": {
       "suspended": "Organizational unit successfully suspended.",
       "scheduled": "Suspension successfully scheduled.",

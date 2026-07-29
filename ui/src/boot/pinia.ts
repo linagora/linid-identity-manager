@@ -30,6 +30,9 @@ import {
 } from '@linagora/linid-im-front-corelib';
 import AccountDetailsBadge from 'src/components/details/AccountDetailsBadge.vue';
 import AccountLifecyclePanel from 'src/components/details/AccountLifecyclePanel.vue';
+import OrganizationalUnitCreateChildButton from 'src/components/details/OrganizationalUnitCreateChildButton.vue';
+import OrganizationalUnitDetailsBadge from 'src/components/details/OrganizationalUnitDetailsBadge.vue';
+import OrganizationalUnitLifecyclePanel from 'src/components/details/OrganizationalUnitLifecyclePanel.vue';
 import { defineBoot } from '#q-app/wrappers';
 
 /**
@@ -56,5 +59,18 @@ export default defineBoot(async ({ app }) => {
   linidZoneStore.registerComponent(
     'moduleAccountDetailsPage.extraContent',
     AccountLifecyclePanel
+  );
+
+  linidZoneStore.registerComponent(
+    'moduleOrganizationalUnitDetailsPage.titleAppend',
+    OrganizationalUnitDetailsBadge
+  );
+  linidZoneStore.registerComponent(
+    'moduleOrganizationalUnitDetailsPage.extraButtons',
+    OrganizationalUnitCreateChildButton
+  );
+  linidZoneStore.registerComponent(
+    'moduleOrganizationalUnitDetailsPage.extraContent',
+    OrganizationalUnitLifecyclePanel
   );
 });

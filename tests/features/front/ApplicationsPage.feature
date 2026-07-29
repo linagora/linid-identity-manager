@@ -67,7 +67,8 @@ Feature: Test Application homepage display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
     And  I expect the HTML element '.linid-smart-filter' to be visible
     And  I expect the HTML element '.generic-entity-table' to be visible
-    And  I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
+    # 3 seeded demo applications + the 2 applications created above
+    And  I expect the HTML element '[data-cy="item-row"]' appear 5 times on screen
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.applicationId}}"]' to be visible
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.applicationId}}"]' contains "app-home-101"
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.applicationId}}"]' to be visible

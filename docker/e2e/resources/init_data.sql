@@ -688,3 +688,26 @@ $$
 
     END
 $$;
+
+-- Demo applications so a freshly seeded environment displays data on the
+-- applications pages. UUIDs are deterministic so e2e scenarios can target
+-- them directly through /applications/{id}.
+INSERT
+INTO applications (app_id, code, name, description, type, claims_template,
+                   created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000ab01', 'demo-app-1',
+        'Demo application 1', 'Demo application number 1', 'OIDC',
+        '{ "sub": "id" }',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000ab02', 'demo-app-2',
+        'Demo application 2', 'Demo application number 2', 'OIDC',
+        '{ "sub": "id" }',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000ab03', 'demo-app-3',
+        'Demo application 3', 'Demo application number 3', 'SAML',
+        '{ "sub": "id" }',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (code) DO NOTHING;

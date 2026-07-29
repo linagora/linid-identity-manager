@@ -53,24 +53,24 @@ export default defineBoot(async ({ app }) => {
   );
 
   linidZoneStore.registerComponent(
-    'moduleAccountDetailsPage.titleAppend',
+    'moduleAccountDetailsPage.header.suffix',
     AccountDetailsBadge
   );
   linidZoneStore.registerComponent(
-    'moduleAccountDetailsPage.extraContent',
+    'moduleAccountDetailsPage.content.before',
     AccountLifecyclePanel
   );
 
   linidZoneStore.registerComponent(
-    'moduleOrganizationalUnitDetailsPage.titleAppend',
+    'moduleOrganizationalUnitDetailsPage.header.suffix',
     OrganizationalUnitDetailsBadge
   );
   linidZoneStore.registerComponent(
-    'moduleOrganizationalUnitDetailsPage.extraButtons',
+    'moduleOrganizationalUnitDetailsPage.header.actions',
     OrganizationalUnitCreateChildButton
   );
   linidZoneStore.registerComponent(
-    'moduleOrganizationalUnitDetailsPage.extraContent',
+    'moduleOrganizationalUnitDetailsPage.content.before',
     OrganizationalUnitLifecyclePanel
   );
 });

@@ -59,6 +59,89 @@
           }
         }
       }
+    },
+    "generic-editable-table-card": {
+      "q-card": {
+        "flat": true,
+        "bordered": true
+      },
+      "buttons-card": {
+        "q-card": {
+          "flat": true
+        },
+        "add-button": {
+          "q-btn": {
+            "color": "primary",
+            "icon": "add",
+            "dense": true
+          }
+        }
+      },
+      "delete-button": {
+        "q-btn": {
+          "color": "negative",
+          "icon": "delete",
+          "flat": true,
+          "dense": true
+        }
+      },
+      "generic-entity-table": {
+        "q-table": {
+          "flat": true
+        }
+      },
+      "form-dialog": {
+        "q-dialog": {
+          "persistent": false
+        },
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        },
+        "buttons-card": {
+          "q-card": {
+            "flat": true
+          },
+          "confirm-button": {
+            "q-btn": {
+              "color": "primary",
+              "icon": "check"
+            }
+          },
+          "cancel-button": {
+            "q-btn": {
+              "color": "negative",
+              "outline": true
+            }
+          }
+        }
+      },
+      "confirmation-dialog": {
+        "q-dialog": {
+          "persistent": false
+        },
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        },
+        "buttons-card": {
+          "q-card": {
+            "flat": true
+          },
+          "confirm-button": {
+            "q-btn": {
+              "color": "primary",
+              "icon": "check"
+            }
+          },
+          "cancel-button": {
+            "q-btn": {
+              "color": "negative",
+              "outline": true
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -30,7 +30,19 @@
       },
       {
         "name": "type",
-        "type": "text"
+        "type": "list",
+        "options": {
+          "items": [
+            {
+              "label": "OIDC",
+              "value": "OIDC"
+            },
+            {
+              "label": "SAML",
+              "value": "SAML"
+            }
+          ]
+        }
       },
       {
         "name": "createdBy",

@@ -7,6 +7,54 @@
   "i18nRemote": "catalogUI/EmptyI18n",
   "apiEndpoint": "applications",
   "basePath": "/applications",
+  "zones": [
+    {
+      "zone": "moduleApplicationDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "columns": [
+          { "name": "code", "label": "columns.code", "field": "code", "align": "left" },
+          { "name": "description", "label": "columns.description", "field": "description", "align": "left" },
+          { "name": "priority", "label": "columns.priority", "field": "priority", "align": "left" }
+        ],
+        "formFields": [
+          {
+            "name": "code",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "description",
+            "type": "String",
+            "input": "TextArea",
+            "required": false,
+            "inputSettings": {}
+          },
+          {
+            "name": "priority",
+            "type": "Integer",
+            "input": "Number",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "script",
+            "type": "String",
+            "input": "TextArea",
+            "required": true,
+            "inputSettings": {}
+          }
+        ],
+        "endpoints": {
+          "find": "/applications/{{ parentEntity.id }}/rules",
+          "create": "/applications/{{ parentEntity.id }}/rules",
+          "delete": "/applications/{{ parentEntity.id }}/rules/{{ entity.id }}"
+        }
+      }
+    }
+  ],
   "options": {
     "layout": "catalogUI/BaseLayout",
     "page": "catalogUI/GenericDetailsPage",

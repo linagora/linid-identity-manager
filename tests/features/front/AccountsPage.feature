@@ -77,7 +77,7 @@ Feature: Test Account homepage display
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
     # Reset the query to paginate over the full dataset
-    When I click on '[data-cy="item_moduleAccountsPage"]'
+    When I click on '[data-cy="linid-smart-filter-clear"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
     And I expect the HTML element '[data-cy="item-row"]' appear 10 times on screen
     # Open the pagination dropdown

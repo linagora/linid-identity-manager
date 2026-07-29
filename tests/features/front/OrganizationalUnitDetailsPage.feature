@@ -148,10 +148,11 @@ Feature: Test Organizational Unit details panel display
     And I expect the HTML element '[data-cy="organizational-unit-suspension-actions"]' to be visible
 
     ## 110 Visiting an unknown organizational unit should display a not found notification
+    # Visiting the URL directly leaves no history entry, so the page falls back to the list
     Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-deadbeefdead"
     Then I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Impossible de charger l'unité organisationnelle. Veuillez réessayer plus tard."
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.suspended_ou_no_end_id}}"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
 
     ## 111 Create child button should open the creation page with the current OU as parent
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'

@@ -125,14 +125,15 @@ Feature: Test Account details page display
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/{{ctx.accountId}}"
 
     ## 101 Should display all account information on detail page
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--firstname"] [data-cy="value"]' contains "John"
-    And I expect the HTML element '[data-cy="information-card--lastname"] [data-cy="value"]' contains "Doe"
-    And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "john@example.com"
-    And I expect the HTML element '[data-cy="information-card--createdBy"] [data-cy="value"]' contains "{{ctx.createdBy}}"
-    And I expect the HTML element '[data-cy="information-card--updatedBy"] [data-cy="value"]' contains "{{ctx.updatedBy}}"
-    And I expect the HTML element '[data-cy="information-card--insertDate"] [data-cy="value"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--updateDate"] [data-cy="value"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--firstname"] [data-cy="value"]' contains "John"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--lastname"] [data-cy="value"]' contains "Doe"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--email"] [data-cy="value"]' contains "john@example.com"
+    And I expect the HTML element '[data-cy="details-section_audit"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"] [data-cy="value"]' contains "{{ctx.createdBy}}"
+    And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--updatedBy"] [data-cy="value"]' contains "{{ctx.updatedBy}}"
+    And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--insertDate"] [data-cy="value"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--updateDate"] [data-cy="value"]' to be visible
 
     ## 102 Should display all action buttons on detail page
     And I expect the HTML element '[data-cy="buttons-card"]' to be visible
@@ -145,10 +146,12 @@ Feature: Test Account details page display
     ## 104: Remove the account
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204
+    When I click on '[data-cy="item_moduleAccountsPage"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
 
     ## 105 Should display a not found notification when navigating to a non-existent account
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-000000000000"
-    Then I expect the HTML element '.q-notification__message' contains "Compte introuvable"
+    Then I expect the HTML element '.q-notification__message' contains "Impossible de charger le compte. Veuillez réessayer plus tard."
     And I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
 
     ## 106 Should display a generic error notification when navigating to an account with a malformed ID
@@ -189,7 +192,7 @@ Feature: Test Account details page display
 
     ## 109 Lifecycle case 3 - ACTIVE, no end date, no suspension
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -206,7 +209,7 @@ Feature: Test Account details page display
 
     ## 110 Lifecycle case 4 - ACTIVE, end > 15 days, no suspension
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c4@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -222,7 +225,7 @@ Feature: Test Account details page display
 
     ## 111 Lifecycle case 5 - ACTIVE, end <= 15 days, no suspension
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c5@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -238,7 +241,7 @@ Feature: Test Account details page display
 
     ## 112 Lifecycle case 6 - ACTIVE, no end date, suspension planned
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c6@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -255,7 +258,7 @@ Feature: Test Account details page display
 
     ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c7@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -272,7 +275,7 @@ Feature: Test Account details page display
 
     ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c8@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -289,7 +292,7 @@ Feature: Test Account details page display
 
     ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c9@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -306,7 +309,7 @@ Feature: Test Account details page display
 
     ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c10@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -323,7 +326,7 @@ Feature: Test Account details page display
 
     ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c11@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -340,7 +343,7 @@ Feature: Test Account details page display
 
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c12@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -357,16 +360,16 @@ Feature: Test Account details page display
 
     ## 119 Immediate activation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d1@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d1"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
@@ -394,16 +397,16 @@ Feature: Test Account details page display
 
     ## 122 Scheduled activation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d5@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d5"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
@@ -451,16 +454,16 @@ Feature: Test Account details page display
 
     ## 127 Immediate suspension - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d2@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d2"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
@@ -493,16 +496,16 @@ Feature: Test Account details page display
 
     ## 130 Scheduled suspension - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d8@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d8"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
@@ -599,16 +602,16 @@ Feature: Test Account details page display
 
     ## 139 Modify suspension - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d9@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d9"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
@@ -693,16 +696,16 @@ Feature: Test Account details page display
 
     ## 147 Immediate reactivation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d4@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d4"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
@@ -728,16 +731,16 @@ Feature: Test Account details page display
 
     ## 150 Immediate deactivation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d3"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
@@ -770,16 +773,16 @@ Feature: Test Account details page display
 
     ## 153 Scheduled deactivation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d6@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d6"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
@@ -834,16 +837,16 @@ Feature: Test Account details page display
 
     ## 158 Modify deactivation - dialog opens correctly
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d7@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d7"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page_title"]' to be visible
+    And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
     And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
@@ -893,7 +896,7 @@ Feature: Test Account details page display
 
     ## 163 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
     When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c13@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'

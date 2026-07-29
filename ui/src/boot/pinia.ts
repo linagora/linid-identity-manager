@@ -35,10 +35,12 @@ export default defineBoot(async ({ app }) => {
   setPiniaStore(app.config.globalProperties.$pinia);
   const linidZoneStore = useLinidZoneStore();
 
-  linidZoneStore.registerOnce('base-layout.dialogComponent', {
-    plugin: 'catalogUI/ConfirmationDialog',
-  });
-  linidZoneStore.registerOnce('base-layout.dialogComponent', {
-    plugin: 'catalogUI/FormDialog',
-  });
+  linidZoneStore.registerPluginOnce(
+    'base-layout.dialogComponent',
+    'catalogUI/ConfirmationDialog'
+  );
+  linidZoneStore.registerPluginOnce(
+    'base-layout.dialogComponent',
+    'catalogUI/FormDialog'
+  );
 });

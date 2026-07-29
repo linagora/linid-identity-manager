@@ -382,10 +382,7 @@ export async function postInit(
   const linidZoneStore = useLinidZoneStore();
 
   config.zones?.forEach(({ zone: zoneName, plugin, props }) => {
-    linidZoneStore.register(zoneName, {
-      plugin,
-      props,
-    });
+    linidZoneStore.registerPlugin(zoneName, plugin, props);
   });
 
   return module.postInit(config);

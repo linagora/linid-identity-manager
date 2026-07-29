@@ -1,54 +1,12 @@
 {
   "accounts": {
     "details-page": {
-      "entity-details-card": {
-        "q-card": {},
-        "firstname": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "account_circle" },
-            "q-card": {}
-          }
-        },
-        "lastname": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "account_circle" },
-            "q-card": {}
-          }
-        },
-        "email": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "mail" },
-            "q-card": {}
-          }
-        },
-        "createdBy": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "person_add" },
-            "q-card": {}
-          }
-        },
-        "updatedBy": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "manage_accounts" },
-            "q-card": {}
-          }
-        },
-        "insertDate": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "event_available" },
-            "q-card": {}
-          }
-        },
-        "updateDate": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "update" },
-            "q-card": {}
-          }
-        }
-      },
       "activation-actions": {
         "dropdown-button": {
-          "q-btn-dropdown": { "color": "positive", "outline": false },
+          "q-btn-dropdown": {
+            "color": "positive",
+            "outline": false
+          },
           "q-list": {},
           "q-menu": {},
           "menu-trigger": {
@@ -74,7 +32,10 @@
       },
       "suspension-actions": {
         "dropdown-button": {
-          "q-btn-dropdown": { "color": "warning", "outline": false },
+          "q-btn-dropdown": {
+            "color": "warning",
+            "outline": false
+          },
           "q-list": {},
           "q-menu": {},
           "menu-trigger": {
@@ -100,7 +61,10 @@
       },
       "deactivation-actions": {
         "dropdown-button": {
-          "q-btn-dropdown": { "color": "negative", "outline": false },
+          "q-btn-dropdown": {
+            "color": "negative",
+            "outline": false
+          },
           "q-list": {},
           "q-menu": {},
           "menu-trigger": {

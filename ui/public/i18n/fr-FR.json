@@ -880,22 +880,6 @@
     }
   },
   "AccountDetailsPage": {
-    "title": "Détails du compte",
-    "EntityDetailsCard": {
-      "title": "Informations du compte",
-      "attributes": {
-        "firstname": "Prénom",
-        "lastname": "Nom",
-        "email": "E-mail",
-        "createdBy": "Créé par",
-        "updatedBy": "Modifié par",
-        "insertDate": "Date de création",
-        "updateDate": "Dernière modification"
-      }
-    },
-    "ButtonsCard": {
-      "cancel": "Retour"
-    },
     "updateStatusSuccess": "Statut du compte mis à jour avec succès",
     "immediateActivationSuccess": "Le compte pourra être activé dans une minute | Le compte pourra être activé dans {count} minutes",
     "immediateSuspensionSuccess": "Le compte sera suspendu dans une minute | Le compte sera suspendu dans {count} minutes",
@@ -929,6 +913,36 @@
             "name": "Nom",
             "description": "Description",
             "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Créé par",
+            "updatedBy": "Modifié par",
+            "insertDate": "Date de création",
+            "updateDate": "Dernière modification"
+          }
+        }
+      }
+    }
+  },
+  "moduleAccountDetailsPage": {
+    "title": "Détails du compte",
+    "error": "Impossible de charger le compte. Veuillez réessayer plus tard.",
+    "ButtonsCard": {
+      "cancel": "Retour"
+    },
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "Informations générales",
+          "attributes": {
+            "firstname": "Prénom",
+            "lastname": "Nom",
+            "email": "E-mail"
           }
         }
       },

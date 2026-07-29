@@ -18,16 +18,8 @@
     "design/accounts-page.json",
     "design/applications-page.json",
     "design/organizational-units-page.json",
-    "design/application-details.json"
-  ],
-  "accountDetailsFieldsOrder": [
-    "firstname",
-    "lastname",
-    "email",
-    "createdBy",
-    "updatedBy",
-    "insertDate",
-    "updateDate"
+    "design/application-details.json",
+    "design/accounts-details.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

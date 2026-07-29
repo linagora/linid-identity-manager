@@ -1,0 +1,37 @@
+{
+  "instanceId": "moduleAccountDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "accounts",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "accounts",
+  "basePath": "/accounts",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "sections": [
+      {
+        "key": "identity",
+        "fieldOrder": [
+          "firstname",
+          "lastname",
+          "email"
+        ]
+      },
+      {
+        "key": "audit",
+        "fieldOrder": [
+          "createdBy",
+          "updatedBy",
+          "insertDate",
+          "updateDate"
+        ]
+      }
+    ],
+    "reloadDetailsOn": [
+      "account-status-updated"
+    ]
+  }
+}

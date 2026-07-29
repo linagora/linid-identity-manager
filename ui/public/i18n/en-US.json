@@ -880,22 +880,6 @@
     }
   },
   "AccountDetailsPage": {
-    "title": "Account details",
-    "EntityDetailsCard": {
-      "title": "Account information",
-      "attributes": {
-        "firstname": "First name",
-        "lastname": "Last name",
-        "email": "Email",
-        "createdBy": "Created by",
-        "updatedBy": "Updated by",
-        "insertDate": "Creation date",
-        "updateDate": "Last update"
-      }
-    },
-    "ButtonsCard": {
-      "cancel": "Back"
-    },
     "updateStatusSuccess": "Account status successfully updated",
     "immediateActivationSuccess": "The account can be activated within one minute | The account can be activated within {count} minutes",
     "immediateSuspensionSuccess": "The account will be suspended in one minute | The account will be suspended in {count} minutes",
@@ -929,6 +913,36 @@
             "name": "Name",
             "description": "Description",
             "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Created by",
+            "updatedBy": "Updated by",
+            "insertDate": "Creation date",
+            "updateDate": "Last update"
+          }
+        }
+      }
+    }
+  },
+  "moduleAccountDetailsPage": {
+    "title": "Account details",
+    "error": "Unable to load the account. Please try again later.",
+    "ButtonsCard": {
+      "cancel": "Back"
+    },
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "General information",
+          "attributes": {
+            "firstname": "First name",
+            "lastname": "Last name",
+            "email": "Email"
           }
         }
       },

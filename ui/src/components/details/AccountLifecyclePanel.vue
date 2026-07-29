@@ -25,141 +25,91 @@
 -->
 
 <template>
-  <!-- v8 ignore start -->
-  <q-page
-    class="row justify-center q-pa-md account-details-page"
-    data-cy="account-details-page"
+  <div
+    v-if="lifecycleUi && accountStatus"
+    class="column q-gutter-y-sm q-mb-md account-details-page--lifecycle"
+    data-cy="account-details-page_lifecycle"
   >
-    <div class="col-12 col-md-10 col-lg-10 account-details-page--content">
-      <div
-        class="row items-center justify-between q-mb-md account-details-page--header"
-      >
-        <div class="row items-center q-gutter-x-md">
-          <h1
-            class="q-ma-none text-h5 account-details-page--title"
-            data-cy="account-details-page_title"
-          >
-            {{ t('title') }}
-          </h1>
-          <StatusBadge
-            v-if="lifecycleUi?.showBadge && accountStatus"
-            :status="accountStatus.status"
-          />
-        </div>
-        <div class="account-details-page--actions">
-          <component
-            :is="buttonsCard"
-            v-if="buttonsCard"
-            :ui-namespace="uiNamespace"
-            :i18n-scope="i18nScope"
-            :show-confirm-button="false"
-            @cancel="goBack"
-          />
-        </div>
-      </div>
+    <AccountSuspendedBanner
+      v-if="lifecycleUi.showSuspendedBanner"
+      :account-status="accountStatus"
+      @clear-suspension="onLifecycleAction('reactivation.immediate')"
+      @modify-suspension="onLifecycleAction('suspension.modify')"
+    />
 
-      <div
-        v-if="lifecycleUi && accountStatus"
-        class="column q-gutter-y-sm q-mb-md account-details-page--lifecycle"
-        data-cy="account-details-page_lifecycle"
-      >
-        <AccountSuspendedBanner
-          v-if="lifecycleUi.showSuspendedBanner"
-          :account-status="accountStatus"
-          @clear-suspension="onLifecycleAction('reactivation.immediate')"
-          @modify-suspension="onLifecycleAction('suspension.modify')"
-        />
+    <AccountDeactivatedBanner
+      v-if="lifecycleUi.showDeactivatedBanner"
+      :account-status="accountStatus"
+      @reactivate-immediate="onLifecycleAction('revalidation.immediate')"
+      @reactivate-scheduled="onLifecycleAction('revalidation.scheduled')"
+    />
 
-        <AccountDeactivatedBanner
-          v-if="lifecycleUi.showDeactivatedBanner"
-          :account-status="accountStatus"
-          @reactivate-immediate="onLifecycleAction('revalidation.immediate')"
-          @reactivate-scheduled="onLifecycleAction('revalidation.scheduled')"
-        />
+    <AccountDeactivatedWarningBanner
+      v-if="lifecycleUi.showDeactivationWarningBanner"
+      :account-status="accountStatus"
+      @deactivate-immediate="onLifecycleAction('deactivation.immediate')"
+      @modify-deactivation="onLifecycleAction('deactivation.modify')"
+    />
 
-        <AccountDeactivatedWarningBanner
-          v-if="lifecycleUi.showDeactivationWarningBanner"
-          :account-status="accountStatus"
-          @deactivate-immediate="onLifecycleAction('deactivation.immediate')"
-          @modify-deactivation="onLifecycleAction('deactivation.modify')"
-        />
+    <AccountDeactivatedInfoText
+      v-if="lifecycleUi.showWillDeactivateInfoText"
+      :account-status="accountStatus"
+    />
 
-        <AccountDeactivatedInfoText
-          v-if="lifecycleUi.showWillDeactivateInfoText"
-          :account-status="accountStatus"
-        />
+    <AccountSuspendedInfoText
+      v-if="lifecycleUi.showWillSuspendInfoText"
+      :account-status="accountStatus"
+    />
 
-        <AccountSuspendedInfoText
-          v-if="lifecycleUi.showWillSuspendInfoText"
-          :account-status="accountStatus"
-        />
+    <AccountNotActivatedInfoText v-if="lifecycleUi.showNotActivatedInfoText" />
 
-        <AccountNotActivatedInfoText
-          v-if="lifecycleUi.showNotActivatedInfoText"
-        />
-
-        <div
-          v-if="hasAnyLifecycleAction"
-          class="row q-gutter-x-sm account-details-page--lifecycle--actions"
-          data-cy="account-lifecycle-actions"
-        >
-          <component
-            :is="dropdownButton"
-            v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
-            :ui-namespace="`${uiNamespace}.activation-actions`"
-            i18n-scope="AccountActivationActions"
-            :items="lifecycleUi.activationMenuItems"
-            data-cy="account-activation-actions"
-            @item-click="onLifecycleAction"
-          />
-          <component
-            :is="dropdownButton"
-            v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
-            :ui-namespace="`${uiNamespace}.suspension-actions`"
-            i18n-scope="AccountSuspensionActions"
-            :items="lifecycleUi.suspensionMenuItems"
-            data-cy="account-suspension-actions"
-            @item-click="onLifecycleAction"
-          />
-          <component
-            :is="dropdownButton"
-            v-if="dropdownButton && lifecycleUi.deactivationMenuItems?.length"
-            :ui-namespace="`${uiNamespace}.deactivation-actions`"
-            i18n-scope="AccountDeactivationActions"
-            :items="lifecycleUi.deactivationMenuItems"
-            data-cy="account-deactivation-actions"
-            @item-click="onLifecycleAction"
-          />
-        </div>
-      </div>
-
+    <div
+      v-if="hasAnyLifecycleAction"
+      class="row q-gutter-x-sm account-details-page--lifecycle--actions"
+      data-cy="account-lifecycle-actions"
+    >
       <component
-        :is="entityDetailsCard"
-        v-if="entityDetailsCard"
-        :entity="account ?? {}"
-        :field-order="fieldsOrder"
-        :is-loading="isLoading"
-        :ui-namespace="uiNamespace"
-        :i18n-scope="i18nScope"
-        class="q-mb-md account-details-page--cards"
-        data-cy="account-details-page_cards"
+        :is="dropdownButton"
+        v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
+        :ui-namespace="`${uiNamespace}.activation-actions`"
+        i18n-scope="AccountActivationActions"
+        :items="lifecycleUi.activationMenuItems"
+        data-cy="account-activation-actions"
+        @item-click="onLifecycleAction"
+      />
+      <component
+        :is="dropdownButton"
+        v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
+        :ui-namespace="`${uiNamespace}.suspension-actions`"
+        i18n-scope="AccountSuspensionActions"
+        :items="lifecycleUi.suspensionMenuItems"
+        data-cy="account-suspension-actions"
+        @item-click="onLifecycleAction"
+      />
+      <component
+        :is="dropdownButton"
+        v-if="dropdownButton && lifecycleUi.deactivationMenuItems?.length"
+        :ui-namespace="`${uiNamespace}.deactivation-actions`"
+        i18n-scope="AccountDeactivationActions"
+        :items="lifecycleUi.deactivationMenuItems"
+        data-cy="account-deactivation-actions"
+        @item-click="onLifecycleAction"
       />
     </div>
-  </q-page>
-  <!-- v8 ignore stop -->
+  </div>
 </template>
 
 <script setup lang="ts">
 import type { DropdownClickPayload } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
+  uiEventSubject,
   useNotify,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { appConfig } from 'boot/config';
 import { dayjs } from 'src/boot/dayjs';
-import StatusBadge from 'src/components/badge/StatusBadge.vue';
 import AccountDeactivatedBanner from 'src/components/banner/AccountDeactivatedBanner.vue';
 import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
@@ -169,30 +119,30 @@ import AccountSuspendedInfoText from 'src/components/text/AccountSuspendedInfoTe
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { useLifecycleDialogs } from 'src/composables/useLifecycleDialogs';
+import { ACCOUNT_STATUS_UPDATED_EVENT } from 'src/constants/detailsEvents';
 import {
   deactivateAccount,
-  getAccountById,
   reactivateAccount,
   setAccountValidity,
   suspendAccount,
 } from 'src/services/AccountService';
-import type { AccountDTO, AccountStatusForm } from 'src/types/accounts';
-import { type Account, type AccountStatus } from 'src/types/accounts';
-import { computed, onMounted, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import type {
+  AccountDTO,
+  AccountStatus,
+  AccountStatusForm,
+} from 'src/types/accounts';
+import type { DetailsContentZoneProps } from 'src/types/detailsZoneProps';
+import { computed } from 'vue';
 
-const pageName = 'AccountDetailsPage';
-const i18nScope = pageName;
+const props = defineProps<DetailsContentZoneProps>();
+
+const i18nScope = 'AccountDetailsPage';
 const uiNamespace = 'accounts.details-page';
 const accountLifecycleUiConfiguration = appConfig.accountLifecycleFields;
-const fieldsOrder = appConfig.accountDetailsFieldsOrder;
 
-const route = useRoute();
-const router = useRouter();
 const { t } = useScopedI18n(i18nScope);
 const { Notify } = useNotify();
 const {
-  toAccount,
   toAccountStatus,
   toAccountStatusForm,
   toAccountSuspensionRecord,
@@ -201,15 +151,13 @@ const {
   toAccountValidityRecord,
 } = useAccountMapper();
 
-const accountId = computed(() => route.params.id as string);
-
-const account = ref<Account | null>(null);
-const accountStatus = ref<AccountStatus | null>(null);
-const isLoading = ref<boolean>(false);
-
-const entityDetailsCard = loadAsyncComponent('catalogUI/EntityDetailsCard');
-const buttonsCard = loadAsyncComponent('catalogUI/ButtonsCard');
 const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
+
+const accountStatus = computed<AccountStatus | null>(() =>
+  props.entity.status
+    ? toAccountStatus(props.entity as unknown as AccountDTO)
+    : null
+);
 
 const lifecycleUi = useAccountLifecycleUi(accountStatus);
 
@@ -226,40 +174,6 @@ const hasAnyLifecycleAction = computed(() =>
 
 const actionDelay: number =
   appConfig?.immediateActionDelay > 0 ? appConfig.immediateActionDelay : 5;
-
-/**
- * Loads the account data from the backend based on the route parameter and splits the raw DTO into the page-level
- * identity (`account`) and lifecycle (`accountStatus`) projections.
- */
-async function loadAccount(): Promise<void> {
-  isLoading.value = true;
-  try {
-    const dto = await getAccountById(accountId.value);
-    account.value = toAccount(dto);
-    accountStatus.value = toAccountStatus(dto);
-  } catch (error) {
-    const errorMessageKey =
-      axios.isAxiosError(error) && error.response?.status === 404
-        ? 'errors.notFound'
-        : 'errors.generic';
-    Notify({
-      type: 'negative',
-      message: t(errorMessageKey),
-    });
-    goBack();
-  } finally {
-    isLoading.value = false;
-  }
-}
-
-/** Navigates back to the accounts list. */
-function goBack(): void {
-  router.push('/accounts');
-}
-
-onMounted(() => {
-  loadAccount();
-});
 
 /**
  * Handles click events on lifecycle action menu items by opening a confirmation or form dialog before executing the
@@ -320,7 +234,7 @@ function immediateActivation() {
       updateAccountStatus(
         () =>
           setAccountValidity(
-            accountId.value,
+            props.entityId,
             toAccountValidityRecord({
               validityPeriodStart: dayjs()
                 .add(actionDelay, 'minute')
@@ -341,7 +255,7 @@ function immediateSuspension() {
       updateAccountStatus(
         () =>
           suspendAccount(
-            accountId.value,
+            props.entityId,
             toAccountSuspensionRecord({
               ...formData,
               suspensionPeriodStart: dayjs()
@@ -363,7 +277,7 @@ function immediateDeactivation() {
       updateAccountStatus(
         () =>
           deactivateAccount(
-            accountId.value,
+            props.entityId,
             toAccountDeactivationRecord({
               ...formData,
               validityPeriodEnd: dayjs()
@@ -385,7 +299,7 @@ function immediateReactivation() {
       updateAccountStatus(
         () =>
           reactivateAccount(
-            accountId.value,
+            props.entityId,
             toAccountReactivationRecord(formData)
           ),
         'immediateReactivationSuccess'
@@ -406,7 +320,7 @@ function immediateRevalidation() {
       updateAccountStatus(
         () =>
           reactivateAccount(
-            accountId.value,
+            props.entityId,
             toAccountReactivationRecord({
               ...formData,
               validityPeriodEnd: dayjs()
@@ -431,7 +345,7 @@ function scheduledRevalidation() {
       updateAccountStatus(
         () =>
           reactivateAccount(
-            accountId.value,
+            props.entityId,
             toAccountReactivationRecord(formData)
           ),
         'scheduledRevalidationSuccess',
@@ -448,10 +362,7 @@ function scheduledActivation() {
     onSubmit: (formData: AccountStatusForm) =>
       updateAccountStatus(
         () =>
-          setAccountValidity(
-            accountId.value,
-            toAccountValidityRecord(formData)
-          ),
+          setAccountValidity(props.entityId, toAccountValidityRecord(formData)),
         'scheduledActivationSuccess',
         formData.validityPeriodStart
       ),
@@ -467,7 +378,7 @@ function scheduledDeactivation() {
       updateAccountStatus(
         () =>
           deactivateAccount(
-            accountId.value,
+            props.entityId,
             toAccountDeactivationRecord(formData)
           ),
         'scheduledDeactivationSuccess',
@@ -488,7 +399,7 @@ function modifyDeactivation() {
       updateAccountStatus(
         () =>
           deactivateAccount(
-            accountId.value,
+            props.entityId,
             toAccountDeactivationRecord(formData)
           ),
         'modifyDeactivationSuccess',
@@ -505,7 +416,7 @@ function scheduledSuspension() {
     onSubmit: (formData: AccountStatusForm) =>
       updateAccountStatus(
         () =>
-          suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
+          suspendAccount(props.entityId, toAccountSuspensionRecord(formData)),
         'scheduledSuspensionSuccess',
         formData.suspensionPeriodStart
       ),
@@ -523,7 +434,7 @@ function modifySuspension() {
     onSubmit: (formData: AccountStatusForm) =>
       updateAccountStatus(
         () =>
-          suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
+          suspendAccount(props.entityId, toAccountSuspensionRecord(formData)),
         'modifySuspensionSuccess',
         formData.suspensionPeriodStart
       ),
@@ -531,26 +442,21 @@ function modifySuspension() {
 }
 
 /**
- * Runs a status-update API call, then updates the page state with the refreshed account information. Displays a
- * notification in case of an error during the update process.
+ * Runs a status-update API call, then notifies the generic details page through the UI event bus so it reloads the
+ * displayed entity. Displays a notification in case of an error during the update process.
  *
  * @param statusUpdate - The status-mutation service call to execute, resolving to the updated account DTO.
  * @param successMsgKey - Optional i18n key for the success message to display upon successful update.
  * @param dateToDisplayInSuccessMsg - Optional date to display in the success message.
- * @returns A promise that resolves once the account status has been updated and the page state has been refreshed with
- *   the new account information.
+ * @returns A promise that resolves once the account status has been updated and the reload event has been emitted.
  */
 async function updateAccountStatus(
   statusUpdate: () => Promise<AccountDTO>,
   successMsgKey = 'updateStatusSuccess',
   dateToDisplayInSuccessMsg?: string | null
 ): Promise<void> {
-  isLoading.value = true;
-
   try {
-    const dto = await statusUpdate();
-    account.value = toAccount(dto);
-    accountStatus.value = toAccountStatus(dto);
+    await statusUpdate();
 
     Notify({
       type: 'positive',
@@ -558,6 +464,8 @@ async function updateAccountStatus(
         ? t(successMsgKey, { date: dateToDisplayInSuccessMsg })
         : t(successMsgKey, { count: actionDelay }),
     });
+
+    uiEventSubject.next({ key: ACCOUNT_STATUS_UPDATED_EVENT, data: null });
   } catch (error) {
     const errorMsg = axios.isAxiosError(error)
       ? (error.response?.data?.error ?? t('errors.status'))
@@ -568,8 +476,6 @@ async function updateAccountStatus(
       message: errorMsg,
     });
     throw error;
-  } finally {
-    isLoading.value = false;
   }
 }
 </script>

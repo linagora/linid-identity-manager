@@ -28,9 +28,14 @@ import {
   setPiniaStore,
   useLinidZoneStore,
 } from '@linagora/linid-im-front-corelib';
+import AccountDetailsBadge from 'src/components/details/AccountDetailsBadge.vue';
+import AccountLifecyclePanel from 'src/components/details/AccountLifecyclePanel.vue';
 import { defineBoot } from '#q-app/wrappers';
 
-/** Boot file that initializes Pinia and registers it in the corelib. */
+/**
+ * Boot file that initializes Pinia in the corelib and registers the host zone entries: the shared dialogs, and the host
+ * components injected in the generic details page zones.
+ */
 export default defineBoot(async ({ app }) => {
   setPiniaStore(app.config.globalProperties.$pinia);
   const linidZoneStore = useLinidZoneStore();
@@ -42,5 +47,14 @@ export default defineBoot(async ({ app }) => {
   linidZoneStore.registerPluginOnce(
     'base-layout.dialogComponent',
     'catalogUI/FormDialog'
+  );
+
+  linidZoneStore.registerComponent(
+    'moduleAccountDetailsPage.titleAppend',
+    AccountDetailsBadge
+  );
+  linidZoneStore.registerComponent(
+    'moduleAccountDetailsPage.extraContent',
+    AccountLifecyclePanel
   );
 });

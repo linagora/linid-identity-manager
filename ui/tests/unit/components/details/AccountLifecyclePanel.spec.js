@@ -24,18 +24,16 @@
  * LinID Identity Manager software.
  */
 
-import { flushPromises, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import {
   deactivateAccount,
-  getAccountById,
   reactivateAccount,
   setAccountValidity,
   suspendAccount,
 } from 'src/services/AccountService';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import AccountDetailsPage from '../../../src/pages/AccountDetailsPage.vue';
+import AccountLifecyclePanel from '../../../../src/components/details/AccountLifecyclePanel.vue';
 
-const mockedGetAccountById = vi.mocked(getAccountById);
 const mockedSuspendAccount = vi.mocked(suspendAccount);
 const mockedDeactivateAccount = vi.mocked(deactivateAccount);
 const mockedReactivateAccount = vi.mocked(reactivateAccount);
@@ -48,16 +46,6 @@ const { mockNotify, mockUiEventSubjectNext, mockGlobalT, mockScopedT } =
     mockGlobalT: vi.fn((v) => v),
     mockScopedT: vi.fn((v) => v),
   }));
-
-const mockRoute = {
-  params: {
-    id: 'test-account-id',
-  },
-};
-
-const mockRouter = {
-  push: vi.fn(),
-};
 
 vi.mock('@linagora/linid-im-front-corelib', () => ({
   loadAsyncComponent: vi.fn(() => null),
@@ -79,16 +67,10 @@ vi.mock('axios', () => ({
 }));
 
 vi.mock('src/services/AccountService', () => ({
-  getAccountById: vi.fn(),
   suspendAccount: vi.fn(),
   deactivateAccount: vi.fn(),
   reactivateAccount: vi.fn(),
   setAccountValidity: vi.fn(),
-}));
-
-vi.mock('vue-router', () => ({
-  useRoute: () => mockRoute,
-  useRouter: () => mockRouter,
 }));
 
 vi.mock('vue-i18n', () => ({
@@ -98,7 +80,6 @@ vi.mock('vue-i18n', () => ({
 vi.mock('boot/config', () => {
   const mockAppConfig = {
     immediateActionDelay: 60,
-    accountDetailsFieldsOrder: [],
     accountLifecycleFields: {
       'suspension.immediate': [],
       'suspension.scheduled': [],
@@ -116,53 +97,52 @@ vi.mock('boot/config', () => {
   return { appConfig: mockAppConfig };
 });
 
-describe('Test component: AccountDetailsPage', () => {
+const buildEntity = (overrides = {}) => ({
+  id: 'test-account-id',
+  firstname: 'John',
+  lastname: 'Doe',
+  email: 'john.doe@example.com',
+  createdBy: 'Alice Creator',
+  updatedBy: 'Bob Updater',
+  insertDate: '2026-04-15T12:00:24.814930Z',
+  updateDate: '2026-04-16T09:30:00.000000Z',
+  status: 'ACTIVE',
+  validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
+  suspensionPeriod: { start: null, end: null },
+  activationAt: '2026-01-01T00:00:00Z',
+  statusReason: null,
+  statusSubreason: null,
+  statusComment: null,
+  daysBeforeDeactivation: null,
+  ...overrides,
+});
+
+const mountPanel = (props = {}) =>
+  shallowMount(AccountLifecyclePanel, {
+    props: {
+      entity: buildEntity(),
+      entityId: 'test-account-id',
+      ...props,
+    },
+  });
+
+describe('Test component: AccountLifecyclePanel', () => {
   let wrapper;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRoute.params.id = 'test-account-id';
-    mockedGetAccountById.mockResolvedValue({
-      id: 'test-account-id',
-      firstname: 'John',
-      lastname: 'Doe',
-      email: 'john.doe@example.com',
-      createdBy: 'Alice Creator',
-      updatedBy: 'Bob Updater',
-      insertDate: '2026-04-15T12:00:24.814930Z',
-      updateDate: '2026-04-16T09:30:00.000000Z',
-      status: 'ACTIVE',
-      validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-      suspensionPeriod: { start: null, end: null },
-      activationAt: '2026-01-01T00:00:00Z',
-      statusReason: null,
-      statusSubreason: null,
-      statusComment: null,
-      daysBeforeDeactivation: null,
-    });
   });
 
-  describe('Test computed: accountId', () => {
-    it('should retrieve valid account id from route params', () => {
-      wrapper = shallowMount(AccountDetailsPage);
+  describe('Test computed: accountStatus', () => {
+    it('should be null while the entity is not loaded', () => {
+      wrapper = mountPanel({ entity: {} });
 
-      expect(wrapper.vm.accountId).toBe('test-account-id');
+      expect(wrapper.vm.accountStatus).toBeNull();
     });
-  });
 
-  describe('Test function: loadAccount', () => {
-    it('should retrieve account data and split it between account and accountStatus', async () => {
-      wrapper = shallowMount(AccountDetailsPage);
+    it('should expose only the lifecycle fields of the entity', () => {
+      wrapper = mountPanel();
 
-      await wrapper.vm.loadAccount();
-
-      expect(getAccountById).toHaveBeenCalledWith('test-account-id');
-      expect(wrapper.vm.account).toMatchObject({
-        id: 'test-account-id',
-        firstname: 'John',
-        lastname: 'Doe',
-        email: 'john.doe@example.com',
-      });
       expect(wrapper.vm.accountStatus).toMatchObject({
         status: 'ACTIVE',
         validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
@@ -171,79 +151,17 @@ describe('Test component: AccountDetailsPage', () => {
       });
       expect(wrapper.vm.accountStatus).not.toHaveProperty('firstname');
     });
-
-    it('should set isLoading to true during data load and false after', async () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      await flushPromises();
-
-      expect(wrapper.vm.isLoading).toBe(false);
-
-      const loadPromise = wrapper.vm.loadAccount();
-      expect(wrapper.vm.isLoading).toBe(true);
-
-      await loadPromise;
-      expect(wrapper.vm.isLoading).toBe(false);
-    });
-
-    it('should notify and redirect with notFound message when API returns 404', async () => {
-      mockedGetAccountById.mockRejectedValueOnce({
-        isAxiosError: true,
-        response: { status: 404 },
-      });
-
-      wrapper = shallowMount(AccountDetailsPage);
-      await wrapper.vm.loadAccount();
-
-      expect(mockNotify).toHaveBeenCalledWith({
-        type: 'negative',
-        message: 'errors.notFound',
-      });
-      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
-      expect(wrapper.vm.isLoading).toBe(false);
-    });
-
-    it('should notify with generic message and redirect when a non-404 error occurs', async () => {
-      mockedGetAccountById.mockRejectedValueOnce(new Error('boom'));
-
-      wrapper = shallowMount(AccountDetailsPage);
-      await wrapper.vm.loadAccount();
-
-      expect(mockNotify).toHaveBeenCalledWith({
-        type: 'negative',
-        message: 'errors.generic',
-      });
-      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
-      expect(wrapper.vm.isLoading).toBe(false);
-    });
-  });
-
-  describe('Test function: goBack', () => {
-    it('should navigate to accounts list', () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      wrapper.vm.goBack();
-
-      expect(mockRouter.push).toHaveBeenCalledWith('/accounts');
-    });
-  });
-
-  describe('Test hook: onMounted', () => {
-    it('should call loadAccount on mount', async () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      await flushPromises();
-
-      expect(getAccountById).toHaveBeenCalledWith('test-account-id');
-    });
   });
 
   describe('Test computed: lifecycleUi', () => {
-    it('should be null when no account is loaded', () => {
-      wrapper = shallowMount(AccountDetailsPage);
+    it('should be null while the entity is not loaded', () => {
+      wrapper = mountPanel({ entity: {} });
+
       expect(wrapper.vm.lifecycleUi).toBeNull();
     });
 
-    it('should expose the projected lifecycle UI once the account is loaded', async () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      await wrapper.vm.loadAccount();
+    it('should expose the projected lifecycle UI once the entity is loaded', () => {
+      wrapper = mountPanel();
 
       const ui = wrapper.vm.lifecycleUi;
       expect(ui).not.toBeNull();
@@ -260,14 +178,15 @@ describe('Test component: AccountDetailsPage', () => {
   });
 
   describe('Test computed: hasAnyLifecycleAction', () => {
-    it('should be false when no account is loaded', () => {
-      wrapper = shallowMount(AccountDetailsPage);
+    it('should be false while the entity is not loaded', () => {
+      wrapper = mountPanel({ entity: {} });
+
       expect(wrapper.vm.hasAnyLifecycleAction).toBe(false);
     });
 
-    it('should be true when at least one family exposes menu items', async () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      await wrapper.vm.loadAccount();
+    it('should be true when at least one family exposes menu items', () => {
+      wrapper = mountPanel();
+
       expect(wrapper.vm.hasAnyLifecycleAction).toBe(true);
     });
   });
@@ -288,7 +207,7 @@ describe('Test component: AccountDetailsPage', () => {
     it.each(actionCases)(
       'should emit a "%s" uiEvent with key "%s" when action is dispatched as string',
       (actionKey, expectedEventKey) => {
-        wrapper = shallowMount(AccountDetailsPage);
+        wrapper = mountPanel();
         mockUiEventSubjectNext.mockClear();
 
         wrapper.vm.onLifecycleAction(actionKey);
@@ -301,7 +220,7 @@ describe('Test component: AccountDetailsPage', () => {
     );
 
     it('should extract the key from a DropdownClickPayload object', () => {
-      wrapper = shallowMount(AccountDetailsPage);
+      wrapper = mountPanel();
       mockUiEventSubjectNext.mockClear();
 
       wrapper.vm.onLifecycleAction({ key: 'activation.immediate' });
@@ -310,7 +229,7 @@ describe('Test component: AccountDetailsPage', () => {
     });
 
     it('should notify with errors.status for an unknown action key', () => {
-      wrapper = shallowMount(AccountDetailsPage);
+      wrapper = mountPanel();
 
       wrapper.vm.onLifecycleAction('unknown.action');
 
@@ -342,7 +261,7 @@ describe('Test component: AccountDetailsPage', () => {
     ])(
       'should pass the correct i18nScope for action "%s"',
       (actionKey, expectedI18nScope) => {
-        wrapper = shallowMount(AccountDetailsPage);
+        wrapper = mountPanel();
         mockUiEventSubjectNext.mockClear();
 
         wrapper.vm.onLifecycleAction(actionKey);
@@ -355,79 +274,24 @@ describe('Test component: AccountDetailsPage', () => {
   });
 
   describe('Test function: updateAccountStatus', () => {
-    beforeEach(async () => {
-      wrapper = shallowMount(AccountDetailsPage);
-      await wrapper.vm.loadAccount();
+    beforeEach(() => {
+      wrapper = mountPanel();
     });
 
-    it('should update account and accountStatus on success', async () => {
-      const updatedDto = {
-        id: 'test-account-id',
-        firstname: 'Jane',
-        lastname: 'Doe',
-        email: 'jane.doe@example.com',
-        createdBy: 'Alice Creator',
-        updatedBy: 'Bob Updater',
-        insertDate: '2026-04-15T12:00:24.814930Z',
-        updateDate: '2026-05-01T00:00:00Z',
-        status: 'SUSPENDED',
-        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-        suspensionPeriod: {
-          start: '2026-05-01T00:00:00Z',
-          end: null,
-        },
-        activationAt: '2026-01-01T00:00:00Z',
-        statusReason: 'INVESTIGATION',
-        statusSubreason: null,
-        statusComment: null,
-        daysBeforeDeactivation: null,
-      };
-      const statusUpdate = vi.fn().mockResolvedValueOnce(updatedDto);
+    it('should notify and emit the reload event on success', async () => {
+      const statusUpdate = vi.fn().mockResolvedValueOnce(buildEntity());
 
       await wrapper.vm.updateAccountStatus(statusUpdate);
 
       expect(statusUpdate).toHaveBeenCalledOnce();
-      expect(wrapper.vm.account).toMatchObject({ firstname: 'Jane' });
-      expect(wrapper.vm.accountStatus).toMatchObject({ status: 'SUSPENDED' });
       expect(mockNotify).toHaveBeenCalledWith({
         type: 'positive',
         message: 'updateStatusSuccess',
       });
-    });
-
-    it('should set isLoading to true during the update and false after', async () => {
-      let resolveUpdate;
-      const statusUpdate = vi.fn(
-        () =>
-          new Promise((resolve) => {
-            resolveUpdate = resolve;
-          })
-      );
-
-      const updatePromise = wrapper.vm.updateAccountStatus(statusUpdate);
-      expect(wrapper.vm.isLoading).toBe(true);
-
-      resolveUpdate({
-        id: 'test-account-id',
-        firstname: 'John',
-        lastname: 'Doe',
-        email: 'john.doe@example.com',
-        createdBy: 'Alice Creator',
-        updatedBy: 'Bob Updater',
-        insertDate: '2026-04-15T12:00:24.814930Z',
-        updateDate: '2026-04-16T09:30:00.000000Z',
-        status: 'ACTIVE',
-        validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-        suspensionPeriod: { start: null, end: null },
-        activationAt: '2026-01-01T00:00:00Z',
-        statusReason: null,
-        statusSubreason: null,
-        statusComment: null,
-        daysBeforeDeactivation: null,
+      expect(mockUiEventSubjectNext).toHaveBeenCalledWith({
+        key: 'account-status-updated',
+        data: null,
       });
-      await updatePromise;
-
-      expect(wrapper.vm.isLoading).toBe(false);
     });
 
     it('should notify with the API error message and rethrow on axios error', async () => {
@@ -445,6 +309,7 @@ describe('Test component: AccountDetailsPage', () => {
         type: 'negative',
         message: 'Conflict detected',
       });
+      expect(mockUiEventSubjectNext).not.toHaveBeenCalled();
     });
 
     it('should fall back to errors.status and rethrow when axios error has no backend message', async () => {
@@ -483,34 +348,14 @@ describe('Test component: AccountDetailsPage', () => {
     const FIXED_NOW = new Date('2026-05-28T10:00:00.000Z');
     const FIXED_NOW_PLUS_1H = '2026-05-28T11:00:00.000Z';
 
-    const resolvedDto = {
-      id: 'test-account-id',
-      firstname: 'John',
-      lastname: 'Doe',
-      email: 'john.doe@example.com',
-      createdBy: 'Alice Creator',
-      updatedBy: 'Bob Updater',
-      insertDate: '2026-04-15T12:00:24.814930Z',
-      updateDate: '2026-04-16T09:30:00.000000Z',
-      status: 'ACTIVE',
-      validityPeriod: { start: '2026-01-01T00:00:00Z', end: null },
-      suspensionPeriod: { start: null, end: null },
-      activationAt: '2026-01-01T00:00:00Z',
-      statusReason: null,
-      statusSubreason: null,
-      statusComment: null,
-      daysBeforeDeactivation: null,
-    };
-
-    beforeEach(async () => {
+    beforeEach(() => {
       vi.useFakeTimers();
       vi.setSystemTime(FIXED_NOW);
-      mockedSuspendAccount.mockResolvedValue(resolvedDto);
-      mockedDeactivateAccount.mockResolvedValue(resolvedDto);
-      mockedReactivateAccount.mockResolvedValue(resolvedDto);
-      mockedSetAccountValidity.mockResolvedValue(resolvedDto);
-      wrapper = shallowMount(AccountDetailsPage);
-      await wrapper.vm.loadAccount();
+      mockedSuspendAccount.mockResolvedValue(buildEntity());
+      mockedDeactivateAccount.mockResolvedValue(buildEntity());
+      mockedReactivateAccount.mockResolvedValue(buildEntity());
+      mockedSetAccountValidity.mockResolvedValue(buildEntity());
+      wrapper = mountPanel();
       mockUiEventSubjectNext.mockClear();
       mockNotify.mockClear();
       mockScopedT.mockClear();
@@ -522,36 +367,30 @@ describe('Test component: AccountDetailsPage', () => {
 
     describe('Test computed: actionDelay', () => {
       it('should default to 5 minutes when appConfig.immediateActionDelay is 0 or less', () => {
-        // Temporarily set appConfig to have immediateActionDelay = 0
         const mockAppConfig = global.mockAppConfig;
         const originalDelay = mockAppConfig.immediateActionDelay;
         mockAppConfig.immediateActionDelay = 0;
 
-        wrapper = shallowMount(AccountDetailsPage);
+        wrapper = mountPanel();
         expect(wrapper.vm.actionDelay).toBe(5);
 
-        // Restore original value
         mockAppConfig.immediateActionDelay = originalDelay;
       });
 
       it('should default to 5 minutes when appConfig.immediateActionDelay is undefined', () => {
-        // Temporarily set appConfig to have immediateActionDelay = undefined
         const mockAppConfig = global.mockAppConfig;
         const originalDelay = mockAppConfig.immediateActionDelay;
         mockAppConfig.immediateActionDelay = undefined;
 
-        wrapper = shallowMount(AccountDetailsPage);
+        wrapper = mountPanel();
         expect(wrapper.vm.actionDelay).toBe(5);
 
-        // Restore original value
         mockAppConfig.immediateActionDelay = originalDelay;
       });
 
-      it('should use the configured value when appConfig.immediateActionDelay is greater than 0', async () => {
-        wrapper = shallowMount(AccountDetailsPage);
-        await wrapper.vm.loadAccount();
+      it('should use the configured value when appConfig.immediateActionDelay is greater than 0', () => {
+        wrapper = mountPanel();
 
-        // The mock is set to immediateActionDelay of 60
         expect(wrapper.vm.actionDelay).toBe(60);
       });
     });

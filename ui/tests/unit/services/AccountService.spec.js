@@ -27,7 +27,6 @@
 import { api } from 'boot/axios';
 import {
   deactivateAccount,
-  getAccountById,
   reactivateAccount,
   setAccountValidity,
   suspendAccount,
@@ -69,25 +68,6 @@ describe('Test service: accountService', () => {
   beforeEach(() => {
     vi.mocked(api.get).mockReset();
     vi.mocked(api.put).mockReset();
-  });
-
-  describe('Test function: getAccountById', () => {
-    it('should call valid endpoint and return the raw DTO', async () => {
-      const dto = buildAccountDTO({ id: USER_1_UUID });
-      vi.mocked(api.get).mockResolvedValue({ data: dto });
-
-      const result = await getAccountById(USER_1_UUID);
-
-      expect(api.get).toHaveBeenCalledWith(`/accounts/${USER_1_UUID}`);
-      expect(result).toEqual(dto);
-    });
-
-    it('should propagate backend errors to the caller', async () => {
-      const error = new Error('boom');
-      vi.mocked(api.get).mockRejectedValue(error);
-
-      await expect(getAccountById(USER_1_UUID)).rejects.toThrow('boom');
-    });
   });
 
   describe('Test function: suspendAccount', () => {

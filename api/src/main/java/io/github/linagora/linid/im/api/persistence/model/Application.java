@@ -26,9 +26,7 @@
 
 package io.github.linagora.linid.im.api.persistence.model;
 
-import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
 import io.github.zorin95670.predicate.FilterType;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -37,7 +35,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,14 +43,13 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
 /**
  * JPA entity representing an application in the system.
  *
  * <p>Maps to the {@code applications} table and includes identification fields, a claims template, an
- * optional provisioning script with its checksum, an optional configuration, and a list of roles.
+ * optional provisioning script with its checksum, and an optional configuration.
  * Inherits audit fields from {@link AbstractEntity}.</p>
  */
 @Entity
@@ -139,11 +135,4 @@ public class Application extends AbstractEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @FilterType(type = String.class)
     private String configuration;
-
-    /**
-     * List of application roles, stored as a JSONB array of role objects (name and optional description).
-     */
-    @Type(JsonType.class)
-    @Column(name = "roles", columnDefinition = "jsonb")
-    private List<ApplicationRoleDTO> roles;
 }

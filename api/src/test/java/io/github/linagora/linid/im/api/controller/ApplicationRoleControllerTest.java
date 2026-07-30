@@ -26,18 +26,18 @@
 
 package io.github.linagora.linid.im.api.controller;
 
-import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.role.ApplicationRoleMapper;
+import io.github.linagora.linid.im.api.model.application.role.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
-import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
-import io.github.linagora.linid.im.api.service.ApplicationService;
-import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
-import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRole;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleViewQueryFilterDto;
+import io.github.linagora.linid.im.api.service.ApplicationRoleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
@@ -51,127 +51,98 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Test class: ApplicationController")
-class ApplicationControllerTest {
+@DisplayName("Test class: ApplicationRoleController")
+class ApplicationRoleControllerTest {
 
     @Mock
-    private ApplicationService applicationService;
+    private ApplicationRoleService applicationRoleService;
+
+    @Mock
+    private ApplicationRoleMapper applicationRoleMapper;
 
     @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
 
-    @Mock
-    private OpaApplicationDeployerService opaApplicationDeployerService;
-
-    @Mock
-    private ApplicationMapper applicationMapper;
-
-    private ApplicationController controller;
+    @InjectMocks
+    private ApplicationRoleController controller;
 
     private UserPrincipal userPrincipal;
 
-    private ApplicationRecord record;
+    private UUID applicationId;
+
+    private ApplicationRoleRecord record;
 
     @BeforeEach
     void setUp() {
-        controller = new ApplicationController(
-            applicationService,
-            applicationMapper,
-            pagedResponseStatusResolver,
-            opaApplicationDeployerService
-        );
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
-        record = new ApplicationRecord("my-app", "My Application", null, "OIDC", "{}");
+        applicationId = UUID.randomUUID();
+        record = new ApplicationRoleRecord("admin", "Grants full administrative access");
     }
 
     @Test
-    @DisplayName("Should create application")
+    @DisplayName("Should create application role")
     void testCreate() {
-        when(applicationService.create(any(), any())).thenReturn(new Application());
+        when(applicationRoleService.create(any(), any(), any())).thenReturn(new ApplicationRole());
 
-        var response = controller.create(userPrincipal, record);
+        var response = controller.create(userPrincipal, applicationId, record);
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        verify(applicationRoleService).create(userPrincipal, applicationId, record);
     }
 
     @Test
-    @DisplayName("Should find applications")
+    @DisplayName("Should find application roles")
     void testFindAll() {
-        when(applicationService.findAll(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+        when(applicationRoleService.findAll(any(), any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
         when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
 
-        var response = controller.findAll(userPrincipal, new ApplicationViewQueryFilterDto(), Pageable.unpaged());
+        var response = controller.findAll(userPrincipal, applicationId,
+            new ApplicationRoleViewQueryFilterDto(), Pageable.unpaged());
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
-    @DisplayName("Should find application by id")
+    @DisplayName("Should find application role by id")
     void testFindById() {
-        when(applicationService.findViewById(any(), any())).thenReturn(new ApplicationView());
+        when(applicationRoleService.findViewById(any(), any(), any())).thenReturn(new ApplicationRoleView());
 
-        var response = controller.findById(userPrincipal, UUID.randomUUID());
+        var response = controller.findById(userPrincipal, applicationId, UUID.randomUUID());
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     @Test
-    @DisplayName("Should update application")
+    @DisplayName("Should update application role")
     void testUpdate() {
-        when(applicationService.update(any(), any(), any())).thenReturn(new Application());
+        var roleId = UUID.randomUUID();
+        when(applicationRoleService.update(any(), any(), any(), any())).thenReturn(new ApplicationRole());
 
-        var response = controller.update(userPrincipal, UUID.randomUUID(), record);
+        var response = controller.update(userPrincipal, applicationId, roleId, record);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(applicationRoleService).update(userPrincipal, applicationId, roleId, record);
     }
 
     @Test
-    @DisplayName("Should delete application by id")
+    @DisplayName("Should delete application role by id")
     void testDeleteById() {
-        doNothing().when(applicationService).deleteById(any(), any());
+        doNothing().when(applicationRoleService).deleteById(any(), any(), any());
 
-        var response = controller.deleteById(userPrincipal, UUID.randomUUID());
+        var response = controller.deleteById(userPrincipal, applicationId, UUID.randomUUID());
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-
-    @Test
-    @DisplayName("Should deploy application with force=false")
-    void testDeploy_withForceFalse() {
-        var id = UUID.randomUUID();
-        var deployedApplication = new Application();
-
-        when(opaApplicationDeployerService.deploy(userPrincipal, id, false)).thenReturn(deployedApplication);
-
-        var response = controller.deploy(userPrincipal, id, false);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(opaApplicationDeployerService).deploy(userPrincipal, id, false);
-    }
-
-    @Test
-    @DisplayName("Should deploy application with force=true")
-    void testDeploy_withForceTrue() {
-        var id = UUID.randomUUID();
-        var deployedApplication = new Application();
-
-        when(opaApplicationDeployerService.deploy(userPrincipal, id, true)).thenReturn(deployedApplication);
-
-        var response = controller.deploy(userPrincipal, id, true);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(opaApplicationDeployerService).deploy(userPrincipal, id, true);
     }
 }

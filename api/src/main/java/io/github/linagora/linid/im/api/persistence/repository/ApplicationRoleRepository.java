@@ -24,41 +24,50 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.application;
+package io.github.linagora.linid.im.api.persistence.repository;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRole;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Request payload for creating or updating an application.
+ * Spring Data JPA repository for {@link ApplicationRole}.
  *
- * <p>The {@code roles} are intentionally omitted: they are managed as a sub-resource, through the
- * {@code /applications/{applicationId}/roles} endpoints. The {@code script}, its {@code scriptChecksum},
- * the {@code deployedAt} date and the {@code configuration} are managed by a separate process and
- * are therefore not part of the request.</p>
- *
- * @param code           functional unique identifier of the application
- * @param name           human-readable name of the application
- * @param description     optional free-text description of the application
- * @param type           type of the application
- * @param claimsTemplate template used to generate the claims of the application
+ * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
+ * via {@code spring-query-filter} specifications.</p>
  */
-@Schema(description = "Request payload for creating or updating an application")
-public record ApplicationRecord(
-    @NotBlank @Schema(description = "Functional unique identifier of the application", example = "my-app")
-    String code,
+public interface ApplicationRoleRepository extends JpaRepository<ApplicationRole, UUID>,
+    JpaSpecificationExecutor<ApplicationRole> {
 
-    @NotBlank @Schema(description = "Human-readable name of the application", example = "My Application")
-    String name,
+    /**
+     * Retrieves an {@link ApplicationRole} by its identifier scoped to the given application.
+     *
+     * @param id            the role identifier
+     * @param applicationId the identifier of the owning application
+     * @return an {@link Optional} containing the matching {@link ApplicationRole} if found,
+     * or {@link Optional#empty()} otherwise
+     */
+    Optional<ApplicationRole> findByIdAndApplicationId(UUID id, UUID applicationId);
 
-    @Schema(description = "Free-text description of the application", example = "Internal HR application")
-    String description,
+    /**
+     * Checks whether a role with the given name already exists within the application.
+     *
+     * @param applicationId the identifier of the owning application
+     * @param name          the name of the role
+     * @return {@code true} if a matching role exists, {@code false} otherwise
+     */
+    boolean existsByApplicationIdAndName(UUID applicationId, String name);
 
-    @NotBlank @Schema(description = "Type of the application", example = "OIDC")
-    String type,
-
-    @NotBlank @Schema(description = "Template used to generate the claims of the application",
-        example = "{ \"sub\": \"{{ id }}\" }")
-    String claimsTemplate
-) {
+    /**
+     * Checks whether another role (different from the given identifier) with the given name already exists
+     * within the application.
+     *
+     * @param applicationId the identifier of the owning application
+     * @param name          the name of the role
+     * @param id            the identifier of the role to exclude from the check
+     * @return {@code true} if a matching role exists, {@code false} otherwise
+     */
+    boolean existsByApplicationIdAndNameAndIdNot(UUID applicationId, String name, UUID id);
 }

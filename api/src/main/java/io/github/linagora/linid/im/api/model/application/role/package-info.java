@@ -24,41 +24,10 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.application;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-
 /**
- * Request payload for creating or updating an application.
+ * Model classes for the Application Role domain.
  *
- * <p>The {@code roles} are intentionally omitted: they are managed as a sub-resource, through the
- * {@code /applications/{applicationId}/roles} endpoints. The {@code script}, its {@code scriptChecksum},
- * the {@code deployedAt} date and the {@code configuration} are managed by a separate process and
- * are therefore not part of the request.</p>
- *
- * @param code           functional unique identifier of the application
- * @param name           human-readable name of the application
- * @param description     optional free-text description of the application
- * @param type           type of the application
- * @param claimsTemplate template used to generate the claims of the application
+ * <p>This package contains DTOs, records, and mappers for the
+ * Application Role domain in the LinID-identity-manager API.</p>
  */
-@Schema(description = "Request payload for creating or updating an application")
-public record ApplicationRecord(
-    @NotBlank @Schema(description = "Functional unique identifier of the application", example = "my-app")
-    String code,
-
-    @NotBlank @Schema(description = "Human-readable name of the application", example = "My Application")
-    String name,
-
-    @Schema(description = "Free-text description of the application", example = "Internal HR application")
-    String description,
-
-    @NotBlank @Schema(description = "Type of the application", example = "OIDC")
-    String type,
-
-    @NotBlank @Schema(description = "Template used to generate the claims of the application",
-        example = "{ \"sub\": \"{{ id }}\" }")
-    String claimsTemplate
-) {
-}
+package io.github.linagora.linid.im.api.model.application.role;

@@ -28,8 +28,6 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
-import io.github.linagora.linid.im.api.model.application.ApplicationRoleDTO;
-import io.github.linagora.linid.im.api.model.application.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
@@ -213,29 +211,6 @@ class ApplicationServiceImplTest {
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.application.code.already_exists", exception.getError().key());
         verify(applicationRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("updateRoles should replace the roles and persist")
-    void testUpdateRoles() {
-        var id = UUID.randomUUID();
-        var existing = Application.builder().id(id).build();
-        when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
-        when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-
-        var roles = List.of(
-            new ApplicationRoleRecord("admin", "Grants full administrative access"),
-            new ApplicationRoleRecord("user", null));
-        var roleDTOs = List.of(
-            new ApplicationRoleDTO("admin", "Grants full administrative access"),
-            new ApplicationRoleDTO("user", null));
-        when(mapper.toRoleDTO(roles.get(0))).thenReturn(roleDTOs.get(0));
-        when(mapper.toRoleDTO(roles.get(1))).thenReturn(roleDTOs.get(1));
-
-        var result = service.updateRoles(userPrincipal, id, roles);
-
-        assertEquals(roleDTOs, result.getRoles());
-        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
     }
 
     @Test

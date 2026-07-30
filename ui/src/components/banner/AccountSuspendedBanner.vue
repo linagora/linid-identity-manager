@@ -62,12 +62,16 @@ import type {
   LinidQBtnProps,
   LinidQIconProps,
 } from '@linagora/linid-im-front-corelib';
-import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import {
+  useCommonMapper,
+  useScopedI18n,
+  useUiDesign,
+} from '@linagora/linid-im-front-corelib';
 import type {
   AccountBannerProps,
   AccountSuspendedBannerOutputs,
 } from 'src/types/accountBannerProps';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
 const props = defineProps<AccountBannerProps>();
@@ -80,9 +84,11 @@ const { t } = useScopedI18n(localI18n);
 const { ui } = useUiDesign();
 const { toDate } = useCommonMapper();
 
-const date = computed(() => toDate(props.accountStatus.suspensionPeriod.start));
+const date = computed(() =>
+  toDate(props.accountStatus.suspensionPeriod.start, DATE_FORMAT_KEY)
+);
 const endDate = computed(() =>
-  toDate(props.accountStatus.suspensionPeriod.end)
+  toDate(props.accountStatus.suspensionPeriod.end, DATE_FORMAT_KEY)
 );
 const contentI18nKey = computed(() =>
   props.accountStatus.suspensionPeriod.end != null

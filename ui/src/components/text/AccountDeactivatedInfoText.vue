@@ -44,9 +44,13 @@
 
 <script setup lang="ts">
 import type { LinidQIconProps } from '@linagora/linid-im-front-corelib';
-import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import {
+  useCommonMapper,
+  useScopedI18n,
+  useUiDesign,
+} from '@linagora/linid-im-front-corelib';
 import type { AccountStatus } from 'src/types/accounts';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
 const localUiNamespace = `account-deactivated-info-text`;
@@ -57,7 +61,9 @@ const props = defineProps<{
   /** Account lifecycle status, used to display the deactivation date. */
   accountStatus: AccountStatus;
 }>();
-const endDate = computed(() => toDate(props.accountStatus.validityPeriod.end));
+const endDate = computed(() =>
+  toDate(props.accountStatus.validityPeriod.end, DATE_FORMAT_KEY)
+);
 
 const uiProps = {
   icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),

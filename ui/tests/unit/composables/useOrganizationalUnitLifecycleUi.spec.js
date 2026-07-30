@@ -28,9 +28,16 @@ import { useOrganizationalUnitLifecycleUi } from 'src/composables/useOrganizatio
 import { ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS } from 'src/types/organizationalUnitLifecycleUi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
+import { mockToDayJs } from '../helpers/mockCommonMapper';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: vi.fn((v) => v) }),
+}));
+
+vi.mock('@linagora/linid-im-front-corelib', () => ({
+  useCommonMapper: () => ({
+    toDayJs: mockToDayJs(),
+  }),
 }));
 
 const NOW_ISO = '2026-05-04T12:00:00Z';

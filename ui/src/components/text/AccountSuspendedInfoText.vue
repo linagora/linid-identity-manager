@@ -45,11 +45,12 @@
 <script setup lang="ts">
 import {
   type LinidQIconProps,
+  useCommonMapper,
   useScopedI18n,
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
 import type { AccountStatus } from 'src/types/accounts';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
 const localUiNamespace = `account-suspended-info-text`;
@@ -61,7 +62,7 @@ const props = defineProps<{
   accountStatus: AccountStatus;
 }>();
 const startDate = computed(() =>
-  toDate(props.accountStatus.suspensionPeriod.start)
+  toDate(props.accountStatus.suspensionPeriod.start, DATE_FORMAT_KEY)
 );
 
 const uiProps = {

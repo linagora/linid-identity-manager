@@ -45,10 +45,11 @@
 <script setup lang="ts">
 import {
   type LinidQIconProps,
+  useCommonMapper,
   useScopedI18n,
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import type { OrganizationalUnitInfoTextProps } from 'src/types/organizationalUnitInfoTextProps';
 import { computed } from 'vue';
 
@@ -60,7 +61,10 @@ const { t } = useScopedI18n('OrganizationalUnitSuspendedInfoText');
 const { ui } = useUiDesign();
 
 const startDate = computed(() =>
-  toDate(props.organizationalUnitStatus.suspensionPeriod?.start)
+  toDate(
+    props.organizationalUnitStatus.suspensionPeriod?.start,
+    DATE_FORMAT_KEY
+  )
 );
 
 const uiProps = {

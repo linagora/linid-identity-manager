@@ -90,13 +90,13 @@
 import type { LinidQInputProps } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
+  useCommonMapper,
   useNotify,
   useScopedI18n,
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 import axios from 'axios';
 import { appConfig } from 'src/boot/config';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import {
   createOrganizationalUnit,

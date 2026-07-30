@@ -62,8 +62,12 @@ import type {
   LinidQBtnProps,
   LinidQIconProps,
 } from '@linagora/linid-im-front-corelib';
-import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import {
+  useCommonMapper,
+  useScopedI18n,
+  useUiDesign,
+} from '@linagora/linid-im-front-corelib';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
   OrganizationalUnitBannerProps,
   OrganizationalUnitSuspendedBannerOutputs,
@@ -81,10 +85,13 @@ const { ui } = useUiDesign();
 const { toDate } = useCommonMapper();
 
 const startDate = computed(() =>
-  toDate(props.organizationalUnitStatus.suspensionPeriod?.start)
+  toDate(
+    props.organizationalUnitStatus.suspensionPeriod?.start,
+    DATE_FORMAT_KEY
+  )
 );
 const endDate = computed(() =>
-  toDate(props.organizationalUnitStatus.suspensionPeriod?.end)
+  toDate(props.organizationalUnitStatus.suspensionPeriod?.end, DATE_FORMAT_KEY)
 );
 const contentI18nKey = computed(() =>
   props.organizationalUnitStatus.suspensionPeriod?.end != null

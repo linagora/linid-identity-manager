@@ -36,9 +36,6 @@ const toDateMock = vi.fn((value) => (value ? `formatted(${value})` : '-'));
 vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: () => ({ t: tMock }),
   useUiDesign: () => ({ ui: uiMock }),
-}));
-
-vi.mock('src/composables/useCommonMapper', () => ({
   useCommonMapper: () => ({ toDate: toDateMock }),
 }));
 
@@ -89,7 +86,10 @@ describe('Test component: OrganizationalUnitSuspendedBanner', () => {
         props: { organizationalUnitStatus: buildStatus() },
       });
       expect(wrapper.vm.startDate).toBe('formatted(2026-05-01T00:00:00Z)');
-      expect(toDateMock).toHaveBeenCalledWith('2026-05-01T00:00:00Z');
+      expect(toDateMock).toHaveBeenCalledWith(
+        '2026-05-01T00:00:00Z',
+        'application.dateFormat'
+      );
     });
 
     it('should format an absent end as "-"', () => {

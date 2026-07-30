@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import { useCommonMapper } from '@linagora/linid-im-front-corelib';
 import type {
   Account,
   AccountDeactivationRecord,
@@ -35,6 +35,7 @@ import type {
   AccountSuspensionRecord,
   AccountValidityRecord,
 } from 'src/types/accounts';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 
 /**
  * Mapper for accounts-related data transformations.
@@ -59,8 +60,8 @@ export function useAccountMapper() {
       email: account.email,
       createdBy: account.createdBy,
       updatedBy: account.updatedBy,
-      insertDate: toDate(account.insertDate),
-      updateDate: toDate(account.updateDate),
+      insertDate: toDate(account.insertDate, DATE_FORMAT_KEY),
+      updateDate: toDate(account.updateDate, DATE_FORMAT_KEY),
     };
   };
 
@@ -94,8 +95,9 @@ export function useAccountMapper() {
   ): AccountSuspensionRecord => {
     return {
       suspensionPeriod: {
-        start: toDateISO(formData.suspensionPeriodStart) || null,
-        end: toDateISO(formData.suspensionPeriodEnd) || null,
+        start:
+          toDateISO(formData.suspensionPeriodStart, DATE_FORMAT_KEY) || null,
+        end: toDateISO(formData.suspensionPeriodEnd, DATE_FORMAT_KEY) || null,
       },
       reason: formData.statusReason || '',
       subreason: formData.statusSubreason || '',
@@ -114,7 +116,7 @@ export function useAccountMapper() {
     formData: AccountStatusForm
   ): AccountDeactivationRecord => {
     return {
-      deactivationAt: toDateISO(formData.validityPeriodEnd),
+      deactivationAt: toDateISO(formData.validityPeriodEnd, DATE_FORMAT_KEY),
       reason: formData.statusReason || '',
       subreason: formData.statusSubreason || '',
       comment: formData.statusComment || null,
@@ -134,7 +136,7 @@ export function useAccountMapper() {
       comment: formData.statusComment || '',
     };
 
-    const validityEnd = toDateISO(formData.validityPeriodEnd);
+    const validityEnd = toDateISO(formData.validityPeriodEnd, DATE_FORMAT_KEY);
     if (validityEnd) {
       record.validityEnd = validityEnd;
     }
@@ -152,7 +154,7 @@ export function useAccountMapper() {
     formData: AccountStatusForm
   ): AccountValidityRecord => {
     return {
-      validityStart: toDateISO(formData.validityPeriodStart),
+      validityStart: toDateISO(formData.validityPeriodStart, DATE_FORMAT_KEY),
     };
   };
 
@@ -168,11 +170,14 @@ export function useAccountMapper() {
     accountStatus: AccountStatus
   ): AccountStatusForm => {
     return {
-      validityPeriodStart: toDate(accountStatus.validityPeriod?.start) || null,
-      validityPeriodEnd: toDate(accountStatus.validityPeriod?.end) || null,
+      validityPeriodStart:
+        toDate(accountStatus.validityPeriod?.start, DATE_FORMAT_KEY) || null,
+      validityPeriodEnd:
+        toDate(accountStatus.validityPeriod?.end, DATE_FORMAT_KEY) || null,
       suspensionPeriodStart:
-        toDate(accountStatus.suspensionPeriod?.start) || null,
-      suspensionPeriodEnd: toDate(accountStatus.suspensionPeriod?.end) || null,
+        toDate(accountStatus.suspensionPeriod?.start, DATE_FORMAT_KEY) || null,
+      suspensionPeriodEnd:
+        toDate(accountStatus.suspensionPeriod?.end, DATE_FORMAT_KEY) || null,
     };
   };
 

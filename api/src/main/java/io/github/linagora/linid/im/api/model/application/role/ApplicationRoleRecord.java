@@ -24,22 +24,23 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.application;
+package io.github.linagora.linid.im.api.model.application.role;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Request payload representing a role exposed by an application.
+ * Request payload for creating or updating an application role.
  *
- * @param name        unique human-readable name of the role
+ * @param name        human-readable name of the role, unique within the application
  * @param description optional free-text description of the role
  */
-@Schema(description = "Request payload representing a role exposed by an application")
+@Schema(description = "Request payload for creating or updating an application role")
 public record ApplicationRoleRecord(
     @NotBlank @Schema(description = "Name of the role", example = "admin")
     String name,
-    @Schema(description = "Optional description of the role", example = "Grants full administrative access")
+
+    @Schema(description = "Free-text description of the role", example = "Grants full administrative access")
     String description
 ) {
 }

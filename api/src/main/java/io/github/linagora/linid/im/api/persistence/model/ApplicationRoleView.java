@@ -35,8 +35,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -44,105 +42,55 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 /**
- * Entity with enriched application information, mapped to the {@code applications_view} database view.
+ * Entity with enriched application role information, mapped to the {@code application_roles_view} database view.
  *
  * <p>Provides {@code createdBy} and {@code updatedBy} resolved to the full name of the referenced account,
  * along with {@code insertDate} and {@code updateDate}, inherited from {@link AbstractViewEntity}.</p>
  */
 @Entity
 @Immutable
-@Table(name = "applications_view")
+@Table(name = "application_roles_view")
 @Data
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 @QueryFilter
-public class ApplicationView extends AbstractViewEntity {
+public class ApplicationRoleView extends AbstractViewEntity {
 
     /**
-     * Unique identifier of the application (UUID).
+     * Unique identifier of the application role (UUID).
      */
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "app_id")
+    @Column(name = "aro_id")
     @FilterType(type = UUID.class)
-    @QueryFilterField(type = UUID.class, description = "Application unique identifier")
+    @QueryFilterField(type = UUID.class, description = "Application role unique identifier")
     private UUID id;
 
     /**
-     * Functional unique identifier of the application.
+     * Identifier of the application the role belongs to.
      */
-    @Column(name = "code", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Functional unique identifier of the application")
-    private String code;
+    @Column(name = "app_id")
+    @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class, description = "Identifier of the application the role belongs to")
+    private UUID applicationId;
 
     /**
-     * Human-readable name of the application.
+     * Human-readable name of the role, unique within a given application.
      */
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Human-readable name of the application")
+    @QueryFilterField(type = String.class, description = "Name of the role")
     private String name;
 
     /**
-     * Optional free-text description of the application.
+     * Free-text description of the role.
      */
     @Column(name = "description")
     @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text description of the application")
+    @QueryFilterField(type = String.class, description = "Free-text description of the role")
     private String description;
-
-    /**
-     * Type of the application.
-     */
-    @Column(name = "type", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Type of the application")
-    private String type;
-
-    /**
-     * Template used to generate the claims exposed to the application.
-     */
-    @Column(name = "claims_template", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Template used to generate the claims of the application")
-    private String claimsTemplate;
-
-    /**
-     * Optional provisioning or transformation script associated with the application.
-     */
-    @Column(name = "script")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Provisioning or transformation script of the application")
-    private String script;
-
-    /**
-     * SHA-256 checksum computed from the script. {@code null} when no script is defined.
-     */
-    @Column(name = "script_checksum")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Checksum computed from the application script")
-    private String scriptChecksum;
-
-    /**
-     * Optional date and time when the application script was deployed on OPA. {@code null} when the
-     * application has not yet been deployed or requires redeployment.
-     */
-    @Column(name = "deployed_at")
-    @FilterType(type = Date.class)
-    @QueryFilterField(type = Date.class, description = "Date when the application script was deployed on OPA")
-    private OffsetDateTime deployedAt;
-
-    /**
-     * JSONB configuration of the application.
-     */
-    @Column(name = "configuration", columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    private String configuration;
 }

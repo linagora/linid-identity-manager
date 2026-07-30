@@ -62,3 +62,24 @@
 .generic-details-page .information-card .q-icon {
   opacity: 0.75;
 }
+
+.generic-details-page .generic-editable-table-card {
+  background: transparent;
+}
+
+.generic-details-page .generic-editable-table-card > .q-card__section:first-child {
+  padding: 0 0 8px;
+}
+
+.generic-details-page .generic-editable-table-card > .q-card__section:last-child {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.generic-details-page .generic-editable-table-card--title {
+  padding-left: 12px;
+  border-left: 4px solid var(--q-primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+}

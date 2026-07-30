@@ -7,6 +7,46 @@
   "i18nRemote": "catalogUI/EmptyI18n",
   "apiEndpoint": "applications",
   "basePath": "/applications",
+  "zones": [
+    {
+      "zone": "moduleApplicationDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "rowKey": "id",
+        "columns": [
+          { "name": "name", "label": "columns.name", "field": "name", "align": "left" },
+          {
+            "name": "description",
+            "label": "columns.description",
+            "field": "description",
+            "align": "left"
+          }
+        ],
+        "formFields": [
+          {
+            "name": "name",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "description",
+            "type": "String",
+            "input": "TextArea",
+            "required": false,
+            "inputSettings": {}
+          }
+        ],
+        "endpoints": {
+          "find": "/applications/{{ entity.id }}/roles",
+          "create": "/applications/{{ entity.id }}/roles",
+          "update": "/applications/{{ entity.id }}/roles/{{ item.id }}",
+          "delete": "/applications/{{ entity.id }}/roles/{{ item.id }}"
+        }
+      }
+    }
+  ],
   "options": {
     "layout": "catalogUI/BaseLayout",
     "page": "catalogUI/GenericDetailsPage",

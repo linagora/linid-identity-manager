@@ -943,6 +943,72 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Rôles",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "loadError": "Impossible de charger les rôles de l'application. Veuillez réessayer plus tard.",
+      "createSuccess": "Rôle créé avec succès.",
+      "createError": "Impossible de créer le rôle. Veuillez réessayer plus tard.",
+      "updateSuccess": "Rôle modifié avec succès.",
+      "updateError": "Impossible de modifier le rôle. Veuillez réessayer plus tard.",
+      "deleteSuccess": "Rôle supprimé avec succès.",
+      "deleteError": "Impossible de supprimer le rôle. Veuillez réessayer plus tard.",
+      "columns": {
+        "name": "Nom",
+        "description": "Description"
+      },
+      "ButtonsCard": {
+        "add": "Ajouter un rôle"
+      },
+      "CreateFormDialog": {
+        "title": "Ajouter un rôle",
+        "ButtonsCard": {
+          "confirm": "Ajouter",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "name": {
+            "label": "Nom",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Modifier le rôle {name}",
+        "ButtonsCard": {
+          "confirm": "Enregistrer",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "name": {
+            "label": "Nom",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Supprimer le rôle {name}",
+        "content": "Voulez-vous vraiment supprimer le rôle {name} ? Cette action est irréversible.",
+        "ButtonsCard": {
+          "confirm": "Supprimer",
+          "cancel": "Annuler"
+        }
+      },
+      "GenericEntityTable": {
+        "noData": "Aucun rôle pour cette application."
+      }
     }
   },
   "AccountDeactivatedBanner": {

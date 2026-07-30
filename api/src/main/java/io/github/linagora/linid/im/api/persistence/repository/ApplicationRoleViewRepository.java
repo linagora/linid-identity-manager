@@ -24,40 +24,30 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.application;
+package io.github.linagora.linid.im.api.persistence.repository;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import java.io.Serializable;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleView;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Data Transfer Object representing a role exposed by an application, stored as a JSONB object in the application
- * {@code roles} list.
+ * Spring Data JPA repository for {@link ApplicationRoleView}.
  *
- * <p>Implements {@link Serializable} because the JSONB mapping performed by hypersistence-utils requires entity
- * attribute values to be serializable.</p>
+ * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
+ * via {@code spring-query-filter} specifications.</p>
  */
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Schema(description = "Role exposed by an application")
-public class ApplicationRoleDTO implements Serializable {
+public interface ApplicationRoleViewRepository extends JpaRepository<ApplicationRoleView, UUID>,
+    JpaSpecificationExecutor<ApplicationRoleView> {
 
     /**
-     * Unique human-readable name of the role.
+     * Retrieves an {@link ApplicationRoleView} by its identifier scoped to the given application.
+     *
+     * @param id            the role identifier
+     * @param applicationId the identifier of the owning application
+     * @return an {@link Optional} containing the matching {@link ApplicationRoleView} if found,
+     * or {@link Optional#empty()} otherwise
      */
-    @NotBlank
-    @Schema(description = "Name of the role", example = "admin")
-    private String name;
-
-    /**
-     * Optional free-text description of the role.
-     */
-    @Schema(description = "Optional description of the role", example = "Grants full administrative access")
-    private String description;
+    Optional<ApplicationRoleView> findByIdAndApplicationId(UUID id, UUID applicationId);
 }

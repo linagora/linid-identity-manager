@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
-import io.github.linagora.linid.im.api.model.application.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
@@ -35,7 +34,6 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -88,10 +86,8 @@ public interface ApplicationService {
     /**
      * Updates the application with the given identifier.
      *
-     * <p>All fields of the record are applied except the roles (managed through
-     * {@link #updateRoles}). The {@code script}, its {@code scriptChecksum}, the {@code deployedAt}
-     * date and the {@code configuration} are left untouched, as they are managed by a separate
-     * process.</p>
+     * <p>The {@code script}, its {@code scriptChecksum}, the {@code deployedAt} date and the
+     * {@code configuration} are left untouched, as they are managed by a separate process.</p>
      *
      * @param userPrincipal the authenticated user
      * @param id            the application UUID
@@ -99,16 +95,6 @@ public interface ApplicationService {
      * @return the updated application entity
      */
     Application update(UserPrincipal userPrincipal, UUID id, ApplicationRecord application);
-
-    /**
-     * Updates the roles of the application with the given identifier.
-     *
-     * @param userPrincipal the authenticated user
-     * @param id            the application UUID
-     * @param roles         the new full list of roles (replaces the existing one)
-     * @return the updated application entity
-     */
-    Application updateRoles(UserPrincipal userPrincipal, UUID id, List<ApplicationRoleRecord> roles);
 
     /**
      * Deletes an application by its unique identifier.

@@ -24,58 +24,55 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.application;
+package io.github.linagora.linid.im.api.model.application.role;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.Application;
-import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRole;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleView;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 /**
- * MapStruct mapper converting an {@link ApplicationRecord} into an {@link Application} entity, and
- * {@link Application} / {@link ApplicationView} entities into their {@link ApplicationDTO} /
- * {@link ApplicationViewDTO} representations.
+ * MapStruct mapper converting an {@link ApplicationRoleRecord} into an {@link ApplicationRole}
+ * entity, and {@link ApplicationRole} / {@link ApplicationRoleView} entities into their
+ * {@link ApplicationRoleDTO} / {@link ApplicationRoleViewDTO} representations.
  */
 @Mapper(componentModel = "spring")
-public interface ApplicationMapper {
+public interface ApplicationRoleMapper {
 
     /**
-     * Creates a new {@link Application} entity from an {@link ApplicationRecord} and the calling principal.
+     * Creates a new {@link ApplicationRole} entity from an {@link ApplicationRoleRecord} and the
+     * calling principal.
      *
-     * <p>Generated and externally-managed fields ({@code id}, {@code script}, {@code scriptChecksum},
-     * {@code deployedAt}, {@code configuration}, {@code insertDate}, {@code updateDate}) are left unset:
-     * {@code script}/{@code scriptChecksum}/{@code deployedAt}/{@code configuration} are managed by a
-     * separate process. The principal's identifier feeds {@code createdBy} and {@code updatedBy}.</p>
+     * <p>Generated and service-managed fields ({@code id}, {@code applicationId}, {@code insertDate},
+     * {@code updateDate}) are left unset: {@code applicationId} is derived from the request path. The
+     * principal's identifier feeds {@code createdBy} and {@code updatedBy}.</p>
      *
      * @param record        the creation request record
      * @param userPrincipal the authenticated principal performing the creation
-     * @return a partially populated {@link Application} entity
+     * @return a partially populated {@link ApplicationRole} entity
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "script", ignore = true)
-    @Mapping(target = "scriptChecksum", ignore = true)
-    @Mapping(target = "deployedAt", ignore = true)
-    @Mapping(target = "configuration", ignore = true)
+    @Mapping(target = "applicationId", ignore = true)
     @Mapping(target = "insertDate", ignore = true)
     @Mapping(target = "updateDate", ignore = true)
     @Mapping(target = "createdBy", source = "userPrincipal.id")
     @Mapping(target = "updatedBy", source = "userPrincipal.id")
-    Application toEntity(ApplicationRecord record, UserPrincipal userPrincipal);
+    ApplicationRole toEntity(ApplicationRoleRecord record, UserPrincipal userPrincipal);
 
     /**
-     * Converts an {@link Application} entity to an {@link ApplicationDTO}.
+     * Converts an {@link ApplicationRole} entity to an {@link ApplicationRoleDTO}.
      *
-     * @param application the application entity
+     * @param applicationRole the application role entity
      * @return the corresponding DTO
      */
-    ApplicationDTO toDTO(Application application);
+    ApplicationRoleDTO toDTO(ApplicationRole applicationRole);
 
     /**
-     * Converts an {@link ApplicationView} entity to an {@link ApplicationViewDTO}.
+     * Converts an {@link ApplicationRoleView} entity to an {@link ApplicationRoleViewDTO}.
      *
-     * @param applicationView the application view entity
+     * @param applicationRoleView the application role view entity
      * @return the corresponding DTO
      */
-    ApplicationViewDTO toDTO(ApplicationView applicationView);
+    ApplicationRoleViewDTO toDTO(ApplicationRoleView applicationRoleView);
 }

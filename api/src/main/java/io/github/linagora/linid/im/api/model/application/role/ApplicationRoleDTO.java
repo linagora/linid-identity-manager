@@ -24,41 +24,73 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.application;
+package io.github.linagora.linid.im.api.model.application.role;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * Request payload for creating or updating an application.
- *
- * <p>The {@code roles} are intentionally omitted: they are managed as a sub-resource, through the
- * {@code /applications/{applicationId}/roles} endpoints. The {@code script}, its {@code scriptChecksum},
- * the {@code deployedAt} date and the {@code configuration} are managed by a separate process and
- * are therefore not part of the request.</p>
- *
- * @param code           functional unique identifier of the application
- * @param name           human-readable name of the application
- * @param description     optional free-text description of the application
- * @param type           type of the application
- * @param claimsTemplate template used to generate the claims of the application
+ * Data Transfer Object representing a role exposed by an application in API responses.
  */
-@Schema(description = "Request payload for creating or updating an application")
-public record ApplicationRecord(
-    @NotBlank @Schema(description = "Functional unique identifier of the application", example = "my-app")
-    String code,
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Role exposed by an application")
+public class ApplicationRoleDTO {
 
-    @NotBlank @Schema(description = "Human-readable name of the application", example = "My Application")
-    String name,
+    /**
+     * Unique identifier of the application role.
+     */
+    @Schema(description = "Unique identifier of the application role",
+        example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID id;
 
-    @Schema(description = "Free-text description of the application", example = "Internal HR application")
-    String description,
+    /**
+     * Identifier of the application the role belongs to.
+     */
+    @Schema(description = "Identifier of the application the role belongs to",
+        example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID applicationId;
 
-    @NotBlank @Schema(description = "Type of the application", example = "OIDC")
-    String type,
+    /**
+     * Human-readable name of the role, unique within the application.
+     */
+    @Schema(description = "Name of the role", example = "admin")
+    private String name;
 
-    @NotBlank @Schema(description = "Template used to generate the claims of the application",
-        example = "{ \"sub\": \"{{ id }}\" }")
-    String claimsTemplate
-) {
+    /**
+     * Optional free-text description of the role.
+     */
+    @Schema(description = "Free-text description of the role", example = "Grants full administrative access")
+    private String description;
+
+    /**
+     * Identifier of the account that created this record.
+     */
+    @Schema(description = "Creator of the record", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID createdBy;
+
+    /**
+     * Identifier of the account that last updated this record.
+     */
+    @Schema(description = "Last updater of the record", example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID updatedBy;
+
+    /**
+     * Timestamp when the record was created.
+     */
+    @Schema(description = "Record creation date")
+    private OffsetDateTime insertDate;
+
+    /**
+     * Timestamp when the record was last updated.
+     */
+    @Schema(description = "Record last update date")
+    private OffsetDateTime updateDate;
 }

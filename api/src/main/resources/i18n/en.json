@@ -50,6 +50,8 @@
   "error.application_rule.not_found": "Application rule not found: {id}",
   "error.application_rule.code.already_exists": "Application rule already exists for code '{code}'",
   "error.application_rule.priority.already_exists": "Application rule already exists for priority '{priority}'",
+  "error.application_role.not_found": "Application role not found: {id}",
+  "error.application_role.name.already_exists": "Application role already exists for name '{name}'",
   "error.opa.template.not_readable": "Unable to read the OPA policy template (location: {location})",
   "error.opa.policy.publish_failed": "Unable to publish the OPA policy to the OPA server (policyId: {policyId})",
   "error.user_preference.not_found": "User preference not found: {key}"

@@ -943,6 +943,72 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Roles",
+      "editButton": "Edit",
+      "deleteButton": "Delete",
+      "loadError": "Unable to load the application roles. Please try again later.",
+      "createSuccess": "Role created successfully.",
+      "createError": "Unable to create the role. Please try again later.",
+      "updateSuccess": "Role updated successfully.",
+      "updateError": "Unable to update the role. Please try again later.",
+      "deleteSuccess": "Role deleted successfully.",
+      "deleteError": "Unable to delete the role. Please try again later.",
+      "columns": {
+        "name": "Name",
+        "description": "Description"
+      },
+      "ButtonsCard": {
+        "add": "Add a role"
+      },
+      "CreateFormDialog": {
+        "title": "Add a role",
+        "ButtonsCard": {
+          "confirm": "Add",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "name": {
+            "label": "Name",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Edit the role {name}",
+        "ButtonsCard": {
+          "confirm": "Save",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "name": {
+            "label": "Name",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Delete the role {name}",
+        "content": "Do you really want to delete the role {name}? This action is irreversible.",
+        "ButtonsCard": {
+          "confirm": "Delete",
+          "cancel": "Cancel"
+        }
+      },
+      "GenericEntityTable": {
+        "noData": "No role for this application."
+      }
     }
   },
   "AccountDeactivatedBanner": {

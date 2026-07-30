@@ -25,7 +25,7 @@
  */
 
 import type { MenuItem } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import { useCommonMapper } from '@linagora/linid-im-front-corelib';
 import type {
   OrganizationalUnitLifecycleAction,
   OrganizationalUnitLifecycleUi,

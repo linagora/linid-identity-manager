@@ -32,3 +32,6 @@ export interface Period {
   /** End date of the period in ISO 8601 format (e.g. "2026-04-23T18:00:00Z"). Can be null if not defined. */
   end: string | null;
 }
+
+/** I18n key of the application-wide date format, consumed by useCommonMapper's toDate/toDateISO. */
+export const DATE_FORMAT_KEY = 'application.dateFormat';

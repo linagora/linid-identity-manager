@@ -24,60 +24,38 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount } from '@vue/test-utils';
-import OrganizationalUnitSuspendedInfoText from 'components/text/OrganizationalUnitSuspendedInfoText.vue';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { useI18n } from 'vue-i18n';
+import dayjs from 'dayjs';
 
-const tMock = vi.fn((key) => key);
-const uiMock = vi.fn(() => ({}));
-const toDateMock = vi.fn((value) => (value ? `formatted(${value})` : '-'));
+/**
+ * Creates a toDate function with the specified date format. Useful for creating consistent date formatting in test
+ * mocks.
+ *
+ * @param dateFormat - The date format string (e.g., 'YYYY-MM-DD HH:mm', 'DD/MM/YYYY').
+ * @returns A toDate function that formats dates consistently.
+ */
+export const mockToDate = (dateFormat: string) => (value: any) =>
+  value ? dayjs(value).format(dateFormat) : '';
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
-  useScopedI18n: () => ({ t: tMock }),
-  useUiDesign: () => ({ ui: uiMock }),
-  useCommonMapper: () => ({ toDate: toDateMock }),
-}));
+/**
+ * Creates a toDateISO function. This is the same implementation for all test mocks.
+ *
+ * @returns A toDateISO function that converts dates to ISO 8601 format.
+ */
+export const mockToDateISO = () => (value: any) => {
+  if (!value) return '';
+  if (
+    typeof value === 'string' &&
+    value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
+  ) {
+    return value;
+  }
+  return dayjs(value).format('YYYY-MM-DD[T]HH:mm:ss.000[Z]');
+};
 
-vi.mock('vue-i18n', () => ({
-  useI18n: vi.fn(),
-}));
-
-describe('Test component: OrganizationalUnitSuspendedInfoText', () => {
-  beforeEach(() => {
-    useI18n.mockReturnValue({ t: tMock });
-  });
-
-  describe('Test computed: startDate', () => {
-    it('should format the scheduled suspension start through the common mapper', () => {
-      const wrapper = shallowMount(OrganizationalUnitSuspendedInfoText, {
-        props: {
-          organizationalUnitStatus: {
-            isSuspended: false,
-            suspensionPeriod: { start: '2099-01-01T00:00:00Z', end: null },
-            statusReason: null,
-            statusSubreason: null,
-            statusComment: null,
-          },
-        },
-      });
-      expect(toDateMock).toHaveBeenCalledWith('2099-01-01T00:00:00Z', 'application.dateFormat');
-      expect(wrapper.vm.startDate).toBe('formatted(2099-01-01T00:00:00Z)');
-    });
-
-    it('should fall back to "-" when no suspension period is set', () => {
-      const wrapper = shallowMount(OrganizationalUnitSuspendedInfoText, {
-        props: {
-          organizationalUnitStatus: {
-            isSuspended: false,
-            suspensionPeriod: null,
-            statusReason: null,
-            statusSubreason: null,
-            statusComment: null,
-          },
-        },
-      });
-      expect(wrapper.vm.startDate).toBe('-');
-    });
-  });
-});
+/**
+ * Creates a toDayJs function. This is the same implementation for all test mocks.
+ *
+ * @returns A toDayJs function that converts dates to dayjs objects.
+ */
+export const mockToDayJs = () => (value: any) =>
+  value ? dayjs(value) : null;

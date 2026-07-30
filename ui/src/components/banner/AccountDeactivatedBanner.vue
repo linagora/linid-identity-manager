@@ -62,12 +62,16 @@ import type {
   LinidQBtnProps,
   LinidQIconProps,
 } from '@linagora/linid-im-front-corelib';
-import { useScopedI18n, useUiDesign } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import {
+  useCommonMapper,
+  useScopedI18n,
+  useUiDesign,
+} from '@linagora/linid-im-front-corelib';
 import type {
   AccountBannerProps,
   AccountDeactivatedBannerOutputs,
 } from 'src/types/accountBannerProps';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
 const props = defineProps<AccountBannerProps>();
@@ -81,7 +85,7 @@ const { ui } = useUiDesign();
 const { toDate } = useCommonMapper();
 
 const deactivatedAt = computed(() =>
-  toDate(props.accountStatus.validityPeriod.end)
+  toDate(props.accountStatus.validityPeriod.end, DATE_FORMAT_KEY)
 );
 const uiProps = {
   banner: ui<LinidQBannerProps>(localUiNamespace, 'q-banner'),

@@ -34,6 +34,11 @@ import {
 } from 'src/services/AccountService';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountDetailsPage from '../../../src/pages/AccountDetailsPage.vue';
+import {
+  mockToDate,
+  mockToDateISO,
+  mockToDayJs,
+} from '../helpers/mockCommonMapper';
 
 const mockedGetAccountById = vi.mocked(getAccountById);
 const mockedSuspendAccount = vi.mocked(suspendAccount);
@@ -67,9 +72,17 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useScopedI18n: () => ({
     t: mockScopedT,
   }),
+  useUiDesign: () => ({
+    ui: vi.fn(() => ({})),
+  }),
   getI18nInstance: vi.fn(() => ({ global: { t: mockGlobalT } })),
   merge: vi.fn((a, b) => ({ ...a, ...b })),
   uiEventSubject: { next: mockUiEventSubjectNext },
+   useCommonMapper: () => ({
+     toDate: mockToDate('DD/MM/YYYY'),
+     toDateISO: mockToDateISO(),
+     toDayJs: mockToDayJs(),
+   }),
 }));
 
 vi.mock('axios', () => ({

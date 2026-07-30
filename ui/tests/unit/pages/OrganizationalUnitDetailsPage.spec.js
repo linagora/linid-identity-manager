@@ -31,8 +31,12 @@ import {
   suspendOrganizationalUnit,
 } from 'src/services/OrganizationalUnitService';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ref } from 'vue';
 import OrganizationalUnitDetailsPage from '../../../src/pages/OrganizationalUnitDetailsPage.vue';
+import {
+  mockToDate,
+  mockToDateISO,
+  mockToDayJs,
+} from '../helpers/mockCommonMapper';
 
 const mockedGetById = vi.mocked(getOrganizationalUnitById);
 const mockedSuspend = vi.mocked(suspendOrganizationalUnit);
@@ -41,7 +45,6 @@ const mockNotify = vi.fn();
 const mockUiEventNext = vi.fn();
 
 const OU_ID = 'test-ou-id';
-
 
 const mockRouter = {
   push: vi.fn(),
@@ -61,6 +64,11 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   }),
   useUiDesign: () => ({
     ui: vi.fn(() => ({})),
+  }),
+  useCommonMapper: () => ({
+    toDate: mockToDate('YYYY/MM/DD'),
+    toDateISO: mockToDateISO(),
+    toDayJs: mockToDayJs(),
   }),
 }));
 

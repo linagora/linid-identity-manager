@@ -55,6 +55,9 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   useUiDesign: () => ({
     ui: vi.fn(() => ({})),
   }),
+  useCommonMapper: () => ({
+    toEmptyRecord: () => ({ name: '', type: '' }),
+  }),
 }));
 
 vi.mock('src/boot/config', () => ({
@@ -64,12 +67,6 @@ vi.mock('src/boot/config', () => ({
       { name: 'type', type: 'String', input: 'List', required: true },
     ],
   },
-}));
-
-vi.mock('src/composables/useCommonMapper', () => ({
-  useCommonMapper: () => ({
-    toEmptyRecord: () => ({ name: '', type: '' }),
-  }),
 }));
 
 vi.mock('vue-i18n', () => ({

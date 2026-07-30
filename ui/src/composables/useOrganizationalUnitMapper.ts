@@ -24,7 +24,8 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from 'src/composables/useCommonMapper';
+import { useCommonMapper } from '@linagora/linid-im-front-corelib';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
   OrganizationalUnit,
   OrganizationalUnitDTO,
@@ -80,8 +81,8 @@ export function useOrganizationalUnitMapper() {
       type: dto.type,
       createdBy: dto.createdBy,
       updatedBy: dto.updatedBy,
-      insertDate: toDate(dto.insertDate),
-      updateDate: toDate(dto.updateDate),
+      insertDate: toDate(dto.insertDate, DATE_FORMAT_KEY),
+      updateDate: toDate(dto.updateDate, DATE_FORMAT_KEY),
     };
   };
 
@@ -113,8 +114,8 @@ export function useOrganizationalUnitMapper() {
   ): OrganizationalUnitSuspensionRecord => {
     return {
       suspensionPeriod: {
-        start: toDateISO(form.start) || null,
-        end: toDateISO(form.end) || null,
+        start: toDateISO(form.start, DATE_FORMAT_KEY) || null,
+        end: toDateISO(form.end, DATE_FORMAT_KEY) || null,
       },
       reason: form.reason || '',
       subreason: form.subreason || '',
@@ -149,8 +150,8 @@ export function useOrganizationalUnitMapper() {
     status: OrganizationalUnitStatus
   ): OrganizationalUnitStatusForm => {
     return {
-      start: toDate(status.suspensionPeriod?.start) || null,
-      end: toDate(status.suspensionPeriod?.end) || null,
+      start: toDate(status.suspensionPeriod?.start, DATE_FORMAT_KEY) || null,
+      end: toDate(status.suspensionPeriod?.end, DATE_FORMAT_KEY) || null,
     };
   };
 

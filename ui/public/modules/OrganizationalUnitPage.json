@@ -92,7 +92,11 @@
         "name": "insertDate",
         "field": "insertDate",
         "sortable": true,
-        "align": "left"
+        "align": "left",
+        "formatter": "toDate",
+        "formatOptions": {
+          "formatKey": "application.dateFormat"
+        }
       },
       {
         "label": "columns.actions",

@@ -198,9 +198,59 @@
       }
     }
   },
+  "moduleApplicationCreationPage": {
+    "title": "Création d'une application",
+    "error": "Erreur pendant la requête",
+    "success": "Application créée avec succès.",
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "confirm": "Créer"
+    },
+    "formSections": {
+      "general": {
+        "title": "Informations générales"
+      },
+      "claims": {
+        "title": "Gestion des claims"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Doit être unique.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "name": {
+        "label": "Nom *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "type": {
+        "label": "Type *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "description": {
+        "label": "Description"
+      },
+      "claimsTemplate": {
+        "label": "Modèle de génération des claims *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      }
+    }
+  },
   "moduleApplicationsPage": {
     "NavigationMenu": {
       "label": "Applications"
+    },
+    "ButtonsCard": {
+      "create": "Ajouter une application"
     },
     "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
     "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",

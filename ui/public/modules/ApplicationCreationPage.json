@@ -1,0 +1,53 @@
+{
+  "instanceId": "moduleApplicationCreationPage",
+  "remoteName": "catalogUI",
+  "entity": "applications",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "applications",
+  "basePath": "/new-application",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericCreationPage",
+    "pagePath": "",
+    "parentPath": "/applications",
+    "idKey": "id",
+    "formSections": [
+      {
+        "id": "general",
+        "fields": [
+          {
+            "name": "code",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "name",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "type",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "description",
+            "input": "TextArea"
+          }
+        ]
+      },
+      {
+        "id": "claims",
+        "fields": [
+          {
+            "name": "claimsTemplate",
+            "input": "TextArea",
+            "required": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -198,9 +198,59 @@
       }
     }
   },
+  "moduleApplicationCreationPage": {
+    "title": "Create Application",
+    "error": "Error while processing the request.",
+    "success": "Application created successfully.",
+    "ButtonsCard": {
+      "cancel": "Back",
+      "confirm": "Create"
+    },
+    "formSections": {
+      "general": {
+        "title": "General Information"
+      },
+      "claims": {
+        "title": "Claims Management"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "name": {
+        "label": "Name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "type": {
+        "label": "Type *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "description": {
+        "label": "Description"
+      },
+      "claimsTemplate": {
+        "label": "Claims Generation Template *",
+        "validation": {
+          "required": "This field is required."
+        }
+      }
+    }
+  },
   "moduleApplicationsPage": {
     "NavigationMenu": {
       "label": "Applications"
+    },
+    "ButtonsCard": {
+      "create": "Add new application"
     },
     "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
     "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",

@@ -291,7 +291,7 @@
           "separator": "ou"
         },
         "name": {
-          "type": "Name",
+          "type": "Nom",
           "separator": "ou"
         },
         "description": {
@@ -315,7 +315,7 @@
         "title": "Filtrer par:",
         "columnFilter": {
           "code": "Code",
-          "name": "Name",
+          "name": "Nom",
           "description": "Description",
           "type": "Type",
           "createdBy": "Créé par",

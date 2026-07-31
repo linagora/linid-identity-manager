@@ -245,6 +245,53 @@
       }
     }
   },
+  "moduleApplicationEditionPage": {
+    "title": "Edit Application",
+    "error": "Unable to load the application. Please try again later.",
+    "success": "Application updated successfully.",
+    "ButtonsCard": {
+      "cancel": "Back",
+      "confirm": "Save"
+    },
+    "formSections": {
+      "general": {
+        "title": "General Information"
+      },
+      "claims": {
+        "title": "Claims Management"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "name": {
+        "label": "Name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "type": {
+        "label": "Type *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "description": {
+        "label": "Description"
+      },
+      "claimsTemplate": {
+        "label": "Claims Generation Template *",
+        "validation": {
+          "required": "This field is required."
+        }
+      }
+    }
+  },
   "moduleApplicationsPage": {
     "NavigationMenu": {
       "label": "Applications"
@@ -968,7 +1015,8 @@
     "title": "Application details",
     "error": "Unable to load the application. Please try again later.",
     "ButtonsCard": {
-      "cancel": "Back"
+      "cancel": "Back",
+      "edit": "Edit"
     },
     "sections": {
       "identity": {

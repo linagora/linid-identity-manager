@@ -2,6 +2,7 @@
   "modules": [
     "/modules/AccountsPage.json",
     "/modules/ApplicationsPage.json",
+    "/modules/ApplicationCreationPage.json",
     "/modules/OrganizationalUnitPage.json",
     "/modules/ApplicationDetailsPage.json"
   ]

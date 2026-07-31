@@ -1,0 +1,29 @@
+{
+  "moduleApplicationEditionPage": {
+    "form-section-general": {
+      "q-card": {},
+      "EntityAttributeField": {
+        "code": {
+          "q-input": {}
+        },
+        "name": {
+          "q-input": {}
+        },
+        "type": {
+          "q-input": {}
+        },
+        "description": {
+          "q-input": {}
+        }
+      }
+    },
+    "form-section-claims": {
+      "q-card": {},
+      "EntityAttributeField": {
+        "claimsTemplate": {
+          "q-input": {}
+        }
+      }
+    }
+  }
+}

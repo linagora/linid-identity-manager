@@ -57,6 +57,7 @@
     "page": "catalogUI/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/applications",
+    "editPath": "/applications/{{ entity.id }}/edit",
     "sections": [
       {
         "key": "identity",

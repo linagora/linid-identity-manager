@@ -39,6 +39,7 @@ import {
   useLinidZoneStore,
 } from '@linagora/linid-im-front-corelib';
 import { loadRemote } from '@module-federation/enhanced/runtime';
+import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
 import type { Component } from 'vue';
 import type { RouteMeta, RouteRecordRaw } from 'vue-router';
 import type { BootFileParams } from '#q-app';
@@ -384,6 +385,13 @@ export async function postInit(
   config.zones?.forEach(({ zone: zoneName, plugin, props }) => {
     linidZoneStore.registerPlugin(zoneName, plugin, props);
   });
+
+  if (config.instanceId === 'moduleApplicationDetailsPage') {
+    linidZoneStore.registerComponent(
+      'moduleApplicationDetailsPage.header.actions',
+      ExportApplicationScriptBtn
+    );
+  }
 
   return module.postInit(config);
 }

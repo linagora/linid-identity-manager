@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS application_roles
     app_id      UUID         NOT NULL REFERENCES applications (app_id) ON DELETE CASCADE,
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(255),
-    created_by  UUID         NOT NULL,
-    updated_by  UUID         NOT NULL,
+    created_by  UUID,
+    updated_by  UUID,
     insert_date TIMESTAMPTZ  NOT NULL DEFAULT now(),
     update_date TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT uk_application_roles_app_id_name UNIQUE (app_id, name)

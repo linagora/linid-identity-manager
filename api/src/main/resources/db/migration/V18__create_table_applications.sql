@@ -10,8 +10,8 @@ CREATE TABLE IF NOT EXISTS applications
     script_checksum TEXT,
     deployed_at     TIMESTAMPTZ,
     configuration   JSONB,
-    created_by      UUID         NOT NULL,
-    updated_by      UUID         NOT NULL,
+    created_by      UUID,
+    updated_by      UUID,
     insert_date     TIMESTAMPTZ  NOT NULL DEFAULT now(),
     update_date     TIMESTAMPTZ  NOT NULL DEFAULT now()
 );

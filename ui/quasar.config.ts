@@ -22,6 +22,7 @@ export default defineConfig((ctx) => {
       'config',
       'i18n',
       'remotes',
+      'local-components',
       'module-lifecycle',
       'theme',
       'ui-design',

@@ -9,6 +9,10 @@
   "basePath": "/applications",
   "zones": [
     {
+      "zone": "moduleApplicationDetailsPage.header.actions",
+      "component": "ExportApplicationScriptBtn"
+    },
+    {
       "zone": "moduleApplicationDetailsPage.content.after",
       "plugin": "catalogUI/GenericEditableTableCard",
       "props": {

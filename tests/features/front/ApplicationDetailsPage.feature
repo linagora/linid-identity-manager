@@ -13,13 +13,26 @@ Feature: Test Application details page display
   ## 110 Should delete a role after confirmation
   ## 111 Should display an error notification when navigating to a non-existent application
   ## 112 Should display an error notification when navigating to an application with a malformed ID
-  ## 113 Remove the application
+
+  ################## Export application script ##################
+  ## 201 Export button should be disabled
+  ## 202 Export button should be enabled
 
   Scenario: Roundtrip about Application Details
 
     ####################################################
     ################## Authentication ##################
     ####################################################
+    Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
+    And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
+      """
+      grant_type=password&username=admin&password=password&scope=openid email profile roles
+      """
+    Then  I expect status code is 200
+    And   I store 'accessToken' as '{{response.body.access_token}}' in context
+    And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
+    And   I set http header 'Content-Type' with 'application/json'
 
     Given I set the viewport size to 1920 px by 1080 px
     And I visit the '{{ env.E2E_FRONT_URL }}'
@@ -182,6 +195,46 @@ Feature: Test Application details page display
     Then I expect the HTML element '.q-notification__message' contains "Impossible de charger l'application. Veuillez réessayer plus tard."
     And I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
 
-    ## 113 Remove the application
+    ###########################################################
+    ################## Export application script ##############
+    ###########################################################
+
+    ## 201 Export button should be disabled
+    When I click on '[data-cy="see-button_{{ctx.applicationId}}"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
+    And  I expect the HTML element '[data-cy="button_export"]' to be disabled
+
+    ## 202 Export button should be enabled
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}/rules' with method 'POST' with body:
+      """
+      {
+        "code": "RULE_ADMIN_202",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": true
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'rule202Id' as '{{response.body.id}}' in context
+
+    # Regenerate policy
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}/rules/{{ctx.rule202Id}}' with method 'PUT' with body:
+      """
+      {
+        "code": "RULE_ADMIN_202",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 200
+
+    When I click on '[data-cy="button_cancel"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
+
+    When I click on '[data-cy="see-button_{{ctx.applicationId}}"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
+    And  I expect the HTML element '[data-cy="button_export"]' to be enabled
+
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}' with method 'DELETE'
     Then I expect status code is 204

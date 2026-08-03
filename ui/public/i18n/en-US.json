@@ -1018,6 +1018,11 @@
       "cancel": "Back",
       "edit": "Edit"
     },
+    "export": {
+      "label": "Export Script",
+      "success": "Script exported successfully.",
+      "error": "Error exporting script."
+    },
     "sections": {
       "identity": {
         "EntityDetailsCard": {

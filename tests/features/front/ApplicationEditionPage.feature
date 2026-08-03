@@ -130,7 +130,7 @@ Feature: Test Application edition page display
     And I expect current url is "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
     And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="details-section_identity"]' to be visible
-    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "new value"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "new_value"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--name"]' contains "new value"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--description"]' contains "new value"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--type"]' contains "new value"

@@ -35,6 +35,12 @@ Feature: Test API Application Role endpoints
   ## 504 Should return 400 with a bad request payload (missing required fields)
   ## 505 Should return 404 when updating a role of an unknown application
 
+  ################## System application roles (code LINID) #############
+  ## 601 Should expose the seeded Administrator role of the LINID application
+  ## 602 Should return 400 when creating a role on the LINID application
+  ## 603 Should return 400 when updating a role of the LINID application
+  ## 604 Should return 400 when deleting a role of the LINID application
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -589,3 +595,79 @@ Feature: Test API Application Role endpoints
       """
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'
+
+  ####################################################
+  ################## System application roles ########
+  ####################################################
+
+  Scenario: 601 - Should expose the seeded Administrator role of the LINID application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is "1"
+    And  I expect '{{response.body.content[0].name}}' is 'Administrator'
+    And  I expect '{{response.body.content[0].description}}' is 'System administrator role'
+
+  Scenario: 602 - Should return 400 when creating a role on the LINID application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'POST' with body:
+      """
+      {
+        "name": "Intruder",
+        "description": "Role that must never be created"
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.application_role.system_reserved'
+
+    # The seeded role must remain the only one.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is "1"
+
+  Scenario: 603 - Should return 400 when updating a role of the LINID application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidRoleId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'PUT' with body:
+      """
+      {
+        "name": "Renamed administrator",
+        "description": "Role that must never be updated"
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.application_role.system_reserved'
+
+    # The role must be left untouched.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.name}}' is 'Administrator'
+
+  Scenario: 604 - Should return 400 when deleting a role of the LINID application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidRoleId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'DELETE'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.application_role.system_reserved'
+
+    # The role must still exist.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'GET'
+    Then I expect status code is 200

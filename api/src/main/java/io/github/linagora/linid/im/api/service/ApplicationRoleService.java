@@ -45,6 +45,9 @@ public interface ApplicationRoleService {
     /**
      * Creates a new role for the given application.
      *
+     * <p>The roles of the system-reserved application are immutable: creating one is rejected with an
+     * HTTP 400.</p>
+     *
      * @param userPrincipal the authenticated user
      * @param applicationId the identifier of the owning application
      * @param role          the role creation record
@@ -90,6 +93,9 @@ public interface ApplicationRoleService {
     /**
      * Updates a role of the given application.
      *
+     * <p>The roles of the system-reserved application are immutable: updating one is rejected with an
+     * HTTP 400.</p>
+     *
      * @param userPrincipal the authenticated user
      * @param applicationId the identifier of the owning application
      * @param id            the role identifier
@@ -100,6 +106,9 @@ public interface ApplicationRoleService {
 
     /**
      * Deletes a role of the given application by its identifier.
+     *
+     * <p>The roles of the system-reserved application are immutable: deleting one is rejected with an
+     * HTTP 400.</p>
      *
      * @param userPrincipal the authenticated user
      * @param applicationId the identifier of the owning application

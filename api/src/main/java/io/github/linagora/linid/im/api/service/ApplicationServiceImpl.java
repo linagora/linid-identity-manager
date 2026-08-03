@@ -35,6 +35,7 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
+import io.github.linagora.linid.im.api.service.validation.SystemApplicationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -91,6 +92,11 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     private final ChecksumService checksumService;
 
+    /**
+     * Validator protecting the system-reserved application from any mutation.
+     */
+    private final SystemApplicationValidator systemApplicationValidator;
+
     @Override
     public Application create(final UserPrincipal userPrincipal, final ApplicationRecord application) {
         if (applicationRepository.findByCode(application.code()).isPresent()) {
@@ -140,6 +146,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                               final ApplicationRecord application) {
         var entity = findById(userPrincipal, id);
 
+        systemApplicationValidator.ensureApplicationIsMutable(entity);
+
         var specifications = new SpringQueryFilterSpecification<>(Application.class, Map.of(
             "id", List.of("not_" + id.toString()),
             "code", List.of(application.code())
@@ -164,14 +172,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
-        if (!applicationRepository.existsById(id)) {
-            throw new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.application.not_found", Map.of("id", id.toString()))
-            );
-        }
+        var entity = findById(userPrincipal, id);
 
-        applicationRepository.deleteById(id);
+        systemApplicationValidator.ensureApplicationIsMutable(entity);
+
+        applicationRepository.delete(entity);
     }
 
     @Override

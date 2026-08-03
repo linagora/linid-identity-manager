@@ -47,11 +47,13 @@
   "error.application.not_found": "Application introuvable : {id}",
   "error.application.code.already_exists": "Une application existe déjà avec le code « {code} »",
   "error.application.script.missing": "Impossible de déployer l'application {applicationId} : il n'y a aucun script dans l'application.",
+  "error.application.system_reserved": "L'application « {code} » est un enregistrement réservé au système et ne peut être ni modifiée ni supprimée.",
   "error.application_rule.not_found": "Règle d'application introuvable : {id}",
   "error.application_rule.code.already_exists": "Une règle d'application existe déjà avec le code « {code} »",
   "error.application_rule.priority.already_exists": "Une règle d'application existe déjà avec la priorité « {priority} »",
   "error.application_role.not_found": "Rôle d'application introuvable : {id}",
   "error.application_role.name.already_exists": "Un rôle d'application existe déjà avec le nom « {name} »",
+  "error.application_role.system_reserved": "Les rôles de l'application « {code} » réservée au système ne peuvent être ni créés, ni modifiés, ni supprimés.",
   "error.opa.template.not_readable": "Impossible de lire le modèle de politique OPA (emplacement : {location})",
   "error.opa.policy.publish_failed": "Impossible de publier la politique OPA sur le serveur OPA (policyId : {policyId})",
   "error.user_preference.not_found": "Préférence de l'utilisateur introuvable: {key}"

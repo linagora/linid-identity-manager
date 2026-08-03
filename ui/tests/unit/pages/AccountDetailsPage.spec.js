@@ -38,7 +38,7 @@ import {
   mockToDate,
   mockToDateISO,
   mockToDayJs,
-} from '../helpers/mockCommonMapper';
+} from '../helpers/mockCommonMapper.js';
 
 const mockedGetAccountById = vi.mocked(getAccountById);
 const mockedSuspendAccount = vi.mocked(suspendAccount);

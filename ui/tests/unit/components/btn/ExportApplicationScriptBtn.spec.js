@@ -7,7 +7,6 @@
  * LINAGORA pursuant to Section 7 of the GNU Affero General Public License.
  */
 
-import { useScopedI18n } from '@linagora/linid-im-front-corelib';
 import { shallowMount } from '@vue/test-utils';
 import ExportApplicationScriptBtn from 'src/components/btn/ExportApplicationScriptBtn.vue';
 import { exportApplicationScript } from 'src/services/ApplicationService';

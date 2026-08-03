@@ -36,7 +36,7 @@ import {
   mockToDate,
   mockToDateISO,
   mockToDayJs,
-} from '../helpers/mockCommonMapper';
+} from '../helpers/mockCommonMapper.js';
 
 const mockedGetById = vi.mocked(getOrganizationalUnitById);
 const mockedSuspend = vi.mocked(suspendOrganizationalUnit);

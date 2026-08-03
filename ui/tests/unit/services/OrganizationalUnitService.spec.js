@@ -43,7 +43,6 @@ vi.mock('boot/axios', () => ({
 
 const ROOT_UUID = '00000000-0000-4000-8000-000000000000';
 const OU_UUID = '11111111-1111-4111-8111-111111111111';
-const ACCOUNT_UUID = '22222222-2222-4222-8222-222222222222';
 
 const buildOuDTO = (overrides = {}) => ({
   id: OU_UUID,
@@ -59,27 +58,6 @@ const buildOuDTO = (overrides = {}) => ({
   statusComment: null,
   isSuspended: false,
   parents: [],
-  ...overrides,
-});
-
-const buildAccountDTO = (overrides = {}) => ({
-  id: ACCOUNT_UUID,
-  externalId: 'user1',
-  firstname: 'User',
-  lastname: 'One',
-  email: 'user1@example.com',
-  status: 'ACTIVE',
-  ...overrides,
-});
-
-const buildPage = (content, overrides = {}) => ({
-  content,
-  totalElements: content.length,
-  totalPages: 1,
-  size: 50,
-  number: 0,
-  last: true,
-  first: true,
   ...overrides,
 });
 

@@ -28,7 +28,7 @@ import { useOrganizationalUnitLifecycleUi } from 'src/composables/useOrganizatio
 import { ORGANIZATIONAL_UNIT_LIFECYCLE_ACTIONS } from 'src/types/organizationalUnitLifecycleUi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
-import { mockToDayJs } from '../helpers/mockCommonMapper';
+import { mockToDayJs } from '../helpers/mockCommonMapper.js';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: vi.fn((v) => v) }),

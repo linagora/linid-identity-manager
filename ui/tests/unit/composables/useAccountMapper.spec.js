@@ -28,10 +28,7 @@ import dayjs from 'dayjs';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
-import {
-  mockToDate,
-  mockToDateISO,
-} from '../helpers/mockCommonMapper';
+import { mockToDate, mockToDateISO } from '../helpers/mockCommonMapper';
 
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),

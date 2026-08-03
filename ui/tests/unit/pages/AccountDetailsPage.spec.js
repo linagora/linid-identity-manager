@@ -78,11 +78,11 @@ vi.mock('@linagora/linid-im-front-corelib', () => ({
   getI18nInstance: vi.fn(() => ({ global: { t: mockGlobalT } })),
   merge: vi.fn((a, b) => ({ ...a, ...b })),
   uiEventSubject: { next: mockUiEventSubjectNext },
-   useCommonMapper: () => ({
-     toDate: mockToDate('DD/MM/YYYY'),
-     toDateISO: mockToDateISO(),
-     toDayJs: mockToDayJs(),
-   }),
+  useCommonMapper: () => ({
+    toDate: mockToDate('DD/MM/YYYY'),
+    toDateISO: mockToDateISO(),
+    toDayJs: mockToDayJs(),
+  }),
 }));
 
 vi.mock('axios', () => ({

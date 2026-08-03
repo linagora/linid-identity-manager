@@ -69,10 +69,20 @@
         }
       },
       "edit-button": {
-        "q-btn": { "color": "primary", "icon": "edit", "flat": true, "dense": true }
+        "q-btn": {
+          "color": "primary",
+          "icon": "edit",
+          "flat": true,
+          "dense": true
+        }
       },
       "delete-button": {
-        "q-btn": { "color": "negative", "icon": "delete", "flat": true, "dense": true }
+        "q-btn": {
+          "color": "negative",
+          "icon": "delete",
+          "flat": true,
+          "dense": true
+        }
       },
       "generic-entity-table": {
         "q-table": { "flat": true }
@@ -83,7 +93,11 @@
         "buttons-card": {
           "q-card": { "flat": true },
           "confirm-button": {
-            "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+            "q-btn": {
+              "color": "primary",
+              "unelevated": true,
+              "outline": false
+            }
           },
           "cancel-button": { "q-btn": { "color": "negative", "outline": true } }
         }
@@ -94,7 +108,11 @@
         "buttons-card": {
           "q-card": { "flat": true },
           "confirm-button": {
-            "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+            "q-btn": {
+              "color": "primary",
+              "unelevated": true,
+              "outline": false
+            }
           },
           "cancel-button": { "q-btn": { "color": "negative", "outline": true } }
         }

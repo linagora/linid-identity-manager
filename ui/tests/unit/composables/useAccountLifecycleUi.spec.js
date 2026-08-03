@@ -24,11 +24,11 @@
  * LinID Identity Manager software.
  */
 
+import dayjs from 'dayjs';
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { ACCOUNT_LIFECYCLE_ACTIONS } from 'src/types/accountLifecycleUi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ref } from 'vue';
-import dayjs from 'dayjs';
 import { mockToDayJs } from '../helpers/mockCommonMapper';
 
 vi.mock('vue-i18n', () => ({

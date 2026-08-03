@@ -24,14 +24,11 @@
  * LinID Identity Manager software.
  */
 
+import dayjs from 'dayjs';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
-import dayjs from 'dayjs';
-import {
-  mockToDate,
-  mockToDateISO,
-} from '../helpers/mockCommonMapper';
+import { mockToDate, mockToDateISO } from '../helpers/mockCommonMapper';
 
 const PARENT_UUID = '00000000-0000-4000-8000-000000000000';
 const OU_UUID = '11111111-1111-4111-8111-111111111111';

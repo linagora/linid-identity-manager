@@ -34,18 +34,25 @@ import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
 import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
+import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -219,5 +226,48 @@ public class ApplicationController {
                 force);
         var application = opaApplicationDeployerService.deploy(userPrincipal, id, force);
         return ResponseEntity.status(HttpStatus.OK).body(applicationMapper.toDTO(application));
+    }
+
+    /**
+     * Exports the application policy script as an OPA Rego file.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the application UUID
+     * @return the application Rego script as a downloadable file
+     */
+    @GetMapping("/{id}/script")
+    @Operation(summary = "Export application policy script")
+    @ApiResponse(
+        responseCode = "200",
+        description = "Application Rego script exported successfully",
+        content = @Content(
+            mediaType = "text/plain"
+        )
+    )
+    @ApiResponse(
+        responseCode = "404",
+        description = "Application or script not found",
+        content = @Content
+    )
+    public ResponseEntity<byte[]> exportScript(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id) {
+        log.info("[{}] Received GET request to export rego script of application {}", userPrincipal.getEmail(), id);
+        var entity = applicationService.findViewById(userPrincipal, id);
+
+        if (entity.getScript() == null || entity.getScript().isBlank()) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.application.script.not_found", Map.of("id", id.toString()))
+            );
+        }
+
+        return ResponseEntity.ok()
+            .header(
+                HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + entity.getCode() + ".rego\""
+            )
+            .contentType(MediaType.TEXT_PLAIN)
+            .body(entity.getScript().getBytes(StandardCharsets.UTF_8));
     }
 }

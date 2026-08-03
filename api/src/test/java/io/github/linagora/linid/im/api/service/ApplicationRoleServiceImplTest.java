@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,9 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleViewQuer
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRoleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRoleViewRepository;
+import io.github.linagora.linid.im.api.service.validation.SystemApplicationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -74,6 +77,9 @@ class ApplicationRoleServiceImplTest {
 
     @Mock
     private ApplicationRoleMapper mapper;
+
+    @Mock
+    private SystemApplicationValidator systemApplicationValidator;
 
     @InjectMocks
     private ApplicationRoleServiceImpl service;
@@ -322,6 +328,57 @@ class ApplicationRoleServiceImplTest {
 
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application_role.not_found", exception.getError().key());
+        verify(applicationRoleRepository, never()).delete(any(ApplicationRole.class));
+    }
+
+    @Test
+    @DisplayName("create should not persist anything when the application is system-reserved")
+    void testCreate_shouldNotPersistWhenSystemReserved() {
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        doThrow(new ApiException(400, I18nMessage.of("error.application_role.system_reserved")))
+            .when(systemApplicationValidator).ensureRolesAreMutable(applicationId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.create(userPrincipal, applicationId, record));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application_role.system_reserved", exception.getError().key());
+        verify(applicationRoleRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("update should not persist anything when the application is system-reserved")
+    void testUpdate_shouldNotPersistWhenSystemReserved() {
+        var id = UUID.randomUUID();
+        var entity = ApplicationRole.builder().id(id).name("Administrator").build();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationRoleRepository.findByIdAndApplicationId(id, applicationId)).thenReturn(Optional.of(entity));
+        doThrow(new ApiException(400, I18nMessage.of("error.application_role.system_reserved")))
+            .when(systemApplicationValidator).ensureRolesAreMutable(applicationId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.update(userPrincipal, applicationId, id, record));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application_role.system_reserved", exception.getError().key());
+        verify(applicationRoleRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("deleteById should not delete anything when the application is system-reserved")
+    void testDeleteById_shouldNotDeleteWhenSystemReserved() {
+        var id = UUID.randomUUID();
+        var entity = ApplicationRole.builder().id(id).build();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationRoleRepository.findByIdAndApplicationId(id, applicationId)).thenReturn(Optional.of(entity));
+        doThrow(new ApiException(400, I18nMessage.of("error.application_role.system_reserved")))
+            .when(systemApplicationValidator).ensureRolesAreMutable(applicationId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.deleteById(userPrincipal, applicationId, id));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application_role.system_reserved", exception.getError().key());
         verify(applicationRoleRepository, never()).delete(any(ApplicationRole.class));
     }
 }

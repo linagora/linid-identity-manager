@@ -47,11 +47,13 @@
   "error.application.not_found": "Application not found: {id}",
   "error.application.code.already_exists": "Application already exists for code '{code}'",
   "error.application.script.missing": "Unable to deploy application {applicationId}: there is no script in the application.",
+  "error.application.system_reserved": "Application '{code}' is a system-reserved record and cannot be modified or deleted.",
   "error.application_rule.not_found": "Application rule not found: {id}",
   "error.application_rule.code.already_exists": "Application rule already exists for code '{code}'",
   "error.application_rule.priority.already_exists": "Application rule already exists for priority '{priority}'",
   "error.application_role.not_found": "Application role not found: {id}",
   "error.application_role.name.already_exists": "Application role already exists for name '{name}'",
+  "error.application_role.system_reserved": "Roles of the system-reserved application '{code}' cannot be created, modified or deleted.",
   "error.opa.template.not_readable": "Unable to read the OPA policy template (location: {location})",
   "error.opa.policy.publish_failed": "Unable to publish the OPA policy to the OPA server (policyId: {policyId})",
   "error.user_preference.not_found": "User preference not found: {key}"

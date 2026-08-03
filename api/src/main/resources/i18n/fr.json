@@ -47,6 +47,7 @@
   "error.application.not_found": "Application introuvable : {id}",
   "error.application.code.already_exists": "Une application existe déjà avec le code « {code} »",
   "error.application.script.missing": "Impossible de déployer l'application {applicationId} : il n'y a aucun script dans l'application.",
+  "error.application.script.not_found": "Script introuvable pour l'application {id}",
   "error.application.system_reserved": "L'application « {code} » est un enregistrement réservé au système et ne peut être ni modifiée ni supprimée.",
   "error.application_rule.not_found": "Règle d'application introuvable : {id}",
   "error.application_rule.code.already_exists": "Une règle d'application existe déjà avec le code « {code} »",

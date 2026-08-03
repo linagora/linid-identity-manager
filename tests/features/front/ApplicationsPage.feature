@@ -67,7 +67,8 @@ Feature: Test Application homepage display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
     And  I expect the HTML element '.linid-smart-filter' to be visible
     And  I expect the HTML element '.generic-entity-table' to be visible
-    And  I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
+    # Three rows: the two applications created above plus the seeded LINID system application.
+    And  I expect the HTML element '[data-cy="item-row"]' appear 3 times on screen
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.applicationId}}"]' to be visible
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.applicationId}}"]' contains "app-home-101"
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.applicationId}}"]' to be visible
@@ -89,7 +90,7 @@ Feature: Test Application homepage display
     And  I expect the HTML element '[data-cy="item-row"]' appear 0 times on screen
 
     When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
-    Then I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
+    Then I expect the HTML element '[data-cy="item-row"]' appear 3 times on screen
 
     When I click on ".linid-smart-filter"
     And  I set the text "app-home-102" in the HTML element '[data-cy="text-search-filter-panel_input"]'
@@ -100,7 +101,7 @@ Feature: Test Application homepage display
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.applicationId2}}"]' to be visible
 
     When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
-    Then I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
+    Then I expect the HTML element '[data-cy="item-row"]' appear 3 times on screen
 
     ## 103 Should go to detail page when click on application detail button
     When I click on '[data-cy="see-button_{{ctx.applicationId}}"]'

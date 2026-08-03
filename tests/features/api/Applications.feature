@@ -30,6 +30,11 @@ Feature: Test API Application endpoints
   ## 702 Should trigger deployment of an application force true
   ## 703 Should return 404 when deploying an unknown application
 
+  ################## System application (code LINID) #################
+  ## 801 Should expose the seeded LINID system application
+  ## 802 Should return 400 when updating the LINID system application
+  ## 803 Should return 400 when deleting the LINID system application
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -425,3 +430,50 @@ Feature: Test API Application endpoints
     When I request '{{env.E2E_API_URL}}/applications/00010000-0000-0000-0000-000000000000/deploy' with method 'POST'
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'
+
+  ####################################################
+  ################## System application (LINID) ######
+  ####################################################
+
+  Scenario: 801 - Should expose the seeded LINID system application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].name}}' is 'LINID - Identity Manager'
+    And  I expect '{{response.body.content[0].description}}' is 'System identity manager application'
+    And  I expect '{{response.body.content[0].type}}' is 'System'
+
+  Scenario: 802 - Should return 400 when updating the LINID system application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}' with method 'PUT' with body:
+      """
+      {
+        "code": "LINID",
+        "name": "Renamed system application",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.application.system_reserved'
+
+    # The application must be left untouched.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.name}}' is 'LINID - Identity Manager'
+
+  Scenario: 803 - Should return 400 when deleting the LINID system application
+    When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'linidId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}' with method 'DELETE'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.application.system_reserved'
+
+    # The application must still exist.
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}' with method 'GET'
+    Then I expect status code is 200

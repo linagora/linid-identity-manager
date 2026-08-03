@@ -36,7 +36,9 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
+import io.github.linagora.linid.im.api.service.validation.SystemApplicationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -80,6 +82,9 @@ class ApplicationServiceImplTest {
 
     @Mock
     private ChecksumService checksumService;
+
+    @Mock
+    private SystemApplicationValidator systemApplicationValidator;
 
     @InjectMocks
     private ApplicationServiceImpl service;
@@ -217,25 +222,60 @@ class ApplicationServiceImplTest {
     @DisplayName("deleteById should delete an existing application")
     void testDeleteById() {
         var id = UUID.randomUUID();
-        when(applicationRepository.existsById(id)).thenReturn(true);
+        var existing = Application.builder().id(id).code("my-app").build();
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
 
         service.deleteById(userPrincipal, id);
 
-        var captor = ArgumentCaptor.forClass(UUID.class);
-        verify(applicationRepository).deleteById(captor.capture());
-        assertEquals(id, captor.getValue());
+        var captor = ArgumentCaptor.forClass(Application.class);
+        verify(applicationRepository).delete(captor.capture());
+        assertSame(existing, captor.getValue());
     }
 
     @Test
     @DisplayName("deleteById should throw when the application does not exist")
     void testDeleteById_shouldThrowWhenAbsent() {
         var id = UUID.randomUUID();
-        when(applicationRepository.existsById(id)).thenReturn(false);
+        when(applicationRepository.findById(id)).thenReturn(Optional.empty());
 
         var exception = assertThrows(ApiException.class, () -> service.deleteById(userPrincipal, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application.not_found", exception.getError().key());
-        verify(applicationRepository, never()).deleteById(any());
+        verify(applicationRepository, never()).delete(any(Application.class));
+    }
+
+    @Test
+    @DisplayName("update should not persist anything when the application is system-reserved")
+    void testUpdate_shouldNotPersistWhenSystemReserved() {
+        var id = UUID.randomUUID();
+        var existing = Application.builder().id(id).code("LINID").build();
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(400, I18nMessage.of("error.application.system_reserved")))
+            .when(systemApplicationValidator).ensureApplicationIsMutable(existing);
+
+        var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, record));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application.system_reserved", exception.getError().key());
+        // The guard runs before the code uniqueness check, so nothing must be looked up nor persisted.
+        verify(applicationRepository, never()).findAll(any(Specification.class));
+        verify(applicationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("deleteById should not delete anything when the application is system-reserved")
+    void testDeleteById_shouldNotDeleteWhenSystemReserved() {
+        var id = UUID.randomUUID();
+        var existing = Application.builder().id(id).code("LINID").build();
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
+        doThrow(new ApiException(400, I18nMessage.of("error.application.system_reserved")))
+            .when(systemApplicationValidator).ensureApplicationIsMutable(existing);
+
+        var exception = assertThrows(ApiException.class, () -> service.deleteById(userPrincipal, id));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application.system_reserved", exception.getError().key());
+        verify(applicationRepository, never()).delete(any(Application.class));
     }
 
     @Test

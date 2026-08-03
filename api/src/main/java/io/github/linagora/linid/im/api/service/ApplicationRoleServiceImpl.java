@@ -35,6 +35,7 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleViewQuer
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRoleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRoleViewRepository;
+import io.github.linagora.linid.im.api.service.validation.SystemApplicationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
@@ -80,12 +81,18 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
      */
     private final ApplicationRoleMapper mapper;
 
+    /**
+     * Validator protecting the roles of the system-reserved application from any mutation.
+     */
+    private final SystemApplicationValidator systemApplicationValidator;
+
     @Override
     public ApplicationRole create(
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final ApplicationRoleRecord role) {
         ensureApplicationExists(applicationId);
+        systemApplicationValidator.ensureRolesAreMutable(applicationId);
 
         if (applicationRoleRepository.existsByApplicationIdAndName(applicationId, role.name())) {
             throw nameAlreadyExists(role.name());
@@ -147,6 +154,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final ApplicationRoleRecord role) {
         var entity = findById(userPrincipal, applicationId, id);
 
+        systemApplicationValidator.ensureRolesAreMutable(applicationId);
+
         if (!role.name().equals(entity.getName())
             && applicationRoleRepository.existsByApplicationIdAndNameAndIdNot(applicationId, role.name(), id)) {
             throw nameAlreadyExists(role.name());
@@ -165,6 +174,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final UUID applicationId,
         final UUID id) {
         var entity = findById(userPrincipal, applicationId, id);
+
+        systemApplicationValidator.ensureRolesAreMutable(applicationId);
 
         applicationRoleRepository.delete(entity);
     }

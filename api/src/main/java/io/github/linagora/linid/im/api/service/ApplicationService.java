@@ -89,6 +89,8 @@ public interface ApplicationService {
      * <p>The {@code script}, its {@code scriptChecksum}, the {@code deployedAt} date and the
      * {@code configuration} are left untouched, as they are managed by a separate process.</p>
      *
+     * <p>The system-reserved application is immutable: updating it is rejected with an HTTP 400.</p>
+     *
      * @param userPrincipal the authenticated user
      * @param id            the application UUID
      * @param application   the update record
@@ -98,6 +100,8 @@ public interface ApplicationService {
 
     /**
      * Deletes an application by its unique identifier.
+     *
+     * <p>The system-reserved application is immutable: deleting it is rejected with an HTTP 400.</p>
      *
      * @param userPrincipal the authenticated user
      * @param id            the application UUID

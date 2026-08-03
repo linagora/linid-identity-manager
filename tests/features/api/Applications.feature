@@ -26,9 +26,14 @@ Feature: Test API Application endpoints
   ## 504 Should return 400 with a bad request payload (missing required fields)
 
   ################## Deploy (POST /applications/{id}/deploy) ##########
-  ## 701 Should trigger deployment of an application no force
-  ## 702 Should trigger deployment of an application force true
-  ## 703 Should return 404 when deploying an unknown application
+  ## 601 Should trigger deployment of an application no force
+  ## 602 Should trigger deployment of an application force true
+  ## 603 Should return 404 when deploying an unknown application
+  
+  ################## Export Script (GET /applications/{id}/script) #####
+  ## 701 Should export application Rego script
+  ## 702 Should return 404 when application script is empty
+  ## 703 Should return 404 when application does not exist
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -350,24 +355,24 @@ Feature: Test API Application endpoints
   ################## Deploy (POST /applications/{id}/deploy) ##########
   ####################################################
 
-  Scenario: 701 - Should trigger deployment of an application no force
+  Scenario: 601 - Should trigger deployment of an application no force
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """
       {
-        "code": "app-701-no-force",
-        "name": "Application 701",
+        "code": "app-601-no-force",
+        "name": "Application 601",
         "type": "OIDC",
         "claimsTemplate": "{}"
       }
       """
     Then I expect status code is 201
-    And  I store 'app701Id' as '{{response.body.id}}' in context
+    And  I store 'app601Id' as '{{response.body.id}}' in context
 
     # Create a rule
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app701Id}}/rules' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}/rules' with method 'POST' with body:
       """
       {
-        "code": "RULE_ADMIN_701",
+        "code": "RULE_ADMIN_601",
         "priority": 1,
         "script": "signals contains \"allow\" if input.user.organizationalUnit == \"public\"",
         "disabled": false
@@ -376,31 +381,31 @@ Feature: Test API Application endpoints
     Then I expect status code is 201
 
     # Deploy the application (this will publish the generated script to OPA)
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app701Id}}/deploy' with method 'POST'
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}/deploy' with method 'POST'
     Then I expect status code is 200
     And  I expect '{{response.body.deployedAt}}' is not empty
 
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app701Id}}' with method 'DELETE'
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app601Id}}' with method 'DELETE'
     Then I expect status code is 204
 
-  Scenario: 702 - Should trigger deployment of an application force true
+  Scenario: 602 - Should trigger deployment of an application force true
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """
       {
-        "code": "app-702-force",
-        "name": "Application 702",
+        "code": "app-602-force",
+        "name": "Application 602",
         "type": "OIDC",
         "claimsTemplate": "{}"
       }
       """
     Then I expect status code is 201
-    And  I store 'app702Id' as '{{response.body.id}}' in context
+    And  I store 'app602Id' as '{{response.body.id}}' in context
 
     # Create a rule
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}/rules' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app602Id}}/rules' with method 'POST' with body:
       """
       {
-        "code": "RULE_ADMIN_702",
+        "code": "RULE_ADMIN_602",
         "priority": 1,
         "script": "signals contains \"allow\" if input.user.organizationalUnit == \"public\"",
         "disabled": false
@@ -409,19 +414,94 @@ Feature: Test API Application endpoints
     Then I expect status code is 201
 
     # Deploy the application for the first time
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}/deploy' with method 'POST'
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app602Id}}/deploy' with method 'POST'
     Then I expect status code is 200
     And  I expect '{{response.body.deployedAt}}' is not empty
 
     # Redeploy with force=true to force redeployment
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}/deploy?force=true' with method 'POST'
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app602Id}}/deploy?force=true' with method 'POST'
     Then I expect status code is 200
     And  I expect '{{response.body.deployedAt}}' is not empty
 
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app702Id}}' with method 'DELETE'
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app602Id}}' with method 'DELETE'
     Then I expect status code is 204
 
-  Scenario: 703 - Should return 404 when deploying an unknown application
+  Scenario: 603 - Should return 404 when deploying an unknown application
     When I request '{{env.E2E_API_URL}}/applications/00010000-0000-0000-0000-000000000000/deploy' with method 'POST'
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.application.not_found'
+
+  ############################################################################
+  ################## Export Script (GET /applications/{id}/script) ###########
+  ############################################################################
+  Scenario: 701 - Should export application Rego script
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-801",
+        "name": "Application 801",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'app801Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app801Id}}/rules' with method 'POST' with body:
+      """
+      {
+        "code": "RULE_ADMIN_801",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'rule801Id' as '{{response.body.id}}' in context
+
+    # Regenerate policy
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app801Id}}/rules/{{ctx.rule801Id}}' with method 'PUT' with body:
+      """
+      {
+        "code": "RULE_ADMIN_801",
+        "priority": 1,
+        "script": "signals contains \"allow\" if input.user.admin == true",
+        "disabled": false
+      }
+      """
+    Then I expect status code is 200
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app801Id}}/script' with method 'GET'
+    Then I expect status code is 200
+    And  I expect http header "Content-Type" contains "text/plain"
+    And  I expect http header "Content-Disposition" contains "attachment; filename=\"app-801.rego\""
+    And  I expect "{{response.body}}" contains "package authz[\"app-801\"]"
+    And  I expect "{{response.body}}" contains "input.user.admin == true"
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app801Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 702 - Should return 404 when application script is empty
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-802",
+        "name": "Application 802",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'app802Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app802Id}}/script' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.application.script.not_found'
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app802Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+
+  Scenario: 703 - Should return 404 when application does not exist
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-0000-0000-000000000000/script' with method 'GET'
+    Then I expect status code is 404

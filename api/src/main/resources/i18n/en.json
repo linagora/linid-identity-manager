@@ -47,6 +47,7 @@
   "error.application.not_found": "Application not found: {id}",
   "error.application.code.already_exists": "Application already exists for code '{code}'",
   "error.application.script.missing": "Unable to deploy application {applicationId}: there is no script in the application.",
+  "error.application.script.not_found": "Application script not found: {id}",
   "error.application_rule.not_found": "Application rule not found: {id}",
   "error.application_rule.code.already_exists": "Application rule already exists for code '{code}'",
   "error.application_rule.priority.already_exists": "Application rule already exists for priority '{priority}'",

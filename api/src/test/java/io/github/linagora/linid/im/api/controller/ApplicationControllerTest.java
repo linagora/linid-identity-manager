@@ -34,6 +34,7 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import io.github.linagora.linid.im.api.service.ApplicationService;
 import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
+import io.github.linagora.linid.im.corelib.exception.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,14 +43,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -173,5 +178,76 @@ class ApplicationControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(opaApplicationDeployerService).deploy(userPrincipal, id, true);
+    }
+
+    @Test
+    @DisplayName("Should export application Rego script")
+    void testExportScript() {
+        var id = UUID.randomUUID();
+        var script = "package application\n\nallow := true";
+
+        var applicationView = new ApplicationView();
+        applicationView.setCode("my-app");
+        applicationView.setScript(script);
+
+        when(applicationService.findViewById(userPrincipal, id)).thenReturn(applicationView);
+
+        var response = controller.exportScript(userPrincipal, id);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(MediaType.parseMediaType("text/plain"), response.getHeaders().getContentType());
+        assertEquals(
+            "attachment; filename=\"my-app.rego\"",
+            response.getHeaders().getFirst(HttpHeaders.CONTENT_DISPOSITION)
+        );
+        assertEquals(
+            script,
+            new String(response.getBody(), StandardCharsets.UTF_8)
+        );
+
+        verify(applicationService).findViewById(userPrincipal, id);
+    }
+
+    @Test
+    @DisplayName("Should fail exporting application Rego script when script is missing")
+    void testExportScript_whenScriptIsMissing() {
+        var id = UUID.randomUUID();
+
+        var applicationView = new ApplicationView();
+        applicationView.setCode("my-app");
+        applicationView.setScript(null);
+
+        when(applicationService.findViewById(userPrincipal, id)).thenReturn(applicationView);
+
+        var exception = assertThrows(
+            ApiException.class,
+            () -> controller.exportScript(userPrincipal, id)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), exception.getStatusCode());
+
+        verify(applicationService).findViewById(userPrincipal, id);
+    }
+
+    @Test
+    @DisplayName("Should fail exporting application Rego script when script is blank")
+    void testExportScript_whenScriptIsBlank() {
+        var id = UUID.randomUUID();
+
+        var applicationView = new ApplicationView();
+        applicationView.setCode("my-app");
+        applicationView.setScript("   ");
+
+        when(applicationService.findViewById(userPrincipal, id)).thenReturn(applicationView);
+
+        var exception = assertThrows(
+            ApiException.class,
+            () -> controller.exportScript(userPrincipal, id)
+        );
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), exception.getStatusCode());
+
+        verify(applicationService).findViewById(userPrincipal, id);
     }
 }

@@ -33,7 +33,7 @@ import dayjs from 'dayjs';
  * @param dateFormat - The date format string (e.g., 'YYYY-MM-DD HH:mm', 'DD/MM/YYYY').
  * @returns A toDate function that formats dates consistently.
  */
-export const mockToDate = (dateFormat: string) => (value: any) =>
+export const mockToDate = (dateFormat) => (value) =>
   value ? dayjs(value).format(dateFormat) : '';
 
 /**
@@ -41,8 +41,10 @@ export const mockToDate = (dateFormat: string) => (value: any) =>
  *
  * @returns A toDateISO function that converts dates to ISO 8601 format.
  */
-export const mockToDateISO = () => (value: any) => {
-  if (!value) return '';
+export const mockToDateISO = () => (value) => {
+  if (!value) {
+    return '';
+  }
   if (
     typeof value === 'string' &&
     value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)
@@ -57,4 +59,4 @@ export const mockToDateISO = () => (value: any) => {
  *
  * @returns A toDayJs function that converts dates to dayjs objects.
  */
-export const mockToDayJs = () => (value: any) => (value ? dayjs(value) : null);
+export const mockToDayJs = () => (value) => (value ? dayjs(value) : null);

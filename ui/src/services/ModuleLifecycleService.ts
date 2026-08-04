@@ -369,6 +369,9 @@ export async function ready(
  * - Late-bound dependencies.
  * - Final application wiring that requires all modules to be available.
  *
+ * Zones declared in the module configuration are registered here. An entry carrying a `component` references a local
+ * component by name, while an entry carrying a `plugin` references an element exposed through module federation.
+ *
  * @param module - The remote module lifecycle implementation.
  * @param config - The host configuration associated with this module instance.
  * @param _boot - The application boot context.
@@ -381,8 +384,20 @@ export async function postInit(
 ) {
   const linidZoneStore = useLinidZoneStore();
 
-  config.zones?.forEach(({ zone: zoneName, plugin, props }) => {
-    linidZoneStore.registerPlugin(zoneName, plugin, props);
+  config.zones?.forEach((zoneDefinition) => {
+    if ('component' in zoneDefinition && zoneDefinition.component) {
+      linidZoneStore.registerComponent(
+        zoneDefinition.zone,
+        zoneDefinition.component,
+        zoneDefinition.props
+      );
+    } else if ('plugin' in zoneDefinition && zoneDefinition.plugin) {
+      linidZoneStore.registerPlugin(
+        zoneDefinition.zone,
+        zoneDefinition.plugin,
+        zoneDefinition.props
+      );
+    }
   });
 
   return module.postInit(config);

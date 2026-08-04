@@ -61,7 +61,10 @@ describe('Test component: OrganizationalUnitSuspendedInfoText', () => {
           },
         },
       });
-      expect(toDateMock).toHaveBeenCalledWith('2099-01-01T00:00:00Z', 'application.dateFormat');
+      expect(toDateMock).toHaveBeenCalledWith(
+        '2099-01-01T00:00:00Z',
+        'application.dateFormat'
+      );
       expect(wrapper.vm.startDate).toBe('formatted(2099-01-01T00:00:00Z)');
     });
 

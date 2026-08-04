@@ -57,5 +57,4 @@ export const mockToDateISO = () => (value: any) => {
  *
  * @returns A toDayJs function that converts dates to dayjs objects.
  */
-export const mockToDayJs = () => (value: any) =>
-  value ? dayjs(value) : null;
+export const mockToDayJs = () => (value: any) => (value ? dayjs(value) : null);

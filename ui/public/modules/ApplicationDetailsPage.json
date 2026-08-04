@@ -14,7 +14,12 @@
       "props": {
         "rowKey": "id",
         "columns": [
-          { "name": "name", "label": "columns.name", "field": "name", "align": "left" },
+          {
+            "name": "name",
+            "label": "columns.name",
+            "field": "name",
+            "align": "left"
+          },
           {
             "name": "description",
             "label": "columns.description",
@@ -55,21 +60,11 @@
     "sections": [
       {
         "key": "identity",
-        "fieldOrder": [
-          "code",
-          "name",
-          "type",
-          "description"
-        ]
+        "fieldOrder": ["code", "name", "type", "description"]
       },
       {
         "key": "audit",
-        "fieldOrder": [
-          "createdBy",
-          "updatedBy",
-          "insertDate",
-          "updateDate"
-        ]
+        "fieldOrder": ["createdBy", "updatedBy", "insertDate", "updateDate"]
       }
     ]
   }

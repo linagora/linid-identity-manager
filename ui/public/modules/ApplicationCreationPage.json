@@ -6,11 +6,11 @@
   "routesRemote": "catalogUI/PageRoutes",
   "i18nRemote": "catalogUI/EmptyI18n",
   "apiEndpoint": "applications",
-  "basePath": "/new-application",
+  "basePath": "/applications",
   "options": {
     "layout": "catalogUI/BaseLayout",
     "page": "catalogUI/GenericCreationPage",
-    "pagePath": "",
+    "pagePath": "/new",
     "parentPath": "/applications",
     "idKey": "id",
     "formSections": [

@@ -14,7 +14,7 @@
     "pagePath": "",
     "idKey": "id",
     "enableActions": true,
-    "creationPagePath": "/new-application",
+    "creationPagePath": "/applications/new",
     "filters": [
       {
         "name": "code",

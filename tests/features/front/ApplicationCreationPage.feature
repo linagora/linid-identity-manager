@@ -27,7 +27,7 @@ Feature: Test Application creation page
 
     ## 101 Test page access and cancel button
     When  I click on '[data-cy="button_create"]'
-    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/new-application"
+    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/applications/new"
 
     When  I click on '[data-cy="button_cancel"]'
     Then  I expect current url is "{{ env.E2E_FRONT_URL }}/applications"

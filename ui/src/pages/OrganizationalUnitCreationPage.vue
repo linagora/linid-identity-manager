@@ -45,6 +45,13 @@
         data-cy="organizational-unit-creation-page_form"
         @submit="onSubmit"
       >
+        <h4
+          class="q-mt-none q-mb-md text-subtitle1 text-weight-medium organizational-unit-creation-page--section-title"
+          data-cy="organizational-unit-creation-page_section-title"
+        >
+          {{ t('sections.general') }}
+        </h4>
+
         <div data-cy="field_parent">
           <q-input
             :model-value="parentName"

@@ -1,5 +1,12 @@
 {
   "moduleApplicationsPage": {
+    "buttons-card": {
+      "create-button": {
+        "q-btn": {
+          "outline": false
+        }
+      }
+    },
     "confirmation-dialog": {
       "q-dialog": { "persistent": false },
       "q-card": { "flat": true, "bordered": true },

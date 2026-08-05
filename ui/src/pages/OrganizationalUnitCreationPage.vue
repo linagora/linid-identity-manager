@@ -31,7 +31,7 @@
     data-cy="organizational-unit-creation-page"
   >
     <div
-      class="col-12 col-md-8 col-lg-6 organizational-unit-creation-page--content"
+      class="col-12 col-md-10 col-lg-10 organizational-unit-creation-page--content"
     >
       <h1
         class="q-ma-none q-mb-md text-h5 organizational-unit-creation-page--title"
@@ -223,3 +223,14 @@ onMounted(() => {
   void loadParent();
 });
 </script>
+
+<style scoped>
+/* Reserve the height of a header actions row (36px button + 16px card
+   padding + 16px top margin) so the title keeps a stable vertical
+   position. */
+.organizational-unit-creation-page--title {
+  display: flex;
+  align-items: center;
+  min-height: 68px;
+}
+</style>

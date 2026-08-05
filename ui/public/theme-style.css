@@ -23,6 +23,14 @@
   line-height: 1.4;
 }
 
+/* Remove the default vertical padding around the attributes container */
+.generic-details-page
+  .entity-details-card
+  > .q-card__section:not(.entity-details-card--title) {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .generic-details-page .entity-details-card--container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -82,4 +90,38 @@
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.4;
+}
+
+/* ===== Generic creation & edition pages ===== */
+
+/* Compact form sections */
+.generic-creation-page--form-section--header.q-card__section,
+.generic-edition-page--form-section--header.q-card__section {
+  padding-top: 8px;
+  padding-bottom: 0;
+}
+
+.generic-creation-page--form-section--field.q-card__section,
+.generic-edition-page--form-section--field.q-card__section {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Form section titles: left accent border */
+.generic-creation-page .generic-creation-page--form-section--title,
+.generic-edition-page .generic-edition-page--form-section--title,
+.organizational-unit-creation-page
+  .organizational-unit-creation-page--section-title {
+  margin-top: 0;
+  padding-left: 12px;
+  border-left: 4px solid var(--q-primary);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.q-table {
+  thead {
+    background-color: rgba(0, 0, 0, 0.12);
+  }
 }

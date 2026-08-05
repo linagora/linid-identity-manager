@@ -54,6 +54,86 @@
           "delete": "/applications/{{ entity.id }}/roles/{{ item.id }}"
         }
       }
+    },
+    {
+      "zone": "moduleApplicationDetailsPage.content.after",
+      "plugin": "catalogUI/GenericSortableListCard",
+      "props": {
+        "itemKey": "id",
+        "listenToItemUpdate": "update:item",
+        "fields": [
+          {
+            "name": "code",
+            "label": "fields.code"
+          },
+          {
+            "name": "description",
+            "label": "fields.description"
+          }
+        ],
+        "orderKey": "priority",
+        "formFields": [
+          {
+            "name": "code",
+            "type": "String",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "description",
+            "type": "String",
+            "input": "Text"
+          },
+          {
+            "name": "priority",
+            "type": "Integer",
+            "input": "Number",
+            "required": true,
+            "inputSettings": {
+              "disable": true
+            }
+          },
+          {
+            "name": "script",
+            "type": "String",
+            "input": "TextArea",
+            "required": true
+          },
+          {
+            "name": "disabled",
+            "type": "Boolean",
+            "input": "Boolean",
+            "inputSettings": {
+              "disable": true,
+              "defaultValue": true,
+              "trueValue": false,
+              "falseValue": true
+            }
+          }
+        ],
+        "endpoints": {
+          "find": "/applications/{{ entity.id }}/rules",
+          "create": "/applications/{{ entity.id }}/rules",
+          "update": "/applications/{{ entity.id }}/rules/{{ item.id }}",
+          "delete": "/applications/{{ entity.id }}/rules/{{ item.id }}"
+        }
+      }
+    },
+    {
+      "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.item.actions",
+      "plugin": "catalogUI/EntityAttributeField",
+      "props": {
+        "definition": {
+          "name": "disabled",
+          "type": "Boolean",
+          "input": "Boolean",
+          "inputSettings": {
+            "trueValue": false,
+            "falseValue": true
+          }
+        },
+        "emitOnUpdate": "update:item"
+      }
     }
   ],
   "options": {

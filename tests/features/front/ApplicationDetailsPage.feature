@@ -11,8 +11,20 @@ Feature: Test Application details page display
   ## 108 Should reject a role with an already used name
   ## 109 Should edit a role and display the updated values
   ## 110 Should delete a role after confirmation
-  ## 111 Should display an error notification when navigating to a non-existent application
-  ## 112 Should display an error notification when navigating to an application with a malformed ID
+  ## 111 Should display the rules card with no rules
+  ## 112 Add rule dialog should close on cancel without creating a rule
+  ## 113 Add rule dialog should display required validation errors on empty required fields
+  ## 114 Should create a rule and display it in the list with all its sections
+  ## 115 Edit rule dialog should close on cancel without modifying the rule
+  ## 116 Edit rule dialog should display required validation errors on empty required fields
+  ## 117 Should edit a rule and display the updated values in the list
+  ## 118 Toggle should show unsaved changes hint and enable the save button
+  ## 119 Toggling back should hide the hint and disable the save button
+  ## 120 Should save the toggle change and persist it to the backend
+  ## 121 Delete confirmation dialog should close on cancel without deleting the rule
+  ## 122 Should delete a rule after confirmation
+  ## 123 Should display an error notification when navigating to a non-existent application
+  ## 124 Should display an error notification when navigating to an application with a malformed ID
 
   ################## Export application script ##################
   ## 201 Export button should be disabled
@@ -182,15 +194,160 @@ Feature: Test Application details page display
     And I expect the HTML element '[data-cy="generic-entity-table"]' contains "Aucun rôle pour cette application."
 
     ####################################################
+    ################## Rules management ################
+    ####################################################
+
+    ## 111 Should display the rules card with no rules
+    Given I visit the "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card"]' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_title"]' contains "Règles"
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_add-button"]' contains "Ajouter une règle"
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' contains "Sauvegarder"
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be disabled
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_list"]' contains "Aucune règle pour cette application."
+
+    ## 112 Add rule dialog should close on cancel without creating a rule
+    When I click on '[data-cy="generic-sortable-list-card_add-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Ajouter une règle"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Code"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_description"]' contains "Description"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_priority"]' contains "Priorité"
+    And I expect the HTML element '[data-cy="form-dialog_field-container_script"]' contains "Script"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Ajouter"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="field_priority"]' to have value "1"
+    And I expect the HTML element '[data-cy="field_priority"]' to be disabled
+    And I expect the HTML element '[data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
+    And I expect the HTML element '[data-cy="field_disabled"].disabled' to be visible
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_list"]' contains "Aucune règle pour cette application."
+
+    ## 113 Add rule dialog should display required validation errors on empty required fields
+    When I click on '[data-cy="generic-sortable-list-card_add-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Ce champ est requis."
+    When I set the text "test-rule" in the HTML element '[data-cy="field_code"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_script"]' contains "Ce champ est requis."
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 114 Should create a rule and display it in the list with all its sections
+    When I click on '[data-cy="generic-sortable-list-card_add-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set the text "test-rule" in the HTML element '[data-cy="field_code"]'
+    And I set the text "A test rule" in the HTML element '[data-cy="field_description"]'
+    And I set the text "default allow := false" in the HTML element '[data-cy="field_script"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '.q-notification__message' contains "Règle créée avec succès."
+    And I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"]' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] .drag-handle' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_code_0"]' contains "test-rule"
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_description_0"]' contains "A test rule"
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_button_edit_0"]' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_button_delete_0"]' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
+
+    ## 115 Edit rule dialog should close on cancel without modifying the rule
+    When I click on '[data-cy="generic-sortable-list-card_button_edit_0"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier la règle test-rule"
+    And I expect the HTML element '[data-cy="field_code"]' to have value "test-rule"
+    And I expect the HTML element '[data-cy="field_description"]' to have value "A test rule"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_priority"]' to be disabled
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_disabled"].disabled' to be visible
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Enregistrer"
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_code_0"]' contains "test-rule"
+
+    ## 116 Edit rule dialog should display required validation errors on empty required fields
+    When I click on '[data-cy="generic-sortable-list-card_button_edit_0"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_priority"]' to be disabled
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_disabled"].disabled' to be visible
+    When I clear the text in the HTML element '[data-cy="field_code"]'
+    And I clear the text in the HTML element '[data-cy="field_script"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Ce champ est requis."
+    When I set the text "test-rule" in the HTML element '[data-cy="field_code"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_script"]' contains "Ce champ est requis."
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 117 Should edit a rule and display the updated values in the list
+    When I click on '[data-cy="generic-sortable-list-card_button_edit_0"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_priority"]' to be disabled
+    And I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_disabled"].disabled' to be visible
+    When I clear the text in the HTML element '[data-cy="field_code"]'
+    And I set the text "updated-rule" in the HTML element '[data-cy="field_code"]'
+    And I clear the text in the HTML element '[data-cy="field_description"]'
+    And I set the text "An updated rule" in the HTML element '[data-cy="field_description"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '.q-notification__message' contains "Règle modifiée avec succès."
+    And I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_code_0"]' contains "updated-rule"
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_description_0"]' contains "An updated rule"
+
+    ## 118 Toggle should show unsaved changes hint and enable the save button
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be disabled
+    When I click on '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]'
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'true'
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' to be visible
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' contains "Des règles ont été modifiées. N'oubliez pas de sauvegarder."
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be enabled
+
+    ## 119 Toggling back should hide the hint and disable the save button
+    When I click on '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]'
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be disabled
+
+    ## 120 Should save the toggle change and persist it to the backend
+    When I click on '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]'
+    And I click on '[data-cy="generic-sortable-list-card_save-button"]'
+    Then I expect the HTML element '.q-notification__message' contains "Modifications sauvegardées avec succès."
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}/rules' with method 'GET'
+    Then I expect status code is 200
+    And I expect '{{response.body.content[0].disabled}}' is "false"
+
+    ## 121 Delete confirmation dialog should close on cancel without deleting the rule
+    When I click on '[data-cy="generic-sortable-list-card_button_delete_0"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Supprimer la règle updated-rule"
+    And I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Voulez-vous vraiment supprimer la règle updated-rule ?"
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"]' to be visible
+
+    ## 122 Should delete a rule after confirmation
+    When I click on '[data-cy="generic-sortable-list-card_button_delete_0"]'
+    And I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '.q-notification__message' contains "Règle supprimée avec succès."
+    And I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And I expect the HTML element '[data-cy="generic-sortable-list-card_list"]' contains "Aucune règle pour cette application."
+
+    ####################################################
     ################## Cleanup and errors ##############
     ####################################################
 
-    ## 111 Should display an error notification when navigating to a non-existent application
+    ## 123 Should display an error notification when navigating to a non-existent application
     Given I visit the "{{ env.E2E_FRONT_URL }}/applications/00000000-0000-4000-8000-000000000000"
     Then I expect the HTML element '.q-notification__message' contains "Impossible de charger l'application. Veuillez réessayer plus tard."
     And I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
 
-    ## 112 Should display an error notification when navigating to an application with a malformed ID
+    ## 124 Should display an error notification when navigating to an application with a malformed ID
     Given I visit the "{{ env.E2E_FRONT_URL }}/applications/not-a-valid-uuid"
     Then I expect the HTML element '.q-notification__message' contains "Impossible de charger l'application. Veuillez réessayer plus tard."
     And I expect current url is "{{ env.E2E_FRONT_URL }}/applications"

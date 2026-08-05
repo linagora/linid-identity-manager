@@ -96,12 +96,18 @@ public class ApplicationViewDTO {
     @Schema(description = "JSON configuration of the application", example = "{ \"timeout\": 30 }")
     private String configuration;
 
-
     /**
      * Full name of the creator of this record.
      */
     @Schema(description = "Full name of the record creator", example = "John Doe")
     private String createdBy;
+
+    /**
+     * Indicates whether an OPA Rego policy script is defined for the application.
+     */
+    @Schema(description = "Indicates whether an OPA Rego policy script is defined for the application",
+        example = "true")
+    private Boolean hasScript;
 
     /**
      * Full name of the last updater of this record.

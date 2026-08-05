@@ -29,6 +29,9 @@ package io.github.linagora.linid.im.api.persistence.repository;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,4 +64,20 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID>,
      * @return the list of applications pending deployment
      */
     List<Application> findByDeployedAtIsNullAndScriptIsNotNull();
+
+    /**
+     * Updates the OPA policy fields of an application directly, bypassing Hibernate's version-managed entity
+     * save path which is incompatible with {@code @DynamicInsert} + {@code @Version} + {@code @Generated} in
+     * Hibernate 7.4.x.
+     *
+     * @param id       the application UUID
+     * @param script   the new OPA Rego policy script
+     * @param checksum the SHA-256 checksum of the script
+     */
+    @Modifying(clearAutomatically = true)
+    @Query(
+        "UPDATE Application a SET a.script = :script, a.scriptChecksum = :checksum, a.deployedAt = null"
+            + " WHERE a.id = :id"
+    )
+    void updatePolicy(@Param("id") UUID id, @Param("script") String script, @Param("checksum") String checksum);
 }

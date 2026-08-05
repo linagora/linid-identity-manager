@@ -164,7 +164,8 @@ class ApplicationServiceImplTest {
     }
 
     @Test
-    @DisplayName("update should apply record fields, leave externally-managed fields untouched and persist the same entity")
+    @DisplayName("update should apply record fields, leave externally-managed fields untouched and persist the same "
+        + "entity")
     void testUpdate() {
         var id = UUID.randomUUID();
         var existing = Application.builder()
@@ -289,18 +290,11 @@ class ApplicationServiceImplTest {
             .thenReturn(activeRules);
         when(opaService.generate(application, activeRules)).thenReturn("rendered-policy");
         when(checksumService.compute("rendered-policy")).thenReturn("policy-checksum");
-        when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         service.regeneratePolicy(id);
 
-        var captor = ArgumentCaptor.forClass(Application.class);
-        verify(applicationRepository).save(captor.capture());
-        var saved = captor.getValue();
-
-        assertEquals("rendered-policy", saved.getScript());
-        assertEquals("policy-checksum", saved.getScriptChecksum());
-        // regeneration must reset the deployment status so the scheduler redeploys the application.
-        assertNull(saved.getDeployedAt());
+        // updatePolicy resets deployedAt to null inside the repository so the scheduler redeploys.
+        verify(applicationRepository).updatePolicy(id, "rendered-policy", "policy-checksum");
     }
 
     @Test
@@ -317,8 +311,8 @@ class ApplicationServiceImplTest {
 
         service.regeneratePolicy(id);
 
-        // The checksum is unchanged: the application must not be saved nor its deployment status reset.
-        verify(applicationRepository, never()).save(any());
+        // The checksum is unchanged: the policy must not be updated nor the deployment status reset.
+        verify(applicationRepository, never()).updatePolicy(any(), any(), any());
     }
 
     @Test

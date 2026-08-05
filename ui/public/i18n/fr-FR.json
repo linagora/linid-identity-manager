@@ -1134,6 +1134,9 @@
   },
   "OrganizationalUnitCreationPage": {
     "title": "Créer une nouvelle unité organisationnelle",
+    "sections": {
+      "general": "Informations générales"
+    },
     "fields": {
       "parent": "Unité organisationnelle parente",
       "name": {

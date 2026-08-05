@@ -1134,6 +1134,9 @@
   },
   "OrganizationalUnitCreationPage": {
     "title": "Create a new organizational unit",
+    "sections": {
+      "general": "General information"
+    },
     "fields": {
       "parent": "Parent organizational unit",
       "name": {

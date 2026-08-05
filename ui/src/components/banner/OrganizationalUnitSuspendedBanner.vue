@@ -77,8 +77,8 @@ import { computed } from 'vue';
 const props = defineProps<OrganizationalUnitBannerProps>();
 const emit = defineEmits<OrganizationalUnitSuspendedBannerOutputs>();
 
-const localUiNamespace = `organizational-unit-suspended-banner`;
-const localI18n = `OrganizationalUnitSuspendedBanner`;
+const localUiNamespace = 'organizational-unit-suspended-banner';
+const localI18n = 'OrganizationalUnitSuspendedBanner';
 
 const { t } = useScopedI18n(localI18n);
 const { ui } = useUiDesign();

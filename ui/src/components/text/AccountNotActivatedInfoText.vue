@@ -50,7 +50,7 @@ import {
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
 
-const localUiNamespace = `account-not-activated-info-text`;
+const localUiNamespace = 'account-not-activated-info-text';
 const { t } = useScopedI18n('AccountNotActivatedInfoText');
 const { ui } = useUiDesign();
 

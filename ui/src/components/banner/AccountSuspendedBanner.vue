@@ -77,8 +77,8 @@ import { computed } from 'vue';
 const props = defineProps<AccountBannerProps>();
 const emit = defineEmits<AccountSuspendedBannerOutputs>();
 
-const localUiNamespace = `account-suspended-banner`;
-const localI18n = `AccountSuspendedBanner`;
+const localUiNamespace = 'account-suspended-banner';
+const localI18n = 'AccountSuspendedBanner';
 
 const { t } = useScopedI18n(localI18n);
 const { ui } = useUiDesign();

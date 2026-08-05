@@ -53,7 +53,7 @@ import type { AccountStatus } from 'src/types/accounts';
 import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
-const localUiNamespace = `account-suspended-info-text`;
+const localUiNamespace = 'account-suspended-info-text';
 const { toDate } = useCommonMapper();
 const { t } = useScopedI18n('AccountSuspendedInfoText');
 const { ui } = useUiDesign();

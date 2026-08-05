@@ -176,8 +176,12 @@ import {
   setAccountValidity,
   suspendAccount,
 } from 'src/services/AccountService';
-import type { AccountDTO, AccountStatusForm } from 'src/types/accounts';
-import { type Account, type AccountStatus } from 'src/types/accounts';
+import type {
+  Account,
+  AccountDTO,
+  AccountStatus,
+  AccountStatusForm,
+} from 'src/types/accounts';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 

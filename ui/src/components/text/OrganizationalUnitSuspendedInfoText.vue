@@ -55,7 +55,7 @@ import { computed } from 'vue';
 
 const props = defineProps<OrganizationalUnitInfoTextProps>();
 
-const localUiNamespace = `organizational-unit-suspended-info-text`;
+const localUiNamespace = 'organizational-unit-suspended-info-text';
 const { toDate } = useCommonMapper();
 const { t } = useScopedI18n('OrganizationalUnitSuspendedInfoText');
 const { ui } = useUiDesign();

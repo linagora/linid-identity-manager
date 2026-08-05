@@ -330,7 +330,7 @@ jobs:
           submodules: "recursive"
 
       - name: Install Task
-        uses: arduino/setup-task@v2
+        uses: arduino/setup-task@v3
 
       - name: Run e2e tests
         run: |

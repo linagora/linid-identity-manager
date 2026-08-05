@@ -25,8 +25,7 @@
  */
 
 import { setHttpClient } from '@linagora/linid-im-front-corelib';
-import type { AxiosError } from 'axios';
-import axios, { type AxiosInstance } from 'axios';
+import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import { authService } from 'src/services/AuthService';
 import { defineBoot } from '#q-app/wrappers';
 

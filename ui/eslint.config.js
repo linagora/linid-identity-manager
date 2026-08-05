@@ -51,7 +51,8 @@ export default defineConfigWithVueTs(
       import: importPlugin,
     },
     rules: {
-      // Import sorting
+      // Import rules
+      'import/no-duplicates': 'error',
       'import/order': [
         'error',
         {
@@ -127,6 +128,14 @@ export default defineConfigWithVueTs(
       'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
       curly: 'error',
+      quotes: [
+        'error',
+        'single',
+        {
+          avoidEscape: true,
+          allowTemplateLiterals: false,
+        },
+      ],
     },
   },
   {

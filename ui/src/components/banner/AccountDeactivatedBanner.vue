@@ -77,8 +77,8 @@ import { computed } from 'vue';
 const props = defineProps<AccountBannerProps>();
 const emit = defineEmits<AccountDeactivatedBannerOutputs>();
 
-const localUiNamespace = `account-deactivated-banner`;
-const localI18n = `AccountDeactivatedBanner`;
+const localUiNamespace = 'account-deactivated-banner';
+const localI18n = 'AccountDeactivatedBanner';
 
 const { t } = useScopedI18n(localI18n);
 const { ui } = useUiDesign();

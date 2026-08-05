@@ -1110,7 +1110,9 @@
         }
       },
       "GenericEntityTable": {
-        "noData": "Aucun rôle pour cette application."
+        "noData": "Aucun rôle pour cette application.",
+        "rowsPerPage": "Éléments par page:",
+        "paginationLabel": "{start}-{end} sur {total}"
       }
     }
   },

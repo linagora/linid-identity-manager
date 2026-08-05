@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.model.application;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 /**
  * Request payload for creating or updating an application.
@@ -45,7 +46,9 @@ import jakarta.validation.constraints.NotBlank;
  */
 @Schema(description = "Request payload for creating or updating an application")
 public record ApplicationRecord(
-    @NotBlank @Schema(description = "Functional unique identifier of the application", example = "my-app")
+    @NotBlank
+    @Pattern(regexp = "^[a-zA-Z-_0-9]+$")
+    @Schema(description = "Functional unique identifier of the application", example = "my-app")
     String code,
 
     @NotBlank @Schema(description = "Human-readable name of the application", example = "My Application")

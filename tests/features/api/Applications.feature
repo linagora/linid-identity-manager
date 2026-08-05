@@ -7,6 +7,7 @@ Feature: Test API Application endpoints
   ## 101 Should create an application with valid data
   ## 102 Should return 400 with a bad request payload (missing required fields)
   ## 103 Should return 400 with another application with same code
+  ## 104 Should return 400 with invalid application code
 
   ################## Find All (GET /applications) ####################
   ## 201 Should return paginated list of applications
@@ -130,6 +131,21 @@ Feature: Test API Application endpoints
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.app103Id}}' with method 'DELETE'
     Then I expect status code is 204
+
+  Scenario: 104 - Should return 400 with invalid application code
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app/104",
+        "name": "Application 104",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.error}}' is 'Validation failed'
+    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+    And  I expect '{{response.body.status}}' is '400'
 
   ####################################################
   ################## Find All (GET /applications) ####

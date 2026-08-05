@@ -645,7 +645,7 @@ Feature: Test API Application Rule endpoints
   ####################################################
 
   Scenario: 601 - Should regenerate the application policy when a rule is toggled active
-    Given I setup database with driver "postgres" host "{{env.DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
 
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """
@@ -674,7 +674,9 @@ Feature: Test API Application Rule endpoints
     # Rules are created disabled: while the rule stays disabled its fragment must NOT be in the policy.
     When I execute sql request "SELECT script FROM applications WHERE code = $1" with values:
       """
-      ["app-rule-601"]
+      [
+        "app-rule-601"
+      ]
       """
     Then I expect 1 database results
     And  I expect '{{ctx.dbResults[0].script}}' not contains 'input.user.admin == true'
@@ -693,7 +695,9 @@ Feature: Test API Application Rule endpoints
 
     When I execute sql request "SELECT script, script_checksum, deployed_at FROM applications WHERE code = $1" with values:
       """
-      ["app-rule-601"]
+      [
+        "app-rule-601"
+      ]
       """
     Then I expect 1 database results
     And  I expect '{{ctx.dbResults[0].script}}' contains 'package authz["app-rule-601"]'
@@ -705,7 +709,7 @@ Feature: Test API Application Rule endpoints
     Then I expect status code is 204
 
   Scenario: 602 - Should regenerate the application policy without the fragment when a rule is deleted
-    Given I setup database with driver "postgres" host "{{env.DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.DATABASE_ADMIN_USER}}" password "{{env.DATABASE_ADMIN_PASSWORD}}" database "{{env.DATABASE_NAME}}"
 
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """
@@ -744,7 +748,9 @@ Feature: Test API Application Rule endpoints
 
     When I execute sql request "SELECT script FROM applications WHERE code = $1" with values:
       """
-      ["app-rule-602"]
+      [
+        "app-rule-602"
+      ]
       """
     Then I expect 1 database results
     And  I expect '{{ctx.dbResults[0].script}}' contains 'input.user.admin == true'
@@ -755,7 +761,9 @@ Feature: Test API Application Rule endpoints
 
     When I execute sql request "SELECT script, deployed_at FROM applications WHERE code = $1" with values:
       """
-      ["app-rule-602"]
+      [
+        "app-rule-602"
+      ]
       """
     Then I expect 1 database results
     And  I expect '{{ctx.dbResults[0].script}}' not contains 'input.user.admin == true'

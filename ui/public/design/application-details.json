@@ -1,5 +1,12 @@
 {
   "moduleApplicationDetailsPage": {
+    "buttons-card": {
+      "edit-button": {
+        "q-btn": {
+          "outline": false
+        }
+      }
+    },
     "sections": {
       "identity": {
         "entity-details-card": {
@@ -85,7 +92,7 @@
         }
       },
       "generic-entity-table": {
-        "q-table": { "flat": true }
+        "q-table": {}
       },
       "form-dialog": {
         "q-dialog": { "persistent": false },
@@ -99,7 +106,7 @@
               "outline": false
             }
           },
-          "cancel-button": { "q-btn": { "color": "negative", "outline": true } }
+          "cancel-button": { "q-btn": { "color": "primary", "outline": true } }
         }
       },
       "confirmation-dialog": {

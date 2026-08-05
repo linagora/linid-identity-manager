@@ -1,5 +1,12 @@
 {
   "moduleApplicationEditionPage": {
+    "buttons-card": {
+      "confirm-button": {
+        "q-btn": {
+          "outline": false
+        }
+      }
+    },
     "form-section-general": {
       "q-card": {},
       "EntityAttributeField": {

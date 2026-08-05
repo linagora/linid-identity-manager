@@ -21,7 +21,8 @@
       "noCaps": true
     },
     "q-table": {
-      "dense": true
+      "dense": true,
+      "flat": true
     },
     "q-header": {
       "elevated": true

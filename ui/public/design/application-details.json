@@ -124,6 +124,89 @@
           "cancel-button": { "q-btn": { "color": "negative", "outline": true } }
         }
       }
+    },
+    "generic-sortable-list-card": {
+      "q-card": { "flat": true, "bordered": false },
+      "q-list": {},
+      "q-item": {},
+      "q-scroll-area": {},
+      "draggable": {
+        "animation": 200,
+        "fallbackTolerance": 3,
+        "forceFallback": true,
+        "scroll": true,
+        "scrollSensitivity": 25,
+        "scrollSpeed": 5,
+        "handle": ".drag-handle"
+      },
+      "icon-section": {
+        "q-item-section": {},
+        "q-icon": {
+          "name": "drag_indicator"
+        }
+      },
+      "no-data-icon-section": {
+        "q-item-section": {},
+        "q-icon": { "name": "inbox", "color": "grey-5", "size": "md" }
+      },
+      "no-data-label-section": {
+        "q-item-section": {}
+      },
+      "item-actions-section": {
+        "q-item-section": { "side": true },
+        "edit-button": {
+          "q-btn": {
+            "flat": true,
+            "icon": "edit",
+            "color": "primary",
+            "dense": true
+          }
+        },
+        "delete-button": {
+          "q-btn": {
+            "flat": true,
+            "icon": "delete",
+            "color": "negative",
+            "dense": true
+          }
+        }
+      },
+      "add-button": {
+        "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+      },
+      "save-button": {
+        "q-btn": { "color": "positive", "unelevated": true, "outline": false }
+      },
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": true },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "confirm-button": {
+            "q-btn": {
+              "color": "primary",
+              "unelevated": true,
+              "outline": false
+            }
+          },
+          "cancel-button": { "q-btn": { "outline": true } }
+        }
+      },
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": true },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "confirm-button": {
+            "q-btn": {
+              "color": "primary",
+              "unelevated": true,
+              "outline": false
+            }
+          },
+          "cancel-button": { "q-btn": { "outline": true } }
+        }
+      }
     }
   }
 }

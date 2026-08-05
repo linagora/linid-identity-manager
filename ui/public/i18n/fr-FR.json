@@ -1114,6 +1114,109 @@
         "rowsPerPage": "Éléments par page:",
         "paginationLabel": "{start}-{end} sur {total}"
       }
+    },
+    "GenericSortableListCard": {
+      "title": "Règles",
+      "noData": "Aucune règle pour cette application.",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "saveNewOrderHint": "L'ordre a été modifié. N'oubliez pas de sauvegarder.",
+      "saveUpdatedItemsHint": "Des règles ont été modifiées. N'oubliez pas de sauvegarder.",
+      "saveNewOrderAndUpdatedItemsHint": "L'ordre et des règles ont été modifiés. N'oubliez pas de sauvegarder.",
+      "loadError": "Impossible de charger les règles de l'application. Veuillez réessayer plus tard.",
+      "createSuccess": "Règle créée avec succès.",
+      "createError": "Impossible de créer la règle. Veuillez réessayer plus tard.",
+      "updateSuccess": "Règle modifiée avec succès.",
+      "updateError": "Impossible de modifier la règle. Veuillez réessayer plus tard.",
+      "updateItemsSuccess": "Modifications sauvegardées avec succès.",
+      "updateItemsError": "Impossible de sauvegarder les modifications. Veuillez réessayer plus tard.",
+      "updateItemsPartially": "Certaines règles n'ont pas pu être sauvegardées.",
+      "deleteSuccess": "Règle supprimée avec succès.",
+      "deleteError": "Impossible de supprimer la règle. Veuillez réessayer plus tard.",
+      "ButtonsCard": {
+        "add": "Ajouter une règle",
+        "save": "Sauvegarder"
+      },
+      "CreateFormDialog": {
+        "title": "Ajouter une règle",
+        "ButtonsCard": {
+          "confirm": "Ajouter",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "code": {
+            "label": "Code",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priorité",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "script": {
+            "label": "Script",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "disabled": {
+            "label": "Désactivée"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Modifier la règle {code}",
+        "ButtonsCard": {
+          "confirm": "Enregistrer",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "code": {
+            "label": "Code",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priorité",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "script": {
+            "label": "Script",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "disabled": {
+            "label": "Désactivée"
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Supprimer la règle {code}",
+        "content": "Voulez-vous vraiment supprimer la règle {code} ? Cette action est irréversible.",
+        "ButtonsCard": {
+          "confirm": "Supprimer",
+          "cancel": "Annuler"
+        }
+      },
+      "fields": {
+        "code": "Code",
+        "description": "Description",
+        "priority": "Priorité",
+        "disabled": "Désactivée"
+      }
     }
   },
   "AccountDeactivatedBanner": {

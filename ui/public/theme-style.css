@@ -75,21 +75,41 @@
   background: transparent;
 }
 
-.generic-details-page .generic-editable-table-card > .q-card__section:first-child {
+.generic-details-page
+  .generic-editable-table-card
+  > .q-card__section:first-child,
+.generic-details-page
+  .generic-sortable-list-card
+  > .q-card__section:first-child {
   padding: 0 0 8px;
 }
 
-.generic-details-page .generic-editable-table-card > .q-card__section:last-child {
+.generic-details-page
+  .generic-editable-table-card
+  > .q-card__section:last-child,
+.generic-details-page
+  .generic-sortable-list-card
+  > .q-card__section:last-child {
   padding-left: 0;
   padding-right: 0;
 }
 
-.generic-details-page .generic-editable-table-card--title {
+.generic-details-page .generic-editable-table-card--title,
+.generic-details-page .generic-sortable-list-card--title {
   padding-left: 12px;
   border-left: 4px solid var(--q-primary);
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.4;
+}
+
+.generic-details-page .generic-sortable-list-card--scroll-area {
+  height: 300px;
+}
+
+.generic-details-page .generic-sortable-list-card--header .q-item__label {
+  font-weight: 500;
+  font-size: 12px;
 }
 
 /* ===== Generic creation & edition pages ===== */

@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-08-05
+
+### Added
+
+#### Backend
+
+- Introduced **Application management**, allowing applications to be created, viewed, updated, and deleted through dedicated API endpoints.
+- Introduced **application rules management**, enabling CRUD operations for OPA-based authorization rules associated with applications.
+- Added **OPA policy generation and deployment workflow**:
+  - Generate Rego policies from application rules.
+  - Automatically regenerate policies when application rules are modified.
+  - Trigger policy deployment directly from an application.
+- Added **application script export**, allowing generated OPA Rego policies to be exported as files.
+- Added protection for the **LINID system application**, preventing unauthorized mutations of the system application and its administrator role.
+- Introduced dedicated **application roles management**, supporting role creation, update, deletion, and association with applications.
+
+#### Frontend
+
+- Introduced a complete **Application management UI**, including:
+  - Applications list page.
+  - Application creation page.
+  - Application edition page.
+  - Application details page.
+- Added **generic application details page integration**, providing a reusable details layout for application resources.
+- Added **application roles management interface**:
+  - Editable roles table.
+  - Sortable roles list card.
+  - Role creation and edition workflows.
+- Added **application rules management interface** through a sortable list card.
+- Added **OPA script export button** from application pages.
+
+### Fixed
+
+- Fixed CI security workflow issues and improved vulnerability handling (shai-hulud).
+
 ## [0.7.0] - 2026-07-21
 
 ### Added
@@ -268,3 +303,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.5.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.5.0
 [0.6.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.6.0
 [0.7.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.7.0
+[0.8.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.8.0

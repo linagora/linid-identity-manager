@@ -115,6 +115,15 @@ public class ApplicationView extends AbstractViewEntity {
     private String claimsTemplate;
 
     /**
+     * Indicates whether an OPA Rego policy script is defined for the application.
+     */
+    @Column(name = "hasScript", nullable = false)
+    @FilterType(type = Boolean.class)
+    @QueryFilterField(type = Boolean.class, description = "Indicates whether an OPA Rego policy script is defined for"
+        + " the application")
+    private Boolean hasScript;
+
+    /**
      * Optional provisioning or transformation script associated with the application.
      */
     @Column(name = "script")

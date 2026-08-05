@@ -6,6 +6,7 @@ SELECT a.app_id,
        a.type,
        a.claims_template,
        a.script,
+       a.script IS NOT NULL                                            AS "has_script",
        a.script_checksum,
        a.deployed_at,
        a.configuration,
@@ -25,6 +26,7 @@ COMMENT ON COLUMN applications_view.name IS 'Human-readable name of the applicat
 COMMENT ON COLUMN applications_view.description IS 'Optional free-text description of the application.';
 COMMENT ON COLUMN applications_view.type IS 'Type of the application.';
 COMMENT ON COLUMN applications_view.claims_template IS 'Template used to generate the claims exposed to the application.';
+COMMENT ON COLUMN applications_view.has_script IS 'Indicates whether an OPA Rego policy script is defined for the application.';
 COMMENT ON COLUMN applications_view.script IS 'Optional OPA Rego policy script stored to compute the access rights of the application.';
 COMMENT ON COLUMN applications_view.script_checksum IS 'Deterministic hash computed from the script. NULL when no script is defined.';
 COMMENT ON COLUMN applications_view.deployed_at IS 'Optional date and time when the application script was deployed on OPA (UTC). NULL when the application has not yet been deployed or requires redeployment.';

@@ -98,7 +98,7 @@ Feature: Test Application edition page display
     When I clear the text in the HTML element "[data-cy='field_code']"
     And I click on '[data-cy="button_confirm"]'
     Then I expect the HTML element '[role="alert"]' contains "Ce champ est requis"
-    When I set the text "new value" in the HTML element "[data-cy='field_code']"
+    When I set the text "new_value" in the HTML element "[data-cy='field_code']"
     Then I expect the HTML element '[role="alert"]' not exists
 
     When I clear the text in the HTML element "[data-cy='field_name']"

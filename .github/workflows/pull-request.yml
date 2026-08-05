@@ -348,3 +348,14 @@ jobs:
         if: always()
         working-directory: docker/e2e
         run: docker compose down
+
+  security-check:
+    name: Supply Chain Malware Scan
+    needs: [delete-comments]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: gensecaihq/Shai-Hulud-2.0-Detector@v2
+        with:
+          fail-on-critical: true

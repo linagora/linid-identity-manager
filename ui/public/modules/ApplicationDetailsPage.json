@@ -149,6 +149,22 @@
       },
       {
         "key": "audit",
+        "formatters": [
+          {
+            "field": "insertDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "updateDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          }
+        ],
         "fieldOrder": ["createdBy", "updatedBy", "insertDate", "updateDate"]
       }
     ]

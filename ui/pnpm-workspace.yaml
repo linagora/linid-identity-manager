@@ -21,4 +21,4 @@ minimumReleaseAgeExclude:
   - '@types/node@26.1.1'
   - '@vue/language-core@3.3.7'
   - vue-tsc@3.3.7
-  - '@linagora/linid-im-front-corelib@0.0.89'
+  - '@linagora/linid-im-front-corelib@0.0.91'

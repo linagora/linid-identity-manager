@@ -24,12 +24,20 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.api.model.superset;
+
 /**
- * Defines user preference domain models for the LinID-identity-manager API.
+ * Request payload used to authenticate against the Superset API.
  *
- * <p>This package contains the request record, data transfer object (DTO) and
- * mapper used to expose and persist per-user key/value preferences. These models
- * define the API contract for the preferences endpoints and the conversion to and
- * from the {@code UserPreference} entity.</p>
+ * @param username the Superset username
+ * @param password the Superset password
+ * @param provider the authentication provider used by Superset
+ * @param refresh  whether a refresh token should also be returned
  */
-package io.github.linagora.linid.im.api.model.user.preference;
+public record SupersetLoginRequest(
+    String username,
+    String password,
+    String provider,
+    boolean refresh
+) {
+}

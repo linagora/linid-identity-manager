@@ -24,12 +24,24 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.api.model.superset;
+
+
 /**
- * Defines user preference domain models for the LinID-identity-manager API.
+ * Configuration used to apply Row Level Security (RLS) rules
+ * to Superset dashboard requests.
  *
- * <p>This package contains the request record, data transfer object (DTO) and
- * mapper used to expose and persist per-user key/value preferences. These models
- * define the API contract for the preferences endpoints and the conversion to and
- * from the {@code UserPreference} entity.</p>
+ * @param slug       the Superset dashboard slug associated with this RLS configuration
+ * @param rlsEnabled whether RLS must be applied for the dashboard
+ * @param datasetId the Superset dataset identifier on which the RLS rule is applied
+ * @param entity     the entity name used to resolve the value required by the RLS rule
+ * @param attribute  the entity attribute used to build the RLS condition
  */
-package io.github.linagora.linid.im.api.model.user.preference;
+public record SupersetRlsConfig(
+    String slug,
+    boolean rlsEnabled,
+    int datasetId,
+    String entity,
+    String attribute
+) {
+}

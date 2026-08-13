@@ -24,12 +24,12 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.api.model.superset;
+
 /**
- * Defines user preference domain models for the LinID-identity-manager API.
+ * Response returned by Superset when requesting a CSRF token.
  *
- * <p>This package contains the request record, data transfer object (DTO) and
- * mapper used to expose and persist per-user key/value preferences. These models
- * define the API contract for the preferences endpoints and the conversion to and
- * from the {@code UserPreference} entity.</p>
+ * @param result the generated CSRF token value
  */
-package io.github.linagora.linid.im.api.model.user.preference;
+public record SupersetCsrfTokenResponse(String result) {
+}

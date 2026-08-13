@@ -24,12 +24,60 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.api.model.superset;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
 /**
- * Defines user preference domain models for the LinID-identity-manager API.
+ * Request payload used to generate a Superset guest token.
  *
- * <p>This package contains the request record, data transfer object (DTO) and
- * mapper used to expose and persist per-user key/value preferences. These models
- * define the API contract for the preferences endpoints and the conversion to and
- * from the {@code UserPreference} entity.</p>
+ * @param user      the guest user information
+ * @param resources the Superset resources accessible to the guest user
+ * @param rls       the Row Level Security rules applied to the guest user
  */
-package io.github.linagora.linid.im.api.model.user.preference;
+public record SupersetGuestTokenRequest(
+    GuestUser user,
+    List<Resource> resources,
+    List<RlsRule> rls
+) {
+
+    /**
+     * Guest user information included in the guest token request.
+     *
+     * @param username  the guest username
+     * @param firstName the guest user's first name
+     * @param lastName  the guest user's last name
+     */
+    public record GuestUser(
+        String username,
+        @JsonProperty("first_name") String firstName,
+        @JsonProperty("last_name") String lastName
+    ) {
+    }
+
+    /**
+     * Superset resource made available to the guest user.
+     *
+     * @param type the resource type
+     * @param id   the resource identifier
+     */
+    public record Resource(
+        String type,
+        String id
+    ) {
+    }
+
+    /**
+     * Row Level Security rule applied to a Superset dataset.
+     *
+     * @param clause  the SQL condition used to restrict the dataset rows
+     * @param dataset the identifier of the dataset to which the rule applies
+     */
+    public record RlsRule(
+        String clause,
+        Integer dataset
+    ) {
+    }
+}

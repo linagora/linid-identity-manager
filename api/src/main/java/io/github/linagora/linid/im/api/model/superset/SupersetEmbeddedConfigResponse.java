@@ -24,12 +24,29 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.api.model.superset;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.List;
+
 /**
- * Defines user preference domain models for the LinID-identity-manager API.
+ * Response returned by Superset when retrieving the embedded
+ * configuration of a dashboard.
  *
- * <p>This package contains the request record, data transfer object (DTO) and
- * mapper used to expose and persist per-user key/value preferences. These models
- * define the API contract for the preferences endpoints and the conversion to and
- * from the {@code UserPreference} entity.</p>
+ * @param result the embedded dashboard configuration
  */
-package io.github.linagora.linid.im.api.model.user.preference;
+public record SupersetEmbeddedConfigResponse(Result result) {
+
+    /**
+     * Embedded dashboard configuration details.
+     *
+     * @param uuid           the embedded dashboard UUID used by the Superset Embedded SDK
+     * @param allowedDomains the list of domains authorized to embed the dashboard
+     */
+    public record Result(
+        String uuid,
+        @JsonProperty("allowed_domains") List<String> allowedDomains
+    ) {
+    }
+}

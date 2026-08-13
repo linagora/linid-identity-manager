@@ -24,12 +24,45 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.api.model.superset;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import java.util.UUID;
+
 /**
- * Defines user preference domain models for the LinID-identity-manager API.
+ * Request payload used to generate a Superset guest token.
+ * <p>
+ * Identifies the target dashboard and optionally provides a Row Level
+ * Security (RLS) identifier used when generating the guest token.
  *
- * <p>This package contains the request record, data transfer object (DTO) and
- * mapper used to expose and persist per-user key/value preferences. These models
- * define the API contract for the preferences endpoints and the conversion to and
- * from the {@code UserPreference} entity.</p>
+ * @param dashboardSlug the Superset dashboard slug
+ * @param dashboardId   the Superset dashboard identifier
+ * @param rlsId         the optional Row Level Security identifier
  */
-package io.github.linagora.linid.im.api.model.user.preference;
+@Schema(description = "Superset guest token creation request")
+public record SupersetTokenRecord(
+    @NotBlank
+    @Schema(
+        description = "Superset dashboard slug",
+        example = "USER_LOG_DASHBOARD"
+    )
+    String dashboardSlug,
+
+    @NotNull
+    @Schema(
+        description = "Superset dashboard identifier",
+        example = "550e8400-e29b-41d4-a716-446655440000"
+    )
+    UUID dashboardId,
+
+    @Schema(
+        description = "Optional Row Level Security identifier",
+        example = "123456"
+    )
+    String rlsId
+
+) {
+}

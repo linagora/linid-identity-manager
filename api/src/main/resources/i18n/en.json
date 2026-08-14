@@ -57,5 +57,11 @@
   "error.application_role.system_reserved": "Roles of the system-reserved application '{code}' cannot be created, modified or deleted.",
   "error.opa.template.not_readable": "Unable to read the OPA policy template (location: {location})",
   "error.opa.policy.publish_failed": "Unable to publish the OPA policy to the OPA server (policyId: {policyId})",
+  "error.superset.file": "Unable to load the Superset configuration file: {path}",
+  "error.superset.access_token": "Unable to retrieve the access token",
+  "error.superset.csrf_token": "Unable to retrieve the CSRF token",
+  "error.superset.guest_token": "Unable to retrieve the guest token",
+  "error.superset.session_cookie": "Superset session cookie is missing",
+  "error.superset.slug_configuration": "Unable to retrieve the Superset dashboard configuration associated with the slug.",
   "error.user_preference.not_found": "User preference not found: {key}"
 }

@@ -94,3 +94,9 @@ opa:
   deployment:
     server-url: ${OPA_SERVER_URL:http://opa:8181}
     interval: ${OPA_DEPLOYMENT_INTERVAL:5m}
+
+superset:
+  url: ${SUPERSET_URL}
+  username: ${SUPERSET_USERNAME}
+  password: ${SUPERSET_PASSWORD}
+  rls-config: ${SUPERSE_RLS_CONFIG}

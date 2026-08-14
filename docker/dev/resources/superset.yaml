@@ -1,0 +1,7 @@
+superset:
+  dashboards:
+    - slug: USER_LOG_DASHBOARD
+      rls-enabled: true
+      dataset-id: 1
+      entity: ACCOUNT
+      attribute: externalId

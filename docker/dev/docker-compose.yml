@@ -6,31 +6,42 @@ services:
     container_name: db
     networks:
       - linid-dev-network
-    environment:
-      POSTGRES_USER: ${DATABASE_ADMIN_USER}
-      POSTGRES_PASSWORD: ${DATABASE_ADMIN_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+    env_file:
+      - ./env/db.env
     ports:
-      - ${DATABASE_PORT}:5432
+      - 5432:5432
     volumes:
-      - ./resources/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
-      - ./resources/init_lemonldap_db.sql:/docker-entrypoint-initdb.d/init_lemonldap_db.sql
+      - ../init-db/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql
     healthcheck:
       test: ["CMD-SHELL", "psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1' || exit 1"]
       interval: 2s
       timeout: 5s
       retries: 5
 
-  auth:
+  init-db:
+    image: postgres:18.4-alpine
+    container_name: init-db
+    networks:
+      - linid-dev-network
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - ./env/db.env
+    volumes:
+      - ../init-db/scripts:/app/scripts:ro
+      - ../init-db/init_data.sh:/app/init_data.sh:ro
+    entrypoint: [ "/bin/sh", "/app/init_data.sh" ]
+
+  lemon:
     image: lemonldapng/lemonldap-ng:2.23
     container_name: lemon
     networks:
       - linid-dev-network
-    environment:
-      SSODOMAIN: ${LEMONLDAP_SSO_DOMAIN}
-      PORTAL_HOSTNAME: ${LEMONLDAP_PORTAL_HOSTNAME}
+    env_file:
+      - ./env/lemon.env
     ports:
-      - ${LEMONLDAP_PORTAL_PORT}:443
+      - 8080:443
     volumes:
       - ./resources/llng/conf:/var/lib/lemonldap-ng/conf
       - ./resources/ssl.conf:/etc/nginx/conf.d/default.conf:ro
@@ -60,23 +71,37 @@ services:
       retries: 10
       start_period: 5s
 
-  db-init:
-    image: postgres:18.4-alpine
-    container_name: init-db
+  superset:
+    image: superset
+    container_name: superset
     networks:
       - linid-dev-network
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      DATABASE_ADMIN_USER: ${DATABASE_ADMIN_USER}
-      DATABASE_ADMIN_PASSWORD: ${DATABASE_ADMIN_PASSWORD}
-      DATABASE_NAME: ${DATABASE_NAME}
-      PGPASSWORD: ${DATABASE_ADMIN_PASSWORD}
+    env_file:
+      - ./env/superset.env
+    ports:
+      - 8088:8443
     volumes:
-      - ./resources/init_data.sql:/init_data.sql:ro
-      - ./resources/init_data.sh:/init_data.sh:ro
-    entrypoint: ["/bin/sh", "/init_data.sh"]
+      - ../superset/init_guest_role.py:/app/superset/init_guest_role.py:ro
+      - ./resources/superset.crt:/app/certs/superset.crt:ro
+      - ./resources/superset.key:/app/certs/superset.key:ro
+    depends_on:
+      - db
+
+  init-superset:
+    image: curlimages/curl:latest
+    container_name: init-superset
+    networks:
+      - linid-dev-network
+    env_file:
+      - ./env/superset.env
+    depends_on:
+      - superset
+    user: root
+    entrypoint: [ "sh", "-c", "apk add --no-cache jq zip && /app/superset/init_data_superset.sh" ]
+    volumes:
+      - ../superset/dashboard_export.zip:/app/superset/dashboard_export.zip:ro
+      - ../superset/init_data_superset.sh:/app/superset/init_data_superset.sh:ro
+    working_dir: /app/superset
 
 networks:
   linid-dev-network:

@@ -2,6 +2,7 @@
   "authentication": "DBI",
   "cfgDate": 1711324800,
   "cfgNum": 1,
+  "logLevel": "debug",
   "dbiAuthChain": "dbi:Pg:dbname=${LEMONLDAP_DATABASE_NAME};host=db",
   "dbiAuthUser": "${LEMONLDAP_DATABASE_ADMIN_USER}",
   "dbiAuthPassword": "${LEMONLDAP_DATABASE_ADMIN_PASSWORD}",

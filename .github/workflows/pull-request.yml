@@ -345,9 +345,9 @@ jobs:
           docker compose logs || true
 
       - name: Stop docker services
-        if: always()
+        if: failure()
         working-directory: docker/e2e
-        run: docker compose down
+        run: docker compose --env-file env/e2e.env down
 
   security-check:
     name: Supply Chain Malware Scan

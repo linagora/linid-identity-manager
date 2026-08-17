@@ -24,6 +24,7 @@ tasks:
   setup:dev:
     desc: Setup certificates, config files and Docker images for dev environment
     cmds:
+      - task: build:image:superset
       - task: setup:certs:dev
       - task: setup:lemonldap-config:dev
 
@@ -31,28 +32,9 @@ tasks:
     desc: Setup certificates, config files and Docker images for E2E environment
     cmds:
       - task: setup:certs:e2e
-      - task: build:images
       - task: setup:lemonldap-config:e2e
       - task: setup:oidc-config:e2e
-
-  build:images:
-    desc: Build all Docker images
-    cmds:
-      - task: build:image
-        vars:
-          IMAGE_NAME: catalog-ui
-          DOCKERFILE: linid-im-front-community-plugins/docker/catalog-ui.Dockerfile
-          CONTEXT_DIR: linid-im-front-community-plugins/
-      - task: build:image
-        vars:
-          IMAGE_NAME: linid-identity-manager-ui
-          DOCKERFILE: ui/Dockerfile
-          CONTEXT_DIR: ui/
-      - task: build:image
-        vars:
-          IMAGE_NAME: linid-identity-manager-api
-          DOCKERFILE: api/Dockerfile
-          CONTEXT_DIR: api/
+      - task: build:images
 
   setup:certs:
     desc: Generate all certificates and keys for all environments
@@ -83,6 +65,13 @@ tasks:
         vars:
           ENV: e2e
 
+  setup:certs:e2e:
+    desc: Generate certificates and keys for E2E environment
+    cmds:
+      - task: generate:certs
+        vars:
+          ENV: e2e
+
   setup:oidc-config:
     desc: Generate OIDC configuration for a specific environment
     cmds:
@@ -103,11 +92,11 @@ tasks:
       - task: generate:config:oidc
         vars:
           ENV: e2e
-          ENV_FILE: local.env
+          ENV_FILE: env/local.env
       - task: generate:config:oidc
         vars:
           ENV: e2e
-          ENV_FILE: .env
+          ENV_FILE: env/e2e.env
 
   setup:lemonldap-config:
     desc: Generate LemonLDAP configuration for all environment
@@ -122,7 +111,7 @@ tasks:
       - task: generate:config:lemonldap
         vars:
           ENV: demo
-          ENV_FILE: .env
+          ENV_FILE: env/demo.env
 
   setup:lemonldap-config:dev:
     desc: Generate LemonLDAP configuration for dev environment
@@ -130,7 +119,7 @@ tasks:
       - task: generate:config:lemonldap
         vars:
           ENV: dev
-          ENV_FILE: .env
+          ENV_FILE: env/dev.env
 
   setup:lemonldap-config:e2e:
     desc: Generate LemonLDAP configuration for E2E environment
@@ -140,11 +129,11 @@ tasks:
       - task: generate:config:lemonldap
         vars:
           ENV: "{{.ENV}}"
-          ENV_FILE: local.env
+          ENV_FILE: env/local.env
       - task: generate:config:lemonldap
         vars:
           ENV: "{{.ENV}}"
-          ENV_FILE: .env
+          ENV_FILE: env/e2e.env
 
   # ─── Demo environment ─────────────────────────────────────────────
 
@@ -159,7 +148,6 @@ tasks:
           HEALTHCHECK: curl -sk https://linid.localtest.me:9000 >/dev/null 2>&1
           TIMEOUT: 90
           LOG_FILE: /tmp/linid-docker.log
-      # Summary
       - echo ""
       - echo "  ✔ All services ready!"
       - echo "    LinID → https://linid.localtest.me:9000"
@@ -193,14 +181,13 @@ tasks:
       - task: start:service
         vars:
           SERVICE_NAME: Docker services (DB + LemonLDAP)
-          CMD: cd docker/dev && docker compose -f docker-compose.yml --env-file .env up -d --quiet-pull
+          CMD: cd docker/dev && docker compose --env-file env/dev.env -f docker-compose.yml up -d --quiet-pull
           HEALTHCHECK: curl -sk https://localhost:8080 >/dev/null 2>&1
           TIMEOUT: 90
           LOG_FILE: /tmp/linid-docker.log
-      # Summary
       - echo ""
       - echo "  ✔ All services ready!"
-      - echo "    DB → postgresql://localhost:5432/linid-db"
+      - echo "    DB → postgresql://localhost:5432/linid"
       - echo "    LemonLDAP → https://localhost:8080"
       - echo ""
       - echo "  Logs:"
@@ -228,32 +215,35 @@ tasks:
   start:e2e:
     desc: Start the full E2E environment (all-in-Docker)
     vars:
-      ENV_FILE: '{{.ENV_FILE| default "local.env"}}'
+      ENV_FILE: '{{.ENV_FILE | default "env/local.env"}}'
     cmds:
       - echo "Starting all services..."
       - task: start:service
         vars:
           SERVICE_NAME: Docker services
           LOG_FILE: /tmp/linid-docker.log
-          CMD: cd docker/e2e && docker compose --env-file {{.ENV_FILE}} up -d --quiet-pull
+          CMD: cd docker/e2e && docker compose --env-file "{{.ENV_FILE}}" up -d --quiet-pull
           HEALTHCHECK: curl -sk https://linid.localtest.me:9000 >/dev/null 2>&1
           TIMEOUT: 120
       - echo ""
       - echo "  ✔ E2E environment ready!"
       - cmd: echo "  → https://linid.localtest.me:9000"
-        if: '[ "{{.ENV_FILE}}" == "local.env" ]'
+        if: '[ "{{.ENV_FILE}}" == "env/local.env" ]'
       - echo ""
       - echo "  Logs:"
       - echo "    Docker       /tmp/linid-docker.log"
 
   stop:e2e:
     desc: Stop the full E2E environment
+    vars:
+      ENV_FILE: '{{.ENV_FILE | default "env/local.env"}}'
     cmds:
       - echo "Stopping all services..."
       - task: stop:compose
         vars:
           SERVICE_NAME: Docker services
           DIR: docker/e2e
+          ENV_FILE: env/e2e.env
       - echo ""
       - echo "  E2E environment stopped."
 
@@ -279,12 +269,16 @@ tasks:
   start:test:ci:
     desc: Run E2E tests in CI environment (Docker-based)
     dir: docker/e2e
+    vars:
+      ENV_FILE: env/e2e.env
     cmds:
       - task: start:e2e
         vars:
-          ENV_FILE: .env
-      - docker compose run --rm --no-deps e2e-test-runner
+          ENV_FILE: env/e2e.env
+      - docker compose --env-file env/e2e.env run --rm --no-deps e2e-test-runner
       - task: stop:e2e
+        vars:
+          ENV_FILE: env/e2e.env
 
   start:test:
     desc: Run E2E tests locally
@@ -312,7 +306,7 @@ tasks:
     desc: Generate certificates and keys for a specific environment
     internal: true
     dir: "docker/{{.ENV}}/resources"
-    dotenv: ['../{{.ENV_FILE| default ".env"}}']
+    dotenv: ['../{{.ENV_FILE | default "env/cert.env"}}']
     vars:
       TRUSTSTORE_PATH: '{{.TRUSTSTORE_PATH | default "."}}'
     cmds:
@@ -350,6 +344,22 @@ tasks:
             -keystore {{.ROOT_DIR}}/api/src/main/resources/keystore.jks \
             -storepass "$SSL_KEY_PASSWORD" -keypass "$SSL_KEY_PASSWORD" \
             -keyalg RSA -keysize 2048 -validity 3650 >/dev/null 2>&1
+      # Superset SSL certificate
+      - cmd: rm -fv superset.key superset.crt
+      - cmd: |
+          openssl req -x509 -newkey rsa:2048 \
+            -keyout superset.key \
+            -out superset.crt \
+            -days 3650 -nodes \
+            -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
+            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:localhost,DNS:superset" >/dev/null 2>&1
+      # Add Superset cert to the API truststore
+      - cmd: |
+          keytool -importcert -noprompt -trustcacerts \
+            -alias superset \
+            -file superset.crt \
+            -keystore {{.TRUSTSTORE_PATH}}/truststore.jks \
+            -storepass "$SSL_TRUSTSTORE_PASSWORD" >/dev/null 2>&1
 
   generate:config:oidc:
     desc: Generate OIDC configuration from templates using env variables
@@ -357,9 +367,10 @@ tasks:
     dir: "docker/{{.ENV}}/resources"
     dotenv: ["../{{.ENV_FILE}}"]
     cmds:
+      - echo ${CONFIG_DIR}/oidc/conf
+      - rm -rf ${CONFIG_DIR}/oidc/conf
       - mkdir -p ${CONFIG_DIR}/oidc/conf
       - envsubst < oidc-config.template.json > ${CONFIG_DIR}/oidc/conf/oidc-config.json
-    if: "[ ! -f {{.CONFIG_DIR}}oidc/conf/oidc-config.json ]"
 
   generate:config:lemonldap:
     desc: Generate LemonLDAP configuration from template using env variables
@@ -368,14 +379,56 @@ tasks:
     dotenv: ["../{{.ENV_FILE}}"]
     vars:
       CONFIG_DIR: "${CONFIG_DIR:+${CONFIG_DIR}/}"
-    status:
-      - "[ -f {{.CONFIG_DIR}}llng/conf/lmConf-1.json ]"
     cmd: |
+      rm -rf {{.CONFIG_DIR}}llng
       export OIDC_PRIVATE_KEY=$(awk '{printf "%s\\n", $0}' oidc.key)
       export OIDC_PUBLIC_KEY=$(awk '{printf "%s\\n", $0}' oidc.pub)
       mkdir -p {{.CONFIG_DIR}}llng/conf
       envsubst < lmConf-1.template.json > {{.CONFIG_DIR}}llng/conf/lmConf-1.json
-    if: "[ ! -f {{.CONFIG_DIR}}llng/conf/lmConf-1.json ]"
+
+  build:images:
+    desc: Build all Docker images
+    cmds:
+      - task: build:image:catalog-ui
+      - task: build:image:ui
+      - task: build:image:api
+      - task: build:image:superset
+
+  build:image:catalog-ui:
+    desc: Build catalog-ui Docker image
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: catalog-ui
+          DOCKERFILE: linid-im-front-community-plugins/docker/catalog-ui.Dockerfile
+          CONTEXT_DIR: linid-im-front-community-plugins/
+
+  build:image:ui:
+    desc: Build linid-identity-manager-ui Docker image
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: linid-identity-manager-ui
+          DOCKERFILE: ui/Dockerfile
+          CONTEXT_DIR: ui/
+
+  build:image:api:
+    desc: Build linid-identity-manager-api Docker image
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: linid-identity-manager-api
+          DOCKERFILE: api/Dockerfile
+          CONTEXT_DIR: api/
+
+  build:image:superset:
+    desc: Build superset Docker image
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: superset
+          DOCKERFILE: docker/superset/Dockerfile
+          CONTEXT_DIR: docker/superset
 
   build:image:
     desc: Build a specific Docker image
@@ -395,8 +448,11 @@ tasks:
             sleep 0.5
           done
         done
-        wait $p; r=$?
-        [ $r -eq 0 ] && printf "\r  ✔ {{.IMAGE_NAME}} image built      \n" || { printf "\r  ✗ {{.IMAGE_NAME}} image build failed — see {{.LOG_FILE}}\n"; exit $r; }
+        wait $p
+        r=$?
+        [ $r -eq 0 ] \
+          && printf "\r  ✔ {{.IMAGE_NAME}} image built      \n" \
+          || { printf "\r  ✗ {{.IMAGE_NAME}} image build failed — see {{.LOG_FILE}}\n"; exit $r; }
       '
 
   start:service:
@@ -404,7 +460,6 @@ tasks:
     internal: true
     cmd: |
       sh -c '
-        {{if .ENV_FILE}}set -a && . "{{.ENV_FILE}}" && set +a{{end}}
         {{.CMD}} > {{.LOG_FILE}} 2>&1 &
         p=$!
         elapsed=0
@@ -433,14 +488,19 @@ tasks:
     desc: Stop a specific service
     internal: true
     cmd: |
-      pids=$(lsof -t -i:{{.PORT}}) && /bin/kill $pids && echo "  ✔ {{.SERVICE_NAME}} stopped" || echo "  ○ {{.SERVICE_NAME}} (not running)"
+      pids=$(lsof -t -i:{{.PORT}}) \
+        && /bin/kill $pids \
+        && echo "  ✔ {{.SERVICE_NAME}} stopped" \
+        || echo "  ○ {{.SERVICE_NAME}} (not running)"
 
   stop:compose:
     desc: Stop Docker Compose services
+    vars:
+      ENV_FILE: '{{.ENV_FILE | default "env/local.env"}}'
     internal: true
     dir: "{{.DIR}}"
     cmd: |
-      running=$(docker compose ps --status running -q 2>/dev/null || true)
+      running=$(docker compose --env-file "{{.ENV_FILE}}" ps --status running -q 2>/dev/null || true)
 
       if [ -z "$running" ]; then
         echo "  ○ {{.SERVICE_NAME}} (not running)"
@@ -448,6 +508,6 @@ tasks:
       fi
 
       set -o pipefail
-      docker compose down -v --remove-orphans 2>&1 | tee /tmp/linid-docker.log
+      docker compose --env-file "{{.ENV_FILE}}" down -v --remove-orphans 2>&1 | tee /tmp/linid-docker.log
 
       echo "  ✔ {{.SERVICE_NAME}} stopped"

@@ -26,46 +26,50 @@
 
 package io.github.linagora.linid.im.api.persistence.repository;
 
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
-import java.util.Optional;
-import java.util.UUID;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.Repository;
-import org.jspecify.annotations.NonNull;
+
+import java.util.Optional;
+import java.util.UUID;
 
 /**
- * Read-only Spring Data repository for {@link AccountView}.
+ * Read-only Spring Data repository for {@link AccountDistinctView}.
  *
- * <p>Exposes only read operations: mutating methods from {@code JpaRepository} (save, delete,
- * flush...) are intentionally not inherited, since {@link AccountView} is backed by a database
- * view.
+ * <p>This repository is backed by a database view and therefore intentionally exposes only
+ * read operations. It does not extend {@code JpaRepository}, preventing write operations such
+ * as {@code save}, {@code delete}, or {@code flush} from being available through this repository.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering via {@code
- * spring-query-filter} specifications.
+ * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering and pagination using
+ * JPA {@link Specification specifications}.
  */
-public interface AccountViewRepository
-    extends Repository<AccountView, UUID>, JpaSpecificationExecutor<AccountView> {
-
+public interface AccountDistinctViewRepository
+    extends Repository<AccountDistinctView, UUID>, JpaSpecificationExecutor<AccountDistinctView> {
 
     /**
-     * Finds all account views matching the given specification and pageable.
+     * Retrieves a page of account views matching the given specification.
      *
-     * @param specification the specification to filter account views.
-     * @param pageable      the pagination information.
-     * @return a page of account views matching the specification and pagination criteria.
+     * @param specification the specification used to filter the account views.
+     * @param pageable the pagination and sorting information.
+     * @return a page containing the matching account views.
      */
     @Override
     @NonNull
-    Page<AccountView> findAll(@NonNull Specification<AccountView> specification, @NonNull Pageable pageable);
+    Page<AccountDistinctView> findAll(
+        @NonNull Specification<AccountDistinctView> specification,
+        @NonNull Pageable pageable
+    );
 
     /**
-     * Finds an account view by its ID.
+     * Retrieves an account view by its identifier.
      *
-     * @param id the UUID of the account view
-     * @return an Optional containing the found account view, or empty if not found
+     * @param id the identifier of the account view.
+     * @return an {@link Optional} containing the matching account view, or an empty
+     * {@link Optional} if no account view exists with the given identifier.
      */
-    Optional<AccountView> findById(UUID id);
+    Optional<AccountDistinctView> findFirstById(UUID id);
 }

@@ -39,7 +39,7 @@ import io.github.linagora.linid.im.api.model.superset.SupersetRlsConfig;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenDTO;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
@@ -83,7 +83,7 @@ public class SupersetServiceImpl implements SupersetService {
     /**
      * Repository used to retrieve account data required to build RLS rules.
      */
-    private final AccountViewRepository accountViewRepository;
+    private final AccountDistinctViewRepository accountDistinctViewRepository;
 
     /**
      * Repository used to retrieve organizational unit data required to build
@@ -120,19 +120,19 @@ public class SupersetServiceImpl implements SupersetService {
      * @param rlsConfigPath                    the path to the Superset RLS configuration file
      * @param supersetCacheService             service responsible for Superset authentication
      *                                         and access token caching
-     * @param accountViewRepository            repository used to retrieve account data for RLS rules
+     * @param accountDistinctViewRepository    repository used to retrieve account data for RLS rules
      * @param organizationalUnitViewRepository repository used to retrieve organizational unit data for RLS rules
      */
     public SupersetServiceImpl(@Value("${superset.url}") final String url,
                                @Value("${superset.rls-config}") final String rlsConfigPath,
                                final SupersetCacheService supersetCacheService,
-                               final AccountViewRepository accountViewRepository,
+                               final AccountDistinctViewRepository accountDistinctViewRepository,
                                final OrganizationalUnitViewRepository organizationalUnitViewRepository) {
         this.url = url;
         this.restClient = RestClient.builder()
             .baseUrl(url)
             .build();
-        this.accountViewRepository = accountViewRepository;
+        this.accountDistinctViewRepository = accountDistinctViewRepository;
         this.organizationalUnitViewRepository = organizationalUnitViewRepository;
         this.supersetCacheService = supersetCacheService;
 
@@ -405,7 +405,7 @@ public class SupersetServiceImpl implements SupersetService {
             );
         }
 
-        var account = accountViewRepository.findById(UUID.fromString(rlsId))
+        var account = accountDistinctViewRepository.findFirstById(UUID.fromString(rlsId))
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.account.not_found", Map.of("id", rlsId))

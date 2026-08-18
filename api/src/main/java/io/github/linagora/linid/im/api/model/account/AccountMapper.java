@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.model.account;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -78,4 +79,15 @@ public interface AccountMapper {
      * @return the corresponding DTO
      */
     AccountViewDTO toDTO(AccountView accountView);
+
+    /**
+     * Converts an {@link AccountDistinctView} entity to an {@link AccountViewDTO}.
+     *
+     * <p>This mapping is used for account view queries where the account data may be enriched
+     * with organizational unit information.
+     *
+     * @param accountView the distinct account view entity.
+     * @return the corresponding account view DTO.
+     */
+    AccountViewDTO toDTO(AccountDistinctView accountView);
 }

@@ -38,13 +38,14 @@ import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
+import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
-import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
@@ -55,6 +56,7 @@ import io.github.linagora.linid.im.api.service.validation.AccountSuspensionValid
 import io.github.linagora.linid.im.api.service.validation.AccountValidityValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import java.time.OffsetDateTime;
 import java.util.Map;
@@ -109,7 +111,7 @@ public class AccountServiceImpl implements AccountService {
     /**
      * Repository for read-only account view operations, supporting dynamic filtering.
      */
-    private final AccountViewRepository accountViewRepository;
+    private final AccountDistinctViewRepository accountDistinctViewRepository;
 
     /**
      * Service for computing SHA-256 checksums.
@@ -177,6 +179,11 @@ public class AccountServiceImpl implements AccountService {
      */
     private final AccountCreationValidator accountCreationValidator;
 
+    /**
+     * Executor used to build and execute dynamic Spring Data JPA queries.
+     */
+    private final SpringQueryExecutor executor;
+
     @Override
     public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
 
@@ -204,18 +211,23 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<AccountView> findAll(final UserPrincipal userPrincipal,
-                                     final AccountViewQueryFilterDto filters,
-                                     final Pageable pageable) {
+    public Page<AccountDistinctView> findAll(final UserPrincipal userPrincipal,
+                                             final AccountViewQueryFilterDto filters,
+                                             final Pageable pageable) {
         var specification = new SpringQueryFilterSpecification<>(AccountView.class, filters);
 
-        return accountViewRepository.findAll(specification, pageable);
+        return executor.findDistinctPageEntities(
+            AccountView.class,
+            AccountDistinctView.class,
+            specification,
+            pageable
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public AccountView findById(final UserPrincipal userPrincipal, final UUID id) {
-        return accountViewRepository.findById(id)
+    public AccountDistinctView findById(final UserPrincipal userPrincipal, final UUID id) {
+        return accountDistinctViewRepository.findFirstById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))
@@ -239,7 +251,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountView suspend(final UserPrincipal userPrincipal,
+    public AccountDistinctView suspend(final UserPrincipal userPrincipal,
                                final UUID accountId,
                                final AccountSuspensionRecord record) {
         ensureAccountExists(accountId);
@@ -254,7 +266,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountView deactivate(final UserPrincipal userPrincipal,
+    public AccountDistinctView deactivate(final UserPrincipal userPrincipal,
                                   final UUID accountId,
                                   final AccountDeactivationRecord record) {
         ensureAccountExists(accountId);
@@ -273,7 +285,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountView reactivate(final UserPrincipal userPrincipal,
+    public AccountDistinctView reactivate(final UserPrincipal userPrincipal,
                                   final UUID accountId,
                                   final AccountReactivationRecord record) {
         ensureAccountExists(accountId);
@@ -313,7 +325,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountView updateValidity(final UserPrincipal userPrincipal,
+    public AccountDistinctView updateValidity(final UserPrincipal userPrincipal,
                                       final UUID accountId,
                                       final AccountValidityRecord record) {
         ensureAccountExists(accountId);
@@ -332,7 +344,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountView updateActivation(final UserPrincipal userPrincipal,
+    public AccountDistinctView updateActivation(final UserPrincipal userPrincipal,
                                         final UUID accountId,
                                         final AccountActivationRecord record) {
         ensureAccountExists(accountId);

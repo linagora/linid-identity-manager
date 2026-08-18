@@ -26,9 +26,6 @@
 
 package io.github.linagora.linid.im.api.persistence.model;
 
-import io.github.zorin95670.predicate.FilterType;
-import io.github.zorin95670.processor.annotation.QueryFilter;
-import io.github.zorin95670.processor.annotation.QueryFilterField;
 import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import jakarta.persistence.Column;
@@ -37,10 +34,6 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -49,11 +42,19 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+
 /**
- * Entity with enriched account information, mapped to the {@code accounts_view} database view.
+ * Entity providing enriched, read-only account information, mapped to the {@code accounts_view} database view.
  *
- * <p>Provides {@code createdBy}, {@code updatedBy}, {@code insertDate}, and {@code updateDate}
- * columns that are automatically managed by the service layer and database triggers.
+ * <p>In addition to the account's identity information, this view exposes organizational unit membership,
+ * account validity and suspension periods, lifecycle timestamps, status information, and the reasons and
+ * comments associated with account state changes.
+ *
+ * <p>Audit information such as {@code createdBy}, {@code updatedBy}, {@code insertDate}, and {@code updateDate}
+ * is inherited from {@link AbstractViewEntity}.
  */
 @Entity
 @Table(name = "accounts_view")
@@ -63,71 +64,43 @@ import org.hibernate.annotations.Type;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@QueryFilter
-public class AccountView extends AbstractViewEntity {
+public class AccountDistinctView extends AbstractViewEntity {
 
     /**
      * Unique identifier of the account (UUID).
      */
     @Id
     @Column(name = "act_id")
-    @FilterType(type = UUID.class)
-    @QueryFilterField(type = UUID.class, description = "Account unique identifier")
     private UUID id;
 
     /**
      * External identifier (e.g. OIDC sub or external system ID).
      */
     @Column(name = "external_id", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "External identifier (e.g. OIDC sub)")
     private String externalId;
 
     /**
      * Last name of the account holder.
      */
     @Column(name = "lastname", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Last name of the account holder")
     private String lastname;
 
     /**
      * First name of the account holder.
      */
     @Column(name = "firstname", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "First name of the account holder")
     private String firstname;
 
     /**
      * Email address associated with the account.
      */
     @Column(name = "email", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Email address of the account")
     private String email;
-
-    /**
-     * Unique identifier of the organizational unit to which the account belongs.
-     */
-    @Column(name = "organizational_unit_id")
-    @FilterType(type = UUID.class)
-    @QueryFilterField(
-        type = UUID.class,
-        description = "Unique identifier of the organizational unit to which the account belongs"
-    )
-    private UUID organizationalUnitId;
 
     /**
      * Names of the organizational units to which the account belongs, represented as a comma-separated list.
      */
-    @Column(name = "organizational_units")
-    @FilterType(type = String.class)
-    @QueryFilterField(
-        type = String.class,
-        description = "Names of the organizational units to which the account belongs, represented as a "
-            + "comma-separated list"
-    )
+    @Column(name = "organizational_units", nullable = false)
     private String organizationalUnits;
 
     /**
@@ -149,24 +122,18 @@ public class AccountView extends AbstractViewEntity {
      * {@code null} until the account is activated.
      */
     @Column(name = "activation_at")
-    @FilterType(type = Date.class)
-    @QueryFilterField(type = Date.class, description = "Activation timestamp")
     private OffsetDateTime activationAt;
 
     /**
      * High-level reason code explaining the suspension. {@code null} when not provided.
      */
     @Column(name = "suspension_reason")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Suspension reason code")
     private String suspensionReason;
 
     /**
      * More detailed classification of the suspension reason. {@code null} when not provided.
      */
     @Column(name = "suspension_subreason")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Suspension sub-reason code")
     private String suspensionSubreason;
 
     /**
@@ -174,24 +141,18 @@ public class AccountView extends AbstractViewEntity {
      * {@code null} when not provided.
      */
     @Column(name = "suspension_comment")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text suspension comment")
     private String suspensionComment;
 
     /**
      * High-level reason code explaining the deactivation. {@code null} when not provided.
      */
     @Column(name = "deactivation_reason")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Deactivation reason code")
     private String deactivationReason;
 
     /**
      * More detailed classification of the deactivation reason. {@code null} when not provided.
      */
     @Column(name = "deactivation_subreason")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Deactivation sub-reason code")
     private String deactivationSubreason;
 
     /**
@@ -199,8 +160,6 @@ public class AccountView extends AbstractViewEntity {
      * {@code null} when not provided.
      */
     @Column(name = "deactivation_comment")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text deactivation comment")
     private String deactivationComment;
 
     /**
@@ -208,8 +167,6 @@ public class AccountView extends AbstractViewEntity {
      * {@code null} when not provided.
      */
     @Column(name = "reactivation_comment")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Free-text reactivation comment")
     private String reactivationComment;
 
     /**
@@ -217,8 +174,6 @@ public class AccountView extends AbstractViewEntity {
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Computed account status (ACTIVE, SUSPENDED or INACTIVE)")
     private AccountStatusEnum status;
 
     /**
@@ -226,7 +181,82 @@ public class AccountView extends AbstractViewEntity {
      * Can be negative. {@code null} when the validity period has no upper bound.
      */
     @Column(name = "days_before_deactivation")
-    @FilterType(type = Integer.class)
-    @QueryFilterField(type = Integer.class, description = "Days before validity period upper bound")
     private Integer daysBeforeDeactivation;
+
+    /**
+     * Creates an account view with its audit information, identity information, organizational unit membership,
+     * lifecycle information, status, and state change details.
+     *
+     * <p>This constructor is intentionally provided with all view properties as parameters to allow
+     *  {@code spring-query-filter} to instantiate the entity when creating filtered query projections.
+     *
+     * @param createdBy the identifier of the user or system that created the account.
+     * @param updatedBy the identifier of the user or system that last updated the account.
+     * @param insertDate the timestamp when the account was created.
+     * @param updateDate the timestamp when the account was last updated.
+     * @param id the unique identifier of the account.
+     * @param externalId the external identifier of the account, such as an OIDC subject or an identifier from
+     *                   an external system.
+     * @param lastname the last name of the account holder.
+     * @param firstname the first name of the account holder.
+     * @param email the email address associated with the account.
+     * @param organizationalUnits the names of the organizational units to which the account belongs,
+     *                             represented as a comma-separated list.
+     * @param validityPeriod the time range during which the account is considered valid.
+     * @param suspensionPeriod the time range during which the account is suspended.
+     * @param activationAt the timestamp when the account was activated or reactivated.
+     * @param suspensionReason the high-level reason code explaining the account suspension.
+     * @param suspensionSubreason the detailed classification of the account suspension reason.
+     * @param suspensionComment the free-text comment providing additional context about the account suspension.
+     * @param deactivationReason the high-level reason code explaining the account deactivation.
+     * @param deactivationSubreason the detailed classification of the account deactivation reason.
+     * @param deactivationComment the free-text comment providing additional context about the account deactivation.
+     * @param reactivationComment the free-text comment providing additional context about the account reactivation.
+     * @param status the computed current status of the account.
+     * @param daysBeforeDeactivation the number of calendar days remaining before the upper bound of the validity
+     *                               period; may be negative when the validity period has expired.
+     */
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    public AccountDistinctView(final String createdBy,
+                               final String updatedBy,
+                               final OffsetDateTime insertDate,
+                               final OffsetDateTime updateDate,
+                               final UUID id,
+                               final String externalId,
+                               final String lastname,
+                               final String firstname,
+                               final String email,
+                               final String organizationalUnits,
+                               final Range<ZonedDateTime> validityPeriod,
+                               final Range<ZonedDateTime> suspensionPeriod,
+                               final OffsetDateTime activationAt,
+                               final String suspensionReason,
+                               final String suspensionSubreason,
+                               final String suspensionComment,
+                               final String deactivationReason,
+                               final String deactivationSubreason,
+                               final String deactivationComment,
+                               final String reactivationComment,
+                               final AccountStatusEnum status,
+                               final Integer daysBeforeDeactivation) {
+        super(createdBy, updatedBy, insertDate, updateDate);
+        this.id = id;
+        this.externalId = externalId;
+        this.lastname = lastname;
+        this.firstname = firstname;
+        this.email = email;
+        this.organizationalUnits = organizationalUnits;
+        this.validityPeriod = validityPeriod;
+        this.suspensionPeriod = suspensionPeriod;
+        this.activationAt = activationAt;
+        this.suspensionReason = suspensionReason;
+        this.suspensionSubreason = suspensionSubreason;
+        this.suspensionComment = suspensionComment;
+        this.deactivationReason = deactivationReason;
+        this.deactivationSubreason = deactivationSubreason;
+        this.deactivationComment = deactivationComment;
+        this.reactivationComment = reactivationComment;
+        this.status = status;
+        this.daysBeforeDeactivation = daysBeforeDeactivation;
+    }
 }

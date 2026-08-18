@@ -29,9 +29,9 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.superset.SupersetRlsConfig;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
-import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import org.junit.jupiter.api.BeforeEach;
@@ -57,7 +57,7 @@ import static org.mockito.Mockito.when;
 class SupersetServiceImplTest {
 
     @Mock
-    private AccountViewRepository accountViewRepository;
+    private AccountDistinctViewRepository accountDistinctViewRepository;
 
     @Mock
     private OrganizationalUnitViewRepository organizationalUnitViewRepository;
@@ -73,7 +73,7 @@ class SupersetServiceImplTest {
             "http://localhost:8088",
             "",
             supersetCacheService,
-            accountViewRepository,
+            accountDistinctViewRepository,
             organizationalUnitViewRepository
         );
     }
@@ -124,9 +124,9 @@ class SupersetServiceImplTest {
             "externalId"
         );
 
-        var account = AccountView.builder().externalId("john.doe").build();
+        var account = AccountDistinctView.builder().externalId("john.doe").build();
 
-        when(accountViewRepository.findById(UUID.fromString(rlsId)))
+        when(accountDistinctViewRepository.findFirstById(UUID.fromString(rlsId)))
             .thenReturn(Optional.of(account));
 
         setRlsConfigurations(
@@ -166,9 +166,9 @@ class SupersetServiceImplTest {
             "externalId"
         );
 
-        var account = AccountView.builder().externalId("john.doe").build();
+        var account = AccountDistinctView.builder().externalId("john.doe").build();
 
-        when(accountViewRepository.findById(rlsId))
+        when(accountDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.of(account));
 
         var tokenRecord = new SupersetTokenRecord(
@@ -252,7 +252,7 @@ class SupersetServiceImplTest {
     void shouldThrowWhenAccountDoesNotExist() {
         var rlsId = UUID.randomUUID();
 
-        when(accountViewRepository.findById(rlsId))
+        when(accountDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
@@ -265,9 +265,9 @@ class SupersetServiceImplTest {
     @DisplayName("should return the configured account attribute value")
     void shouldReturnAccountAttributeValue() {
         var rlsId = UUID.randomUUID();
-        var account = AccountView.builder().externalId("john.doe").build();
+        var account = AccountDistinctView.builder().externalId("john.doe").build();
 
-        when(accountViewRepository.findById(rlsId))
+        when(accountDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.of(account));
 
         var result = service.getAccountValue(

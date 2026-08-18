@@ -45,7 +45,7 @@ import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
@@ -128,9 +128,9 @@ class AccountControllerTest {
             .build();
     }
 
-    private AccountView createSampleViewEntity() {
+    private AccountDistinctView createSampleViewEntity() {
         Account entity = new Account();
-        return AccountView.builder()
+        return AccountDistinctView.builder()
             .id(entity.getId())
             .externalId(entity.getExternalId())
             .lastname(entity.getLastname())
@@ -143,7 +143,7 @@ class AccountControllerTest {
             .build();
     }
 
-    private AccountViewDTO createSampleViewDTO(final AccountView viewEntity) {
+    private AccountViewDTO createSampleViewDTO(final AccountDistinctView viewEntity) {
         return AccountViewDTO.builder()
             .id(viewEntity.getId())
             .externalId(viewEntity.getExternalId())

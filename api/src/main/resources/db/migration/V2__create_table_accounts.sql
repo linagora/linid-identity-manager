@@ -1,16 +1,17 @@
 CREATE TABLE IF NOT EXISTS accounts
 (
-    act_id      UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    external_id VARCHAR(128) NOT NULL,
-    email       VARCHAR(320) NOT NULL UNIQUE,
-    lastname    VARCHAR(255) NOT NULL,
-    firstname   VARCHAR(255) NOT NULL,
-    payload     JSONB        NOT NULL DEFAULT '{}'::JSONB,
-    checksum    VARCHAR(64)  NOT NULL,
-    created_by  UUID         NOT NULL,
-    updated_by  UUID         NOT NULL,
-    insert_date TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    update_date TIMESTAMPTZ  NOT NULL DEFAULT now()
+    act_id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    external_id      VARCHAR(128) NOT NULL,
+    email            VARCHAR(320) NOT NULL UNIQUE,
+    lastname         VARCHAR(255) NOT NULL,
+    firstname        VARCHAR(255) NOT NULL,
+    extra_parameters JSONB        NOT NULL DEFAULT '{}'::JSONB,
+    payload          JSONB        NOT NULL DEFAULT '{}'::JSONB,
+    checksum         VARCHAR(64)  NOT NULL,
+    created_by       UUID         NOT NULL,
+    updated_by       UUID         NOT NULL,
+    insert_date      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    update_date      TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
 CREATE UNIQUE INDEX idx_accounts_external_id ON accounts (external_id);

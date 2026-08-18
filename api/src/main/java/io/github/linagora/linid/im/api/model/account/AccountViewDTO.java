@@ -77,6 +77,14 @@ public class AccountViewDTO {
     private String email;
 
     /**
+     * Names of the organizational units to which the account belongs, represented as a comma-separated list.
+     */
+    @Schema(
+        description = "Names of the organizational units to which the account belongs, "
+                + "represented as a comma-separated list")
+    private String organizationalUnits;
+
+    /**
      * Time range during which the account is considered valid.
      */
     @Schema(description = "Time range during which the account is considered valid")

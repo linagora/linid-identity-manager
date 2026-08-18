@@ -38,13 +38,13 @@ import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
+import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
-import io.github.linagora.linid.im.api.persistence.repository.AccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
@@ -55,6 +55,7 @@ import io.github.linagora.linid.im.api.service.validation.AccountSuspensionValid
 import io.github.linagora.linid.im.api.service.validation.AccountValidityValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import org.springframework.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,7 +70,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
@@ -93,7 +93,7 @@ class AccountServiceImplTest {
     @Mock
     private AccountRepository accountRepository;
     @Mock
-    private AccountViewRepository accountViewRepository;
+    private AccountDistinctViewRepository accountDistinctViewRepository;
     @Mock
     private ChecksumService checksumService;
     @Mock
@@ -120,6 +120,8 @@ class AccountServiceImplTest {
     private AccountValidityValidator accountValidityValidator;
     @Mock
     private AccountCreationValidator accountCreationValidator;
+    @Mock
+    private SpringQueryExecutor executor;
     @InjectMocks
     private AccountServiceImpl accountService;
     private UserPrincipal userPrincipal;
@@ -367,31 +369,35 @@ class AccountServiceImplTest {
     @DisplayName("Should call repository with specification and pageable")
     void testFindAll_shouldDelegateToRepository() {
         var pageable = PageRequest.of(0, 10);
-        var entity = new AccountView();
+        var entity = new AccountDistinctView();
         var filters = new AccountViewQueryFilterDto();
-        when(accountViewRepository.findAll(
-            ArgumentMatchers.<Specification<AccountView>>any(),
-            any(Pageable.class)))
+        when(executor.findDistinctPageEntities(
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()))
             .thenReturn(new PageImpl<>(List.of(entity)));
 
-        Page<AccountView> result = accountService.findAll(userPrincipal, filters, pageable);
+        Page<AccountDistinctView> result = accountService.findAll(userPrincipal, filters, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(accountViewRepository).findAll(
-            ArgumentMatchers.<Specification<AccountView>>any(),
-            any(Pageable.class));
+        verify(executor).findDistinctPageEntities(
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any());
     }
 
     @Test
     @DisplayName("Should return account when found by ID")
     void testFindById_shouldReturnAccountWhenFound() {
         UUID id = UUID.randomUUID();
-        var entity = new AccountView();
+        var entity = new AccountDistinctView();
         entity.setId(id);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
 
-        AccountView result = accountService.findById(userPrincipal, id);
+        AccountDistinctView result = accountService.findById(userPrincipal, id);
 
         assertNotNull(result);
         assertEquals(id, result.getId());
@@ -401,7 +407,7 @@ class AccountServiceImplTest {
     @DisplayName("Should throw ApiException 404 when account not found")
     void testFindById_shouldThrow404WhenNotFound() {
         UUID id = UUID.randomUUID();
-        when(accountViewRepository.findById(id)).thenReturn(Optional.empty());
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
             () -> accountService.findById(userPrincipal, id));
@@ -414,9 +420,9 @@ class AccountServiceImplTest {
     @DisplayName("Should delete account when it exists")
     void testDeleteById_shouldDeleteWhenFound() {
         UUID id = UUID.randomUUID();
-        var entity = new AccountView();
+        var entity = new AccountDistinctView();
         entity.setId(id);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
 
         accountService.deleteById(userPrincipal, id);
 
@@ -427,7 +433,7 @@ class AccountServiceImplTest {
     @DisplayName("Should throw ApiException 404 when deleting non-existent account")
     void testDeleteById_shouldThrow404WhenNotFound() {
         UUID id = UUID.randomUUID();
-        when(accountViewRepository.findById(id)).thenReturn(Optional.empty());
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
             () -> accountService.deleteById(userPrincipal, id));
@@ -523,7 +529,7 @@ class AccountServiceImplTest {
     @DisplayName("suspend should apply suspension fields, save and return the refreshed view")
     void testSuspend_shouldApplyFieldsSaveAndReturnView() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
+        var view = new AccountDistinctView();
         view.setId(id);
         var existing = new AccountStatus();
         var record = new AccountSuspensionRecord(
@@ -532,9 +538,9 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
-        AccountView result = accountService.suspend(userPrincipal, id, record);
+        AccountDistinctView result = accountService.suspend(userPrincipal, id, record);
 
         assertSame(view, result);
         assertEquals("REASON", existing.getSuspensionReason());
@@ -606,7 +612,7 @@ class AccountServiceImplTest {
     @DisplayName("deactivate should set validity end to deactivationAt, save and return the refreshed view")
     void testDeactivate_shouldApplyFieldsSaveAndReturnView() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
+        var view = new AccountDistinctView();
         view.setId(id);
         var existing = new AccountStatus();
         existing.setValidityPeriod(commonMapper.toRange(new PeriodRecord(START, null)));
@@ -616,9 +622,9 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
-        AccountView result = accountService.deactivate(userPrincipal, id, record);
+        AccountDistinctView result = accountService.deactivate(userPrincipal, id, record);
 
         assertSame(view, result);
         assertEquals(START, commonMapper.startOf(existing.getValidityPeriod()));
@@ -692,7 +698,7 @@ class AccountServiceImplTest {
     @DisplayName("reactivate should close the suspension period, save and return the refreshed view")
     void testReactivate_shouldApplyFieldsSaveAndReturnView() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
+        var view = new AccountDistinctView();
         view.setId(id);
         var existing = new AccountStatus();
         OffsetDateTime suspensionStart = OffsetDateTime.now().minusDays(1);
@@ -702,9 +708,9 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
-        AccountView result = accountService.reactivate(userPrincipal, id, record);
+        AccountDistinctView result = accountService.reactivate(userPrincipal, id, record);
 
         assertSame(view, result);
         assertEquals(suspensionStart.toInstant(),
@@ -720,7 +726,7 @@ class AccountServiceImplTest {
     @DisplayName("reactivate should push the validity end of a deactivated account and preserve its deactivation fields")
     void testReactivate_shouldPushValidityEndOfDeactivatedAccount() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
+        var view = new AccountDistinctView();
         view.setId(id);
         var existing = new AccountStatus();
         OffsetDateTime validityStart = OffsetDateTime.now().minusDays(30);
@@ -735,9 +741,9 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
-        AccountView result = accountService.reactivate(userPrincipal, id, record);
+        AccountDistinctView result = accountService.reactivate(userPrincipal, id, record);
 
         assertSame(view, result);
         assertEquals(validityStart.toInstant(),
@@ -792,7 +798,7 @@ class AccountServiceImplTest {
     @DisplayName("updateValidity should set the validity start, preserve the end, save and return the refreshed view")
     void testUpdateValidity_shouldApplyFieldsSaveAndReturnView() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
+        var view = new AccountDistinctView();
         view.setId(id);
         var existing = new AccountStatus();
         OffsetDateTime existingEnd = START.plusYears(2);
@@ -803,9 +809,9 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
-        AccountView result = accountService.updateValidity(userPrincipal, id, record);
+        AccountDistinctView result = accountService.updateValidity(userPrincipal, id, record);
 
         assertSame(view, result);
         assertEquals(newStart, commonMapper.startOf(existing.getValidityPeriod()));
@@ -880,17 +886,17 @@ class AccountServiceImplTest {
     @DisplayName("updateActivation should set activationAt and save on happy path")
     void testUpdateActivation_shouldSucceedOnHappyPath() {
         UUID id = UUID.randomUUID();
-        var view = new AccountView();
+        var view = new AccountDistinctView();
         view.setId(id);
         var existing = new AccountStatus();
         OffsetDateTime activationAt = OffsetDateTime.now().minusHours(1);
 
         when(accountRepository.existsById(id)).thenReturn(true);
-        when(accountViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
         when(accountStatusRepository.findByAccountId(id)).thenReturn(Optional.of(existing));
         when(accountStatusRepository.saveAndFlush(existing)).thenReturn(existing);
 
-        AccountView result = accountService.updateActivation(userPrincipal, id,
+        AccountDistinctView result = accountService.updateActivation(userPrincipal, id,
             new AccountActivationRecord(activationAt));
 
         assertNotNull(result);

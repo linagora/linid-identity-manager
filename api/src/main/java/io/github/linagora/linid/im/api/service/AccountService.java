@@ -34,7 +34,7 @@ import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
-import io.github.linagora.linid.im.api.persistence.model.AccountView;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -70,7 +70,9 @@ public interface AccountService {
      * @param pageable      pagination information
      * @return a page of account entities
      */
-    Page<AccountView> findAll(UserPrincipal userPrincipal, AccountViewQueryFilterDto filters, Pageable pageable);
+    Page<AccountDistinctView> findAll(UserPrincipal userPrincipal,
+                                      AccountViewQueryFilterDto filters,
+                                      Pageable pageable);
 
     /**
      * Retrieves an account by its unique identifier.
@@ -79,7 +81,7 @@ public interface AccountService {
      * @param id            the account UUID
      * @return the account entity
      */
-    AccountView findById(UserPrincipal userPrincipal, UUID id);
+    AccountDistinctView findById(UserPrincipal userPrincipal, UUID id);
 
     /**
      * Deletes an account by its unique identifier.
@@ -107,7 +109,7 @@ public interface AccountService {
      * @param record        the suspension request (suspension period and reason fields)
      * @return the refreshed account view
      */
-    AccountView suspend(UserPrincipal userPrincipal, UUID accountId, AccountSuspensionRecord record);
+    AccountDistinctView suspend(UserPrincipal userPrincipal, UUID accountId, AccountSuspensionRecord record);
 
     /**
      * Deactivates the account with the given identifier (sets its validity period end), either
@@ -119,7 +121,7 @@ public interface AccountService {
      * @param record        the deactivation request (deactivation timestamp and reason fields)
      * @return the refreshed account view
      */
-    AccountView deactivate(UserPrincipal userPrincipal, UUID accountId, AccountDeactivationRecord record);
+    AccountDistinctView deactivate(UserPrincipal userPrincipal, UUID accountId, AccountDeactivationRecord record);
 
     /**
      * Reactivates the account with the given identifier (lifts its suspension), after enforcing the
@@ -130,7 +132,7 @@ public interface AccountService {
      * @param record        the reactivation request (mandatory justification comment)
      * @return the refreshed account view
      */
-    AccountView reactivate(UserPrincipal userPrincipal, UUID accountId, AccountReactivationRecord record);
+    AccountDistinctView reactivate(UserPrincipal userPrincipal, UUID accountId, AccountReactivationRecord record);
 
     /**
      * Schedules the validity period start of the account with the given identifier, after enforcing
@@ -143,7 +145,7 @@ public interface AccountService {
      * @param record        the validity request (validity period start)
      * @return the refreshed account view
      */
-    AccountView updateValidity(UserPrincipal userPrincipal, UUID accountId, AccountValidityRecord record);
+    AccountDistinctView updateValidity(UserPrincipal userPrincipal, UUID accountId, AccountValidityRecord record);
 
     /**
      * Sets the {@code activationAt} timestamp of the account with the given identifier.
@@ -162,5 +164,5 @@ public interface AccountService {
      * @param record        the activation request carrying the new {@code activationAt}
      * @return the refreshed account view
      */
-    AccountView updateActivation(UserPrincipal userPrincipal, UUID accountId, AccountActivationRecord record);
+    AccountDistinctView updateActivation(UserPrincipal userPrincipal, UUID accountId, AccountActivationRecord record);
 }

@@ -45,11 +45,7 @@
         }
       },
       {
-        "name": "createdBy",
-        "type": "text"
-      },
-      {
-        "name": "parents",
+        "name": "parentNames",
         "type": "tree",
         "options": {
           "url": "/organizational-units",
@@ -61,6 +57,10 @@
         }
       },
       {
+        "name": "createdBy",
+        "type": "text"
+      },
+      {
         "name": "insertDate",
         "type": "date"
       }
@@ -70,6 +70,13 @@
         "label": "columns.name",
         "name": "name",
         "field": "name",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.parentNames",
+        "name": "parentNames",
+        "field": "parentNames",
         "sortable": true,
         "align": "left"
       },

@@ -510,6 +510,7 @@
     "columns": {
       "name": "Name",
       "type": "Type",
+      "parentNames": "Linked organizational-units",
       "createdBy": "Created by",
       "insertDate": "Creation date",
       "actions": "Actions"
@@ -593,6 +594,10 @@
           "type": "Type",
           "separator": "or"
         },
+        "parentId": {
+          "type": "Organizational unit",
+          "separator": "or"
+        },
         "createdBy": {
           "type": "Created by",
           "separator": "or"
@@ -611,7 +616,7 @@
         "columnFilter": {
           "name": "Name",
           "type": "Type",
-          "parents": "Organizational unit",
+          "parentId": "Organizational unit",
           "createdBy": "Created by",
           "insertDate": "Creation date"
         }

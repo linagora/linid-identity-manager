@@ -58,6 +58,8 @@ export interface OrganizationalUnitDTO {
   name: string;
   /** Type of the organizational unit. */
   type: string;
+  /** Names of the organizational units to which it belongs, represented as a comma-separated list. */
+  parentNames: string;
   /** Creator identifier. */
   createdBy: string;
   /** Last updater identifier. */

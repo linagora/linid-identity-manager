@@ -156,7 +156,7 @@
           "lastname": "Nom de famille",
           "email": "Email",
           "status": "Statut",
-          "organizationalUnitId": "Unité organisationelle",
+          "organizationalUnitId": "Unité organisationnelle",
           "createdBy": "Créé par",
           "insertDate": "Date de création"
         }
@@ -510,6 +510,7 @@
     "columns": {
       "name": "Nom",
       "type": "Type",
+      "parentNames": "Unités organisationnelles liées",
       "createdBy": "Créé par",
       "insertDate": "Date de création",
       "actions": "Actions"
@@ -593,6 +594,10 @@
           "type": "Type",
           "separator": "ou"
         },
+        "parentId": {
+          "type": "Unité organisationnelle",
+          "separator": "ou"
+        },
         "createdBy": {
           "type": "Créé par",
           "separator": "ou"
@@ -611,7 +616,7 @@
         "columnFilter": {
           "name": "Nom",
           "type": "Type",
-          "parents": "Unité organisationnelle",
+          "parentId": "Unité organisationnelle",
           "createdBy": "Créé par",
           "insertDate": "Date de création"
         }

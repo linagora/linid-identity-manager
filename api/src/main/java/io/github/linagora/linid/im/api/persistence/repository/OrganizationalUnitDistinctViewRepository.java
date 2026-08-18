@@ -26,7 +26,7 @@
 
 package io.github.linagora.linid.im.api.persistence.repository;
 
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import java.util.Optional;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
@@ -38,17 +38,17 @@ import org.springframework.data.repository.Repository;
 import java.util.UUID;
 
 /**
- * Read-only Spring Data repository for {@link OrganizationalUnitView}.
+ * Read-only Spring Data repository for {@link OrganizationalUnitDistinctView}.
  *
  * <p>Exposes only read operations: mutating methods from {@code JpaRepository} (save, delete,
- * flush...) are intentionally not inherited, since {@link OrganizationalUnitView} is backed by a database
+ * flush...) are intentionally not inherited, since {@link OrganizationalUnitDistinctView} is backed by a database
  * view.
  *
  * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering via {@code
  * spring-query-filter} specifications.
  */
-public interface OrganizationalUnitViewRepository
-    extends Repository<OrganizationalUnitView, UUID>, JpaSpecificationExecutor<OrganizationalUnitView> {
+public interface OrganizationalUnitDistinctViewRepository
+    extends Repository<OrganizationalUnitDistinctView, UUID>, JpaSpecificationExecutor<OrganizationalUnitDistinctView> {
 
     /**
      * Finds all organizational unit views matching the given specification and pageable.
@@ -59,8 +59,8 @@ public interface OrganizationalUnitViewRepository
      */
     @Override
     @NonNull
-    Page<OrganizationalUnitView> findAll(@NonNull Specification<OrganizationalUnitView> specification,
-                                         @NonNull Pageable pageable);
+    Page<OrganizationalUnitDistinctView> findAll(@NonNull Specification<OrganizationalUnitDistinctView> specification,
+                                                 @NonNull Pageable pageable);
 
     /**
      * Finds an organizational unit view by its ID.
@@ -69,5 +69,5 @@ public interface OrganizationalUnitViewRepository
      * @return an Optional containing the found organizational unit view, or empty if not found
      */
     @NonNull
-    Optional<OrganizationalUnitView> findById(@NonNull UUID id);
+    Optional<OrganizationalUnitDistinctView> findFirstById(@NonNull UUID id);
 }

@@ -38,18 +38,19 @@ import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
-import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import java.lang.reflect.Field;
@@ -90,7 +91,7 @@ class OrganizationalUnitServiceImplTest {
     private OrganizationalUnitRepository organizationalUnitRepository;
 
     @Mock
-    private OrganizationalUnitViewRepository organizationalUnitViewRepository;
+    private OrganizationalUnitDistinctViewRepository organizationalUnitDistinctViewRepository;
 
     @Mock
     private OrganizationalUnitAccountViewRepository organizationalUnitAccountViewRepository;
@@ -115,6 +116,9 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitReactivationValidator organizationalUnitReactivationValidator;
+
+    @Mock
+    private SpringQueryExecutor executor;
 
     @Spy
     private OrganizationalUnitStatusMapperImpl organizationalUnitStatusMapper = new OrganizationalUnitStatusMapperImpl();
@@ -270,20 +274,24 @@ class OrganizationalUnitServiceImplTest {
     @DisplayName("Should call repository with specification and pageable")
     void testFindAll_shouldDelegateToRepository() {
         var pageable = PageRequest.of(0, 10);
-        var entity = new OrganizationalUnitView();
+        var entity = new OrganizationalUnitDistinctView();
         var filters = new OrganizationalUnitViewQueryFilterDto();
-        when(organizationalUnitViewRepository.findAll(
-            ArgumentMatchers.<Specification<OrganizationalUnitView>>any(),
-            any(Pageable.class)))
+        when(executor.findDistinctPageEntities(
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any()))
             .thenReturn(new PageImpl<>(List.of(entity)));
 
-        Page<OrganizationalUnitView> result = service.findAll(userPrincipal, filters, pageable);
+        Page<OrganizationalUnitDistinctView> result = service.findAll(userPrincipal, filters, pageable);
 
         assertNotNull(result);
         assertEquals(1, result.getTotalElements());
-        verify(organizationalUnitViewRepository).findAll(
-            ArgumentMatchers.<Specification<OrganizationalUnitView>>any(),
-            any(Pageable.class));
+        verify(executor).findDistinctPageEntities(
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any(),
+            ArgumentMatchers.any());
     }
 
     @Test
@@ -579,12 +587,12 @@ class OrganizationalUnitServiceImplTest {
             .id(UUID.randomUUID())
             .organizationalUnitId(uuid)
             .build();
-        var view = new OrganizationalUnitView();
+        var view = new OrganizationalUnitDistinctView();
 
         when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
         when(organizationalUnitStatusRepository.findByOrganizationalUnitId(uuid)).thenReturn(Optional.of(status));
         when(organizationalUnitStatusRepository.saveAndFlush(status)).thenReturn(status);
-        when(organizationalUnitViewRepository.findById(uuid)).thenReturn(Optional.of(view));
+        when(organizationalUnitDistinctViewRepository.findFirstById(uuid)).thenReturn(Optional.of(view));
 
         var result = service.suspend(userPrincipal, uuid, record);
 
@@ -646,12 +654,12 @@ class OrganizationalUnitServiceImplTest {
             .organizationalUnitId(uuid)
             .suspensionPeriod(Range.closedInfinite(OffsetDateTime.now().minusDays(5).toZonedDateTime()))
             .build();
-        var view = new OrganizationalUnitView();
+        var view = new OrganizationalUnitDistinctView();
 
         when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
         when(organizationalUnitStatusRepository.findByOrganizationalUnitId(uuid)).thenReturn(Optional.of(status));
         when(organizationalUnitStatusRepository.saveAndFlush(status)).thenReturn(status);
-        when(organizationalUnitViewRepository.findById(uuid)).thenReturn(Optional.of(view));
+        when(organizationalUnitDistinctViewRepository.findFirstById(uuid)).thenReturn(Optional.of(view));
 
         var result = service.reactivate(userPrincipal, uuid, record);
 

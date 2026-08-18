@@ -35,7 +35,7 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +137,7 @@ class OrganizationalUnitControllerTest {
     @Test
     @DisplayName("Should find organizational unit by id")
     void testFindById() {
-        when(service.findViewById(any(), any())).thenReturn(new OrganizationalUnitView());
+        when(service.findViewById(any(), any())).thenReturn(new OrganizationalUnitDistinctView());
 
         var response = controller.findById(userPrincipal, UUID.randomUUID());
 
@@ -160,7 +160,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should suspend organizational unit")
     void testSuspend() {
         var id = UUID.randomUUID();
-        when(service.suspend(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+        when(service.suspend(any(), any(), any())).thenReturn(new OrganizationalUnitDistinctView());
 
         var record = new OrganizationalUnitSuspensionRecord(
             new PeriodRecord(OffsetDateTime.parse("2100-01-01T00:00:00Z"), null), "REASON", null, null);
@@ -175,7 +175,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should reactivate organizational unit")
     void testReactivate() {
         var id = UUID.randomUUID();
-        when(service.reactivate(any(), any(), any())).thenReturn(new OrganizationalUnitView());
+        when(service.reactivate(any(), any(), any())).thenReturn(new OrganizationalUnitDistinctView());
 
         var record = new OrganizationalUnitReactivationRecord("Merger completed");
         var response = controller.reactivate(userPrincipal, id, record);

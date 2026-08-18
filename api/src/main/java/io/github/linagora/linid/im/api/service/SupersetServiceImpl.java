@@ -40,7 +40,7 @@ import io.github.linagora.linid.im.api.model.superset.SupersetTokenDTO;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
-import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +89,7 @@ public class SupersetServiceImpl implements SupersetService {
      * Repository used to retrieve organizational unit data required to build
      * RLS rules.
      */
-    private final OrganizationalUnitViewRepository organizationalUnitViewRepository;
+    private final OrganizationalUnitDistinctViewRepository organizationalUnitDistinctViewRepository;
 
     /**
      * Service used to obtain and cache the Superset access token, delegated
@@ -116,24 +116,26 @@ public class SupersetServiceImpl implements SupersetService {
     /**
      * Creates a Superset service.
      *
-     * @param url                              the base URL of the Superset instance
-     * @param rlsConfigPath                    the path to the Superset RLS configuration file
-     * @param supersetCacheService             service responsible for Superset authentication
-     *                                         and access token caching
-     * @param accountDistinctViewRepository    repository used to retrieve account data for RLS rules
-     * @param organizationalUnitViewRepository repository used to retrieve organizational unit data for RLS rules
+     * @param url                                      the base URL of the Superset instance
+     * @param rlsConfigPath                            the path to the Superset RLS configuration file
+     * @param supersetCacheService                     service responsible for Superset authentication
+     *                                                 and access token caching
+     * @param accountDistinctViewRepository            repository used to retrieve account data for RLS rules
+     * @param organizationalUnitDistinctViewRepository repository used to retrieve organizational unit data for RLS
+     *                                                 rules
      */
     public SupersetServiceImpl(@Value("${superset.url}") final String url,
                                @Value("${superset.rls-config}") final String rlsConfigPath,
                                final SupersetCacheService supersetCacheService,
                                final AccountDistinctViewRepository accountDistinctViewRepository,
-                               final OrganizationalUnitViewRepository organizationalUnitViewRepository) {
+                               final OrganizationalUnitDistinctViewRepository
+                                   organizationalUnitDistinctViewRepository) {
         this.url = url;
         this.restClient = RestClient.builder()
             .baseUrl(url)
             .build();
         this.accountDistinctViewRepository = accountDistinctViewRepository;
-        this.organizationalUnitViewRepository = organizationalUnitViewRepository;
+        this.organizationalUnitDistinctViewRepository = organizationalUnitDistinctViewRepository;
         this.supersetCacheService = supersetCacheService;
 
         initRlsConfiguration(rlsConfigPath);
@@ -431,7 +433,7 @@ public class SupersetServiceImpl implements SupersetService {
             );
         }
 
-        var organizationalUnit = organizationalUnitViewRepository.findById(UUID.fromString(rlsId))
+        var organizationalUnit = organizationalUnitDistinctViewRepository.findFirstById(UUID.fromString(rlsId))
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.not_found", Map.of("id", rlsId))

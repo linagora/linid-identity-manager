@@ -48,6 +48,7 @@
       "lastname": "Nom de famille",
       "email": "Email",
       "status": "Statut",
+      "organizationalUnits": "Unités organisationnelles liées",
       "createdBy": "Créé par",
       "insertDate": "Date de création",
       "actions": "Actions"
@@ -155,6 +156,7 @@
           "lastname": "Nom de famille",
           "email": "Email",
           "status": "Statut",
+          "organizationalUnitId": "Unité organisationelle",
           "createdBy": "Créé par",
           "insertDate": "Date de création"
         }
@@ -201,6 +203,28 @@
         },
         "validation": {
           "invalidDate": "Date incorrecte. Format attendu: {format}"
+        }
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Rechercher",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
         }
       }
     }

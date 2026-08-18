@@ -57,6 +57,8 @@ export interface AccountDTO {
   updateDate: string;
   /** Computed account lifecycle status. */
   status: AccountStatusEnum;
+  /** Names of the organizational units to which the account belongs, represented as a comma-separated list. */
+  organizationalUnits: string;
   /** Period during which the account is considered active. */
   validityPeriod: Period;
   /** Period during which the account is suspended. */

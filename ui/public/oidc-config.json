@@ -1,5 +1,5 @@
 {
-  "authority": "https://localhost:9000/auth",
+  "authority": "https://localhost:8080",
   "client_id": "linid-im-client",
   "redirect_uri": "https://localhost:9000/callback",
   "post_logout_redirect_uri": "https://localhost:9000/auth/logout",

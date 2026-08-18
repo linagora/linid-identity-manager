@@ -38,6 +38,7 @@ import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
@@ -45,11 +46,12 @@ import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnit
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
-import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -84,7 +86,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     /**
      * Repository used to manage {@link OrganizationalUnitView} persistence operations.
      */
-    private final OrganizationalUnitViewRepository organizationalUnitViewRepository;
+    private final OrganizationalUnitDistinctViewRepository organizationalUnitDistinctViewRepository;
 
     /**
      * Repository used to manage {@link OrganizationalUnitAccountView} persistence operations.
@@ -131,6 +133,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Validator enforcing the business rules of the organizational unit reactivation flow.
      */
     private final OrganizationalUnitReactivationValidator organizationalUnitReactivationValidator;
+
+    /**
+     * Executor used to build and execute dynamic Spring Data JPA queries.
+     */
+    private final SpringQueryExecutor executor;
 
     /**
      * Cached root organizational unit instance.
@@ -228,8 +235,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public OrganizationalUnitView findViewById(final UserPrincipal userPrincipal, final UUID id) {
-        return organizationalUnitViewRepository.findById(id)
+    public OrganizationalUnitDistinctView findViewById(final UserPrincipal userPrincipal, final UUID id) {
+        return organizationalUnitDistinctViewRepository.findFirstById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
@@ -237,12 +244,17 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public Page<OrganizationalUnitView> findAll(final UserPrincipal userPrincipal,
-                                                final OrganizationalUnitViewQueryFilterDto filters,
-                                                final Pageable pageable) {
+    public Page<OrganizationalUnitDistinctView> findAll(final UserPrincipal userPrincipal,
+                                                        final OrganizationalUnitViewQueryFilterDto filters,
+                                                        final Pageable pageable) {
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitView.class, filters);
 
-        return organizationalUnitViewRepository.findAll(specification, pageable);
+        return executor.findDistinctPageEntities(
+            OrganizationalUnitView.class,
+            OrganizationalUnitDistinctView.class,
+            specification,
+            pageable
+        );
     }
 
     @Override
@@ -318,9 +330,9 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public OrganizationalUnitView suspend(final UserPrincipal userPrincipal,
-                                          final UUID id,
-                                          final OrganizationalUnitSuspensionRecord record) {
+    public OrganizationalUnitDistinctView suspend(final UserPrincipal userPrincipal,
+                                                  final UUID id,
+                                                  final OrganizationalUnitSuspensionRecord record) {
         ensureOrganizationalUnitExists(id);
         OrganizationalUnitStatus status = loadStatus(id);
 
@@ -333,9 +345,9 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
-    public OrganizationalUnitView reactivate(final UserPrincipal userPrincipal,
-                                             final UUID id,
-                                             final OrganizationalUnitReactivationRecord record) {
+    public OrganizationalUnitDistinctView reactivate(final UserPrincipal userPrincipal,
+                                                     final UUID id,
+                                                     final OrganizationalUnitReactivationRecord record) {
         ensureOrganizationalUnitExists(id);
         OrganizationalUnitStatus status = loadStatus(id);
 

@@ -30,9 +30,9 @@ import io.github.linagora.linid.im.api.model.superset.SupersetRlsConfig;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
-import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -60,7 +60,7 @@ class SupersetServiceImplTest {
     private AccountDistinctViewRepository accountDistinctViewRepository;
 
     @Mock
-    private OrganizationalUnitViewRepository organizationalUnitViewRepository;
+    private OrganizationalUnitDistinctViewRepository organizationalUnitDistinctViewRepository;
 
     @Mock
     private SupersetCacheService supersetCacheService;
@@ -74,7 +74,7 @@ class SupersetServiceImplTest {
             "",
             supersetCacheService,
             accountDistinctViewRepository,
-            organizationalUnitViewRepository
+            organizationalUnitDistinctViewRepository
         );
     }
 
@@ -199,9 +199,9 @@ class SupersetServiceImplTest {
             "name"
         );
 
-        var organizationalUnit = OrganizationalUnitView.builder().name("IT").build();
+        var organizationalUnit = OrganizationalUnitDistinctView.builder().name("IT").build();
 
-        when(organizationalUnitViewRepository.findById(rlsId))
+        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.of(organizationalUnit));
 
         var tokenRecord = new SupersetTokenRecord(
@@ -283,7 +283,7 @@ class SupersetServiceImplTest {
     void shouldThrowWhenOrganizationalUnitDoesNotExist() {
         var rlsId = UUID.randomUUID();
 
-        when(organizationalUnitViewRepository.findById(rlsId))
+        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
@@ -296,9 +296,9 @@ class SupersetServiceImplTest {
     @DisplayName("should return the configured organizational unit attribute value")
     void shouldReturnOrganizationalUnitAttributeValue() {
         var rlsId = UUID.randomUUID();
-        var organizationalUnit = OrganizationalUnitView.builder().name("IT").build();
+        var organizationalUnit = OrganizationalUnitDistinctView.builder().name("IT").build();
 
-        when(organizationalUnitViewRepository.findById(rlsId))
+        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.of(organizationalUnit));
 
         var result = service.getOrganizationalUnitValue(

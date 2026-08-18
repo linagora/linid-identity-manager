@@ -31,6 +31,7 @@
 -->
 
 <module name="Checker">
+    <module name="SuppressWarningsFilter"/>
     <!-- Excludes all 'module-info.java' files              -->
     <!-- See https://checkstyle.org/config_filefilters.html -->
     <module name="BeforeExecutionExclusionFileFilter">
@@ -105,6 +106,7 @@
     <!-- </module> -->
 
     <module name="TreeWalker">
+        <module name="SuppressWarningsHolder"/>
 
         <!-- Checks for Javadoc comments.                     -->
         <!-- See http://checkstyle.sf.net/config_javadoc.html -->

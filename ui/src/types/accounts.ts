@@ -67,6 +67,8 @@ export interface AccountDTO {
   activationAt: string | null;
   /** Number of days remaining before the account is deactivated. Null when the validity period has no upper bound. */
   daysBeforeDeactivation: number | null;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /** Account shape consumed by Vue components. */
@@ -89,6 +91,8 @@ export interface Account {
   insertDate: string;
   /** Account last update date converted from API ISO timestamp. Display formatting depends on the user's locale. */
   updateDate: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /**

@@ -62,6 +62,7 @@ export function useAccountMapper() {
       updatedBy: account.updatedBy,
       insertDate: toDate(account.insertDate, DATE_FORMAT_KEY),
       updateDate: toDate(account.updateDate, DATE_FORMAT_KEY),
+      extraParameters: account.extraParameters,
     };
   };
 

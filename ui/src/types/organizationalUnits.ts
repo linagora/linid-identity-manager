@@ -32,6 +32,8 @@ export interface OrganizationalUnitRelationDTO {
   id: string;
   /** Unique identifier of the parent organizational unit. */
   parent: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /**
@@ -48,6 +50,8 @@ export interface OrganizationalUnitRecord {
   name: string;
   /** Type of the organizational unit, picked from a fixed list of values. */
   type: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /** Raw organizational unit shape returned by the API. */
@@ -77,6 +81,13 @@ export interface OrganizationalUnitDTO {
   isSuspended: boolean;
   /** List of parent organizational units, with their identifiers and relation IDs. */
   parents?: OrganizationalUnitRelationDTO[];
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
+  /**
+   * Additional deployment-specific attributes associated with the relationship between an account and an organizational
+   * unit.
+   */
+  relationExtraParameters: Record<string, unknown>;
 }
 
 /**
@@ -98,6 +109,8 @@ export interface OrganizationalUnit {
   insertDate: string;
   /** Organizational unit last update date converted from API ISO timestamp. */
   updateDate: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }
 
 /**
@@ -162,4 +175,6 @@ export interface OrganizationalUnitForm {
   name: string;
   /** Type of the organizational unit, picked from a fixed list of values. */
   type: string;
+  /** Additional deployment-specific attributes stored as JSON. */
+  extraParameters: Record<string, unknown>;
 }

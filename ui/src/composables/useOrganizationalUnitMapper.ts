@@ -62,6 +62,7 @@ export function useOrganizationalUnitMapper() {
       parent,
       name: form.name,
       type: form.type,
+      extraParameters: form.extraParameters,
     };
   };
 
@@ -83,6 +84,7 @@ export function useOrganizationalUnitMapper() {
       updatedBy: dto.updatedBy,
       insertDate: toDate(dto.insertDate, DATE_FORMAT_KEY),
       updateDate: toDate(dto.updateDate, DATE_FORMAT_KEY),
+      extraParameters: dto.extraParameters,
     };
   };
 

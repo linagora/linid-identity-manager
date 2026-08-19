@@ -45,7 +45,7 @@
         }
       },
       {
-        "name": "parentNames",
+        "name": "parentId",
         "type": "tree",
         "options": {
           "url": "/organizational-units",

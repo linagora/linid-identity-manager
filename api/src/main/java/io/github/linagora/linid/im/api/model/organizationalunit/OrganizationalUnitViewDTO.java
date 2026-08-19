@@ -36,6 +36,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -150,4 +151,10 @@ public class OrganizationalUnitViewDTO {
     @JsonProperty("isSuspended")
     @Schema(description = "Whether the organizational unit is currently suspended", example = "false")
     private boolean suspended;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     */
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    private Map<String, Object> extraParameters;
 }

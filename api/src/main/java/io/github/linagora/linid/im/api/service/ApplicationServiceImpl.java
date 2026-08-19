@@ -164,6 +164,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         entity.setDescription(application.description());
         entity.setType(application.type());
         entity.setClaimsTemplate(application.claimsTemplate());
+        entity.setExtraParameters(application.extraParameters());
         entity.setUpdatedBy(userPrincipal.getId());
 
         return applicationRepository.save(entity);

@@ -71,6 +71,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -172,7 +173,7 @@ class OrganizationalUnitServiceImplTest {
     @Test
     @DisplayName("should throw exception with root name")
     void testCreate_shouldThrowExceptionOnRootName() {
-        var entity = new OrganizationalUnitRecord(UUID.randomUUID(), "root", "test");
+        var entity = new OrganizationalUnitRecord(UUID.randomUUID(), "root", "test", Map.of());
 
         var exception = assertThrows(ApiException.class,
             () -> service.create(userPrincipal, entity));
@@ -183,7 +184,7 @@ class OrganizationalUnitServiceImplTest {
     @Test
     @DisplayName("should throw exception with root type")
     void testCreate_shouldThrowExceptionOnRootType() {
-        var entity = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "root");
+        var entity = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "root", Map.of());
 
         var exception = assertThrows(ApiException.class,
             () -> service.create(userPrincipal, entity));
@@ -195,7 +196,7 @@ class OrganizationalUnitServiceImplTest {
     @DisplayName("should throw exception with unknown parent")
     void testCreate_shouldThrowExceptionOnUnknownParent() {
         var uuid = UUID.randomUUID();
-        var entity = new OrganizationalUnitRecord(uuid, "test", "test");
+        var entity = new OrganizationalUnitRecord(uuid, "test", "test", Map.of());
         when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.empty());
 
         var exception = assertThrows(ApiException.class,
@@ -211,7 +212,7 @@ class OrganizationalUnitServiceImplTest {
     @DisplayName("should throw exception with same name and type")
     void testCreate_shouldThrowExceptionOnSameNameAndType() {
         var uuid = UUID.randomUUID();
-        var entity = new OrganizationalUnitRecord(uuid, "test", "test");
+        var entity = new OrganizationalUnitRecord(uuid, "test", "test", Map.of());
         when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(new OrganizationalUnit()));
         when(organizationalUnitRepository.findByNameAndType("test", "test")).thenReturn(Optional.of(new OrganizationalUnit()));
 
@@ -240,7 +241,7 @@ class OrganizationalUnitServiceImplTest {
             .name("test")
             .type("test")
             .build();
-        var entity = new OrganizationalUnitRecord(uuid, "test", "test");
+        var entity = new OrganizationalUnitRecord(uuid, "test", "test", Map.of());
         var relation = OrganizationalUnitRelation.builder()
             .id(UUID.randomUUID())
             .parentId(root.getId())
@@ -389,7 +390,7 @@ class OrganizationalUnitServiceImplTest {
         when(organizationalUnitRepository.findByNameAndType(any(), any()))
             .thenReturn(Optional.of(root));
 
-        var record = new OrganizationalUnitRecord(rootId, "test", "test");
+        var record = new OrganizationalUnitRecord(rootId, "test", "test", Map.of());
 
         var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, rootId, record));
 
@@ -412,7 +413,7 @@ class OrganizationalUnitServiceImplTest {
         when(organizationalUnitRepository.findByNameAndType(any(), any()))
             .thenReturn(Optional.of(root));
 
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "root", "test");
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "root", "test", Map.of());
 
         var exception = assertThrows(ApiException.class,
             () -> service.update(userPrincipal, uuid, record));
@@ -435,7 +436,7 @@ class OrganizationalUnitServiceImplTest {
 
         when(organizationalUnitRepository.findByNameAndType(any(), any()))
             .thenReturn(Optional.of(root));
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "root");
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "root", Map.of());
 
         var exception = assertThrows(ApiException.class,
             () -> service.update(userPrincipal, uuid, record));
@@ -460,7 +461,7 @@ class OrganizationalUnitServiceImplTest {
             .thenReturn(Optional.of(root));
         when(organizationalUnitRepository.findAll(any(SpringQueryFilterSpecification.class))).thenReturn(List.of(new OrganizationalUnit()));
 
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test");
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test", Map.of());
 
         var exception = assertThrows(ApiException.class,
             () -> service.update(userPrincipal, uuid, record));
@@ -469,35 +470,6 @@ class OrganizationalUnitServiceImplTest {
         assertEquals("error.organizational.unit.already_exists", exception.getError().key());
         assertEquals("test", exception.getError().context().get("name"));
         assertEquals("test", exception.getError().context().get("type"));
-    }
-
-    @Test
-    @DisplayName("should return existing entity when no changes are detected")
-    void testUpdate_shouldReturnSameEntityWhenNoChange() {
-        var rootId = UUID.randomUUID();
-        var uuid = UUID.randomUUID();
-
-        var root = OrganizationalUnit.builder()
-            .id(rootId)
-            .name("root")
-            .type("root")
-            .build();
-        var entity = OrganizationalUnit.builder()
-            .id(uuid)
-            .name("same")
-            .type("same")
-            .build();
-
-        when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
-
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "same", "same");
-
-        var result = service.update(userPrincipal, uuid, record);
-
-        assertEquals(entity, result);
-
-        verify(organizationalUnitRepository, times(0)).save(any());
     }
 
     @Test
@@ -526,7 +498,7 @@ class OrganizationalUnitServiceImplTest {
         when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
         when(organizationalUnitRepository.save(any())).thenReturn(updated);
 
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new");
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", Map.of());
 
         var result = service.update(userPrincipal, uuid, record);
 

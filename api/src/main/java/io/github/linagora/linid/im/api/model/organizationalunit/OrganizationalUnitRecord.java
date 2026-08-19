@@ -26,21 +26,40 @@
 
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * Request record used to create or update an organizational unit.
  *
- * @param parent the identifier of the parent organizational unit
- * @param name   the organizational unit name
- * @param type   the organizational unit type
+ * @param parent          the identifier of the parent organizational unit
+ * @param name            the organizational unit name
+ * @param type            the organizational unit type
+ * @param extraParameters additional deployment-specific attributes stored as JSON.
  */
 public record OrganizationalUnitRecord(
-    @NotNull UUID parent,
-    @NotBlank String name,
-    @NotBlank String type
+    @Schema(
+        description = "Identifier of the parent organizational unit",
+        example = "00000000-0000-4000-8000-000000000001")
+    @NotNull
+    UUID parent,
+
+    @Schema(description = "Organizational unit name", example = "Engineering")
+    @NotBlank
+    String name,
+
+    @Schema(description = "Organizational unit type", example = "department")
+    @NotBlank
+    String type,
+
+    @Schema(
+        description = "Additional deployment-specific attributes stored as JSON",
+        example = "{\"name\":\"test\"}"
+    )
+    Map<String, Object> extraParameters
 ) {
 }

@@ -40,6 +40,7 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -47,7 +48,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Entity with enriched account information, mapped to the {@code accounts_view} database view.
@@ -129,6 +132,17 @@ public class AccountView extends AbstractViewEntity {
             + "comma-separated list"
     )
     private String organizationalUnits;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
 
     /**
      * Time range during which the account is considered valid. {@code null} when no status row exists.

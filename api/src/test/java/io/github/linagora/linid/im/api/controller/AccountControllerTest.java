@@ -51,6 +51,7 @@ import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -161,7 +162,7 @@ class AccountControllerTest {
     @DisplayName("Should create account and return 201")
     void testCreate_shouldReturn201WithAccountDTO() {
         UUID ouId = UUID.randomUUID();
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null), ouId);
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null), ouId, Map.of());
         var entity = createSampleEntity();
         var dto = createSampleDTO(entity);
         when(accountService.create(userPrincipal, request)).thenReturn(entity);

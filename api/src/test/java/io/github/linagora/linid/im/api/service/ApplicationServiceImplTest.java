@@ -54,6 +54,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -98,7 +99,7 @@ class ApplicationServiceImplTest {
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
-        record = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}");
+        record = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}", Map.of());
     }
 
     @Test

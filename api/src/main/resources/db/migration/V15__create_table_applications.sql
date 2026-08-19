@@ -1,19 +1,20 @@
 CREATE TABLE IF NOT EXISTS applications
 (
-    app_id          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    code            VARCHAR(100) NOT NULL UNIQUE,
-    name            VARCHAR(255) NOT NULL,
-    description     TEXT,
-    type            VARCHAR(255) NOT NULL,
-    claims_template TEXT         NOT NULL,
-    script          TEXT,
-    script_checksum TEXT,
-    deployed_at     TIMESTAMPTZ,
-    configuration   JSONB,
-    created_by      UUID,
-    updated_by      UUID,
-    insert_date     TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    update_date     TIMESTAMPTZ  NOT NULL DEFAULT now()
+    app_id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    code             VARCHAR(100) NOT NULL UNIQUE,
+    name             VARCHAR(255) NOT NULL,
+    description      TEXT,
+    type             VARCHAR(255) NOT NULL,
+    extra_parameters JSONB        NOT NULL DEFAULT '{}'::JSONB,
+    claims_template  TEXT         NOT NULL,
+    script           TEXT,
+    script_checksum  TEXT,
+    deployed_at      TIMESTAMPTZ,
+    configuration    JSONB,
+    created_by       UUID,
+    updated_by       UUID,
+    insert_date      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    update_date      TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
 CREATE UNIQUE INDEX idx_applications_code ON applications (code);
@@ -31,6 +32,7 @@ COMMENT ON COLUMN applications.code IS 'Functional unique identifier of the appl
 COMMENT ON COLUMN applications.name IS 'Human-readable name of the application.';
 COMMENT ON COLUMN applications.description IS 'Optional free-text description of the application.';
 COMMENT ON COLUMN applications.type IS 'Type of the application.';
+COMMENT ON COLUMN applications.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
 COMMENT ON COLUMN applications.claims_template IS 'Template used to generate the claims exposed to the application.';
 COMMENT ON COLUMN applications.script IS 'Optional OPA Rego policy script stored to compute the access rights of the application.';
 COMMENT ON COLUMN applications.script_checksum IS 'Deterministic hash (e.g. SHA-256) computed from the script. Used to detect changes to the script. NULL when no script is defined.';

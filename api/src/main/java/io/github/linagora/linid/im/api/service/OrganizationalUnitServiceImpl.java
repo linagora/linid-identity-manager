@@ -318,13 +318,9 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         var entity = findById(userPrincipal, id);
 
-        if (entity.getName().equals(organizationalUnit.name())
-            && entity.getType().equals(organizationalUnit.type())) {
-            return entity;
-        }
-
         entity.setName(organizationalUnit.name());
         entity.setType(organizationalUnit.type());
+        entity.setExtraParameters(organizationalUnit.extraParameters());
 
         return organizationalUnitRepository.save(entity);
     }

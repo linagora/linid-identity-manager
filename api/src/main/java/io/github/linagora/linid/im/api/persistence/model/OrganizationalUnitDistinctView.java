@@ -40,11 +40,14 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -145,6 +148,17 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
     private boolean suspended;
 
     /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
+
+    /**
      * Creates an organizational unit view with its audit information, identity information, parent relationships,
      * parent names, and suspension information.
      *
@@ -169,6 +183,7 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
      * @param reactivationComment the free-text comment providing additional context about the organizational unit
      *                            reactivation.
      * @param suspended whether the organizational unit is currently suspended.
+     * @param extraParameters additional deployment-specific attributes stored as JSON.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public OrganizationalUnitDistinctView(final String createdBy,
@@ -185,7 +200,8 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
                                           final String suspensionSubreason,
                                           final String suspensionComment,
                                           final String reactivationComment,
-                                          final boolean suspended) {
+                                          final boolean suspended,
+                                          final Map<String, Object> extraParameters) {
         super(createdBy, updatedBy, insertDate, updateDate);
         this.id = id;
         this.name = name;
@@ -198,5 +214,6 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
         this.suspensionComment = suspensionComment;
         this.reactivationComment = reactivationComment;
         this.suspended = suspended;
+        this.extraParameters = extraParameters;
     }
 }

@@ -41,6 +41,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +49,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Represents an organizational unit within the system.
@@ -172,4 +175,15 @@ public class OrganizationalUnitView extends AbstractViewEntity {
     @FilterType(type = Boolean.class)
     @QueryFilterField(type = Boolean.class, description = "Whether the organizational unit is currently suspended")
     private boolean suspended;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
 }

@@ -4,13 +4,14 @@
 
 CREATE TABLE organizational_units
 (
-    oun_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    name        VARCHAR(255) NOT NULL,
-    type        VARCHAR(100) NOT NULL,
-    created_by  UUID,
-    updated_by  UUID,
-    insert_date TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    update_date TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    oun_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name             VARCHAR(255) NOT NULL,
+    type             VARCHAR(100) NOT NULL,
+    extra_parameters JSONB        NOT NULL DEFAULT '{}'::JSONB,
+    created_by       UUID,
+    updated_by       UUID,
+    insert_date      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    update_date      TIMESTAMPTZ  NOT NULL DEFAULT now(),
     CONSTRAINT uk_organizational_units_type_name UNIQUE (type, name)
 );
 
@@ -25,6 +26,7 @@ COMMENT ON TABLE organizational_units IS 'Stores all organizational units (nodes
 COMMENT ON COLUMN organizational_units.oun_id IS 'Primary key (UUID) of the organizational unit.';
 COMMENT ON COLUMN organizational_units.name IS 'Human-readable name of the organizational unit.';
 COMMENT ON COLUMN organizational_units.type IS 'Type of the organizational unit.';
+COMMENT ON COLUMN organizational_units.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
 COMMENT ON COLUMN organizational_units.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_units.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_units.insert_date IS 'Date and time when the account record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';

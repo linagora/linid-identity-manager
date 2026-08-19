@@ -40,10 +40,13 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -96,6 +99,17 @@ public class AccountDistinctView extends AbstractViewEntity {
      */
     @Column(name = "email", nullable = false)
     private String email;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
 
     /**
      * Names of the organizational units to which the account belongs, represented as a comma-separated list.
@@ -200,6 +214,7 @@ public class AccountDistinctView extends AbstractViewEntity {
      * @param lastname the last name of the account holder.
      * @param firstname the first name of the account holder.
      * @param email the email address associated with the account.
+     * @param extraParameters additional deployment-specific attributes stored as JSON.
      * @param organizationalUnits the names of the organizational units to which the account belongs,
      *                             represented as a comma-separated list.
      * @param validityPeriod the time range during which the account is considered valid.
@@ -226,6 +241,7 @@ public class AccountDistinctView extends AbstractViewEntity {
                                final String lastname,
                                final String firstname,
                                final String email,
+                               final Map<String, Object> extraParameters,
                                final String organizationalUnits,
                                final Range<ZonedDateTime> validityPeriod,
                                final Range<ZonedDateTime> suspensionPeriod,
@@ -245,6 +261,7 @@ public class AccountDistinctView extends AbstractViewEntity {
         this.lastname = lastname;
         this.firstname = firstname;
         this.email = email;
+        this.extraParameters = extraParameters;
         this.organizationalUnits = organizationalUnits;
         this.validityPeriod = validityPeriod;
         this.suspensionPeriod = suspensionPeriod;

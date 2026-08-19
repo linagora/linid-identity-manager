@@ -37,6 +37,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -105,6 +106,17 @@ public class ApplicationView extends AbstractViewEntity {
     @FilterType(type = String.class)
     @QueryFilterField(type = String.class, description = "Type of the application")
     private String type;
+
+    /**
+     * Additional deployment-specific attributes stored as JSON.
+     * <p>
+     * This field allows integrators and customers to extend the standard data model
+     * with custom parameters required by their environment without modifying the
+     * application schema.
+     */
+    @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, Object> extraParameters;
 
     /**
      * Template used to generate the claims exposed to the application.

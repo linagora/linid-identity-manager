@@ -10,6 +10,7 @@ SELECT a.app_id,
        a.script_checksum,
        a.deployed_at,
        a.configuration,
+       a.extra_parameters,
        NULLIF(CONCAT_WS(' ', creator.firstname, creator.lastname), '') AS created_by,
        NULLIF(CONCAT_WS(' ', updater.firstname, updater.lastname), '') AS updated_by,
        a.insert_date,
@@ -35,3 +36,4 @@ COMMENT ON COLUMN applications_view.created_by IS 'Full name ("firstname lastnam
 COMMENT ON COLUMN applications_view.updated_by IS 'Full name ("firstname lastname") of the account that last updated this record. Resolved via LEFT OUTER JOIN on accounts.act_id; NULL if the referenced account no longer exists.';
 COMMENT ON COLUMN applications_view.insert_date IS 'Date and time when the application record was created (UTC).';
 COMMENT ON COLUMN applications_view.update_date IS 'Date and time when the application record was last updated (UTC).';
+COMMENT ON COLUMN applications_view.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';

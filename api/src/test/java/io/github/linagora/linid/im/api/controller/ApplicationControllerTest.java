@@ -50,6 +50,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -91,7 +92,7 @@ class ApplicationControllerTest {
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
-        record = new ApplicationRecord("my-app", "My Application", null, "OIDC", "{}");
+        record = new ApplicationRecord("my-app", "My Application", null, "OIDC", "{}", Map.of());
     }
 
     @Test

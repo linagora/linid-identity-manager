@@ -30,6 +30,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.Map;
+
 /**
  * Request payload for creating or updating an application.
  *
@@ -43,6 +45,7 @@ import jakarta.validation.constraints.Pattern;
  * @param description     optional free-text description of the application
  * @param type           type of the application
  * @param claimsTemplate template used to generate the claims of the application
+ * @param extraParameters additional deployment-specific attributes stored as JSON.
  */
 @Schema(description = "Request payload for creating or updating an application")
 public record ApplicationRecord(
@@ -62,6 +65,9 @@ public record ApplicationRecord(
 
     @NotBlank @Schema(description = "Template used to generate the claims of the application",
         example = "{ \"sub\": \"{{ id }}\" }")
-    String claimsTemplate
+    String claimsTemplate,
+
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    Map<String, Object> extraParameters
 ) {
 }

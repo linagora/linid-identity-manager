@@ -6,6 +6,7 @@ SELECT a.act_id,
        a.firstname,
        oua.oun_id AS organizational_unit_id,
        ou_list.organizational_units,
+       a.extra_parameters,
        s.validity_period,
        s.suspension_period,
        s.activation_at,
@@ -82,6 +83,7 @@ COMMENT ON COLUMN accounts_view.lastname IS 'Last name of the account holder.';
 COMMENT ON COLUMN accounts_view.firstname IS 'First name of the account holder.';
 COMMENT ON COLUMN accounts_view.organizational_unit_id IS 'Identifier of the organizational unit associated with the account. One row is returned for each organizational unit association.';
 COMMENT ON COLUMN accounts_view.organizational_units IS 'Comma-separated names of all organizational units associated with the account.';
+COMMENT ON COLUMN accounts_view.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
 COMMENT ON COLUMN accounts_view.validity_period IS 'Time range during which the account is valid. NULL when no validity period is configured.';
 COMMENT ON COLUMN accounts_view.suspension_period IS 'Time range during which the account is suspended. NULL when no suspension is configured. An open-ended suspension (NULL upper bound) is treated as a permanent suspension.';
 COMMENT ON COLUMN accounts_view.activation_at IS 'Date and time when the account was activated.';

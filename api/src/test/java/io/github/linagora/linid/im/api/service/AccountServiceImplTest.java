@@ -141,7 +141,7 @@ class AccountServiceImplTest {
     void testCreate_shouldSetAllFieldsAndChecksum() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         Account mappedAccount = new Account();
         mappedAccount.setExternalId("ext-001");
         mappedAccount.setLastname("Doe");
@@ -180,7 +180,7 @@ class AccountServiceImplTest {
     void testCreate_shouldGenerateConsistentChecksum() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
@@ -203,7 +203,7 @@ class AccountServiceImplTest {
     void testCreate_shouldCallValidator() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
@@ -224,7 +224,7 @@ class AccountServiceImplTest {
     @DisplayName("Should not save account when validator throws")
     void testCreate_shouldNotSaveWhenValidatorThrows() {
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), null);
+            new PeriodRecord(START, null), null, Map.of());
         doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
             I18nMessage.of("error.account.creation.validity_period_start_in_past")))
             .when(accountCreationValidator).validate(request);
@@ -244,7 +244,7 @@ class AccountServiceImplTest {
     void testCreate_shouldSaveStatusWithCorrectAuditFields() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         UUID generatedId = UUID.randomUUID();
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
@@ -275,7 +275,7 @@ class AccountServiceImplTest {
     void testCreate_shouldRespectValidatePersistAccountMapPersistStatusOrder() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-002", "Doe", "John", "john2@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
         when(accountStatusMapper.toAccountStatus(
@@ -306,7 +306,7 @@ class AccountServiceImplTest {
     void testCreate_shouldCreateOUAccountLinkWhenOUIdProvided() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-003", "Doe", "John", "john3@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         UUID accountId = UUID.randomUUID();
         Account createdAccount = new Account();
         createdAccount.setId(accountId);
@@ -339,7 +339,7 @@ class AccountServiceImplTest {
         UUID ouId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         var request = new AccountRecord("ext-006", "Doe", "John", "john6@example.com",
-            new PeriodRecord(START, null), ouId);
+            new PeriodRecord(START, null), ouId, Map.of());
         Account createdAccount = new Account();
         createdAccount.setId(accountId);
         AccountStatus mockStatus = new AccountStatus();

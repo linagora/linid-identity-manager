@@ -21,6 +21,8 @@ SELECT DISTINCT
     accounts_view.updated_by,
     accounts_view.insert_date,
     accounts_view.update_date,
+    accounts_view.extra_parameters,
+    organizational_unit_accounts.extra_parameters AS "relation_extra_parameters",
     organizational_unit_accounts.oun_id
 FROM
     accounts_view
@@ -51,3 +53,5 @@ COMMENT ON COLUMN organizational_unit_accounts_view.updated_by IS 'Identifier of
 COMMENT ON COLUMN organizational_unit_accounts_view.insert_date IS 'Timestamp when the account record was created (UTC).';
 COMMENT ON COLUMN organizational_unit_accounts_view.update_date IS 'Timestamp when the account record was last updated (UTC).';
 COMMENT ON COLUMN organizational_unit_accounts_view.oun_id IS 'Identifier of the organizational unit associated with the account.';
+COMMENT ON COLUMN organizational_unit_accounts_view.extra_parameters IS 'JSONB column containing custom attributes and metadata associated with the organizational unit. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
+COMMENT ON COLUMN organizational_unit_accounts_view.relation_extra_parameters IS 'JSONB column containing custom attributes and metadata associated with the relationship between an account and an organizational unit. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';

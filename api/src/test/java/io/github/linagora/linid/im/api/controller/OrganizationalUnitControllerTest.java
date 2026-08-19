@@ -52,6 +52,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -93,7 +94,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should create organizational unit")
     void testCreate() {
         when(service.create(any(), any())).thenReturn(new OrganizationalUnit());
-        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test");
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test", Map.of());
 
         var response = controller.create(userPrincipal, record);
 
@@ -150,7 +151,7 @@ class OrganizationalUnitControllerTest {
     void testUpdate() {
         when(service.update(any(), any(), any())).thenReturn(new OrganizationalUnit());
 
-        var response = controller.update(userPrincipal, UUID.randomUUID(), new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test"));
+        var response = controller.update(userPrincipal, UUID.randomUUID(), new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test", Map.of()));
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());

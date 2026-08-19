@@ -2,6 +2,7 @@ CREATE OR REPLACE VIEW organizational_units_view AS
 SELECT child.oun_id,
        child.name,
        child.type,
+       child.extra_parameters,
        relations.parent_id AS parent_id,
        parents.parent_names,
        parents.parents,
@@ -54,6 +55,7 @@ COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizat
 COMMENT ON COLUMN organizational_units_view.oun_id IS 'Primary key (UUID) of the organizational unit.';
 COMMENT ON COLUMN organizational_units_view.name IS 'Human-readable name of the organizational unit.';
 COMMENT ON COLUMN organizational_units_view.type IS 'Type of the organizational unit.';
+COMMENT ON COLUMN organizational_units_view.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
 COMMENT ON COLUMN organizational_units_view.parent_id IS 'Identifier of the parent organizational unit. One row is returned for each parent relationship.';
 COMMENT ON COLUMN organizational_units_view.parent_names IS 'Comma-separated names of all parent organizational units associated with this organizational unit.';
 COMMENT ON COLUMN organizational_units_view.suspension_period IS 'Time range during which the organizational unit is suspended. NULL when no suspension is configured. An open-ended suspension (NULL upper bound) is treated as a permanent suspension.';

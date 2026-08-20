@@ -38,7 +38,28 @@ openssl pkey -in docker/demo/resources/oidc.key -pubout -out docker/demo/resourc
 
 ---
 
-## 🗝️ 3️⃣ Create a Keystore for the API
+## 🔒 3️⃣ Generate TLS Certificate for Apache Superset™
+
+This certificate is used to **enable HTTPS** on the Apache Superset™ demo instance.
+
+```bash
+# for demo env
+openssl req -x509 -newkey rsa:2048 \
+  -keyout superset.key \
+  -out superset.crt \
+  -days 3650 -nodes \
+  -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
+  -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:localhost,DNS:superset"
+```
+
+* `superset.key`: TLS private key
+* `superset.crt`: TLS certificate
+
+> Place both files in the Superset configuration directory and mount them into the container. The certificate includes Subject Alternative Names (SANs) for `linid.localtest.me`, `ui`, `localhost`, and `superset` to support local demo deployments.
+
+---
+
+## 🗝️ 4️⃣ Create a Keystore for the API
 
 LinId API uses a **Java Keystore (JKS)** to serve HTTPS.
 
@@ -58,7 +79,7 @@ keytool -genkey -alias myKeyAlias \
 
 ---
 
-## 🧾 4️⃣ Generate Truststore (Automation)
+## 🧾 5️⃣ Generate Truststore (Automation)
 
 This section covers the generation of the **truststore for SSL validation** and an alternative **API keystore setup** using automated scripts.
 
@@ -75,6 +96,22 @@ keytool -importcert -noprompt -trustcacerts \
   -keystore docker/demo/resources/truststore.jks \
   -storepass changeit >/dev/null 2>&1
 ```
+
+---
+
+### 🔐 Add Apache Superset™ Certificate to the Truststore
+
+The truststore is used to **trust the self-signed Apache Superset™ certificate** generated earlier.
+
+```bash id="superset-truststore-gen"
+keytool -importcert -noprompt -trustcacerts \
+  -alias superset \
+  -file superset.crt \
+  -keystore docker/demo/resources/truststore.jks \
+  -storepass changeit >/dev/null 2>&1
+```
+
+> This command adds the Apache Superset™ certificate to the shared demo truststore, allowing Java applications to establish TLS connections without certificate validation errors.
 
 ---
 

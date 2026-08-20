@@ -99,6 +99,10 @@ SUPERSET_PASSWORD=password
 
 # Path to the Superset Row Level Security (RLS) configuration file
 SUPERSET_RLS_CONFIG=/app/superset.yaml
+
+# Caffeine cache spec for the Superset access token (single entry, renewed
+# before Superset's JWT_ACCESS_TOKEN_EXPIRES to avoid using an expired token)
+# SUPERSET_CACHE_OPTION=maximumSize=1,expireAfterWrite=55m,recordStats
 ```
 
 ---

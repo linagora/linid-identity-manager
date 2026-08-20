@@ -34,3 +34,9 @@ TALISMAN_CONFIG = {
 }
 
 GUEST_ROLE_NAME = "Guest"
+
+# JWT access token lifetime for the Superset API. The API's Caffeine cache
+# for this token (SUPERSET_CACHE_OPTION) is configured with a TTL of 55min,
+# slightly shorter than this default of 1h, so the token is renewed before
+# it expires server-side.
+JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)

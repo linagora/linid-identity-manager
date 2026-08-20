@@ -48,6 +48,7 @@ import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -218,10 +219,22 @@ public class SupersetServiceImpl implements SupersetService {
 
     /**
      * Authenticates against Superset and retrieves an access token.
+     * <p>
+     * The result is cached under {@code superset-access-token} to avoid
+     * re-authenticating on every call. The cache is configured with a single
+     * entry ({@code maximumSize=1}) and a TTL slightly shorter than Superset's
+     * {@code JWT_ACCESS_TOKEN_EXPIRES} (default: 55 minutes) to renew the token
+     * before it expires server-side.
+     * <p>
+     * Concurrent calls are synchronized ({@code sync = true}) so that only one
+     * thread triggers the Superset login request when the cache is empty or
+     * expired; other threads wait for and reuse that result instead of issuing
+     * duplicate login requests.
      *
      * @return the Superset access token
      * @throws ApiException if Superset does not return an access token
      */
+    @Cacheable(value = "superset-access-token", sync = true)
     public String fetchAccessToken() {
         var loginRequest = new SupersetLoginRequest(username, password, "db", true);
 

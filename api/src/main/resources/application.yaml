@@ -45,6 +45,12 @@ spring:
           issuer-uri: ${AUTH_ISSUER_URI}
           jwk-set-uri: ${AUTH_JWK_SET_URI}
 
+  cache:
+    type: caffeine
+    cache-names: superset-access-token
+    caffeine:
+      spec: ${SUPERSET_CACHE_OPTION:maximumSize=1,expireAfterWrite=55m,recordStats}
+
 management:
   endpoints:
     web:

@@ -1,0 +1,95 @@
+@startuml C2-Containers
+' ============================================================================
+' LinID Identity Manager — C4 Level 2: Containers
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_WITH_LEGEND()
+title LinID Identity Manager — Containers (C2)
+
+' --- Actors -----------------------------------------------------------------
+Person(admin, "Administrator", "Manages identities, applications, rules, dashboards")
+Person(enduser, "End user", "Authenticates, uses UI, manages preferences, views dashboards")
+
+System_Boundary(linid, "LinID Identity Manager") {
+
+  ' --- Frontend -----------------------------------------------------------
+  Container(ui, "LinID UI", "Vue 3.5, Quasar 2.21, Module Federation (host), Nginx", "SPA host application. Handles OIDC flow (oidc-client-ts), loads remote modules at runtime from remotes.json, proxies API/auth/catalog-ui requests via Nginx.")
+  Container(catalog_ui, "Catalog UI", "Vue 3.5, Quasar 2.21, Module Federation (remote 'catalogUI'), Nginx", "Module Federation remote exposing shared UI components (layouts, tables, trees, forms, fields, cards, Superset widget). Will also incorporate the import feature.")
+
+  ' --- Backend ------------------------------------------------------------
+  Container(api, "LinID API", "Java 25, Spring Boot 4.1.0, Spring Data JPA, Flyway, MapStruct", "Core REST API. Manages accounts, OUs, applications, roles, rules (Rego fragments), user preferences, i18n. Compiles Rego policies and deploys them to OPA on a schedule. Generates Superset guest tokens with RLS.")
+
+  ' --- Data store ---------------------------------------------------------
+  ContainerDb(db, "PostgreSQL", "PostgreSQL 18.4", "Relational data store. Hosts 4 databases: linid (business data + Flyway), lemon (LemonLDAP directory), superset (metadata), datalake (analytical data).")
+
+  ' --- Identity provider --------------------------------------------------
+  Container(auth, "LemonLDAP::NG", "LemonLDAP::NG 2.23", "OIDC IdP & SSO portal. Authenticates users against its PostgreSQL directory, issues JWT tokens (RS256). Target: a LemonLDAP script will convert synced claims & entitlements into per-application JWTs.")
+
+  ' --- Policy engine ------------------------------------------------------
+  Container(opa, "Open Policy Agent", "OPA 1.18.1", "Policy decision point. Stores Rego policies pushed by the API (one per application) and evaluates access decisions returning {allow, roles}.")
+
+  ' --- Dashboard engine ---------------------------------------------------
+  Container(superset, "Apache Superset", "Apache Superset 6.1.0, Gunicorn (HTTPS)", "Embedded BI dashboard engine. Stores metadata in the superset DB, reads analytical data from the datalake DB. Serves embedded dashboards via guest tokens with RLS.")
+
+  ' --- One-shot jobs ------------------------------------------------------
+  Container(init_db, "Init DB job", "PostgreSQL Alpine, shell", "One-shot: waits for API to create the LinID schema (Flyway), then seeds demo data into linid, lemon and datalake DBs.")
+  Container(init_superset, "Init Superset job", "curl image, shell", "One-shot: imports a pre-built Superset dashboard export and configures it for embedding via the Superset REST API.")
+
+  ' --- Test runner (e2e only) ---------------------------------------------
+  Container(e2e, "E2E Test Runner", "Cypress (custom image)", "Runs Cucumber/Cypress end-to-end tests against the full stack (UI + API). Activated via the 'test' Docker Compose profile.")
+
+  ' --- Future: sync brick -------------------------------------------------
+  Container(flink, "Apache Flink sync brick (future)", "Apache Flink", "Computes per account/application profiles (claims + entitlements) by evaluating OPA decisions, stores them in account_application_profiles, and syncs them to LDAP.")
+
+  ' --- Future: LDAP directory ---------------------------------------------
+  ContainerDb(ldap, "LDAP Directory (future)", "LDAP server", "Stores claims & entitlements per user, written by the Flink sync brick and read by LemonLDAP::NG to build per-application JWT tokens.")
+}
+
+' --- External systems (future) ---------------------------------------------
+System_Ext(s3trino, "S3 + Trino (future)", "Target datalake: S3 storage queried by Superset via Trino.")
+
+' --- Relationships: actors -> containers -----------------------------------
+Rel(admin, ui, "Manages identities, applications, rules, dashboards", "HTTPS")
+Rel(enduser, ui, "Authenticates, uses UI, manages preferences, views dashboards", "HTTPS")
+Rel(admin, api, "Manages accounts, OUs, applications, roles, rules, deploys policies", "HTTPS/REST")
+Rel(admin, superset, "Creates & configures new dashboards for embedding", "HTTPS")
+Rel(enduser, api, "Reads/writes preferences, requests Superset guest tokens", "HTTPS/REST")
+
+' --- Relationships: frontend -----------------------------------------------
+Rel(ui, api, "Proxies API calls via /backend/", "HTTPS/REST")
+Rel(ui, auth, "OIDC login flow (authorization code + PKCE), token renewal via /auth/", "OIDC/HTTPS")
+Rel(ui, catalog_ui, "Loads Module Federation remote components via /catalog-ui/", "HTTP")
+Rel(ui, api, "Fetches i18n translations", "HTTPS/REST")
+
+' --- Relationships: backend -------------------------------------------------
+Rel(api, db, "Reads/writes LinID business data (linid DB)", "JDBC")
+Rel(api, auth, "Fetches OIDC JWKS for JWT validation", "OIDC/HTTPS")
+Rel(api, opa, "Publishes Rego policies (PUT /v1/policies/{id})", "REST/HTTP")
+Rel(api, opa, "Scheduled deployment of pending policies (every 5 min)", "REST/HTTP")
+Rel(api, superset, "Login, CSRF, guest token generation, dashboard config", "REST/HTTPS")
+
+' --- Relationships: LemonLDAP ----------------------------------------------
+Rel(auth, db, "Reads user directory (lemon DB)", "DBI/PostgreSQL")
+
+' --- Relationships: Superset -----------------------------------------------
+Rel(superset, db, "Reads/writes metadata (superset DB)", "SQLAlchemy/psycopg2")
+Rel(superset, db, "Reads analytical data (datalake DB)", "SQLAlchemy/psycopg2")
+Rel(superset, s3trino, "Queries datalake via Trino (target architecture)", "SQL")
+
+' --- Relationships: jobs ---------------------------------------------------
+Rel(init_db, db, "Seeds demo data into linid, lemon, datalake DBs", "psql")
+Rel(init_db, api, "Waits for API health (schema readiness)", "HTTPS")
+Rel(init_superset, superset, "Imports dashboard export, configures embedding", "REST/HTTPS")
+
+' --- Relationships: e2e ----------------------------------------------------
+Rel(e2e, ui, "Runs browser E2E tests", "HTTPS")
+Rel(e2e, api, "Runs API E2E tests", "HTTPS/REST")
+
+' --- Relationships: future sync brick --------------------------------------
+Rel(flink, opa, "Evaluates decisions to compute entitlements", "REST/HTTP")
+Rel(flink, db, "Writes computed profiles (account_application_profiles, linid DB)", "JDBC")
+Rel(flink, ldap, "Syncs claims & entitlements per user", "LDAP")
+Rel(auth, ldap, "Reads claims & entitlements to build per-application JWT", "LDAP")
+
+@enduml

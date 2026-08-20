@@ -1,0 +1,47 @@
+@startuml C1-System-Context
+' ============================================================================
+' LinID Identity Manager — C4 Level 1: System Context
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_WITH_LEGEND()
+title LinID Identity Manager — System Context (C1)
+
+' --- Actors -----------------------------------------------------------------
+Person(admin, "Administrator", "Manages user accounts, organizational units, applications, application roles & OPA authorization rules. Triggers OPA policy deployment and configures Superset dashboards.")
+Person(enduser, "End user", "Authenticates through LemonLDAP::NG, uses the application UI, manages own preferences and consumes embedded Superset dashboards.")
+
+' --- System -----------------------------------------------------------------
+System(linid, "LinID Identity Manager", "Centralized IAM platform: manages identities, organizational structure, application permissions, OIDC authentication configuration and policy-based authorization (PBAC) across an organization's applications.")
+
+' --- External systems (current) --------------------------------------------
+System_Ext(lemonldap, "LemonLDAP::NG", "OIDC Identity Provider & SSO portal. Authenticates users against its directory and issues JWT tokens (RS256). In the target architecture, a LemonLDAP script will convert synced claims & entitlements into per-application JWT tokens.")
+System_Ext(opa, "Open Policy Agent (OPA)", "Policy decision point. Stores Rego policies compiled by the API and evaluates access decisions (allow/deny + roles) per application.")
+System_Ext(superset, "Apache Superset", "Embedded BI dashboard engine. The API generates guest tokens with Row Level Security (RLS) rules; the frontend embeds dashboards via the Superset Embedded SDK.")
+System_Ext(postgres, "PostgreSQL", "Relational data store hosting four isolated databases: linid (business data), lemon (LemonLDAP directory), superset (metadata), datalake (analytical data).")
+
+' --- External systems (future / target architecture) -----------------------
+System_Ext(flink, "Apache Flink (future)", "Synchronization brick that computes per account/application profiles (claims + entitlements) by evaluating OPA decisions, stores them in the account_application_profiles table, and syncs them to the LDAP directory linked to the user.")
+System_Ext(ldap, "LDAP Directory (future)", "Stores claims & entitlements per user, written by the Flink sync brick and read by LemonLDAP::NG to build per-application JWT tokens.")
+System_Ext(s3trino, "S3 + Trino (future)", "Target datalake: business data stored in an S3 bucket, queried by Apache Superset via Trino instead of the local datalake database.")
+
+' --- Relationships (current) ------------------------------------------------
+Rel(admin, linid, "Manages identities, applications, rules, dashboards", "HTTPS")
+Rel(enduser, linid, "Authenticates, uses UI, manages preferences, views dashboards", "HTTPS")
+
+Rel(linid, lemonldap, "OIDC authentication (authorization code + PKCE), JWT validation via JWKS", "OIDC/HTTPS")
+Rel(linid, opa, "Publishes Rego policies (PUT /v1/policies/{id})", "REST/HTTP")
+Rel(linid, superset, "Generates guest tokens with RLS, embeds dashboards", "REST/HTTPS")
+Rel(linid, postgres, "Reads/writes business data (linid DB)", "JDBC")
+
+Rel(lemonldap, postgres, "Reads user directory (lemon DB)", "DBI/PostgreSQL")
+Rel(superset, postgres, "Reads/writes metadata (superset DB) & analytical data (datalake DB)", "SQLAlchemy/psycopg2")
+
+' --- Relationships (future / target architecture) --------------------------
+Rel(flink, opa, "Evaluates decisions to compute entitlements", "REST/HTTP")
+Rel(flink, postgres, "Writes computed profiles (account_application_profiles)", "JDBC")
+Rel(flink, ldap, "Syncs claims & entitlements per user", "LDAP")
+Rel(lemonldap, ldap, "Reads claims & entitlements to build per-application JWT", "LDAP")
+Rel(superset, s3trino, "Queries datalake via Trino", "SQL")
+
+@enduml

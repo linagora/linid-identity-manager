@@ -1,0 +1,116 @@
+@startuml C3-API-Components
+' ============================================================================
+' LinID Identity Manager — C4 Level 3: Components of the LinID API container
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title LinID API — Components (C3)
+
+Container_Boundary(api, "LinID API") {
+
+  ' --- Configuration ------------------------------------------------------
+  Component(security_config, "SecurityConfig", "Security Config", "Two filter chains: public endpoints (health, actuator, i18n, swagger) and secured endpoints (JWT via OAuth2 Resource Server + UserAuthenticationFilter).")
+  Component(opa_config, "OpaConfig", "Config", "Creates the RestClient bean targeting the OPA server URL.")
+  Component(scheduling_config, "SchedulingConfig", "Config", "Enables @EnableScheduling for the OPA deployment scheduler.")
+  Component(flyway_config, "FlywayConfig", "Config", "Two Flyway beans: flywayCore (public schema) and flywayClient (client-specific schema).")
+  Component(ssl_config, "SslConfig", "Config", "Sets JVM truststore system properties for HTTPS calls to external services.")
+
+  ' --- Filters & Exception handler ----------------------------------------
+  Component(user_auth_filter, "UserAuthenticationFilter", "Security Filter", "Runs after JWT Bearer filter; extracts email claim, resolves LinID account, sets UserPrincipal in security context.")
+  Component(copyright_filter, "CopyrightFilter", "Servlet Filter", "Adds configurable X-Copyright header to all responses.")
+  Component(exception_handler, "GlobalExceptionHandler", "Controller Advice", "Intercepts ApiException & validation exceptions, translates messages via i18n, returns standardized error body.")
+
+  ' --- Controllers --------------------------------------------------------
+  Component(account_ctrl, "AccountController", "REST Controller (/accounts)", "CRUD & lifecycle (suspend, deactivate, reactivate, activate, schedule-activation) for accounts.")
+  Component(application_ctrl, "ApplicationController", "REST Controller (/applications)", "CRUD for applications; triggers OPA policy deployment; exports Rego script.")
+  Component(app_role_ctrl, "ApplicationRoleController", "REST Controller (/applications/{id}/roles)", "CRUD for application roles.")
+  Component(app_rule_ctrl, "ApplicationRuleController", "REST Controller (/applications/{id}/rules)", "CRUD for application rules (Rego fragments); triggers policy regeneration.")
+  Component(ou_ctrl, "OrganizationalUnitController", "REST Controller (/organizational-units)", "CRUD & lifecycle (suspend, reactivate) for OUs; lists OU accounts.")
+  Component(superset_ctrl, "SupersetController", "REST Controller (/superset)", "Generates Superset guest tokens; resolves dashboard ID from slug.")
+  Component(user_pref_ctrl, "UserPreferenceController", "REST Controller (/user-preferences)", "Key/value preference store scoped to the authenticated user.")
+  Component(i18n_ctrl, "I18nController", "REST Controller (/i18n)", "Returns available languages and translation files (public, no auth).")
+
+  ' --- Services -----------------------------------------------------------
+  Component(account_svc, "AccountService", "Service", "CRUD & lifecycle management for accounts.")
+  Component(application_svc, "ApplicationService", "Service", "CRUD for applications; regeneratePolicy() compiles active rules into Rego via OpaService.")
+  Component(app_role_svc, "ApplicationRoleService", "Service", "CRUD for application roles.")
+  Component(app_rule_svc, "ApplicationRuleService", "Service", "CRUD for application rules (Rego fragments).")
+  Component(ou_svc, "OrganizationalUnitService", "Service", "CRUD & lifecycle for organizational units; lists OU accounts.")
+  Component(user_pref_svc, "UserPreferenceService", "Service", "Key/value preference store scoped to the authenticated user.")
+  Component(opa_svc, "OpaService", "Service / Adapter", "Generates Rego policy from active rules (Jinja template) and publishes it to OPA (PUT /v1/policies/{id}).")
+  Component(opa_deployer, "OpaApplicationDeployerService", "Service", "Deploys a single application policy to OPA in its own transaction (REQUIRES_NEW); updates deployedAt.")
+  Component(opa_scheduler, "OpaDeploymentScheduler", "Scheduler", "Periodically (every 5 min) deploys all applications with a generated script but no deployedAt.")
+  Component(superset_svc, "SupersetService", "Service / Adapter", "Authenticates to Superset, generates guest tokens with RLS rules from account/OU data, resolves dashboard IDs. Caches access token (Caffeine, 55 min).")
+  Component(jinja_svc, "JinjaService", "Service", "Renders Jinja/Jinjava templates (used for OPA policy generation).")
+  Component(checksum_svc, "ChecksumService", "Service", "Computes checksums of generated OPA scripts to detect changes.")
+
+  ' --- i18n ---------------------------------------------------------------
+  Component(i18n_svc, "I18nServiceImpl", "Service (CommandLineRunner)", "Merges translations from multiple loaders (plugin, external, internal) at startup; provides translation lookup.")
+  Component(i18n_loaders, "I18n Loaders", "Loader", "ClasspathI18nLoader, ExternalPathI18nLoader, PluginI18nLoader: load translations from classpath, filesystem and plugins.")
+
+  ' --- Validators ---------------------------------------------------------
+  Component(validators, "Validators", "Validator", "Account lifecycle validators (creation, activation, deactivation, reactivation, suspension, validity), OU validators (suspension, reactivation), PeriodValidator, SystemApplicationValidator.")
+
+  ' --- Repositories (JPA) -------------------------------------------------
+  ComponentDb(account_repos, "Account Repositories", "JPA Repositories", "AccountRepository, AccountViewRepository, AccountStatusRepository.")
+  ComponentDb(application_repos, "Application Repositories", "JPA Repositories", "ApplicationRepository, ApplicationViewRepository, ApplicationRoleRepository, ApplicationRoleViewRepository, ApplicationRuleRepository, ApplicationRuleViewRepository.")
+  ComponentDb(ou_repos, "Organizational Unit Repositories", "JPA Repositories", "OrganizationalUnitRepository, OrganizationalUnitViewRepository, OrganizationalUnitRelationRepository, OrganizationalUnitStatusRepository, OrganizationalUnitAccountRepository, OrganizationalUnitAccountViewRepository.")
+  ComponentDb(user_pref_repo, "UserPreferenceRepository", "JPA Repository", "CRUD for UserPreference entities.")
+}
+
+' --- External systems ------------------------------------------------------
+System_Ext(opa, "OPA", "Open Policy Agent")
+System_Ext(superset, "Apache Superset", "BI dashboard engine")
+System_Ext(lemonldap, "LemonLDAP::NG", "OIDC IdP")
+ContainerDb_Ext(db, "PostgreSQL (linid DB)", "PostgreSQL", "LinID business data")
+
+' --- Relationships: controllers -> services -------------------------------
+Rel(account_ctrl, account_svc, "Uses")
+Rel(account_ctrl, ou_svc, "Checks OU exists")
+Rel(application_ctrl, application_svc, "Uses")
+Rel(application_ctrl, opa_deployer, "Triggers policy deployment")
+Rel(app_role_ctrl, app_role_svc, "Uses")
+Rel(app_rule_ctrl, app_rule_svc, "Uses")
+Rel(app_rule_ctrl, application_svc, "Regenerates policy")
+Rel(ou_ctrl, ou_svc, "Uses")
+Rel(superset_ctrl, superset_svc, "Uses")
+Rel(user_pref_ctrl, user_pref_svc, "Uses")
+Rel(i18n_ctrl, i18n_svc, "Uses")
+
+' --- Relationships: services -> repositories ------------------------------
+Rel(account_svc, account_repos, "Uses")
+Rel(application_svc, application_repos, "Uses")
+Rel(app_role_svc, application_repos, "Uses")
+Rel(app_rule_svc, application_repos, "Uses")
+Rel(ou_svc, ou_repos, "Uses")
+Rel(user_pref_svc, user_pref_repo, "Uses")
+Rel(superset_svc, account_repos, "Reads account data for RLS")
+Rel(superset_svc, ou_repos, "Reads OU data for RLS")
+
+' --- Relationships: services -> OPA ---------------------------------------
+Rel(application_svc, opa_svc, "Generates policy")
+Rel(opa_svc, jinja_svc, "Renders Rego template")
+Rel(opa_svc, checksum_svc, "Computes script checksum")
+Rel(opa_deployer, opa_svc, "Publishes policy")
+Rel(opa_scheduler, opa_deployer, "Deploys pending applications")
+Rel(opa_deployer, application_repos, "Updates deployedAt")
+
+' --- Relationships: filters -> services -----------------------------------
+Rel(user_auth_filter, account_svc, "Resolves account by email")
+Rel(security_config, user_auth_filter, "Registers filter")
+Rel(exception_handler, i18n_svc, "Translates error messages")
+
+' --- Relationships: external ----------------------------------------------
+Rel(opa_svc, opa, "Publishes Rego policies (PUT /v1/policies/{id})", "REST/HTTP")
+Rel(superset_svc, superset, "Login, CSRF, guest token, dashboard config", "REST/HTTPS")
+Rel(security_config, lemonldap, "JWT validation via JWKS", "OIDC/HTTPS")
+Rel(user_auth_filter, lemonldap, "Reads email claim from JWT", "JWT")
+
+Rel(account_repos, db, "Reads/writes", "JDBC")
+Rel(application_repos, db, "Reads/writes", "JDBC")
+Rel(ou_repos, db, "Reads/writes", "JDBC")
+Rel(user_pref_repo, db, "Reads/writes", "JDBC")
+Rel(flyway_config, db, "Runs migrations", "JDBC/Flyway")
+
+@enduml

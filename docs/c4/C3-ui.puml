@@ -1,0 +1,71 @@
+@startuml C3-UI-Components
+' ============================================================================
+' LinID Identity Manager — C4 Level 3: Components of the LinID UI container
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title LinID UI (Frontend Host) — Components (C3)
+
+Container_Boundary(ui, "LinID UI (Module Federation host)") {
+
+  ' --- Boot files (initialization sequence) --------------------------------
+  Component(boot_oidc, "oidc boot", "Boot file", "Initializes oidc-client-ts UserManager, retrieves user, populates Pinia user store & preferences.")
+  Component(boot_remotes, "remotes boot", "Boot file", "Fetches /remotes.json and registers Module Federation remotes at runtime.")
+  Component(boot_lifecycle, "module-lifecycle boot", "Boot file", "Loads each remote module's lifecycle entry point and executes lifecycle phases (SETUP, CONFIGURE, INITIALIZE, READY, POST_INIT).")
+  Component(boot_i18n, "i18n boot", "Boot file", "Initializes Vue I18n with translations fetched from the API (/i18n/{lang}.json).")
+  Component(boot_config, "config boot", "Boot file", "Loads runtime configuration (/config.json, /oidc-config.json).")
+  Component(boot_axios, "axios boot", "Boot file", "Configures Axios HTTP client with base URL /backend/ and interceptors.")
+  Component(boot_misc, "Other boot files", "Boot file", "pinia, theme, ui-design, local-components, nunjucks, dayjs: initialize supporting libraries & configuration.")
+
+  ' --- Services ------------------------------------------------------------
+  Component(auth_service, "AuthService", "Service", "Wraps oidc-client-ts for login, logout, token renewal and user retrieval.")
+  Component(account_service, "AccountService", "Service", "REST client for /accounts endpoints.")
+  Component(application_service, "ApplicationService", "Service", "REST client for /applications endpoints.")
+  Component(ou_service, "OrganizationalUnitService", "Service", "REST client for /organizational-units endpoints.")
+  Component(module_lifecycle_svc, "ModuleLifecycleService", "Service", "Orchestrates remote module configuration loading and lifecycle phase execution.")
+
+  ' --- Stores --------------------------------------------------------------
+  Component(stores, "Pinia Stores", "Store", "User store, user preference store (from @linagora/linid-im-front-corelib).")
+
+  ' --- Composables ---------------------------------------------------------
+  Component(composables, "Composables", "Composable", "useAccountLifecycleUi, useAccountMapper, useOrganizationalUnitLifecycleUi, useOrganizationalUnitMapper, useLifecycleDialogs.")
+}
+
+' --- Module Federation remotes (loaded at runtime from remotes.json) --------
+Container_Ext(catalog_ui, "Catalog UI (remote: catalogUI)", "Vue, Quasar, Module Federation", "Shared UI component library: layouts, tables, trees, forms, fields, cards, dialogs, pages, smart filter, Superset widget card. Will also incorporate the import feature.")
+
+Container_Ext(module_import, "module-import (to be merged into catalog-ui)", "Vue, Quasar, Module Federation", "Data import feature (CSV via papaparse). Will be incorporated into catalog-ui.")
+
+Container_Ext(module_users, "module-users (to be removed)", "Vue, Quasar, Module Federation", "User management pages. Will likely disappear.")
+
+' --- External systems ------------------------------------------------------
+System_Ext(api, "LinID API", "Spring Boot REST API")
+System_Ext(auth, "LemonLDAP::NG", "OIDC IdP")
+
+' --- Relationships: boot -> services ---------------------------------------
+Rel(boot_oidc, auth_service, "Initializes")
+Rel(boot_oidc, stores, "Populates user store")
+Rel(boot_remotes, module_lifecycle_svc, "Registers remotes")
+Rel(boot_lifecycle, module_lifecycle_svc, "Executes lifecycle phases")
+Rel(boot_i18n, api, "Fetches translations", "HTTPS/REST")
+Rel(boot_config, api, "Fetches config (indirectly)", "HTTPS/REST")
+Rel(boot_axios, api, "Configures base URL /backend/", "HTTPS/REST")
+
+' --- Relationships: services -> API ----------------------------------------
+Rel(auth_service, auth, "OIDC login flow (authorization code + PKCE)", "OIDC/HTTPS")
+Rel(account_service, api, "Calls /accounts", "HTTPS/REST")
+Rel(application_service, api, "Calls /applications", "HTTPS/REST")
+Rel(ou_service, api, "Calls /organizational-units", "HTTPS/REST")
+
+' --- Relationships: host -> remotes ----------------------------------------
+Rel(boot_remotes, catalog_ui, "Loads remote components via /catalog-ui/", "HTTP")
+Rel(boot_lifecycle, catalog_ui, "Loads lifecycle entry point", "HTTP")
+Rel(boot_lifecycle, module_import, "Loads lifecycle entry point (if registered)", "HTTP")
+Rel(boot_lifecycle, module_users, "Loads lifecycle entry point (if registered)", "HTTP")
+
+' --- Relationships: composables -> services --------------------------------
+Rel(composables, account_service, "Uses")
+Rel(composables, ou_service, "Uses")
+
+@enduml

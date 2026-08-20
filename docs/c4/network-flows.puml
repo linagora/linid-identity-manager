@@ -1,0 +1,163 @@
+@startuml network-flows
+' ============================================================================
+' LinID Identity Manager — Network Flows
+' ============================================================================
+' Diagram showing all network flows with: source, destination, port, protocol,
+' direction, authentication, encryption, internal/external scope.
+' ============================================================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "DejaVu Sans"
+skinparam roundCorner 8
+skinparam ArrowFontName "DejaVu Sans"
+skinparam ArrowFontSize 9
+skinparam NodeFontName "DejaVu Sans"
+skinparam NodeFontSize 10
+skinparam noteFontSize 8
+
+title LinID Identity Manager — Network Flows
+
+' --- Style definitions -----------------------------------------------------
+skinparam rectangle {
+  BackgroundColor<<ui>>        #E3F2FD
+  BackgroundColor<<api>>       #E8F5E9
+  BackgroundColor<<auth>>      #FFF3E0
+  BackgroundColor<<opa>>       #F3E5F5
+  BackgroundColor<<superset>>  #FCE4EC
+  BackgroundColor<<catalog>>   #E0F7FA
+  BackgroundColor<<job>>       #F5F5F5
+  BackgroundColor<<test>>      #FFFDE7
+  BackgroundColor<<future>>    #ECEFF1
+  BorderColor                  #555555
+}
+skinparam database {
+  BackgroundColor #E8EAF6
+  BorderColor     #555555
+}
+
+' --- External network ------------------------------------------------------
+cloud "External Network" as ext #FFEBEE
+
+' --- Docker network boundary ----------------------------------------------
+node "Docker Network\n(linid-e2e-network)" as docker {
+
+  ' --- Containers ----------------------------------------------------------
+  rectangle "**LinID UI**\nimage: linid-identity-manager-ui\nNginx (HTTPS)\n:9000 -> :443" as ui <<ui>>
+  rectangle "**LinID API**\nimage: linid-identity-manager-api\nSpring Boot (HTTPS)\n:8443" as api <<api>>
+  rectangle "**Catalog UI**\nimage: catalog-ui\nNginx (HTTP)\n:80" as catalog_ui <<catalog>>
+  rectangle "**LemonLDAP::NG**\nimage: lemonldapng/lemonldap-ng:2.23\n:8080 -> :80" as auth <<auth>>
+  rectangle "**OPA**\nimage: openpolicyagent/opa:1.18.1\n:8181" as opa <<opa>>
+  rectangle "**Apache Superset**\nimage: apache/superset:6.1.0\nGunicorn (HTTPS)\n:8088 -> :8443" as superset <<superset>>
+  database "**PostgreSQL**\nimage: postgres:18.4-alpine\n:5432\nDBs: linid, lemon,\nsuperset, datalake" as db
+  rectangle "**Init DB**\n(one-shot)\npostgres:18.4-alpine" as init_db <<job>>
+  rectangle "**Init Superset**\n(one-shot)\ncurlimages/curl" as init_superset <<job>>
+  rectangle "**E2E Test Runner**\n(profile: test)\nvincentmoittie/e2e-test-runner" as e2e <<test>>
+
+  ' --- Future containers ---------------------------------------------------
+  rectangle "**Apache Flink**\n(future)\nSync brick" as flink <<future>>
+  database "**LDAP Directory**\n(future)" as ldap <<future>>
+}
+
+' --- External future system ------------------------------------------------
+cloud "S3 + Trino\n(future)" as s3trino #ECEFF1
+
+' ===========================================================================
+' EXTERNAL FLOWS (red arrows)
+' ===========================================================================
+
+ext --> ui : "**F1** Admin -> UI\nHTTPS :9000->443\nOIDC session cookie | TLS | External" #EF5350
+
+ext --> ui : "**F2** End user -> UI\nHTTPS :9000->443\nOIDC session cookie | TLS | External" #EF5350
+
+ext --> superset : "**F3** Admin -> Superset\nHTTPS :8088->8443\nUsername/password | TLS | External" #EF5350
+
+ext --> api : "**F4** Admin -> API (Swagger)\nHTTPS :8443\nJWT | TLS | External" #EF5350
+
+ext --> auth : "**F5** Admin -> LemonLDAP portal\nHTTP :8080->80\nUsername/password | None | External" #EF5350
+
+' ===========================================================================
+' INTERNAL FLOWS — UI (green arrows)
+' ===========================================================================
+
+ui --> api : "**F6** UI -> API (proxy /backend/)\nHTTPS :8443 | JWT bearer | TLS | Internal" #66BB6A
+
+ui --> auth : "**F7** UI -> LemonLDAP (proxy /auth/)\nHTTP :80 | OIDC session | None | Internal" #66BB6A
+
+ui --> catalog_ui : "**F8** UI -> Catalog UI (proxy /catalog-ui/)\nHTTP :80 | None | None | Internal" #66BB6A
+
+' ===========================================================================
+' INTERNAL FLOWS — API (green arrows)
+' ===========================================================================
+
+api --> db : "**F9** API -> PostgreSQL (linid DB)\nJDBC :5432 | DB user/pass | None | Internal" #66BB6A
+
+api --> opa : "**F10** API -> OPA (publish policies)\nREST :8181 | None | None | Internal" #66BB6A
+
+api --> auth : "**F11** API -> LemonLDAP (JWKS)\nHTTPS :80 | None (public) | TLS | Internal" #66BB6A
+
+api --> superset : "**F12** API -> Superset (guest tokens)\nREST :8443 | Service account | TLS | Internal" #66BB6A
+
+' ===========================================================================
+' INTERNAL FLOWS — LemonLDAP (green arrows)
+' ===========================================================================
+
+auth --> db : "**F13** LemonLDAP -> PostgreSQL (lemon DB)\nDBI :5432 | DB user/pass | None | Internal" #66BB6A
+
+' ===========================================================================
+' INTERNAL FLOWS — Superset (green arrows)
+' ===========================================================================
+
+superset --> db : "**F14** Superset -> PostgreSQL (superset DB)\nSQLAlchemy :5432 | DB user/pass | None | Internal" #66BB6A
+
+superset --> db : "**F15** Superset -> PostgreSQL (datalake DB)\nSQLAlchemy :5432 | DB user/pass | None | Internal" #66BB6A
+
+' ===========================================================================
+' INTERNAL FLOWS — Jobs (green arrows)
+' ===========================================================================
+
+init_db --> db : "**F16** Init DB -> PostgreSQL (seed data)\npsql :5432 | DB admin pass | None | Internal" #66BB6A
+
+init_db --> api : "**F17** Init DB -> API (health check)\nHTTPS :8443 | None | TLS | Internal" #66BB6A
+
+init_superset --> superset : "**F18** Init Superset -> Superset (import dashboard)\nREST :8443 | Service account | TLS | Internal" #66BB6A
+
+' ===========================================================================
+' INTERNAL FLOWS — E2E (green arrows)
+' ===========================================================================
+
+e2e --> ui : "**F19** E2E -> UI (browser tests)\nHTTPS :443 | None | TLS | Internal" #66BB6A
+
+e2e --> api : "**F20** E2E -> API (API tests)\nHTTPS :8443 | JWT | TLS | Internal" #66BB6A
+
+' ===========================================================================
+' FUTURE FLOWS (dashed gray arrows)
+' ===========================================================================
+
+flink ..> opa : "**F21** Flink -> OPA (evaluate decisions)\nREST :8181 | None | None | Internal" #90A4AE
+
+flink ..> db : "**F22** Flink -> PostgreSQL (write profiles)\nJDBC :5432 | DB user/pass | None | Internal" #90A4AE
+
+flink ..> ldap : "**F23** Flink -> LDAP (sync claims & entitlements)\nLDAP :389/636 | Service account | TLS (LDAPS) | Internal" #90A4AE
+
+auth ..> ldap : "**F24** LemonLDAP -> LDAP (read claims & entitlements)\nLDAP :389/636 | Service account | TLS (LDAPS) | Internal" #90A4AE
+
+superset ..> s3trino : "**F25** Superset -> Trino (query datalake)\nSQL :8080 | DB user/pass | TLS | Internal" #90A4AE
+
+' ===========================================================================
+' LEGEND
+' ===========================================================================
+
+legend right
+  |= Color |= Scope |
+  |<#EF5350>  | External flow (from outside Docker network) |
+  |<#66BB6A>  | Internal flow (within Docker network) |
+  |<#90A4AE>  | Future flow (target architecture, not yet implemented) |
+  |           |                 |
+  |= Field   |= Description     |
+  | Port     | Host port -> container port (or container port only if internal) |
+  | Protocol | HTTPS, HTTP, REST, JDBC, DBI, LDAP, SQL |
+  | Auth     | OIDC session, JWT, username/password, service account, DB credentials, none |
+  | Encrypt  | TLS (transport encryption) or None (plaintext within Docker network) |
+endlegend
+
+@enduml

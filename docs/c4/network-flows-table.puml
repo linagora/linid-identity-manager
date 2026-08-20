@@ -1,0 +1,55 @@
+@startuml network-flows-table
+' ============================================================================
+' LinID Identity Manager — Network Flows (Table View)
+' Companion to network-flows.puml — renders as a sortable table.
+' ============================================================================
+
+skinparam backgroundColor #FEFEFE
+skinparam defaultFontName "DejaVu Sans"
+skinparam noteFontSize 8
+
+title LinID Identity Manager — Network Flows (Table)
+
+note
+  **Current flows (F1–F20)**
+  |= ID |= Source |= Destination |= Port |= Protocol |= Direction |= Authentication |= Encryption |= Scope |
+  | F1  | Admin     | UI (Nginx)       | 9000 -> 443 | HTTPS      | Inbound  | OIDC session cookie    | TLS  | External |
+  | F2  | End user  | UI (Nginx)       | 9000 -> 443 | HTTPS      | Inbound  | OIDC session cookie    | TLS  | External |
+  | F3  | Admin     | Apache Superset  | 8088 -> 8443| HTTPS      | Inbound  | Username / password    | TLS  | External |
+  | F4  | Admin     | LinID API        | 8443        | HTTPS      | Inbound  | JWT                    | TLS  | External |
+  | F5  | Admin     | LemonLDAP::NG    | 8080 -> 80  | HTTP       | Inbound  | Username / password    | None | External |
+  | F6  | UI (Nginx)| LinID API        | 8443        | HTTPS/REST | Outbound | JWT bearer             | TLS  | Internal |
+  | F7  | UI (Nginx)| LemonLDAP::NG    | 80          | HTTP       | Outbound | OIDC session           | None | Internal |
+  | F8  | UI (Nginx)| Catalog UI       | 80          | HTTP       | Outbound | None                   | None | Internal |
+  | F9  | LinID API | PostgreSQL       | 5432        | JDBC       | Outbound | DB user / password     | None | Internal |
+  | F10 | LinID API | OPA              | 8181        | REST/HTTP  | Outbound | None                   | None | Internal |
+  | F11 | LinID API | LemonLDAP::NG    | 80          | HTTPS      | Outbound | None (public JWKS)     | TLS  | Internal |
+  | F12 | LinID API | Apache Superset  | 8443        | REST/HTTPS | Outbound | Service account        | TLS  | Internal |
+  | F13 | LemonLDAP | PostgreSQL       | 5432        | DBI/Pg     | Outbound | DB user / password     | None | Internal |
+  | F14 | Superset  | PostgreSQL       | 5432        | SQLAlchemy | Outbound | DB user / password     | None | Internal |
+  | F15 | Superset  | PostgreSQL       | 5432        | SQLAlchemy | Outbound | DB user / password     | None | Internal |
+  | F16 | Init DB   | PostgreSQL       | 5432        | psql       | Outbound | DB admin password      | None | Internal |
+  | F17 | Init DB   | LinID API        | 8443        | HTTPS      | Outbound | None                   | TLS  | Internal |
+  | F18 | Init Sup. | Apache Superset  | 8443        | REST/HTTPS | Outbound | Service account        | TLS  | Internal |
+  | F19 | E2E       | UI (Nginx)       | 443         | HTTPS      | Outbound | None                   | TLS  | Internal |
+  | F20 | E2E       | LinID API        | 8443        | HTTPS/REST | Outbound | JWT                    | TLS  | Internal |
+  ~~~~~~
+  **Future flows (F21–F25) — target architecture, not yet implemented**
+  |= ID |= Source |= Destination |= Port |= Protocol |= Direction |= Authentication |= Encryption |= Scope |
+  | F21 | Flink     | OPA              | 8181        | REST/HTTP  | Outbound | None                   | None | Internal |
+  | F22 | Flink     | PostgreSQL       | 5432        | JDBC       | Outbound | DB user / password     | None | Internal |
+  | F23 | Flink     | LDAP Directory   | 389 / 636   | LDAP       | Outbound | Service account        | TLS (LDAPS) | Internal |
+  | F24 | LemonLDAP | LDAP Directory   | 389 / 636   | LDAP       | Outbound | Service account        | TLS (LDAPS) | Internal |
+  | F25 | Superset  | Trino (S3)       | 8080        | SQL        | Outbound | DB user / password     | TLS  | Internal |
+  ~~~~~~
+  **Notes**
+  • F7: The UI Nginx proxies /auth/ to LemonLDAP over plain HTTP inside the Docker network.
+    The browser-to-UI connection (F1/F2) is TLS-encrypted; the proxy leg is not.
+  • F11: The API fetches OIDC JWKS from LemonLDAP over HTTPS using a truststore
+    (truststore.jks containing LemonLDAP's self-signed certificate).
+  • F14/F15: Superset connects to two different databases (superset metadata + datalake)
+    on the same PostgreSQL instance, same port, different DB names and credentials.
+  • F23/F24: LDAP port 389 (STARTTLS) or 636 (LDAPS) — to be confirmed at implementation time.
+end note
+
+@enduml

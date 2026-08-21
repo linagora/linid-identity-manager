@@ -47,7 +47,7 @@ jobs:
 
       - name: Comment PR on failure
         if: failure()
-        uses: marocchino/sticky-pull-request-comment@v3
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           message: |
             ❌ **Merge blocked into `main`**
@@ -161,7 +161,7 @@ jobs:
 
       - name: Comment PR
         if: success()
-        uses: JoseThen/comment-pr@v1.2.0
+        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
         with:
           file_path: ui/coverage.txt
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -191,7 +191,7 @@ jobs:
           echo '```' >> dependencies.txt
 
       - name: Comment PR
-        uses: JoseThen/comment-pr@v1.2.0
+        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
         with:
           file_path: ui/dependencies.txt
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -266,7 +266,7 @@ jobs:
         run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
 
       - name: Post comment
-        uses: JoseThen/comment-pr@v1.2.0
+        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
         with:
           file_path: api/pitest.html
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -293,7 +293,7 @@ jobs:
         run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false > dependency-updates.txt
 
       - name: Post comment
-        uses: JoseThen/comment-pr@v1.2.0
+        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
         with:
           file_path: api/dependency-updates.txt
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -330,7 +330,9 @@ jobs:
           submodules: "recursive"
 
       - name: Install Task
-        uses: arduino/setup-task@v3
+        uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run e2e tests
         run: |
@@ -349,13 +351,95 @@ jobs:
         working-directory: docker/e2e
         run: docker compose --env-file env/e2e.env down
 
-  security-check:
-    name: Supply Chain Malware Scan
+  security-malware-scan:
+    name: Security - Malware Scan
     needs: [delete-comments]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
-      - uses: gensecaihq/Shai-Hulud-2.0-Detector@v2
+        with:
+          persist-credentials: false
+      - uses: gensecaihq/Shai-Hulud-2.0-Detector@2755f94762bf5012bc7be82c93e172eabbcd0802 # v2.2.0
         with:
           fail-on-critical: true
+
+  security-sast:
+    name: Security - SAST
+    needs: [delete-comments]
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Set up JDK 25 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
+      - uses: github/codeql-action/init@v4
+        with:
+          languages: java,javascript
+      - uses: github/codeql-action/autobuild@v4
+      - uses: github/codeql-action/analyze@v4
+
+  security-dependency-review:
+    name: Security - Dependency Review
+    needs: [delete-comments]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@v5
+
+  security-github-actions:
+    name: Security - GitHub Actions
+    needs: [delete-comments]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: zizmorcore/zizmor-action@3dc1ecc9bcb9e94e9b2c709687979e1298497054 # v0.6.2
+
+  security-container:
+    name: Security - Container
+    needs: [delete-comments]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: "recursive"
+          persist-credentials: false
+      - name: Install Task
+        uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build api image
+        run: task build:image:api
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: linid-identity-manager-api
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          skip-files: /usr/bin/pebble
+      - name: Build ui image
+        run: task build:image:ui
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: linid-identity-manager-ui
+          severity: CRITICAL,HIGH
+          exit-code: "1"

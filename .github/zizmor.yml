@@ -1,0 +1,8 @@
+# Zizmor configuration: relaxes action pinning checks for trusted GitHub-owned actions.
+rules:
+  unpinned-uses:
+    config:
+      policies:
+        actions/*: ref-pin
+        github/*: ref-pin
+        dependabot/*: ref-pin

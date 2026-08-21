@@ -34,6 +34,7 @@
 	</scm>
 	<properties>
 		<java.version>25</java.version>
+		<postgresql.version>42.7.13</postgresql.version>
 	</properties>
 	<dependencies>
 		<dependency>

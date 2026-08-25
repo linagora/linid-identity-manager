@@ -27,6 +27,7 @@
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 import type { AccountLifecycleAction } from './accountLifecycleUi';
 import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
+import type { ThemeVariables } from './theme';
 
 /**
  * Runtime application configuration loaded from `public/config.json`. Holds deployment-specific values that must be
@@ -47,6 +48,8 @@ export interface AppConfig {
     /** Default locale of the application. */
     locale: string;
   };
+  /** Theme variables of the project. */
+  themeVariables: ThemeVariables;
   /** Defines the delay(in minutes) applied when reactivating a suspended or inactive account. */
   immediateActionDelay: number;
   /** List of design files to be loaded for the UI. */

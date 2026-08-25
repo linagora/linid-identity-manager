@@ -1127,19 +1127,13 @@
       "noData": "No rule for this application.",
       "editButton": "Edit",
       "deleteButton": "Delete",
-      "saveNewOrderHint": "The order has been modified. Don't forget to save.",
-      "saveUpdatedItemsHint": "Some rules have been modified. Don't forget to save.",
-      "saveNewOrderAndUpdatedItemsHint": "The order and some rules have been modified. Don't forget to save.",
+      "unsavedChangesHint": "Some rules have been modified. Don't forget to save.",
+      "saveChangesSuccess": "Changes saved successfully.",
+      "saveChangesError": "Unable to save the changes. Please try again later.",
+      "saveChangesPartially": "Some changes could not be saved.",
       "loadError": "Unable to load the application rules. Please try again later.",
       "createSuccess": "Rule created successfully.",
       "createError": "Unable to create the rule. Please try again later.",
-      "updateSuccess": "Rule updated successfully.",
-      "updateError": "Unable to update the rule. Please try again later.",
-      "updateItemsSuccess": "Changes saved successfully.",
-      "updateItemsError": "Unable to save the changes. Please try again later.",
-      "updateItemsPartially": "Some rules could not be saved.",
-      "deleteSuccess": "Rule deleted successfully.",
-      "deleteError": "Unable to delete the rule. Please try again later.",
       "ButtonsCard": {
         "add": "Add a rule",
         "save": "Save"
@@ -1208,14 +1202,6 @@
           "disabled": {
             "label": "Disabled"
           }
-        }
-      },
-      "DeleteConfirmationDialog": {
-        "title": "Delete the rule {code}",
-        "content": "Do you really want to delete the rule {code}? This action is irreversible.",
-        "ButtonsCard": {
-          "confirm": "Delete",
-          "cancel": "Cancel"
         }
       },
       "fields": {

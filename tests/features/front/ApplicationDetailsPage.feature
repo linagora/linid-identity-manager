@@ -21,8 +21,7 @@ Feature: Test Application details page display
   ## 118 Toggle should show unsaved changes hint and enable the save button
   ## 119 Toggling back should hide the hint and disable the save button
   ## 120 Should save the toggle change and persist it to the backend
-  ## 121 Delete confirmation dialog should close on cancel without deleting the rule
-  ## 122 Should delete a rule after confirmation
+  ## 121 Should delete a rule
 
   ################## Export application script ##################
   ## 201 Export button should be enabled
@@ -168,8 +167,8 @@ Feature: Test Application details page display
     And  I clear the text in the HTML element '[data-cy="field_description"]'
     And  I set the text "Supervision des comptes" in the HTML element '[data-cy="field_description"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '.q-notification__message' contains "Rôle modifié avec succès."
-    And  I expect the HTML element '[data-cy="form-dialog"]' not exists
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Rôle modifié avec succès."
     And  I expect the HTML element '[data-cy="generic-entity-table"]' contains "supervisor"
     And  I expect the HTML element '[data-cy="generic-entity-table"]' contains "Supervision des comptes"
 
@@ -285,13 +284,13 @@ Feature: Test Application details page display
     And  I clear the text in the HTML element '[data-cy="field_description"]'
     And  I set the text "An updated rule" in the HTML element '[data-cy="field_description"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '.q-notification__message' contains "Règle modifiée avec succès."
-    And  I expect the HTML element '[data-cy="form-dialog"]' not exists
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_code_0"]' contains "updated-rule"
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_item-field_description_0"]' contains "An updated rule"
 
     ## 118 Toggle should show unsaved changes hint and enable the save button
-    And  I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
+    When I click on '[data-cy="generic-sortable-list-card_save-button"]'
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be disabled
     When I click on '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]'
@@ -309,27 +308,24 @@ Feature: Test Application details page display
     ## 120 Should save the toggle change and persist it to the backend
     When I click on '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]'
     And  I click on '[data-cy="generic-sortable-list-card_save-button"]'
-    Then I expect the HTML element '.q-notification__message' contains "Modifications sauvegardées avec succès."
-    And  I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Modifications sauvegardées avec succès."
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}/rules' with method 'GET'
     Then I expect status code is 200
     And  I expect '{{response.body.content[0].disabled}}' is "false"
 
-    ## 121 Delete confirmation dialog should close on cancel without deleting the rule
+    ## 121 Should delete a rule
     When I click on '[data-cy="generic-sortable-list-card_button_delete_0"]'
-    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
-    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Supprimer la règle updated-rule"
-    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Voulez-vous vraiment supprimer la règle updated-rule ?"
-    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
-    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
-    And  I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"]' to be visible
-
-    ## 122 Should delete a rule after confirmation
-    When I click on '[data-cy="generic-sortable-list-card_button_delete_0"]'
-    And  I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '.q-notification__message' contains "Règle supprimée avec succès."
-    And  I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
-    And  I expect the HTML element '[data-cy="generic-sortable-list-card_list"]' contains "Aucune règle pour cette application."
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"]' not exists
+    And  I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be enabled
+    And  I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' contains "Des règles ont été modifiées. N'oubliez pas de sauvegarder."
+    When I click on '[data-cy="generic-sortable-list-card_save-button"]'
+    Then I expect the HTML element '[data-cy="generic-sortable-list-card_unsaved-changes-hint"]' not exists
+    And  I expect the HTML element '[data-cy="generic-sortable-list-card_save-button"]' to be disabled
+    And  I expect the HTML element '.q-notification__message' contains "Modifications sauvegardées avec succès."
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}/rules' with method 'GET'
+    Then I expect status code is 200
+    And  I expect "{{ response.body.content }}" to have length 0
 
     ###########################################################
     ################## Export application script ##############

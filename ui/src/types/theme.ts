@@ -24,13 +24,22 @@
  * LinID Identity Manager software.
  */
 
-import { appConfig } from 'boot/config';
-
-export default () => {
-  const theme = appConfig.themeVariables;
-
-  Object.entries(theme).forEach(([key, val]) => {
-    /** The '--q-' prefix is used to namespace CSS custom properties (variables) related to Quasar framework themes. */
-    document.documentElement.style.setProperty(`--q-${key}`, val);
-  });
-};
+/** Theme variables of the project. */
+export interface ThemeVariables {
+  /** The primary color of the theme. */
+  primary: string;
+  /** The secondary color of the theme. */
+  secondary: string;
+  /** The accent color of the theme. */
+  accent: string;
+  /** The dark color of the theme. */
+  dark: string;
+  /** The positive color of the theme. */
+  positive: string;
+  /** The negative color of the theme. */
+  negative: string;
+  /** The info color of the theme. */
+  info: string;
+  /** The warning color of the theme. */
+  warning: string;
+}

@@ -15,6 +15,12 @@
     "info": "#31ccec",
     "warning": "#f2c037"
   },
+  "remotes": [
+    {
+      "name": "catalogUI",
+      "entry": "http://localhost:5001/mf-manifest.json"
+    }
+  ],
   "designFiles": [
     "design/default.json",
     "design/base-layout.json",

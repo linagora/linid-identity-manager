@@ -1127,19 +1127,13 @@
       "noData": "Aucune règle pour cette application.",
       "editButton": "Modifier",
       "deleteButton": "Supprimer",
-      "saveNewOrderHint": "L'ordre a été modifié. N'oubliez pas de sauvegarder.",
-      "saveUpdatedItemsHint": "Des règles ont été modifiées. N'oubliez pas de sauvegarder.",
-      "saveNewOrderAndUpdatedItemsHint": "L'ordre et des règles ont été modifiés. N'oubliez pas de sauvegarder.",
+      "unsavedChangesHint": "Des règles ont été modifiées. N'oubliez pas de sauvegarder.",
+      "saveChangesSuccess": "Modifications sauvegardées avec succès.",
+      "saveChangesError": "Impossible de sauvegarder les modifications. Veuillez réessayer plus tard.",
+      "saveChangesPartially": "Certaines modifications n'ont pas pu être sauvegardées.",
       "loadError": "Impossible de charger les règles de l'application. Veuillez réessayer plus tard.",
       "createSuccess": "Règle créée avec succès.",
       "createError": "Impossible de créer la règle. Veuillez réessayer plus tard.",
-      "updateSuccess": "Règle modifiée avec succès.",
-      "updateError": "Impossible de modifier la règle. Veuillez réessayer plus tard.",
-      "updateItemsSuccess": "Modifications sauvegardées avec succès.",
-      "updateItemsError": "Impossible de sauvegarder les modifications. Veuillez réessayer plus tard.",
-      "updateItemsPartially": "Certaines règles n'ont pas pu être sauvegardées.",
-      "deleteSuccess": "Règle supprimée avec succès.",
-      "deleteError": "Impossible de supprimer la règle. Veuillez réessayer plus tard.",
       "ButtonsCard": {
         "add": "Ajouter une règle",
         "save": "Sauvegarder"
@@ -1208,14 +1202,6 @@
           "disabled": {
             "label": "Désactivée"
           }
-        }
-      },
-      "DeleteConfirmationDialog": {
-        "title": "Supprimer la règle {code}",
-        "content": "Voulez-vous vraiment supprimer la règle {code} ? Cette action est irréversible.",
-        "ButtonsCard": {
-          "confirm": "Supprimer",
-          "cancel": "Annuler"
         }
       },
       "fields": {

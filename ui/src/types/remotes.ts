@@ -24,24 +24,11 @@
  * LinID Identity Manager software.
  */
 
-import { setModuleFederation } from '@linagora/linid-im-front-corelib';
-import {
-  getInstance,
-  registerRemotes,
-} from '@module-federation/enhanced/runtime';
-import { defineBoot } from '@quasar/app-vite/wrappers';
-import { appConfig } from 'boot/config';
+/** Represents a remote Module Federation module. */
+export interface Remote {
+  /** The name of the remote. */
+  name: string;
 
-/**
- * Boot file that registers remote Module Federation modules.
- *
- * Fetches the remotes configuration from the application configuration and registers them with the Module Federation
- * runtime.
- */
-export default defineBoot(async () => {
-  const remotes = appConfig.remotes;
-
-  registerRemotes(remotes);
-
-  setModuleFederation(getInstance()!);
-});
+  /** The entry URL of the remote. */
+  entry: string;
+}

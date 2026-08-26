@@ -29,6 +29,15 @@
     "/modules/OrganizationalUnitPage.json",
     "/modules/ApplicationDetailsPage.json"
   ],
+  "oidc": {
+    "authority": "https://localhost:8080",
+    "client_id": "linid-im-client",
+    "redirect_uri": "https://localhost:9000/callback",
+    "post_logout_redirect_uri": "https://localhost:9000/auth/logout",
+    "silent_redirect_uri": "https://localhost:9000/silent-renew",
+    "response_type": "code",
+    "scope": "openid email profile roles"
+  },
   "designFiles": [
     "design/default.json",
     "design/base-layout.json",

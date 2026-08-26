@@ -30,20 +30,22 @@ Feature: Test Account homepage display
     ## 101 Should display the account homepage with all accounts listed
     When I click on '[data-cy="item_moduleAccountsPage"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    And I expect the HTML element '.linid-smart-filter' to be visible
-    And I expect the HTML element '.generic-entity-table' to be visible
-    And I expect the HTML element '[data-cy="item-row"]' appear 10 times on screen
-    And I expect the HTML element '[data-cy="cell-firstname_00000000-0000-4000-8000-00000000a001"]' to be visible
-    And I expect the HTML element '[data-cy="cell-firstname_00000000-0000-4000-8000-00000000a001"]' contains "admin_fn"
-    And I expect the HTML element '[data-cy="cell-lastname_00000000-0000-4000-8000-00000000a001"]' to be visible
-    And I expect the HTML element '[data-cy="cell-lastname_00000000-0000-4000-8000-00000000a001"]' contains "admin_ln"
-    And I expect the HTML element '[data-cy="cell-email_00000000-0000-4000-8000-00000000a001"]' to be visible
-    And I expect the HTML element '[data-cy="cell-email_00000000-0000-4000-8000-00000000a001"]' contains "admin@example.com"
-    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-00000000a001"]' to be visible
-    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-00000000a001"]' contains "admin_fn admin_ln"
-    And I expect the HTML element '[data-cy="cell-insertDate_00000000-0000-4000-8000-00000000a001"]' to be visible
-    And I expect the HTML element '[data-cy="cell-insertDate_00000000-0000-4000-8000-00000000a001"]' contains "{{ctx.accountDate}}"
-    And I expect the HTML element '[data-cy="cell-table_actions_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '.linid-smart-filter' to be visible
+    And  I expect the HTML element '.generic-entity-table' to be visible
+    And  I expect the HTML element '[data-cy="item-row"]' appear 10 times on screen
+    And  I expect the HTML element '[data-cy="cell-firstname_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-firstname_00000000-0000-4000-8000-00000000a001"]' contains "admin_fn"
+    And  I expect the HTML element '[data-cy="cell-lastname_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-lastname_00000000-0000-4000-8000-00000000a001"]' contains "admin_ln"
+    And  I expect the HTML element '[data-cy="cell-email_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-email_00000000-0000-4000-8000-00000000a001"]' contains "admin@example.com"
+    And  I expect the HTML element '[data-cy="cell-organizationalUnits_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-organizationalUnits_00000000-0000-4000-8000-00000000a001"]' contains "root"
+    And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-00000000a001"]' contains "admin_fn admin_ln"
+    And  I expect the HTML element '[data-cy="cell-insertDate_00000000-0000-4000-8000-00000000a001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-insertDate_00000000-0000-4000-8000-00000000a001"]' contains "{{ctx.accountDate}}"
+    And  I expect the HTML element '[data-cy="cell-table_actions_00000000-0000-4000-8000-00000000a001"]' to be visible
 
     ## 102 Should filter accounts when using advanced search
     Given I store "user_id" as "00000000-0000-4000-8000-00000000a006" in context
@@ -53,7 +55,7 @@ Feature: Test Account homepage display
     Then  I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
     And   I expect the HTML element '[data-cy="item-row"]' to be visible
     And   I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="cell-firstname_{{ctx.user_id}}"]' to be visible
+    And   I expect the HTML element '[data-cy="cell-firstname_{{ctx.user_id}}"]' to be visible
 
     When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 10 times on screen

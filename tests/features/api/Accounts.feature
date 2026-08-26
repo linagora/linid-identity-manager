@@ -91,7 +91,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 401
@@ -112,11 +113,12 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 9
+    And   I expect '{{response.body | dump}}' as 'json' to have length 10
     And   I expect '{{response.body.id}}' is not empty
     And   I expect '{{response.body.externalId}}' is 'ext-201'
     And   I expect '{{response.body.lastname}}' is 'Doe'
@@ -126,6 +128,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.updatedBy}}' is not empty
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
+    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
 
     When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.id}}' with method 'DELETE'
     Then  I expect status code is 204
@@ -139,7 +142,8 @@ Feature: Test API Account endpoints
         "firstname": "",
         "email": "",
         "validityPeriod": null,
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -159,7 +163,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -179,7 +184,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -196,7 +202,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 500
@@ -216,7 +223,8 @@ Feature: Test API Account endpoints
           "start": null,
           "end": "2030-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -235,7 +243,8 @@ Feature: Test API Account endpoints
           "start": "2000-01-01T00:00:00Z",
           "end": "2030-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 400
@@ -254,11 +263,12 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 9
+    And   I expect '{{response.body | dump}}' as 'json' to have length 10
     And   I expect '{{response.body.id}}' is not empty
     And   I expect '{{response.body.externalId}}' is 'ext-207'
     And   I expect '{{response.body.lastname}}' is 'Doe'
@@ -268,6 +278,7 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.updatedBy}}' is not empty
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
+    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000a/accounts?email=john207@example.com' with method 'GET'
     Then I expect status code is 200
@@ -292,7 +303,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -308,6 +320,8 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.content[0].email}}' is 'findall301@example.com'
     And   I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.content[0].updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.content[0].organizationalUnits}}' is 'Company A'
+    And   I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
     And   I expect '{{response.body.content[0].insertDate}}' is not empty
     And   I expect '{{response.body.content[0].updateDate}}' is not empty
 
@@ -330,7 +344,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -345,6 +360,8 @@ Feature: Test API Account endpoints
     And   I expect '{{response.body.email}}' is 'findbyid401@example.com'
     And   I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.organizationalUnits}}' is 'Company A'
+    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
     And   I expect '{{response.body.insertDate}}' is not empty
     And   I expect '{{response.body.updateDate}}' is not empty
 
@@ -373,7 +390,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -407,7 +425,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -448,7 +467,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -484,7 +504,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -519,7 +540,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -554,7 +576,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -608,7 +631,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -645,7 +669,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -677,7 +702,8 @@ Feature: Test API Account endpoints
           "start": "2090-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -725,7 +751,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -770,7 +797,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -812,7 +840,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -881,7 +910,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -912,7 +942,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": null
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201
@@ -989,7 +1020,8 @@ Feature: Test API Account endpoints
           "start": "2099-01-01T00:00:00Z",
           "end": "2099-12-31T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 201

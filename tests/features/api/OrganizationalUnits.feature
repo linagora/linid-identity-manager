@@ -77,7 +77,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test",
-        "type": "test"
+        "type": "test",
+        "extraParameters": {}
       }
       """
     Then  I expect status code is 401
@@ -91,14 +92,16 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test",
-        "type": "test"
+        "type": "test",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
-    And  I expect '{{response.body | dump}}' as 'json' to have length 7
+    And  I expect '{{response.body | dump}}' as 'json' to have length 8
     And  I expect '{{response.body.id}}' is not empty
     And  I expect '{{response.body.name}}' is 'test'
     And  I expect '{{response.body.type}}' is 'test'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
     And  I expect '{{response.body.createdBy}}' is not empty
     And  I expect '{{response.body.updatedBy}}' is not empty
     And  I expect '{{response.body.insertDate}}' is not empty
@@ -113,7 +116,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": <parent>,
         "name": <name>,
-        "type": <type>
+        "type": <type>,
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -133,7 +137,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "<name>",
-        "type": "<type>"
+        "type": "<type>",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -153,7 +158,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -167,7 +173,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.parentID}}",
         "name": "test2",
-        "type": "test2"
+        "type": "test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 404
@@ -180,7 +187,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -191,7 +199,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -222,6 +231,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.content[0].id}}' is '{{ctx.ouId}}'
     And  I expect '{{response.body.content[0].name}}' is 'test1'
     And  I expect '{{response.body.content[0].type}}' is 'test1'
+    And  I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
     Then I expect status code is 204
@@ -236,7 +246,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test2"
+        "type": "test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -247,6 +258,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
     And  I expect '{{response.body.name}}' is 'test1'
     And  I expect '{{response.body.type}}' is 'test2'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
     And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.insertDate}}' is not empty
@@ -254,6 +266,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.parents.length}}' is "1"
     And  I expect '{{response.body.parents[0].id}}' is not empty
     And  I expect '{{response.body.parents[0].parent}}' is "{{ctx.rootID}}"
+    And  I expect '{{response.body.parents[0].extraParameters | dump}}' is 'null'
 
     When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then  I expect status code is 204
@@ -264,7 +277,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -287,7 +301,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -314,7 +329,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test2"
+        "type": "test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -336,7 +352,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test3",
-        "type": "test4"
+        "type": "test4",
+        "extraParameters": { "test": "test"}
       }
       """
     Then I expect status code is 200
@@ -346,6 +363,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
     And  I expect '{{response.body.name}}' is 'test3'
     And  I expect '{{response.body.type}}' is 'test4'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
     And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.insertDate}}' is "{{ctx.lastInsertDate}}"
@@ -360,7 +378,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test2"
+        "type": "test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -371,7 +390,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "<name>",
-        "type": "<type>"
+        "type": "<type>",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -391,7 +411,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test2"
+        "type": "test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -404,7 +425,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -415,7 +437,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test2",
-        "type": "test2"
+        "type": "test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -426,7 +449,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "test1",
-        "type": "test1"
+        "type": "test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -449,7 +473,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test1",
-        "type": "status-test1"
+        "type": "status-test1",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -470,7 +495,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test2",
-        "type": "status-test2"
+        "type": "status-test2",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -514,7 +540,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test3",
-        "type": "status-test3"
+        "type": "status-test3",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -545,7 +572,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test4",
-        "type": "status-test4"
+        "type": "status-test4",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -569,7 +597,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test5",
-        "type": "status-test5"
+        "type": "status-test5",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -599,7 +628,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test6",
-        "type": "status-test6"
+        "type": "status-test6",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -629,7 +659,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test7",
-        "type": "status-test7"
+        "type": "status-test7",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -659,7 +690,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test8",
-        "type": "status-test8"
+        "type": "status-test8",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -692,7 +724,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test9",
-        "type": "status-test9"
+        "type": "status-test9",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -731,7 +764,8 @@ Feature: Test API Organizational unit endpoints
       {
         "parent": "{{ctx.rootID}}",
         "name": "status-test10",
-        "type": "status-test10"
+        "type": "status-test10",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201

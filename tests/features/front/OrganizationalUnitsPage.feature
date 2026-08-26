@@ -34,19 +34,21 @@ Feature: Test Organizational Units page display
 
     ## 103 Should show the details of a OU when click see button of a OU
     When I click on '[data-cy="linid-smart-filter-field"]'
-    And I set the text "Team Beta" in the HTML element '[data-cy="text-search-filter-panel_input"]'
-    And I click on '[data-cy="text-search-filter-panel_search"]'
+    And  I set the text "Team Beta" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' to be visible
-    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' contains "Team Beta"
-    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' to be visible
-    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' contains "TEAM"
-    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' to be visible
-    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' contains "admin_fn admin_ln"
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000000ee1"]' contains "Team Beta"
+    And  I expect the HTML element '[data-cy="cell-parentNames_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-parentNames_00000000-0000-4000-8000-000000000ee1"]' contains "Dept A1-2"
+    And  I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-000000000ee1"]' contains "TEAM"
+    And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' contains "admin_fn admin_ln"
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-000000000ee1"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-000000000ee1"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Team Beta"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "TEAM"
+    And  I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Team Beta"
+    And  I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "TEAM"
 
     ## 104 Should show the details of another OU when click see button of a OU
     When I click on '[data-cy="button_cancel"]'
@@ -57,6 +59,8 @@ Feature: Test Organizational Units page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' to be visible
     And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' contains "SuspendedOuWithEnd"
+    And  I expect the HTML element '[data-cy="cell-parentNames_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-parentNames_00000000-0000-4000-8000-0000000000e3"]' contains "root"
     And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' to be visible
     And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' contains "COMPANY"
     And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' to be visible

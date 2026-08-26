@@ -55,6 +55,8 @@ export interface AppConfig {
   remotes: Remote[];
   /** Defines the delay(in minutes) applied when reactivating a suspended or inactive account. */
   immediateActionDelay: number;
+  /** List of module files to be loaded for the UI. */
+  modules: string[];
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
 

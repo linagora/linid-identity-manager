@@ -65,7 +65,8 @@ Feature: Test API Application endpoints
         "name": "Application 101",
         "description": "An application for tests",
         "type": "OIDC",
-        "claimsTemplate": "{ \"sub\": \"id\" }"
+        "claimsTemplate": "{ \"sub\": \"id\" }",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -74,6 +75,7 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.name}}' is 'Application 101'
     And  I expect '{{response.body.description}}' is 'An application for tests'
     And  I expect '{{response.body.type}}' is 'OIDC'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
     And  I expect '{{response.body.createdBy}}' is not empty
     And  I expect '{{response.body.updatedBy}}' is not empty
     And  I expect '{{response.body.insertDate}}' is not empty
@@ -89,7 +91,8 @@ Feature: Test API Application endpoints
         "code": <code>,
         "name": <name>,
         "type": <type>,
-        "claimsTemplate": <claimsTemplate>
+        "claimsTemplate": <claimsTemplate>,
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -111,7 +114,8 @@ Feature: Test API Application endpoints
         "code": "app-103",
         "name": "Application 103",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -123,7 +127,8 @@ Feature: Test API Application endpoints
         "code": "app-103",
         "name": "Another Application 103",
         "type": "SAML",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -139,7 +144,8 @@ Feature: Test API Application endpoints
         "code": "app/104",
         "name": "Application 104",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -158,7 +164,8 @@ Feature: Test API Application endpoints
         "code": "app-201",
         "name": "Application 201",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -171,6 +178,7 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.content[0].code}}' is 'app-201'
     And  I expect '{{response.body.content[0].name}}' is 'Application 201'
     And  I expect '{{response.body.content[0].type}}' is 'OIDC'
+    And  I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
     And  I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.app201Id}}' with method 'DELETE'
@@ -187,7 +195,8 @@ Feature: Test API Application endpoints
         "code": "app-301",
         "name": "Application 301",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -199,6 +208,7 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.code}}' is 'app-301'
     And  I expect '{{response.body.name}}' is 'Application 301'
     And  I expect '{{response.body.type}}' is 'OIDC'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
     And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.insertDate}}' is not empty
@@ -223,7 +233,8 @@ Feature: Test API Application endpoints
         "code": "app-401",
         "name": "Application 401",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -247,7 +258,8 @@ Feature: Test API Application endpoints
         "code": "app-501",
         "name": "Application 501",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -261,7 +273,8 @@ Feature: Test API Application endpoints
         "name": "Application 501 updated",
         "description": "Updated description",
         "type": "SAML",
-        "claimsTemplate": "{ \"sub\": \"id\" }"
+        "claimsTemplate": "{ \"sub\": \"id\" }",
+        "extraParameters": { "test": "test" }
       }
       """
     Then I expect status code is 200
@@ -273,6 +286,7 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.name}}' is 'Application 501 updated'
     And  I expect '{{response.body.description}}' is 'Updated description'
     And  I expect '{{response.body.type}}' is 'SAML'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
     And  I expect '{{response.body.insertDate}}' is "{{ctx.lastInsertDate}}"
     And  I expect '{{response.body.updateDate}}' is not empty
 
@@ -286,7 +300,8 @@ Feature: Test API Application endpoints
         "code": "app-502",
         "name": "Application 502",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 404
@@ -299,7 +314,8 @@ Feature: Test API Application endpoints
         "code": "app-503-a",
         "name": "Application 503 A",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -311,7 +327,8 @@ Feature: Test API Application endpoints
         "code": "app-503-b",
         "name": "Application 503 B",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -323,7 +340,8 @@ Feature: Test API Application endpoints
         "code": "app-503-a",
         "name": "Application 503 B",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -342,7 +360,8 @@ Feature: Test API Application endpoints
         "code": "app-504-<field>",
         "name": "Application 504",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -354,7 +373,8 @@ Feature: Test API Application endpoints
         "code": <code>,
         "name": <name>,
         "type": <type>,
-        "claimsTemplate": <claimsTemplate>
+        "claimsTemplate": <claimsTemplate>,
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400
@@ -383,7 +403,8 @@ Feature: Test API Application endpoints
         "code": "app-601-no-force",
         "name": "Application 601",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -398,7 +419,7 @@ Feature: Test API Application endpoints
         "script": "signals contains \"allow\" if input.user.organizationalUnit == \"public\"",
         "disabled": false
       }
-      """
+      """application/json
     Then I expect status code is 201
 
     # Deploy the application (this will publish the generated script to OPA)
@@ -416,7 +437,8 @@ Feature: Test API Application endpoints
         "code": "app-602-force",
         "name": "Application 602",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -462,7 +484,8 @@ Feature: Test API Application endpoints
         "code": "app-701",
         "name": "Application 701",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -509,7 +532,8 @@ Feature: Test API Application endpoints
         "code": "app-702",
         "name": "Application 702",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 201
@@ -550,7 +574,8 @@ Feature: Test API Application endpoints
         "code": "LINID",
         "name": "Renamed system application",
         "type": "OIDC",
-        "claimsTemplate": "{}"
+        "claimsTemplate": "{}",
+        "extraParameters": {}
       }
       """
     Then I expect status code is 400

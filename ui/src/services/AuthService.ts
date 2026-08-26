@@ -24,39 +24,13 @@
  * LinID Identity Manager software.
  */
 
+import { appConfig } from 'boot/config';
 import {
   UserManager,
   WebStorageStateStore,
   type User,
   type UserManagerSettings,
 } from 'oidc-client-ts';
-
-/** OpenID Connect configuration loaded from `/oidc-config.json`. */
-interface OidcConfig {
-  /** URL of the OpenID Connect authority (Identity Provider). */
-  authority: string;
-
-  /** OAuth 2.0 / OIDC client identifier. */
-  client_id: string;
-
-  /** URI where the Identity Provider redirects the user after a successful login. */
-  redirect_uri: string;
-
-  /** URI where the Identity Provider redirects the user after logout. */
-  post_logout_redirect_uri?: string;
-
-  /** OAuth 2.0 response type used during authentication. Typically set to `code`. */
-  response_type?: string;
-
-  /** Requested OAuth 2.0/OIDC scopes. */
-  scope?: string;
-
-  /** URI used for silent token renewal. */
-  silent_redirect_uri?: string;
-
-  /** Additional OIDC configuration properties. */
-  [key: string]: unknown;
-}
 
 /** Service responsible for authentication and session management using OpenID Connect (OIDC). */
 class AuthService {
@@ -81,20 +55,15 @@ class AuthService {
   }
 
   /**
-   * Loads the OIDC configuration and creates a configured {@link UserManager} instance.
+   * Get the OIDC configuration and creates a configured {@link UserManager} instance.
    *
    * This method also registers authentication event handlers for token expiration, silent renewal failures, and remote
    * sign-out.
    *
    * @returns A promise resolving to the configured {@link UserManager}.
-   * @throws {Error} If the OIDC configuration file cannot be loaded.
    */
   private async buildUserManager(): Promise<UserManager> {
-    const response = await fetch('/oidc-config.json');
-    if (!response.ok) {
-      throw new Error(`Unable to load /oidc-config.json (${response.status})`);
-    }
-    const config: OidcConfig = await response.json();
+    const config = appConfig.oidc;
 
     const settings: UserManagerSettings = {
       authority: config.authority,

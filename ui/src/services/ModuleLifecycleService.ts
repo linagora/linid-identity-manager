@@ -39,18 +39,19 @@ import {
   useLinidZoneStore,
 } from '@linagora/linid-im-front-corelib';
 import { loadRemote } from '@module-federation/enhanced/runtime';
+import { appConfig } from 'boot/config';
 import type { Component } from 'vue';
 import type { RouteMeta, RouteRecordRaw } from 'vue-router';
 import type { BootFileParams } from '#q-app';
+
 /**
  * Loads and aggregates configuration files for all federated modules.
  *
  * This function performs a multi-step fetch process:
  *
- * 1. Fetches the root `/modules.json` manifest.
- * 2. Extracts the list of module configuration file URLs.
- * 3. Fetches each module configuration in parallel.
- * 4. Filters out any modules that failed to load.
+ * 1. Get the list of module configuration file URLs.
+ * 2. Fetches each module configuration in parallel.
+ * 3. Filters out any modules that failed to load.
  *
  * The function is intentionally fault-tolerant:
  *
@@ -63,18 +64,7 @@ export async function getModulesConfiguration(): Promise<
   ModuleHostConfig<unknown>[]
 > {
   try {
-    const response = await fetch('/modules.json');
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch /modules.json');
-    }
-
-    const {
-      modules,
-    }: {
-      /** Modules files. */
-      modules: string[];
-    } = await response.json();
+    const modules = appConfig.modules;
 
     const moduleConfigs = await Promise.all(
       modules.map(async (moduleFile) => {

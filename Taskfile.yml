@@ -11,7 +11,7 @@ tasks:
       - task: setup:certs
       - task: build:images
       - task: setup:lemonldap-config
-      - task: setup:oidc-config
+      - task: setup:config
 
   setup:demo:
     desc: Setup certificates, config files and Docker images for demo environment
@@ -19,7 +19,7 @@ tasks:
       - task: setup:certs:demo
       - task: build:images
       - task: setup:lemonldap-config:demo
-      - task: setup:oidc-config:demo
+      - task: setup:config
 
   setup:dev:
     desc: Setup certificates, config files and Docker images for dev environment
@@ -33,13 +33,12 @@ tasks:
     cmds:
       - task: setup:certs:e2e
       - task: setup:lemonldap-config:e2e
-      - task: setup:oidc-config:e2e
+      - task: setup:config
       - task: build:images
 
   setup:certs:
     desc: Generate all certificates and keys for all environments
     cmds:
-      - task: setup:certs:demo
       - task: setup:certs:dev
       - task: setup:certs:e2e
 
@@ -65,31 +64,21 @@ tasks:
         vars:
           ENV: e2e
 
-  setup:oidc-config:
-    desc: Generate OIDC configuration for a specific environment
+  setup:config:
+    desc: Generate configuration files
     cmds:
-      - task: setup:oidc-config:demo
-      - task: setup:oidc-config:e2e
-
-  setup:oidc-config:demo:
-    desc: Generate OIDC configuration for demo environment
-    cmds:
-      - task: generate:config:oidc
-        vars:
-          ENV: demo
-          ENV_FILE: .env
-
-  setup:oidc-config:e2e:
-    desc: Generate OIDC configuration for E2E environment
-    cmds:
-      - task: generate:config:oidc
+      - task: generate:config
         vars:
           ENV: e2e
           ENV_FILE: env/local.env
-      - task: generate:config:oidc
+      - task: generate:config
         vars:
           ENV: e2e
           ENV_FILE: env/e2e.env
+      - task: generate:config
+        vars:
+          ENV: demo
+          ENV_FILE: .env
 
   setup:lemonldap-config:
     desc: Generate LemonLDAP configuration for all environment
@@ -289,7 +278,7 @@ tasks:
     desc: Open Cypress UI for E2E testing locally
     deps: [setup:test]
     dir: tests/e2e
-    dotenv: ["../../docker/e2e/local.env"]
+    dotenv: ["../../docker/e2e/env/local.env"]
     cmds:
       - task: start:e2e
       - npm run start:ui
@@ -355,15 +344,15 @@ tasks:
             -keystore {{.TRUSTSTORE_PATH}}/truststore.jks \
             -storepass "$SSL_TRUSTSTORE_PASSWORD" >/dev/null 2>&1
 
-  generate:config:oidc:
-    desc: Generate OIDC configuration from templates using env variables
+  generate:config:
+    desc: Generate configuration from templates using env variables
     internal: true
     dir: "docker/{{.ENV}}/resources"
     dotenv: ["../{{.ENV_FILE}}"]
     cmds:
-      - rm -rf ${CONFIG_DIR}/oidc/conf
-      - mkdir -p ${CONFIG_DIR}/oidc/conf
-      - envsubst < oidc-config.template.json > ${CONFIG_DIR}/oidc/conf/oidc-config.json
+      - rm -rf ${CONFIG_DIR}/conf
+      - mkdir -p ${CONFIG_DIR}/conf
+      - envsubst < config.template.json > ${CONFIG_DIR}/conf/config.json
 
   generate:config:lemonldap:
     desc: Generate LemonLDAP configuration from template using env variables

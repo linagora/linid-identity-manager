@@ -62,15 +62,25 @@ export default defineBoot(async ({ app }) => {
   const messages: Record<string, unknown> = {};
 
   for (const lang of appConfig.i18n.languages) {
-    const appMessages = await fetch(`/i18n/${lang}.json`)
-      .then((res) => res.json())
-      .catch(() => ({}));
+    let mergedMessages = {};
+
+    const appMessagesList = await Promise.all(
+      appConfig.i18n.i18nFiles.map((fileName) =>
+        fetch(`/i18n/${lang}/${fileName}`)
+          .then((res) => res.json())
+          .catch(() => ({}))
+      )
+    );
+
+    for (const appMessages of appMessagesList) {
+      mergedMessages = merge(mergedMessages, appMessages);
+    }
     const apiMessages = await api
       .get(`/i18n/${lang}.json`)
       .then(({ data }) => fromDot(data))
       .catch(() => ({}));
 
-    messages[lang] = merge(apiMessages, appMessages);
+    messages[lang] = merge(apiMessages, mergedMessages);
   }
 
   const uiStore = useLinidUiStore();

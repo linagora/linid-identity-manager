@@ -1,0 +1,417 @@
+{
+  "moduleOrganizationalUnitsPage": {
+    "NavigationMenu": {
+      "label": "Organization units"
+    },
+    "ButtonsCard": {
+      "create": "Create"
+    },
+    "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
+    "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
+    "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
+    "seeButton": "See",
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "parentNames": "Linked organizational-units",
+      "createdBy": "Created by",
+      "insertDate": "Creation date",
+      "actions": "Actions"
+    },
+    "error": "Error during request",
+    "GenericEntityTable": {
+      "noData": "No data available",
+      "rowsPerPage": "Rows per page:",
+      "paginationLabel": "{start}-{end} of {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Delete a favorite?",
+      "content": "Confirm deleting favorite \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmLoading": "Deleting..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Override a favorite?",
+      "content": "Select a favorite to override with current search.",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Override",
+        "confirmLoading": "Overriding..."
+      },
+      "fields": {
+        "favorite": {
+          "label": "Favorites"
+        }
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Create a favorite?",
+      "content": "Create favorite from current search.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
+    "LinidSmartFilter": {
+      "label": "Current search filter",
+      "hint": "Enter your filter",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "name": {
+          "type": "Name",
+          "separator": "or"
+        },
+        "type": {
+          "type": "Type",
+          "separator": "or"
+        },
+        "parentId": {
+          "type": "Organizational unit",
+          "separator": "or"
+        },
+        "createdBy": {
+          "type": "Created by",
+          "separator": "or"
+        },
+        "status": {
+          "type": "Status",
+          "separator": "or"
+        },
+        "insertDate": {
+          "type": "Creation date",
+          "separator": "or"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filter by:",
+        "columnFilter": {
+          "name": "Name",
+          "type": "Type",
+          "parentId": "Organizational unit",
+          "createdBy": "Created by",
+          "insertDate": "Creation date"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favorite",
+        "noData": "No favorite available",
+        "createFavorite": "Create a favorite",
+        "overrideFavorite": "Override a favorite",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filter by text",
+        "inputHint": "Enter a text to search",
+        "negateLabel": "Negate",
+        "searchButton": "Search",
+        "operators": {
+          "contains": "Contains",
+          "startsWith": "Start with",
+          "endsWith": "End with",
+          "equals": "Equals to",
+          "notContains": "Not contains",
+          "notStartsWith": "Not start with",
+          "notEndsWith": "Not end with",
+          "notEquals": "Not equals to"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Search"
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Search",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
+        }
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filter by date",
+        "inputHint": "Enter/select a date to search",
+        "negateLabel": "Negate",
+        "close": "Close",
+        "searchButton": "Search",
+        "operators": {
+          "inferior": "Inferior to",
+          "superior": "Superior to",
+          "equals": "Equals to",
+          "notInferior": "Not inferior to",
+          "notSuperior": "Not superior to",
+          "notEquals": "Not equals to"
+        },
+        "validation": {
+          "invalidDate": "Incorrect date. Attempt format: {format}"
+        }
+      }
+    }
+  },
+  "OrganizationalUnitCreationPage": {
+    "title": "Create a new organizational unit",
+    "sections": {
+      "general": "General information"
+    },
+    "fields": {
+      "parent": "Parent organizational unit",
+      "name": {
+        "label": "Name",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "type": {
+        "label": "Type",
+        "validation": {
+          "required": "This field is required."
+        }
+      }
+    },
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "success": "Organizational unit successfully created",
+    "errors": {
+      "missingParent": "A parent organizational unit is required.",
+      "validation": "Invalid data. Please check the form.",
+      "generic": "Unable to create the organizational unit. Please try again later."
+    }
+  },
+  "OrganizationalUnitDetailsPage": {
+    "title": "Organizational unit details",
+    "createChild": "Create a child O.U.",
+    "EntityDetailsCard": {
+      "title": "Organizational unit information",
+      "attributes": {
+        "name": "Name",
+        "type": "Type",
+        "createdBy": "Created by",
+        "updatedBy": "Updated by",
+        "insertDate": "Creation date",
+        "updateDate": "Last update"
+      }
+    },
+    "ButtonsCard": {
+      "cancel": "Back"
+    },
+    "success": {
+      "suspended": "Organizational unit successfully suspended.",
+      "scheduled": "Suspension successfully scheduled.",
+      "endUpdated": "Suspension end date successfully updated.",
+      "reactivated": "The organizational unit will be reactivated in one hour."
+    },
+    "errors": {
+      "notFound": "Organizational unit not found.",
+      "generic": "Unable to load the organizational unit. Please try again later.",
+      "validation": "Invalid data. Please check the form."
+    }
+  },
+  "OrganizationalUnitsPage": {
+    "menuTitle": "Organizational units"
+  },
+  "OrganizationalUnitSuspendedBanner": {
+    "content": "This organizational unit has been suspended since {date}.",
+    "contentWithEndDate": "This organizational unit has been suspended from {date} until {endDate}.",
+    "clearSuspensionButton": "Immediate reactivation",
+    "modifySuspensionEndButton": "Edit suspension end"
+  },
+  "OrganizationalUnitSuspendedInfoText": {
+    "message": "This organizational unit will be suspended on {date}."
+  },
+  "OrganizationalUnitSuspensionActions": {
+    "DropdownButton": {
+      "title": "Suspension",
+      "suspension": {
+        "immediate": "Immediate suspension",
+        "scheduled": "Schedule suspension"
+      }
+    }
+  },
+  "OrganizationalUnitActivationActions": {
+    "DropdownButton": {
+      "title": "Activation",
+      "reactivation": {
+        "immediate": "Immediate reactivation"
+      }
+    }
+  },
+  "OrganizationalUnitSuspendDialog": {
+    "title": "Suspend the organizational unit",
+    "content": "Are you sure you want to immediately suspend this organizational unit?",
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Suspend",
+      "confirmLoading": "Suspending..."
+    },
+    "fields": {
+      "reason": {
+        "label": "Reason",
+        "hint": "Select a suspension reason.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "subreason": {
+        "label": "Sub-reason",
+        "hint": "Select a suspension sub-reason.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "comment": {
+        "label": "Justification",
+        "hint": "Add an optional comment."
+      }
+    }
+  },
+  "OrganizationalUnitScheduleSuspensionDialog": {
+    "title": "Schedule a suspension",
+    "content": "Pick a start date for the future suspension. An end date is optional.",
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Schedule",
+      "confirmLoading": "Scheduling..."
+    },
+    "fields": {
+      "start": {
+        "label": "Suspension start date",
+        "close": "Close",
+        "validation": {
+          "required": "This field is required.",
+          "invalidDate": "Invalid date format. Expected format is {format}.",
+          "afterDate": "The date cannot be before today."
+        }
+      },
+      "end": {
+        "label": "Suspension end date (optional)",
+        "close": "Close",
+        "validation": {
+          "invalidDate": "Invalid date format. Expected format is {format}.",
+          "afterDate": "The date cannot be before today.",
+          "fromDate": "The end date must be after {compareTo}."
+        }
+      },
+      "reason": {
+        "label": "Reason",
+        "hint": "Select a reason for the suspension.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "subreason": {
+        "label": "Subreason",
+        "hint": "Select a subreason for the suspension.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "comment": {
+        "label": "Justification",
+        "hint": "Add an optional comment."
+      }
+    }
+  },
+  "OrganizationalUnitEditSuspensionEndDialog": {
+    "title": "Edit suspension end",
+    "content": "Set a new end date for the current suspension. Leave empty for an open-ended suspension.",
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Update",
+      "confirmLoading": "Updating..."
+    },
+    "fields": {
+      "end": {
+        "label": "Suspension end date (optional)",
+        "close": "Close",
+        "validation": {
+          "invalidDate": "Invalid date format. Expected format is {format}.",
+          "afterDate": "The date cannot be before today.",
+          "fromDate": "The end date must be after {compareTo}."
+        }
+      },
+      "reason": {
+        "label": "Reason",
+        "hint": "Select a reason for the suspension.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "subreason": {
+        "label": "Subreason",
+        "hint": "Select a subreason for the suspension.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "comment": {
+        "label": "Justification",
+        "hint": "Add an optional comment."
+      }
+    }
+  },
+  "OrganizationalUnitReactivateDialog": {
+    "title": "Reactivate the organizational unit",
+    "content": "Are you sure you want to immediately reactivate this organizational unit?",
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Reactivate",
+      "confirmLoading": "Reactivating..."
+    },
+    "fields": {
+      "comment": {
+        "label": "Justification",
+        "hint": "Provide a mandatory comment for this reactivation.",
+        "validation": {
+          "required": "This field is required."
+        }
+      }
+    }
+  }
+}

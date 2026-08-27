@@ -49,6 +49,8 @@ export interface AppConfig {
     languages: string[];
     /** Default locale of the application. */
     locale: string;
+    /** Array of internationalization file names. */
+    i18nFiles: string[];
   };
   /** Theme variables of the project. */
   themeVariables: ThemeVariables;

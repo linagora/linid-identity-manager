@@ -2,7 +2,13 @@
   "environment": "__APP_ENV__",
   "i18n": {
     "languages": ["fr-FR", "en-US"],
-    "locale": "fr-FR"
+    "locale": "fr-FR",
+    "i18nFiles": [
+      "common.json",
+      "accounts.json",
+      "applications.json",
+      "organizational-units.json"
+    ]
   },
   "immediateActionDelay": 60,
   "themeVariables": {

@@ -267,7 +267,7 @@ tasks:
     desc: Run E2E tests locally
     deps: [setup:test]
     dir: tests/e2e
-    dotenv: ["../../docker/e2e/local.env"]
+    dotenv: ["../../docker/e2e/env/local.env"]
     vars:
       SPEC: '{{.SPEC | default ""}}'
     cmds:

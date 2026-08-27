@@ -1,0 +1,463 @@
+{
+  "moduleApplicationCreationPage": {
+    "title": "Création d'une application",
+    "error": "Erreur pendant la requête",
+    "success": "Application créée avec succès.",
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "confirm": "Créer"
+    },
+    "formSections": {
+      "general": {
+        "title": "Informations générales"
+      },
+      "claims": {
+        "title": "Gestion des claims"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Doit être unique.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "name": {
+        "label": "Nom *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "type": {
+        "label": "Type *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "description": {
+        "label": "Description"
+      },
+      "claimsTemplate": {
+        "label": "Modèle de génération des claims *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      }
+    }
+  },
+  "moduleApplicationEditionPage": {
+    "title": "Modifier l'application",
+    "error": "Impossible de charger l'application. Veuillez réessayer plus tard.",
+    "success": "Application modifiée avec succès.",
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "confirm": "Enregistrer"
+    },
+    "formSections": {
+      "general": {
+        "title": "Informations générales"
+      },
+      "claims": {
+        "title": "Gestion des claims"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Doit être unique.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "name": {
+        "label": "Nom *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "type": {
+        "label": "Type *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "description": {
+        "label": "Description"
+      },
+      "claimsTemplate": {
+        "label": "Modèle de génération des claims *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      }
+    }
+  },
+  "moduleApplicationsPage": {
+    "NavigationMenu": {
+      "label": "Applications"
+    },
+    "ButtonsCard": {
+      "create": "Ajouter une application"
+    },
+    "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
+    "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
+    "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
+    "seeButton": "Voir",
+    "columns": {
+      "code": "Code",
+      "name": "Nom",
+      "description": "Description",
+      "type": "Type",
+      "createdBy": "Créé par",
+      "insertDate": "Date de création",
+      "actions": "Actions"
+    },
+    "error": "Erreur pendant la requête",
+    "GenericEntityTable": {
+      "noData": "Aucune donnée disponible",
+      "rowsPerPage": "Éléments par page:",
+      "paginationLabel": "{start}-{end} sur {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Supprimer un favori?",
+      "content": "Confirmer la suppression du favori \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "confirmLoading": "Suppression..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Remplacer un favori?",
+      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Remplacer",
+        "confirmLoading": "Remplacement..."
+      },
+      "fields": {
+        "favorite": {
+          "label": "Favoris"
+        }
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Créer un favori?",
+      "content": "Créer un favori à partir de la recherche actuelle.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favori",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Créer",
+        "confirmLoading": "Création..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Renommer un favori?",
+      "content": "Renommer le favori avec un nouveau nom.",
+      "duplicateName": "Le favori '{name}' existe déjà.",
+      "fields": {
+        "favoriteName": {
+          "label": "Nom du favori",
+          "validation": {
+            "required": "Ce champ est requis."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Annuler",
+        "confirm": "Renommer",
+        "confirmLoading": "Renommage..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
+    "LinidSmartFilter": {
+      "label": "Filtre(s) de recherche",
+      "hint": "",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "code": {
+          "type": "Code",
+          "separator": "ou"
+        },
+        "name": {
+          "type": "Nom",
+          "separator": "ou"
+        },
+        "description": {
+          "type": "Description",
+          "separator": "ou"
+        },
+        "type": {
+          "type": "Type",
+          "separator": "ou"
+        },
+        "createdBy": {
+          "type": "Créé par",
+          "separator": "ou"
+        },
+        "insertDate": {
+          "type": "Date de création",
+          "separator": "ou"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filtrer par:",
+        "columnFilter": {
+          "code": "Code",
+          "name": "Nom",
+          "description": "Description",
+          "type": "Type",
+          "createdBy": "Créé par",
+          "insertDate": "Date de création"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favoris",
+        "noData": "Aucun favori disponible",
+        "createFavorite": "Créer un favori",
+        "overrideFavorite": "Remplacer un favori",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filtrage par texte",
+        "inputHint": "Entrer un texte à rechercher",
+        "negateLabel": "Négation",
+        "searchButton": "Rechercher",
+        "operators": {
+          "contains": "Contient",
+          "startsWith": "Commence par",
+          "endsWith": "Finit par",
+          "equals": "Strictement égale à",
+          "notContains": "Ne contient pas",
+          "notStartsWith": "Ne commence pas par",
+          "notEndsWith": "Ne finit pas par",
+          "notEquals": "Strictement différent de"
+        }
+      },
+      "ListSearchFilterPanel": {
+        "searchButton": "Rechercher"
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filtrage par date",
+        "inputHint": "Entrer/sélectionner une date à rechercher",
+        "negateLabel": "Négation",
+        "close": "Fermer",
+        "searchButton": "Rechercher",
+        "operators": {
+          "inferior": "Inférieure à",
+          "superior": "Supérieure à",
+          "equals": "Strictement égale à",
+          "notInferior": "N'est pas inférieure à",
+          "notSuperior": "N'est pas supérieure à",
+          "notEquals": "N'est pas strictement égale à"
+        },
+        "validation": {
+          "invalidDate": "Date incorrecte. Format attendu: {format}"
+        }
+      }
+    }
+  },
+  "moduleApplicationDetailsPage": {
+    "title": "Détails de l'application",
+    "error": "Impossible de charger l'application. Veuillez réessayer plus tard.",
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "edit": "Modifier"
+    },
+    "export": {
+      "label": "Exporter script",
+      "success": "Export terminé avec succès.",
+      "error": "Erreur lors de l'export."
+    },
+    "sections": {
+      "identity": {
+        "EntityDetailsCard": {
+          "title": "Informations générales",
+          "attributes": {
+            "code": "Code",
+            "name": "Nom",
+            "description": "Description",
+            "type": "Type"
+          }
+        }
+      },
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Créé par",
+            "updatedBy": "Modifié par",
+            "insertDate": "Date de création",
+            "updateDate": "Dernière modification"
+          }
+        }
+      }
+    },
+    "GenericEditableTableCard": {
+      "title": "Rôles",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "loadError": "Impossible de charger les rôles de l'application. Veuillez réessayer plus tard.",
+      "createSuccess": "Rôle créé avec succès.",
+      "createError": "Impossible de créer le rôle. Veuillez réessayer plus tard.",
+      "updateSuccess": "Rôle modifié avec succès.",
+      "updateError": "Impossible de modifier le rôle. Veuillez réessayer plus tard.",
+      "deleteSuccess": "Rôle supprimé avec succès.",
+      "deleteError": "Impossible de supprimer le rôle. Veuillez réessayer plus tard.",
+      "columns": {
+        "name": "Nom",
+        "description": "Description"
+      },
+      "ButtonsCard": {
+        "add": "Ajouter un rôle"
+      },
+      "CreateFormDialog": {
+        "title": "Ajouter un rôle",
+        "ButtonsCard": {
+          "confirm": "Ajouter",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "name": {
+            "label": "Nom",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Modifier le rôle {name}",
+        "ButtonsCard": {
+          "confirm": "Enregistrer",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "name": {
+            "label": "Nom",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Supprimer le rôle {name}",
+        "content": "Voulez-vous vraiment supprimer le rôle {name} ? Cette action est irréversible.",
+        "ButtonsCard": {
+          "confirm": "Supprimer",
+          "cancel": "Annuler"
+        }
+      },
+      "GenericEntityTable": {
+        "noData": "Aucun rôle pour cette application.",
+        "rowsPerPage": "Éléments par page:",
+        "paginationLabel": "{start}-{end} sur {total}"
+      }
+    },
+    "GenericSortableListCard": {
+      "title": "Règles",
+      "noData": "Aucune règle pour cette application.",
+      "editButton": "Modifier",
+      "deleteButton": "Supprimer",
+      "unsavedChangesHint": "Des règles ont été modifiées. N'oubliez pas de sauvegarder.",
+      "saveChangesSuccess": "Modifications sauvegardées avec succès.",
+      "saveChangesError": "Impossible de sauvegarder les modifications. Veuillez réessayer plus tard.",
+      "saveChangesPartially": "Certaines modifications n'ont pas pu être sauvegardées.",
+      "loadError": "Impossible de charger les règles de l'application. Veuillez réessayer plus tard.",
+      "createSuccess": "Règle créée avec succès.",
+      "createError": "Impossible de créer la règle. Veuillez réessayer plus tard.",
+      "ButtonsCard": {
+        "add": "Ajouter une règle",
+        "save": "Sauvegarder"
+      },
+      "CreateFormDialog": {
+        "title": "Ajouter une règle",
+        "ButtonsCard": {
+          "confirm": "Ajouter",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "code": {
+            "label": "Code",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priorité",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "script": {
+            "label": "Script",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "disabled": {
+            "label": "Désactivée"
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Modifier la règle {code}",
+        "ButtonsCard": {
+          "confirm": "Enregistrer",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "code": {
+            "label": "Code",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "description": {
+            "label": "Description"
+          },
+          "priority": {
+            "label": "Priorité",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "script": {
+            "label": "Script",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "disabled": {
+            "label": "Désactivée"
+          }
+        }
+      },
+      "fields": {
+        "code": "Code",
+        "description": "Description",
+        "priority": "Priorité",
+        "disabled": "Désactivée"
+      }
+    }
+  }
+}

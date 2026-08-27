@@ -33,33 +33,70 @@ export I18N_EXTERNAL_PATH=/path/to/translations
 
 ### 2️⃣ Frontend Translations
 
-* Defined in the **resources folder** of the frontend:
+#### i18n Configuration
 
-```
-resources/i18n.json
-resources/i18n/fr-FR.json
-resources/i18n/en-US.json
-```
-
-#### i18n.json
+Translation configuration is defined in the **`config.json`** file:
 
 ```json id="i18n-config"
 {
-  "languages": [
-    "fr-FR",
-    "en-US"
-  ],
-  "locale": "fr-FR"
+  "i18n": {
+    "languages": [
+      "fr-FR",
+      "en-US"
+    ],
+    "locale": "fr-FR",
+    "i18nFiles": [
+      "common.json",
+      "accounts.json",
+      "applications.json",
+      "organizational-units.json"
+    ]
+  }
 }
 ```
 
+**Configuration properties:**
+
 * `languages`: list of supported languages
 * `locale`: default language
+* `i18nFiles`: list of translation files to load for each language (these files are loaded from `/i18n/{language}/{fileName}`)
 
-#### Language Files (`fr-FR.json`, `en-US.json`)
+#### Language Files
 
-* Contain all frontend text strings
-* Are merged with backend translations when the frontend loads
+Frontend translations are organized as **modular language files** by domain to improve maintainability and performance.
+
+**File structure:**
+
+```
+resources/i18n/
+├── fr-FR/
+│   ├── common.json
+│   ├── accounts.json
+│   ├── applications.json
+│   └── organizational-units.json
+├── en-US/
+│   ├── common.json
+│   ├── accounts.json
+│   ├── applications.json
+│   └── organizational-units.json
+```
+
+**File purposes:**
+
+| File                        | Purpose                                                              |
+|-----------------------------|----------------------------------------------------------------------|
+| `common.json`               | General configuration, home page, badges, and common UI elements     |
+| `accounts.json`             | User account management (activation, suspension, deactivation, etc.) |
+| `applications.json`         | Application management and details                                   |
+| `organizational-units.json` | Organizational unit management                                       |
+
+**How files are loaded:**
+
+1. The frontend loops through each language defined in `i18n.languages` (e.g., `fr-FR`, `en-US`)
+2. For each language, it loads all files listed in `i18nFiles` from `/i18n/{language}/{fileName}`
+3. All loaded messages are merged together for that language
+4. The merged translations are combined with backend translations when the frontend loads
+
 * Ensure a **consistent UI for both backend and frontend messages**
 
 > ⚠️ The frontend downloads backend translations and merges them with its own internal translations automatically.
@@ -95,7 +132,9 @@ When the user selects a language, the choice is applied immediately to the whole
 
 For every language listed in `languages`, the frontend resources must provide:
 
-* the locale messages file (`i18n/{locale}.json`)
+* the locale messages file (`i18n/{locale}/common.json`, `i18n/{locale}/accounts.json`, etc.)
+    - Files are defined in the `i18nFiles` configuration array
+    - All files are loaded and merged together for each language
 * the translation key `application.language.title` (label of the selector)
 * the translation key `application.languages.{locale}` (display name of the language, written in its own language — must be identical across all locale files)
 * a flag image served at `icons/{locale}.svg`

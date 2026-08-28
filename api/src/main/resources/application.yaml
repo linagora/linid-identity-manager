@@ -68,6 +68,7 @@ server:
   port: 8443
   ssl:
     key-store: ${SSL_KEY_STORE}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
     key-store-password: ${SSL_KEY_PASSWORD}
     key-password: ${SSL_KEY_PASSWORD}
     truststore:

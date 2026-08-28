@@ -62,7 +62,7 @@ AUTH_ISSUER_URI=https://ui/auth
 AUTH_JWK_SET_URI=https://ui/auth/oauth2/jwks
 
 # Path to SSL/TLS key store
-SSL_KEY_STORE=classpath:keystore.jks
+SSL_KEY_STORE=classpath:keystore.p12
 
 # Password for the individual SSL key within the key store
 SSL_KEY_PASSWORD=password

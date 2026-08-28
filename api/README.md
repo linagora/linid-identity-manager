@@ -98,12 +98,13 @@ The `UserAuthenticationFilter` extracts the user email from the JWT token and cr
 
 ### SSL
 
-| Variable                  | Description                           | Required |
-| ------------------------- |---------------------------------------|----------|
-| `SSL_KEY_STORE`           | Path to keystore                      | Yes      |
-| `SSL_KEY_PASSWORD`        | Password for private key and JKS file | Yes      |
-| `SSL_TRUSTSTORE_PATH`     | Path to truststore                    | Yes      |
-| `SSL_TRUSTSTORE_PASSWORD` | Truststore password                   | Yes      |
+| Variable                  | Description                               | Required               |
+| ------------------------- |-------------------------------------------|------------------------|
+| `SSL_KEY_STORE`           | Path to keystore                          | Yes                    |
+| `SSL_KEY_STORE_TYPE`      | Keystore type (`PKCS12` or `JKS`)         | No (default `PKCS12`)  |
+| `SSL_KEY_PASSWORD`        | Password for private key and keystore     | Yes                    |
+| `SSL_TRUSTSTORE_PATH`     | Path to truststore                        | Yes                    |
+| `SSL_TRUSTSTORE_PASSWORD` | Truststore password                       | Yes                    |
 
 ### Application
 
@@ -124,14 +125,16 @@ The `UserAuthenticationFilter` extracts the user email from the JWT token and cr
 
 ## Generate Certificates for HTTPS
 
-```bash
-keytool -genkey -alias myKeyAlias -keyalg RSA -keysize 2048 \
-  -keystore src/main/resources/keystore.jks -validity 3650
+The keystore and truststore are generated from the repository root, together with all
+other development certificates:
 
-keytool -importcert -noprompt -trustcacerts -alias lemonldap \
-  -file selfsigned.crt -keystore src/main/resources/truststore.jks \
-  -storepass changeit >/dev/null 2>&1
+```bash
+task setup:certs:dev
 ```
+
+This produces `src/main/resources/keystore.p12` (server certificate signed by the local
+development CA) and `src/main/resources/truststore.jks` (trusting that CA).
+See [docs/configuration/certificates](../docs/configuration/certificates.md) for details.
 
 Set the keystore and truststore passwords in the corresponding environment variables.
 

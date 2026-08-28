@@ -19,6 +19,9 @@
         "type": {
           "q-input": {}
         },
+        "domain": {
+          "q-input": {}
+        },
         "description": {
           "q-input": {}
         }

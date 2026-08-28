@@ -145,7 +145,7 @@
     "sections": [
       {
         "key": "identity",
-        "fieldOrder": ["code", "name", "type", "description"]
+        "fieldOrder": ["code", "name", "type", "domain", "description"]
       },
       {
         "key": "audit",

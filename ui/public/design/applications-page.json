@@ -62,6 +62,16 @@
             "square": true
           }
         },
+        "domain": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "deep-purple-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
         "description": {
           "q-avatar": {
             "size": "28px",

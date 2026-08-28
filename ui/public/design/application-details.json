@@ -29,6 +29,12 @@
               "q-card": {}
             }
           },
+          "domain": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "domain" },
+              "q-card": {}
+            }
+          },
           "description": {
             "information-card": {
               "q-icon": { "color": "primary", "name": "description" },

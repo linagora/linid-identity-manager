@@ -35,6 +35,9 @@
           "required": "This field is required."
         }
       },
+      "domain": {
+        "label": "Domain"
+      },
       "description": {
         "label": "Description"
       },
@@ -82,6 +85,9 @@
           "required": "This field is required."
         }
       },
+      "domain": {
+        "label": "Domain"
+      },
       "description": {
         "label": "Description"
       },
@@ -107,6 +113,7 @@
     "columns": {
       "code": "Code",
       "name": "Name",
+      "domain": "Domain",
       "description": "Description",
       "type": "Type",
       "createdBy": "Created by",
@@ -192,6 +199,10 @@
           "type": "Name",
           "separator": "or"
         },
+        "domain": {
+          "type": "Domain",
+          "separator": "or"
+        },
         "description": {
           "type": "Description",
           "separator": "or"
@@ -214,6 +225,7 @@
         "columnFilter": {
           "code": "Code",
           "name": "Name",
+          "domain": "Domain",
           "description": "Description",
           "type": "Type",
           "createdBy": "Created by",
@@ -285,6 +297,7 @@
           "attributes": {
             "code": "Code",
             "name": "Name",
+            "domain": "Domain",
             "description": "Description",
             "type": "Type"
           }

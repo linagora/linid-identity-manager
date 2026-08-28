@@ -259,7 +259,7 @@ tasks:
       - task: start:e2e
         vars:
           ENV_FILE: env/e2e.env
-      - docker compose --env-file env/e2e.env run --rm --no-deps e2e-test-runner
+      - docker compose --env-file env/e2e.env run --rm e2e-test-runner
       - task: stop:e2e
         vars:
           ENV_FILE: env/e2e.env

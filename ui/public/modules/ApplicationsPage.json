@@ -25,6 +25,10 @@
         "type": "text"
       },
       {
+        "name": "domain",
+        "type": "text"
+      },
+      {
         "name": "description",
         "type": "text"
       },
@@ -60,6 +64,13 @@
         "label": "columns.description",
         "name": "description",
         "field": "description",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.domain",
+        "name": "domain",
+        "field": "domain",
         "sortable": true,
         "align": "left"
       },

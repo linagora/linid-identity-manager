@@ -166,4 +166,12 @@ public class ApplicationView extends AbstractViewEntity {
     @Column(name = "configuration", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private String configuration;
+
+    /**
+     * Domain associated with the application.
+     */
+    @Column(name = "domain")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Optional domain associated with the application")
+    private String domain;
 }

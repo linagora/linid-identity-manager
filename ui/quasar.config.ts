@@ -21,8 +21,6 @@ export default defineConfig((ctx) => {
       'axios',
       'oidc',
       'i18n',
-      'remotes',
-      'local-components',
       'module-lifecycle',
       'theme',
       'ui-design',

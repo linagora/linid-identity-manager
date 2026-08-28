@@ -1,6 +1,5 @@
-/* eslint-disable */
 /*
- * Copyright (C) 2025 Linagora
+ * Copyright (C) 2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -25,57 +24,28 @@
  * LinID Identity Manager software.
  */
 
-import { BootFileParams } from '#q-app';
-import {
-  ModuleLifecyclePhase,
-  type FederatedModule,
-  type RemoteModule,
-} from '@linagora/linid-im-front-corelib';
-import { loadRemote } from '@module-federation/enhanced/runtime';
+import { linidModuleFederation } from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '@quasar/app-vite/wrappers';
-import * as ModuleLifecycleService from 'src/services/ModuleLifecycleService';
+import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
+import { appConfig } from './config';
 
 /**
  * Application bootstrapping entry point.
  *
- * This boot function is responsible for orchestrating the lifecycle of all remote federated modules. It performs the
- * following steps:
- *
- * 1. Retrieves module configurations from the lifecycle service.
- * 2. Dynamically loads each remote module’s lifecycle entry point.
- * 3. Executes all lifecycle phases sequentially for each module, ensuring deterministic and ordered initialization.
+ * Delegates the whole Module Federation setup to the corelib: the remotes and module configuration files declared in
+ * the application configuration are registered and loaded, the host-local components are made available to zones, and
+ * all lifecycle phases are executed sequentially for each module.
  *
  * The boot process is asynchronous and blocks application startup until all lifecycle phases have been completed.
  *
- * @param boot - The framework-provided boot context, propagated to all lifecycle phases so modules can register
- *   services, routes, stores, or side effects.
+ * @param boot - The framework-provided boot context; the router is used to register module routes.
  * @returns Resolves once all modules have completed every lifecycle phase.
  */
-export default defineBoot(async (boot: BootFileParams): Promise<void> => {
-  const configurations = await ModuleLifecycleService.getModulesConfiguration();
-  const modules = new Map();
-
-  for (const configuration of configurations) {
-    const module = await loadRemote<FederatedModule<RemoteModule<unknown>>>(
-      configuration.lifecycleRemote
-    );
-
-    modules.set(configuration.instanceId, module?.default);
-  }
-
-  const phases = [
-    ModuleLifecyclePhase.SETUP,
-    ModuleLifecyclePhase.CONFIGURE,
-    ModuleLifecyclePhase.INITIALIZE,
-    ModuleLifecyclePhase.READY,
-    ModuleLifecyclePhase.POST_INIT,
-  ];
-
-  for (const phase of phases) {
-    for (const configuration of configurations) {
-      const module = modules.get(configuration.instanceId);
-
-      await ModuleLifecycleService[phase](module, configuration, boot);
-    }
-  }
+export default defineBoot(async ({ router }): Promise<void> => {
+  await linidModuleFederation.init({
+    router,
+    remotes: appConfig.remotes,
+    modules: appConfig.modules,
+    localComponents: { ExportApplicationScriptBtn },
+  });
 });

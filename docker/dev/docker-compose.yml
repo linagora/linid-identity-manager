@@ -45,8 +45,8 @@ services:
     volumes:
       - ./resources/llng/conf:/var/lib/lemonldap-ng/conf
       - ./resources/ssl.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./resources/selfsigned.crt:/etc/nginx/ssl/selfsigned.crt:ro
-      - ./resources/selfsigned.key:/etc/nginx/ssl/selfsigned.key:ro
+      - ./resources/server.crt:/etc/nginx/ssl/server.crt:ro
+      - ./resources/server.key:/etc/nginx/ssl/server.key:ro
       - ./resources/oidc.key:/etc/keys/oidc.key:ro
       - ./resources/oidc.pub:/etc/keys/oidc.pub:ro
     depends_on:
@@ -82,8 +82,8 @@ services:
       - 8088:8443
     volumes:
       - ../superset/init_guest_role.py:/app/superset/init_guest_role.py:ro
-      - ./resources/superset.crt:/app/certs/superset.crt:ro
-      - ./resources/superset.key:/app/certs/superset.key:ro
+      - ./resources/server.crt:/app/certs/superset.crt:ro
+      - ./resources/server.key:/app/certs/superset.key:ro
     depends_on:
       db:
         condition: service_healthy

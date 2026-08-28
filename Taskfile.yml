@@ -56,6 +56,7 @@ tasks:
       - task: generate:certs
         vars:
           ENV: demo
+          ENV_FILE: .env
 
   setup:certs:e2e:
     desc: Generate certificates and keys for E2E environment
@@ -285,6 +286,21 @@ tasks:
 
   # ─── Internal tasks ─────────────────────────────────────────────────────────
 
+  generate:ca:
+    desc: Generate the local certificate authority shared by all environments
+    internal: true
+    status:
+      - test -f docker/certs/ca.key
+      - test -f docker/certs/ca.crt
+    cmds:
+      - cmd: mkdir -p docker/certs
+      - cmd: |
+          openssl req -x509 -newkey rsa:2048 \
+            -keyout docker/certs/ca.key \
+            -out docker/certs/ca.crt \
+            -days 3650 -nodes \
+            -subj "/CN=LinID Development CA/O=LinID/C=FR" >/dev/null 2>&1
+
   generate:certs:
     desc: Generate certificates and keys for a specific environment
     internal: true
@@ -293,15 +309,18 @@ tasks:
     vars:
       TRUSTSTORE_PATH: '{{.TRUSTSTORE_PATH | default "."}}'
     cmds:
-      # SSL certificate
-      - cmd: rm -fv selfsigned.key selfsigned.crt
+      - task: generate:ca
+      # Server certificate signed by the local CA, shared by all HTTPS services
+      - cmd: rm -fv server.key server.crt
       - cmd: |
           openssl req -x509 -newkey rsa:2048 \
-            -keyout selfsigned.key \
-            -out selfsigned.crt \
+            -keyout server.key \
+            -out server.crt \
             -days 3650 -nodes \
             -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
-            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:localhost" >/dev/null 2>&1
+            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:api,DNS:auth,DNS:lemon,DNS:superset,DNS:localhost" \
+            -CA {{.ROOT_DIR}}/docker/certs/ca.crt \
+            -CAkey {{.ROOT_DIR}}/docker/certs/ca.key >/dev/null 2>&1
       # OIDC signing keys
       - cmd: rm -fv oidc.key oidc.pub
       - cmd: |
@@ -311,38 +330,23 @@ tasks:
           && openssl pkey \
             -in oidc.key \
             -pubout -out oidc.pub >/dev/null 2>&1
-      # API truststore
+      # API truststore: trusting the CA covers every service certificate
       - cmd: rm -fv {{.TRUSTSTORE_PATH}}/truststore.jks
       - cmd: |
           keytool -importcert -noprompt -trustcacerts \
-            -alias lemonldap \
-            -file selfsigned.crt \
+            -alias linid-ca \
+            -file {{.ROOT_DIR}}/docker/certs/ca.crt \
             -keystore {{.TRUSTSTORE_PATH}}/truststore.jks \
             -storepass "$SSL_TRUSTSTORE_PASSWORD" >/dev/null 2>&1
-      # API keystore
-      - cmd: rm -fv {{.ROOT_DIR}}/api/src/main/resources/keystore.jks
+      # API keystore built from the same server certificate
+      - cmd: rm -fv {{.ROOT_DIR}}/api/src/main/resources/keystore.p12 {{.ROOT_DIR}}/api/src/main/resources/keystore.jks
       - cmd: |
-          keytool -genkeypair -v -alias mykey \
-            -dname "CN=Test, OU=Test, O=Test, L=Test, S=Test, C=FR" \
-            -keystore {{.ROOT_DIR}}/api/src/main/resources/keystore.jks \
-            -storepass "$SSL_KEY_PASSWORD" -keypass "$SSL_KEY_PASSWORD" \
-            -keyalg RSA -keysize 2048 -validity 3650 >/dev/null 2>&1
-      # Superset SSL certificate
-      - cmd: rm -fv superset.key superset.crt
-      - cmd: |
-          openssl req -x509 -newkey rsa:2048 \
-            -keyout superset.key \
-            -out superset.crt \
-            -days 3650 -nodes \
-            -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
-            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:localhost,DNS:superset" >/dev/null 2>&1
-      # Add Superset cert to the API truststore
-      - cmd: |
-          keytool -importcert -noprompt -trustcacerts \
-            -alias superset \
-            -file superset.crt \
-            -keystore {{.TRUSTSTORE_PATH}}/truststore.jks \
-            -storepass "$SSL_TRUSTSTORE_PASSWORD" >/dev/null 2>&1
+          openssl pkcs12 -export \
+            -in server.crt \
+            -inkey server.key \
+            -name linid \
+            -out {{.ROOT_DIR}}/api/src/main/resources/keystore.p12 \
+            -passout pass:"$SSL_KEY_PASSWORD" >/dev/null 2>&1
 
   generate:config:
     desc: Generate configuration from templates using env variables

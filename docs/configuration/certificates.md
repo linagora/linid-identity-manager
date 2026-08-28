@@ -1,134 +1,110 @@
 # Certificates Configuration
 
-This guide explains how to generate **self-signed certificates** for Nginx, **OIDC keys for LemonLDAP::NG**, and the *
-*keystore for the LinId API**.
+This guide explains how TLS certificates and OIDC keys are managed in the **development,
+demo, and E2E environments**.
+
+All HTTPS-enabled services (Nginx UI, LinID API, LemonLDAP::NG, Apache Superset™) share a
+**single server certificate** signed by a **local certificate authority (CA)**. Trusting
+that CA once is enough to access every service without browser security warnings.
 
 ---
 
-## 🔐 1️⃣ Generate Self-Signed Certificates for Nginx
+## 🔐 1️⃣ Local Certificate Authority
 
-These certificates are used for **HTTPS in the Docker demo environment**.
+The CA is generated **once** in `docker/certs/` (`ca.crt` and `ca.key`) and reused by all
+environments. It is created automatically by the certificate tasks and is **never
+regenerated** as long as the files exist, so the trust you grant it in your browser or
+operating system survives environment restarts.
 
-```bash id="nginx-cert"
-# for demo env
-openssl req -x509 -newkey rsa:2048 \
-  -keyout docker/demo/resources/selfsigned.key \
-  -out docker/demo/resources/selfsigned.crt \
-  -days 3650 -nodes
+```bash
+task setup:certs        # dev + e2e
+task setup:certs:demo   # demo
 ```
 
-> The certificates are valid for **10 years (3650 days)** and placed in the `docker/demo/resources/` folder.
+To start from scratch, delete `docker/certs/` and run the task again (you will need to
+trust the new CA).
 
 ---
 
-## 🔑 2️⃣ Generate OIDC Keys for LemonLDAP::NG
+## 🌐 2️⃣ Shared Server Certificate
 
-These keys are used to **sign JWTs** for OIDC authentication.
+Each environment gets a single `server.crt`/`server.key` pair in
+`docker/<env>/resources/`, signed by the local CA. Its Subject Alternative Names cover
+every hostname used in the platform:
 
-```bash id="oidc-keys"
-# for demo env
-openssl genpkey -algorithm RSA -out docker/demo/resources/oidc.key -pkeyopt rsa_keygen_bits:2048
-openssl pkey -in docker/demo/resources/oidc.key -pubout -out docker/demo/resources/oidc.pub
+* `linid.localtest.me`
+* `localhost`
+* `ui`, `api`, `auth`, `lemon`, `superset` (internal Docker service names)
+
+The same certificate is used by:
+
+| Service        | Usage                                              |
+| -------------- | -------------------------------------------------- |
+| Nginx (UI)     | HTTPS on the frontend                              |
+| LemonLDAP::NG  | HTTPS on the SSO portal (dev environment)          |
+| LinID API      | HTTPS via `keystore.p12` (PKCS12, same key pair)   |
+| Superset       | HTTPS on the analytics instance                    |
+
+---
+
+## ✅ 3️⃣ Trust the CA (one-time setup)
+
+Trust `docker/certs/ca.crt` once and all services are accepted by your browser.
+
+**Linux (system-wide):**
+
+```bash
+sudo cp docker/certs/ca.crt /usr/local/share/ca-certificates/linid-dev-ca.crt
+sudo update-ca-certificates
 ```
+
+**macOS:**
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain docker/certs/ca.crt
+```
+
+**Firefox** (uses its own trust store): *Settings → Privacy & Security → Certificates →
+View Certificates → Authorities → Import*, select `docker/certs/ca.crt` and check
+*"Trust this CA to identify websites"*.
+
+**Chrome/Chromium on Linux** reads the system store after a restart; alternatively import
+the CA under *Settings → Privacy and security → Security → Manage certificates*.
+
+---
+
+## 🔑 4️⃣ OIDC Keys for LemonLDAP::NG
+
+These RSA keys **sign JWTs** for OIDC authentication. They are not TLS certificates and
+are generated per environment alongside the server certificate:
 
 * `oidc.key`: private key
 * `oidc.pub`: public key
 
-> Place them in `docker/demo/resources/` and configure LemonLDAP to use them.
-
 ---
 
-## 🔒 3️⃣ Generate TLS Certificate for Apache Superset™
+## 🗝️ 5️⃣ API Keystore and Truststore
 
-This certificate is used to **enable HTTPS** on the Apache Superset™ demo instance.
+Generated automatically by the certificate tasks:
 
-```bash
-# for demo env
-openssl req -x509 -newkey rsa:2048 \
-  -keyout superset.key \
-  -out superset.crt \
-  -days 3650 -nodes \
-  -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
-  -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:localhost,DNS:superset"
-```
+* **Keystore** (`api/src/main/resources/keystore.p12`): PKCS12 archive built from the
+  shared server certificate and key. The Spring Boot API uses it to serve HTTPS, so the
+  API presents the same certificate as every other service.
+* **Truststore** (`truststore.jks`): contains only the local CA certificate. Because
+  every service certificate is signed by that CA, this single entry lets the API validate
+  TLS connections to LemonLDAP::NG, Superset, and any future HTTPS service.
 
-* `superset.key`: TLS private key
-* `superset.crt`: TLS certificate
-
-> Place both files in the Superset configuration directory and mount them into the container. The certificate includes Subject Alternative Names (SANs) for `linid.localtest.me`, `ui`, `localhost`, and `superset` to support local demo deployments.
-
----
-
-## 🗝️ 4️⃣ Create a Keystore for the API
-
-LinId API uses a **Java Keystore (JKS)** to serve HTTPS.
-
-```bash id="keystore-api"
-keytool -genkey -alias myKeyAlias \
-  -keyalg RSA \
-  -keysize 2048 \
-  -keystore api/src/main/resources/keystore.jks \
-  -validity 3650
-```
-
-* `myKeyAlias`: key alias (can be any name)
-* `keystore.jks`: Java keystore file used by the Spring Boot backend
-* Valid for 10 years
-
-> ⚠️ Make sure to configure `application.yml` with the keystore path and password.
-
----
-
-## 🧾 5️⃣ Generate Truststore (Automation)
-
-This section covers the generation of the **truststore for SSL validation** and an alternative **API keystore setup** using automated scripts.
-
----
-
-### 🔐 Create Truststore for LemonLDAP::NG Certificate
-
-The truststore is used to **trust the self-signed certificate** generated earlier.
-
-```bash id="truststore-gen"
-keytool -importcert -noprompt -trustcacerts \
-  -alias lemonldap \
-  -file docker/demo/resources/selfsigned.crt \
-  -keystore docker/demo/resources/truststore.jks \
-  -storepass $SSL_TRUSTSTORE_PASSWORD >/dev/null 2>&1
-```
-
----
-
-### 🔐 Add Apache Superset™ Certificate to the Truststore
-
-The truststore is used to **trust the self-signed Apache Superset™ certificate** generated earlier.
-
-```bash id="superset-truststore-gen"
-keytool -importcert -noprompt -trustcacerts \
-  -alias superset \
-  -file superset.crt \
-  -keystore docker/demo/resources/truststore.jks \
-  -storepass $SSL_TRUSTSTORE_PASSWORD >/dev/null 2>&1
-```
-
-> This command adds the Apache Superset™ certificate to the shared demo truststore, allowing Java applications to establish TLS connections without certificate validation errors.
+Passwords come from `docker/<env>/env/cert.env` (`SSL_KEY_PASSWORD`,
+`SSL_TRUSTSTORE_PASSWORD`).
 
 ---
 
 ## 📝 Notes
 
-* The **truststore** is required for SSL trust chain validation in internal services
-* The **keystore** is used by the Spring Boot API to serve HTTPS
-* Both artifacts are generated with **10-year validity (3650 days)**
-* Avoid committing generated `.jks` files into version control
-* Ensure passwords are externalized in production environments
-
----
-
-
-## 📝 Best Practices
-
-* Keep **private keys secure** and do not commit them to the repository
-* Regenerate certificates/keys periodically in production environments
-* For demo purposes, self-signed certificates are sufficient
-* Document passwords and aliases for the keystore securely
+* All generated files are **git-ignored**; never commit certificates, keys, or stores
+* The CA and certificates are valid for **10 years (3650 days)**
+* Server certificates are regenerated on each setup, but this is invisible to the
+  browser as long as the CA stays the same
+* These certificates are for **development, demo, and E2E only** — use certificates from
+  a real authority in production, and externalize all passwords

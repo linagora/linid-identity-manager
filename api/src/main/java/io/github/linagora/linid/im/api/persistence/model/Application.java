@@ -147,4 +147,11 @@ public class Application extends AbstractEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @FilterType(type = String.class)
     private String configuration;
+
+    /**
+     * Optional domain associated with the application.
+     */
+    @Column(name = "domain")
+    @FilterType(type = String.class)
+    private String domain;
 }

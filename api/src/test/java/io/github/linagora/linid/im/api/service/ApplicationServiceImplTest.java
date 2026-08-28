@@ -99,7 +99,7 @@ class ApplicationServiceImplTest {
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
-        record = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}", Map.of());
+        record = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}", "Security", Map.of());
     }
 
     @Test
@@ -196,6 +196,7 @@ class ApplicationServiceImplTest {
         assertEquals("desc", saved.getDescription());
         assertEquals("OIDC", saved.getType());
         assertEquals("{}", saved.getClaimsTemplate());
+        assertEquals("Security", saved.getDomain());
         assertEquals(userPrincipal.getId(), saved.getUpdatedBy());
         // The script, checksum, deployedAt and configuration are managed by a separate process
         // and must be left untouched.

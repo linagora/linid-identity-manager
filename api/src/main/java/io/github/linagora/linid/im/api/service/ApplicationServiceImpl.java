@@ -161,6 +161,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         entity.setCode(application.code());
         entity.setName(application.name());
+        entity.setDomain(application.domain());
         entity.setDescription(application.description());
         entity.setType(application.type());
         entity.setClaimsTemplate(application.claimsTemplate());

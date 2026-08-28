@@ -94,6 +94,11 @@ public class ApplicationDTO {
     @Schema(description = "JSON configuration of the application", example = "{ \"timeout\": 30 }")
     private String configuration;
 
+    /**
+     * Optional domain associated with the application.
+     */
+    @Schema(description = "Domain associated with the application", example = "example.com")
+    private String domain;
 
     /**
      * Identifier of the creator of this record.

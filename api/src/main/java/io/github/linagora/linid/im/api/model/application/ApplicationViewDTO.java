@@ -98,6 +98,12 @@ public class ApplicationViewDTO {
     private String configuration;
 
     /**
+     * Optional domain associated with the application.
+     */
+    @Schema(description = "Domain associated with the application", example = "example.com")
+    private String domain;
+
+    /**
      * Full name of the creator of this record.
      */
     @Schema(description = "Full name of the record creator", example = "John Doe")

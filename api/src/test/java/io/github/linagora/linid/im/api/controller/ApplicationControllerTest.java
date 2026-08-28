@@ -92,7 +92,7 @@ class ApplicationControllerTest {
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
-        record = new ApplicationRecord("my-app", "My Application", null, "OIDC", "{}", Map.of());
+        record = new ApplicationRecord("my-app", "My Application", null, "OIDC", "{}", "example.com", Map.of());
     }
 
     @Test

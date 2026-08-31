@@ -1,0 +1,90 @@
+{
+  "instanceId": "moduleAccountDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "accounts",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "accounts",
+  "basePath": "/accounts",
+  "zones": [
+    {
+      "zone": "moduleAccountDetailsPage.side-left",
+      "plugin": "catalogUI/EntityProfilePanel",
+      "props": {
+        "statusKey": "status",
+        "parentPath": "/accounts",
+        "fieldOrder": ["id", "email"]
+      }
+    },
+    {
+      "zone": "moduleAccountDetailsPage.content.before",
+      "component": "AccountLifecyclePanel"
+    }
+  ],
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "parentPath": "/accounts",
+    "enableActions": false,
+    "reloadDetailsOn": ["account-status-updated"],
+    "sections": [
+      {
+        "key": "lifecycle",
+        "fieldOrder": [
+          "insertDate",
+          "activationAt",
+          "validityPeriod.start",
+          "validityPeriod.end",
+          "suspensionPeriod.start",
+          "suspensionPeriod.end"
+        ],
+        "formatters": [
+          {
+            "field": "insertDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "activationAt",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "validityPeriod.start",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "validityPeriod.end",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "suspensionPeriod.start",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "suspensionPeriod.end",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -26,7 +26,6 @@
 
 import { useCommonMapper } from '@linagora/linid-im-front-corelib';
 import type {
-  Account,
   AccountDeactivationRecord,
   AccountDTO,
   AccountReactivationRecord,
@@ -46,29 +45,8 @@ export function useAccountMapper() {
   const { toDate, toDateISO } = useCommonMapper();
 
   /**
-   * Maps an AccountDTO to an Account, converting date to date ISO.
-   *
-   * @param account AccountDTO to be transformed into an Account.
-   * @returns Account with properly typed fields for UI.
-   */
-  const toAccount = (account: AccountDTO): Account => {
-    return {
-      id: account.id,
-      externalId: account.externalId,
-      lastname: account.lastname,
-      firstname: account.firstname,
-      email: account.email,
-      createdBy: account.createdBy,
-      updatedBy: account.updatedBy,
-      insertDate: toDate(account.insertDate, DATE_FORMAT_KEY),
-      updateDate: toDate(account.updateDate, DATE_FORMAT_KEY),
-      extraParameters: account.extraParameters,
-    };
-  };
-
-  /**
    * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status fields. Identity fields (firstname,
-   * lastname, ...) are intentionally not included; combine with {@link toAccount} when both are needed.
+   * lastname, ...) are intentionally not included.
    *
    * @param account AccountDTO to be transformed into an AccountStatus.
    * @returns AccountStatus with lifecycle fields preserved as ISO strings.
@@ -183,7 +161,6 @@ export function useAccountMapper() {
   };
 
   return {
-    toAccount,
     toAccountStatus,
     toAccountSuspensionRecord,
     toAccountDeactivationRecord,

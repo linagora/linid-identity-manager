@@ -508,23 +508,47 @@
       }
     }
   },
-  "AccountDetailsPage": {
-    "title": "Account details",
-    "EntityDetailsCard": {
-      "title": "Account information",
-      "attributes": {
-        "firstname": "First name",
-        "lastname": "Last name",
-        "email": "Email",
-        "createdBy": "Created by",
-        "updatedBy": "Updated by",
-        "insertDate": "Creation date",
-        "updateDate": "Last update"
-      }
-    },
+  "moduleAccountDetailsPage": {
+    "error": "Unable to load the account. Please try again later.",
     "ButtonsCard": {
       "cancel": "Back"
     },
+    "EntityProfilePanel": {
+      "title": "{firstname} {lastname}",
+      "subtitle": "{email}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Accounts list"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "id": "Identifier",
+          "email": "Email"
+        }
+      }
+    },
+    "sections": {
+      "lifecycle": {
+        "EntityDetailsCard": {
+          "title": "Lifecycle",
+          "attributes": {
+            "insertDate": "Creation date",
+            "activationAt": "Activation date",
+            "validityPeriod": {
+              "start": "Validity start date",
+              "end": "Validity end date"
+            },
+            "suspensionPeriod": {
+              "start": "Suspension start date",
+              "end": "Suspension end date"
+            }
+          }
+        }
+      }
+    }
+  },
+  "AccountLifecyclePanel": {
     "updateStatusSuccess": "Account status successfully updated",
     "immediateActivationSuccess": "The account can be activated within one minute | The account can be activated within {count} minutes",
     "immediateSuspensionSuccess": "The account will be suspended in one minute | The account will be suspended in {count} minutes",
@@ -536,8 +560,6 @@
     "scheduledSuspensionSuccess": "The account will be suspended from {date}",
     "modifySuspensionSuccess": "The account will be suspended from {date}",
     "errors": {
-      "notFound": "Account not found",
-      "generic": "Unable to load the account. Please try again later.",
       "status": "Unable to update the account status. Please try again later."
     },
     "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",

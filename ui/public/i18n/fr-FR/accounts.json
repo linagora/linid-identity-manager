@@ -508,23 +508,47 @@
       }
     }
   },
-  "AccountDetailsPage": {
-    "title": "Détails du compte",
-    "EntityDetailsCard": {
-      "title": "Informations du compte",
-      "attributes": {
-        "firstname": "Prénom",
-        "lastname": "Nom",
-        "email": "E-mail",
-        "createdBy": "Créé par",
-        "updatedBy": "Modifié par",
-        "insertDate": "Date de création",
-        "updateDate": "Dernière modification"
-      }
-    },
+  "moduleAccountDetailsPage": {
+    "error": "Impossible de charger le compte. Veuillez réessayer plus tard.",
     "ButtonsCard": {
       "cancel": "Retour"
     },
+    "EntityProfilePanel": {
+      "title": "{firstname} {lastname}",
+      "subtitle": "{email}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Liste des comptes"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "id": "Identifiant",
+          "email": "E-mail"
+        }
+      }
+    },
+    "sections": {
+      "lifecycle": {
+        "EntityDetailsCard": {
+          "title": "Cycle de vie",
+          "attributes": {
+            "insertDate": "Date de création",
+            "activationAt": "Date d'activation",
+            "validityPeriod": {
+              "start": "Date de début de validité",
+              "end": "Date de fin de validité"
+            },
+            "suspensionPeriod": {
+              "start": "Date de début de suspension",
+              "end": "Date de fin de suspension"
+            }
+          }
+        }
+      }
+    }
+  },
+  "AccountLifecyclePanel": {
     "updateStatusSuccess": "Statut du compte mis à jour avec succès",
     "immediateActivationSuccess": "Le compte pourra être activé dans une minute | Le compte pourra être activé dans {count} minutes",
     "immediateSuspensionSuccess": "Le compte sera suspendu dans une minute | Le compte sera suspendu dans {count} minutes",
@@ -536,8 +560,6 @@
     "scheduledSuspensionSuccess": "Le compte sera suspendu à partir du {date}",
     "modifySuspensionSuccess": "Le compte sera suspendu à partir du {date}",
     "errors": {
-      "notFound": "Compte introuvable",
-      "generic": "Impossible de charger le compte. Veuillez réessayer plus tard.",
       "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
     },
     "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes",

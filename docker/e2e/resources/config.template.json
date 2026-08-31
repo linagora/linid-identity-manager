@@ -33,7 +33,8 @@
     "/modules/ApplicationCreationPage.json",
     "/modules/ApplicationEditionPage.json",
     "/modules/OrganizationalUnitPage.json",
-    "/modules/ApplicationDetailsPage.json"
+    "/modules/ApplicationDetailsPage.json",
+    "/modules/AccountDetailsPage.json"
   ],
   "oidc": {
     "authority": "${LEMONLDAP_PORTAL_URL}",
@@ -60,15 +61,6 @@
     "design/application-edition.json",
     "design/organizational-units-page.json",
     "design/application-details.json"
-  ],
-  "accountDetailsFieldsOrder": [
-    "firstname",
-    "lastname",
-    "email",
-    "createdBy",
-    "updatedBy",
-    "insertDate",
-    "updateDate"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

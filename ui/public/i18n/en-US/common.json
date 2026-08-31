@@ -38,7 +38,11 @@
   "StatusBadge": {
     "active": "Active",
     "inactive": "Inactive",
-    "suspended": "Suspended"
+    "suspended": "Suspended",
+    "ACTIVE": "Active",
+    "INACTIVE": "Inactive",
+    "SUSPENDED": "Suspended",
+    "UNKNOWN": "Unknown"
   },
   "AuthenticationCallbackPage": {
     "processing": "Processing authentication response..."

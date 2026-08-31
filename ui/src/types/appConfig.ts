@@ -68,12 +68,6 @@ export interface AppConfig {
   // ─── Accounts ───────────────────────────────────────────────────────────────
 
   /**
-   * Ordered list of account attribute keys displayed on the account details page. Only keys listed here appear in the
-   * details card; the order is preserved.
-   */
-  accountDetailsFieldsOrder: string[];
-
-  /**
    * Form field configurations for each account lifecycle action dialog, keyed by action identifier (e.g.
    * `"suspension.immediate"`, `"deactivation.scheduled"`). Each value is the ordered list of fields rendered inside the
    * dialog.

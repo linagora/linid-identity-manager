@@ -60,6 +60,12 @@ Feature: Test API Account endpoints
   ## 704 Should return 400 when validity period start is in the future
   ## 705 Should return 400 when activationAt is before validity start
   ## 706 Should return 400 when activationAt is in the future
+
+  ################## Update (PUT /accounts/{id}) #####
+  ## 801 Should update the editable attributes of an existing account
+  ## 802 Should return 404 when updating an unknown account
+  ## 803 Should return 400 when updating with an invalid
+  ## 804 Should return 400 when updating with an email or external identifier already used
   ## 707 Should return 404 when activating unknown account
 
   Background:
@@ -1072,3 +1078,198 @@ Feature: Test API Account endpoints
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
     And   I expect '{{response.body.status}}' is '404'
+
+  ####################################################
+  ################## Update (PUT /accounts/{id}) #####
+  ####################################################
+
+  Scenario: 801 - Should update the editable attributes of an existing account
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-801",
+        "lastname": "Before",
+        "firstname": "Update",
+        "email": "update801@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-801-updated",
+        "lastname": "After",
+        "firstname": "Updated",
+        "email": "updated801@example.com",
+        "extraParameters": {"updated": true}
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And   I expect '{{response.body.externalId}}' is 'ext-801-updated'
+    And   I expect '{{response.body.lastname}}' is 'After'
+    And   I expect '{{response.body.firstname}}' is 'Updated'
+    And   I expect '{{response.body.email}}' is 'updated801@example.com'
+    And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And   I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
+
+    # A payload without extraParameters must preserve the stored value
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-801-updated",
+        "lastname": "After",
+        "firstname": "Updated",
+        "email": "updated801@example.com"
+      }
+      """
+    Then  I expect status code is 200
+    And   I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
+  Scenario: 802 - Should return 404 when updating an unknown account
+    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-802",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update802@example.com"
+      }
+      """
+    Then  I expect status code is 404
+    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And   I expect '{{response.body.status}}' is '404'
+
+  Scenario Outline: 803 - Should return 400 when updating with an invalid <field>
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-803",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update803@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "<externalId>",
+        "lastname": "<lastname>",
+        "firstname": "<firstname>",
+        "email": "<email>"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.error}}' is 'Validation failed'
+    And   I expect '{{response.body.errorKey}}' is 'error.validation'
+    And   I expect '{{response.body.status}}' is '400'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
+    Examples:
+      | field      | externalId | lastname | firstname | email                 |
+      | email      | ext-803    | Doe      | Jane      | not-an-email          |
+      | externalId |            | Doe      | Jane      | update803@example.com |
+      | lastname   | ext-803    |          | Jane      | update803@example.com |
+      | firstname  | ext-803    | Doe      |           | update803@example.com |
+
+  Scenario: 804 - Should return 400 when updating with an email or external identifier already used
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-804-a",
+        "lastname": "Taken",
+        "firstname": "Already",
+        "email": "update804-a@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'firstAccountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-804-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-b@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'secondAccountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-804-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-a@example.com"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.email_already_used'
+    And   I expect '{{response.body.status}}' is '400'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-804-a",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-b@example.com"
+      }
+      """
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.account.external_id_already_used'
+    And   I expect '{{response.body.status}}' is '400'
+
+    # Updating an account with its own current values must stay allowed
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+      """
+      {
+        "externalId": "ext-804-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "update804-b@example.com"
+      }
+      """
+    Then  I expect status code is 200
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.firstAccountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
+    Then  I expect status code is 204

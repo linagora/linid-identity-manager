@@ -61,6 +61,11 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
+      try {
+        await authService.clearUser();
+      } catch {
+        // ignored — clearUser failure must not replace the original 401 error
+      }
       await authService.login();
     }
 

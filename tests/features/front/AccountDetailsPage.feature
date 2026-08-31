@@ -3,9 +3,9 @@ Feature: Test Account details page display
   ################## Account Details ##################
   ## 101 Should display all account information on detail page
   ## 102 Should display all action buttons on detail page
-  ## 103 Cancel button should come back at accounts list page
+  ## 103 Back button should come back at accounts list page
   ## 104 Remove the account
-  ## 105 Should display a not found notification when navigating to a non-existent account
+  ## 105 Should display a load-error notification when navigating to a non-existent account
   ## 106 Should display a generic error notification when navigating to an account with a malformed ID
   ## 107 Lifecycle case 1 - INACTIVE, future validity start
   ## 108 Lifecycle case 2 - INACTIVE, not activated yet
@@ -125,30 +125,32 @@ Feature: Test Account details page display
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/{{ctx.accountId}}"
 
     ## 101 Should display all account information on detail page
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--firstname"] [data-cy="value"]' contains "John"
-    And I expect the HTML element '[data-cy="information-card--lastname"] [data-cy="value"]' contains "Doe"
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "John"
+    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Doe"
+    And I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "john@example.com"
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' to be visible
+    And I expect the HTML element '[data-cy="information-card--id"] [data-cy="value"]' contains "{{ctx.accountId}}"
     And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "john@example.com"
-    And I expect the HTML element '[data-cy="information-card--createdBy"] [data-cy="value"]' contains "{{ctx.createdBy}}"
-    And I expect the HTML element '[data-cy="information-card--updatedBy"] [data-cy="value"]' contains "{{ctx.updatedBy}}"
+    And I expect the HTML element '[data-cy="details-section_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="information-card--insertDate"] [data-cy="value"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--updateDate"] [data-cy="value"]' to be visible
+    And I expect the HTML element '[data-cy="information-card--validityPeriod.start"] [data-cy="value"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_back-button"]' to be visible
 
     ## 102 Should display all action buttons on detail page
-    And I expect the HTML element '[data-cy="buttons-card"]' to be visible
-    And I expect the HTML element '[data-cy="buttons-card"] [data-cy="button_cancel"]' contains "Retour"
+    And I expect the HTML element '[data-cy="entity-profile-panel_back-button"]' contains "Liste des comptes"
 
-    ## 103 Cancel button should come back at accounts list page
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    ## 103 Back button should come back at accounts list page
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
 
     ## 104: Remove the account
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204
 
-    ## 105 Should display a not found notification when navigating to a non-existent account
+    ## 105 Should display a load-error notification when navigating to a non-existent account
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-000000000000"
-    Then I expect the HTML element '.q-notification__message' contains "Compte introuvable"
+    Then I expect the HTML element '.q-notification__message' contains "Impossible de charger le compte. Veuillez réessayer plus tard."
     And I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
 
     ## 106 Should display a generic error notification when navigating to an account with a malformed ID
@@ -164,15 +166,14 @@ Feature: Test Account details page display
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c1"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-not-activated-info-text"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 108 Lifecycle case 2 - INACTIVE, not activated yet
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
@@ -180,24 +181,23 @@ Feature: Test Account details page display
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c2"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-not-activated-info-text"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 109 Lifecycle case 3 - ACTIVE, no end date, no suspension
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c3"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -205,48 +205,48 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 110 Lifecycle case 4 - ACTIVE, end > 15 days, no suspension
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c4@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c4"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 111 Lifecycle case 5 - ACTIVE, end <= 15 days, no suspension
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c5@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c5"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 112 Lifecycle case 6 - ACTIVE, no end date, suspension planned
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c6@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c6"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -254,16 +254,16 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c7@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c7"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -271,16 +271,16 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c8@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c8"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' contains "Actif"
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
@@ -288,85 +288,77 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c9@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c9"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c10@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000a"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c11@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000b"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c12@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000c"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' not exists
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
 
     ## 119 Immediate activation - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d1@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d1"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
@@ -393,17 +385,17 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé dans 60 minutes"
 
     ## 122 Scheduled activation - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d5@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d5"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
@@ -450,17 +442,17 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte pourra être activé à partir du 01/01/2100"
 
     ## 127 Immediate suspension - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d2@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d2"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
@@ -492,17 +484,17 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu dans 60 minutes"
 
     ## 130 Scheduled suspension - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d8@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d8"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
@@ -598,18 +590,18 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
 
     ## 139 Modify suspension - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d9@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d9"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
@@ -692,18 +684,18 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera suspendu à partir du 01/01/2100"
 
     ## 147 Immediate reactivation - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d4@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d4"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
@@ -727,17 +719,17 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé dans 60 minutes"
 
     ## 150 Immediate deactivation - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d3"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
@@ -769,17 +761,17 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé dans 60 minutes"
 
     ## 153 Scheduled deactivation - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d6@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d6"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
@@ -833,18 +825,18 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé à partir du 01/01/2100"
 
     ## 158 Modify deactivation - dialog opens correctly
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "dialog-d7@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d7"]'
-    Then I expect the HTML element '[data-cy="account-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_title"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_cards"]' to be visible
-    And I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
+    And I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
@@ -892,18 +884,17 @@ Feature: Test Account details page display
     And I expect the HTML element ".q-notification__message" contains "Le compte sera désactivé à partir du 01/01/2100"
 
     ## 163 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I click on '[data-cy="linid-filter-panel_item-email"]'
     And I set the text "lifecycle-c13@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000cd"]'
-    Then I expect the HTML element '[data-cy="account-details-page_lifecycle"]' to be visible
+    Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-banner"]' to be visible
-    And I expect the HTML element '[data-cy="status-badge_inactive"]' contains "Inactif"
-    And I expect the HTML element '[data-cy="status-badge_active"]' not exists
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
 

@@ -33,6 +33,7 @@ import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountStatusMapperImpl;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
@@ -411,6 +412,84 @@ class AccountServiceImplTest {
 
         ApiException exception = assertThrows(ApiException.class,
             () -> accountService.findById(userPrincipal, id));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("update should apply the editable fields, save and return the refreshed view")
+    void testUpdate_shouldApplyFieldsSaveAndReturnView() {
+        UUID id = UUID.randomUUID();
+        var existing = new Account();
+        existing.setId(id);
+        var view = new AccountDistinctView();
+        view.setId(id);
+        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+
+        when(accountRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(accountRepository.findAccountByEmail(record.email())).thenReturn(Optional.of(existing));
+        when(accountRepository.findAccountByExternalId(record.externalId())).thenReturn(Optional.of(existing));
+        when(accountRepository.saveAndFlush(existing)).thenReturn(existing);
+        when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
+
+        AccountDistinctView result = accountService.update(userPrincipal, id, record);
+
+        assertSame(view, result);
+        verify(accountMapper).applyUpdate(existing, record, ADMIN_ID);
+        verify(accountRepository).saveAndFlush(existing);
+    }
+
+    @Test
+    @DisplayName("update should throw 400 when the email is already used by another account")
+    void testUpdate_shouldThrow400WhenEmailUsedByAnotherAccount() {
+        UUID id = UUID.randomUUID();
+        var existing = new Account();
+        existing.setId(id);
+        var other = new Account();
+        other.setId(UUID.randomUUID());
+        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+
+        when(accountRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(accountRepository.findAccountByEmail("jane@example.com")).thenReturn(Optional.of(other));
+
+        ApiException exception = assertThrows(ApiException.class,
+            () -> accountService.update(userPrincipal, id, record));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.account.email_already_used", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("update should throw 400 when the external identifier is already used by another account")
+    void testUpdate_shouldThrow400WhenExternalIdUsedByAnotherAccount() {
+        UUID id = UUID.randomUUID();
+        var existing = new Account();
+        existing.setId(id);
+        var other = new Account();
+        other.setId(UUID.randomUUID());
+        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+
+        when(accountRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(accountRepository.findAccountByEmail("jane@example.com")).thenReturn(Optional.empty());
+        when(accountRepository.findAccountByExternalId("ext-002")).thenReturn(Optional.of(other));
+
+        ApiException exception = assertThrows(ApiException.class,
+            () -> accountService.update(userPrincipal, id, record));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.account.external_id_already_used", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("update should throw 404 when the account does not exist")
+    void testUpdate_shouldThrow404WhenAccountNotFound() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        when(accountRepository.findById(id)).thenReturn(Optional.empty());
+
+        ApiException exception = assertThrows(ApiException.class,
+            () -> accountService.update(userPrincipal, id, record));
 
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.account.not_found", exception.getError().key());

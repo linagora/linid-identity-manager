@@ -7,6 +7,8 @@
   "error.plugin.unknown": "Unknown plugin: {type}",
   "error.authentication.unauthorized": "Unauthorized",
   "error.router.unknown.language": "Unknown language: {language}",
+  "error.account.email_already_used": "Email address already used by another account: {email}",
+  "error.account.external_id_already_used": "External identifier already used by another account: {externalId}",
   "error.account.not_found": "Account not found: {id}",
   "error.account.status.not_found": "Account status not found for account: {id}",
   "error.account.status.activation.already_activated": "Account {id} is already activated.",

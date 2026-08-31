@@ -31,6 +31,7 @@ import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
@@ -82,6 +83,19 @@ public interface AccountService {
      * @return the account entity
      */
     AccountDistinctView findById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Updates the editable attributes ({@code externalId}, {@code lastname}, {@code firstname},
+     * {@code email} and, when provided, {@code extraParameters}) of the account with the given
+     * identifier. An email or external identifier already used by another account is rejected with
+     * an HTTP 400 error.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param record        the update request record
+     * @return the refreshed account view
+     */
+    AccountDistinctView update(UserPrincipal userPrincipal, UUID accountId, AccountUpdateRecord record);
 
     /**
      * Deletes an account by its unique identifier.

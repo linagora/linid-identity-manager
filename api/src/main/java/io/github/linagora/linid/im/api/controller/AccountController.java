@@ -33,6 +33,7 @@ import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
@@ -155,6 +156,29 @@ public class AccountController {
         log.info("[{}] Received GET request for account {}", userPrincipal.getEmail(), id);
         var entity = accountService.findById(userPrincipal, id);
         return ResponseEntity.ok(accountMapper.toDTO(entity));
+    }
+
+    /**
+     * Updates the editable attributes of an account.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @param account       the update record with validated fields
+     * @return the refreshed account view
+     */
+    @PutMapping("/{id}")
+    @Operation(summary = "Update an account's editable attributes")
+    @ApiResponse(responseCode = "200", description = "Account successfully updated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<AccountViewDTO> update(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id,
+        @Valid @RequestBody final AccountUpdateRecord account) {
+        log.info("[{}] Received PUT request to update account {} with {}",
+            userPrincipal.getEmail(), id, account);
+        var view = accountService.update(userPrincipal, id, account);
+        return ResponseEntity.ok(accountMapper.toDTO(view));
     }
 
     /**

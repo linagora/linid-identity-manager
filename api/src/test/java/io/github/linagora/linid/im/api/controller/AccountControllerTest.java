@@ -40,6 +40,7 @@ import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
@@ -221,6 +222,24 @@ class AccountControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(entity.getId(), response.getBody().getId());
+    }
+
+    @Test
+    @DisplayName("Should update account and return 200 with AccountViewDTO")
+    void testUpdate_shouldReturn200WithAccountViewDTO() {
+        UUID id = UUID.randomUUID();
+        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        var entity = createSampleViewEntity();
+        var dto = createSampleViewDTO(entity);
+        when(accountService.update(userPrincipal, id, record)).thenReturn(entity);
+        when(accountMapper.toDTO(entity)).thenReturn(dto);
+
+        ResponseEntity<AccountViewDTO> response = accountController.update(userPrincipal, id, record);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(entity.getId(), response.getBody().getId());
+        verify(accountService).update(userPrincipal, id, record);
     }
 
     @Test

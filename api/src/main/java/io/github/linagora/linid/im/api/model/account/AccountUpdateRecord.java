@@ -24,38 +24,38 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.persistence.repository;
+package io.github.linagora.linid.im.api.model.account;
 
-import io.github.linagora.linid.im.api.persistence.model.Account;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
 
 /**
- * Spring Data JPA repository for {@link Account}.
+ * Request payload for updating the editable attributes of an existing account.
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering
- * via {@code spring-query-filter} specifications.</p>
+ * @param externalId      external identifier (e.g. OIDC sub)
+ * @param lastname        last name of the account holder
+ * @param firstname       first name of the account holder
+ * @param email           email address, must be valid format
+ * @param extraParameters additional deployment-specific attributes stored as JSON; left untouched when omitted
  */
-public interface AccountRepository extends JpaRepository<Account, UUID>,
-    JpaSpecificationExecutor<Account> {
-    /**
-     * Retrieves an {@link Account} associated with the given email address.
-     *
-     * @param email the email address used to search for the account
-     * @return an {@link Optional} containing the matching {@link Account} if found,
-     * or {@link Optional#empty()} if no account exists for the given email
-     */
-    Optional<Account> findAccountByEmail(String email);
+@Schema(description = "Request payload for updating an existing account")
+public record AccountUpdateRecord(
+    @NotBlank @Schema(description = "External identifier", example = "oidc-sub-12345")
+    String externalId,
 
-    /**
-     * Retrieves an {@link Account} associated with the given external identifier.
-     *
-     * @param externalId the external identifier used to search for the account
-     * @return an {@link Optional} containing the matching {@link Account} if found,
-     * or {@link Optional#empty()} if no account exists for the given external identifier
-     */
-    Optional<Account> findAccountByExternalId(String externalId);
+    @NotBlank @Schema(description = "Last name", example = "Doe")
+    String lastname,
+
+    @NotBlank @Schema(description = "First name", example = "John")
+    String firstname,
+
+    @NotBlank @Email @Schema(description = "Email address", example = "john.doe@example.com")
+    String email,
+
+    @Schema(description = "Additional deployment-specific attributes stored as JSON")
+    Map<String, Object> extraParameters
+) {
 }

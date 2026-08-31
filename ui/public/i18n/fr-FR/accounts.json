@@ -523,8 +523,52 @@
       },
       "EntityDetailsCard": {
         "attributes": {
-          "id": "Identifiant",
+          "externalId": "Identifiant",
           "email": "E-mail"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Le compte a été mis à jour avec succès.",
+              "submitError": "Impossible de mettre à jour le compte. Veuillez réessayer plus tard.",
+              "FormDialog": {
+                "title": "Modifier {firstname} {lastname}",
+                "fields": {
+                  "externalId": {
+                    "label": "Identifiant",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "firstname": {
+                    "label": "Prénom",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "lastname": {
+                    "label": "Nom",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "email": {
+                    "label": "E-mail",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Enregistrer",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          }
         }
       }
     },

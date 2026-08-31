@@ -47,12 +47,12 @@ Feature: Test Organizational Units page display
     And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-000000000ee1"]' contains "admin_fn admin_ln"
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-000000000ee1"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-000000000ee1"
-    And  I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "Team Beta"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Team Beta"
     And  I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "TEAM"
 
     ## 104 Should show the details of another OU when click see button of a OU
-    When I click on '[data-cy="button_cancel"]'
-    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I set the text "SuspendedOuWithEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And I click on '[data-cy="text-search-filter-panel_search"]'
@@ -67,5 +67,5 @@ Feature: Test Organizational Units page display
     And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' contains "admin_fn admin_ln"
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000e3"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e3"
-    And I expect the HTML element '[data-cy="information-card--name"] [data-cy="value"]' contains "SuspendedOuWithEnd"
+    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "SuspendedOuWithEnd"
     And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"

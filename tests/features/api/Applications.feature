@@ -561,6 +561,7 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.totalElements}}' is '1'
     And  I expect '{{response.body.content[0].name}}' is 'LINID - Identity Manager'
     And  I expect '{{response.body.content[0].description}}' is 'System identity manager application'
+    And  I expect '{{response.body.content[0].domain}}' is 'Security'
     And  I expect '{{response.body.content[0].type}}' is 'System'
 
   Scenario: 802 - Should return 400 when updating the LINID system application

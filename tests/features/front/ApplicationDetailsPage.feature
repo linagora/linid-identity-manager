@@ -60,6 +60,7 @@ Feature: Test Application details page display
         "code": "app-detail-101",
         "name": "Application Detail 101",
         "description": "An application for the details page tests",
+        "domain": "Security",
         "type": "OIDC",
         "claimsTemplate": "{ \"sub\": \"id\" }"
       }
@@ -83,6 +84,7 @@ Feature: Test Application details page display
     And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "app-detail-101"
     And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--name"]' contains "Application Detail 101"
     And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--description"]' contains "An application for the details page tests"
+    And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--domain"]' contains "Security"
     And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--type"]' contains "OIDC"
     And  I expect the HTML element '[data-cy="details-section_audit"]' to be visible
     And  I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"]' contains "admin_fn admin_ln"

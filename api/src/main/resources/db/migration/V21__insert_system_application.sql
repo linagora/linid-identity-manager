@@ -1,7 +1,8 @@
-INSERT INTO applications (code, name, description, type, claims_template)
+INSERT INTO applications (code, name, description, domain, type, claims_template)
 VALUES ('LINID',
         'LINID - Identity Manager',
         'System identity manager application',
+        'Security',
         'System',
         '{ "sub": "id" }');
 

@@ -79,6 +79,8 @@ export interface OrganizationalUnitDTO {
    * instant).
    */
   isSuspended: boolean;
+  /** Computed organizational unit status, server-derived from the suspension period. */
+  status: 'ACTIVE' | 'SUSPENDED';
   /** List of parent organizational units, with their identifiers and relation IDs. */
   parents?: OrganizationalUnitRelationDTO[];
   /** Additional deployment-specific attributes stored as JSON. */
@@ -91,34 +93,8 @@ export interface OrganizationalUnitDTO {
 }
 
 /**
- * Identity projection of an organizational unit consumed by Vue components on the Details page. Identity fields only;
- * combine with {@link OrganizationalUnitStatus} when both identity and suspension state are needed.
- */
-export interface OrganizationalUnit {
-  /** Unique identifier of the organizational unit. */
-  id: string;
-  /** Human-readable name of the organizational unit. */
-  name: string;
-  /** Type of the organizational unit. */
-  type: string;
-  /** Creator identifier. */
-  createdBy: string;
-  /** Last updater identifier. */
-  updatedBy: string;
-  /** Organizational unit creation date converted from API ISO timestamp. */
-  insertDate: string;
-  /** Organizational unit last update date converted from API ISO timestamp. */
-  updateDate: string;
-  /** Additional deployment-specific attributes stored as JSON. */
-  extraParameters: Record<string, unknown>;
-}
-
-/**
  * Suspension status fields of an organizational unit: suspension period, reason metadata, and the computed
  * `isSuspended` flag.
- *
- * Combine with an {@link OrganizationalUnit} when both identity and lifecycle data are needed (for example on the OU
- * Details page).
  */
 export interface OrganizationalUnitStatus {
   /** Period during which the organizational unit is suspended. Null when no suspension is configured. */

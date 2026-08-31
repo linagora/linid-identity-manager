@@ -36,9 +36,6 @@
     "branding": "<div class='row items-center q-gutter-x-sm q-pt-md'><img src='/applicationLogo.svg' alt='Logo application' style='height: 32px' /><span class='text-caption'>A project by</span><a href='https://linagora.com' target='_blank' rel='noopener' class='text-primary text-weight-bold'>LINAGORA</a></div>"
   },
   "StatusBadge": {
-    "active": "Active",
-    "inactive": "Inactive",
-    "suspended": "Suspended",
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "SUSPENDED": "Suspended",

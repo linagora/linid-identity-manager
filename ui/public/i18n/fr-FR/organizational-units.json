@@ -224,33 +224,82 @@
       "generic": "Impossible de créer l'unité organisationnelle. Veuillez réessayer plus tard."
     }
   },
-  "OrganizationalUnitDetailsPage": {
-    "title": "Détails de l'unité organisationnelle",
-    "createChild": "Créer une O.U. enfant",
-    "EntityDetailsCard": {
-      "title": "Informations de l'unité organisationnelle",
-      "attributes": {
-        "name": "Nom",
-        "type": "Type",
-        "createdBy": "Créé par",
-        "updatedBy": "Mis à jour par",
-        "insertDate": "Date de création",
-        "updateDate": "Dernière mise à jour"
+  "moduleOrganizationalUnitDetailsPage": {
+    "error": "Impossible de charger l'unité organisationnelle. Veuillez réessayer plus tard.",
+    "EntityProfilePanel": {
+      "title": "{name}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Liste des unités organisationnelles"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "type": "Type"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "createChild": "Créer une O.U. enfant",
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "L'unité organisationnelle a été mise à jour avec succès.",
+              "submitError": "Impossible de mettre à jour l'unité organisationnelle. Veuillez réessayer plus tard.",
+              "FormDialog": {
+                "title": "Modifier {name}",
+                "fields": {
+                  "name": {
+                    "label": "Nom",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "type": {
+                    "label": "Type",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Enregistrer",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "ButtonsCard": {
-      "cancel": "Retour"
-    },
+    "sections": {
+      "lifecycle": {
+        "EntityDetailsCard": {
+          "title": "Cycle de vie",
+          "attributes": {
+            "insertDate": "Date de création",
+            "createdBy": "Créé par",
+            "updateDate": "Dernière mise à jour",
+            "updatedBy": "Mis à jour par",
+            "suspensionPeriod": {
+              "start": "Date de début de suspension",
+              "end": "Date de fin de suspension"
+            }
+          }
+        }
+      }
+    }
+  },
+  "OrganizationalUnitLifecyclePanel": {
     "success": {
       "suspended": "Unité organisationnelle suspendue avec succès.",
       "scheduled": "Suspension planifiée avec succès.",
       "endUpdated": "Date de fin de suspension mise à jour avec succès.",
-      "reactivated": "L'unité organisationnelle sera réactivée dans une heure."
+      "reactivated": "L'unité organisationnelle a été réactivée avec succès."
     },
     "errors": {
-      "notFound": "Unité organisationnelle introuvable.",
-      "generic": "Impossible de charger l'unité organisationnelle. Veuillez réessayer plus tard.",
-      "validation": "Données invalides. Veuillez vérifier le formulaire."
+      "validation": "Données invalides. Veuillez vérifier le formulaire.",
+      "status": "Impossible de mettre à jour le statut de l'unité organisationnelle. Veuillez réessayer plus tard."
     }
   },
   "OrganizationalUnitsPage": {

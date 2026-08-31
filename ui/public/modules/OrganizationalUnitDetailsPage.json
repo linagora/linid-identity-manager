@@ -1,0 +1,122 @@
+{
+  "instanceId": "moduleOrganizationalUnitDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "organizational-units",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "organizational-units",
+  "basePath": "/organizational-units",
+  "zones": [
+    {
+      "zone": "moduleOrganizationalUnitDetailsPage.entity-profile-panel.actions.prepend",
+      "component": "OrganizationalUnitCreateChildBtn"
+    },
+    {
+      "zone": "moduleOrganizationalUnitDetailsPage.side-left",
+      "plugin": "catalogUI/EntityProfilePanel",
+      "props": {
+        "statusKey": "status",
+        "parentPath": "/organizational-units",
+        "avatarOptions": {
+          "seed": [
+            "{{ entity.name }}"
+          ],
+          "style": "stack"
+        },
+        "fieldOrder": [
+          "type"
+        ],
+        "updateEndpoint": "/organizational-units/{{ entity.id }}",
+        "updateBody": {
+          "parent": "{{ entity.parents[0].parent }}",
+          "name": "{{ entity.name }}",
+          "type": "{{ entity.type }}",
+          "extraParameters": {}
+        },
+        "formFields": [
+          {
+            "name": "name",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "type",
+            "type": "String",
+            "input": "List",
+            "required": true,
+            "inputSettings": {
+              "values": [
+                "COMPANY",
+                "DIVISION",
+                "DEPARTMENT",
+                "TEAM"
+              ]
+            }
+          }
+        ],
+        "emitOnUpdate": "organizational-unit-updated"
+      }
+    },
+    {
+      "zone": "moduleOrganizationalUnitDetailsPage.content.before",
+      "component": "OrganizationalUnitLifecyclePanel"
+    }
+  ],
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "parentPath": "/organizational-units",
+    "enableActions": false,
+    "reloadDetailsOn": [
+      "organizational-unit-status-updated",
+      "organizational-unit-updated"
+    ],
+    "sections": [
+      {
+        "key": "lifecycle",
+        "fieldOrder": [
+          "insertDate",
+          "createdBy",
+          "updateDate",
+          "updatedBy",
+          "suspensionPeriod.start",
+          "suspensionPeriod.end"
+        ],
+        "formatters": [
+          {
+            "field": "insertDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "updateDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "suspensionPeriod.start",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "suspensionPeriod.end",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

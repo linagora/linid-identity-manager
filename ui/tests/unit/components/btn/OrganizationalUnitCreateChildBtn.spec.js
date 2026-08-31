@@ -24,36 +24,56 @@
  * LinID Identity Manager software.
  */
 
-import { linidModuleFederation } from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
-import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
-import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
-import AccountLifecyclePanel from 'components/panel/AccountLifecyclePanel.vue';
-import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
-import { appConfig } from './config';
+import { shallowMount } from '@vue/test-utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import OrganizationalUnitCreateChildBtn from '../../../../src/components/btn/OrganizationalUnitCreateChildBtn.vue';
+
+const { mockPush } = vi.hoisted(() => ({
+  mockPush: vi.fn(),
+}));
+
+vi.mock('@linagora/linid-im-front-corelib', () => ({
+  useScopedI18n: () => ({ t: vi.fn((v) => v) }),
+  useUiDesign: () => ({ ui: vi.fn(() => ({})) }),
+}));
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
 
 /**
- * Application bootstrapping entry point.
+ * Mounts the button with the given entity, mimicking the zone renderer of the generic details page.
  *
- * Delegates the whole Module Federation setup to the corelib: the remotes and module configuration files declared in
- * the application configuration are registered and loaded, the host-local components are made available to zones, and
- * all lifecycle phases are executed sequentially for each module.
- *
- * The boot process is asynchronous and blocks application startup until all lifecycle phases have been completed.
- *
- * @param boot - The framework-provided boot context; the router is used to register module routes.
- * @returns Resolves once all modules have completed every lifecycle phase.
+ * @param entity - The raw organizational unit entity provided by the hosting page.
+ * @returns The shallow-mounted wrapper.
  */
-export default defineBoot(async ({ router }): Promise<void> => {
-  await linidModuleFederation.init({
-    router,
-    remotes: appConfig.remotes,
-    modules: appConfig.modules,
-    localComponents: {
-      AccountLifecyclePanel,
-      ExportApplicationScriptBtn,
-      OrganizationalUnitCreateChildBtn,
-      OrganizationalUnitLifecyclePanel,
+function mountBtn(entity = { id: 'test-ou-id' }) {
+  return shallowMount(OrganizationalUnitCreateChildBtn, {
+    props: {
+      entity,
+      uiNamespace: 'moduleOrganizationalUnitDetailsPage',
+      i18nScope: 'moduleOrganizationalUnitDetailsPage',
     },
+  });
+}
+
+describe('Test component: OrganizationalUnitCreateChildBtn', () => {
+  let wrapper;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('Test function: goToCreateChild', () => {
+    it('should navigate to the creation page with the current entity as parent', () => {
+      wrapper = mountBtn();
+
+      wrapper.vm.goToCreateChild();
+
+      expect(mockPush).toHaveBeenCalledWith({
+        path: '/organizational-units/create',
+        query: { parent: 'test-ou-id' },
+      });
+    });
   });
 });

@@ -24,36 +24,15 @@
  * LinID Identity Manager software.
  */
 
-import { linidModuleFederation } from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
-import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
-import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
-import AccountLifecyclePanel from 'components/panel/AccountLifecyclePanel.vue';
-import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
-import { appConfig } from './config';
-
 /**
- * Application bootstrapping entry point.
- *
- * Delegates the whole Module Federation setup to the corelib: the remotes and module configuration files declared in
- * the application configuration are registered and loaded, the host-local components are made available to zones, and
- * all lifecycle phases are executed sequentially for each module.
- *
- * The boot process is asynchronous and blocks application startup until all lifecycle phases have been completed.
- *
- * @param boot - The framework-provided boot context; the router is used to register module routes.
- * @returns Resolves once all modules have completed every lifecycle phase.
+ * Props for the OrganizationalUnitCreateChildBtn component, rendered in a generic details page zone. The zone renderer
+ * provides the loaded entity, the page UI namespace and the page i18n scope; other zone attributes are ignored.
  */
-export default defineBoot(async ({ router }): Promise<void> => {
-  await linidModuleFederation.init({
-    router,
-    remotes: appConfig.remotes,
-    modules: appConfig.modules,
-    localComponents: {
-      AccountLifecyclePanel,
-      ExportApplicationScriptBtn,
-      OrganizationalUnitCreateChildBtn,
-      OrganizationalUnitLifecyclePanel,
-    },
-  });
-});
+export interface OrganizationalUnitCreateChildBtnProps {
+  /** Raw organizational unit entity loaded by the generic details page; empty object while loading. */
+  entity: Record<string, unknown>;
+  /** UI design namespace of the hosting page, used to resolve the button design properties. */
+  uiNamespace: string;
+  /** I18n scope of the hosting page, used to resolve the button label. */
+  i18nScope: string;
+}

@@ -485,6 +485,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.suspensionPeriod}}' is empty
     And  I expect '{{response.body.statusReason}}' is empty
     And  I expect '{{response.body.isSuspended}}' is "false"
+    And  I expect '{{response.body.status}}' is 'ACTIVE'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then I expect status code is 204
@@ -754,6 +755,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.id}}' is '{{ctx.ouID}}'
     And  I expect '{{response.body.reactivationComment}}' is 'Reactivated after review'
     And  I expect '{{response.body.isSuspended}}' is "false"
+    And  I expect '{{response.body.status}}' is 'ACTIVE'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then I expect status code is 204

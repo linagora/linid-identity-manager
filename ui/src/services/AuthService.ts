@@ -37,6 +37,7 @@ class AuthService {
   private userManager: UserManager | null = null;
   private initPromise: Promise<UserManager> | null = null;
   private loginPromise: Promise<void> | null = null;
+  private clearPromise: Promise<void> | null = null;
 
   /**
    * Initializes the OIDC client and creates the underlying {@link UserManager} instance.
@@ -204,6 +205,31 @@ class AuthService {
   async getAccessToken(): Promise<string | null> {
     const user = await this.getUser();
     return user?.access_token ?? null;
+  }
+
+  /**
+   * Clears the current user session by removing the user from the OIDC client storage.
+   *
+   * This method does not perform a logout with the Identity Provider; it only clears the local session state.
+   *
+   * @returns A promise that resolves when the user has been removed from storage.
+   */
+  async clearUser(): Promise<void> {
+    if (this.clearPromise) {
+      return this.clearPromise;
+    }
+
+    const manager = this.getManager();
+
+    this.clearPromise = (async () => {
+      try {
+        await manager.removeUser();
+      } finally {
+        this.clearPromise = null;
+      }
+    })();
+
+    return this.clearPromise;
   }
 }
 

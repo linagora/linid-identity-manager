@@ -34,7 +34,8 @@
     "/modules/ApplicationEditionPage.json",
     "/modules/OrganizationalUnitPage.json",
     "/modules/ApplicationDetailsPage.json",
-    "/modules/AccountDetailsPage.json"
+    "/modules/AccountDetailsPage.json",
+    "/modules/OrganizationalUnitDetailsPage.json"
   ],
   "oidc": {
     "authority": "${LEMONLDAP_PORTAL_URL}",
@@ -522,14 +523,6 @@
         "values": ["COMPANY", "DEPARTMENT", "TEAM"]
       }
     }
-  ],
-  "organizationalUnitDetailsFieldsOrder": [
-    "name",
-    "type",
-    "createdBy",
-    "updatedBy",
-    "insertDate",
-    "updateDate"
   ],
   "organizationalUnitLifecycleFields": {
     "suspension.immediate": [

@@ -14,170 +14,214 @@
           "q-btn": {}
         }
       }
-    },
-    "details-page": {
-      "create-child-button": {
-        "q-btn": {
-          "outline": false
+    }
+  },
+  "moduleOrganizationalUnitDetailsPage": {
+    "entity-profile-panel": {
+      "q-card": {},
+      "q-img": {},
+      "q-icon": {
+        "name": "corporate_fare",
+        "color": "grey-6"
+      },
+      "navigation": {
+        "buttons-card": {
+          "q-card": {
+            "flat": true
+          },
+          "q-card-actions": {
+            "align": "left"
+          },
+          "back-button": {
+            "q-btn": {
+              "flat": true,
+              "color": "primary",
+              "icon": "arrow_back",
+              "no-caps": true
+            }
+          }
+        }
+      },
+      "actions": {
+        "buttons-card": {
+          "q-card": {
+            "flat": true
+          },
+          "q-card-actions": {
+            "align": "right"
+          },
+          "create-child-button": {
+            "q-btn": {
+              "color": "primary",
+              "icon": "add",
+              "outline": false
+            }
+          },
+          "edit-button": {
+            "form-dialog-button": {
+              "q-btn": {
+                "color": "primary",
+                "icon": "edit",
+                "outline": false
+              },
+              "form-dialog": {
+                "buttons-card": {
+                  "confirm-button": {
+                    "q-btn": {
+                      "outline": false
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "entity-details-card": {
         "q-card": {},
-        "name": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "badge" },
-            "q-card": {}
-          }
-        },
         "type": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "category" },
-            "q-card": {}
-          }
-        },
-        "createdBy": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "person_add" },
-            "q-card": {}
-          }
-        },
-        "updatedBy": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "manage_accounts" },
-            "q-card": {}
-          }
-        },
-        "insertDate": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "event_available" },
-            "q-card": {}
-          }
-        },
-        "updateDate": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "update" },
+            "q-icon": {
+              "color": "primary",
+              "name": "category"
+            },
             "q-card": {}
           }
         }
-      },
-      "suspension-actions": {
-        "dropdown-button": {
-          "q-btn-dropdown": { "color": "warning", "outline": false },
-          "q-list": {},
-          "q-menu": {},
-          "menu-trigger": {
-            "q-item-section": {},
-            "q-icon": {}
+      }
+    },
+    "activation-actions": {
+      "dropdown-button": {
+        "q-btn-dropdown": {
+          "color": "positive",
+          "outline": false
+        },
+        "q-list": {},
+        "q-menu": {},
+        "menu-trigger": {
+          "q-item-section": {},
+          "q-icon": {}
+        },
+        "items": {
+          "suspension": {
+            "scheduled": {
+              "q-item": {},
+              "icon": {
+                "q-icon": {},
+                "q-item-section": {}
+              },
+              "label": {
+                "q-item-section": {},
+                "q-item-label": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "suspension-actions": {
+      "dropdown-button": {
+        "q-btn-dropdown": {
+          "color": "warning",
+          "outline": false
+        },
+        "q-list": {},
+        "q-menu": {},
+        "menu-trigger": {
+          "q-item-section": {},
+          "q-icon": {}
+        },
+        "items": {
+          "suspension": {
+            "scheduled": {
+              "q-item": {},
+              "icon": {
+                "q-icon": {},
+                "q-item-section": {}
+              },
+              "label": {
+                "q-item-section": {},
+                "q-item-label": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "form-dialog": {
+      "q-dialog": {},
+      "buttons-card": {
+        "q-card": {},
+        "q-icon": {},
+        "q-card-actions": {},
+        "confirm-button": {
+          "q-btn": {
+            "outline": false
+          }
+        },
+        "cancel-button": {
+          "q-btn": {}
+        }
+      }
+    },
+    "sections": {
+      "lifecycle": {
+        "entity-details-card": {
+          "q-card": {},
+          "insertDate": {
+            "information-card": {
+              "q-icon": {
+                "color": "primary",
+                "name": "event_available"
+              },
+              "q-card": {}
+            }
           },
-          "items": {
-            "suspension": {
-              "scheduled": {
-                "q-item": {},
-                "icon": {
-                  "q-icon": {},
-                  "q-item-section": {}
-                },
-                "label": {
-                  "q-item-section": {},
-                  "q-item-label": {}
-                }
-              }
+          "createdBy": {
+            "information-card": {
+              "q-icon": {
+                "color": "primary",
+                "name": "person_add"
+              },
+              "q-card": {}
             }
-          }
-        }
-      },
-      "activation-actions": {
-        "dropdown-button": {
-          "q-btn-dropdown": { "color": "positive", "outline": false },
-          "q-list": {},
-          "q-menu": {},
-          "menu-trigger": {
-            "q-item-section": {},
-            "q-icon": {}
           },
-          "items": {
-            "suspension": {
-              "scheduled": {
-                "q-item": {},
-                "icon": {
-                  "q-icon": {},
-                  "q-item-section": {}
+          "updateDate": {
+            "information-card": {
+              "q-icon": {
+                "color": "primary",
+                "name": "update"
+              },
+              "q-card": {}
+            }
+          },
+          "updatedBy": {
+            "information-card": {
+              "q-icon": {
+                "color": "primary",
+                "name": "manage_accounts"
+              },
+              "q-card": {}
+            }
+          },
+          "suspensionPeriod": {
+            "start": {
+              "information-card": {
+                "q-icon": {
+                  "color": "primary",
+                  "name": "event"
                 },
-                "label": {
-                  "q-item-section": {},
-                  "q-item-label": {}
-                }
-              }
-            }
-          }
-        }
-      },
-      "schedule-suspension-dialog": {
-        "form-dialog": {
-          "buttons-card": {
-            "q-card": {},
-            "q-icon": {},
-            "q-card-actions": {},
-            "confirm-button": {
-              "q-btn": {
-                "outline": false
+                "q-card": {}
               }
             },
-            "cancel-button": {
-              "q-btn": {}
-            }
-          }
-        }
-      },
-      "edit-suspension-end-dialog": {
-        "form-dialog": {
-          "buttons-card": {
-            "q-card": {},
-            "q-icon": {},
-            "q-card-actions": {},
-            "confirm-button": {
-              "q-btn": {
-                "outline": false
+            "end": {
+              "information-card": {
+                "q-icon": {
+                  "color": "primary",
+                  "name": "event"
+                },
+                "q-card": {}
               }
-            },
-            "cancel-button": {
-              "q-btn": {}
-            }
-          }
-        }
-      },
-      "suspend-dialog": {
-        "form-dialog": {
-          "q-dialog": {},
-          "buttons-card": {
-            "q-card": {},
-            "q-icon": {},
-            "q-card-actions": {},
-            "confirm-button": {
-              "q-btn": {
-                "outline": false
-              }
-            },
-            "cancel-button": {
-              "q-btn": {}
-            }
-          }
-        }
-      },
-      "reactivate-dialog": {
-        "form-dialog": {
-          "q-dialog": {},
-          "buttons-card": {
-            "q-card": {},
-            "q-icon": {},
-            "q-card-actions": {},
-            "confirm-button": {
-              "q-btn": {
-                "outline": false
-              }
-            },
-            "cancel-button": {
-              "q-btn": {}
             }
           }
         }

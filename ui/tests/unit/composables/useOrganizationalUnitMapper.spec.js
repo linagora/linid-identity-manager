@@ -93,40 +93,6 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
     });
   });
 
-  describe('Test function: toOrganizationalUnit', () => {
-    it('should project identity fields from the DTO', () => {
-      const { toOrganizationalUnit } = useOrganizationalUnitMapper();
-
-      const dto = buildDto();
-      const result = toOrganizationalUnit(dto);
-
-      expect(result).toEqual({
-        id: OU_UUID,
-        name: 'Engineering',
-        type: 'DEPARTMENT',
-        createdBy: CREATOR_UUID,
-        updatedBy: CREATOR_UUID,
-        insertDate: '2026/05/13',
-        updateDate: '2026/05/13',
-      });
-    });
-
-    it('should omit suspension fields from the identity projection', () => {
-      const { toOrganizationalUnit } = useOrganizationalUnitMapper();
-
-      const dto = buildDto({
-        isSuspended: true,
-        suspensionPeriod: { start: '2026-06-01T00:00:00Z', end: null },
-        statusReason: 'AUDIT',
-      });
-      const result = toOrganizationalUnit(dto);
-
-      expect(result).not.toHaveProperty('isSuspended');
-      expect(result).not.toHaveProperty('suspensionPeriod');
-      expect(result).not.toHaveProperty('statusReason');
-    });
-  });
-
   describe('Test function: toOrganizationalUnitStatus', () => {
     it('should project suspension fields from the DTO', () => {
       const { toOrganizationalUnitStatus } = useOrganizationalUnitMapper();

@@ -224,33 +224,82 @@
       "generic": "Unable to create the organizational unit. Please try again later."
     }
   },
-  "OrganizationalUnitDetailsPage": {
-    "title": "Organizational unit details",
-    "createChild": "Create a child O.U.",
-    "EntityDetailsCard": {
-      "title": "Organizational unit information",
-      "attributes": {
-        "name": "Name",
-        "type": "Type",
-        "createdBy": "Created by",
-        "updatedBy": "Updated by",
-        "insertDate": "Creation date",
-        "updateDate": "Last update"
+  "moduleOrganizationalUnitDetailsPage": {
+    "error": "Unable to load the organizational unit. Please try again later.",
+    "EntityProfilePanel": {
+      "title": "{name}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Organizational units list"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "type": "Type"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "createChild": "Create a child O.U.",
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "The organizational unit has been successfully updated.",
+              "submitError": "Unable to update the organizational unit. Please try again later.",
+              "FormDialog": {
+                "title": "Edit {name}",
+                "fields": {
+                  "name": {
+                    "label": "Name",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "type": {
+                    "label": "Type",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Save",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
+        }
       }
     },
-    "ButtonsCard": {
-      "cancel": "Back"
-    },
+    "sections": {
+      "lifecycle": {
+        "EntityDetailsCard": {
+          "title": "Lifecycle",
+          "attributes": {
+            "insertDate": "Creation date",
+            "createdBy": "Created by",
+            "updateDate": "Last update",
+            "updatedBy": "Updated by",
+            "suspensionPeriod": {
+              "start": "Suspension start date",
+              "end": "Suspension end date"
+            }
+          }
+        }
+      }
+    }
+  },
+  "OrganizationalUnitLifecyclePanel": {
     "success": {
       "suspended": "Organizational unit successfully suspended.",
       "scheduled": "Suspension successfully scheduled.",
       "endUpdated": "Suspension end date successfully updated.",
-      "reactivated": "The organizational unit will be reactivated in one hour."
+      "reactivated": "The organizational unit has been successfully reactivated."
     },
     "errors": {
-      "notFound": "Organizational unit not found.",
-      "generic": "Unable to load the organizational unit. Please try again later.",
-      "validation": "Invalid data. Please check the form."
+      "validation": "Invalid data. Please check the form.",
+      "status": "Unable to update the organizational unit status. Please try again later."
     }
   },
   "OrganizationalUnitsPage": {

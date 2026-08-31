@@ -3,6 +3,9 @@
     "NavigationMenu": {
       "label": "Comptes"
     },
+    "ButtonsCard": {
+      "create": "Créer"
+    },
     "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
     "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
     "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
@@ -504,6 +507,61 @@
         "ButtonsCard": {
           "confirm": "Réactiver",
           "cancel": "Annuler"
+        }
+      }
+    }
+  },
+  "moduleAccountCreationPage" : {
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "confirm": "Créer"
+    },
+    "formSections": {
+      "general": {
+        "title": "Informations générales"
+      }
+    },
+    "fields": {
+      "externalId": {
+        "label": "Identifiant *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "lastname": {
+        "label": "Nom *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "firstname": {
+        "label": "Prénom *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "email": {
+        "label": "Email *",
+        "hint": "Doit être unique.",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "validityPeriod": {
+        "start": {
+          "label": "Date de début de validité *",
+          "validation": {
+            "required": "Ce champ est requis.",
+            "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+            "afterDate": "La date ne peut pas être antérieure à la date du jour."
+          },
+          "close": "Fermer"
+        }
+      },
+      "organizationalUnit": {
+        "label": "Unité organisationnelle *",
+        "validation": {
+          "required": "Ce champ est requis."
         }
       }
     }

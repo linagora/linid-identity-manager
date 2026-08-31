@@ -43,6 +43,7 @@ Feature: Test Application edition page display
         "code": "app-edition-101",
         "name": "Application Edition 101",
         "description": "An application for the edition page tests",
+        "domain": "Security",
         "type": "OIDC",
         "claimsTemplate": "{ \"sub\": \"id\" }"
       }
@@ -58,6 +59,7 @@ Feature: Test Application edition page display
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "app-edition-101"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--name"]' contains "Application Edition 101"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--description"]' contains "An application for the edition page tests"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--domain"]' contains "Security"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--type"]' contains "OIDC"
     And I expect the HTML element '[data-cy="details-section_audit"]' to be visible
     And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"]' contains "admin_fn admin_ln"
@@ -81,6 +83,8 @@ Feature: Test Application edition page display
     And I expect the HTML element '[data-cy="field_type"]' to have value "OIDC"
     And I expect the HTML element '[data-cy="field_description"]' to be visible
     And I expect the HTML element '[data-cy="field_description"]' to have value "An application for the edition page tests"
+    And I expect the HTML element '[data-cy="field_domain"]' to be visible
+    And I expect the HTML element '[data-cy="field_domain"]' to have value "Security"
     And I expect the HTML element '[data-cy="field-container_claims"]' to be visible
     And I expect the HTML element '[data-cy="field_claimsTemplate"]' to be visible
     And I expect the HTML element '[data-cy="field_claimsTemplate"]' to have value "{ \"sub\": \"id\" }"
@@ -113,6 +117,11 @@ Feature: Test Application edition page display
     When I set the text "new value" in the HTML element "[data-cy='field_type']"
     Then I expect the HTML element '[role="alert"]' not exists
 
+    When I clear the text in the HTML element "[data-cy='field_domain']"
+    Then I expect the HTML element '[role="alert"]' not exists
+    When I set the text "new value" in the HTML element "[data-cy='field_domain']"
+    Then I expect the HTML element '[role="alert"]' not exists
+
     When I clear the text in the HTML element "[data-cy='field_description']"
     Then I expect the HTML element '[role="alert"]' not exists
     When I set the text "new value" in the HTML element "[data-cy='field_description']"
@@ -133,6 +142,7 @@ Feature: Test Application edition page display
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "new_value"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--name"]' contains "new value"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--description"]' contains "new value"
+    And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--domain"]' contains "new value"
     And I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--type"]' contains "new value"
     And I expect the HTML element '[data-cy="details-section_audit"]' to be visible
     And I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"]' contains "admin_fn admin_ln"

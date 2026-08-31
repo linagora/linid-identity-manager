@@ -68,6 +68,7 @@ Feature: Test Account details page display
   ## 165 Immediate revalidation - cancel button closes the dialog
   ## 166 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
   ## 167 Scheduled revalidation - success, account re-validated after form submission
+  ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
 
   Scenario: Roundtrip about Account Details
 
@@ -126,11 +127,10 @@ Feature: Test Account details page display
 
     ## 101 Should display all account information on detail page
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "John"
-    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Doe"
+    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "John Doe"
     And I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "john@example.com"
     And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' to be visible
-    And I expect the HTML element '[data-cy="information-card--id"] [data-cy="value"]' contains "{{ctx.accountId}}"
+    And I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "external-id1"
     And I expect the HTML element '[data-cy="information-card--email"] [data-cy="value"]' contains "john@example.com"
     And I expect the HTML element '[data-cy="details-section_lifecycle"]' to be visible
     And I expect the HTML element '[data-cy="information-card--insertDate"] [data-cy="value"]' to be visible
@@ -297,6 +297,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c9"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
@@ -312,6 +313,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000a"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
@@ -327,6 +329,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000b"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
@@ -342,6 +345,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000c"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
@@ -357,7 +361,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d1"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
@@ -394,7 +397,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d5"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
@@ -451,7 +453,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d2"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
@@ -493,7 +494,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d8"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
@@ -599,7 +599,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d9"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
@@ -693,7 +692,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d4"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
@@ -728,7 +726,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d3"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
@@ -770,7 +767,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d6"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
@@ -834,7 +830,6 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d7"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
@@ -928,3 +923,62 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And I expect the HTML element ".q-notification__message" to be visible
     And I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé à partir du"
+
+    ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
+    Given I set http header 'Content-Type' with 'application/json'
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "edit-me",
+        "lastname": "Editable",
+        "firstname": "Eddy",
+        "email": "edit-me@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+      }
+      """
+    Then I expect status code is 201
+    And I store 'editAccountId' as '{{response.body.id}}' in context
+
+    # Navigate through the list like every other section: SPA navigation avoids a full reload
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-email"]'
+    And I set the text "edit-me@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_{{ctx.editAccountId}}"]'
+    Then I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
+    And I expect the HTML element '[data-cy="entity-profile-panel_edit-button"]' to be visible
+    And I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "edit-me"
+
+    When I click on '[data-cy="entity-profile-panel_edit-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And I expect the HTML element '[data-cy="form-dialog"]' contains "Modifier Eddy Editable"
+
+    # Cancelling the dialog must not change anything
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "edit-me"
+
+    When I click on '[data-cy="entity-profile-panel_edit-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+
+    # Clearing a required field displays the validation message
+    When I clear the text in the HTML element '[data-cy="field_email"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' contains "Ce champ est requis."
+
+    When I set the text "edited-id" in the HTML element '[data-cy="field_externalId"]'
+    And I set the text "Edwina" in the HTML element '[data-cy="field_firstname"]'
+    And I set the text "Edited" in the HTML element '[data-cy="field_lastname"]'
+    And I set the text "edited@example.com" in the HTML element '[data-cy="field_email"]'
+    And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And I expect the HTML element ".q-notification__message" contains "Le compte a été mis à jour avec succès."
+    And I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "edited-id"
+    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Edwina Edited"
+    And I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "edited@example.com"

@@ -68,10 +68,9 @@ Feature: Test Account homepage display
 
     When I click on '[data-cy="see-button_{{ctx.user_id}}"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/{{ctx.user_id}}"
-    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "user5_fn"
-    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "user5_ln"
+    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "user5_fn user5_ln"
     And I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "user5@example.com"
-    And I expect the HTML element '[data-cy="information-card--id"] [data-cy="value"]' contains "{{ctx.user_id}}"
+    And I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "user5"
     And I expect the HTML element '[data-cy="information-card--insertDate"] [data-cy="value"]' contains "{{ctx.accountDate}}"
 
     ## 104 Should have pagination working

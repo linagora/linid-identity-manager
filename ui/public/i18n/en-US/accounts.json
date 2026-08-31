@@ -523,8 +523,52 @@
       },
       "EntityDetailsCard": {
         "attributes": {
-          "id": "Identifier",
+          "externalId": "Identifier",
           "email": "Email"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Account successfully updated.",
+              "submitError": "Unable to update the account. Please try again later.",
+              "FormDialog": {
+                "title": "Edit {firstname} {lastname}",
+                "fields": {
+                  "externalId": {
+                    "label": "Identifier",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "firstname": {
+                    "label": "First name",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "lastname": {
+                    "label": "Last name",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "email": {
+                    "label": "Email",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Save",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
         }
       }
     },

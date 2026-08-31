@@ -14,11 +14,49 @@
       "props": {
         "statusKey": "status",
         "parentPath": "/accounts",
-        "fieldOrder": ["id", "email"],
+        "fieldOrder": ["externalId", "email"],
         "avatarOptions": {
           "seed": ["{{ entity.firstname }}", " ", "{{ entity.lastname }}"],
           "style": "initials"
-        }
+        },
+        "updateEndpoint": "/accounts/{{ entity.id }}",
+        "updateBody": {
+          "externalId": "{{ entity.externalId }}",
+          "lastname": "{{ entity.lastname }}",
+          "firstname": "{{ entity.firstname }}",
+          "email": "{{ entity.email }}"
+        },
+        "formFields": [
+          {
+            "name": "externalId",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "firstname",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "lastname",
+            "type": "String",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {}
+          },
+          {
+            "name": "email",
+            "type": "String",
+            "input": "Email",
+            "required": true,
+            "inputSettings": {}
+          }
+        ],
+        "emitOnUpdate": "account-updated"
       }
     },
     {
@@ -32,7 +70,7 @@
     "pagePath": ":id",
     "parentPath": "/accounts",
     "enableActions": false,
-    "reloadDetailsOn": ["account-status-updated"],
+    "reloadDetailsOn": ["account-status-updated", "account-updated"],
     "sections": [
       {
         "key": "lifecycle",

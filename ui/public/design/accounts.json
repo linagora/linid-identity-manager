@@ -17,9 +17,33 @@
           }
         }
       },
+      "actions": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "edit-button": {
+            "form-dialog-button": {
+              "q-btn": {
+                "color": "primary",
+                "icon": "edit",
+                "outline": false
+              },
+              "form-dialog": {
+                "buttons-card": {
+                  "confirm-button": {
+                    "q-btn": {
+                      "outline": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "entity-details-card": {
         "q-card": {},
-        "id": {
+        "externalId": {
           "information-card": {
             "q-icon": { "color": "primary", "name": "badge" },
             "q-card": {}

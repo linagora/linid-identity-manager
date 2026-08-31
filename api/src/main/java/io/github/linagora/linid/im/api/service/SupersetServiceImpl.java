@@ -39,13 +39,14 @@ import io.github.linagora.linid.im.api.model.superset.SupersetRlsConfig;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenDTO;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -61,8 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-
-import static io.github.linagora.linid.im.api.service.resolver.FieldValueResolver.getFieldAsString;
 
 /**
  * Service implementation responsible for integrating LinID Identity Manager
@@ -99,6 +98,11 @@ public class SupersetServiceImpl implements SupersetService {
     private final SupersetCacheService supersetCacheService;
 
     /**
+     * Service used to render Jinja templates for RLS clauses.
+     */
+    private final JinjaService jinjaService;
+
+    /**
      * Base URL of the Superset instance.
      */
     private final String url;
@@ -120,6 +124,7 @@ public class SupersetServiceImpl implements SupersetService {
      * @param rlsConfigPath                            the path to the Superset RLS configuration file
      * @param supersetCacheService                     service responsible for Superset authentication
      *                                                 and access token caching
+     * @param jinjaService                             service for rendering Jinja templates
      * @param accountDistinctViewRepository            repository used to retrieve account data for RLS rules
      * @param organizationalUnitDistinctViewRepository repository used to retrieve organizational unit data for RLS
      *                                                 rules
@@ -127,6 +132,7 @@ public class SupersetServiceImpl implements SupersetService {
     public SupersetServiceImpl(@Value("${superset.url}") final String url,
                                @Value("${superset.rls-config}") final String rlsConfigPath,
                                final SupersetCacheService supersetCacheService,
+                               final JinjaService jinjaService,
                                final AccountDistinctViewRepository accountDistinctViewRepository,
                                final OrganizationalUnitDistinctViewRepository
                                    organizationalUnitDistinctViewRepository) {
@@ -134,6 +140,7 @@ public class SupersetServiceImpl implements SupersetService {
         this.restClient = RestClient.builder()
             .baseUrl(url)
             .build();
+        this.jinjaService = jinjaService;
         this.accountDistinctViewRepository = accountDistinctViewRepository;
         this.organizationalUnitDistinctViewRepository = organizationalUnitDistinctViewRepository;
         this.supersetCacheService = supersetCacheService;
@@ -356,25 +363,25 @@ public class SupersetServiceImpl implements SupersetService {
      * Builds a Superset RLS rule from a dashboard RLS configuration.
      *
      * <p>The configured entity determines which repository is used to resolve
-     * the RLS value. The configured attribute identifies the field whose value
-     * is used in the generated Superset RLS clause.</p>
+     * the entity. The configured clause template is rendered with the entity
+     * context to generate the Superset RLS clause.</p>
      *
      * @param userPrincipal the authenticated LinID user
      * @param tokenRecord   the guest token request containing the RLS identifier
      * @param rlsConfig     the RLS configuration associated with the dashboard
      * @return the generated Superset RLS rule
      * @throws ApiException if the configured entity is not supported or the
-     *                      referenced entity value cannot be resolved
+     *                      referenced entity cannot be resolved
      */
     public SupersetGuestTokenRequest.RlsRule buildRlsRule(final UserPrincipal userPrincipal,
                                                           final SupersetTokenRecord tokenRecord,
                                                           final SupersetRlsConfig rlsConfig) {
-        String value;
+        Object entity;
 
         if (rlsConfig.entity().equalsIgnoreCase("ACCOUNT")) {
-            value = getAccountValue(tokenRecord.rlsId(), rlsConfig.attribute());
+            entity = getAccount(tokenRecord.rlsId());
         } else if (rlsConfig.entity().equalsIgnoreCase("ORGANIZATIONAL_UNIT")) {
-            value = getOrganizationalUnitValue(tokenRecord.rlsId(), rlsConfig.attribute());
+            entity = getOrganizationalUnit(tokenRecord.rlsId());
         } else {
             throw new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -382,24 +389,19 @@ public class SupersetServiceImpl implements SupersetService {
             );
         }
 
-        String clause = String.format(
-            "rls_id='%s'",
-            Strings.CS.replace(value, "'", "''")
-        );
+        String clause = jinjaService.render(rlsConfig.clause(), Map.of("entity", entity));
 
         return new SupersetGuestTokenRequest.RlsRule(clause, rlsConfig.datasetId());
     }
 
     /**
-     * Retrieves an account attribute value used to build an RLS rule.
+     * Retrieves an account used to build an RLS rule.
      *
-     * @param rlsId     the account identifier
-     * @param attribute the account field name to retrieve
-     * @return the value of the requested account attribute as a string
-     * @throws ApiException if the account does not exist or the requested
-     *                      attribute is unknown
+     * @param rlsId the account identifier
+     * @return the account entity
+     * @throws ApiException if the account does not exist
      */
-    public String getAccountValue(final String rlsId, final String attribute) {
+    AccountDistinctView getAccount(final String rlsId) {
         if (StringUtils.isBlank(rlsId)) {
             throw new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -407,25 +409,21 @@ public class SupersetServiceImpl implements SupersetService {
             );
         }
 
-        var account = accountDistinctViewRepository.findFirstById(UUID.fromString(rlsId))
+        return accountDistinctViewRepository.findFirstById(UUID.fromString(rlsId))
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.account.not_found", Map.of("id", rlsId))
             ));
-
-        return getFieldAsString(account, attribute, "account");
     }
 
     /**
-     * Retrieves an organizational unit attribute value used to build an RLS rule.
+     * Retrieves an organizational unit used to build an RLS rule.
      *
-     * @param rlsId     the organizational unit identifier
-     * @param attribute the organizational unit field name to retrieve
-     * @return the value of the requested organizational unit attribute as a string
-     * @throws ApiException if the organizational unit does not exist or the
-     *                      requested attribute is unknown
+     * @param rlsId the organizational unit identifier
+     * @return the organizational unit entity
+     * @throws ApiException if the organizational unit does not exist
      */
-    public String getOrganizationalUnitValue(final String rlsId, final String attribute) {
+    OrganizationalUnitDistinctView getOrganizationalUnit(final String rlsId) {
         if (StringUtils.isBlank(rlsId)) {
             throw new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -433,13 +431,10 @@ public class SupersetServiceImpl implements SupersetService {
             );
         }
 
-        var organizationalUnit = organizationalUnitDistinctViewRepository.findFirstById(UUID.fromString(rlsId))
+        return organizationalUnitDistinctViewRepository.findFirstById(UUID.fromString(rlsId))
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.organizational.unit.not_found", Map.of("id", rlsId))
             ));
-
-        return getFieldAsString(organizationalUnit, attribute, "organizational-unit");
-
     }
 }

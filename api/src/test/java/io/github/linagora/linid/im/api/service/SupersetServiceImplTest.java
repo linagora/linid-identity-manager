@@ -44,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -65,6 +66,9 @@ class SupersetServiceImplTest {
     @Mock
     private SupersetCacheService supersetCacheService;
 
+    @Mock
+    private JinjaService jinjaService;
+
     private SupersetServiceImpl service;
 
     @BeforeEach
@@ -73,6 +77,7 @@ class SupersetServiceImplTest {
             "http://localhost:8088",
             "",
             supersetCacheService,
+            jinjaService,
             accountDistinctViewRepository,
             organizationalUnitDistinctViewRepository
         );
@@ -99,13 +104,14 @@ class SupersetServiceImplTest {
     void shouldReturnOnlyMatchingEnabledRlsRules() {
         var dashboardId = UUID.randomUUID();
         var rlsId = UUID.randomUUID().toString();
+        var clause = "rls_id='{{ entity.externalId | replace(\"'\", \"''\") }}'";
 
         var matchingConfig = new SupersetRlsConfig(
             "dashboard",
             true,
             10,
             "ACCOUNT",
-            "externalId"
+            clause
         );
 
         var disabledConfig = new SupersetRlsConfig(
@@ -113,7 +119,7 @@ class SupersetServiceImplTest {
             false,
             20,
             "ACCOUNT",
-            "externalId"
+            clause
         );
 
         var otherDashboardConfig = new SupersetRlsConfig(
@@ -121,13 +127,16 @@ class SupersetServiceImplTest {
             true,
             30,
             "ACCOUNT",
-            "externalId"
+            clause
         );
 
         var account = AccountDistinctView.builder().externalId("john.doe").build();
 
         when(accountDistinctViewRepository.findFirstById(UUID.fromString(rlsId)))
             .thenReturn(Optional.of(account));
+
+        when(jinjaService.render(clause, Map.of("entity", account)))
+            .thenReturn("rls_id='john.doe'");
 
         setRlsConfigurations(
             matchingConfig,
@@ -155,21 +164,25 @@ class SupersetServiceImplTest {
     }
 
     @Test
-    @DisplayName("should build an account RLS rule using the configured account attribute")
+    @DisplayName("should build an account RLS rule from the configuration")
     void shouldBuildAccountRlsRule() {
         var rlsId = UUID.randomUUID();
+        var clause = "rls_id='{{ entity.externalId | replace(\"'\", \"''\") }}'";
         var config = new SupersetRlsConfig(
             "dashboard",
             true,
             42,
             "ACCOUNT",
-            "externalId"
+            clause
         );
 
         var account = AccountDistinctView.builder().externalId("john.doe").build();
 
         when(accountDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.of(account));
+
+        when(jinjaService.render(clause, Map.of("entity", account)))
+            .thenReturn("rls_id='john.doe'");
 
         var tokenRecord = new SupersetTokenRecord(
             "dashboard",
@@ -188,21 +201,25 @@ class SupersetServiceImplTest {
     }
 
     @Test
-    @DisplayName("should build an organizational unit RLS rule using the configured attribute")
+    @DisplayName("should build an organizational unit RLS rule from the configuration")
     void shouldBuildOrganizationalUnitRlsRule() {
         var rlsId = UUID.randomUUID();
+        var clause = "rls_id='{{ entity.name | replace(\"'\", \"''\") }}'";
         var config = new SupersetRlsConfig(
             "dashboard",
             true,
             42,
             "ORGANIZATIONAL_UNIT",
-            "name"
+            clause
         );
 
         var organizationalUnit = OrganizationalUnitDistinctView.builder().name("IT").build();
 
         when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
             .thenReturn(Optional.of(organizationalUnit));
+
+        when(jinjaService.render(clause, Map.of("entity", organizationalUnit)))
+            .thenReturn("rls_id='IT'");
 
         var tokenRecord = new SupersetTokenRecord(
             "dashboard",
@@ -228,7 +245,7 @@ class SupersetServiceImplTest {
             true,
             42,
             "UNKNOWN_ENTITY",
-            "name"
+            "rls_id='{{ entity.name | replace(\"'\", \"''\") }}'"
         );
 
         var tokenRecord = new SupersetTokenRecord(
@@ -245,68 +262,6 @@ class SupersetServiceImplTest {
             )
         )
             .isInstanceOf(ApiException.class);
-    }
-
-    @Test
-    @DisplayName("should throw a not found exception when the account does not exist")
-    void shouldThrowWhenAccountDoesNotExist() {
-        var rlsId = UUID.randomUUID();
-
-        when(accountDistinctViewRepository.findFirstById(rlsId))
-            .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-            service.getAccountValue(rlsId.toString(), "username")
-        )
-            .isInstanceOf(ApiException.class);
-    }
-
-    @Test
-    @DisplayName("should return the configured account attribute value")
-    void shouldReturnAccountAttributeValue() {
-        var rlsId = UUID.randomUUID();
-        var account = AccountDistinctView.builder().externalId("john.doe").build();
-
-        when(accountDistinctViewRepository.findFirstById(rlsId))
-            .thenReturn(Optional.of(account));
-
-        var result = service.getAccountValue(
-            rlsId.toString(),
-            "externalId"
-        );
-
-        assertThat(result).isEqualTo("john.doe");
-    }
-
-    @Test
-    @DisplayName("should throw a not found exception when the organizational unit does not exist")
-    void shouldThrowWhenOrganizationalUnitDoesNotExist() {
-        var rlsId = UUID.randomUUID();
-
-        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
-            .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-            service.getOrganizationalUnitValue(rlsId.toString(), "name")
-        )
-            .isInstanceOf(ApiException.class);
-    }
-
-    @Test
-    @DisplayName("should return the configured organizational unit attribute value")
-    void shouldReturnOrganizationalUnitAttributeValue() {
-        var rlsId = UUID.randomUUID();
-        var organizationalUnit = OrganizationalUnitDistinctView.builder().name("IT").build();
-
-        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
-            .thenReturn(Optional.of(organizationalUnit));
-
-        var result = service.getOrganizationalUnitValue(
-            rlsId.toString(),
-            "name"
-        );
-
-        assertThat(result).isEqualTo("IT");
     }
 
     @Test
@@ -338,10 +293,66 @@ class SupersetServiceImplTest {
     }
 
     @Test
+    @DisplayName("should return the account when the account exists")
+    void shouldReturnAccountWhenAccountExists() {
+        var rlsId = UUID.randomUUID();
+        var account = AccountDistinctView.builder().externalId("john.doe").build();
+
+        when(accountDistinctViewRepository.findFirstById(rlsId))
+            .thenReturn(Optional.of(account));
+
+        var result = service.getAccount(rlsId.toString());
+
+        assertThat(result).isEqualTo(account);
+    }
+
+    @Test
+    @DisplayName("should throw a not found exception when the account does not exist")
+    void shouldThrowWhenAccountDoesNotExist() {
+        var rlsId = UUID.randomUUID();
+
+        when(accountDistinctViewRepository.findFirstById(rlsId))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+            service.getAccount(rlsId.toString())
+        )
+            .isInstanceOf(ApiException.class);
+    }
+
+    @Test
     @DisplayName("should throw a not found exception when the account rlsId is blank")
     void shouldThrowWhenAccountRlsIdIsBlank() {
         assertThatThrownBy(() ->
-            service.getAccountValue(" ", "externalId")
+            service.getAccount(" ")
+        )
+            .isInstanceOf(ApiException.class);
+    }
+
+    @Test
+    @DisplayName("should return the organizational unit when the organizational unit exists")
+    void shouldReturnOrganizationalUnitWhenOrganizationalUnitExists() {
+        var rlsId = UUID.randomUUID();
+        var organizationalUnit = OrganizationalUnitDistinctView.builder().name("IT").build();
+
+        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
+            .thenReturn(Optional.of(organizationalUnit));
+
+        var result = service.getOrganizationalUnit(rlsId.toString());
+
+        assertThat(result).isEqualTo(organizationalUnit);
+    }
+
+    @Test
+    @DisplayName("should throw a not found exception when the organizational unit does not exist")
+    void shouldThrowWhenOrganizationalUnitDoesNotExist() {
+        var rlsId = UUID.randomUUID();
+
+        when(organizationalUnitDistinctViewRepository.findFirstById(rlsId))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() ->
+            service.getOrganizationalUnit(rlsId.toString())
         )
             .isInstanceOf(ApiException.class);
     }
@@ -350,7 +361,7 @@ class SupersetServiceImplTest {
     @DisplayName("should throw a not found exception when the organizational unit rlsId is blank")
     void shouldThrowWhenOrganizationalUnitRlsIdIsBlank() {
         assertThatThrownBy(() ->
-            service.getOrganizationalUnitValue(" ", "name")
+            service.getOrganizationalUnit(" ")
         )
             .isInstanceOf(ApiException.class);
     }

@@ -4,4 +4,4 @@ superset:
       rls-enabled: true
       dataset-id: 1
       entity: ACCOUNT
-      attribute: externalId
+      clause: "rls_id='{{ entity.externalId | replace(\"'\", \"''\") }}'"

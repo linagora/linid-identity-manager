@@ -14,7 +14,11 @@
       "props": {
         "statusKey": "status",
         "parentPath": "/accounts",
-        "fieldOrder": ["id", "email"]
+        "fieldOrder": ["id", "email"],
+        "avatarOptions": {
+          "seed": ["{{ entity.firstname }}", " ", "{{ entity.lastname }}"],
+          "style": "initials"
+        }
       }
     },
     {

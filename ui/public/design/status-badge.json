@@ -17,6 +17,30 @@
         "color": "warning",
         "align": "middle"
       }
+    },
+    "ACTIVE": {
+      "q-badge": {
+        "color": "positive",
+        "align": "middle"
+      }
+    },
+    "INACTIVE": {
+      "q-badge": {
+        "color": "negative",
+        "align": "middle"
+      }
+    },
+    "SUSPENDED": {
+      "q-badge": {
+        "color": "warning",
+        "align": "middle"
+      }
+    },
+    "UNKNOWN": {
+      "q-badge": {
+        "color": "grey",
+        "align": "middle"
+      }
     }
   }
 }

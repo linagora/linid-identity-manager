@@ -112,6 +112,11 @@
   font-size: 12px;
 }
 
+/* The profile panel fills its side-left column, which is content-sized: pin its width */
+.generic-details-page .entity-profile-panel {
+  width: 300px;
+}
+
 /* ===== Generic creation & edition pages ===== */
 
 /* Compact form sections */

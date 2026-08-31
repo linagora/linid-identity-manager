@@ -1,161 +1,194 @@
 {
-  "accounts": {
-    "details-page": {
+  "moduleAccountDetailsPage": {
+    "entity-profile-panel": {
+      "q-img": {},
+      "q-icon": { "name": "account_circle", "color": "grey-6" },
+      "navigation": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "left" },
+          "back-button": {
+            "q-btn": {
+              "flat": true,
+              "color": "primary",
+              "icon": "arrow_back",
+              "no-caps": true
+            }
+          }
+        }
+      },
       "entity-details-card": {
         "q-card": {},
-        "firstname": {
+        "id": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "account_circle" },
-            "q-card": {}
-          }
-        },
-        "lastname": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "account_circle" },
+            "q-icon": { "color": "primary", "name": "badge" },
             "q-card": {}
           }
         },
         "email": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "mail" },
-            "q-card": {}
-          }
-        },
-        "createdBy": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "person_add" },
-            "q-card": {}
-          }
-        },
-        "updatedBy": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "manage_accounts" },
-            "q-card": {}
-          }
-        },
-        "insertDate": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "event_available" },
-            "q-card": {}
-          }
-        },
-        "updateDate": {
-          "information-card": {
-            "q-icon": { "color": "primary", "name": "update" },
+            "q-icon": { "color": "primary", "name": "alternate_email" },
             "q-card": {}
           }
         }
-      },
-      "activation-actions": {
-        "dropdown-button": {
-          "q-btn-dropdown": { "color": "positive", "outline": false },
-          "q-list": {},
-          "q-menu": {},
-          "menu-trigger": {
-            "q-item-section": {},
-            "q-icon": {}
-          },
-          "items": {
-            "suspension": {
-              "scheduled": {
-                "q-item": {},
-                "icon": {
-                  "q-icon": {},
-                  "q-item-section": {}
-                },
-                "label": {
-                  "q-item-section": {},
-                  "q-item-label": {}
-                }
-              }
-            }
-          }
-        }
-      },
-      "suspension-actions": {
-        "dropdown-button": {
-          "q-btn-dropdown": { "color": "warning", "outline": false },
-          "q-list": {},
-          "q-menu": {},
-          "menu-trigger": {
-            "q-item-section": {},
-            "q-icon": {}
-          },
-          "items": {
-            "suspension": {
-              "scheduled": {
-                "q-item": {},
-                "icon": {
-                  "q-icon": {},
-                  "q-item-section": {}
-                },
-                "label": {
-                  "q-item-section": {},
-                  "q-item-label": {}
-                }
-              }
-            }
-          }
-        }
-      },
-      "deactivation-actions": {
-        "dropdown-button": {
-          "q-btn-dropdown": { "color": "negative", "outline": false },
-          "q-list": {},
-          "q-menu": {},
-          "menu-trigger": {
-            "q-item-section": {},
-            "q-icon": {}
-          },
-          "items": {
-            "suspension": {
-              "scheduled": {
-                "q-item": {},
-                "icon": {
-                  "q-icon": {},
-                  "q-item-section": {}
-                },
-                "label": {
-                  "q-item-section": {},
-                  "q-item-label": {}
-                }
-              }
-            }
-          }
-        }
-      },
-      "confirmation-dialog": {
-        "q-dialog": {},
-        "buttons-card": {
+      }
+    },
+    "sections": {
+      "lifecycle": {
+        "entity-details-card": {
           "q-card": {},
-          "q-icon": {},
-          "q-card-actions": {},
-          "confirm-button": {
-            "q-btn": {
-              "outline": false
+          "insertDate": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-card": {}
             }
           },
-          "cancel-button": {
-            "q-btn": {}
+          "activationAt": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "event" },
+              "q-card": {}
+            }
+          },
+          "validityPeriod": {
+            "start": {
+              "information-card": {
+                "q-icon": { "color": "primary", "name": "event" },
+                "q-card": {}
+              }
+            },
+            "end": {
+              "information-card": {
+                "q-icon": { "color": "primary", "name": "event" },
+                "q-card": {}
+              }
+            }
+          },
+          "suspensionPeriod": {
+            "start": {
+              "information-card": {
+                "q-icon": { "color": "primary", "name": "event" },
+                "q-card": {}
+              }
+            },
+            "end": {
+              "information-card": {
+                "q-icon": { "color": "primary", "name": "event" },
+                "q-card": {}
+              }
+            }
           }
         }
-      },
-      "form-dialog": {
-        "q-card-actions": {
-          "align": "right"
+      }
+    },
+    "activation-actions": {
+      "dropdown-button": {
+        "q-btn-dropdown": { "color": "positive", "outline": false },
+        "q-list": {},
+        "q-menu": {},
+        "menu-trigger": {
+          "q-item-section": {},
+          "q-icon": {}
         },
-        "buttons-card": {
-          "q-card": {},
-          "q-icon": {},
-          "q-card-actions": {},
-          "confirm-button": {
-            "q-btn": {
-              "outline": false
+        "items": {
+          "suspension": {
+            "scheduled": {
+              "q-item": {},
+              "icon": {
+                "q-icon": {},
+                "q-item-section": {}
+              },
+              "label": {
+                "q-item-section": {},
+                "q-item-label": {}
+              }
             }
-          },
-          "cancel-button": {
-            "q-btn": {}
           }
+        }
+      }
+    },
+    "suspension-actions": {
+      "dropdown-button": {
+        "q-btn-dropdown": { "color": "warning", "outline": false },
+        "q-list": {},
+        "q-menu": {},
+        "menu-trigger": {
+          "q-item-section": {},
+          "q-icon": {}
+        },
+        "items": {
+          "suspension": {
+            "scheduled": {
+              "q-item": {},
+              "icon": {
+                "q-icon": {},
+                "q-item-section": {}
+              },
+              "label": {
+                "q-item-section": {},
+                "q-item-label": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "deactivation-actions": {
+      "dropdown-button": {
+        "q-btn-dropdown": { "color": "negative", "outline": false },
+        "q-list": {},
+        "q-menu": {},
+        "menu-trigger": {
+          "q-item-section": {},
+          "q-icon": {}
+        },
+        "items": {
+          "suspension": {
+            "scheduled": {
+              "q-item": {},
+              "icon": {
+                "q-icon": {},
+                "q-item-section": {}
+              },
+              "label": {
+                "q-item-section": {},
+                "q-item-label": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "confirmation-dialog": {
+      "q-dialog": {},
+      "buttons-card": {
+        "q-card": {},
+        "q-icon": {},
+        "q-card-actions": {},
+        "confirm-button": {
+          "q-btn": {
+            "outline": false
+          }
+        },
+        "cancel-button": {
+          "q-btn": {}
+        }
+      }
+    },
+    "form-dialog": {
+      "q-card-actions": {
+        "align": "right"
+      },
+      "buttons-card": {
+        "q-card": {},
+        "q-icon": {},
+        "q-card-actions": {},
+        "confirm-button": {
+          "q-btn": {
+            "outline": false
+          }
+        },
+        "cancel-button": {
+          "q-btn": {}
         }
       }
     }

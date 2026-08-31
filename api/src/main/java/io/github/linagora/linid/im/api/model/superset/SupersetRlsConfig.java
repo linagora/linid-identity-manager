@@ -35,13 +35,13 @@ package io.github.linagora.linid.im.api.model.superset;
  * @param rlsEnabled whether RLS must be applied for the dashboard
  * @param datasetId the Superset dataset identifier on which the RLS rule is applied
  * @param entity     the entity name used to resolve the value required by the RLS rule
- * @param attribute  the entity attribute used to build the RLS condition
+ * @param clause     the Jinja template to render the RLS clause with entity context
  */
 public record SupersetRlsConfig(
     String slug,
     boolean rlsEnabled,
     int datasetId,
     String entity,
-    String attribute
+    String clause
 ) {
 }

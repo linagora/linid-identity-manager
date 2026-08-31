@@ -33,6 +33,7 @@ import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountStatusMapper;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
+import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
@@ -232,6 +233,41 @@ public class AccountServiceImpl implements AccountService {
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))
             ));
+    }
+
+    @Override
+    public AccountDistinctView update(final UserPrincipal userPrincipal,
+                                      final UUID accountId,
+                                      final AccountUpdateRecord record) {
+        Account account = accountRepository.findById(accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            ));
+
+        accountRepository.findAccountByEmail(record.email())
+            .filter(other -> !other.getId().equals(accountId))
+            .ifPresent(other -> {
+                throw new ApiException(
+                    HttpStatus.BAD_REQUEST.value(),
+                    I18nMessage.of("error.account.email_already_used", Map.of("email", record.email()))
+                );
+            });
+
+        accountRepository.findAccountByExternalId(record.externalId())
+            .filter(other -> !other.getId().equals(accountId))
+            .ifPresent(other -> {
+                throw new ApiException(
+                    HttpStatus.BAD_REQUEST.value(),
+                    I18nMessage.of("error.account.external_id_already_used",
+                        Map.of("externalId", record.externalId()))
+                );
+            });
+
+        accountMapper.applyUpdate(account, record, userPrincipal.getId());
+        accountRepository.saveAndFlush(account);
+
+        return findById(userPrincipal, accountId);
     }
 
     @Override

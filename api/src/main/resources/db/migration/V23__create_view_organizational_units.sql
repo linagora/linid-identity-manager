@@ -22,6 +22,17 @@ SELECT child.oun_id,
                THEN TRUE
            ELSE FALSE
            END AS is_suspended,
+       CASE
+           WHEN s.suspension_period IS NOT NULL
+               AND lower(s.suspension_period) IS NOT NULL
+               AND now() >= lower(s.suspension_period)
+               AND (
+                    upper(s.suspension_period) IS NULL
+                        OR now() <= upper(s.suspension_period)
+                    )
+               THEN 'SUSPENDED'
+           ELSE 'ACTIVE'
+           END AS status,
        NULLIF(CONCAT_WS(' ', creator.firstname, creator.lastname), '') AS created_by,
        NULLIF(CONCAT_WS(' ', updater.firstname, updater.lastname), '') AS updated_by,
        child.insert_date,
@@ -50,7 +61,7 @@ FROM organizational_units child
     WHERE r.child_id = child.oun_id
     ) parents ON TRUE;
 
-COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizational units along with their parent organizational units and their suspension status (suspension period, current-state status reason / sub-reason / comment and a computed is_suspended flag).';
+COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizational units along with their parent organizational units and their suspension status (suspension period, current-state status reason / sub-reason / comment and a computed is_suspended flag and a computed status).';
 
 COMMENT ON COLUMN organizational_units_view.oun_id IS 'Primary key (UUID) of the organizational unit.';
 COMMENT ON COLUMN organizational_units_view.name IS 'Human-readable name of the organizational unit.';
@@ -64,6 +75,7 @@ COMMENT ON COLUMN organizational_units_view.suspension_subreason IS 'More detail
 COMMENT ON COLUMN organizational_units_view.suspension_comment IS 'Free-text comment providing additional context about the suspension.';
 COMMENT ON COLUMN organizational_units_view.reactivation_comment IS 'Free-text comment providing additional context about a reactivation.';
 COMMENT ON COLUMN organizational_units_view.is_suspended IS 'Computed flag: TRUE when the current instant falls within the suspension period (including suspensions with no upper bound), FALSE otherwise.';
+COMMENT ON COLUMN organizational_units_view.status IS 'Computed lifecycle status of the organizational unit. SUSPENDED when the organizational unit is currently suspended, ACTIVE otherwise.';
 COMMENT ON COLUMN organizational_units_view.parents IS 'JSON array containing the parent organizational units associated with this organizational unit.';
 COMMENT ON COLUMN organizational_units_view.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_units_view.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';

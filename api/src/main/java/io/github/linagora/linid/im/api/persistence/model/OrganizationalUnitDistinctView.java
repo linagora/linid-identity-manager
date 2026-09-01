@@ -31,6 +31,8 @@ import io.hypersistence.utils.hibernate.type.json.JsonType;
 import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -148,6 +150,13 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
     private boolean suspended;
 
     /**
+     * Computed organizational unit status: {@code ACTIVE} or {@code SUSPENDED}.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private OrganizationalUnitStatusEnum status;
+
+    /**
      * Additional deployment-specific attributes stored as JSON.
      * <p>
      * This field allows integrators and customers to extend the standard data model
@@ -183,6 +192,7 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
      * @param reactivationComment the free-text comment providing additional context about the organizational unit
      *                            reactivation.
      * @param suspended whether the organizational unit is currently suspended.
+     * @param status the computed organizational unit status.
      * @param extraParameters additional deployment-specific attributes stored as JSON.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
@@ -201,6 +211,7 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
                                           final String suspensionComment,
                                           final String reactivationComment,
                                           final boolean suspended,
+                                          final OrganizationalUnitStatusEnum status,
                                           final Map<String, Object> extraParameters) {
         super(createdBy, updatedBy, insertDate, updateDate);
         this.id = id;
@@ -214,6 +225,7 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
         this.suspensionComment = suspensionComment;
         this.reactivationComment = reactivationComment;
         this.suspended = suspended;
+        this.status = status;
         this.extraParameters = extraParameters;
     }
 }

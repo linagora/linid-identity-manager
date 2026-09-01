@@ -26,33 +26,70 @@
 
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
-import org.mapstruct.Mapper;
+import io.swagger.v3.oas.annotations.media.Schema;
+import java.time.OffsetDateTime;
+import java.util.Map;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
- * MapStruct mapper responsible for converting between
- * {@link OrganizationalUnitAccountView} entities and their associated DTO/record models.
+ * Data Transfer Object representing the relationship between an account and an organizational unit.
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface OrganizationalUnitAccountMapper {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Schema(description = "Relationship between an account and an organizational unit")
+public class OrganizationalUnitAccountDTO {
 
     /**
-     * Converts an {@link OrganizationalUnitAccountView} entity into an
-     * {@link OrganizationalUnitAccountViewDTO}.
-     *
-     * @param organizationalUnitAccountView the source entity
-     * @return the mapped DTO
+     * Unique identifier of the relationship.
      */
-    OrganizationalUnitAccountViewDTO toDTO(OrganizationalUnitAccountView organizationalUnitAccountView);
+    @Schema(description = "Unique identifier of the relationship")
+    private UUID id;
 
     /**
-     * Converts an {@link OrganizationalUnitAccount} relationship entity into an
-     * {@link OrganizationalUnitAccountDTO}.
-     *
-     * @param organizationalUnitAccount the source entity
-     * @return the mapped DTO
+     * Identifier of the organizational unit.
      */
-    OrganizationalUnitAccountDTO toDTO(OrganizationalUnitAccount organizationalUnitAccount);
+    @Schema(description = "Identifier of the organizational unit")
+    private UUID organizationalUnitId;
+
+    /**
+     * Identifier of the attached account.
+     */
+    @Schema(description = "Identifier of the attached account")
+    private UUID accountId;
+
+    /**
+     * Free-form attributes of the relationship.
+     */
+    @Schema(description = "Free-form attributes of the relationship")
+    private Map<String, Object> extraParameters;
+
+    /**
+     * Identifier of the record creator.
+     */
+    @Schema(description = "Identifier of the record creator")
+    private UUID createdBy;
+
+    /**
+     * Identifier of the record last updater.
+     */
+    @Schema(description = "Identifier of the record last updater")
+    private UUID updatedBy;
+
+    /**
+     * Timestamp when the record was created.
+     */
+    @Schema(description = "Timestamp when the record was created")
+    private OffsetDateTime insertDate;
+
+    /**
+     * Timestamp when the record was last updated.
+     */
+    @Schema(description = "Timestamp when the record was last updated")
+    private OffsetDateTime updateDate;
 }

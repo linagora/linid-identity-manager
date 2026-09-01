@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -41,4 +42,23 @@ import java.util.UUID;
  */
 public interface OrganizationalUnitAccountRepository
     extends JpaRepository<OrganizationalUnitAccount, UUID>, JpaSpecificationExecutor<OrganizationalUnitAccount> {
+
+    /**
+     * Finds the relationship between the given organizational unit and account, if any.
+     *
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the account identifier
+     * @return the relationship, or empty when the account is not attached to the organizational unit
+     */
+    Optional<OrganizationalUnitAccount> findByOrganizationalUnitIdAndAccountId(UUID organizationalUnitId,
+                                                                               UUID accountId);
+
+    /**
+     * Checks whether the given account is already attached to the given organizational unit.
+     *
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the account identifier
+     * @return {@code true} when the relationship exists
+     */
+    boolean existsByOrganizationalUnitIdAndAccountId(UUID organizationalUnitId, UUID accountId);
 }

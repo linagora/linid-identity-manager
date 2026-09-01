@@ -26,11 +26,14 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
@@ -110,6 +113,45 @@ public interface OrganizationalUnitService {
         OrganizationalUnitAccountViewQueryFilterDto filters,
         Pageable pageable
     );
+
+    /**
+     * Attaches an account to an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param record               the attachment payload (account identifier and relationship attributes)
+     * @return the created {@link OrganizationalUnitAccount} relationship
+     */
+    OrganizationalUnitAccount attachAccount(
+        UserPrincipal userPrincipal,
+        UUID organizationalUnitId,
+        OrganizationalUnitAccountRecord record
+    );
+
+    /**
+     * Updates the relationship attributes between an account and an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param accountId            the unique identifier of the attached account
+     * @param record               the update payload (relationship attributes)
+     * @return the updated {@link OrganizationalUnitAccount} relationship
+     */
+    OrganizationalUnitAccount updateAccountRelation(
+        UserPrincipal userPrincipal,
+        UUID organizationalUnitId,
+        UUID accountId,
+        OrganizationalUnitAccountUpdateRecord record
+    );
+
+    /**
+     * Detaches an account from an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param accountId            the unique identifier of the attached account
+     */
+    void detachAccount(UserPrincipal userPrincipal, UUID organizationalUnitId, UUID accountId);
 
     /**
      * Deletes an organizational unit by its unique identifier.

@@ -28,6 +28,8 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -36,12 +38,15 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
@@ -92,6 +97,16 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Repository used to manage {@link OrganizationalUnitAccountView} persistence operations.
      */
     private final OrganizationalUnitAccountViewRepository organizationalUnitAccountViewRepository;
+
+    /**
+     * Repository used to manage {@link OrganizationalUnitAccount} relationship persistence operations.
+     */
+    private final OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    /**
+     * Repository used to check the existence of accounts to attach.
+     */
+    private final AccountRepository accountRepository;
 
     /**
      * Repository used to manage organizational unit relation persistence operations.
@@ -265,6 +280,83 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitAccountView.class, filters);
 
         return organizationalUnitAccountViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public OrganizationalUnitAccount attachAccount(
+        final UserPrincipal userPrincipal,
+        final UUID organizationalUnitId,
+        final OrganizationalUnitAccountRecord record) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        if (!accountRepository.existsById(record.accountId())) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
+            organizationalUnitId, record.accountId())) {
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of("error.organizational.unit.account.already_attached",
+                    Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        var entity = OrganizationalUnitAccount.builder()
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(record.accountId())
+            .extraParameters(record.extraParameters())
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        return organizationalUnitAccountRepository.save(entity);
+    }
+
+    @Override
+    public OrganizationalUnitAccount updateAccountRelation(
+        final UserPrincipal userPrincipal,
+        final UUID organizationalUnitId,
+        final UUID accountId,
+        final OrganizationalUnitAccountUpdateRecord record) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        var entity = findRelation(organizationalUnitId, accountId);
+
+        entity.setExtraParameters(record.extraParameters());
+        entity.setUpdatedBy(userPrincipal.getId());
+
+        return organizationalUnitAccountRepository.save(entity);
+    }
+
+    @Override
+    public void detachAccount(final UserPrincipal userPrincipal,
+                              final UUID organizationalUnitId,
+                              final UUID accountId) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        organizationalUnitAccountRepository.delete(findRelation(organizationalUnitId, accountId));
+    }
+
+    /**
+     * Retrieves the relationship between an organizational unit and an account, throwing a 404
+     * {@link ApiException} when the account is not attached to the organizational unit.
+     *
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the account identifier
+     * @return the {@link OrganizationalUnitAccount} relationship
+     */
+    private OrganizationalUnitAccount findRelation(final UUID organizationalUnitId, final UUID accountId) {
+        return organizationalUnitAccountRepository
+            .findByOrganizationalUnitIdAndAccountId(organizationalUnitId, accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.account.not_attached",
+                    Map.of("id", accountId.toString()))
+            ));
     }
 
     @Override

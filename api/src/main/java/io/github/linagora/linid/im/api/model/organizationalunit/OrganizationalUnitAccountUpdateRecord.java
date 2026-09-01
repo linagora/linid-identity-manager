@@ -26,33 +26,21 @@
 
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
-import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
-import org.mapstruct.Mapper;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import java.util.Map;
 
 /**
- * MapStruct mapper responsible for converting between
- * {@link OrganizationalUnitAccountView} entities and their associated DTO/record models.
+ * Request payload for updating the relationship between an account and an organizational unit.
+ *
+ * <p>Only the relationship {@code extraParameters} are updatable: the account and organizational
+ * unit themselves are left untouched.</p>
+ *
+ * @param extraParameters free-form attributes of the relationship
  */
-@Mapper(componentModel = "spring", uses = CommonMapper.class)
-public interface OrganizationalUnitAccountMapper {
-
-    /**
-     * Converts an {@link OrganizationalUnitAccountView} entity into an
-     * {@link OrganizationalUnitAccountViewDTO}.
-     *
-     * @param organizationalUnitAccountView the source entity
-     * @return the mapped DTO
-     */
-    OrganizationalUnitAccountViewDTO toDTO(OrganizationalUnitAccountView organizationalUnitAccountView);
-
-    /**
-     * Converts an {@link OrganizationalUnitAccount} relationship entity into an
-     * {@link OrganizationalUnitAccountDTO}.
-     *
-     * @param organizationalUnitAccount the source entity
-     * @return the mapped DTO
-     */
-    OrganizationalUnitAccountDTO toDTO(OrganizationalUnitAccount organizationalUnitAccount);
+@Schema(description = "Request payload for updating an account-to-organizational-unit relationship")
+public record OrganizationalUnitAccountUpdateRecord(
+    @NotNull @Schema(description = "Free-form attributes of the relationship")
+    Map<String, Object> extraParameters
+) {
 }

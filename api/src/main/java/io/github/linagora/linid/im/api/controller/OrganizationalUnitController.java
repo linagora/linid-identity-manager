@@ -26,7 +26,10 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountViewDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
@@ -192,6 +195,79 @@ public class OrganizationalUnitController {
             .map(accountMapper::toDTO);
 
         return pagedResponseStatusResolver.resolve(pages);
+    }
+
+    /**
+     * Attaches an account to an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param record               the attachment payload (account identifier and relationship attributes)
+     * @return the created relationship with HTTP 201 status
+     */
+    @PostMapping("/{organizationalUnitId}/accounts")
+    @Operation(summary = "Attach an account to an organizational unit")
+    @ApiResponse(responseCode = "201", description = "Account successfully attached")
+    @ApiResponse(responseCode = "400", description = "Invalid request body or account already attached",
+        content = @Content)
+    @ApiResponse(responseCode = "404", description = "Organizational unit or account not found", content = @Content)
+    public ResponseEntity<OrganizationalUnitAccountDTO> attachAccount(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        @Valid @RequestBody final OrganizationalUnitAccountRecord record) {
+        log.info("[{}] Received POST request to attach account to organizational unit {} with {}",
+            userPrincipal.getEmail(), organizationalUnitId, record);
+        var entity = service.attachAccount(userPrincipal, organizationalUnitId, record);
+        return ResponseEntity.status(HttpStatus.CREATED).body(accountMapper.toDTO(entity));
+    }
+
+    /**
+     * Updates the relationship attributes between an account and an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the attached account identifier
+     * @param record               the update payload (relationship attributes)
+     * @return the updated relationship
+     */
+    @PutMapping("/{organizationalUnitId}/accounts/{accountId}")
+    @Operation(summary = "Update the relationship between an account and an organizational unit")
+    @ApiResponse(responseCode = "200", description = "Relationship successfully updated")
+    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Organizational unit not found or account not attached",
+        content = @Content)
+    public ResponseEntity<OrganizationalUnitAccountDTO> updateAccountRelation(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        @PathVariable final UUID accountId,
+        @Valid @RequestBody final OrganizationalUnitAccountUpdateRecord record) {
+        log.info("[{}] Received PUT request to update relationship between organizational unit {} and account {} "
+            + "with {}", userPrincipal.getEmail(), organizationalUnitId, accountId, record);
+        var entity = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
+        return ResponseEntity.ok(accountMapper.toDTO(entity));
+    }
+
+    /**
+     * Detaches an account from an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the attached account identifier
+     * @return an empty response with HTTP 204 status
+     */
+    @DeleteMapping("/{organizationalUnitId}/accounts/{accountId}")
+    @Operation(summary = "Detach an account from an organizational unit")
+    @ApiResponse(responseCode = "204", description = "Account successfully detached")
+    @ApiResponse(responseCode = "404", description = "Organizational unit not found or account not attached",
+        content = @Content)
+    public ResponseEntity<Void> detachAccount(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        @PathVariable final UUID accountId) {
+        log.info("[{}] Received DELETE request to detach account {} from organizational unit {}",
+            userPrincipal.getEmail(), accountId, organizationalUnitId);
+        service.detachAccount(userPrincipal, organizationalUnitId, accountId);
+        return ResponseEntity.noContent().build();
     }
 
     /**

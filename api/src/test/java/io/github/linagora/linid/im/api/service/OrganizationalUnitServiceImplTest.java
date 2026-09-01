@@ -28,6 +28,8 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -36,12 +38,15 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
@@ -96,6 +101,12 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitAccountViewRepository organizationalUnitAccountViewRepository;
+
+    @Mock
+    private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    @Mock
+    private AccountRepository accountRepository;
 
     @Mock
     private OrganizationalUnitRelationRepository organizationalUnitRelationRepository;
@@ -313,6 +324,186 @@ class OrganizationalUnitServiceImplTest {
         verify(organizationalUnitAccountViewRepository).findAll(
             ArgumentMatchers.any(),
             any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("should attach an account to an organizational unit")
+    void testAttachAccount_shouldSaveRelation() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, Map.of("key", "value"));
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.attachAccount(userPrincipal, organizationalUnitId, record);
+
+        assertEquals(organizationalUnitId, result.getOrganizationalUnitId());
+        assertEquals(accountId, result.getAccountId());
+        assertEquals(Map.of("key", "value"), result.getExtraParameters());
+        assertEquals(userPrincipal.getId(), result.getCreatedBy());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("should throw exception on attach with unknown organizational unit")
+    void testAttachAccount_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), Map.of());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.attachAccount(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should throw exception on attach with unknown account")
+    void testAttachAccount_shouldThrowExceptionOnUnknownAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, Map.of());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.attachAccount(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should throw exception on attach with already attached account")
+    void testAttachAccount_shouldThrowExceptionOnAlreadyAttachedAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, Map.of());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(true);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.attachAccount(userPrincipal, organizationalUnitId, record));
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.organizational.unit.account.already_attached", exception.getError().key());
+        verify(organizationalUnitAccountRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("should update the relationship extra parameters")
+    void testUpdateAccountRelation_shouldUpdateExtraParameters() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(Map.of("key", "updated"));
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .extraParameters(Map.of("key", "value"))
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
+
+        assertEquals(Map.of("key", "updated"), result.getExtraParameters());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("should throw exception on update with unknown organizational unit")
+    void testUpdateAccountRelation_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should throw exception on update with not attached account")
+    void testUpdateAccountRelation_shouldThrowExceptionOnNotAttachedAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.account.not_attached", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should detach an account from an organizational unit")
+    void testDetachAccount_shouldDeleteRelation() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+
+        assertDoesNotThrow(() -> service.detachAccount(userPrincipal, organizationalUnitId, accountId));
+
+        verify(organizationalUnitAccountRepository).delete(entity);
+    }
+
+    @Test
+    @DisplayName("should throw exception on detach with unknown organizational unit")
+    void testDetachAccount_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.detachAccount(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should throw exception on detach with not attached account")
+    void testDetachAccount_shouldThrowExceptionOnNotAttachedAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.detachAccount(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.account.not_attached", exception.getError().key());
+        verify(organizationalUnitAccountRepository, never()).delete(any(OrganizationalUnitAccount.class));
     }
 
     @Test

@@ -28,12 +28,15 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
@@ -133,6 +136,44 @@ class OrganizationalUnitControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should attach account to organizational unit")
+    void testAttachAccount() {
+        when(service.attachAccount(any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
+        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), Map.of());
+
+        var response = controller.attachAccount(userPrincipal, UUID.randomUUID(), record);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should update account relationship")
+    void testUpdateAccountRelation() {
+        when(service.updateAccountRelation(any(), any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
+        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+
+        var response = controller.updateAccountRelation(userPrincipal, UUID.randomUUID(), UUID.randomUUID(), record);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should detach account from organizational unit")
+    void testDetachAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        doNothing().when(service).detachAccount(any(), any(), any());
+
+        var response = controller.detachAccount(userPrincipal, organizationalUnitId, accountId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(service).detachAccount(userPrincipal, organizationalUnitId, accountId);
     }
 
     @Test

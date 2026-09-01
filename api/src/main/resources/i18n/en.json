@@ -34,6 +34,8 @@
   "error.organizational.unit.root.not_found": "Organizational unit 'root' is not found",
   "error.organizational.unit.not_found": "Organizational unit not found: {id}",
   "error.organizational.unit.already_exists": "Organizational unit already exists for name '{name}' and type '{type}'",
+  "error.organizational.unit.account.already_attached": "Account {id} is already attached to this organizational unit",
+  "error.organizational.unit.account.not_attached": "Account {id} is not attached to this organizational unit",
   "error.organizational.unit.status.not_found": "Organizational unit status not found for organizational unit: {id}",
   "error.organizational.unit.status.suspension_period_invalid": "Organizational unit {id} status cannot be updated: suspension period start ({start}) must be before or equal to end ({end}).",
   "error.organizational.unit.status.suspension_start_in_past": "Organizational unit {id} status cannot be updated: the suspension period start ({start}) must be greater than or equal to today.",

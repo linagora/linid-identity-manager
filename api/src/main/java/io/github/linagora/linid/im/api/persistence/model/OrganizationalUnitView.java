@@ -35,6 +35,8 @@ import io.hypersistence.utils.hibernate.type.range.PostgreSQLRangeType;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -175,6 +177,15 @@ public class OrganizationalUnitView extends AbstractViewEntity {
     @FilterType(type = Boolean.class)
     @QueryFilterField(type = Boolean.class, description = "Whether the organizational unit is currently suspended")
     private boolean suspended;
+
+    /**
+     * Computed organizational unit status: {@code ACTIVE} or {@code SUSPENDED}.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class, description = "Computed organizational unit status (ACTIVE or SUSPENDED)")
+    private OrganizationalUnitStatusEnum status;
 
     /**
      * Additional deployment-specific attributes stored as JSON.

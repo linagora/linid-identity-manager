@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.github.linagora.linid.im.api.model.common.PeriodDTO;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatusEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -151,6 +152,12 @@ public class OrganizationalUnitViewDTO {
     @JsonProperty("isSuspended")
     @Schema(description = "Whether the organizational unit is currently suspended", example = "false")
     private boolean suspended;
+
+    /**
+     * Computed organizational unit status (ACTIVE or SUSPENDED).
+     */
+    @Schema(description = "Computed organizational unit status", example = "ACTIVE")
+    private OrganizationalUnitStatusEnum status;
 
     /**
      * Additional deployment-specific attributes stored as JSON.

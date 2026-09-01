@@ -288,6 +288,51 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Comptes",
+      "deleteButton": "Détacher",
+      "loadError": "Impossible de charger les comptes de l'unité organisationnelle. Veuillez réessayer plus tard.",
+      "createSuccess": "Compte attaché avec succès.",
+      "createError": "Impossible de rattacher le compte. Veuillez réessayer plus tard.",
+      "deleteSuccess": "Compte détaché avec succès.",
+      "deleteError": "Impossible de détacher le compte. Veuillez réessayer plus tard.",
+      "columns": {
+        "lastname": "Nom",
+        "firstname": "Prénom",
+        "email": "Email"
+      },
+      "ButtonsCard": {
+        "add": "Attacher un compte"
+      },
+      "CreateFormDialog": {
+        "title": "Attacher un compte",
+        "ButtonsCard": {
+          "confirm": "Attacher",
+          "cancel": "Annuler"
+        },
+        "fields": {
+          "accountId": {
+            "label": "Compte",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Détacher le compte {lastname} {firstname}",
+        "content": "Voulez-vous vraiment détacher le compte {lastname} {firstname} de cette unité organisationnelle ?",
+        "ButtonsCard": {
+          "confirm": "Détacher",
+          "cancel": "Annuler"
+        }
+      },
+      "GenericEntityTable": {
+        "noData": "Aucun compte rattaché à cette unité organisationnelle.",
+        "rowsPerPage": "Éléments par page:",
+        "paginationLabel": "{start}-{end} sur {total}"
+      }
     }
   },
   "OrganizationalUnitLifecyclePanel": {

@@ -70,6 +70,51 @@
     {
       "zone": "moduleOrganizationalUnitDetailsPage.content.before",
       "component": "OrganizationalUnitLifecyclePanel"
+    },
+    {
+      "zone": "moduleOrganizationalUnitDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "rowKey": "id",
+        "columns": [
+          {
+            "name": "lastname",
+            "label": "columns.lastname",
+            "field": "lastname",
+            "align": "left"
+          },
+          {
+            "name": "firstname",
+            "label": "columns.firstname",
+            "field": "firstname",
+            "align": "left"
+          },
+          {
+            "name": "email",
+            "label": "columns.email",
+            "field": "email",
+            "align": "left"
+          }
+        ],
+        "formFields": [
+          {
+            "name": "accountId",
+            "type": "String",
+            "input": "DynamicList",
+            "required": true,
+            "inputSettings": {
+              "route": "/accounts",
+              "optionLabel": "{{ lastname }} {{ firstname }} ({{ email }})",
+              "optionValue": "{{ id }}"
+            }
+          }
+        ],
+        "endpoints": {
+          "find": "/organizational-units/{{ entity.id }}/accounts",
+          "create": "/organizational-units/{{ entity.id }}/accounts",
+          "delete": "/organizational-units/{{ entity.id }}/accounts/{{ item.id }}"
+        }
+      }
     }
   ],
   "options": {

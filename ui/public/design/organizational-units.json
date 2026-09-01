@@ -226,6 +226,89 @@
           }
         }
       }
+    },
+    "generic-editable-table-card": {
+      "q-card": {
+        "flat": true,
+        "bordered": false
+      },
+      "buttons-card": {
+        "q-card": {
+          "flat": true
+        },
+        "add-button": {
+          "q-btn": {
+            "color": "primary",
+            "unelevated": true,
+            "outline": false
+          }
+        }
+      },
+      "delete-button": {
+        "q-btn": {
+          "color": "negative",
+          "icon": "person_remove",
+          "flat": true,
+          "dense": true
+        }
+      },
+      "generic-entity-table": {
+        "q-table": {}
+      },
+      "form-dialog": {
+        "q-dialog": {
+          "persistent": false
+        },
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        },
+        "buttons-card": {
+          "q-card": {
+            "flat": true
+          },
+          "confirm-button": {
+            "q-btn": {
+              "color": "primary",
+              "unelevated": true,
+              "outline": false
+            }
+          },
+          "cancel-button": {
+            "q-btn": {
+              "color": "primary",
+              "outline": true
+            }
+          }
+        }
+      },
+      "confirmation-dialog": {
+        "q-dialog": {
+          "persistent": false
+        },
+        "q-card": {
+          "flat": true,
+          "bordered": true
+        },
+        "buttons-card": {
+          "q-card": {
+            "flat": true
+          },
+          "confirm-button": {
+            "q-btn": {
+              "color": "primary",
+              "unelevated": true,
+              "outline": false
+            }
+          },
+          "cancel-button": {
+            "q-btn": {
+              "color": "negative",
+              "outline": true
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -288,6 +288,51 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Accounts",
+      "deleteButton": "Detach",
+      "loadError": "Unable to load the organizational unit accounts. Please try again later.",
+      "createSuccess": "Account successfully attached.",
+      "createError": "Unable to attach the account. Please try again later.",
+      "deleteSuccess": "Account successfully detached.",
+      "deleteError": "Unable to detach the account. Please try again later.",
+      "columns": {
+        "lastname": "Last name",
+        "firstname": "First name",
+        "email": "Email"
+      },
+      "ButtonsCard": {
+        "add": "Attach an account"
+      },
+      "CreateFormDialog": {
+        "title": "Attach an account",
+        "ButtonsCard": {
+          "confirm": "Attach",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "accountId": {
+            "label": "Account",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        }
+      },
+      "DeleteConfirmationDialog": {
+        "title": "Detach the account {lastname} {firstname}",
+        "content": "Do you really want to detach the account {lastname} {firstname} from this organizational unit?",
+        "ButtonsCard": {
+          "confirm": "Detach",
+          "cancel": "Cancel"
+        }
+      },
+      "GenericEntityTable": {
+        "noData": "No account attached to this organizational unit.",
+        "rowsPerPage": "Items per page:",
+        "paginationLabel": "{start}-{end} of {total}"
+      }
     }
   },
   "OrganizationalUnitLifecyclePanel": {

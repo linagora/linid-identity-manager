@@ -22,7 +22,14 @@
           "seed": [
             "{{ entity.name }}"
           ],
-          "style": "stack"
+          "style": "constellation",
+          "styleOptions": {
+            "animationVariant": [
+              "fastest",
+              "fast",
+              "medium"
+            ]
+          }
         },
         "fieldOrder": [
           "type"

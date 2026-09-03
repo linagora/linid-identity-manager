@@ -106,6 +106,7 @@ import type { DropdownClickPayload } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
   uiEventSubject,
+  useCommonMapper,
   useNotify,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
@@ -133,6 +134,7 @@ import type {
   AccountStatus,
   AccountStatusForm,
 } from 'src/types/accounts';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
 defineOptions({ inheritAttrs: false });
@@ -157,7 +159,7 @@ const {
 } = useAccountMapper();
 
 const accountId = computed(() => props.entity.id as string);
-
+const { toDate } = useCommonMapper();
 const accountStatus = computed<AccountStatus | null>(() =>
   props.entity.id
     ? toAccountStatus(props.entity as unknown as AccountDTO)
@@ -375,7 +377,7 @@ function scheduledActivation() {
             toAccountValidityRecord(formData)
           ),
         'scheduledActivationSuccess',
-        formData.validityPeriodStart
+        toDate(formData.validityPeriodStart, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -393,7 +395,7 @@ function scheduledDeactivation() {
             toAccountDeactivationRecord(formData)
           ),
         'scheduledDeactivationSuccess',
-        formData.validityPeriodEnd
+        toDate(formData.validityPeriodEnd, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -414,7 +416,7 @@ function modifyDeactivation() {
             toAccountDeactivationRecord(formData)
           ),
         'modifyDeactivationSuccess',
-        formData.validityPeriodEnd
+        toDate(formData.validityPeriodEnd, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -429,13 +431,14 @@ function scheduledSuspension() {
         () =>
           suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
         'scheduledSuspensionSuccess',
-        formData.suspensionPeriodStart
+        toDate(formData.suspensionPeriodStart, DATE_FORMAT_KEY)
       ),
   });
 }
 
 /** Opens a form dialog for the modify suspension action, pre-filled with the existing suspension period bounds. */
 function modifySuspension() {
+  console.log('AAAAAAAA', accountStatus.value);
   openFormDialog({
     i18nScope: 'AccountSuspensionActions.FormDialog.modify',
     formFields: accountLifecycleUiConfiguration['suspension.modify'],
@@ -447,7 +450,7 @@ function modifySuspension() {
         () =>
           suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
         'modifySuspensionSuccess',
-        formData.suspensionPeriodStart
+        toDate(formData.suspensionPeriodStart, DATE_FORMAT_KEY)
       ),
   });
 }

@@ -19,6 +19,7 @@
     },
     "dateTimeFormat": "YYYY/MM/DD hh:mm:ss A",
     "dateFormat": "YYYY/MM/DD",
+    "dateFormatApi": "YYYY-MM-DDTHH:mm:ssZ",
     "language": {
       "title": "Language"
     },

@@ -1,0 +1,70 @@
+{
+  "instanceId": "moduleAccountCreationPage",
+  "remoteName": "catalogUI",
+  "entity": "accounts",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "accounts",
+  "basePath": "/accounts",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericCreationPage",
+    "pagePath": "new",
+    "parentPath": "/accounts",
+    "idKey": "id",
+    "formSections": [
+      {
+        "id": "general",
+        "fields": [
+          {
+            "name": "externalId",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "lastname",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "firstname",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "email",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "validityPeriod.start",
+            "type": "String",
+            "input": "Date",
+            "required": true,
+            "inputSettings": {
+              "valueFormatI18NKey": "application.dateFormatApi",
+              "maskI18NKey": "application.dateFormat",
+              "options": {
+                "afterDate": "{{ today }}"
+              }
+            }
+          },
+          {
+            "name": "organizationalUnit",
+            "input": "DynamicList",
+            "type": "String",
+            "required": true,
+            "hasValidations": false,
+            "inputSettings": {
+              "route": "/organizational-units",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 10
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

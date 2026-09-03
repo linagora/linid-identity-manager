@@ -29,6 +29,7 @@
   ],
   "modules": [
     "/modules/AccountsPage.json",
+    "/modules/AccountCreationPage.json",
     "/modules/ApplicationsPage.json",
     "/modules/ApplicationCreationPage.json",
     "/modules/ApplicationEditionPage.json",

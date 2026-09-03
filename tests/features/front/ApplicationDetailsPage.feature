@@ -1,7 +1,7 @@
 Feature: Test Application details page display
 
   ################## Application Details ##################
-  ## 101 Should display the application details page with its sections
+  ## 101 Should display the application details page with its profile panel and audit section
   ## 102 Back button should come back at applications list page
   ## 103 Should display the roles card with an empty table
   ## 104 Add role dialog should close on cancel without creating a role
@@ -23,12 +23,17 @@ Feature: Test Application details page display
   ## 120 Should save the toggle change and persist it to the backend
   ## 121 Should delete a rule
 
+  ################## Profile panel edition ##################
+  ## 201 Edit dialog should open with the current values and close on cancel
+  ## 202 Edit dialog should display required validation errors on empty required fields
+  ## 203 Should edit the application and display the updated values in the panel
+
   ################## Export application script ##################
-  ## 201 Export button should be enabled
+  ## 301 Export button should be enabled
 
   ################## Test invalid id ####################
-  ## 301 Should display an error notification when navigating to a non-existent application
-  ## 302 Should display an error notification when navigating to an application with a malformed ID
+  ## 401 Should display an error notification when navigating to a non-existent application
+  ## 402 Should display an error notification when navigating to an application with a malformed ID
   Scenario: Roundtrip about Application Details
     ####################################################
     ################## Authentication ##################
@@ -75,24 +80,31 @@ Feature: Test Application details page display
     ################## Application Details #############
     ####################################################
 
-    ## 101 Should display the application details page with its sections
+    ## 101 Should display the application details page with its profile panel and audit section
     When I click on '[data-cy="see-button_{{ctx.applicationId}}"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
     And  I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="generic-details-page_title"]' contains "Détails de l'application"
-    And  I expect the HTML element '[data-cy="details-section_identity"]' to be visible
-    And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--code"]' contains "app-detail-101"
-    And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--name"]' contains "Application Detail 101"
-    And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--description"]' contains "An application for the details page tests"
-    And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--domain"]' contains "Security"
-    And  I expect the HTML element '[data-cy="details-section_identity"] [data-cy="information-card--type"]' contains "OIDC"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
+    And  I expect the HTML element '[data-cy="entity-profile-panel_avatar-img"]' to be visible
+    And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' not exists
+    And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Application Detail 101"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "app-detail-101"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--type"] [data-cy="value"]' contains "OIDC"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--domain"] [data-cy="value"]' contains "Security"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--description"] [data-cy="value"]' contains "An application for the details page tests"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--deployedAt"] [data-cy="title"]' contains "Déployée le"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--deployedAt"] [data-cy="value"]' contains "-"
+    And  I expect the HTML element '[data-cy="details-section_claims"]' to be visible
+    And  I expect the HTML element '[data-cy="details-section_claims"] [data-cy="information-card--claimsTemplate"] [data-cy="value"]' contains '{ "sub": "id" }'
     And  I expect the HTML element '[data-cy="details-section_audit"]' to be visible
     And  I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"]' contains "admin_fn admin_ln"
-    And  I expect the HTML element '[data-cy="buttons-card"] [data-cy="button_cancel"]' contains "Retour"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_back-button"]' contains "Liste des applications"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_edit-button"]' to be visible
     And  I expect the HTML element '[data-cy="button_export"]' to be disabled
 
     ## 102 Back button should come back at applications list page
-    When I click on '[data-cy="buttons-card"] [data-cy="button_cancel"]'
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
 
     ####################################################
@@ -112,8 +124,9 @@ Feature: Test Application details page display
     When I click on '[data-cy="generic-editable-table-card_add-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Ajouter un rôle"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_name"]' contains "Nom"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_name"]' contains "Nom *"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' contains "Description"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' not contains "Description *"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Ajouter"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -161,6 +174,8 @@ Feature: Test Application details page display
     When I click on '[data-cy="edit-button_{{ctx.roleId}}"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier le rôle auditor"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_name"]' contains "Nom *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' not contains "Description *"
     And  I expect the HTML element '[data-cy="field_name"]' to have value "auditor"
     And  I expect the HTML element '[data-cy="field_description"]' to have value "Accès en lecture seule"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Enregistrer"
@@ -204,10 +219,11 @@ Feature: Test Application details page display
     When I click on '[data-cy="generic-sortable-list-card_add-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Ajouter une règle"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Code"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Code *"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' contains "Description"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_priority"]' contains "Priorité"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_script"]' contains "Script"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' not contains "Description *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_priority"]' contains "Priorité *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_script"]' contains "Script *"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Ajouter"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And  I expect the HTML element '[data-cy="field_priority"]' to have value "1"
@@ -251,6 +267,10 @@ Feature: Test Application details page display
     When I click on '[data-cy="generic-sortable-list-card_button_edit_0"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier la règle test-rule"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Code *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' not contains "Description *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_priority"]' contains "Priorité *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_script"]' contains "Script *"
     And  I expect the HTML element '[data-cy="field_code"]' to have value "test-rule"
     And  I expect the HTML element '[data-cy="field_description"]' to have value "A test rule"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_priority"]' to be disabled
@@ -330,10 +350,72 @@ Feature: Test Application details page display
     And  I expect "{{ response.body.content }}" to have length 0
 
     ###########################################################
+    ################## Profile panel edition ##################
+    ###########################################################
+
+    ## 201 Edit dialog should open with the current values and close on cancel
+    When I click on '[data-cy="entity-profile-panel_edit-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog"]' contains "Modifier Application Detail 101"
+    And  I expect the HTML element '[data-cy="field_code"]' to have value "app-detail-101"
+    And  I expect the HTML element '[data-cy="field_name"]' to have value "Application Detail 101"
+    And  I expect the HTML element '[data-cy="field_type"]' to have value "OIDC"
+    And  I expect the HTML element '[data-cy="field_domain"]' to have value "Security"
+    And  I expect the HTML element '[data-cy="field_description"]' to have value "An application for the details page tests"
+    And  I expect the HTML element '[data-cy="field_claimsTemplate"]' to have value '{ "sub": "id" }'
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Code *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_name"]' contains "Nom *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_type"]' contains "Type *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_domain"]' contains "Domaine applicatif"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_domain"]' not contains "Domaine applicatif *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_description"]' not contains "Description *"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_claimsTemplate"]' contains "Modèle de génération des claims *"
+    And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Enregistrer"
+    And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Application Detail 101"
+
+    ## 202 Edit dialog should display required validation errors on empty required fields
+    When I click on '[data-cy="entity-profile-panel_edit-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I clear the text in the HTML element '[data-cy="field_code"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_code"]' contains "Ce champ est requis."
+    When I clear the text in the HTML element '[data-cy="field_name"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_name"]' contains "Ce champ est requis."
+    When I clear the text in the HTML element '[data-cy="field_type"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_type"]' contains "Ce champ est requis."
+    When I clear the text in the HTML element '[data-cy="field_claimsTemplate"]'
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_claimsTemplate"]' contains "Ce champ est requis."
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "app-detail-101"
+
+    ## 203 Should edit the application and display the updated values in the panel
+    When I click on '[data-cy="entity-profile-panel_edit-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I clear the text in the HTML element '[data-cy="field_name"]'
+    And  I set the text "Application Detail 101 edited" in the HTML element '[data-cy="field_name"]'
+    And  I clear the text in the HTML element '[data-cy="field_domain"]'
+    And  I set the text "Identity" in the HTML element '[data-cy="field_domain"]'
+    And  I clear the text in the HTML element '[data-cy="field_description"]'
+    And  I set the text "An edited application" in the HTML element '[data-cy="field_description"]'
+    And  I clear the text in the HTML element '[data-cy="field_claimsTemplate"]'
+    And  I set the text '{% raw %}{{} "sub": "login" }{% endraw %}' in the HTML element '[data-cy="field_claimsTemplate"]'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Application modifiée avec succès."
+    And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Application Detail 101 edited"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "app-detail-101"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--domain"] [data-cy="value"]' contains "Identity"
+    And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--description"] [data-cy="value"]' contains "An edited application"
+    And  I expect the HTML element '[data-cy="details-section_claims"] [data-cy="information-card--claimsTemplate"] [data-cy="value"]' contains '{ "sub": "login" }'
+
+    ###########################################################
     ################## Export application script ##############
     ###########################################################
-    ## 201 Export button should be enabled
-    When I click on '[data-cy="button_cancel"]'
+    ## 301 Export button should be enabled
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
 
     When I click on '[data-cy="see-button_{{ctx.applicationId}}"]'
@@ -346,7 +428,7 @@ Feature: Test Application details page display
   ####################################################
   ################## Test invalid id #################
   ####################################################
-  Scenario: 301 - Should display an error notification when navigating to a non-existent application
+  Scenario: 401 - Should display an error notification when navigating to a non-existent application
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
     When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
@@ -369,7 +451,7 @@ Feature: Test Application details page display
     Then I expect the HTML element '.q-notification__message' contains "Impossible de charger l'application. Veuillez réessayer plus tard."
     And  I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
 
-  Scenario: 302 - Should display an error notification when navigating to an application with a malformed ID
+  Scenario: 402 - Should display an error notification when navigating to an application with a malformed ID
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
     When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:

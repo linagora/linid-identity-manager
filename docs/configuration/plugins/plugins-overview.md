@@ -24,12 +24,13 @@ export PLUGIN_LOADER_PATH=/path/to/plugins
 
 2. **Frontend Plugins**
 
-    * Configured in `config.json` via two properties:
+    * Configured in `config.json` via three properties:
 
-| Property   | Purpose                                      |
-|------------|----------------------------------------------|
-| `remotes`  | List of remote Module Federation modules     |
-| `modules`  | List of module files to be loaded for the UI |
+| Property       | Purpose                                                                                                    |
+|----------------|------------------------------------------------------------------------------------------------------------|
+| `remotes`      | List of remote Module Federation modules                                                                   |
+| `modules`      | List of module files to be loaded for the UI                                                               |
+| `extraZones`   | Optional list of zone definition files (JSON arrays of zone entries) registered after the module zones     |
 
 ### Example: `config.json`
 
@@ -44,7 +45,8 @@ export PLUGIN_LOADER_PATH=/path/to/plugins
   "modules": [
     "/modules/AccountsPage.json",
     "/modules/ApplicationsPage.json"
-  ]
+  ],
+  "extraZones": ["/zones/supersetGraphs.json"]
 }
 ```
 

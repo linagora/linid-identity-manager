@@ -60,6 +60,8 @@ export interface AppConfig {
   immediateActionDelay: number;
   /** List of module files to be loaded for the UI. */
   modules: string[];
+  /** List of additional zone definition files to be loaded for the UI. */
+  extraZones?: string[];
   /** OpenID Connect (OIDC) configuration for authentication. */
   oidc: OidcConfig;
   /** List of design files to be loaded for the UI. */

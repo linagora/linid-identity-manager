@@ -28,6 +28,7 @@
     }
   ],
   "modules": [],
+  "extraZones": [],
   "oidc": {
     "authority": "${LEMONLDAP_PORTAL_URL}",
     "client_id": "linid-im-client",

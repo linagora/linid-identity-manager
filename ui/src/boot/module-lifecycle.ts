@@ -35,9 +35,9 @@ import { appConfig } from './config';
 /**
  * Application bootstrapping entry point.
  *
- * Delegates the whole Module Federation setup to the corelib: the remotes and module configuration files declared in
- * the application configuration are registered and loaded, the host-local components are made available to zones, and
- * all lifecycle phases are executed sequentially for each module.
+ * Delegates the whole Module Federation setup to the corelib: the remotes, module configuration files and extra zone
+ * files declared in the application configuration are registered and loaded, the host-local components are made
+ * available to zones, and all lifecycle phases are executed sequentially for each module.
  *
  * The boot process is asynchronous and blocks application startup until all lifecycle phases have been completed.
  *
@@ -49,6 +49,7 @@ export default defineBoot(async ({ router }): Promise<void> => {
     router,
     remotes: appConfig.remotes,
     modules: appConfig.modules,
+    extraZones: appConfig.extraZones,
     localComponents: {
       AccountLifecyclePanel,
       ExportApplicationScriptBtn,

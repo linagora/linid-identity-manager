@@ -28,8 +28,11 @@ package io.github.linagora.linid.im.api.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +40,8 @@ import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
+import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitMapper;
+import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
@@ -47,9 +52,13 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
+import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -83,6 +92,9 @@ class AccountControllerTest {
 
     @Mock
     private OrganizationalUnitService organizationalUnitService;
+
+    @Mock
+    private AccountOrganizationalUnitMapper accountOrganizationalUnitMapper;
 
     @InjectMocks
     private AccountController accountController;
@@ -207,6 +219,71 @@ class AccountControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
         assertEquals(1, response.getBody().getTotalElements());
+    }
+
+    @Test
+    @DisplayName("Should return the paginated organizational units of the account")
+    void testFindAllOrganizationalUnits_shouldReturnPaginatedDTOs() {
+        var accountId = UUID.randomUUID();
+        var entity = AccountOrganizationalUnitView.builder()
+            .id(UUID.randomUUID())
+            .accountId(accountId)
+            .name("Headquarters")
+            .type("DIVISION")
+            .build();
+        var dto = AccountOrganizationalUnitViewDTO.builder()
+            .id(entity.getId())
+            .name(entity.getName())
+            .type(entity.getType())
+            .build();
+        var filters = new AccountOrganizationalUnitViewQueryFilterDto();
+        when(accountService.findAllOrganizationalUnits(
+            any(UserPrincipal.class),
+            any(AccountOrganizationalUnitViewQueryFilterDto.class),
+            any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+        when(accountOrganizationalUnitMapper.toDTO(entity)).thenReturn(dto);
+        when(pagedResponseStatusResolver.resolve(any(Page.class)))
+            .thenAnswer(invocation -> ResponseEntity.ok(invocation.getArgument(0)));
+
+        ResponseEntity<Page<AccountOrganizationalUnitViewDTO>> response =
+            accountController.findAllOrganizationalUnits(userPrincipal, accountId, filters, PageRequest.of(0, 10));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getTotalElements());
+        assertEquals(entity.getId(), response.getBody().getContent().getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("Should restrict the organizational units listing to the requested account")
+    void testFindAllOrganizationalUnits_shouldFilterOnAccountId() {
+        var accountId = UUID.randomUUID();
+        var filters = new AccountOrganizationalUnitViewQueryFilterDto();
+        when(accountService.findAllOrganizationalUnits(any(), any(), any()))
+            .thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any(Page.class)))
+            .thenAnswer(invocation -> ResponseEntity.ok(invocation.getArgument(0)));
+
+        accountController.findAllOrganizationalUnits(userPrincipal, accountId, filters, Pageable.unpaged());
+
+        assertEquals(List.of(accountId.toString()), filters.getAccountId());
+        verify(accountService).existsById(userPrincipal, accountId);
+    }
+
+    @Test
+    @DisplayName("Should propagate the 404 raised when the account does not exist")
+    void testFindAllOrganizationalUnits_shouldPropagateUnknownAccount() {
+        var accountId = UUID.randomUUID();
+        var filters = new AccountOrganizationalUnitViewQueryFilterDto();
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
+
+        var exception = assertThrows(ApiException.class, () -> accountController.findAllOrganizationalUnits(
+            userPrincipal, accountId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(accountService, never()).findAllOrganizationalUnits(any(), any(), any());
     }
 
     @Test

@@ -40,10 +40,13 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountOrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
@@ -71,6 +74,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.lang.reflect.Field;
 import java.time.OffsetDateTime;
@@ -101,6 +105,8 @@ class AccountServiceImplTest {
     private AccountStatusRepository accountStatusRepository;
     @Mock
     private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+    @Mock
+    private AccountOrganizationalUnitViewRepository accountOrganizationalUnitViewRepository;
     @Mock
     private OrganizationalUnitRepository organizationalUnitRepository;
     @Mock
@@ -388,6 +394,55 @@ class AccountServiceImplTest {
             ArgumentMatchers.any(),
             ArgumentMatchers.any(),
             ArgumentMatchers.any());
+    }
+
+    @Test
+    @DisplayName("Should delegate organizational units listing to the account organizational unit view repository")
+    void testFindAllOrganizationalUnits_shouldDelegateToRepository() {
+        var pageable = PageRequest.of(0, 10);
+        var entity = AccountOrganizationalUnitView.builder()
+            .id(UUID.randomUUID())
+            .accountId(UUID.randomUUID())
+            .name("Headquarters")
+            .type("DIVISION")
+            .build();
+        var filters = new AccountOrganizationalUnitViewQueryFilterDto();
+        when(accountOrganizationalUnitViewRepository.findAll(
+            ArgumentMatchers.<Specification<AccountOrganizationalUnitView>>any(),
+            ArgumentMatchers.any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        Page<AccountOrganizationalUnitView> result =
+            accountService.findAllOrganizationalUnits(userPrincipal, filters, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(entity.getId(), result.getContent().getFirst().getId());
+        verify(accountOrganizationalUnitViewRepository).findAll(
+            ArgumentMatchers.<Specification<AccountOrganizationalUnitView>>any(),
+            ArgumentMatchers.any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("Should not throw when the account exists")
+    void testExistsById_shouldNotThrowWhenAccountExists() {
+        UUID id = UUID.randomUUID();
+        when(accountRepository.existsById(id)).thenReturn(true);
+
+        assertDoesNotThrow(() -> accountService.existsById(userPrincipal, id));
+    }
+
+    @Test
+    @DisplayName("Should throw 404 when the account does not exist")
+    void testExistsById_shouldThrow404WhenAccountDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(accountRepository.existsById(id)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> accountService.existsById(userPrincipal, id));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
     }
 
     @Test

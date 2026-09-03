@@ -30,6 +30,8 @@ import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
+import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitMapper;
+import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.account.AccountReactivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountRecord;
 import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
@@ -37,6 +39,7 @@ import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
@@ -61,6 +64,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -95,6 +99,11 @@ public class AccountController {
      * Service handling organizational unit business logic.
      */
     private final OrganizationalUnitService organizationalUnitService;
+
+    /**
+     * Mapper for account organizational unit view entity-to-DTO conversion.
+     */
+    private final AccountOrganizationalUnitMapper accountOrganizationalUnitMapper;
 
     /**
      * Creates a new account.
@@ -156,6 +165,38 @@ public class AccountController {
         log.info("[{}] Received GET request for account {}", userPrincipal.getEmail(), id);
         var entity = accountService.findById(userPrincipal, id);
         return ResponseEntity.ok(accountMapper.toDTO(entity));
+    }
+
+    /**
+     * Retrieves the organizational units the account is attached to, with pagination and filtering.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of organizational unit DTOs
+     */
+    @GetMapping("/{accountId}/organizational-units")
+    @Operation(summary = "Get all account organizational units with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of account organizational units")
+    @ApiResponse(responseCode = "206",
+        description = "Partial list of account organizational units (more pages available)")
+    public ResponseEntity<Page<AccountOrganizationalUnitViewDTO>> findAllOrganizationalUnits(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID accountId,
+        final AccountOrganizationalUnitViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for account {} organizational units with {}", userPrincipal.getEmail(),
+            accountId, filters);
+
+        accountService.existsById(userPrincipal, accountId);
+
+        filters.setAccountId(List.of(accountId.toString()));
+
+        var pages = accountService.findAllOrganizationalUnits(userPrincipal, filters, pageable)
+            .map(accountOrganizationalUnitMapper::toDTO);
+
+        return pagedResponseStatusResolver.resolve(pages);
     }
 
     /**

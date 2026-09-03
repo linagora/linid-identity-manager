@@ -590,6 +590,20 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Unités organisationnelles",
+      "loadError": "Impossible de charger les unités organisationnelles. Veuillez réessayer plus tard.",
+      "columns": {
+        "name": "Nom",
+        "type": "Type",
+        "status": "Statut"
+      },
+      "GenericEntityTable": {
+        "noData": "Aucune unité organisationnelle pour ce compte.",
+        "rowsPerPage": "Éléments par page:",
+        "paginationLabel": "{start}-{end} sur {total}"
+      }
     }
   },
   "AccountLifecyclePanel": {

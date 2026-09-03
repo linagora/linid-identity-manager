@@ -590,6 +590,20 @@
           }
         }
       }
+    },
+    "GenericEditableTableCard": {
+      "title": "Organizational units",
+      "loadError": "Unable to load the organizational units. Please try again later.",
+      "columns": {
+        "name": "Name",
+        "type": "Type",
+        "status": "Status"
+      },
+      "GenericEntityTable": {
+        "noData": "No organizational unit for this account.",
+        "rowsPerPage": "Rows per page:",
+        "paginationLabel": "{start}-{end} of {total}"
+      }
     }
   },
   "AccountLifecyclePanel": {

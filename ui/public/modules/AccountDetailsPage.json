@@ -62,6 +62,38 @@
     {
       "zone": "moduleAccountDetailsPage.content.before",
       "component": "AccountLifecyclePanel"
+    },
+    {
+      "zone": "moduleAccountDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "rowKey": "id",
+        "enableActions": false,
+        "enableRowActions": false,
+        "columns": [
+          {
+            "name": "name",
+            "label": "columns.name",
+            "field": "name",
+            "align": "left"
+          },
+          {
+            "name": "type",
+            "label": "columns.type",
+            "field": "type",
+            "align": "left"
+          },
+          {
+            "name": "status",
+            "label": "columns.status",
+            "field": "status",
+            "align": "left"
+          }
+        ],
+        "endpoints": {
+          "find": "/accounts/{{ entity.id }}/organizational-units?sort=name,asc"
+        }
+      }
     }
   ],
   "options": {

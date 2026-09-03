@@ -104,6 +104,12 @@
         }
       }
     },
+    "generic-editable-table-card": {
+      "q-card": { "flat": true, "bordered": false },
+      "generic-entity-table": {
+        "q-table": {}
+      }
+    },
     "activation-actions": {
       "dropdown-button": {
         "q-btn-dropdown": { "color": "positive", "outline": false },

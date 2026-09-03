@@ -3,6 +3,9 @@
     "NavigationMenu": {
       "label": "Accounts"
     },
+    "ButtonsCard": {
+      "create": "Add an account"
+    },
     "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
     "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
     "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
@@ -504,6 +507,67 @@
         "ButtonsCard": {
           "confirm": "Reactivate",
           "cancel": "Cancel"
+        }
+      }
+    }
+  },
+  "moduleAccountCreationPage": {
+    "title": "Create an account",
+    "error": "Unable to create the account. Please try again later.",
+    "success": "Account created successfully.",
+    "ButtonsCard": {
+      "cancel": "Back",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "formSections": {
+      "general": {
+        "title": "General information"
+      }
+    },
+    "fields": {
+      "externalId": {
+        "label": "Identifier *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "lastname": {
+        "label": "Last name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "firstname": {
+        "label": "First name *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "email": {
+        "label": "Email *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required.",
+          "email": "The email format is invalid."
+        }
+      },
+      "validityPeriod": {
+        "start": {
+          "label": "Validity start date *",
+          "close": "Close",
+          "validation": {
+            "required": "This field is required.",
+            "invalidDate": "Invalid date format. Expected format is {format}.",
+            "afterDate": "The date cannot be before today."
+          }
+        }
+      },
+      "organizationalUnit": {
+        "label": "Organizational unit *",
+        "validation": {
+          "required": "This field is required."
         }
       }
     }

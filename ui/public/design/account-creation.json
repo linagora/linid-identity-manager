@@ -1,0 +1,36 @@
+{
+  "moduleAccountCreationPage": {
+    "buttons-card": {
+      "confirm-button": {
+        "q-btn": {
+          "outline": false
+        }
+      }
+    },
+    "form-section-general": {
+      "q-card": {},
+      "EntityAttributeField": {
+        "externalId": {
+          "q-input": {}
+        },
+        "lastname": {
+          "q-input": {}
+        },
+        "firstname": {
+          "q-input": {}
+        },
+        "email": {
+          "q-input": {}
+        },
+        "validityPeriod": {
+          "start": {
+            "q-input": {}
+          }
+        },
+        "organizationalUnit": {
+          "q-select": {}
+        }
+      }
+    }
+  }
+}

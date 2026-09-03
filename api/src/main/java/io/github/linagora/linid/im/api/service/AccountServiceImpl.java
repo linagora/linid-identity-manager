@@ -40,11 +40,14 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountOrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
@@ -128,6 +131,11 @@ public class AccountServiceImpl implements AccountService {
      * Repository for organizational unit account link persistence operations.
      */
     private final OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    /**
+     * Repository for read-only account organizational unit view operations, supporting dynamic filtering.
+     */
+    private final AccountOrganizationalUnitViewRepository accountOrganizationalUnitViewRepository;
 
     /**
      * Repository for organizational unit persistence operations.
@@ -227,12 +235,36 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<AccountOrganizationalUnitView> findAllOrganizationalUnits(
+        final UserPrincipal userPrincipal,
+        final AccountOrganizationalUnitViewQueryFilterDto filters,
+        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(AccountOrganizationalUnitView.class, filters);
+
+        return accountOrganizationalUnitViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public AccountDistinctView findById(final UserPrincipal userPrincipal, final UUID id) {
         return accountDistinctViewRepository.findFirstById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
                 I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))
             ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        if (accountRepository.existsById(id)) {
+            return;
+        }
+
+        throw new ApiException(
+            HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.account.not_found", Map.of("id", id.toString()))
+        );
     }
 
     @Override

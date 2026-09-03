@@ -36,6 +36,8 @@ import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
+import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -76,6 +78,19 @@ public interface AccountService {
                                       Pageable pageable);
 
     /**
+     * Retrieves a paginated list of the organizational units the account is attached to.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination information
+     * @return a page of {@link AccountOrganizationalUnitView}
+     */
+    Page<AccountOrganizationalUnitView> findAllOrganizationalUnits(
+        UserPrincipal userPrincipal,
+        AccountOrganizationalUnitViewQueryFilterDto filters,
+        Pageable pageable);
+
+    /**
      * Retrieves an account by its unique identifier.
      *
      * @param userPrincipal the authenticated user
@@ -83,6 +98,14 @@ public interface AccountService {
      * @return the account entity
      */
     AccountDistinctView findById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Checks whether an account exists for the given identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     */
+    void existsById(UserPrincipal userPrincipal, UUID id);
 
     /**
      * Updates the editable attributes ({@code externalId}, {@code lastname}, {@code firstname},

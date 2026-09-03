@@ -13,8 +13,8 @@
     "page": "catalogUI/GenericTablePage",
     "pagePath": "",
     "idKey": "id",
-    "enableActions": false,
-    "creationPagePath": null,
+    "enableActions": true,
+    "creationPagePath": "/accounts/new",
     "filters": [
       {
         "name": "firstname",

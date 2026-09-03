@@ -29,6 +29,7 @@
   ],
   "modules": [
     "/modules/AccountsPage.json",
+    "/modules/AccountCreationPage.json",
     "/modules/ApplicationsPage.json",
     "/modules/ApplicationCreationPage.json",
     "/modules/OrganizationalUnitPage.json",
@@ -59,6 +60,7 @@
     "design/accounts-page.json",
     "design/applications-page.json",
     "design/application-creation.json",
+    "design/account-creation.json",
     "design/organizational-units-page.json",
     "design/application-details.json"
   ],

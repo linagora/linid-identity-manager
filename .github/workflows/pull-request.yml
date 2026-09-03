@@ -428,16 +428,14 @@ jobs:
         uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build api image
-        run: task build:image:api
+      - name: Setup certificates for image
+        run: task setup:e2e
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: linid-identity-manager-api
           severity: CRITICAL,HIGH
           exit-code: "1"
           skip-files: /usr/bin/pebble
-      - name: Build ui image
-        run: task build:image:ui
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: linid-identity-manager-ui

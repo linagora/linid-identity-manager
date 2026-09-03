@@ -42,7 +42,7 @@ import { DATE_FORMAT_KEY } from 'src/types/common';
  * @returns Functions to convert API records to UI-friendly formats.
  */
 export function useAccountMapper() {
-  const { toDate, toDateISO } = useCommonMapper();
+  const { toDateISO } = useCommonMapper();
 
   /**
    * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status fields. Identity fields (firstname,
@@ -149,14 +149,10 @@ export function useAccountMapper() {
     accountStatus: AccountStatus
   ): AccountStatusForm => {
     return {
-      validityPeriodStart:
-        toDate(accountStatus.validityPeriod?.start, DATE_FORMAT_KEY) || null,
-      validityPeriodEnd:
-        toDate(accountStatus.validityPeriod?.end, DATE_FORMAT_KEY) || null,
-      suspensionPeriodStart:
-        toDate(accountStatus.suspensionPeriod?.start, DATE_FORMAT_KEY) || null,
-      suspensionPeriodEnd:
-        toDate(accountStatus.suspensionPeriod?.end, DATE_FORMAT_KEY) || null,
+      validityPeriodStart: accountStatus.validityPeriod?.start,
+      validityPeriodEnd: accountStatus.validityPeriod?.end,
+      suspensionPeriodStart: accountStatus.suspensionPeriod?.start,
+      suspensionPeriodEnd: accountStatus.suspensionPeriod?.end,
     };
   };
 

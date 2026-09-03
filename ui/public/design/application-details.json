@@ -1,44 +1,84 @@
 {
   "moduleApplicationDetailsPage": {
-    "buttons-card": {
-      "edit-button": {
-        "q-btn": {
-          "outline": false
+    "entity-profile-panel": {
+      "q-card": {},
+      "q-img": {},
+      "q-icon": { "name": "apps", "color": "grey-6" },
+      "navigation": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "left" },
+          "back-button": {
+            "q-btn": {
+              "flat": true,
+              "color": "primary",
+              "icon": "arrow_back",
+              "no-caps": true
+            }
+          }
+        }
+      },
+      "actions": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "export": {
+            "q-btn": {
+              "color": "primary",
+              "icon": "download",
+              "outline": true
+            }
+          },
+          "edit-button": {
+            "form-dialog-button": {
+              "q-btn": {
+                "color": "primary",
+                "icon": "edit",
+                "outline": false
+              },
+              "form-dialog": {
+                "buttons-card": {
+                  "confirm-button": {
+                    "q-btn": {
+                      "outline": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "entity-details-card": {
+        "q-card": {},
+        "type": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "category" },
+            "q-card": {}
+          }
+        },
+        "domain": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "domain" },
+            "q-card": {}
+          }
+        },
+        "description": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "description" },
+            "q-card": {}
+          }
         }
       }
     },
     "sections": {
-      "identity": {
+      "claims": {
         "entity-details-card": {
           "q-card": {},
-          "code": {
+          "claimsTemplate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "tag" },
-              "q-card": {}
-            }
-          },
-          "name": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "apps" },
-              "q-card": {}
-            }
-          },
-          "type": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "category" },
-              "q-card": {}
-            }
-          },
-          "domain": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "domain" },
-              "q-card": {}
-            }
-          },
-          "description": {
-            "information-card": {
-              "q-icon": { "color": "primary", "name": "description" },
-              "q-card": {}
+              "q-icon": { "color": "primary", "name": "token" },
+              "q-input": {}
             }
           }
         }

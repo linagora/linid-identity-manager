@@ -118,6 +118,7 @@
         "required": true,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       },
@@ -128,6 +129,7 @@
         "required": false,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": {
             "afterDate": "{{ today }}",
             "fromDate": "{{ entity.suspensionPeriodStart }}"
@@ -188,6 +190,7 @@
         "required": false,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       },
@@ -198,6 +201,7 @@
         "required": false,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": {
             "afterDate": "{{ today }}",
             "fromDate": "{{ entity.suspensionPeriodStart }}"
@@ -321,6 +325,7 @@
         "required": true,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       },
@@ -394,6 +399,7 @@
         "required": true,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       },
@@ -475,6 +481,7 @@
         "required": true,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       }
@@ -495,6 +502,7 @@
         "required": true,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       },
@@ -579,6 +587,7 @@
         "required": true,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": { "afterDate": "{{ today }}" }
         }
       },
@@ -589,6 +598,7 @@
         "required": false,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": {
             "afterDate": "{{ today }}",
             "fromDate": "{{ entity.start }}"
@@ -649,6 +659,7 @@
         "required": false,
         "inputSettings": {
           "maskI18NKey": "application.dateFormat",
+          "valueFormatI18NKey": "application.dateFormatApi",
           "options": {
             "afterDate": "{{ today }}",
             "fromDate": "{{ entity.start }}"

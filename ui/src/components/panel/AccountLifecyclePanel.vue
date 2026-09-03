@@ -106,6 +106,7 @@ import type { DropdownClickPayload } from '@linagora/linid-im-front-corelib';
 import {
   loadAsyncComponent,
   uiEventSubject,
+  useCommonMapper,
   useNotify,
   useScopedI18n,
 } from '@linagora/linid-im-front-corelib';
@@ -133,6 +134,7 @@ import type {
   AccountStatus,
   AccountStatusForm,
 } from 'src/types/accounts';
+import { DATE_FORMAT_KEY } from 'src/types/common';
 import { computed } from 'vue';
 
 defineOptions({ inheritAttrs: false });
@@ -155,6 +157,7 @@ const {
   toAccountReactivationRecord,
   toAccountValidityRecord,
 } = useAccountMapper();
+const { toDate } = useCommonMapper();
 
 const accountId = computed(() => props.entity.id as string);
 
@@ -375,7 +378,7 @@ function scheduledActivation() {
             toAccountValidityRecord(formData)
           ),
         'scheduledActivationSuccess',
-        formData.validityPeriodStart
+        toDate(formData.validityPeriodStart, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -393,7 +396,7 @@ function scheduledDeactivation() {
             toAccountDeactivationRecord(formData)
           ),
         'scheduledDeactivationSuccess',
-        formData.validityPeriodEnd
+        toDate(formData.validityPeriodEnd, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -414,7 +417,7 @@ function modifyDeactivation() {
             toAccountDeactivationRecord(formData)
           ),
         'modifyDeactivationSuccess',
-        formData.validityPeriodEnd
+        toDate(formData.validityPeriodEnd, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -429,7 +432,7 @@ function scheduledSuspension() {
         () =>
           suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
         'scheduledSuspensionSuccess',
-        formData.suspensionPeriodStart
+        toDate(formData.suspensionPeriodStart, DATE_FORMAT_KEY)
       ),
   });
 }
@@ -447,7 +450,7 @@ function modifySuspension() {
         () =>
           suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
         'modifySuspensionSuccess',
-        formData.suspensionPeriodStart
+        toDate(formData.suspensionPeriodStart, DATE_FORMAT_KEY)
       ),
   });
 }

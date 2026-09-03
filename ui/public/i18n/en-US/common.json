@@ -18,6 +18,7 @@
       "version": "Demo version"
     },
     "dateTimeFormat": "YYYY/MM/DD hh:mm:ss A",
+    "dateFormatApi": "YYYY-MM-DDTHH:mm:ssZ",
     "dateFormat": "YYYY/MM/DD",
     "language": {
       "title": "Language"

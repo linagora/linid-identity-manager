@@ -33,6 +33,8 @@
 		<url>https://github.com/linagora/linid-identity-manager</url>
 	</scm>
 	<properties>
+		<!-- Overrides the Spring Boot managed version to fix CVE-2026-65182, CVE-2026-65905 and CVE-2026-68525 -->
+		<tomcat.version>11.0.25</tomcat.version>
 		<java.version>25</java.version>
 		<postgresql.version>42.7.13</postgresql.version>
 	</properties>

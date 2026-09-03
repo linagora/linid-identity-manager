@@ -69,6 +69,10 @@ Feature: Test Account details page display
   ## 166 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
   ## 167 Scheduled revalidation - success, account re-validated after form submission
   ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
+  ## 169 Should display the organizational units card of the account
+  ## 170 Should list every organizational unit of the account exactly once
+  ## 171 Organizational units table should be read-only
+  ## 172 Should display an empty organizational units table for an unattached account
 
   Scenario: Roundtrip about Account Details
 
@@ -982,3 +986,56 @@ Feature: Test Account details page display
     And I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "edited-id"
     And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Edwina Edited"
     And I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "edited@example.com"
+
+    ####################################################
+    ########### Organizational units of the account ####
+    ####################################################
+
+    ## 169 Should display the organizational units card of the account
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-email"]'
+    And I set the text "user3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000a004"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000a004"
+    And I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
+    And I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
+    And I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
+    And I expect the HTML element '[data-cy="generic-entity-table"] thead th' appear 3 times on screen
+    And I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(1)' contains "Nom"
+    And I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(2)' contains "Type"
+    And I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(3)' contains "Statut"
+
+    ## 170 Should list every organizational unit of the account exactly once
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' appear 2 times on screen
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(1)' contains "Division A1"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(2)' contains "DIVISION"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(1)' contains "Team Beta"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(2)' contains "TEAM"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(3)' contains "ACTIVE"
+
+    ## 171 Organizational units table should be read-only
+    And I expect the HTML element '[data-cy="generic-editable-table-card_add-button"]' not exists
+    And I expect the HTML element '.generic-editable-table-card--edit-button' not exists
+    And I expect the HTML element '.generic-editable-table-card--delete-button' not exists
+    And I expect the HTML element '.generic-entity-table--actions' not exists
+
+    ## 172 Should display an empty organizational units table for an unattached account
+    # lifecycle-c14 is the only account of the dataset with no membership at all
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And I click on '[data-cy="linid-filter-panel_item-email"]'
+    And I set the text "lifecycle-c14@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000ce"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000ce"
+    And I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
+    And I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' not exists
+    And I expect the HTML element '[data-cy="generic-entity-table"] .q-table__bottom--nodata' contains "Aucune unité organisationnelle pour ce compte."

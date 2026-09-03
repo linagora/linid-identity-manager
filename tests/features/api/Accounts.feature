@@ -68,6 +68,11 @@ Feature: Test API Account endpoints
   ## 804 Should return 400 when updating with an email or external identifier already used
   ## 707 Should return 404 when activating unknown account
 
+  ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
+  ## 901 Should return <ou> for the <user> account
+  ## 902 Should return 404 for an unknown account
+  ## 903 Should return an empty page for an account without any organizational unit
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -1273,3 +1278,44 @@ Feature: Test API Account endpoints
     Then  I expect status code is 204
     When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
     Then  I expect status code is 204
+
+  ####################################################
+  ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
+  ####################################################
+
+  Scenario Outline: 901 - Should return <ou> for the <user> account
+    When I request '{{env.E2E_API_URL}}/accounts?externalId=<user>' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I store 'accountId' as '{{response.body.content[0].id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/organizational-units?sort=name,asc' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '<totalElements>'
+    And  I expect '{{response.body.content.length}}' is '<totalElements>'
+    And  I expect '{{response.body.content[<indice>].id}}' is not empty
+    And  I expect '{{response.body.content[<indice>].name}}' is '<ou>'
+    And  I expect '{{response.body.content[<indice>].type}}' is '<type>'
+    And  I expect '{{response.body.content[<indice>].status}}' is 'ACTIVE'
+
+    Examples:
+      | user          | ou          | type     | totalElements | indice |
+      | user1         | Company A   | COMPANY  | 2             | 0      |
+      | user1         | Team Beta   | TEAM     | 2             | 1      |
+      | user2         | Company B   | COMPANY  | 2             | 0      |
+      | user2         | Team Beta   | TEAM     | 2             | 1      |
+      | user3         | Division A1 | DIVISION | 2             | 0      |
+      | user3         | Team Beta   | TEAM     | 2             | 1      |
+      | lifecycle-c10 | Team Alpha  | TEAM     | 1             | 0      |
+
+  Scenario: 902 - Should return 404 for an unknown account
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/organizational-units' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'
+
+  Scenario: 903 - Should return an empty page for an account without any organizational unit
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000ce/organizational-units' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '0'
+    And  I expect '{{response.body.content.length}}' is '0'

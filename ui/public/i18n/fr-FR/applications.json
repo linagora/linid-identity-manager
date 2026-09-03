@@ -104,7 +104,7 @@
       "content": "Créer un favori à partir de la recherche actuelle.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favori",
+          "label": "Nom du favori *",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -122,7 +122,7 @@
       "duplicateName": "Le favori '{name}' existe déjà.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favori",
+          "label": "Nom du favori *",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -231,25 +231,84 @@
   "moduleApplicationDetailsPage": {
     "title": "Détails de l'application",
     "error": "Impossible de charger l'application. Veuillez réessayer plus tard.",
-    "ButtonsCard": {
-      "cancel": "Retour",
-      "edit": "Modifier"
-    },
-    "export": {
-      "label": "Exporter script",
-      "success": "Export terminé avec succès.",
-      "error": "Erreur lors de l'export."
+    "EntityProfilePanel": {
+      "title": "{name}",
+      "subtitle": "{code}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Liste des applications"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "type": "Type",
+          "domain": "Domaine applicatif",
+          "description": "Description",
+          "deployedAt": "Déployée le"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "export": {
+            "label": "Exporter script",
+            "success": "Export terminé avec succès.",
+            "error": "Erreur lors de l'export."
+          },
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Application modifiée avec succès.",
+              "submitError": "Impossible de modifier l'application. Veuillez réessayer plus tard.",
+              "FormDialog": {
+                "title": "Modifier {name}",
+                "fields": {
+                  "code": {
+                    "label": "Code *",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "name": {
+                    "label": "Nom *",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "type": {
+                    "label": "Type *",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "domain": {
+                    "label": "Domaine applicatif"
+                  },
+                  "description": {
+                    "label": "Description"
+                  },
+                  "claimsTemplate": {
+                    "label": "Modèle de génération des claims *",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Enregistrer",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "sections": {
-      "identity": {
+      "claims": {
         "EntityDetailsCard": {
-          "title": "Informations générales",
+          "title": "Claims",
           "attributes": {
-            "code": "Code",
-            "name": "Nom",
-            "domain": "Domaine applicatif",
-            "description": "Description",
-            "type": "Type"
+            "claimsTemplate": "Modèle de génération des claims"
           }
         }
       },
@@ -291,7 +350,7 @@
         },
         "fields": {
           "name": {
-            "label": "Nom",
+            "label": "Nom *",
             "validation": {
               "required": "Ce champ est requis."
             }
@@ -309,7 +368,7 @@
         },
         "fields": {
           "name": {
-            "label": "Nom",
+            "label": "Nom *",
             "validation": {
               "required": "Ce champ est requis."
             }
@@ -357,7 +416,7 @@
         },
         "fields": {
           "code": {
-            "label": "Code",
+            "label": "Code *",
             "validation": {
               "required": "Ce champ est requis."
             }
@@ -366,13 +425,13 @@
             "label": "Description"
           },
           "priority": {
-            "label": "Priorité",
+            "label": "Priorité *",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "script": {
-            "label": "Script",
+            "label": "Script *",
             "validation": {
               "required": "Ce champ est requis."
             }
@@ -390,7 +449,7 @@
         },
         "fields": {
           "code": {
-            "label": "Code",
+            "label": "Code *",
             "validation": {
               "required": "Ce champ est requis."
             }
@@ -399,13 +458,13 @@
             "label": "Description"
           },
           "priority": {
-            "label": "Priorité",
+            "label": "Priorité *",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "script": {
-            "label": "Script",
+            "label": "Script *",
             "validation": {
               "required": "Ce champ est requis."
             }

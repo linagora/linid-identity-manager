@@ -81,9 +81,6 @@ export interface AppConfig {
 
   // ─── Organizational units ────────────────────────────────────────────────────
 
-  /** Ordered list of field definitions rendered in the organizational unit creation form. */
-  organizationalUnitCreationFields: LinidAttributeConfiguration[];
-
   /**
    * Form field configurations for each OU lifecycle action dialog, keyed by action identifier (e.g.
    * `"suspension.immediate"`, `"suspension.scheduled"`).

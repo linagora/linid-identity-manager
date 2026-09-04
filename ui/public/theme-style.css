@@ -135,9 +135,7 @@
 
 /* Form section titles: left accent border */
 .generic-creation-page .generic-creation-page--form-section--title,
-.generic-edition-page .generic-edition-page--form-section--title,
-.organizational-unit-creation-page
-  .organizational-unit-creation-page--section-title {
+.generic-edition-page .generic-edition-page--form-section--title {
   margin-top: 0;
   padding-left: 12px;
   border-left: 4px solid var(--q-primary);

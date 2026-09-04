@@ -26,7 +26,6 @@
 
 import { api } from 'boot/axios';
 import {
-  createOrganizationalUnit,
   getOrganizationalUnitById,
   reactivateOrganizationalUnit,
   suspendOrganizationalUnit,
@@ -86,31 +85,6 @@ describe('Test service: organizationalUnitService', () => {
       vi.mocked(api.get).mockRejectedValue(error);
 
       await expect(getOrganizationalUnitById(OU_UUID)).rejects.toThrow('boom');
-    });
-  });
-
-  describe('Test function: createOrganizationalUnit', () => {
-    const payload = {
-      parent: ROOT_UUID,
-      name: 'Engineering',
-      type: 'DEPARTMENT',
-    };
-
-    it('should call valid endpoint with payload and return the raw DTO', async () => {
-      const dto = buildOuDTO();
-      vi.mocked(api.post).mockResolvedValue({ data: dto });
-
-      const result = await createOrganizationalUnit(payload);
-
-      expect(api.post).toHaveBeenCalledWith('/organizational-units', payload);
-      expect(result).toEqual(dto);
-    });
-
-    it('should propagate backend errors to the caller', async () => {
-      const error = new Error('boom');
-      vi.mocked(api.post).mockRejectedValue(error);
-
-      await expect(createOrganizationalUnit(payload)).rejects.toThrow('boom');
     });
   });
 

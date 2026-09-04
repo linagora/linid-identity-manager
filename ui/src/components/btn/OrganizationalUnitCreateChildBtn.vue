@@ -65,7 +65,7 @@ const uiProps = computed(() => ({
  */
 function goToCreateChild(): void {
   void router.push({
-    path: '/organizational-units/create',
+    path: '/organizational-units/new',
     query: { parent: props.entity.id as string },
   });
 }

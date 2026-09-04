@@ -71,7 +71,7 @@ describe('Test component: OrganizationalUnitCreateChildBtn', () => {
       wrapper.vm.goToCreateChild();
 
       expect(mockPush).toHaveBeenCalledWith({
-        path: '/organizational-units/create',
+        path: '/organizational-units/new',
         query: { parent: 'test-ou-id' },
       });
     });

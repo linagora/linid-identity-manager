@@ -24,39 +24,21 @@
  * LinID Identity Manager software.
  */
 
-import { linidModuleFederation } from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
-import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
-import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
-import OrganizationalUnitParentField from 'components/field/OrganizationalUnitParentField.vue';
-import AccountLifecyclePanel from 'components/panel/AccountLifecyclePanel.vue';
-import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
-import { appConfig } from './config';
-
 /**
- * Application bootstrapping entry point.
- *
- * Delegates the whole Module Federation setup to the corelib: the remotes, module configuration files and extra zone
- * files declared in the application configuration are registered and loaded, the host-local components are made
- * available to zones, and all lifecycle phases are executed sequentially for each module.
- *
- * The boot process is asynchronous and blocks application startup until all lifecycle phases have been completed.
- *
- * @param boot - The framework-provided boot context; the router is used to register module routes.
- * @returns Resolves once all modules have completed every lifecycle phase.
+ * Props for the OrganizationalUnitParentField component, rendered in a generic creation page zone. The zone renderer
+ * provides the page UI namespace and the page i18n scope; other zone attributes are ignored.
  */
-export default defineBoot(async ({ router }): Promise<void> => {
-  await linidModuleFederation.init({
-    router,
-    remotes: appConfig.remotes,
-    modules: appConfig.modules,
-    extraZones: appConfig.extraZones,
-    localComponents: {
-      AccountLifecyclePanel,
-      ExportApplicationScriptBtn,
-      OrganizationalUnitCreateChildBtn,
-      OrganizationalUnitLifecyclePanel,
-      OrganizationalUnitParentField,
-    },
-  });
-});
+export interface OrganizationalUnitParentFieldProps {
+  /** Raw organizational unit entity. */
+  entity: Record<string, unknown>;
+  /** UI design namespace of the hosting page, used to resolve the field design properties. */
+  uiNamespace: string;
+  /** I18n scope of the hosting page, used to resolve the field label. */
+  i18nScope: string;
+  /** Path to the parent page. */
+  parentPath: string;
+  /** Path to the entity homepage. */
+  homepagePath: string;
+  /** UI event key emitted once the parent OU is successfully loaded. */
+  emitOnParentLoaded: string;
+}

@@ -1,0 +1,194 @@
+/*
+ * Copyright (C) 2026 Linagora
+ *
+ * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
+ * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
+ * any later version, provided you comply with the Additional Terms applicable for LinID Identity Manager software by
+ * LINAGORA pursuant to Section 7 of the GNU Affero General Public License, subsections (b), (c), and (e), pursuant to
+ * which these Appropriate Legal Notices must notably (i) retain the display of the "LinID™" trademark/logo at the top
+ * of the interface window, the display of the "You are using the Open Source and free version of LinID™, powered by
+ * Linagora © 2009–2013. Contribute to LinID R&D by subscribing to an Enterprise offer!" infobox and in the e-mails
+ * sent with the Program, notice appended to any type of outbound messages (e.g. e-mail and meeting requests) as well
+ * as in the LinID Identity Manager user interface, (ii) retain all hypertext links between LinID Identity Manager
+ * and https://linid.org/, as well as between LINAGORA and LINAGORA.com, and (iii) refrain from infringing LINAGORA
+ * intellectual property rights over its trademarks and commercial brands. Other Additional Terms apply, see
+ * <http://www.linagora.com/licenses/> for more details.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License and its applicable Additional Terms for
+ * LinID Identity Manager along with this program. If not, see <http://www.gnu.org/licenses/> for the GNU Affero
+ * General Public License version 3 and <http://www.linagora.com/licenses/> for the Additional Terms applicable to the
+ * LinID Identity Manager software.
+ */
+
+import { flushPromises, shallowMount } from '@vue/test-utils';
+import { getOrganizationalUnitById } from 'src/services/OrganizationalUnitService';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import OrganizationalUnitParentField from '../../../../src/components/field/OrganizationalUnitParentField.vue';
+
+const { mockNotify, mockUiEventSubjectNext, mockRouterPush, mockRenderString } =
+  vi.hoisted(() => ({
+    mockNotify: vi.fn(),
+    mockUiEventSubjectNext: vi.fn(),
+    mockRouterPush: vi.fn(),
+    mockRenderString: vi.fn(() => '/organizational-units/parent-uuid'),
+  }));
+
+const mockRouter = {
+  push: mockRouterPush,
+};
+
+const route = {
+  query: { parent: 'parent-uuid' },
+};
+
+vi.mock('@linagora/linid-im-front-corelib', () => ({
+  uiEventSubject: { next: mockUiEventSubjectNext },
+  useNotify: () => ({
+    Notify: mockNotify,
+  }),
+  useNunjucks: () => ({
+    renderString: mockRenderString,
+  }),
+  useScopedI18n: () => ({
+    t: vi.fn((v) => v),
+  }),
+  useUiDesign: () => ({
+    ui: vi.fn(() => ({})),
+  }),
+}));
+
+vi.mock('src/services/OrganizationalUnitService', () => ({
+  getOrganizationalUnitById: vi.fn(),
+}));
+
+vi.mock('vue-router', () => ({
+  useRouter: () => mockRouter,
+  useRoute: () => route,
+}));
+
+const parentOu = {
+  id: 'parent-uuid',
+  name: 'Root',
+  type: 'root',
+  createdBy: 'admin',
+  updatedBy: 'admin',
+  insertDate: '2026-05-13T12:00:00.000000Z',
+  updateDate: '2026-05-13T12:00:00.000000Z',
+};
+
+const defaultProps = {
+  entity: { name: '' },
+  uiNamespace: 'OrganizationalUnitCreationPage',
+  i18nScope: 'organizational-units',
+  homepagePath: '/organizational-units',
+  parentPath: '/organizational-units/{{ parentId }}',
+  emitOnParentLoaded: 'ou-creation:parent-loaded',
+};
+
+describe('Test component: OrganizationalUnitParentField', () => {
+  let wrapper;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    route.query = { parent: 'parent-uuid' };
+    getOrganizationalUnitById.mockResolvedValue(parentOu);
+  });
+
+  describe('Test function: loadParent', () => {
+    it('should fetch the parent OU by id and expose its name', async () => {
+      wrapper = shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(getOrganizationalUnitById).toHaveBeenCalledWith('parent-uuid');
+      expect(wrapper.vm.parentName).toBe(parentOu.name);
+    });
+
+    it('should emit the parent-loaded event with the merged entity on success', async () => {
+      const entity = { name: 'Engineering' };
+      wrapper = shallowMount(OrganizationalUnitParentField, {
+        props: { ...defaultProps, entity },
+      });
+      await flushPromises();
+
+      expect(mockUiEventSubjectNext).toHaveBeenCalledWith({
+        key: defaultProps.emitOnParentLoaded,
+        data: { ...entity, parent: parentOu.id },
+      });
+    });
+
+    it('should not emit the parent-loaded event when the parent query is missing', async () => {
+      route.query = {};
+
+      wrapper = shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(mockUiEventSubjectNext).not.toHaveBeenCalled();
+    });
+
+    it('should not emit the parent-loaded event when the API call fails', async () => {
+      getOrganizationalUnitById.mockRejectedValueOnce(new Error('not-found'));
+
+      wrapper = shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(mockUiEventSubjectNext).not.toHaveBeenCalled();
+    });
+
+    it('should notify and redirect to the homepage when the parent query is missing', async () => {
+      route.query = {};
+
+      wrapper = shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(getOrganizationalUnitById).not.toHaveBeenCalled();
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'missingParent',
+      });
+      expect(mockRouterPush).toHaveBeenCalledWith(defaultProps.homepagePath);
+    });
+
+    it('should treat an array parent query as missing and redirect to the homepage', async () => {
+      route.query = { parent: ['parent-uuid'] };
+
+      wrapper = shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(getOrganizationalUnitById).not.toHaveBeenCalled();
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'missingParent',
+      });
+      expect(mockRouterPush).toHaveBeenCalledWith(defaultProps.homepagePath);
+    });
+
+    it('should notify and redirect to the parent OU detail page when the API call fails', async () => {
+      getOrganizationalUnitById.mockRejectedValueOnce(new Error('not-found'));
+
+      wrapper = shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(mockNotify).toHaveBeenCalledWith({
+        type: 'negative',
+        message: 'errorLoadingParent',
+      });
+      expect(mockRenderString).toHaveBeenCalledWith(defaultProps.parentPath, {
+        parentId: 'parent-uuid',
+      });
+      expect(mockRouterPush).toHaveBeenCalledWith('/organizational-units/parent-uuid');
+    });
+  });
+
+  describe('Test hook: onMounted', () => {
+    it('should call loadParent on mount', async () => {
+      shallowMount(OrganizationalUnitParentField, { props: defaultProps });
+      await flushPromises();
+
+      expect(getOrganizationalUnitById).toHaveBeenCalledWith('parent-uuid');
+    });
+  });
+});

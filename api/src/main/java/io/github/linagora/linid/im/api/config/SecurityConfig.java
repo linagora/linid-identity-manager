@@ -39,6 +39,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtTypeValidator;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -103,6 +106,20 @@ public class SecurityConfig {
                 new UserAuthenticationFilter(accountService), BearerTokenAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Requires the {@code typ: at+jwt} JOSE header (RFC 9068) so that only access tokens are accepted
+     * as bearer tokens; ID tokens ({@code typ: JWT}) or tokens without type are rejected.
+     *
+     * <p>Spring Boot merges this validator with the issuer and audience validators of the auto-configured
+     * {@code JwtDecoder}, and it replaces the default type validator which only accepts {@code JWT}.
+     *
+     * @return the access token type validator
+     */
+    @Bean
+    public OAuth2TokenValidator<Jwt> accessTokenTypeValidator() {
+        return new JwtTypeValidator("at+jwt");
     }
 
     /**

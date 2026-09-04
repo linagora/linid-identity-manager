@@ -34,6 +34,7 @@
     "/modules/OrganizationalUnitPage.json",
     "/modules/ApplicationDetailsPage.json",
     "/modules/AccountDetailsPage.json",
+    "/modules/OrganizationalUnitCreationPage.json",
     "/modules/OrganizationalUnitDetailsPage.json"
   ],
   "extraZones": [],
@@ -506,23 +507,6 @@
       }
     ]
   },
-  "organizationalUnitCreationFields": [
-    {
-      "name": "name",
-      "type": "String",
-      "input": "Text",
-      "required": true
-    },
-    {
-      "name": "type",
-      "type": "String",
-      "input": "List",
-      "required": true,
-      "inputSettings": {
-        "values": ["COMPANY", "DEPARTMENT", "TEAM"]
-      }
-    }
-  ],
   "organizationalUnitLifecycleFields": {
     "suspension.immediate": [
       {

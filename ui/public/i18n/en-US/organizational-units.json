@@ -192,10 +192,21 @@
       }
     }
   },
-  "OrganizationalUnitCreationPage": {
-    "title": "Create a new organizational unit",
-    "sections": {
-      "general": "General information"
+  "moduleOrganizationalUnitCreationPage": {
+    "title": "Create organizational unit",
+    "error": "Error while processing the request.",
+    "success": "Organizational unit successfully created",
+    "missingParent": "A parent organizational unit is required.",
+    "errorLoadingParent": "Unable to load the parent organizational unit. Please try again later.",
+    "ButtonsCard": {
+      "cancel": "Cancel",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "formSections": {
+      "general": {
+        "title": "General information"
+      }
     },
     "fields": {
       "parent": "Parent organizational unit",
@@ -211,17 +222,6 @@
           "required": "This field is required."
         }
       }
-    },
-    "ButtonsCard": {
-      "cancel": "Cancel",
-      "confirm": "Create",
-      "confirmLoading": "Creating..."
-    },
-    "success": "Organizational unit successfully created",
-    "errors": {
-      "missingParent": "A parent organizational unit is required.",
-      "validation": "Invalid data. Please check the form.",
-      "generic": "Unable to create the organizational unit. Please try again later."
     }
   },
   "moduleOrganizationalUnitDetailsPage": {

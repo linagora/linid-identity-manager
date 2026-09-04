@@ -26,47 +26,87 @@
 
 <template>
   <!-- v8 ignore start -->
-  <q-btn
-    v-bind="uiProps.btn"
-    :label="t('createChild')"
-    :disable="!entity?.id"
-    class="organizational-unit-create-child-button"
-    data-cy="organizational-unit-create-child-button"
-    @click="goToCreateChild"
-  />
+  <div data-cy="field_parent">
+    <q-input
+      :model-value="parentName"
+      :label="t('fields.parent')"
+      readonly
+      class="q-mb-sm"
+      v-bind="parentUiInputProps"
+      bottom-slots
+    />
+  </div>
   <!-- v8 ignore stop -->
 </template>
 
 <script setup lang="ts">
+import type { LinidQInputProps } from '@linagora/linid-im-front-corelib';
 import {
-  type LinidQBtnProps,
+  uiEventSubject,
+  useNotify,
+  useNunjucks,
   useScopedI18n,
   useUiDesign,
 } from '@linagora/linid-im-front-corelib';
-import type { OrganizationalUnitCreateChildBtnProps } from 'src/types/organizationalUnitCreateChildBtnProps';
-import { computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { getOrganizationalUnitById } from 'src/services/OrganizationalUnitService';
+import { type OrganizationalUnitParentFieldProps } from 'src/types/organizationalUnitParentField';
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 defineOptions({ inheritAttrs: false });
 
-const props = defineProps<OrganizationalUnitCreateChildBtnProps>();
+const props = defineProps<OrganizationalUnitParentFieldProps>();
 
+const route = useRoute();
 const router = useRouter();
 const { t } = useScopedI18n(props.i18nScope);
+const { Notify } = useNotify();
 const { ui } = useUiDesign();
+const { renderString } = useNunjucks();
 
-const uiProps = computed(() => ({
-  btn: ui<LinidQBtnProps>(`${props.uiNamespace}.create-child-button`, 'q-btn'),
-}));
+const parentName = ref<string>('');
+
+const parentUiInputProps = ui<LinidQInputProps>(
+  `${props.uiNamespace}.parent`,
+  'q-input'
+);
 
 /**
- * Navigates to the creation page to create a child organizational unit under the current one, which is passed as the
- * parent through the route query.
+ * Resolves the parent OU from the route query, fetches its name, and stores both for the lifetime of the page. Creating
+ * an OU without a parent is not allowed, so on error the user is redirected:
+ *
+ * - If the parent query parameter is absent, to {@link OrganizationalUnitParentFieldProps.homepagePath};
+ * - If the API call fails, to the parent OU detail page via {@link OrganizationalUnitParentFieldProps.parentPath} rendered
+ *   with the known parent id.
  */
-function goToCreateChild(): void {
-  void router.push({
-    path: '/organizational-units/new',
-    query: { parent: props.entity.id as string },
-  });
+async function loadParent(): Promise<void> {
+  const rawParent = route.query.parent;
+  const id = typeof rawParent === 'string' ? rawParent : '';
+  if (!id) {
+    Notify({
+      type: 'negative',
+      message: t('missingParent'),
+    });
+    void router.push(props.homepagePath);
+    return;
+  }
+  try {
+    const parent = await getOrganizationalUnitById(id);
+    parentName.value = parent.name;
+    uiEventSubject.next({
+      key: props.emitOnParentLoaded,
+      data: { ...props.entity, parent: parent.id },
+    });
+  } catch {
+    Notify({
+      type: 'negative',
+      message: t('errorLoadingParent'),
+    });
+    void router.push(renderString(props.parentPath, { parentId: id }));
+  }
 }
+
+onMounted(() => {
+  void loadParent();
+});
 </script>

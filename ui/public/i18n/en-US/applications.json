@@ -2,7 +2,7 @@
   "moduleApplicationCreationPage": {
     "title": "Create Application",
     "error": "Error while processing the request.",
-    "success": "Application created successfully.",
+    "success": "Application successfully created.",
     "ButtonsCard": {
       "cancel": "Back",
       "confirm": "Create"
@@ -253,7 +253,7 @@
         "ButtonsCard": {
           "export": {
             "label": "Export Script",
-            "success": "Script exported successfully.",
+            "success": "Script successfully exported.",
             "error": "Error exporting script."
           },
           "editButton": {
@@ -331,11 +331,11 @@
       "editButton": "Edit",
       "deleteButton": "Delete",
       "loadError": "Unable to load the application roles. Please try again later.",
-      "createSuccess": "Role created successfully.",
+      "createSuccess": "Role successfully created.",
       "createError": "Unable to create the role. Please try again later.",
-      "updateSuccess": "Role updated successfully.",
+      "updateSuccess": "Role successfully updated.",
       "updateError": "Unable to update the role. Please try again later.",
-      "deleteSuccess": "Role deleted successfully.",
+      "deleteSuccess": "Role successfully deleted.",
       "deleteError": "Unable to delete the role. Please try again later.",
       "columns": {
         "name": "Name",
@@ -400,11 +400,11 @@
       "editButton": "Edit",
       "deleteButton": "Delete",
       "unsavedChangesHint": "Some rules have been modified. Don't forget to save.",
-      "saveChangesSuccess": "Changes saved successfully.",
+      "saveChangesSuccess": "Changes successfully saved.",
       "saveChangesError": "Unable to save the changes. Please try again later.",
       "saveChangesPartially": "Some changes could not be saved.",
       "loadError": "Unable to load the application rules. Please try again later.",
-      "createSuccess": "Rule created successfully.",
+      "createSuccess": "Rule successfully created.",
       "createError": "Unable to create the rule. Please try again later.",
       "ButtonsCard": {
         "add": "Add a rule",

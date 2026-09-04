@@ -1,0 +1,28 @@
+{
+  "moduleOrganizationalUnitCreationPage": {
+    "buttons-card": {
+      "confirm-button": {
+        "q-btn": {
+          "outline": false
+        }
+      }
+    },
+    "form-section-general": {
+      "q-card": {},
+      "parent": {
+        "q-input": {}
+      },
+      "EntityAttributeField": {
+        "name": {
+          "q-input": {}
+        },
+        "type": {
+          "q-input": {}
+        }
+      }
+    },
+    "form-section-claims": {
+      "q-card": {}
+    }
+  }
+}

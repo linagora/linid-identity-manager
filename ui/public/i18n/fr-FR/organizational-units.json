@@ -192,10 +192,21 @@
       }
     }
   },
-  "OrganizationalUnitCreationPage": {
+  "moduleOrganizationalUnitCreationPage": {
     "title": "Créer une nouvelle unité organisationnelle",
-    "sections": {
-      "general": "Informations générales"
+    "error": "Erreur pendant la requête",
+    "success": "Unité organisationnelle créée avec succès",
+    "missingParent": "Une unité organisationnelle parente est requise.",
+    "errorLoadingParent": "Impossible de charger l'unité organisationnelle parente. Veuillez réessayer plus tard.",
+    "ButtonsCard": {
+      "cancel": "Annuler",
+      "confirm": "Créer",
+      "confirmLoading": "Création..."
+    },
+    "formSections": {
+      "general": {
+        "title": "Informations générales"
+      }
     },
     "fields": {
       "parent": "Unité organisationnelle parente",
@@ -211,17 +222,6 @@
           "required": "Ce champ est requis."
         }
       }
-    },
-    "ButtonsCard": {
-      "cancel": "Annuler",
-      "confirm": "Créer",
-      "confirmLoading": "Création..."
-    },
-    "success": "Unité organisationnelle créée avec succès",
-    "errors": {
-      "missingParent": "Une unité organisationnelle parente est requise.",
-      "validation": "Données invalides. Veuillez vérifier le formulaire.",
-      "generic": "Impossible de créer l'unité organisationnelle. Veuillez réessayer plus tard."
     }
   },
   "moduleOrganizationalUnitDetailsPage": {

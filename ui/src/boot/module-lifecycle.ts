@@ -28,6 +28,7 @@ import { linidModuleFederation } from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '@quasar/app-vite/wrappers';
 import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
 import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
+import OrganizationalUnitParentField from 'components/field/OrganizationalUnitParentField.vue';
 import AccountLifecyclePanel from 'components/panel/AccountLifecyclePanel.vue';
 import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
 import { appConfig } from './config';
@@ -55,6 +56,7 @@ export default defineBoot(async ({ router }): Promise<void> => {
       ExportApplicationScriptBtn,
       OrganizationalUnitCreateChildBtn,
       OrganizationalUnitLifecyclePanel,
+      OrganizationalUnitParentField,
     },
   });
 });

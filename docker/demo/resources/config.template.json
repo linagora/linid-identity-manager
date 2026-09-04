@@ -498,23 +498,6 @@
       }
     ]
   },
-  "organizationalUnitCreationFields": [
-    {
-      "name": "name",
-      "type": "String",
-      "input": "Text",
-      "required": true
-    },
-    {
-      "name": "type",
-      "type": "String",
-      "input": "List",
-      "required": true,
-      "inputSettings": {
-        "values": ["COMPANY", "DEPARTMENT", "TEAM"]
-      }
-    }
-  ],
   "organizationalUnitLifecycleFields": {
     "suspension.immediate": [
       {

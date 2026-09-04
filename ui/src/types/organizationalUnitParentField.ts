@@ -24,56 +24,21 @@
  * LinID Identity Manager software.
  */
 
-import { shallowMount } from '@vue/test-utils';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import OrganizationalUnitCreateChildBtn from '../../../../src/components/btn/OrganizationalUnitCreateChildBtn.vue';
-
-const { mockPush } = vi.hoisted(() => ({
-  mockPush: vi.fn(),
-}));
-
-vi.mock('@linagora/linid-im-front-corelib', () => ({
-  useScopedI18n: () => ({ t: vi.fn((v) => v) }),
-  useUiDesign: () => ({ ui: vi.fn(() => ({})) }),
-}));
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: mockPush }),
-}));
-
 /**
- * Mounts the button with the given entity, mimicking the zone renderer of the generic details page.
- *
- * @param entity - The raw organizational unit entity provided by the hosting page.
- * @returns The shallow-mounted wrapper.
+ * Props for the OrganizationalUnitParentField component, rendered in a generic creation page zone. The zone renderer
+ * provides the page UI namespace and the page i18n scope; other zone attributes are ignored.
  */
-function mountBtn(entity = { id: 'test-ou-id' }) {
-  return shallowMount(OrganizationalUnitCreateChildBtn, {
-    props: {
-      entity,
-      uiNamespace: 'moduleOrganizationalUnitDetailsPage',
-      i18nScope: 'moduleOrganizationalUnitDetailsPage',
-    },
-  });
+export interface OrganizationalUnitParentFieldProps {
+  /** Raw organizational unit entity. */
+  entity: Record<string, unknown>;
+  /** UI design namespace of the hosting page, used to resolve the field design properties. */
+  uiNamespace: string;
+  /** I18n scope of the hosting page, used to resolve the field label. */
+  i18nScope: string;
+  /** Path to the parent page. */
+  parentPath: string;
+  /** Path to the entity homepage. */
+  homepagePath: string;
+  /** UI event key emitted once the parent OU is successfully loaded. */
+  emitOnParentLoaded: string;
 }
-
-describe('Test component: OrganizationalUnitCreateChildBtn', () => {
-  let wrapper;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  describe('Test function: goToCreateChild', () => {
-    it('should navigate to the creation page with the current entity as parent', () => {
-      wrapper = mountBtn();
-
-      wrapper.vm.goToCreateChild();
-
-      expect(mockPush).toHaveBeenCalledWith({
-        path: '/organizational-units/new',
-        query: { parent: 'test-ou-id' },
-      });
-    });
-  });
-});

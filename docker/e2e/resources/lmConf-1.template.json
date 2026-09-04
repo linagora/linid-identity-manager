@@ -53,6 +53,7 @@
       "oidcRPMetaDataOptionsAdditionalAudiences": "linid-im-api",
       "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
       "oidcRPMetaDataOptionsRedirectUris": "${LEMONLDAP_REDIRECT_URL}/callback ${LEMONLDAP_REDIRECT_URL}/silent-renew",
+      "oidcRPMetaDataOptionsPostLogoutRedirectUris": "${LEMONLDAP_REDIRECT_URL}/logged-out",
       "oidcRPMetaDataOptionsIDTokenForceClaims": 1,
       "oidcRPMetaDataOptionsExtraClaims": {
         "roles": "roles"

@@ -49,6 +49,7 @@ Ensuring these are met will allow a smooth setup and avoid common issues.
 Some configuration depends on environment variables:
 * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`
 * `AUTH_ISSUER_URI` (URL of the OIDC issuer / LemonLDAP)
+* `AUTH_AUDIENCE` (expected `aud` claim of the access tokens, i.e. the OIDC client ID)
 * `I18N_EXTERNAL_PATH` (optional, for backend/plugin translations)
 
 > ⚠️ A `.env` file can be used for local development

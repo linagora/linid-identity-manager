@@ -44,5 +44,8 @@
   },
   "AuthenticationCallbackPage": {
     "processing": "Processing authentication response..."
+  },
+  "AuthenticationLoggedOutPage": {
+    "processing": "Redirecting to the login page..."
   }
 }

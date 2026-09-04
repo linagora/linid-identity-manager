@@ -43,7 +43,7 @@ import { authService } from 'src/services/AuthService';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-const PUBLIC_PATHS = ['/callback', '/silent-renew', '/logout'];
+const PUBLIC_PATHS = ['/callback', '/silent-renew', '/logout', '/logged-out'];
 
 /**
  * Creates and configures the Vue Router instance.

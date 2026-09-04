@@ -44,6 +44,9 @@ spring:
         jwt:
           issuer-uri: ${AUTH_ISSUER_URI}
           jwk-set-uri: ${AUTH_JWK_SET_URI}
+          audiences: ${AUTH_AUDIENCE}
+          # JOSE "typ" header required on bearer tokens: JWT, at+jwt, dpop+jwt, logout+jwt or jwt-bearer
+          expected-type: ${AUTH_JWT_EXPECTED_TYPE:at+jwt}
 
   cache:
     type: caffeine

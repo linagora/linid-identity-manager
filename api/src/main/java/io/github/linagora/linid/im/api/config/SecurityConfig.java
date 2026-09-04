@@ -33,12 +33,16 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtTypeValidator;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -103,6 +107,30 @@ public class SecurityConfig {
                 new UserAuthenticationFilter(accountService), BearerTokenAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Validates the JOSE {@code typ} header of the bearer tokens.
+     *
+     * <p>Nothing in this code base calls this bean directly: Spring Boot collects every
+     * {@link OAuth2TokenValidator} bean when it auto-configures the {@code JwtDecoder} from the
+     * {@code spring.security.oauth2.resourceserver.jwt.*} properties, and runs it after the signature,
+     * timestamp, issuer and audience checks. Because it is a {@link JwtTypeValidator}, it also replaces
+     * the default type validator, which only accepts {@code JWT} or an absent header.
+     *
+     * <p>The expected type comes from the {@code spring.security.oauth2.resourceserver.jwt.expected-type}
+     * property (defaults to {@code at+jwt}, compared case-insensitively). Possible values are the IANA
+     * registered JWT types: {@code JWT}, {@code at+jwt} (RFC 9068 access token), {@code dpop+jwt},
+     * {@code logout+jwt} and {@code jwt-bearer}. With {@code at+jwt}, only access tokens are accepted: an ID token
+     * ({@code typ: JWT}) or a token without {@code typ} is rejected with {@code 401}.
+     *
+     * @param expectedType the {@code typ} header value required on bearer tokens
+     * @return the token type validator
+     */
+    @Bean
+    public OAuth2TokenValidator<Jwt> accessTokenTypeValidator(
+        @Value("${spring.security.oauth2.resourceserver.jwt.expected-type:at+jwt}") final String expectedType) {
+        return new JwtTypeValidator(expectedType);
     }
 
     /**

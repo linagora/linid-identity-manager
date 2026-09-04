@@ -50,9 +50,9 @@
       "oidcRPMetaDataOptionsRequirePKCE": 1,
       "oidcRPMetaDataOptionsBypassConsent": 1,
       "oidcRPMetaDataOptionsClientID": "linid-im-client",
+      "oidcRPMetaDataOptionsAdditionalAudiences": "linid-im-api",
       "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
       "oidcRPMetaDataOptionsRedirectUris": "${LEMONLDAP_REDIRECT_URL}/callback ${LEMONLDAP_REDIRECT_URL}/silent-renew",
-      "oidcRPMetaDataOptionsNoJwtHeader": 1,
       "oidcRPMetaDataOptionsIDTokenForceClaims": 1,
       "oidcRPMetaDataOptionsExtraClaims": {
         "roles": "roles"

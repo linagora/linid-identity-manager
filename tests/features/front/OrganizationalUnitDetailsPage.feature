@@ -11,7 +11,8 @@ Feature: Test Organizational Unit details panel display
   ## 109 Immediate reactivation from the banner should end the suspension once confirmed
   ## 110 Visiting an unknown organizational unit should display a load-error notification
   ## 111 Create child button should open the creation page with the current OU as parent
-  ## 112 Edit the organizational unit from the profile panel
+  ## 112 Clicking cancel on the creation page should navigate back to the parent OU detail page
+  ## 113 Edit the organizational unit from the profile panel
   ## 201 Should display an empty accounts card for an organizational unit without accounts
   ## 202 Should display the accounts card with the attached account
   ## 203 Attach dialog should close on cancel without attaching an account
@@ -171,12 +172,18 @@ Feature: Test Organizational Unit details panel display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.company_a_id}}"
     And I expect the HTML element '[data-cy="organizational-unit-create-child-button"]' to be visible
     When I click on '[data-cy="organizational-unit-create-child-button"]'
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/create?parent={{ctx.company_a_id}}"
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/new?parent={{ctx.company_a_id}}"
     And I expect the HTML element '[data-cy="organizational-unit-creation-page"]' to be visible
     And I expect the HTML element '[data-cy="field_parent"] input' to have value "Company A"
 
-    ## 112 Edit the organizational unit from the profile panel
+    ## 112 Clicking cancel on the creation page should navigate back to the parent OU detail page
+    When I click on '[data-cy="button_cancel"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.company_a_id}}"
+
+    ## 113 Edit the organizational unit from the profile panel
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    When I click on '[data-cy="linid-smart-filter-field"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
     When I click on '[data-cy="linid-smart-filter-field"]'
     And I set the text "Dept B1-1" in the HTML element '[data-cy="text-search-filter-panel_input"]'

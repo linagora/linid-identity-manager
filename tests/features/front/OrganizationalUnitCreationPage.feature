@@ -46,7 +46,7 @@ Feature: Test Organizational Unit creation page
     ################## Creation Page  ##################
     ####################################################
 
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/create?parent={{ctx.rootID}}"
+    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/new?parent={{ctx.rootID}}"
 
     ## 101 Should display title, form fields and action buttons
     Then I expect the HTML element '[data-cy="organizational-unit-creation-page"]' to be visible
@@ -71,7 +71,7 @@ Feature: Test Organizational Unit creation page
     When I click on '[data-cy="organizational-unit-creation-page_title"]'
     And I click on '[data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="organizational-unit-creation-page_form"]' contains "Ce champ est requis"
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/create?parent={{ctx.rootID}}"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/new?parent={{ctx.rootID}}"
 
     ## 105 Submitting a valid form should create the organizational unit
     When I set the text "EngineeringE2E" in the HTML element "[data-cy=\"field_name\"] input"
@@ -88,9 +88,9 @@ Feature: Test Organizational Unit creation page
     ####################################################
 
     ## 107 Visiting the page without a parent should redirect to the home page
-    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/create"
+    Given I visit the "{{ env.E2E_FRONT_URL }}/organizational-units/new"
     Then I expect the HTML element ".q-notification__message" contains "Une unité organisationnelle parente est requise."
-    And I expect current url is "{{ env.E2E_FRONT_URL }}/"
+    And I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
 
     ####################################################
     ################## Cleanup #########################

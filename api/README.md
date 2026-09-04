@@ -70,6 +70,8 @@ Authentication is configured via:
 
 - `AUTH_ISSUER_URI`: OIDC issuer URI
 - `AUTH_JWK_SET_URI`: JSON Web Key Set URI
+- `AUTH_AUDIENCE`: expected `aud` claim of the access tokens, i.e. the audience declared for the API at the OIDC provider (not the client ID)
+- `AUTH_JWT_EXPECTED_TYPE`: JOSE `typ` header required on access tokens (default `at+jwt`, compared case-insensitively); only change it if the OIDC provider issues another type. Leave the variable unset to use the default: an empty value is not the default and rejects every token
 
 The `UserAuthenticationFilter` extracts the user email from the JWT token and creates a `UserPrincipal` in the security context.
 
@@ -95,6 +97,8 @@ The `UserAuthenticationFilter` extracts the user email from the JWT token and cr
 | ------------------ | --------------- | -------- |
 | `AUTH_ISSUER_URI`  | OIDC issuer URI | Yes      |
 | `AUTH_JWK_SET_URI` | JWK Set URI     | Yes      |
+| `AUTH_AUDIENCE`    | Expected `aud`  | Yes      |
+| `AUTH_JWT_EXPECTED_TYPE` | Required `typ` header (default `at+jwt`) | No |
 
 ### SSL
 

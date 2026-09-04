@@ -49,6 +49,9 @@ Ensuring these are met will allow a smooth setup and avoid common issues.
 Some configuration depends on environment variables:
 * `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_NAME`, `DATABASE_USER`, `DATABASE_PASSWORD`
 * `AUTH_ISSUER_URI` (URL of the OIDC issuer / LemonLDAP)
+* `AUTH_JWK_SET_URI` (URL of the JSON Web Key Set of the OIDC issuer / LemonLDAP)
+* `AUTH_AUDIENCE` (expected `aud` claim of the access tokens, i.e. the audience declared for the API at the OIDC provider, distinct from the client ID)
+* `AUTH_JWT_EXPECTED_TYPE` (optional, JOSE `typ` header required on access tokens, default `at+jwt`)
 * `I18N_EXTERNAL_PATH` (optional, for backend/plugin translations)
 
 > ⚠️ A `.env` file can be used for local development
@@ -59,6 +62,12 @@ Some configuration depends on environment variables:
 
 * Ports required by LinId backend and frontend (default `8443` for backend) must be accessible
 * LemonLDAP OIDC endpoint must be reachable by the backend and applications
+* LemonLDAP must issue access tokens carrying a `typ` header whose value matches
+  `AUTH_JWT_EXPECTED_TYPE` (default `at+jwt`, compared case-insensitively). Access tokens without a `typ` header are rejected with `401`.
+* The OIDC provider must issue ID tokens with an audience different from the one of the access tokens
+  (`AUTH_AUDIENCE`), otherwise an ID token with the expected `typ` would be accepted as a bearer token.
+  LemonLDAP::NG copies the additional audiences (`oidcRPMetaDataOptionsAdditionalAudiences`) into its ID tokens
+  as well, so with the shipped configuration the `typ` header is what keeps ID tokens out.
 
 ---
 

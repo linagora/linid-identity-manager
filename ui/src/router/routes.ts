@@ -68,14 +68,7 @@ const routes: RouteRecordRaw[] = [
     component: async () =>
       (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
         .default,
-    children: [
-      { path: '', component: () => import('pages/Homepage.vue') },
-      {
-        path: 'organizational-units/create',
-        name: 'OrganizationalUnitCreate',
-        component: () => import('pages/OrganizationalUnitCreationPage.vue'),
-      },
-    ],
+    children: [{ path: '', component: () => import('pages/Homepage.vue') }],
   },
 ];
 export default routes;

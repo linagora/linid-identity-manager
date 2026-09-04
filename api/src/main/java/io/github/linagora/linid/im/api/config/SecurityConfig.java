@@ -33,12 +33,17 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.oauth2.core.OAuth2TokenValidator;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtTypeValidator;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -50,6 +55,7 @@ import org.springframework.security.web.SecurityFilterChain;
  *
  * <p>CSRF protection is disabled, and the application is stateless (no HTTP sessions).
  */
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -103,6 +109,39 @@ public class SecurityConfig {
                 new UserAuthenticationFilter(accountService), BearerTokenAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    /**
+     * Validates the JOSE {@code typ} header of the bearer tokens.
+     *
+     * <p>Nothing in this code base calls this bean directly: Spring Boot collects every
+     * {@link OAuth2TokenValidator} bean when it auto-configures the {@code JwtDecoder} from the
+     * {@code spring.security.oauth2.resourceserver.jwt.*} properties, and adds it to the validators
+     * applied once the signature has been verified. Because it is a {@link JwtTypeValidator}, it
+     * replaces the default type validator, which accepts {@code JWT} or an absent header.
+     *
+     * <p>Each instance authenticates against a single OIDC provider, whose {@code typ} it must match. The
+     * {@code spring.security.oauth2.resourceserver.jwt.expected-type} property carries that value,
+     * compared case-insensitively, and defaults to {@code at+jwt} — the type RFC 9068 prescribes for JWT
+     * access tokens, and the one LemonLDAP::NG emits ({@code at+JWT}). Against another provider, decode
+     * one of its access tokens and read the {@code typ} header rather than assuming it follows the RFC.
+     *
+     * <p>This check defends against replaying an ID token as a bearer token: providers usually issue ID
+     * tokens and access tokens with the same {@code aud} — the OIDC client ID — so audience validation
+     * cannot separate them and the {@code typ} header is the only thing that does. Setting this property
+     * to {@code JWT}, as a provider typing its access tokens that way would require, removes that
+     * defence: it is a deliberate trade-off, not a neutral configuration change. A token carrying no
+     * {@code typ} header is rejected ({@code 401}).
+     *
+     * @param expectedType the {@code typ} header value required on bearer tokens
+     * @return the token type validator
+     */
+    @Bean
+    public OAuth2TokenValidator<Jwt> accessTokenTypeValidator(
+        @Value("${spring.security.oauth2.resourceserver.jwt.expected-type:at+jwt}") final String expectedType) {
+        final String type = expectedType.trim();
+        log.info("Bearer tokens must carry the JOSE typ header '{}'", type);
+        return new JwtTypeValidator(type);
     }
 
     /**

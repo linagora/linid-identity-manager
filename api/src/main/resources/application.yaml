@@ -44,6 +44,11 @@ spring:
         jwt:
           issuer-uri: ${AUTH_ISSUER_URI}
           jwk-set-uri: ${AUTH_JWK_SET_URI}
+          audiences: ${AUTH_AUDIENCE}
+          # JOSE "typ" header required on access tokens (default: at+jwt)
+          # Only needed if the OIDC provider issues another type
+          # Leave the variable unset to use the default: an empty value is not the default and rejects every token
+          expected-type: ${AUTH_JWT_EXPECTED_TYPE:at+jwt}
 
   cache:
     type: caffeine

@@ -29,7 +29,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
 import { mockToDate, mockToDateISO } from '../helpers/mockCommonMapper.js';
 
-const PARENT_UUID = '00000000-0000-4000-8000-000000000000';
 const OU_UUID = '11111111-1111-4111-8111-111111111111';
 const CREATOR_UUID = '22222222-2222-4222-8222-222222222222';
 
@@ -68,29 +67,6 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
     tMock.mockReset();
     tMock.mockReturnValue('YYYY/MM/DD');
     useI18n.mockReturnValue({ t: tMock });
-  });
-
-  describe('Test function: toOrganizationalUnitRecord', () => {
-    it('should attach the parent identifier to the form values', () => {
-      const { toOrganizationalUnitRecord } = useOrganizationalUnitMapper();
-
-      const form = { name: 'Engineering', type: 'DEPARTMENT' };
-
-      expect(toOrganizationalUnitRecord(form, PARENT_UUID)).toEqual({
-        parent: PARENT_UUID,
-        name: 'Engineering',
-        type: 'DEPARTMENT',
-      });
-    });
-
-    it('should not mutate the source form', () => {
-      const { toOrganizationalUnitRecord } = useOrganizationalUnitMapper();
-
-      const form = { name: 'Engineering', type: 'DEPARTMENT' };
-      toOrganizationalUnitRecord(form, PARENT_UUID);
-
-      expect(form).toEqual({ name: 'Engineering', type: 'DEPARTMENT' });
-    });
   });
 
   describe('Test function: toOrganizationalUnitStatus', () => {

@@ -28,9 +28,7 @@ import { useCommonMapper } from '@linagora/linid-im-front-corelib';
 import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
   OrganizationalUnitDTO,
-  OrganizationalUnitForm,
   OrganizationalUnitReactivationRecord,
-  OrganizationalUnitRecord,
   OrganizationalUnitStatus,
   OrganizationalUnitStatusForm,
   OrganizationalUnitSuspensionRecord,
@@ -44,26 +42,6 @@ import type {
  */
 export function useOrganizationalUnitMapper() {
   const { toDate, toDateISO } = useCommonMapper();
-
-  /**
-   * Transforms an {@link OrganizationalUnitForm} into an {@link OrganizationalUnitRecord} by attaching the parent
-   * identifier supplied by the navigation context.
-   *
-   * @param form OU form carrying the user-editable fields.
-   * @param parent UUID of the parent OU, provided by the route context.
-   * @returns OU record ready to be posted to the backend.
-   */
-  const toOrganizationalUnitRecord = (
-    form: OrganizationalUnitForm,
-    parent: string
-  ): OrganizationalUnitRecord => {
-    return {
-      parent,
-      name: form.name,
-      type: form.type,
-      extraParameters: form.extraParameters,
-    };
-  };
 
   /**
    * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnitStatus}, exposing only the suspension lifecycle
@@ -135,7 +113,6 @@ export function useOrganizationalUnitMapper() {
   };
 
   return {
-    toOrganizationalUnitRecord,
     toOrganizationalUnitStatus,
     toOrganizationalUnitSuspensionRecord,
     toOrganizationalUnitReactivationRecord,

@@ -1,0 +1,25 @@
+{
+  "moduleOrganizationalUnitCreationPage": {
+    "buttons-card": {
+      "confirm-button": {
+        "q-btn": {
+          "outline": false
+        }
+      }
+    },
+    "form-section-general": {
+      "q-card": {},
+      "organizational-unit-parent-field": {
+        "q-input": {}
+      },
+      "EntityAttributeField": {
+        "name": {
+          "q-input": {}
+        },
+        "type": {
+          "q-input": {}
+        }
+      }
+    }
+  }
+}

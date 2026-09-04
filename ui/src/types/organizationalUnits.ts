@@ -36,24 +36,6 @@ export interface OrganizationalUnitRelationDTO {
   extraParameters: Record<string, unknown>;
 }
 
-/**
- * Writable fields of an organizational unit, sent to the backend when creating a new OU. Distinct from
- * {@link OrganizationalUnitDTO}: a record carries only client-provided values, with no server-managed metadata.
- */
-export interface OrganizationalUnitRecord {
-  /**
-   * Identifier of the parent organizational unit. Always required: the root is the only OU without a parent and is
-   * created by the backend.
-   */
-  parent: string;
-  /** Human-readable name of the organizational unit. */
-  name: string;
-  /** Type of the organizational unit, picked from a fixed list of values. */
-  type: string;
-  /** Additional deployment-specific attributes stored as JSON. */
-  extraParameters: Record<string, unknown>;
-}
-
 /** Raw organizational unit shape returned by the API. */
 export interface OrganizationalUnitDTO {
   /** Unique identifier of the organizational unit. */
@@ -140,17 +122,4 @@ export interface OrganizationalUnitStatusForm {
   subreason?: string | null;
   /** Free-text comment. */
   comment?: string | null;
-}
-
-/**
- * Shape of the OU creation form. The `parent` value is provided by the navigation context and is therefore not present
- * here; the form only carries user-editable fields.
- */
-export interface OrganizationalUnitForm {
-  /** Human-readable name of the organizational unit. */
-  name: string;
-  /** Type of the organizational unit, picked from a fixed list of values. */
-  type: string;
-  /** Additional deployment-specific attributes stored as JSON. */
-  extraParameters: Record<string, unknown>;
 }

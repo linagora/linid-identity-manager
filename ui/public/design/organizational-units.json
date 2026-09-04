@@ -1,21 +1,4 @@
 {
-  "organizational-units": {
-    "creation-page": {
-      "buttons-card": {
-        "q-card": {},
-        "q-icon": {},
-        "q-card-actions": {},
-        "confirm-button": {
-          "q-btn": {
-            "outline": false
-          }
-        },
-        "cancel-button": {
-          "q-btn": {}
-        }
-      }
-    }
-  },
   "moduleOrganizationalUnitDetailsPage": {
     "entity-profile-panel": {
       "q-card": {},

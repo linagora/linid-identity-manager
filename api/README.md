@@ -72,6 +72,7 @@ Authentication is configured via:
 - `AUTH_JWK_SET_URI`: JSON Web Key Set URI
 
 The `UserAuthenticationFilter` extracts the user email from the JWT token and creates a `UserPrincipal` in the security context.
+When the token is valid but no account matches its `email` claim, the API responds `401 Unauthorized` with a `WWW-Authenticate: Bearer` header, like any rejected bearer token.
 
 ---
 

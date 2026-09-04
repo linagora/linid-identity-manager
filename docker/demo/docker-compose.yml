@@ -151,8 +151,6 @@ services:
     environment:
       SSODOMAIN: ${LEMONLDAP_SSO_DOMAIN}
       PORTAL_HOSTNAME: ${LEMONLDAP_PORTAL_HOSTNAME}
-    ports:
-      - ${LEMONLDAP_PORTAL_PORT}:80
     volumes:
       - ./resources/llng/conf:/var/lib/lemonldap-ng/conf
       - ./resources/oidc.key:/etc/keys/oidc.key:ro

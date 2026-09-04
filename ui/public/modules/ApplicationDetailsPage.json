@@ -9,7 +9,60 @@
   "basePath": "/applications",
   "zones": [
     {
-      "zone": "moduleApplicationDetailsPage.header.actions",
+      "zone": "moduleApplicationDetailsPage.side-left",
+      "plugin": "catalogUI/EntityProfilePanel",
+      "props": {
+        "parentPath": "/applications",
+        "fieldOrder": ["type", "domain", "description"],
+        "avatarOptions": {
+          "seed": ["{{ entity.code }}"],
+          "style": "shape-grid"
+        },
+        "updateEndpoint": "/applications/{{ entity.id }}",
+        "updateBody": {
+          "code": "{{ entity.code }}",
+          "name": "{{ entity.name }}",
+          "type": "{{ entity.type }}",
+          "domain": "{{ entity.domain }}",
+          "description": "{{ entity.description }}",
+          "claimsTemplate": "{{ entity.claimsTemplate }}",
+          "extraParameters": "{{ entity.extraParameters }}"
+        },
+        "formFields": [
+          {
+            "name": "code",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "name",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "type",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "domain",
+            "input": "Text"
+          },
+          {
+            "name": "description",
+            "input": "TextArea"
+          },
+          {
+            "name": "claimsTemplate",
+            "input": "TextArea",
+            "required": true
+          }
+        ],
+        "emitOnUpdate": "application-updated"
+      }
+    },
+    {
+      "zone": "moduleApplicationDetailsPage.entity-profile-panel.actions.prepend",
       "component": "ExportApplicationScriptBtn"
     },
     {
@@ -141,11 +194,12 @@
     "page": "catalogUI/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/applications",
-    "editPath": "/applications/{{ entity.id }}/edit",
+    "enableActions": false,
+    "reloadDetailsOn": ["application-updated"],
     "sections": [
       {
-        "key": "identity",
-        "fieldOrder": ["code", "name", "type", "domain", "description"]
+        "key": "claims",
+        "fieldOrder": ["claimsTemplate"]
       },
       {
         "key": "audit",

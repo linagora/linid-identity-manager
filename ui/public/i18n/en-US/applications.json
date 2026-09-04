@@ -49,56 +49,6 @@
       }
     }
   },
-  "moduleApplicationEditionPage": {
-    "title": "Edit Application",
-    "error": "Unable to load the application. Please try again later.",
-    "success": "Application updated successfully.",
-    "ButtonsCard": {
-      "cancel": "Back",
-      "confirm": "Save"
-    },
-    "formSections": {
-      "general": {
-        "title": "General Information"
-      },
-      "claims": {
-        "title": "Claims Management"
-      }
-    },
-    "fields": {
-      "code": {
-        "label": "Code *",
-        "hint": "Must be unique.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "name": {
-        "label": "Name *",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "type": {
-        "label": "Type *",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "domain": {
-        "label": "Domain"
-      },
-      "description": {
-        "label": "Description"
-      },
-      "claimsTemplate": {
-        "label": "Claims Generation Template *",
-        "validation": {
-          "required": "This field is required."
-        }
-      }
-    }
-  },
   "moduleApplicationsPage": {
     "NavigationMenu": {
       "label": "Applications"
@@ -282,24 +232,85 @@
     "title": "Application details",
     "error": "Unable to load the application. Please try again later.",
     "ButtonsCard": {
-      "cancel": "Back",
-      "edit": "Edit"
+      "cancel": "Back"
     },
-    "export": {
-      "label": "Export Script",
-      "success": "Script exported successfully.",
-      "error": "Error exporting script."
+    "EntityProfilePanel": {
+      "title": "{name}",
+      "subtitle": "{code}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Applications list"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "type": "Type",
+          "domain": "Domain",
+          "description": "Description"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "export": {
+            "label": "Export Script",
+            "success": "Script exported successfully.",
+            "error": "Error exporting script."
+          },
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Application successfully updated.",
+              "submitError": "Unable to update the application. Please try again later.",
+              "FormDialog": {
+                "title": "Edit {name}",
+                "fields": {
+                  "code": {
+                    "label": "Code",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "name": {
+                    "label": "Name",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "type": {
+                    "label": "Type",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  },
+                  "domain": {
+                    "label": "Domain"
+                  },
+                  "description": {
+                    "label": "Description"
+                  },
+                  "claimsTemplate": {
+                    "label": "Claims Generation Template *",
+                    "validation": {
+                      "required": "This field is required."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Save",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
+        }
+      }
     },
     "sections": {
-      "identity": {
+      "claims": {
         "EntityDetailsCard": {
-          "title": "General information",
+          "title": "Claims",
           "attributes": {
-            "code": "Code",
-            "name": "Name",
-            "domain": "Domain",
-            "description": "Description",
-            "type": "Type"
+            "claimsTemplate": "Claims Generation Template"
           }
         }
       },

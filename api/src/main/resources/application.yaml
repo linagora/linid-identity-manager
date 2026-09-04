@@ -44,6 +44,7 @@ spring:
         jwt:
           issuer-uri: ${AUTH_ISSUER_URI}
           jwk-set-uri: ${AUTH_JWK_SET_URI}
+          audiences: ${AUTH_AUDIENCE}
 
   cache:
     type: caffeine

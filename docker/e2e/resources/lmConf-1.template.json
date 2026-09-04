@@ -70,5 +70,6 @@
     "LockDirectory": "/var/lib/lemonldap-ng/psessions/lock"
   },
   "portal": "${LEMONLDAP_PORTAL_URL}",
+  "securedCookie": 1,
   "userDB": "DBI"
 }

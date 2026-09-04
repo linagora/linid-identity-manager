@@ -70,6 +70,7 @@ Authentication is configured via:
 
 - `AUTH_ISSUER_URI`: OIDC issuer URI
 - `AUTH_JWK_SET_URI`: JSON Web Key Set URI
+- `AUTH_AUDIENCE`: expected `aud` claim of the access tokens
 
 The `UserAuthenticationFilter` extracts the user email from the JWT token and creates a `UserPrincipal` in the security context.
 
@@ -95,6 +96,7 @@ The `UserAuthenticationFilter` extracts the user email from the JWT token and cr
 | ------------------ | --------------- | -------- |
 | `AUTH_ISSUER_URI`  | OIDC issuer URI | Yes      |
 | `AUTH_JWK_SET_URI` | JWK Set URI     | Yes      |
+| `AUTH_AUDIENCE`    | Expected `aud`  | Yes      |
 
 ### SSL
 

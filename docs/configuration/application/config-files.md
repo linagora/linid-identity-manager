@@ -61,6 +61,9 @@ AUTH_ISSUER_URI=https://ui/auth
 # JWK Set URI; direct HTTPS access to LemonLDAP::NG for fetching public keys
 AUTH_JWK_SET_URI=https://ui/auth/oauth2/jwks
 
+# Expected "aud" claim of the access tokens; must match the OIDC client ID
+AUTH_AUDIENCE=linid-im-client
+
 # Path to SSL/TLS key store
 SSL_KEY_STORE=classpath:keystore.p12
 
@@ -345,6 +348,9 @@ AUTH_ISSUER_URI=https://linid.localtest.me:9000/auth
 
 # JWK Set URI; direct HTTP access to LemonLDAP::NG for fetching public keys
 AUTH_JWK_SET_URI=https://linid.localtest.me:9000/auth/oauth2/jwks
+
+# Expected "aud" claim of the access tokens; must match the OIDC client ID
+AUTH_AUDIENCE=linid-im-client
 ```
 
 ---

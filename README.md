@@ -132,7 +132,7 @@ task start:demo
 
 * **Backend API**: `https://localhost:8443/swagger-ui/index.html`
 * **Frontend UI**: `https://linid.localtest.me:9000`
-* **LemonLDAP portal**: `http://localhost:8080` (pre-configured demo)
+* **LemonLDAP portal**: `https://linid.localtest.me:9000/auth` (pre-configured demo, served through the frontend nginx)
 * **Apache Superset™**: `http://localhost:8088`
 
 #### **Demo credentials**

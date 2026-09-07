@@ -35,6 +35,36 @@
         "q-img": {
           "width": "25px",
           "fit": "contain"
+        },
+        "logout-menu-item": {
+          "q-item": {
+            "dense": true
+          },
+          "confirmation-dialog": {
+            "q-dialog": {
+              "persistent": false
+            },
+            "buttons-card": {
+              "q-card": {
+                "flat": true
+              },
+              "q-card-actions": {
+                "align": "right"
+              },
+              "confirm-button": {
+                "q-btn": {
+                  "color": "primary",
+                  "outline": false
+                }
+              },
+              "cancel-button": {
+                "q-btn": {
+                  "color": "primary",
+                  "outline": true
+                }
+              }
+            }
+          }
         }
       }
     }

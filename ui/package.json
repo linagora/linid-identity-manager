@@ -38,11 +38,12 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
-    "@linagora/linid-im-front-corelib": "0.0.96",
+    "@linagora/linid-im-front-corelib": "0.0.98",
     "@module-federation/enhanced": "2.7.0",
     "@quasar/extras": "2.0.2",
     "axios": "1.18.1",
     "dayjs": "1.11.21",
+    "interactjs": "1.10.27",
     "nunjucks": "3.2.4",
     "oidc-client-ts": "3.5.0",
     "pinia": "3.0.4",
@@ -50,8 +51,7 @@
     "rxjs": "7.8.2",
     "vue": "3.5.39",
     "vue-i18n": "11.4.6",
-    "vue-router": "5.1.0",
-    "interactjs": "1.10.27"
+    "vue-router": "5.1.0"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

@@ -110,6 +110,10 @@ export default defineConfig((ctx) => {
                 singleton: true,
                 requiredVersion: '3.0.4',
               },
+              'vue-i18n': {
+                singleton: true,
+                requiredVersion: '11.4.6',
+              },
             },
           })
         );

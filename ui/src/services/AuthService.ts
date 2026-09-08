@@ -91,10 +91,6 @@ class AuthService {
       void this.login();
     });
 
-    userManager.events.addUserSignedOut(() => {
-      void this.login();
-    });
-
     this.userManager = userManager;
     return userManager;
   }

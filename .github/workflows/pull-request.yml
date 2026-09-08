@@ -321,9 +321,13 @@ jobs:
         run: E2E_SPEC_PATTERN=../features npm run lint
 
   e2e-tests:
-    name: E2E tests
+    name: E2E tests (${{ matrix.suite }})
     runs-on: ubuntu-latest
     needs: [api-tests]
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [api, front]
     steps:
       - uses: actions/checkout@v7
         with:
@@ -337,7 +341,7 @@ jobs:
       - name: Run e2e tests
         run: |
           task setup:e2e
-          task start:test:ci
+          task start:test:ci SUITE=${{ matrix.suite }}
 
       - name: Dump docker logs
         if: failure()

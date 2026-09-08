@@ -12,7 +12,7 @@ LinId uses **Quasar** as the frontend framework. The UI can be themed globally o
 ## 🧩 Theming Overview
 
 | Configuration                       | Purpose                                                             |
-|-------------------------------------|---------------------------------------------------------------------|
+| ----------------------------------- | ------------------------------------------------------------------- |
 | `themeVariables` (in `config.json`) | Define colors used throughout the application                       |
 | `designFiles` (in `config.json`)    | List of design JSON files that override Quasar component attributes |
 | `theme-style.css` (separate file)   | Apply global CSS overrides (served from the resources folder)       |
@@ -21,10 +21,10 @@ LinId uses **Quasar** as the frontend framework. The UI can be themed globally o
 
 ## 1️⃣ Design Configuration (in `config.json`)
 
-* Specifies a list of **design JSON files** to be loaded from the resources folder
-* Each design file defines **component-level defaults** globally or for a **specific namespace / layout**
-* Examples of attributes:
-    * `dense`, `outline`, `color`, `noCaps`, `align`, `inlineLabel`, etc.
+- Specifies a list of **design JSON files** to be loaded from the resources folder
+- Each design file defines **component-level defaults** globally or for a **specific namespace / layout**
+- Examples of attributes:
+  - `dense`, `outline`, `color`, `noCaps`, `align`, `inlineLabel`, etc.
 
 ### Example in `config.json`
 
@@ -33,8 +33,8 @@ LinId uses **Quasar** as the frontend framework. The UI can be themed globally o
   "designFiles": [
     "design/default.json",
     "design/base-layout.json",
-    "design/accounts.json",
-    "design/organizational-units.json"
+    "design/accounts-page.json",
+    "design/organizational-units-page.json"
   ]
 }
 ```
@@ -75,8 +75,8 @@ LinId uses **Quasar** as the frontend framework. The UI can be themed globally o
 
 ## 2️⃣ Theme Colors (in `config.json`)
 
-* Defines **primary, secondary, accent, dark, positive, negative, info, warning colors** under the `themeVariables` key
-* Used by Quasar components that reference these color names
+- Defines **primary, secondary, accent, dark, positive, negative, info, warning colors** under the `themeVariables` key
+- Used by Quasar components that reference these color names
 
 ### Example in `config.json`
 
@@ -101,19 +101,19 @@ LinId uses **Quasar** as the frontend framework. The UI can be themed globally o
 
 ## 3️⃣ CSS Overrides (`theme-style.css`)
 
-* Allows **global CSS customizations**
-* Can be used for advanced styling not covered by design files
-* Typical use cases:
-    * Custom fonts
-    * Margins/paddings adjustments
-    * Custom animations or transitions
+- Allows **global CSS customizations**
+- Can be used for advanced styling not covered by design files
+- Typical use cases:
+  - Custom fonts
+  - Margins/paddings adjustments
+  - Custom animations or transitions
 
 ---
 
 ## ⚙️ How to Apply Themes
 
 **Update `config.json`** with your theme colors under `themeVariables` and list your design files under
-   `designFiles`:
+`designFiles`:
 
 > ⚠️ Namespace-specific overrides in design files take precedence over global defaults.
 
@@ -136,21 +136,21 @@ LinId uses **Quasar** as the frontend framework. The UI can be themed globally o
 
 ## 📝 Best Practices
 
-* Keep `themeVariables` in `config.json` **simple and consistent**
-* Create separate design JSON files **for different namespaces/pages** (e.g., `design/accounts.json`,
-  `design/applications.json`)
-* Use design files for **component behavior adjustments**, not just colors
-* Use `theme-style.css` **sparingly** for advanced tweaks
-* Test changes in **different layouts and screen sizes**
-* Document customizations for future maintenance
-* Ensure all design files referenced in `config.json` exist in the `/design` resources folder
+- Keep `themeVariables` in `config.json` **simple and consistent**
+- Create separate design JSON files **for different namespaces/pages** (e.g., `design/accounts-page.json`,
+  `design/applications-page.json`)
+- Use design files for **component behavior adjustments**, not just colors
+- Use `theme-style.css` **sparingly** for advanced tweaks
+- Test changes in **different layouts and screen sizes**
+- Document customizations for future maintenance
+- Ensure all design files referenced in `config.json` exist in the `/design` resources folder
 
 ---
 
 ## ➡️ Next Steps
 
-* Define **claims per application**:
+- Define **claims per application**:
   👉 [authentication/claims](../authentication/claims.md)
 
-* Configure **application settings**:
+- Configure **application settings**:
   👉 [application/config-files](../application/config-files.md)

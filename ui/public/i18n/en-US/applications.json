@@ -1,18 +1,19 @@
 {
   "moduleApplicationCreationPage": {
-    "title": "Create Application",
-    "error": "Error while processing the request.",
+    "title": "Create an application",
+    "error": "Unable to create the application. Please try again later.",
     "success": "Application successfully created.",
     "ButtonsCard": {
       "cancel": "Back",
-      "confirm": "Create"
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
     },
     "formSections": {
       "general": {
-        "title": "General Information"
+        "title": "General information"
       },
       "claims": {
-        "title": "Claims Management"
+        "title": "Claims management"
       }
     },
     "fields": {
@@ -42,7 +43,7 @@
         "label": "Description"
       },
       "claimsTemplate": {
-        "label": "Claims Generation Template *",
+        "label": "Claims generation template *",
         "validation": {
           "required": "This field is required."
         }
@@ -70,7 +71,7 @@
       "insertDate": "Creation date",
       "actions": "Actions"
     },
-    "error": "Error during request",
+    "error": "Unable to load the applications. Please try again later.",
     "GenericEntityTable": {
       "noData": "No data available",
       "rowsPerPage": "Rows per page:",
@@ -86,17 +87,12 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Override a favorite?",
-      "content": "Select a favorite to override with current search.",
+      "title": "Override the favorite?",
+      "content": "Confirm overriding favorite \"{label}\" with the current search?",
       "ButtonsCard": {
         "cancel": "Cancel",
         "confirm": "Override",
         "confirmLoading": "Overriding..."
-      },
-      "fields": {
-        "favorite": {
-          "label": "Favorites"
-        }
       }
     },
     "CreateFavoriteDialog": {
@@ -183,7 +179,7 @@
         }
       },
       "LinidFavoritePanel": {
-        "title": "Favorite",
+        "title": "Favorites",
         "noData": "No favorite available",
         "createFavorite": "Create a favorite",
         "overrideFavorite": "Override a favorite",
@@ -196,13 +192,13 @@
         "searchButton": "Search",
         "operators": {
           "contains": "Contains",
-          "startsWith": "Start with",
-          "endsWith": "End with",
-          "equals": "Equals to",
-          "notContains": "Not contains",
-          "notStartsWith": "Not start with",
-          "notEndsWith": "Not end with",
-          "notEquals": "Not equals to"
+          "startsWith": "Starts with",
+          "endsWith": "Ends with",
+          "equals": "Equal to",
+          "notContains": "Does not contain",
+          "notStartsWith": "Does not start with",
+          "notEndsWith": "Does not end with",
+          "notEquals": "Not equal to"
         }
       },
       "ListSearchFilterPanel": {
@@ -215,15 +211,15 @@
         "close": "Close",
         "searchButton": "Search",
         "operators": {
-          "inferior": "Inferior to",
-          "superior": "Superior to",
-          "equals": "Equals to",
-          "notInferior": "Not inferior to",
-          "notSuperior": "Not superior to",
-          "notEquals": "Not equals to"
+          "inferior": "Before",
+          "superior": "After",
+          "equals": "Equal to",
+          "notInferior": "Not before",
+          "notSuperior": "Not after",
+          "notEquals": "Not equal to"
         },
         "validation": {
-          "invalidDate": "Incorrect date. Attempt format: {format}"
+          "invalidDate": "Incorrect date. Expected format: {format}"
         }
       }
     }
@@ -250,7 +246,7 @@
       "actions": {
         "ButtonsCard": {
           "export": {
-            "label": "Export Script",
+            "label": "Export script",
             "success": "Script successfully exported.",
             "error": "Error exporting script."
           },
@@ -287,7 +283,7 @@
                     "label": "Description"
                   },
                   "claimsTemplate": {
-                    "label": "Claims Generation Template *",
+                    "label": "Claims generation template *",
                     "validation": {
                       "required": "This field is required."
                     }
@@ -295,6 +291,7 @@
                 },
                 "ButtonsCard": {
                   "confirm": "Save",
+                  "confirmLoading": "Saving...",
                   "cancel": "Cancel"
                 }
               }
@@ -308,7 +305,7 @@
         "EntityDetailsCard": {
           "title": "Claims",
           "attributes": {
-            "claimsTemplate": "Claims Generation Template"
+            "claimsTemplate": "Claims generation template"
           }
         }
       },
@@ -346,6 +343,7 @@
         "title": "Add a role",
         "ButtonsCard": {
           "confirm": "Add",
+          "confirmLoading": "Adding...",
           "cancel": "Cancel"
         },
         "fields": {
@@ -364,6 +362,7 @@
         "title": "Edit the role {name}",
         "ButtonsCard": {
           "confirm": "Save",
+          "confirmLoading": "Saving...",
           "cancel": "Cancel"
         },
         "fields": {
@@ -412,6 +411,7 @@
         "title": "Add a rule",
         "ButtonsCard": {
           "confirm": "Add",
+          "confirmLoading": "Adding...",
           "cancel": "Cancel"
         },
         "fields": {
@@ -445,6 +445,7 @@
         "title": "Edit the rule {code}",
         "ButtonsCard": {
           "confirm": "Save",
+          "confirmLoading": "Saving...",
           "cancel": "Cancel"
         },
         "fields": {

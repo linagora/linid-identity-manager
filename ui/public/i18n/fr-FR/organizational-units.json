@@ -1,10 +1,7 @@
 {
   "moduleOrganizationalUnitsPage": {
     "NavigationMenu": {
-      "label": "Unités Organisationnelles"
-    },
-    "ButtonsCard": {
-      "create": "Créer"
+      "label": "Unités organisationnelles"
     },
     "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
     "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
@@ -18,15 +15,15 @@
       "insertDate": "Date de création",
       "actions": "Actions"
     },
-    "error": "Erreur pendant la requête",
+    "error": "Impossible de charger les unités organisationnelles. Veuillez réessayer plus tard.",
     "GenericEntityTable": {
       "noData": "Aucune donnée disponible",
-      "rowsPerPage": "Éléments par page:",
+      "rowsPerPage": "Éléments par page :",
       "paginationLabel": "{start}-{end} sur {total}"
     },
     "DeleteFavoriteDialog": {
-      "title": "Supprimer un favori?",
-      "content": "Confirmer la suppression du favori \"{label}\"?",
+      "title": "Supprimer un favori ?",
+      "content": "Confirmer la suppression du favori \"{label}\" ?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
@@ -34,25 +31,20 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Remplacer un favori?",
-      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
+      "title": "Remplacer le favori ?",
+      "content": "Confirmer le remplacement du favori \"{label}\" par la recherche actuelle ?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",
         "confirmLoading": "Remplacement..."
-      },
-      "fields": {
-        "favorite": {
-          "label": "Favoris"
-        }
       }
     },
     "CreateFavoriteDialog": {
-      "title": "Créer un favori?",
+      "title": "Créer un favori ?",
       "content": "Créer un favori à partir de la recherche actuelle.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favori",
+          "label": "Nom du favori *",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -61,16 +53,16 @@
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Créer",
-        "confirmLoading": "Creation..."
+        "confirmLoading": "Création..."
       }
     },
     "RenameFavoriteDialog": {
-      "title": "Renommer un favori?",
+      "title": "Renommer un favori ?",
       "content": "Renommer le favori avec un nouveau nom.",
       "duplicateName": "Le favori '{name}' existe déjà.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favori",
+          "label": "Nom du favori *",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -85,7 +77,7 @@
     "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
     "LinidSmartFilter": {
       "label": "Filtre(s) de recherche",
-      "hint": "",
+      "hint": "Saisissez votre filtre",
       "prefix": "",
       "suffix": "",
       "LinidFilterChip": {
@@ -115,7 +107,7 @@
         }
       },
       "LinidFilterPanel": {
-        "title": "Filtrer par:",
+        "title": "Filtrer par :",
         "columnFilter": {
           "name": "Nom",
           "type": "Type",
@@ -139,8 +131,8 @@
         "operators": {
           "contains": "Contient",
           "startsWith": "Commence par",
-          "endsWith": "Finis par",
-          "equals": "Strictement égale à",
+          "endsWith": "Finit par",
+          "equals": "Strictement égal à",
           "notContains": "Ne contient pas",
           "notStartsWith": "Ne commence pas par",
           "notEndsWith": "Ne finit pas par",
@@ -179,27 +171,27 @@
         "close": "Fermer",
         "searchButton": "Rechercher",
         "operators": {
-          "inferior": "Inférieure à",
-          "superior": "Supérieure à",
+          "inferior": "Antérieure à",
+          "superior": "Postérieure à",
           "equals": "Strictement égale à",
-          "notInferior": "N'est pas inférieure à",
-          "notSuperior": "N'est pas supérieure à",
+          "notInferior": "N'est pas antérieure à",
+          "notSuperior": "N'est pas postérieure à",
           "notEquals": "N'est pas strictement égale à"
         },
         "validation": {
-          "invalidDate": "Date incorrecte. Format attendu: {format}"
+          "invalidDate": "Date incorrecte. Format attendu : {format}"
         }
       }
     }
   },
   "moduleOrganizationalUnitCreationPage": {
-    "title": "Créer une nouvelle unité organisationnelle",
-    "error": "Erreur pendant la requête.",
+    "title": "Création d'une unité organisationnelle",
+    "error": "Impossible de créer l'unité organisationnelle. Veuillez réessayer plus tard.",
     "success": "Unité organisationnelle créée avec succès.",
     "missingParent": "Une unité organisationnelle parente est requise.",
     "errorLoadingParent": "Impossible de charger l'unité organisationnelle parente. Veuillez réessayer plus tard.",
     "ButtonsCard": {
-      "cancel": "Annuler",
+      "cancel": "Retour",
       "confirm": "Créer",
       "confirmLoading": "Création..."
     },
@@ -213,13 +205,13 @@
         "label": "Unité organisationnelle parente"
       },
       "name": {
-        "label": "Nom",
+        "label": "Nom *",
         "validation": {
           "required": "Ce champ est requis."
         }
       },
       "type": {
-        "label": "Type",
+        "label": "Type *",
         "validation": {
           "required": "Ce champ est requis."
         }
@@ -242,7 +234,7 @@
       },
       "actions": {
         "ButtonsCard": {
-          "createChild": "Créer une O.U. enfant",
+          "createChild": "Créer une OU enfant",
           "editButton": {
             "FormDialogButton": {
               "title": "",
@@ -252,13 +244,13 @@
                 "title": "Modifier {name}",
                 "fields": {
                   "name": {
-                    "label": "Nom",
+                    "label": "Nom *",
                     "validation": {
                       "required": "Ce champ est requis."
                     }
                   },
                   "type": {
-                    "label": "Type",
+                    "label": "Type *",
                     "validation": {
                       "required": "Ce champ est requis."
                     }
@@ -266,6 +258,7 @@
                 },
                 "ButtonsCard": {
                   "confirm": "Enregistrer",
+                  "confirmLoading": "Enregistrement...",
                   "cancel": "Annuler"
                 }
               }
@@ -311,11 +304,12 @@
         "title": "Attacher un compte",
         "ButtonsCard": {
           "confirm": "Attacher",
+          "confirmLoading": "Rattachement...",
           "cancel": "Annuler"
         },
         "fields": {
           "accountId": {
-            "label": "Compte",
+            "label": "Compte *",
             "validation": {
               "required": "Ce champ est requis."
             }
@@ -324,7 +318,7 @@
       },
       "DeleteConfirmationDialog": {
         "title": "Détacher le compte {lastname} {firstname}",
-        "content": "Voulez-vous vraiment détacher le compte {lastname} {firstname} de cette unité organisationnelle ?",
+        "content": "Voulez-vous vraiment détacher le compte {lastname} {firstname} de cette unité organisationnelle ?",
         "ButtonsCard": {
           "confirm": "Détacher",
           "cancel": "Annuler"
@@ -332,7 +326,7 @@
       },
       "GenericEntityTable": {
         "noData": "Aucun compte rattaché à cette unité organisationnelle.",
-        "rowsPerPage": "Éléments par page:",
+        "rowsPerPage": "Éléments par page :",
         "paginationLabel": "{start}-{end} sur {total}"
       }
     }
@@ -354,7 +348,7 @@
   },
   "OrganizationalUnitSuspendedBanner": {
     "content": "Cette unité organisationnelle est suspendue depuis le {date}.",
-    "contentWithEndDate": "Cette unité organisationnelle est suspendue du {date} jusqu'au {endDate}.",
+    "contentWithEndDate": "Cette unité organisationnelle est suspendue du {date} au {endDate}.",
     "clearSuspensionButton": "Réactivation immédiate",
     "modifySuspensionEndButton": "Modifier la fin de suspension"
   },
@@ -380,7 +374,7 @@
   },
   "OrganizationalUnitSuspendDialog": {
     "title": "Suspendre l'unité organisationnelle",
-    "content": "Êtes-vous sûr de vouloir suspendre immédiatement cette unité organisationnelle ?",
+    "content": "Êtes-vous sûr de vouloir suspendre immédiatement cette unité organisationnelle ?",
     "ButtonsCard": {
       "cancel": "Annuler",
       "confirm": "Suspendre",
@@ -388,14 +382,14 @@
     },
     "fields": {
       "reason": {
-        "label": "Motif",
+        "label": "Motif *",
         "hint": "Sélectionnez un motif pour la suspension.",
         "validation": {
           "required": "Ce champ est requis."
         }
       },
       "subreason": {
-        "label": "Sous-motif",
+        "label": "Sous-motif *",
         "hint": "Sélectionnez un sous-motif pour la suspension.",
         "validation": {
           "required": "Ce champ est requis."
@@ -417,12 +411,12 @@
     },
     "fields": {
       "start": {
-        "label": "Date de début de suspension",
+        "label": "Date de début de suspension *",
         "close": "Fermer",
         "validation": {
           "required": "Ce champ est requis.",
           "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-          "afterDate": "La date ne peut pas être antérieure à la date du jour."
+          "afterDate": "La date doit être postérieure à la date du jour."
         }
       },
       "end": {
@@ -430,19 +424,19 @@
         "close": "Fermer",
         "validation": {
           "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-          "afterDate": "La date ne peut pas être antérieure à la date du jour.",
-          "fromDate": "La date de fin doit être postérieure au {compareTo}."
+          "afterDate": "La date doit être postérieure à la date du jour.",
+          "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
         }
       },
       "reason": {
-        "label": "Motif",
+        "label": "Motif *",
         "hint": "Sélectionnez un motif pour la suspension.",
         "validation": {
           "required": "Ce champ est requis."
         }
       },
       "subreason": {
-        "label": "Sous-motif",
+        "label": "Sous-motif *",
         "hint": "Sélectionnez un sous-motif pour la suspension.",
         "validation": {
           "required": "Ce champ est requis."
@@ -468,19 +462,19 @@
         "close": "Fermer",
         "validation": {
           "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-          "afterDate": "La date ne peut pas être antérieure à la date du jour.",
-          "fromDate": "La date de fin doit être postérieure au {compareTo}."
+          "afterDate": "La date doit être postérieure à la date du jour.",
+          "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
         }
       },
       "reason": {
-        "label": "Motif",
+        "label": "Motif *",
         "hint": "Sélectionnez un motif pour la suspension.",
         "validation": {
           "required": "Ce champ est requis."
         }
       },
       "subreason": {
-        "label": "Sous-motif",
+        "label": "Sous-motif *",
         "hint": "Sélectionnez un sous-motif pour la suspension.",
         "validation": {
           "required": "Ce champ est requis."
@@ -494,7 +488,7 @@
   },
   "OrganizationalUnitReactivateDialog": {
     "title": "Réactiver l'unité organisationnelle",
-    "content": "Êtes-vous sûr de vouloir réactiver immédiatement cette unité organisationnelle ?",
+    "content": "Êtes-vous sûr de vouloir réactiver immédiatement cette unité organisationnelle ?",
     "ButtonsCard": {
       "cancel": "Annuler",
       "confirm": "Réactiver",
@@ -502,7 +496,7 @@
     },
     "fields": {
       "comment": {
-        "label": "Justification",
+        "label": "Justification *",
         "hint": "Fournissez un commentaire obligatoire pour cette réactivation.",
         "validation": {
           "required": "Ce champ est requis."

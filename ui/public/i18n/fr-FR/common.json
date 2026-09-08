@@ -9,13 +9,13 @@
       "version": "Version d'intégration"
     },
     "PREPROD": {
-      "version": "Version de pre-production"
+      "version": "Version de pré-production"
     },
     "PROD": {
       "version": "Version de production"
     },
     "DEMO": {
-      "version": "Version de demo"
+      "version": "Version de démo"
     },
     "dateTimeFormat": "DD/MM/YYYY HH:mm:ss",
     "dateFormatApi": "YYYY-MM-DDTHH:mm:ssZ",

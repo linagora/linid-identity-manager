@@ -1,11 +1,12 @@
 {
   "moduleApplicationCreationPage": {
     "title": "Création d'une application",
-    "error": "Erreur pendant la requête",
+    "error": "Impossible de créer l'application. Veuillez réessayer plus tard.",
     "success": "Application créée avec succès.",
     "ButtonsCard": {
       "cancel": "Retour",
-      "confirm": "Créer"
+      "confirm": "Créer",
+      "confirmLoading": "Création..."
     },
     "formSections": {
       "general": {
@@ -70,15 +71,15 @@
       "insertDate": "Date de création",
       "actions": "Actions"
     },
-    "error": "Erreur pendant la requête",
+    "error": "Impossible de charger les applications. Veuillez réessayer plus tard.",
     "GenericEntityTable": {
       "noData": "Aucune donnée disponible",
-      "rowsPerPage": "Éléments par page:",
+      "rowsPerPage": "Éléments par page :",
       "paginationLabel": "{start}-{end} sur {total}"
     },
     "DeleteFavoriteDialog": {
-      "title": "Supprimer un favori?",
-      "content": "Confirmer la suppression du favori \"{label}\"?",
+      "title": "Supprimer un favori ?",
+      "content": "Confirmer la suppression du favori \"{label}\" ?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
@@ -86,21 +87,16 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Remplacer un favori?",
-      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
+      "title": "Remplacer le favori ?",
+      "content": "Confirmer le remplacement du favori \"{label}\" par la recherche actuelle ?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",
         "confirmLoading": "Remplacement..."
-      },
-      "fields": {
-        "favorite": {
-          "label": "Favoris"
-        }
       }
     },
     "CreateFavoriteDialog": {
-      "title": "Créer un favori?",
+      "title": "Créer un favori ?",
       "content": "Créer un favori à partir de la recherche actuelle.",
       "fields": {
         "favoriteName": {
@@ -117,7 +113,7 @@
       }
     },
     "RenameFavoriteDialog": {
-      "title": "Renommer un favori?",
+      "title": "Renommer un favori ?",
       "content": "Renommer le favori avec un nouveau nom.",
       "duplicateName": "Le favori '{name}' existe déjà.",
       "fields": {
@@ -137,7 +133,7 @@
     "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
     "LinidSmartFilter": {
       "label": "Filtre(s) de recherche",
-      "hint": "",
+      "hint": "Saisissez votre filtre",
       "prefix": "",
       "suffix": "",
       "LinidFilterChip": {
@@ -171,7 +167,7 @@
         }
       },
       "LinidFilterPanel": {
-        "title": "Filtrer par:",
+        "title": "Filtrer par :",
         "columnFilter": {
           "code": "Code",
           "name": "Nom",
@@ -198,7 +194,7 @@
           "contains": "Contient",
           "startsWith": "Commence par",
           "endsWith": "Finit par",
-          "equals": "Strictement égale à",
+          "equals": "Strictement égal à",
           "notContains": "Ne contient pas",
           "notStartsWith": "Ne commence pas par",
           "notEndsWith": "Ne finit pas par",
@@ -215,15 +211,15 @@
         "close": "Fermer",
         "searchButton": "Rechercher",
         "operators": {
-          "inferior": "Inférieure à",
-          "superior": "Supérieure à",
+          "inferior": "Antérieure à",
+          "superior": "Postérieure à",
           "equals": "Strictement égale à",
-          "notInferior": "N'est pas inférieure à",
-          "notSuperior": "N'est pas supérieure à",
+          "notInferior": "N'est pas antérieure à",
+          "notSuperior": "N'est pas postérieure à",
           "notEquals": "N'est pas strictement égale à"
         },
         "validation": {
-          "invalidDate": "Date incorrecte. Format attendu: {format}"
+          "invalidDate": "Date incorrecte. Format attendu : {format}"
         }
       }
     }
@@ -251,8 +247,8 @@
         "ButtonsCard": {
           "export": {
             "label": "Exporter script",
-            "success": "Export terminé avec succès.",
-            "error": "Erreur lors de l'export."
+            "success": "Script exporté avec succès.",
+            "error": "Erreur lors de l'export du script."
           },
           "editButton": {
             "FormDialogButton": {
@@ -295,6 +291,7 @@
                 },
                 "ButtonsCard": {
                   "confirm": "Enregistrer",
+                  "confirmLoading": "Enregistrement...",
                   "cancel": "Annuler"
                 }
               }
@@ -346,6 +343,7 @@
         "title": "Ajouter un rôle",
         "ButtonsCard": {
           "confirm": "Ajouter",
+          "confirmLoading": "Ajout...",
           "cancel": "Annuler"
         },
         "fields": {
@@ -364,6 +362,7 @@
         "title": "Modifier le rôle {name}",
         "ButtonsCard": {
           "confirm": "Enregistrer",
+          "confirmLoading": "Enregistrement...",
           "cancel": "Annuler"
         },
         "fields": {
@@ -380,7 +379,7 @@
       },
       "DeleteConfirmationDialog": {
         "title": "Supprimer le rôle {name}",
-        "content": "Voulez-vous vraiment supprimer le rôle {name} ? Cette action est irréversible.",
+        "content": "Voulez-vous vraiment supprimer le rôle {name} ? Cette action est irréversible.",
         "ButtonsCard": {
           "confirm": "Supprimer",
           "cancel": "Annuler"
@@ -388,7 +387,7 @@
       },
       "GenericEntityTable": {
         "noData": "Aucun rôle pour cette application.",
-        "rowsPerPage": "Éléments par page:",
+        "rowsPerPage": "Éléments par page :",
         "paginationLabel": "{start}-{end} sur {total}"
       }
     },
@@ -412,6 +411,7 @@
         "title": "Ajouter une règle",
         "ButtonsCard": {
           "confirm": "Ajouter",
+          "confirmLoading": "Ajout...",
           "cancel": "Annuler"
         },
         "fields": {
@@ -445,6 +445,7 @@
         "title": "Modifier la règle {code}",
         "ButtonsCard": {
           "confirm": "Enregistrer",
+          "confirmLoading": "Enregistrement...",
           "cancel": "Annuler"
         },
         "fields": {

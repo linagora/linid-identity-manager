@@ -1,6 +1,7 @@
 {
   "moduleAccountDetailsPage": {
     "entity-profile-panel": {
+      "q-card": {},
       "q-img": {},
       "q-icon": { "name": "account_circle", "color": "grey-6" },
       "navigation": {
@@ -12,7 +13,7 @@
               "flat": true,
               "color": "primary",
               "icon": "arrow_back",
-              "no-caps": true
+              "noCaps": true
             }
           }
         }
@@ -29,11 +30,17 @@
                 "outline": false
               },
               "form-dialog": {
+                "q-dialog": { "persistent": false },
+                "q-card": { "flat": true, "bordered": false },
+                "q-card-actions": { "align": "right" },
                 "buttons-card": {
+                  "q-card": { "flat": true },
+                  "q-card-actions": { "align": "right" },
                   "confirm-button": {
-                    "q-btn": {
-                      "outline": false
-                    }
+                    "q-btn": { "color": "primary", "outline": false }
+                  },
+                  "cancel-button": {
+                    "q-btn": { "color": "primary", "outline": true }
                   }
                 }
               }
@@ -189,36 +196,30 @@
       }
     },
     "confirmation-dialog": {
-      "q-dialog": {},
+      "q-dialog": { "persistent": false },
       "buttons-card": {
-        "q-card": {},
-        "q-icon": {},
-        "q-card-actions": {},
+        "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
         "confirm-button": {
-          "q-btn": {
-            "outline": false
-          }
+          "q-btn": { "color": "primary", "outline": false }
         },
         "cancel-button": {
-          "q-btn": {}
+          "q-btn": { "color": "negative", "outline": true }
         }
       }
     },
     "form-dialog": {
-      "q-card-actions": {
-        "align": "right"
-      },
+      "q-dialog": { "persistent": false },
+      "q-card": { "flat": true, "bordered": false },
+      "q-card-actions": { "align": "right" },
       "buttons-card": {
-        "q-card": {},
-        "q-icon": {},
-        "q-card-actions": {},
+        "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
         "confirm-button": {
-          "q-btn": {
-            "outline": false
-          }
+          "q-btn": { "color": "primary", "outline": false }
         },
         "cancel-button": {
-          "q-btn": {}
+          "q-btn": { "color": "primary", "outline": true }
         }
       }
     }

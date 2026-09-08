@@ -5,6 +5,12 @@
       "size": "xs"
     }
   },
+  "account-not-activated-info-text": {
+    "q-icon": {
+      "name": "info",
+      "size": "xs"
+    }
+  },
   "account-suspended-info-text": {
     "q-icon": {
       "name": "warning",

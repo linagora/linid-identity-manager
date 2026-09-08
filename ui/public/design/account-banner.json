@@ -15,14 +15,13 @@
     },
     "reactivate-scheduled-button": {
       "q-btn": {
-        "color": "white"
+        "color": "white",
+        "outline": true
       }
     }
   },
   "account-deactivated-warning-banner": {
-    "q-banner": {
-      "color": "negative"
-    },
+    "q-banner": {},
     "q-icon": {
       "color": "negative",
       "name": "warning"
@@ -36,7 +35,8 @@
     },
     "modify-deactivation-button": {
       "q-btn": {
-        "color": "negative"
+        "color": "negative",
+        "outline": true
       }
     }
   },
@@ -56,7 +56,8 @@
     },
     "modify-suspension-button": {
       "q-btn": {
-        "color": "white"
+        "color": "white",
+        "outline": true
       }
     }
   }

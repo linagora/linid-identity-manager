@@ -3,36 +3,25 @@
     "entity-profile-panel": {
       "q-card": {},
       "q-img": {},
-      "q-icon": {
-        "name": "corporate_fare",
-        "color": "grey-6"
-      },
+      "q-icon": { "name": "corporate_fare", "color": "grey-6" },
       "navigation": {
         "buttons-card": {
-          "q-card": {
-            "flat": true
-          },
-          "q-card-actions": {
-            "align": "left"
-          },
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "left" },
           "back-button": {
             "q-btn": {
               "flat": true,
               "color": "primary",
               "icon": "arrow_back",
-              "no-caps": true
+              "noCaps": true
             }
           }
         }
       },
       "actions": {
         "buttons-card": {
-          "q-card": {
-            "flat": true
-          },
-          "q-card-actions": {
-            "align": "right"
-          },
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "create-child-button": {
             "q-btn": {
               "color": "primary",
@@ -48,11 +37,17 @@
                 "outline": false
               },
               "form-dialog": {
+                "q-dialog": { "persistent": false },
+                "q-card": { "flat": true, "bordered": false },
+                "q-card-actions": { "align": "right" },
                 "buttons-card": {
+                  "q-card": { "flat": true },
+                  "q-card-actions": { "align": "right" },
                   "confirm-button": {
-                    "q-btn": {
-                      "outline": false
-                    }
+                    "q-btn": { "color": "primary", "outline": false }
+                  },
+                  "cancel-button": {
+                    "q-btn": { "color": "primary", "outline": true }
                   }
                 }
               }
@@ -64,10 +59,7 @@
         "q-card": {},
         "type": {
           "information-card": {
-            "q-icon": {
-              "color": "primary",
-              "name": "category"
-            },
+            "q-icon": { "color": "primary", "name": "category" },
             "q-card": {}
           }
         }
@@ -75,10 +67,7 @@
     },
     "activation-actions": {
       "dropdown-button": {
-        "q-btn-dropdown": {
-          "color": "positive",
-          "outline": false
-        },
+        "q-btn-dropdown": { "color": "positive", "outline": false },
         "q-list": {},
         "q-menu": {},
         "menu-trigger": {
@@ -104,10 +93,7 @@
     },
     "suspension-actions": {
       "dropdown-button": {
-        "q-btn-dropdown": {
-          "color": "warning",
-          "outline": false
-        },
+        "q-btn-dropdown": { "color": "warning", "outline": false },
         "q-list": {},
         "q-menu": {},
         "menu-trigger": {
@@ -132,18 +118,17 @@
       }
     },
     "form-dialog": {
-      "q-dialog": {},
+      "q-dialog": { "persistent": false },
+      "q-card": { "flat": true, "bordered": false },
+      "q-card-actions": { "align": "right" },
       "buttons-card": {
-        "q-card": {},
-        "q-icon": {},
-        "q-card-actions": {},
+        "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
         "confirm-button": {
-          "q-btn": {
-            "outline": false
-          }
+          "q-btn": { "color": "primary", "outline": false }
         },
         "cancel-button": {
-          "q-btn": {}
+          "q-btn": { "color": "primary", "outline": true }
         }
       }
     },
@@ -153,56 +138,38 @@
           "q-card": {},
           "insertDate": {
             "information-card": {
-              "q-icon": {
-                "color": "primary",
-                "name": "event_available"
-              },
+              "q-icon": { "color": "primary", "name": "event_available" },
               "q-card": {}
             }
           },
           "createdBy": {
             "information-card": {
-              "q-icon": {
-                "color": "primary",
-                "name": "person_add"
-              },
+              "q-icon": { "color": "primary", "name": "person_add" },
               "q-card": {}
             }
           },
           "updateDate": {
             "information-card": {
-              "q-icon": {
-                "color": "primary",
-                "name": "update"
-              },
+              "q-icon": { "color": "primary", "name": "update" },
               "q-card": {}
             }
           },
           "updatedBy": {
             "information-card": {
-              "q-icon": {
-                "color": "primary",
-                "name": "manage_accounts"
-              },
+              "q-icon": { "color": "primary", "name": "manage_accounts" },
               "q-card": {}
             }
           },
           "suspensionPeriod": {
             "start": {
               "information-card": {
-                "q-icon": {
-                  "color": "primary",
-                  "name": "event"
-                },
+                "q-icon": { "color": "primary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": {
-                  "color": "primary",
-                  "name": "event"
-                },
+                "q-icon": { "color": "primary", "name": "event" },
                 "q-card": {}
               }
             }
@@ -211,20 +178,12 @@
       }
     },
     "generic-editable-table-card": {
-      "q-card": {
-        "flat": true,
-        "bordered": false
-      },
+      "q-card": { "flat": true, "bordered": false },
       "buttons-card": {
-        "q-card": {
-          "flat": true
-        },
+        "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
         "add-button": {
-          "q-btn": {
-            "color": "primary",
-            "unelevated": true,
-            "outline": false
-          }
+          "q-btn": { "color": "primary", "outline": false }
         }
       },
       "delete-button": {
@@ -239,56 +198,30 @@
         "q-table": {}
       },
       "form-dialog": {
-        "q-dialog": {
-          "persistent": false
-        },
-        "q-card": {
-          "flat": true,
-          "bordered": true
-        },
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
         "buttons-card": {
-          "q-card": {
-            "flat": true
-          },
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
           "cancel-button": {
-            "q-btn": {
-              "color": "primary",
-              "outline": true
-            }
+            "q-btn": { "color": "primary", "outline": true }
           }
         }
       },
       "confirmation-dialog": {
-        "q-dialog": {
-          "persistent": false
-        },
-        "q-card": {
-          "flat": true,
-          "bordered": true
-        },
+        "q-dialog": { "persistent": false },
         "buttons-card": {
-          "q-card": {
-            "flat": true
-          },
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
           "cancel-button": {
-            "q-btn": {
-              "color": "negative",
-              "outline": true
-            }
+            "q-btn": { "color": "negative", "outline": true }
           }
         }
       }

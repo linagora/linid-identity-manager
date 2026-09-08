@@ -5,6 +5,84 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-09-08
+
+### Added
+
+#### Backend
+
+- Added **account update API endpoint**.
+- Added **organizational unit account relationship management**, including:
+  - Attach account to organizational unit.
+  - Detach account from organizational unit.
+  - Update relationship metadata between accounts and organizational units.
+- Added API endpoint to **list organizational units attached to an account**.
+- Added support for **computed organizational unit status** in organizational unit views.
+- Added optional **domain field** support for applications.
+- Added support for **extraParameters** on configurable entities.
+- Added support for **Apache Superset integration**, including dedicated backend services and controllers.
+- Exposed organizational unit fields on accounts and parent fields on organizational units through the distinct value views.
+
+#### Frontend
+
+- Added complete **Account creation page** based on Generic Creation Page.
+- Introduced **Entity Profile Panel** across multiple entities, providing:
+  - Avatar display and generation.
+  - Entity editing capabilities.
+  - Consistent profile layout.
+- Added **DiceBear avatar generation** for accounts, applications and organizational units.
+- Added management of **account memberships in organizational units** directly from organizational unit details pages.
+- Added display of **organizational unit relationships** from account pages.
+- Added support for **parent organizational unit visualization**.
+- Added support for loading additional UI zones through application configuration.
+- Added **language switcher** in the user profile menu.
+- Added support for **entity extra parameters** in UI components.
+- Added **Apache Superset dashboard integration**.
+- Displayed organizational units in the accounts list and parent organizational units in the organizational units list.
+
+### Changed
+
+#### Frontend
+
+- Migrated **Account Details Page** to the Generic Details Page architecture.
+- Migrated **Organizational Unit Details Page** to the Generic Details Page architecture.
+- Migrated **Organizational Unit Creation Page** to the Generic Creation Page architecture.
+- Replaced dedicated account and organizational unit pages with configuration-driven implementations.
+- Added lifecycle components and configurable zones for account and organizational unit pages.
+- Improved application details pages by integrating the Entity Profile Panel.
+- Reworked date field rendering and formatting behavior.
+- Split translations into multiple files to improve maintainability.
+- Moved OIDC, theme, remotes, modules, and runtime configuration into `config.json`.
+- Updated Row-Level Security (RLS) configuration to use Jinja templates for clause rendering.
+- Restyled **design configurations** across all pages and dialogs for a more consistent user experience.
+- Harmonized **i18n labels** across the application.
+- Reordered **Application page sections** to improve content organization and usability.
+- Removed the dedicated **Application Edition page**, replacing it with editing capabilities directly integrated into the **EntityProfilePanel**.
+- Changed the **remote module lifecycle architecture** to bootstrap modules through `linidModuleFederation.init`.
+
+### Fixed
+
+#### Security
+
+- Updated Tomcat to **11.0.25** to address critical vulnerabilities.
+- Fixed vulnerabilities in PostgreSQL dependencies.
+- Fixed vulnerabilities in Nginx Alpine images.
+- Improved CI security validation workflows.
+
+#### Frontend
+
+- Fixed infinite OIDC redirect loops by clearing invalid user sessions on authentication failures.
+- Fixed internationalization issues in organizational unit labels.
+- Improved E2E test reliability and independence.
+
+### Build
+
+- Added dedicated CI jobs for security validation.
+- Unified TLS handling by introducing a **single CA-signed certificate** shared across all services.
+- Improved E2E environment configuration and test execution.
+- Updated CoreLib and Community Plugins dependencies.
+- Centralized database initialization and configuration management.
+
 ## [0.8.0] - 2026-08-05
 
 ### Added
@@ -309,3 +387,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.6.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.6.0
 [0.7.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.7.0
 [0.8.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.8.0
+[0.9.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.9.0

@@ -1,17 +1,10 @@
 {
   "moduleOrganizationalUnitsPage": {
-    "confirmation-dialog": {
-      "q-dialog": { "persistent": false },
-      "q-card": { "flat": true, "bordered": true },
-      "buttons-card": {
-        "q-card": { "flat": true },
-        "confirm-button": {
-          "q-btn": { "color": "primary", "icon": "check" }
-        },
-        "cancel-button": {
-          "q-btn": { "color": "negative", "outline": true }
-        }
-      }
+    "see-button": {
+      "q-btn": { "color": "primary", "outline": true }
+    },
+    "generic-entity-table": {
+      "q-table": {}
     },
     "linid-smart-filter": {
       "q-field": {
@@ -22,6 +15,11 @@
       "iconSearch": {
         "q-icon": {
           "name": "search"
+        }
+      },
+      "iconClear": {
+        "q-icon": {
+          "name": "close"
         }
       },
       "iconMenuClose": {
@@ -35,6 +33,36 @@
         }
       },
       "linid-filter-chip": {
+        "name": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "deep-purple-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
+        "type": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "red-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
+        "parentId": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "blue-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
         "createdBy": {
           "q-avatar": {
             "size": "28px",
@@ -42,7 +70,7 @@
             "textColor": "white"
           },
           "q-chip": {
-            "square": false
+            "square": true
           }
         },
         "insertDate": {
@@ -70,11 +98,6 @@
           },
           "label-section": {
             "q-item-section": {}
-          },
-          "types": {
-            "[FILTER_TYPE]": {
-              "q-icon": { "name": "filter_alt", "size": "sm" }
-            }
           }
         }
       },
@@ -91,7 +114,7 @@
         "q-btn": { "color": "primary", "unelevated": true }
       },
       "list-search-filter-panel": {
-        "q-list": { "bordered": true },
+        "q-list": { "bordered": false },
         "q-item": { "dense": true },
         "checkboxSection": {
           "q-item-section": { "side": true },
@@ -101,6 +124,26 @@
           "q-item-section": {}
         },
         "q-btn": { "color": "primary", "unelevated": true }
+      },
+      "tree-search-filter-panel": {
+        "q-btn": { "color": "primary", "unelevated": true },
+        "GenericTree": {
+          "q-tree": {
+            "dense": true,
+            "defaultExpandAll": true
+          }
+        }
+      },
+      "date-search-filter-panel": {
+        "q-input": { "outlined": true, "dense": true },
+        "q-icon": { "name": "event" },
+        "q-date": { "todayBtn": true },
+        "q-checkbox": { "color": "primary", "dense": true },
+        "q-option-group": { "color": "primary", "dense": true },
+        "q-btn": { "color": "primary", "unelevated": true },
+        "close": {
+          "q-btn": { "flat": true }
+        }
       },
       "linid-favorite-panel": {
         "header": {
@@ -155,25 +198,69 @@
             "q-btn": {}
           }
         }
-      },
-      "tree-search-filter-panel": {
-        "q-btn": {},
-        "GenericTree": {
-          "q-tree": {
-            "dense": true,
-            "defaultExpandAll": true
+      }
+    },
+    "delete-favorite-dialog": {
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
           }
         }
-      },
-      "date-search-filter-panel": {
-        "q-input": { "outlined": true, "dense": true },
-        "q-icon": { "name": "event" },
-        "q-date": { "today-btn": true },
-        "q-checkbox": { "color": "primary", "dense": true },
-        "q-option-group": { "color": "primary", "dense": true },
-        "q-btn": { "color": "primary", "unelevated": true },
-        "close": {
-          "q-btn": { "flat": true }
+      }
+    },
+    "override-favorite-dialog": {
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      }
+    },
+    "rename-favorite-dialog": {
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      }
+    },
+    "create-favorite-dialog": {
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       }
     }

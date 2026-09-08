@@ -13,7 +13,7 @@
               "flat": true,
               "color": "primary",
               "icon": "arrow_back",
-              "no-caps": true
+              "noCaps": true
             }
           }
         }
@@ -26,7 +26,7 @@
             "q-btn": {
               "color": "primary",
               "icon": "download",
-              "outline": true
+              "outline": false
             }
           },
           "edit-button": {
@@ -37,11 +37,17 @@
                 "outline": false
               },
               "form-dialog": {
+                "q-dialog": { "persistent": false },
+                "q-card": { "flat": true, "bordered": false },
+                "q-card-actions": { "align": "right" },
                 "buttons-card": {
+                  "q-card": { "flat": true },
+                  "q-card-actions": { "align": "right" },
                   "confirm-button": {
-                    "q-btn": {
-                      "outline": false
-                    }
+                    "q-btn": { "color": "primary", "outline": false }
+                  },
+                  "cancel-button": {
+                    "q-btn": { "color": "primary", "outline": true }
                   }
                 }
               }
@@ -84,7 +90,7 @@
           "claimsTemplate": {
             "information-card": {
               "q-icon": { "color": "primary", "name": "token" },
-              "q-input": {}
+              "q-card": {}
             }
           }
         }
@@ -123,8 +129,9 @@
       "q-card": { "flat": true, "bordered": false },
       "buttons-card": {
         "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
         "add-button": {
-          "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+          "q-btn": { "color": "primary", "outline": false }
         }
       },
       "edit-button": {
@@ -148,32 +155,30 @@
       },
       "form-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "color": "primary", "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       },
       "confirmation-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "color": "negative", "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       }
     },
@@ -224,39 +229,37 @@
         }
       },
       "add-button": {
-        "q-btn": { "color": "primary", "unelevated": true, "outline": false }
+        "q-btn": { "color": "primary", "outline": false }
       },
       "save-button": {
-        "q-btn": { "color": "positive", "unelevated": true, "outline": false }
+        "q-btn": { "color": "positive", "outline": false }
       },
       "form-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       },
       "confirmation-dialog": {
         "q-dialog": { "persistent": false },
-        "q-card": { "flat": true, "bordered": true },
         "buttons-card": {
           "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
           "confirm-button": {
-            "q-btn": {
-              "color": "primary",
-              "unelevated": true,
-              "outline": false
-            }
+            "q-btn": { "color": "primary", "outline": false }
           },
-          "cancel-button": { "q-btn": { "outline": true } }
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       }
     }

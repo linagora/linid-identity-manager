@@ -207,10 +207,6 @@
     "reloadDetailsOn": ["application-updated"],
     "sections": [
       {
-        "key": "claims",
-        "fieldOrder": ["claimsTemplate"]
-      },
-      {
         "key": "audit",
         "formatters": [
           {
@@ -229,6 +225,10 @@
           }
         ],
         "fieldOrder": ["createdBy", "updatedBy", "insertDate", "updateDate"]
+      },
+      {
+        "key": "claims",
+        "fieldOrder": ["claimsTemplate"]
       }
     ]
   }

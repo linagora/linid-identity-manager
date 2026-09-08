@@ -58,8 +58,7 @@ class AuthService {
   /**
    * Get the OIDC configuration and creates a configured {@link UserManager} instance.
    *
-   * This method also registers authentication event handlers for token expiration, silent renewal failures, and remote
-   * sign-out.
+   * This method also registers authentication event handlers for token expiration and silent renewal failures.
    *
    * @returns A promise resolving to the configured {@link UserManager}.
    */
@@ -88,10 +87,6 @@ class AuthService {
 
     userManager.events.addSilentRenewError((err) => {
       console.error('[auth] silent renew failed', err);
-      void this.login();
-    });
-
-    userManager.events.addUserSignedOut(() => {
       void this.login();
     });
 

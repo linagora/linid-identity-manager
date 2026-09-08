@@ -59,7 +59,7 @@ Feature: Test Account creation page
     ## 105 validityPeriod.start afterDate validation error
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriod.start"]'
     And  I click on '[data-cy="button_confirm"]'
-    Then I expect the HTML element '[role="alert"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[role="alert"]' contains "La date doit être postérieure à la date du jour."
 
     ## 106 Submitting a valid form should create the account
     When I set the text "E2E_ACCOUNT_CREATION" in the HTML element '[data-cy="field_externalId"]'

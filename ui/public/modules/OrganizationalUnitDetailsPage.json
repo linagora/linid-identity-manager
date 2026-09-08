@@ -24,11 +24,7 @@
           ],
           "style": "constellation",
           "styleOptions": {
-            "animationVariant": [
-              "fastest",
-              "fast",
-              "medium"
-            ]
+            "animationVariant": "fast"
           }
         },
         "fieldOrder": [

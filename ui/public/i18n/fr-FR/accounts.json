@@ -12,7 +12,7 @@
     "seeButton": "Voir",
     "columns": {
       "firstname": "Prénom",
-      "lastname": "Nom de famille",
+      "lastname": "Nom",
       "email": "Email",
       "status": "Statut",
       "organizationalUnits": "Unités organisationnelles liées",
@@ -20,15 +20,15 @@
       "insertDate": "Date de création",
       "actions": "Actions"
     },
-    "error": "Erreur pendant la requête",
+    "error": "Impossible de charger les comptes. Veuillez réessayer plus tard.",
     "GenericEntityTable": {
       "noData": "Aucune donnée disponible",
-      "rowsPerPage": "Éléments par page:",
+      "rowsPerPage": "Éléments par page :",
       "paginationLabel": "{start}-{end} sur {total}"
     },
     "DeleteFavoriteDialog": {
-      "title": "Supprimer un favori?",
-      "content": "Confirmer la suppression du favori \"{label}\"?",
+      "title": "Supprimer un favori ?",
+      "content": "Confirmer la suppression du favori \"{label}\" ?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Confirmer",
@@ -36,25 +36,20 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Remplacer un favori?",
-      "content": "Sélectionner un favori pour le remplacer par la recherche actuelle.",
+      "title": "Remplacer le favori ?",
+      "content": "Confirmer le remplacement du favori \"{label}\" par la recherche actuelle ?",
       "ButtonsCard": {
         "cancel": "Annuler",
         "confirm": "Remplacer",
         "confirmLoading": "Remplacement..."
-      },
-      "fields": {
-        "favorite": {
-          "label": "Favoris"
-        }
       }
     },
     "CreateFavoriteDialog": {
-      "title": "Créer un favori?",
+      "title": "Créer un favori ?",
       "content": "Créer un favori à partir de la recherche actuelle.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favori",
+          "label": "Nom du favori *",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -67,12 +62,12 @@
       }
     },
     "RenameFavoriteDialog": {
-      "title": "Renommer un favori?",
+      "title": "Renommer un favori ?",
       "content": "Renommer le favori avec un nouveau nom.",
       "duplicateName": "Le favori '{name}' existe déjà.",
       "fields": {
         "favoriteName": {
-          "label": "Nom du favori",
+          "label": "Nom du favori *",
           "validation": {
             "required": "Ce champ est requis."
           }
@@ -87,7 +82,7 @@
     "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
     "LinidSmartFilter": {
       "label": "Filtre(s) de recherche",
-      "hint": "",
+      "hint": "Saisissez votre filtre",
       "prefix": "",
       "suffix": "",
       "LinidFilterChip": {
@@ -96,7 +91,7 @@
           "separator": "ou"
         },
         "lastname": {
-          "type": "Nom de famille",
+          "type": "Nom",
           "separator": "ou"
         },
         "email": {
@@ -105,6 +100,10 @@
         },
         "status": {
           "type": "Statut",
+          "separator": "ou"
+        },
+        "organizationalUnitId": {
+          "type": "Unité organisationnelle",
           "separator": "ou"
         },
         "createdBy": {
@@ -117,10 +116,10 @@
         }
       },
       "LinidFilterPanel": {
-        "title": "Filtrer par:",
+        "title": "Filtrer par :",
         "columnFilter": {
           "firstname": "Prénom",
-          "lastname": "Nom de famille",
+          "lastname": "Nom",
           "email": "Email",
           "status": "Statut",
           "organizationalUnitId": "Unité organisationnelle",
@@ -144,7 +143,7 @@
           "contains": "Contient",
           "startsWith": "Commence par",
           "endsWith": "Finit par",
-          "equals": "Strictement égale à",
+          "equals": "Strictement égal à",
           "notContains": "Ne contient pas",
           "notStartsWith": "Ne commence pas par",
           "notEndsWith": "Ne finit pas par",
@@ -161,15 +160,15 @@
         "close": "Fermer",
         "searchButton": "Rechercher",
         "operators": {
-          "inferior": "Inférieure à",
-          "superior": "Supérieure à",
+          "inferior": "Antérieure à",
+          "superior": "Postérieure à",
           "equals": "Strictement égale à",
-          "notInferior": "N'est pas inférieure à",
-          "notSuperior": "N'est pas supérieure à",
+          "notInferior": "N'est pas antérieure à",
+          "notSuperior": "N'est pas postérieure à",
           "notEquals": "N'est pas strictement égale à"
         },
         "validation": {
-          "invalidDate": "Date incorrecte. Format attendu: {format}"
+          "invalidDate": "Date incorrecte. Format attendu : {format}"
         }
       },
       "TreeSearchFilterPanel": {
@@ -197,13 +196,13 @@
     }
   },
   "AccountDeactivatedInfoText": {
-    "message": "Ce compte va être désactivé le {date}."
+    "message": "Ce compte sera désactivé le {date}."
   },
   "AccountSuspendedInfoText": {
-    "message": "Ce compte va être suspendu le {date}."
+    "message": "Ce compte sera suspendu le {date}."
   },
   "AccountNotActivatedInfoText": {
-    "message": "L'utilisateur n'a pas encore activé son compte."
+    "message": "Ce compte n'a pas encore été activé."
   },
   "AccountActivationActions": {
     "DropdownButton": {
@@ -216,7 +215,7 @@
     "ConfirmationDialog": {
       "immediate": {
         "title": "Activation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir activer ce compte immédiatement ?",
+        "content": "Êtes-vous sûr de vouloir activer ce compte immédiatement ?",
         "ButtonsCard": {
           "confirm": "Activer",
           "cancel": "Annuler"
@@ -229,17 +228,18 @@
         "content": "Veuillez sélectionner une date d'activation.",
         "fields": {
           "validityPeriodStart": {
-            "label": "Date d'activation",
+            "label": "Date d'activation *",
             "close": "Fermer",
             "validation": {
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+              "afterDate": "La date doit être postérieure à la date du jour."
             }
           }
         },
         "ButtonsCard": {
           "confirm": "Planifier",
+          "confirmLoading": "Planification...",
           "cancel": "Annuler"
         }
       }
@@ -256,17 +256,17 @@
     "FormDialog": {
       "immediate": {
         "title": "Suspension immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?",
+        "content": "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?",
         "fields": {
           "statusReason": {
-            "label": "Motif",
+            "label": "Motif *",
             "hint": "Sélectionnez un motif de suspension.",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "statusSubreason": {
-            "label": "Sous-motif",
+            "label": "Sous-motif *",
             "hint": "Sélectionnez un sous-motif de suspension.",
             "validation": {
               "required": "Ce champ est requis."
@@ -274,11 +274,12 @@
           },
           "statusComment": {
             "label": "Justification",
-            "hint": "Ajoutez un commentaire optionnel."
+            "hint": "Ajoutez un commentaire facultatif."
           }
         },
         "ButtonsCard": {
           "confirm": "Suspendre",
+          "confirmLoading": "Suspension...",
           "cancel": "Annuler"
         }
       },
@@ -287,12 +288,12 @@
         "content": "Configurez la période de suspension du compte.",
         "fields": {
           "suspensionPeriodStart": {
-            "label": "Date de début de suspension",
+            "label": "Date de début de suspension *",
             "close": "Fermer",
             "validation": {
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+              "afterDate": "La date doit être postérieure à la date du jour."
             }
           },
           "suspensionPeriodEnd": {
@@ -300,19 +301,19 @@
             "close": "Fermer",
             "validation": {
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour.",
-              "fromDate": "La date de fin doit être postérieure au {compareTo}."
+              "afterDate": "La date doit être postérieure à la date du jour.",
+              "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
             }
           },
           "statusReason": {
-            "label": "Motif",
+            "label": "Motif *",
             "hint": "Sélectionnez un motif de suspension.",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "statusSubreason": {
-            "label": "Sous-motif",
+            "label": "Sous-motif *",
             "hint": "Sélectionnez un sous-motif de suspension.",
             "validation": {
               "required": "Ce champ est requis."
@@ -320,11 +321,12 @@
           },
           "statusComment": {
             "label": "Justification",
-            "hint": "Ajoutez un commentaire optionnel."
+            "hint": "Ajoutez un commentaire facultatif."
           }
         },
         "ButtonsCard": {
           "confirm": "Planifier",
+          "confirmLoading": "Planification...",
           "cancel": "Annuler"
         }
       },
@@ -333,12 +335,12 @@
         "content": "Mettez à jour les paramètres de suspension de ce compte.",
         "fields": {
           "suspensionPeriodStart": {
-            "label": "Nouvelle date de début de suspension",
+            "label": "Nouvelle date de début de suspension *",
             "close": "Fermer",
             "validation": {
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+              "afterDate": "La date doit être postérieure à la date du jour."
             }
           },
           "suspensionPeriodEnd": {
@@ -346,19 +348,19 @@
             "close": "Fermer",
             "validation": {
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour.",
-              "fromDate": "La date de fin doit être postérieure au {compareTo}."
+              "afterDate": "La date doit être postérieure à la date du jour.",
+              "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
             }
           },
           "statusReason": {
-            "label": "Motif",
+            "label": "Motif *",
             "hint": "Sélectionnez un motif de suspension.",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "statusSubreason": {
-            "label": "Sous-motif",
+            "label": "Sous-motif *",
             "hint": "Sélectionnez un sous-motif de suspension.",
             "validation": {
               "required": "Ce champ est requis."
@@ -366,11 +368,12 @@
           },
           "statusComment": {
             "label": "Justification",
-            "hint": "Ajoutez un commentaire optionnel."
+            "hint": "Ajoutez un commentaire facultatif."
           }
         },
         "ButtonsCard": {
           "confirm": "Modifier",
+          "confirmLoading": "Mise à jour...",
           "cancel": "Annuler"
         }
       }
@@ -388,17 +391,17 @@
     "FormDialog": {
       "immediate": {
         "title": "Désactivation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?",
+        "content": "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?",
         "fields": {
           "statusReason": {
-            "label": "Motif",
+            "label": "Motif *",
             "hint": "Sélectionnez un motif de désactivation.",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "statusSubreason": {
-            "label": "Sous-motif",
+            "label": "Sous-motif *",
             "hint": "Sélectionnez un sous-motif de désactivation.",
             "validation": {
               "required": "Ce champ est requis."
@@ -406,11 +409,12 @@
           },
           "statusComment": {
             "label": "Justification",
-            "hint": "Ajoutez un commentaire optionnel."
+            "hint": "Ajoutez un commentaire facultatif."
           }
         },
         "ButtonsCard": {
           "confirm": "Désactiver",
+          "confirmLoading": "Désactivation...",
           "cancel": "Annuler"
         }
       },
@@ -419,23 +423,23 @@
         "content": "Sélectionnez une date de désactivation et indiquez un motif.",
         "fields": {
           "validityPeriodEnd": {
-            "label": "Date de désactivation",
+            "label": "Date de désactivation *",
             "close": "Fermer",
             "validation": {
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+              "afterDate": "La date doit être postérieure à la date du jour."
             }
           },
           "statusReason": {
-            "label": "Motif",
+            "label": "Motif *",
             "hint": "Sélectionnez un motif de désactivation.",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "statusSubreason": {
-            "label": "Sous-motif",
+            "label": "Sous-motif *",
             "hint": "Sélectionnez un sous-motif de désactivation.",
             "validation": {
               "required": "Ce champ est requis."
@@ -443,11 +447,12 @@
           },
           "statusComment": {
             "label": "Justification",
-            "hint": "Ajoutez un commentaire optionnel."
+            "hint": "Ajoutez un commentaire facultatif."
           }
         },
         "ButtonsCard": {
           "confirm": "Planifier",
+          "confirmLoading": "Planification...",
           "cancel": "Annuler"
         }
       },
@@ -456,23 +461,23 @@
         "content": "Mettez à jour la date de désactivation planifiée pour ce compte.",
         "fields": {
           "validityPeriodEnd": {
-            "label": "Nouvelle date de désactivation",
+            "label": "Nouvelle date de désactivation *",
             "close": "Fermer",
             "validation": {
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+              "afterDate": "La date doit être postérieure à la date du jour."
             }
           },
           "statusReason": {
-            "label": "Motif",
+            "label": "Motif *",
             "hint": "Sélectionnez un motif de désactivation.",
             "validation": {
               "required": "Ce champ est requis."
             }
           },
           "statusSubreason": {
-            "label": "Sous-motif",
+            "label": "Sous-motif *",
             "hint": "Sélectionnez un sous-motif de désactivation.",
             "validation": {
               "required": "Ce champ est requis."
@@ -480,11 +485,12 @@
           },
           "statusComment": {
             "label": "Justification",
-            "hint": "Ajoutez un commentaire optionnel."
+            "hint": "Ajoutez un commentaire facultatif."
           }
         },
         "ButtonsCard": {
           "confirm": "Modifier",
+          "confirmLoading": "Mise à jour...",
           "cancel": "Annuler"
         }
       }
@@ -494,10 +500,10 @@
     "FormDialog": {
       "immediate": {
         "title": "Réactivation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
+        "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
         "fields": {
           "statusComment": {
-            "label": "Justification",
+            "label": "Justification *",
             "hint": "Fournissez une justification obligatoire pour cette réactivation.",
             "validation": {
               "required": "Ce champ est requis."
@@ -506,6 +512,7 @@
         },
         "ButtonsCard": {
           "confirm": "Réactiver",
+          "confirmLoading": "Réactivation...",
           "cancel": "Annuler"
         }
       }
@@ -560,7 +567,7 @@
           "validation": {
             "required": "Ce champ est requis.",
             "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-            "afterDate": "La date ne peut pas être antérieure à la date du jour."
+            "afterDate": "La date doit être postérieure à la date du jour."
           }
         }
       },
@@ -574,9 +581,6 @@
   },
   "moduleAccountDetailsPage": {
     "error": "Impossible de charger le compte. Veuillez réessayer plus tard.",
-    "ButtonsCard": {
-      "cancel": "Retour"
-    },
     "EntityProfilePanel": {
       "title": "{firstname} {lastname}",
       "subtitle": "{email}",
@@ -588,7 +592,7 @@
       "EntityDetailsCard": {
         "attributes": {
           "externalId": "Identifiant",
-          "email": "E-mail"
+          "email": "Email"
         }
       },
       "actions": {
@@ -602,25 +606,25 @@
                 "title": "Modifier {firstname} {lastname}",
                 "fields": {
                   "externalId": {
-                    "label": "Identifiant",
+                    "label": "Identifiant *",
                     "validation": {
                       "required": "Ce champ est requis."
                     }
                   },
                   "firstname": {
-                    "label": "Prénom",
+                    "label": "Prénom *",
                     "validation": {
                       "required": "Ce champ est requis."
                     }
                   },
                   "lastname": {
-                    "label": "Nom",
+                    "label": "Nom *",
                     "validation": {
                       "required": "Ce champ est requis."
                     }
                   },
                   "email": {
-                    "label": "E-mail",
+                    "label": "Email *",
                     "validation": {
                       "required": "Ce champ est requis."
                     }
@@ -628,6 +632,7 @@
                 },
                 "ButtonsCard": {
                   "confirm": "Enregistrer",
+                  "confirmLoading": "Enregistrement...",
                   "cancel": "Annuler"
                 }
               }
@@ -665,13 +670,13 @@
       },
       "GenericEntityTable": {
         "noData": "Aucune unité organisationnelle pour ce compte.",
-        "rowsPerPage": "Éléments par page:",
+        "rowsPerPage": "Éléments par page :",
         "paginationLabel": "{start}-{end} sur {total}"
       }
     }
   },
   "AccountLifecyclePanel": {
-    "updateStatusSuccess": "Statut du compte mis à jour avec succès",
+    "updateStatusSuccess": "Statut du compte mis à jour avec succès.",
     "immediateActivationSuccess": "Le compte pourra être activé dans une minute | Le compte pourra être activé dans {count} minutes",
     "immediateSuspensionSuccess": "Le compte sera suspendu dans une minute | Le compte sera suspendu dans {count} minutes",
     "immediateDeactivationSuccess": "Le compte sera désactivé dans une minute | Le compte sera désactivé dans {count} minutes",
@@ -688,7 +693,7 @@
     "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
   },
   "AccountDeactivatedBanner": {
-    "content": "Ce compte a été désactivé depuis le {date}.",
+    "content": "Ce compte est désactivé depuis le {date}.",
     "reactivateImmediateButton": "Réactivation immédiate",
     "reactivateScheduledButton": "Planifier la réactivation"
   },
@@ -699,7 +704,7 @@
   },
   "AccountSuspendedBanner": {
     "content": "Ce compte est suspendu depuis le {date}.",
-    "contentWithEndDate": "Ce compte est suspendu depuis le {date} jusqu'au {endDate}.",
+    "contentWithEndDate": "Ce compte est suspendu du {date} au {endDate}.",
     "clearSuspensionButton": "Réactivation immédiate",
     "modifySuspensionButton": "Modifier les paramètres de suspension"
   },
@@ -710,7 +715,7 @@
         "content": "Veuillez fournir une justification pour réactiver ce compte immédiatement.",
         "fields": {
           "statusComment": {
-            "label": "Justification",
+            "label": "Justification *",
             "hint": "Fournissez une justification obligatoire pour cette réactivation.",
             "validation": {
               "required": "Ce champ est requis."
@@ -719,6 +724,7 @@
         },
         "ButtonsCard": {
           "confirm": "Réactiver",
+          "confirmLoading": "Réactivation...",
           "cancel": "Annuler"
         }
       },
@@ -727,16 +733,16 @@
         "content": "Veuillez sélectionner une nouvelle date de fin de validité et fournir une justification.",
         "fields": {
           "validityPeriodEnd": {
-            "label": "Date de fin de validité",
+            "label": "Date de fin de validité *",
             "close": "Fermer",
             "validation": {
               "required": "Ce champ est requis.",
               "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date ne peut pas être antérieure à la date du jour."
+              "afterDate": "La date doit être postérieure à la date du jour."
             }
           },
           "statusComment": {
-            "label": "Justification",
+            "label": "Justification *",
             "hint": "Fournissez une justification obligatoire pour cette réactivation.",
             "validation": {
               "required": "Ce champ est requis."
@@ -745,6 +751,7 @@
         },
         "ButtonsCard": {
           "confirm": "Planifier",
+          "confirmLoading": "Planification...",
           "cancel": "Annuler"
         }
       }

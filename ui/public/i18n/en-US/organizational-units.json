@@ -3,9 +3,6 @@
     "NavigationMenu": {
       "label": "Organizational Units"
     },
-    "ButtonsCard": {
-      "create": "Create"
-    },
     "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
     "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
     "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
@@ -13,12 +10,12 @@
     "columns": {
       "name": "Name",
       "type": "Type",
-      "parentNames": "Linked organizational-units",
+      "parentNames": "Linked organizational units",
       "createdBy": "Created by",
       "insertDate": "Creation date",
       "actions": "Actions"
     },
-    "error": "Error during request",
+    "error": "Unable to load the organizational units. Please try again later.",
     "GenericEntityTable": {
       "noData": "No data available",
       "rowsPerPage": "Rows per page:",
@@ -34,17 +31,12 @@
       }
     },
     "OverrideFavoriteDialog": {
-      "title": "Override a favorite?",
-      "content": "Select a favorite to override with current search.",
+      "title": "Override the favorite?",
+      "content": "Confirm overriding favorite \"{label}\" with the current search?",
       "ButtonsCard": {
         "cancel": "Cancel",
         "confirm": "Override",
         "confirmLoading": "Overriding..."
-      },
-      "fields": {
-        "favorite": {
-          "label": "Favorites"
-        }
       }
     },
     "CreateFavoriteDialog": {
@@ -52,7 +44,7 @@
       "content": "Create favorite from current search.",
       "fields": {
         "favoriteName": {
-          "label": "Favorite's name",
+          "label": "Favorite's name *",
           "validation": {
             "required": "This field is required."
           }
@@ -70,7 +62,7 @@
       "duplicateName": "The favorite '{name}' already exists.",
       "fields": {
         "favoriteName": {
-          "label": "Favorite's name",
+          "label": "Favorite's name *",
           "validation": {
             "required": "This field is required."
           }
@@ -125,7 +117,7 @@
         }
       },
       "LinidFavoritePanel": {
-        "title": "Favorite",
+        "title": "Favorites",
         "noData": "No favorite available",
         "createFavorite": "Create a favorite",
         "overrideFavorite": "Override a favorite",
@@ -138,13 +130,13 @@
         "searchButton": "Search",
         "operators": {
           "contains": "Contains",
-          "startsWith": "Start with",
-          "endsWith": "End with",
-          "equals": "Equals to",
-          "notContains": "Not contains",
-          "notStartsWith": "Not start with",
-          "notEndsWith": "Not end with",
-          "notEquals": "Not equals to"
+          "startsWith": "Starts with",
+          "endsWith": "Ends with",
+          "equals": "Equal to",
+          "notContains": "Does not contain",
+          "notStartsWith": "Does not start with",
+          "notEndsWith": "Does not end with",
+          "notEquals": "Not equal to"
         }
       },
       "ListSearchFilterPanel": {
@@ -179,27 +171,27 @@
         "close": "Close",
         "searchButton": "Search",
         "operators": {
-          "inferior": "Inferior to",
-          "superior": "Superior to",
-          "equals": "Equals to",
-          "notInferior": "Not inferior to",
-          "notSuperior": "Not superior to",
-          "notEquals": "Not equals to"
+          "inferior": "Before",
+          "superior": "After",
+          "equals": "Equal to",
+          "notInferior": "Not before",
+          "notSuperior": "Not after",
+          "notEquals": "Not equal to"
         },
         "validation": {
-          "invalidDate": "Incorrect date. Attempt format: {format}"
+          "invalidDate": "Incorrect date. Expected format: {format}"
         }
       }
     }
   },
   "moduleOrganizationalUnitCreationPage": {
-    "title": "Create organizational unit",
-    "error": "Error while processing the request.",
+    "title": "Create an organizational unit",
+    "error": "Unable to create the organizational unit. Please try again later.",
     "success": "Organizational unit successfully created.",
     "missingParent": "A parent organizational unit is required.",
     "errorLoadingParent": "Unable to load the parent organizational unit. Please try again later.",
     "ButtonsCard": {
-      "cancel": "Cancel",
+      "cancel": "Back",
       "confirm": "Create",
       "confirmLoading": "Creating..."
     },
@@ -213,13 +205,13 @@
         "label": "Parent organizational unit"
       },
       "name": {
-        "label": "Name",
+        "label": "Name *",
         "validation": {
           "required": "This field is required."
         }
       },
       "type": {
-        "label": "Type",
+        "label": "Type *",
         "validation": {
           "required": "This field is required."
         }
@@ -242,7 +234,7 @@
       },
       "actions": {
         "ButtonsCard": {
-          "createChild": "Create a child O.U.",
+          "createChild": "Create a child OU",
           "editButton": {
             "FormDialogButton": {
               "title": "",
@@ -252,13 +244,13 @@
                 "title": "Edit {name}",
                 "fields": {
                   "name": {
-                    "label": "Name",
+                    "label": "Name *",
                     "validation": {
                       "required": "This field is required."
                     }
                   },
                   "type": {
-                    "label": "Type",
+                    "label": "Type *",
                     "validation": {
                       "required": "This field is required."
                     }
@@ -266,6 +258,7 @@
                 },
                 "ButtonsCard": {
                   "confirm": "Save",
+                  "confirmLoading": "Saving...",
                   "cancel": "Cancel"
                 }
               }
@@ -311,11 +304,12 @@
         "title": "Attach an account",
         "ButtonsCard": {
           "confirm": "Attach",
+          "confirmLoading": "Attaching...",
           "cancel": "Cancel"
         },
         "fields": {
           "accountId": {
-            "label": "Account",
+            "label": "Account *",
             "validation": {
               "required": "This field is required."
             }
@@ -332,7 +326,7 @@
       },
       "GenericEntityTable": {
         "noData": "No account attached to this organizational unit.",
-        "rowsPerPage": "Items per page:",
+        "rowsPerPage": "Rows per page:",
         "paginationLabel": "{start}-{end} of {total}"
       }
     }
@@ -388,15 +382,15 @@
     },
     "fields": {
       "reason": {
-        "label": "Reason",
-        "hint": "Select a suspension reason.",
+        "label": "Reason *",
+        "hint": "Select a reason for the suspension.",
         "validation": {
           "required": "This field is required."
         }
       },
       "subreason": {
-        "label": "Sub-reason",
-        "hint": "Select a suspension sub-reason.",
+        "label": "Sub-reason *",
+        "hint": "Select a sub-reason for the suspension.",
         "validation": {
           "required": "This field is required."
         }
@@ -417,12 +411,12 @@
     },
     "fields": {
       "start": {
-        "label": "Suspension start date",
+        "label": "Suspension start date *",
         "close": "Close",
         "validation": {
           "required": "This field is required.",
           "invalidDate": "Invalid date format. Expected format is {format}.",
-          "afterDate": "The date cannot be before today."
+          "afterDate": "The date must be after today."
         }
       },
       "end": {
@@ -430,20 +424,20 @@
         "close": "Close",
         "validation": {
           "invalidDate": "Invalid date format. Expected format is {format}.",
-          "afterDate": "The date cannot be before today.",
-          "fromDate": "The end date must be after {compareTo}."
+          "afterDate": "The date must be after today.",
+          "fromDate": "The end date must be on or after {compareTo}."
         }
       },
       "reason": {
-        "label": "Reason",
+        "label": "Reason *",
         "hint": "Select a reason for the suspension.",
         "validation": {
           "required": "This field is required."
         }
       },
       "subreason": {
-        "label": "Subreason",
-        "hint": "Select a subreason for the suspension.",
+        "label": "Sub-reason *",
+        "hint": "Select a sub-reason for the suspension.",
         "validation": {
           "required": "This field is required."
         }
@@ -468,20 +462,20 @@
         "close": "Close",
         "validation": {
           "invalidDate": "Invalid date format. Expected format is {format}.",
-          "afterDate": "The date cannot be before today.",
-          "fromDate": "The end date must be after {compareTo}."
+          "afterDate": "The date must be after today.",
+          "fromDate": "The end date must be on or after {compareTo}."
         }
       },
       "reason": {
-        "label": "Reason",
+        "label": "Reason *",
         "hint": "Select a reason for the suspension.",
         "validation": {
           "required": "This field is required."
         }
       },
       "subreason": {
-        "label": "Subreason",
-        "hint": "Select a subreason for the suspension.",
+        "label": "Sub-reason *",
+        "hint": "Select a sub-reason for the suspension.",
         "validation": {
           "required": "This field is required."
         }
@@ -502,7 +496,7 @@
     },
     "fields": {
       "comment": {
-        "label": "Justification",
+        "label": "Justification *",
         "hint": "Provide a mandatory comment for this reactivation.",
         "validation": {
           "required": "This field is required."

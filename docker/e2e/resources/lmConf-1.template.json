@@ -48,6 +48,7 @@
       "oidcRPMetaDataOptionsAllowPasswordGrant": 1,
       "oidcRPMetaDataOptionsPublic": 1,
       "oidcRPMetaDataOptionsRequirePKCE": 1,
+      "oidcRPMetaDataOptionsAuthnRequireNonce": 1,
       "oidcRPMetaDataOptionsBypassConsent": 1,
       "oidcRPMetaDataOptionsClientID": "linid-im-client",
       "oidcRPMetaDataOptionsAdditionalAudiences": "linid-im-api",

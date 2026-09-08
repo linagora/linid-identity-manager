@@ -133,7 +133,7 @@ Feature: Test Account homepage display
     # Rename that favorite through its own rename button
     When I click on '[data-cy="button_rename_0"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Renommer un favori?"
+    And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Renommer un favori ?"
     When I set the text "RenamedFavorite" in the HTML element '[data-cy="field_favoriteName"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists

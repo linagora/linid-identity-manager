@@ -193,7 +193,7 @@ Feature: Test Application details page display
     When I click on '[data-cy="delete-button_{{ctx.roleId}}"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
     And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Supprimer le rôle supervisor"
-    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Voulez-vous vraiment supprimer le rôle supervisor ?"
+    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Voulez-vous vraiment supprimer le rôle supervisor ?"
     When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
     And  I expect the HTML element '[data-cy="generic-entity-table"]' contains "supervisor"

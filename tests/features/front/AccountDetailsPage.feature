@@ -374,7 +374,7 @@ Feature: Test Account details page display
     When I click on '[data-cy="dropdown-button_item_activation.immediate"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
     And I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Activation immédiate du compte"
-    And I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Êtes-vous sûr de vouloir activer ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Êtes-vous sûr de vouloir activer ce compte immédiatement ?"
     And I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]' contains "Activer"
 
@@ -434,7 +434,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodStart"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "La date doit être postérieure à la date du jour."
 
     ## 126 Scheduled activation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -466,7 +466,7 @@ Feature: Test Account details page display
     When I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Suspension immédiate du compte"
-    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -554,7 +554,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date doit être postérieure à la date du jour."
 
     ## 136 Scheduled suspension - suspensionPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -565,7 +565,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog_title"]'
     And I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
 
     ## 137 Scheduled suspension - suspensionPeriodEnd fromDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -576,7 +576,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog_title"]'
     And I set the text "01/06/2099" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être postérieure au 01/01/2100."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être égale ou postérieure au 01/01/2100."
 
     ## 138 Scheduled suspension - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -638,7 +638,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date doit être postérieure à la date du jour."
 
     ## 143 Modify suspension - suspensionPeriodEnd invalidDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -658,7 +658,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog_title"]'
     And I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
 
     ## 145 Modify suspension - suspensionPeriodEnd fromDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -668,7 +668,7 @@ Feature: Test Account details page display
     And I click on '[data-cy="form-dialog_title"]'
     And I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être postérieure au 01/06/2100."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être égale ou postérieure au 01/06/2100."
 
     ## 146 Modify suspension - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -702,7 +702,7 @@ Feature: Test Account details page display
     When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
-    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Réactiver"
@@ -739,7 +739,7 @@ Feature: Test Account details page display
     When I click on '[data-cy="dropdown-button_item_deactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And I expect the HTML element '[data-cy="form-dialog_title"]' contains "Désactivation immédiate du compte"
-    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?"
+    And I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -807,7 +807,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodEnd"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
 
     ## 157 Scheduled deactivation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -866,7 +866,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodEnd"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date ne peut pas être antérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
 
     ## 162 Modify deactivation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'

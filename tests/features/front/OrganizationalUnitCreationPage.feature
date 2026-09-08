@@ -50,11 +50,11 @@ Feature: Test Organizational Unit creation page
 
     ## 101 Should display title, form fields and action buttons
     Then I expect the HTML element '[data-cy="generic-creation-page"]' to be visible
-    And I expect the HTML element '[data-cy="generic-creation-page_title"]' contains "Créer une nouvelle unité organisationnelle"
+    And I expect the HTML element '[data-cy="generic-creation-page_title"]' contains "Création d'une unité organisationnelle"
     And I expect the HTML element '[data-cy="field_parent"]' to be visible
     And I expect the HTML element '[data-cy="field_name"]' to be visible
     And I expect the HTML element '[data-cy="field_type"]' to be visible
-    And I expect the HTML element '[data-cy="button_cancel"]' contains "Annuler"
+    And I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 
     ## 102 Parent organizational unit should be displayed with the resolved root name

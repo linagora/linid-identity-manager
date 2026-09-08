@@ -255,11 +255,12 @@ tasks:
     dir: docker/e2e
     vars:
       ENV_FILE: env/e2e.env
+      SUITE: '{{.SUITE | default ""}}'
     cmds:
       - task: start:e2e
         vars:
           ENV_FILE: env/e2e.env
-      - docker compose --env-file env/e2e.env run --rm e2e-test-runner
+      - cmd: docker compose --env-file env/e2e.env run --rm {{if .SUITE}}-e CYPRESS_FEATURES_PATH=/app/features/{{.SUITE}}{{end}} e2e-test-runner
       - task: stop:e2e
         vars:
           ENV_FILE: env/e2e.env

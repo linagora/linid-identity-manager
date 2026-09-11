@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Build
 
 - Served the **CA-signed development certificate** from the Quasar dev server.
+- Fixed flaky E2E tests caused by shared state between front and API scenarios.
+- Reformatted the E2E feature files with aligned step keywords for better readability.
 
 ## [0.9.0] - 2026-09-08
 

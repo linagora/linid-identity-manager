@@ -9,6 +9,7 @@ Feature: Test Account homepage display
   ## 106 Should rename a favorite filter set from its rename button
   ## 107 Should override a favorite filter set from its own override button
   ## 108 Should disable the favorite override button when no filter is active
+  ## 109 Should delete a favorite filter set from its delete button
 
   Scenario: Roundtrip about Account homepage
 
@@ -137,7 +138,7 @@ Feature: Test Account homepage display
     When I set the text "RenamedFavorite" in the HTML element '[data-cy="field_favoriteName"]'
     And I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
-    And I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
+    And  I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
     And I expect the HTML element ".q-dialog__backdrop" not exists
     And I expect the HTML element '[data-cy="favorite-label_0"]' contains "RenamedFavorite"
 
@@ -163,7 +164,7 @@ Feature: Test Account homepage display
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
     When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
-    And I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
+    And  I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
     And I expect the HTML element ".q-dialog__backdrop" not exists
 
     # Apply the favorite again: it now restores the overridden search (lastname, not firstname)
@@ -178,3 +179,12 @@ Feature: Test Account homepage display
     # With no active filter, the favorite's own override button is disabled
     When I click on '[data-cy="linid-smart-filter-field"]'
     Then I expect the HTML element '[data-cy="button_override_0"]' to be disabled
+
+    ## 109 Should delete a favorite filter set from its delete button
+    # The menu is still open; delete the favorite so no user preference is left behind
+    When I click on '[data-cy="button_delete_0"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" contains "RenamedFavorite"
+    And  I expect the HTML element '[data-cy="favorite-label_0"]' not exists

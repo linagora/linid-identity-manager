@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Optional relationships with an organizational unit and an application.
   - Groups audit table, SQL view and recursive ancestors view.
 
+#### Frontend
+
+- Added the **logout entry** of the user profile menu.
+
 ### Fixed
 
 #### Security

@@ -13,11 +13,11 @@ Feature: Test Organizational Units page display
     ####################################################
 
     Given I set the viewport size to 1920 px by 1080 px
-    And I visit the '{{ env.E2E_FRONT_URL }}'
-    When I set the text "admin" in the HTML element "input#userfield"
-    And I set the text "password" in the HTML element "input#passwordfield"
-    And I click on "button.btn-success"
-    Then I expect current url is "{{ env.E2E_FRONT_URL }}/"
+    And   I visit the '{{ env.E2E_FRONT_URL }}'
+    When  I set the text "admin" in the HTML element "input#userfield"
+    And   I set the text "password" in the HTML element "input#passwordfield"
+    And   I click on "button.btn-success"
+    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/"
 
     ####################################################
     ################## Organizational Units Page #######
@@ -54,18 +54,18 @@ Feature: Test Organizational Units page display
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
     When I click on '[data-cy="linid-smart-filter-field"]'
-    And I set the text "SuspendedOuWithEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
-    And I click on '[data-cy="text-search-filter-panel_search"]'
+    And  I set the text "SuspendedOuWithEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
-    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' to be visible
-    And I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' contains "SuspendedOuWithEnd"
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000e3"]' contains "SuspendedOuWithEnd"
     And  I expect the HTML element '[data-cy="cell-parentNames_00000000-0000-4000-8000-0000000000e3"]' to be visible
     And  I expect the HTML element '[data-cy="cell-parentNames_00000000-0000-4000-8000-0000000000e3"]' contains "root"
-    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' to be visible
-    And I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' contains "COMPANY"
-    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' to be visible
-    And I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' contains "admin_fn admin_ln"
+    And  I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-type_00000000-0000-4000-8000-0000000000e3"]' contains "COMPANY"
+    And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-createdBy_00000000-0000-4000-8000-0000000000e3"]' contains "admin_fn admin_ln"
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000e3"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e3"
-    And I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "SuspendedOuWithEnd"
-    And I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "SuspendedOuWithEnd"
+    And  I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"

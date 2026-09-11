@@ -26,6 +26,17 @@
     "languages": {
       "fr-FR": "Français",
       "en-US": "English (US)"
+    },
+    "logout": {
+      "label": "Log out",
+      "ConfirmationDialog": {
+        "title": "Log out",
+        "content": "Are you sure you want to log out?",
+        "ButtonsCard": {
+          "confirm": "Log out",
+          "cancel": "Cancel"
+        }
+      }
     }
   },
   "Homepage": {

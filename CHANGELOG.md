@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Validated the **audience** and **type** of the access tokens received by the API (`AUTH_AUDIENCE`, `AUTH_JWT_EXPECTED_TYPE`).
 - Returned **401 Unauthorized** when the access token is valid but no account matches it.
+- Issued the SSO cookie with the **Secure** flag and stopped exposing the LemonLDAP portal over plain HTTP.
+
+#### Frontend
+
+- Made the **RP-initiated logout** work end to end through the LemonLDAP logout confirmation page.
 
 ### Build
 

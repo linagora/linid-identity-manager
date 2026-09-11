@@ -26,12 +26,12 @@ Feature: Test Application creation page
     Given I visit the "{{ env.E2E_FRONT_URL }}/applications"
 
     ## 101 Test page access and cancel button
-    When  I click on '[data-cy="button_create"]'
-    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/applications/new"
+    When I click on '[data-cy="button_create"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/new"
 
-    When  I click on '[data-cy="button_cancel"]'
-    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
-    When  I click on '[data-cy="button_create"]'
+    When I click on '[data-cy="button_cancel"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
+    When I click on '[data-cy="button_create"]'
 
     ## 102 Should display title, form fields and action buttons
     Then I expect the HTML element '[data-cy="generic-creation-page"]' to be visible
@@ -76,8 +76,8 @@ Feature: Test Application creation page
     And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And   I set http header 'Content-Type' with 'application/json'
 
-    When  I request '{{env.E2E_API_URL}}/applications?code=TEST_APP' with method 'GET'
-    Then  I expect status code is 200
-    And   I store 'applicationID' as '{{response.body.content[0].id}}' in context
-    When  I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationID}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/applications?code=TEST_APP' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'applicationID' as '{{response.body.content[0].id}}' in context
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationID}}' with method 'DELETE'
+    Then I expect status code is 204

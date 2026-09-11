@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Build
+
+- Fixed flaky E2E tests caused by shared state between front and API scenarios.
+- Reformatted the E2E feature files with aligned step keywords for better readability.
+
 ## [0.9.0] - 2026-09-08
 
 ### Added

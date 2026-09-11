@@ -37,6 +37,18 @@ They allow you to:
 
 ---
 
+### 👥 Groups
+
+Groups are named entities identified by a unique code.
+
+They can:
+
+* Be nested under a parent group
+* Be attached to an organizational unit
+* Be attached to an application
+
+---
+
 ### 📦 Applications
 
 Applications represent the systems connected to LinId.

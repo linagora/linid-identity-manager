@@ -5,6 +5,7 @@ Feature: Test API Account endpoints
 
   ################## Authentication #######################
   ## 101 Should return 401 without valid authentication
+  ## 102 Should return 401 when an ID token is used as bearer
 
   ################## Create (POST /accounts) ##############
   ## 201 Should create an account with valid data
@@ -82,6 +83,7 @@ Feature: Test API Account endpoints
       """
     Then  I expect status code is 200
     And   I store 'accessToken' as '{{response.body.access_token}}' in context
+    And   I store 'idToken' as '{{response.body.id_token}}' in context
     And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And   I set http header 'Content-Type' with 'application/json'
 
@@ -107,6 +109,12 @@ Feature: Test API Account endpoints
       }
       """
     Then  I expect status code is 401
+
+  Scenario: 102 - Should return 401 when an ID token is used as bearer
+    Given I set http header 'Authorization' with 'Bearer {{ctx.idToken}}'
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
 
   ####################################################
   ################## Create (POST /accounts) ##########

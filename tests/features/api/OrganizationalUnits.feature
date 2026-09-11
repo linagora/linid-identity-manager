@@ -268,8 +268,8 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.parents[0].parent}}' is "{{ctx.rootID}}"
     And  I expect '{{response.body.parents[0].extraParameters | dump}}' is 'null'
 
-    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 402 - Should return 404 for unknown organizational unit id
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:

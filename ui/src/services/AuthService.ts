@@ -198,6 +198,18 @@ class AuthService {
   }
 
   /**
+   * Processes the logout callback returned by the Identity Provider after a successful RP-initiated logout.
+   *
+   * This method should be invoked from the page configured as the post logout redirect URI.
+   *
+   * @returns A promise that resolves when the callback has been processed.
+   */
+  async handleLogoutCallback(): Promise<void> {
+    const manager = this.getManager();
+    await manager.signoutRedirectCallback();
+  }
+
+  /**
    * Returns the current access token.
    *
    * @returns The access token if a valid user session exists, otherwise `null`.

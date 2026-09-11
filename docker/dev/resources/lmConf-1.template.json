@@ -51,6 +51,8 @@
       "oidcRPMetaDataOptionsClientID": "linid-im-client",
       "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
       "oidcRPMetaDataOptionsRedirectUris": "${LEMONLDAP_REDIRECT_URL}/callback ${LEMONLDAP_REDIRECT_URL}/silent-renew",
+      "oidcRPMetaDataOptionsPostLogoutRedirectUris": "${LEMONLDAP_REDIRECT_URL}/logged-out",
+      "oidcRPMetaDataOptionsLogoutBypassConfirm": 1,
       "oidcRPMetaDataOptionsNoJwtHeader": 1,
       "oidcRPMetaDataOptionsIDTokenForceClaims": 1,
       "oidcRPMetaDataOptionsExtraClaims": {
@@ -68,5 +70,6 @@
     "LockDirectory": "/var/lib/lemonldap-ng/psessions/lock"
   },
   "portal": "${LEMONLDAP_PORTAL_URL}",
+  "securedCookie": 1,
   "userDB": "DBI"
 }

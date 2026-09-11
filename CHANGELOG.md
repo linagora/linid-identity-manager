@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Security
 
 - Validated the **audience** and **type** of the access tokens received by the API (`AUTH_AUDIENCE`, `AUTH_JWT_EXPECTED_TYPE`).
+- Returned **401 Unauthorized** when the access token is valid but no account matches it.
 
 ### Build
 

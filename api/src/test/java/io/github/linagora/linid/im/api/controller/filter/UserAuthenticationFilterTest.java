@@ -29,8 +29,9 @@ package io.github.linagora.linid.im.api.controller.filter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.any;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,11 +41,8 @@ import static org.mockito.Mockito.when;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.service.AccountService;
-import io.github.linagora.linid.im.corelib.exception.ApiException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -55,6 +53,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 @DisplayName("Test class: UserAuthenticationFilter")
@@ -62,8 +62,8 @@ class UserAuthenticationFilterTest {
 
     private UserAuthenticationFilter filter;
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
+    private MockHttpServletRequest request;
+    private MockHttpServletResponse response;
     private FilterChain filterChain;
     private AccountService accountService;
 
@@ -71,8 +71,8 @@ class UserAuthenticationFilterTest {
     void setUp() {
         accountService = mock(AccountService.class);
         filter = new UserAuthenticationFilter(accountService);
-        request = mock(HttpServletRequest.class);
-        response = mock(HttpServletResponse.class);
+        request = new MockHttpServletRequest();
+        response = new MockHttpServletResponse();
         filterChain = mock(FilterChain.class);
 
         SecurityContextHolder.clearContext();
@@ -115,8 +115,8 @@ class UserAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should throw exception on unknown account")
-    void doFilterInternal_withUnknownAccount_throwsApiException() throws ServletException, IOException {
+    @DisplayName("test doFilterInternal: should respond 401 on unknown account")
+    void doFilterInternal_withUnknownAccount_respondsUnauthorized() throws ServletException, IOException {
         // Mock Jwt
         Jwt jwt = mock(Jwt.class);
         when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
@@ -127,47 +127,37 @@ class UserAuthenticationFilterTest {
             new UsernamePasswordAuthenticationToken(jwt, null, List.of())
         );
 
-        ApiException exception = assertThrows(ApiException.class, () ->
-            filter.doFilterInternal(request, response, filterChain)
-        );
+        filter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(401, exception.getStatusCode());
-        assertEquals("error.unauthorized", exception.getError().key());
-        verify(filterChain, never()).doFilter(any(), any());
+        assertUnauthorized();
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should throw exception on bad authentication")
-    void doFilterInternal_withNoAuthentication_throwsApiException() {
+    @DisplayName("test doFilterInternal: should respond 401 on bad authentication")
+    void doFilterInternal_withNoAuthentication_respondsUnauthorized() throws ServletException, IOException {
         SecurityContextHolder.getContext().setAuthentication(null);
 
-        ApiException exception = assertThrows(ApiException.class, () ->
-            filter.doFilterInternal(request, response, filterChain)
-        );
+        filter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(401, exception.getStatusCode());
-        assertEquals("error.unauthorized", exception.getError().key());
+        assertUnauthorized();
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should throw exception on invalid token")
-    void doFilterInternal_withInvalidPrincipal_throwsApiException() {
+    @DisplayName("test doFilterInternal: should respond 401 on invalid token")
+    void doFilterInternal_withInvalidPrincipal_respondsUnauthorized() throws ServletException, IOException {
         // Principal is not a Jwt
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken("not-a-jwt", null, List.of())
         );
 
-        ApiException exception = assertThrows(ApiException.class, () ->
-            filter.doFilterInternal(request, response, filterChain)
-        );
+        filter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(401, exception.getStatusCode());
-        assertEquals("error.unauthorized", exception.getError().key());
+        assertUnauthorized();
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should throw exception when email claim is null")
-    void doFilterInternal_withNullEmailClaim_throwsApiException() throws ServletException, IOException {
+    @DisplayName("test doFilterInternal: should respond 401 when email claim is null")
+    void doFilterInternal_withNullEmailClaim_respondsUnauthorized() throws ServletException, IOException {
         Jwt jwt = mock(Jwt.class);
         when(jwt.getClaimAsString("email")).thenReturn(null);
 
@@ -175,19 +165,15 @@ class UserAuthenticationFilterTest {
             new UsernamePasswordAuthenticationToken(jwt, null, List.of())
         );
 
-        ApiException exception = assertThrows(ApiException.class, () ->
-            filter.doFilterInternal(request, response, filterChain)
-        );
+        filter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(401, exception.getStatusCode());
-        assertEquals("error.unauthorized", exception.getError().key());
+        assertUnauthorized();
         verify(accountService, never()).getAccountByEmail(any());
-        verify(filterChain, never()).doFilter(any(), any());
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should throw exception when email claim is blank")
-    void doFilterInternal_withBlankEmailClaim_throwsApiException() throws ServletException, IOException {
+    @DisplayName("test doFilterInternal: should respond 401 when email claim is blank")
+    void doFilterInternal_withBlankEmailClaim_respondsUnauthorized() throws ServletException, IOException {
         Jwt jwt = mock(Jwt.class);
         when(jwt.getClaimAsString("email")).thenReturn("   ");
 
@@ -195,13 +181,16 @@ class UserAuthenticationFilterTest {
             new UsernamePasswordAuthenticationToken(jwt, null, List.of())
         );
 
-        ApiException exception = assertThrows(ApiException.class, () ->
-            filter.doFilterInternal(request, response, filterChain)
-        );
+        filter.doFilterInternal(request, response, filterChain);
 
-        assertEquals(401, exception.getStatusCode());
-        assertEquals("error.unauthorized", exception.getError().key());
+        assertUnauthorized();
         verify(accountService, never()).getAccountByEmail(any());
+    }
+
+    private void assertUnauthorized() throws ServletException, IOException {
+        assertEquals(401, response.getStatus());
+        assertTrue(response.getHeader("WWW-Authenticate").startsWith("Bearer "));
         verify(filterChain, never()).doFilter(any(), any());
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
     }
 }

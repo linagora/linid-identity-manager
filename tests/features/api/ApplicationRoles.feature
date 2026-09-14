@@ -486,7 +486,7 @@ Feature: Test API Application Role endpoints
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.appId}}' with method 'DELETE'
     Then I expect status code is 204
 
-  Scenario: 502 - Should return 404 when updating an unknown role
+  Scenario: 502 - Should return 404 when updating an unknown application role
     When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
       """
       {

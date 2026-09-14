@@ -6,6 +6,8 @@ Feature: Test API Account endpoints
   ################## Authentication #######################
   ## 101 Should return 401 without valid authentication
   ## 102 Should return 401 when an ID token is used as bearer
+  ## 103 Should return 401 when the token is valid but no account matches
+  ## 104 Should return 401 without any Authorization header
 
   ################## Create (POST /accounts) ##############
   ## 201 Should create an account with valid data
@@ -115,6 +117,26 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
     Then  I expect status code is 401
     And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
+
+  Scenario: 103 - Should return 401 when the token is valid but no account matches
+    Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
+    And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
+      """
+      grant_type=password&username=noaccount&password=password&scope=openid email profile roles
+      """
+    Then  I expect status code is 200
+    And   I set http header 'Authorization' with 'Bearer {{response.body.access_token}}'
+    And   I set http header 'Content-Type' with 'application/json'
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
+
+  Scenario: 104 - Should return 401 without any Authorization header
+    Given I set http header 'Authorization' with ''
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'Bearer'
 
   ####################################################
   ################## Create (POST /accounts) ##########

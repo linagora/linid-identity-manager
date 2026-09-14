@@ -63,6 +63,8 @@
   "error.group.parent.cycle": "Le groupe {id} ne peut pas avoir le groupe {parentId} comme parent : cela créerait un cycle dans la hiérarchie des groupes.",
   "error.opa.template.not_readable": "Impossible de lire le modèle de politique OPA (emplacement : {location})",
   "error.opa.policy.publish_failed": "Impossible de publier la politique OPA sur le serveur OPA (policyId : {policyId})",
+  "error.role.not_found": "Rôle fonctionnel introuvable : {id}",
+  "error.role.code.already_exists": "Un rôle fonctionnel existe déjà avec le code « {code} »",
   "error.superset.file": "Impossible de charger le fichier configuration superset: {path}",
   "error.superset.access_token": "Impossible de récupérer le token d'accès",
   "error.superset.csrf_token": "Impossible de récupérer le token CSRF",

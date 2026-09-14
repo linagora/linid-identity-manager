@@ -24,60 +24,69 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.api.model.role;
+package io.github.linagora.linid.im.api.service;
 
-import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Role;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
-import org.mapstruct.CollectionMappingStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
- * MapStruct mapper for converting between {@link Role} entities and role API models.
+ * Service interface for functional role management operations.
  */
-@Mapper(
-        componentModel = "spring",
-        uses = CommonMapper.class,
-        collectionMappingStrategy = CollectionMappingStrategy.TARGET_IMMUTABLE
-)
-public interface RoleMapper {
+public interface RoleService {
 
     /**
-     * Creates a new {@link Role} entity from a {@link RoleRecord}
-     * and the calling principal.
+     * Creates a new functional role from the given request.
      *
-     * <p>The role identifier and audit timestamps are generated or managed
-     * by the persistence layer. The creator and updater identifiers are
-     * initialized from the authenticated principal.</p>
-     *
-     * @param record        the creation request record
-     * @param userPrincipal the authenticated principal performing the creation
-     * @return a partially populated {@link Role} entity
+     * @param userPrincipal the authenticated user
+     * @param role          the role creation record
+     * @return the created role entity
      */
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "insertDate", ignore = true)
-    @Mapping(target = "updateDate", ignore = true)
-    @Mapping(target = "createdBy", source = "userPrincipal.id")
-    @Mapping(target = "updatedBy", source = "userPrincipal.id")
-    @Mapping(target = "extraParameters", source = "record.extraParameters",
-        defaultExpression = "java(new java.util.HashMap<>())")
-    Role toRole(RoleRecord record, UserPrincipal userPrincipal);
+    Role create(UserPrincipal userPrincipal, RoleRecord role);
 
     /**
-     * Converts a {@link Role} entity to a {@link RoleDTO}.
+     * Retrieves a paginated list of functional roles, optionally filtered.
      *
-     * @param role the role entity
-     * @return the corresponding DTO
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination information
+     * @return a page of role view entities
      */
-    RoleDTO toDTO(Role role);
+    Page<RoleView> findAll(
+            UserPrincipal userPrincipal,
+            RoleViewQueryFilterDto filters,
+            Pageable pageable
+    );
 
     /**
-     * Converts a {@link RoleView} entity to a {@link RoleViewDTO}.
+     * Retrieves a functional role by its unique identifier.
      *
-     * @param roleView the role view entity
-     * @return the corresponding view DTO
+     * @param userPrincipal the authenticated user
+     * @param id            the role UUID
+     * @return the role view entity
      */
-    RoleViewDTO toDTO(RoleView roleView);
+    RoleView findById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Updates a functional role.
+     *
+     * @param userPrincipal the authenticated user
+     * @param roleId        the role UUID
+     * @param record        the role update record
+     * @return the refreshed role view
+     */
+    RoleView update(UserPrincipal userPrincipal, UUID roleId, RoleRecord record);
+
+    /**
+     * Deletes a functional role by its unique identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the role UUID
+     */
+    void deleteById(UserPrincipal userPrincipal, UUID id);
 }

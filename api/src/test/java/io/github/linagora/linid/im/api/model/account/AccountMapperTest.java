@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.model.account;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import java.util.Map;
 import java.util.UUID;
@@ -83,5 +84,17 @@ class AccountMapperTest {
                 Map.of("updated", true)),
             updaterId);
         assertEquals(Map.of("updated", true), account.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("toAccount should default extraParameters to an empty map when the record omits them")
+    void testToAccount_shouldDefaultExtraParameters() {
+        var userPrincipal = new UserPrincipal();
+        userPrincipal.setId(UUID.randomUUID());
+        var record = new AccountRecord("ext-001", "Doe", "John", "john@example.com", null, null, null);
+
+        var account = mapper.toAccount(record, userPrincipal);
+
+        assertEquals(Map.of(), account.getExtraParameters());
     }
 }

@@ -66,8 +66,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -308,7 +310,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         var entity = OrganizationalUnitAccount.builder()
             .organizationalUnitId(organizationalUnitId)
             .accountId(record.accountId())
-            .extraParameters(record.extraParameters())
+            .extraParameters(Objects.requireNonNullElseGet(record.extraParameters(), HashMap::new))
             .createdBy(userPrincipal.getId())
             .updatedBy(userPrincipal.getId())
             .build();
@@ -326,7 +328,10 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         var entity = findRelation(organizationalUnitId, accountId);
 
-        entity.setExtraParameters(record.extraParameters());
+        if (record.extraParameters() != null) {
+            entity.setExtraParameters(record.extraParameters());
+        }
+
         entity.setUpdatedBy(userPrincipal.getId());
 
         return organizationalUnitAccountRepository.save(entity);
@@ -412,7 +417,10 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         entity.setName(organizationalUnit.name());
         entity.setType(organizationalUnit.type());
-        entity.setExtraParameters(organizationalUnit.extraParameters());
+
+        if (organizationalUnit.extraParameters() != null) {
+            entity.setExtraParameters(organizationalUnit.extraParameters());
+        }
 
         return organizationalUnitRepository.save(entity);
     }

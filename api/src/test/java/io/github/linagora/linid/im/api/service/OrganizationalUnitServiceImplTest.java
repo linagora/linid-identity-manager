@@ -832,4 +832,91 @@ class OrganizationalUnitServiceImplTest {
         verify(organizationalUnitReactivationValidator).validate(status, record, uuid);
         verify(organizationalUnitStatusRepository).saveAndFlush(status);
     }
+
+    @Test
+    @DisplayName("should keep the stored extra parameters when the update record omits them")
+    void testUpdate_shouldKeepExtraParametersWhenOmitted() {
+        var uuid = UUID.randomUUID();
+        var root = OrganizationalUnit.builder().id(UUID.randomUUID()).name("root").type("root").build();
+        var entity = OrganizationalUnit.builder()
+            .id(uuid)
+            .name("old")
+            .type("old")
+            .extraParameters(Map.of("team", "core"))
+            .build();
+        when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
+        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        when(organizationalUnitRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", null);
+
+        var result = service.update(userPrincipal, uuid, record);
+
+        assertEquals(Map.of("team", "core"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("should keep the relationship extra parameters when the update record omits them")
+    void testUpdateAccountRelation_shouldKeepExtraParametersWhenOmitted() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .extraParameters(Map.of("key", "value"))
+            .build();
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var record = new OrganizationalUnitAccountUpdateRecord(null);
+
+        var result = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
+
+        assertEquals(Map.of("key", "value"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("should attach an account with empty extra parameters when the record omits them")
+    void testAttachAccount_shouldDefaultExtraParametersWhenOmitted() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, null);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.attachAccount(userPrincipal, organizationalUnitId, record);
+
+        assertEquals(Map.of(), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("should replace the stored extra parameters when the update record provides them")
+    void testUpdate_shouldOverrideExtraParametersWhenProvided() {
+        var uuid = UUID.randomUUID();
+        var root = OrganizationalUnit.builder().id(UUID.randomUUID()).name("root").type("root").build();
+        var entity = OrganizationalUnit.builder()
+            .id(uuid)
+            .name("old")
+            .type("old")
+            .extraParameters(Map.of("team", "core"))
+            .build();
+        when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
+        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        when(organizationalUnitRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", Map.of("team", "platform"));
+
+        var result = service.update(userPrincipal, uuid, record);
+
+        assertEquals(Map.of("team", "platform"), result.getExtraParameters());
+    }
 }

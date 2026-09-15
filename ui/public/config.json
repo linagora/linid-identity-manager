@@ -7,7 +7,8 @@
       "common.json",
       "accounts.json",
       "applications.json",
-      "organizational-units.json"
+      "organizational-units.json",
+      "groups.json"
     ]
   },
   "immediateActionDelay": 60,

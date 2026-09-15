@@ -41,8 +41,6 @@ services:
     env_file:
       - ./env/lemon.env
       - ./env/${ENV}.env
-    ports:
-      - 8080:80
     volumes:
       - ./resources/${CONFIG_DIR}/llng/conf:/var/lib/lemonldap-ng/conf
       - ./resources/oidc.key:/etc/keys/oidc.key:ro

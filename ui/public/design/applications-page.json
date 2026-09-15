@@ -228,7 +228,7 @@
             "q-btn": { "color": "primary", "outline": false }
           },
           "cancel-button": {
-            "q-btn": { "color": "primary", "outline": true }
+            "q-btn": { "color": "primary", "outline": true, "flat": true }
           }
         }
       }
@@ -243,7 +243,7 @@
             "q-btn": { "color": "primary", "outline": false }
           },
           "cancel-button": {
-            "q-btn": { "color": "primary", "outline": true }
+            "q-btn": { "color": "primary", "outline": true, "flat": true }
           }
         }
       }
@@ -260,7 +260,7 @@
             "q-btn": { "color": "primary", "outline": false }
           },
           "cancel-button": {
-            "q-btn": { "color": "primary", "outline": true }
+            "q-btn": { "color": "primary", "outline": true, "flat": true }
           }
         }
       }
@@ -277,7 +277,7 @@
             "q-btn": { "color": "primary", "outline": false }
           },
           "cancel-button": {
-            "q-btn": { "color": "primary", "outline": true }
+            "q-btn": { "color": "primary", "outline": true, "flat": true }
           }
         }
       }

@@ -27,7 +27,8 @@
               "q-btn": {
                 "color": "primary",
                 "icon": "edit",
-                "outline": false
+                "outline": false,
+                "round": true
               },
               "form-dialog": {
                 "q-dialog": { "persistent": false },
@@ -40,7 +41,7 @@
                     "q-btn": { "color": "primary", "outline": false }
                   },
                   "cancel-button": {
-                    "q-btn": { "color": "primary", "outline": true }
+                    "q-btn": { "color": "primary", "outline": true, "flat": true }
                   }
                 }
               }
@@ -52,13 +53,13 @@
         "q-card": {},
         "externalId": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "badge" },
+            "q-icon": { "color": "secondary", "name": "badge" },
             "q-card": {}
           }
         },
         "email": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "alternate_email" },
+            "q-icon": { "color": "secondary", "name": "alternate_email" },
             "q-card": {}
           }
         }
@@ -70,26 +71,26 @@
           "q-card": {},
           "insertDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-icon": { "color": "secondary", "name": "event_available" },
               "q-card": {}
             }
           },
           "activationAt": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event" },
+              "q-icon": { "color": "secondary", "name": "event" },
               "q-card": {}
             }
           },
           "validityPeriod": {
             "start": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             }
@@ -97,13 +98,13 @@
           "suspensionPeriod": {
             "start": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             }
@@ -204,7 +205,7 @@
           "q-btn": { "color": "primary", "outline": false }
         },
         "cancel-button": {
-          "q-btn": { "color": "primary", "outline": true }
+          "q-btn": { "color": "primary", "outline": true, "flat": true }
         }
       }
     },
@@ -219,7 +220,7 @@
           "q-btn": { "color": "primary", "outline": false }
         },
         "cancel-button": {
-          "q-btn": { "color": "primary", "outline": true }
+          "q-btn": { "color": "primary", "outline": true, "flat": true }
         }
       }
     }

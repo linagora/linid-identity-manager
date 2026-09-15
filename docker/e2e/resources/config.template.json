@@ -66,7 +66,8 @@
     "design/account-creation.json",
     "design/organizational-units-page.json",
     "design/organizational-unit-creation.json",
-    "design/application-details.json"
+    "design/application-details.json",
+    "design/groups-page.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

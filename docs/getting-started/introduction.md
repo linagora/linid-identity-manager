@@ -49,6 +49,18 @@ They can:
 
 ---
 
+### 🛡️ Functional Roles
+
+Functional roles are named entities identified by a unique code.
+
+They can:
+
+* Represent a business responsibility or function
+* Be assigned to one or more accounts
+* Be used to derive technical roles and permissions through authorization rules
+
+---
+
 ### 📦 Applications
 
 Applications represent the systems connected to LinId.
@@ -62,7 +74,7 @@ For each application, you can:
 
 ---
 
-### 🏷️ Roles
+### 🏷️ Application Roles
 
 Roles define what a user can do within an application.
 

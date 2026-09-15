@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Optional relationships with an organizational unit and an application.
   - Groups audit table, SQL view and recursive ancestors view.
 
+#### Frontend
+
+- Added the **groups list page** (`/groups`), with its navigation menu entry, its columns (code, label, parent
+  group, description, organizational unit, application, email) and its search filters.
+
 ### Fixed
 
 #### Security

@@ -10,6 +10,7 @@ Feature: Test API Group endpoints
   ## 103 Should return 400 with another group with same code
   ## 104 Should return 400 with an invalid group <field>
   ## 105 Should return 404 with an unknown <reference>
+  ## 106 Should create a group with empty extra parameters when they are omitted
 
   ################## Find All (GET /groups) ##########################
   ## 201 Should return paginated list of groups with resolved relationships
@@ -31,6 +32,7 @@ Feature: Test API Group endpoints
   ## 505 Should return 400 when a group is set as its own parent
   ## 506 Should return 400 when the parent group is a descendant of the group
   ## 507 Should return 400 updating a group with an invalid <field>
+  ## 508 Should keep the extra parameters when the update payload omits them
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -107,8 +109,7 @@ Feature: Test API Group endpoints
       """
       {
         "code": <code>,
-        "name": <name>,
-        "extraParameters": <extraParameters>
+        "name": <name>
       }
       """
     Then I expect status code is 400
@@ -117,10 +118,9 @@ Feature: Test API Group endpoints
     And  I expect '{{response.body.status}}' is '400'
 
     Examples:
-      | field           | code      | name        | extraParameters |
-      | code            | null      | "Group 102" | {}              |
-      | name            | "grp-102" | null        | {}              |
-      | extraParameters | "grp-102" | "Group 102" | null            |
+      | field | code      | name        |
+      | code  | null      | "Group 102" |
+      | name  | "grp-102" | null        |
 
   Scenario: 103 - Should return 400 with another group with same code
     When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
@@ -188,6 +188,25 @@ Feature: Test API Group endpoints
       | parent group        | "00000000-0000-0000-0000-000000000000" | null                                   | null                                   | error.group.not_found               |
       | organizational unit | null                                   | "00000000-0000-0000-0000-000000000000" | null                                   | error.organizational.unit.not_found |
       | application         | null                                   | null                                   | "00000000-0000-0000-0000-000000000000" | error.application.not_found         |
+
+  Scenario: 106 - Should create a group with empty extra parameters when they are omitted
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-106",
+        "name": "Group 106"
+      }
+      """
+    Then I expect status code is 201
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+    And  I store 'grp106Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp106Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp106Id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   ####################################################
   ################## Find All (GET /groups) ##########
@@ -481,8 +500,7 @@ Feature: Test API Group endpoints
       """
       {
         "code": <code>,
-        "name": <name>,
-        "extraParameters": <extraParameters>
+        "name": <name>
       }
       """
     Then I expect status code is 400
@@ -494,10 +512,9 @@ Feature: Test API Group endpoints
     Then I expect status code is 204
 
     Examples:
-      | field           | code      | name        | extraParameters |
-      | code            | null      | "Group 504" | {}              |
-      | name            | "grp-504" | null        | {}              |
-      | extraParameters | "grp-504" | "Group 504" | null            |
+      | field | code      | name        |
+      | code  | null      | "Group 504" |
+      | name  | "grp-504" | null        |
 
   Scenario: 505 - Should return 400 when a group is set as its own parent
     When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
@@ -622,3 +639,32 @@ Feature: Test API Group endpoints
       | field | code      | email          |
       | code  | "grp/507" | null           |
       | email | "grp-507" | "not-an-email" |
+
+  Scenario: 508 - Should keep the extra parameters when the update payload omits them
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-508",
+        "name": "Group 508",
+        "extraParameters": { "test": "test" }
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp508Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp508Id}}' with method 'PUT' with body:
+      """
+      {
+        "code": "grp-508",
+        "name": "Group 508 updated"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp508Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp508Id}}' with method 'DELETE'
+    Then I expect status code is 204

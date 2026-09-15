@@ -7,7 +7,7 @@ Feature: Test Group creation page
   ## 104 Should display the pattern validation message on an invalid code
   ## 105 Should display the email validation message on an invalid email
   ## 106 Submitting a valid form should create the group
-  ## 107 Should display a success notification and redirect to the group list
+  ## 107 Should display a success notification and redirect to the group details page
   ## 108 Remove the created groups
 
   Scenario: Roundtrip about Group creation
@@ -98,10 +98,11 @@ Feature: Test Group creation page
     And  I set the text "e2e-group-creation@example.com" in the HTML element '[data-cy="field_email"]'
     And  I click on '[data-cy="button_confirm"]'
 
-    ## 107 Should display a success notification and redirect to the group list
+    ## 107 Should display a success notification and redirect to the group details page
     Then I expect the HTML element ".q-notification__message" to be visible
     And  I expect the HTML element ".q-notification__message" contains "Groupe créé avec succès."
-    And  I expect current url is "{{ env.E2E_FRONT_URL }}/groups"
+    And  I expect current url matches "{{ env.E2E_FRONT_URL }}/groups/.*"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "E2E Group Creation"
 
     ## 108 Remove the created groups (the new one is looked up by code)
     When I request '{{env.E2E_API_URL}}/groups?code=e2e-group-creation' with method 'GET'

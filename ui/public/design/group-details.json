@@ -1,0 +1,117 @@
+{
+  "moduleGroupDetailsPage": {
+    "entity-profile-panel": {
+      "q-card": {},
+      "q-img": {},
+      "q-icon": { "name": "groups", "color": "grey-6" },
+      "navigation": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "left" },
+          "back-button": {
+            "q-btn": {
+              "flat": true,
+              "color": "primary",
+              "icon": "arrow_back",
+              "noCaps": true
+            }
+          }
+        }
+      },
+      "actions": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "edit-button": {
+            "form-dialog-button": {
+              "q-btn": {
+                "color": "primary",
+                "icon": "edit",
+                "outline": false
+              },
+              "form-dialog": {
+                "q-dialog": { "persistent": false },
+                "q-card": { "flat": true, "bordered": false },
+                "q-card-actions": { "align": "right" },
+                "buttons-card": {
+                  "q-card": { "flat": true },
+                  "q-card-actions": { "align": "right" },
+                  "confirm-button": {
+                    "q-btn": { "color": "primary", "outline": false }
+                  },
+                  "cancel-button": {
+                    "q-btn": { "color": "primary", "outline": true }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "entity-details-card": {
+        "q-card": {},
+        "parentName": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "account_tree" },
+            "q-card": {}
+          }
+        },
+        "email": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "mail" },
+            "q-card": {}
+          }
+        },
+        "description": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "description" },
+            "q-card": {}
+          }
+        },
+        "organizationalUnitName": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "corporate_fare" },
+            "q-card": {}
+          }
+        },
+        "applicationName": {
+          "information-card": {
+            "q-icon": { "color": "primary", "name": "apps" },
+            "q-card": {}
+          }
+        }
+      }
+    },
+    "sections": {
+      "audit": {
+        "entity-details-card": {
+          "q-card": {},
+          "createdBy": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "person_add" },
+              "q-card": {}
+            }
+          },
+          "updatedBy": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "manage_accounts" },
+              "q-card": {}
+            }
+          },
+          "insertDate": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-card": {}
+            }
+          },
+          "updateDate": {
+            "information-card": {
+              "q-icon": { "color": "primary", "name": "update" },
+              "q-card": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

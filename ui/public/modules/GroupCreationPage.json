@@ -12,7 +12,7 @@
     "page": "catalogUI/GenericCreationPage",
     "pagePath": "new",
     "parentPath": "/groups",
-    "successPath": "/groups",
+    "successPath": "/groups/{{ entity.id }}",
     "idKey": "id",
     "formSections": [
       {

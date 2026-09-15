@@ -3,6 +3,9 @@
     "NavigationMenu": {
       "label": "Groupes"
     },
+    "ButtonsCard": {
+      "create": "Ajouter un groupe"
+    },
     "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
     "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
     "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
@@ -198,6 +201,55 @@
         },
         "validation": {
           "invalidDate": "Date incorrecte. Format attendu : {format}"
+        }
+      }
+    }
+  },
+  "moduleGroupCreationPage": {
+    "title": "Création d'un groupe",
+    "error": "Impossible de créer le groupe. Veuillez réessayer plus tard.",
+    "success": "Groupe créé avec succès.",
+    "ButtonsCard": {
+      "cancel": "Retour",
+      "confirm": "Créer",
+      "confirmLoading": "Création..."
+    },
+    "formSections": {
+      "general": {
+        "title": "Informations générales"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Doit être unique.",
+        "validation": {
+          "required": "Ce champ est requis.",
+          "pattern": "Seuls les lettres, les chiffres, les tirets et les tirets bas sont autorisés."
+        }
+      },
+      "name": {
+        "label": "Libellé *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
+      },
+      "parentId": {
+        "label": "Groupe parent"
+      },
+      "description": {
+        "label": "Description"
+      },
+      "organizationalUnitId": {
+        "label": "Unité organisationnelle"
+      },
+      "applicationId": {
+        "label": "Application"
+      },
+      "email": {
+        "label": "Email",
+        "validation": {
+          "email": "Le format de l'email est invalide."
         }
       }
     }

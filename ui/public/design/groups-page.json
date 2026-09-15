@@ -1,5 +1,12 @@
 {
   "moduleGroupsPage": {
+    "buttons-card": {
+      "q-card": { "flat": true },
+      "q-card-actions": { "align": "right" },
+      "create-button": {
+        "q-btn": { "color": "primary", "outline": false }
+      }
+    },
     "see-button": {
       "q-btn": { "color": "primary", "outline": true }
     },

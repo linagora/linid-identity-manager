@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added the **groups list page** (`/groups`), with its navigation menu entry, its columns (code, label, parent
   group, description, organizational unit, application, email) and its search filters.
+- Added the **group creation page** (`/groups/new`), with its required-field and code format validation and its
+  parent group, organizational unit and application selectors.
 
 ### Fixed
 

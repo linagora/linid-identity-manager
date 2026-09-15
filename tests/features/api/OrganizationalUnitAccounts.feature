@@ -16,7 +16,7 @@ Feature: Test API Organizational unit account endpoints
   ## 201 Should update the relationship extra parameters
   ## 202 Should return 404 when the account is not attached
   ## 203 Should return 404 when updating on an unknown organizational unit
-  ## 204 Should return 400 with a bad request payload (missing extraParameters)
+  ## 204 Should keep the relationship extra parameters when the update payload omits them
 
   ################## Detach (DELETE /organizational-units/{id}/accounts/{accountId}) ##################
   ## 301 Should detach an account from an organizational unit
@@ -324,7 +324,7 @@ Feature: Test API Organizational unit account endpoints
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.not_found'
 
-  Scenario: 204 - Should return 400 with a bad request payload (missing extraParameters)
+  Scenario: 204 - Should keep the relationship extra parameters when the update payload omits them
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
       """
       {
@@ -357,10 +357,20 @@ Feature: Test API Organizational unit account endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
+      {
+        "extraParameters": {
+          "role": "manager"
+        }
+      }
+      """
+    Then I expect status code is 200
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
       {}
       """
-    Then I expect status code is 400
-    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters.role}}' is 'manager'
 
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204

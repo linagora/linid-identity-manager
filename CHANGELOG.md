@@ -12,9 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Backend
 
 - Added **groups management API** (`/groups`), including:
-  - Unique code, name, optional parent group, description and email.
+  - Unique code, name, optional parent group, description, email and extra-parameters.
   - Optional relationships with an organizational unit and an application.
   - Groups audit table, SQL view and recursive ancestors view.
+- Added **roles management API** (`/roles`), including:
+  - Unique code, name, description and extra-parameters.
+  - Roles audit table and SQL view.
+  - 
 
 #### Frontend
 

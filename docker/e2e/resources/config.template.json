@@ -36,7 +36,8 @@
     "/modules/ApplicationDetailsPage.json",
     "/modules/AccountDetailsPage.json",
     "/modules/OrganizationalUnitCreationPage.json",
-    "/modules/OrganizationalUnitDetailsPage.json"
+    "/modules/OrganizationalUnitDetailsPage.json",
+    "/modules/GroupsPage.json"
   ],
   "extraZones": [],
   "oidc": {

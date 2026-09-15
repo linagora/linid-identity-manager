@@ -49,8 +49,9 @@ public interface AccountMapper {
      * Creates a new {@link Account} entity from an {@link AccountRecord} and the calling principal.
      *
      * <p>Only the fields present in the record ({@code externalId}, {@code lastname}, {@code
-     * firstname}, {@code email}) and the principal's identifier ({@code createdBy}, {@code
-     * updatedBy}) are mapped. Computed fields ({@code payload}, {@code checksum}) are left unset and
+     * firstname}, {@code email}, {@code extraParameters} defaulting to an empty map) and the
+     * principal's identifier ({@code createdBy}, {@code updatedBy}) are mapped. Computed fields
+     * ({@code payload}, {@code checksum}) are left unset and
      * must be populated by the caller after this method returns. {@code validityPeriod} is
      * intentionally omitted — it is stored in the companion {@code account_status} row, not on the
      * account itself.
@@ -67,6 +68,8 @@ public interface AccountMapper {
     @Mapping(target = "createdBy", source = "userPrincipal.id")
     @Mapping(target = "updatedBy", source = "userPrincipal.id")
     @Mapping(target = "email", source = "record.email")
+    @Mapping(target = "extraParameters", source = "record.extraParameters",
+        defaultExpression = "java(new java.util.HashMap<>())")
     Account toAccount(AccountRecord record, UserPrincipal userPrincipal);
 
     /**

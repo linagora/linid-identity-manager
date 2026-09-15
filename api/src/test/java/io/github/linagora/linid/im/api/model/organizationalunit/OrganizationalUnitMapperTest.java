@@ -33,11 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
+import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatusEnum;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import java.lang.reflect.Field;
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -102,5 +104,17 @@ class OrganizationalUnitMapperTest {
         assertNull(dto.getSuspensionReason());
         assertFalse(dto.isSuspended());
         assertEquals(OrganizationalUnitStatusEnum.ACTIVE, dto.getStatus());
+    }
+
+    @Test
+    @DisplayName("toEntity should default extraParameters to an empty map when the record omits them")
+    void testToEntity_shouldDefaultExtraParameters() {
+        var userPrincipal = new UserPrincipal();
+        userPrincipal.setId(UUID.randomUUID());
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "Finance", "DEPARTMENT", null);
+
+        var entity = mapper.toEntity(record, userPrincipal);
+
+        assertEquals(Map.of(), entity.getExtraParameters());
     }
 }

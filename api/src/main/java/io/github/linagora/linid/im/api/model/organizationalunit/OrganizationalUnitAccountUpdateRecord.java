@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import java.util.Map;
 
 /**
@@ -40,7 +39,7 @@ import java.util.Map;
  */
 @Schema(description = "Request payload for updating an account-to-organizational-unit relationship")
 public record OrganizationalUnitAccountUpdateRecord(
-    @NotNull @Schema(description = "Free-form attributes of the relationship")
+    @Schema(description = "Free-form attributes of the relationship")
     Map<String, Object> extraParameters
 ) {
 }

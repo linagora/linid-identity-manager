@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS groups
     parent_id        UUID         REFERENCES groups (grp_id) ON DELETE SET NULL,
     oun_id           UUID         REFERENCES organizational_units (oun_id) ON DELETE SET NULL,
     app_id           UUID         REFERENCES applications (app_id) ON DELETE SET NULL,
-    code             VARCHAR(100) NOT NULL,
+    code             VARCHAR(100) NOT NULL UNIQUE,
     name             VARCHAR(255) NOT NULL,
     description      TEXT,
     email            VARCHAR(320),

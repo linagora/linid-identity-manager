@@ -149,3 +149,7 @@
     background-color: rgba(0, 0, 0, 0.12);
   }
 }
+
+.q-btn {
+  border-radius: 2rem;
+}

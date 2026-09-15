@@ -59,7 +59,7 @@
         "q-card": {},
         "type": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "category" },
+            "q-icon": { "color": "secondary", "name": "category" },
             "q-card": {}
           }
         }
@@ -138,38 +138,38 @@
           "q-card": {},
           "insertDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-icon": { "color": "secondary", "name": "event_available" },
               "q-card": {}
             }
           },
           "createdBy": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "person_add" },
+              "q-icon": { "color": "secondary", "name": "person_add" },
               "q-card": {}
             }
           },
           "updateDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "update" },
+              "q-icon": { "color": "secondary", "name": "update" },
               "q-card": {}
             }
           },
           "updatedBy": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "manage_accounts" },
+              "q-icon": { "color": "secondary", "name": "manage_accounts" },
               "q-card": {}
             }
           },
           "suspensionPeriod": {
             "start": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             }

@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+#### Backend
+
+- Defaulted `extraParameters` to an empty object on creation of accounts, organizational units, applications, groups and account relationships, instead of failing with a 500 error.
+- Kept the stored `extraParameters` when an update payload omits it, on organizational units, applications, groups and account relationships.
+
 #### Security
 
 - Validated the **audience** and **type** of the access tokens received by the API (`AUTH_AUDIENCE`, `AUTH_JWT_EXPECTED_TYPE`).

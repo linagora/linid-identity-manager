@@ -329,4 +329,20 @@ class ApplicationServiceImplTest {
         assertEquals("error.application.not_found", exception.getError().key());
         verify(applicationRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("update should keep the stored extra parameters when the record omits them")
+    void testUpdate_shouldKeepExtraParametersWhenOmitted() {
+        var id = UUID.randomUUID();
+        var withoutExtraParameters = new ApplicationRecord("my-app", "My Application", "desc", "OIDC", "{}",
+            "Security", null);
+        var existing = Application.builder().id(id).code("my-app").extraParameters(Map.of("team", "core")).build();
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(applicationRepository.findAll(any(Specification.class))).thenReturn(List.of());
+        when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.update(userPrincipal, id, withoutExtraParameters);
+
+        assertEquals(Map.of("team", "core"), result.getExtraParameters());
+    }
 }

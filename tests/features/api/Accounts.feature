@@ -17,6 +17,7 @@ Feature: Test API Account endpoints
   ## 205 Should return 400 when validity period start is null
   ## 206 Should return 400 when validity period start is before current date
   ## 207 Should create an account link with an organizational unit
+  ## 208 Should create an account with empty extra parameters when they are omitted
 
   ################## Find All (GET /accounts) #############
   ## 301 Should return paginated list of accounts
@@ -326,6 +327,32 @@ Feature: Test API Account endpoints
     And  I expect '{{response.body.content.length}}' is '1'
 
     When I request '{{env.E2E_API_URL}}/accounts/{{response.body.content[0].id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 208 - Should create an account with empty extra parameters when they are omitted
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-208",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john208@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+      }
+      """
+    Then I expect status code is 201
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+    And  I store 'account208Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.account208Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.account208Id}}' with method 'DELETE'
     Then I expect status code is 204
 
   ####################################################

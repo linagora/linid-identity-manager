@@ -144,7 +144,11 @@ public class GroupServiceImpl implements GroupService {
         entity.setEmail(group.email());
         entity.setOrganizationalUnitId(group.organizationalUnitId());
         entity.setApplicationId(group.applicationId());
-        entity.setExtraParameters(group.extraParameters());
+
+        if (group.extraParameters() != null) {
+            entity.setExtraParameters(group.extraParameters());
+        }
+
         entity.setUpdatedBy(userPrincipal.getId());
 
         return groupRepository.save(entity);

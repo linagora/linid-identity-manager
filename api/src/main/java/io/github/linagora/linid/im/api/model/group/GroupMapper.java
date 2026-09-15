@@ -56,6 +56,8 @@ public interface GroupMapper {
     @Mapping(target = "email", source = "record.email")
     @Mapping(target = "createdBy", source = "userPrincipal.id")
     @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "extraParameters", source = "record.extraParameters",
+        defaultExpression = "java(new java.util.HashMap<>())")
     Group toEntity(GroupRecord record, UserPrincipal userPrincipal);
 
     /**

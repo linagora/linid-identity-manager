@@ -371,4 +371,35 @@ class GroupServiceImplTest {
         assertEquals("error.group.not_found", exception.getError().key());
         verify(groupRepository, never()).delete(any(Group.class));
     }
+
+    @Test
+    @DisplayName("update should keep the stored extra parameters when the record omits them")
+    void testUpdate_shouldKeepExtraParametersWhenOmitted() {
+        var id = UUID.randomUUID();
+        var withoutExtraParameters = new GroupRecord("developers", "Developers", null, null, null, null, null, null);
+        var existing = Group.builder().id(id).code("developers").extraParameters(Map.of("team", "core")).build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.update(userPrincipal, id, withoutExtraParameters);
+
+        assertEquals(Map.of("team", "core"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("update should replace the stored extra parameters when the record provides them")
+    void testUpdate_shouldOverrideExtraParametersWhenProvided() {
+        var id = UUID.randomUUID();
+        var withExtraParameters = new GroupRecord("developers", "Developers", null, null, null, null, null,
+            Map.of("team", "platform"));
+        var existing = Group.builder().id(id).code("developers").extraParameters(Map.of("team", "core")).build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.update(userPrincipal, id, withExtraParameters);
+
+        assertEquals(Map.of("team", "platform"), result.getExtraParameters());
+    }
 }

@@ -131,6 +131,9 @@ public interface OrganizationalUnitService {
     /**
      * Updates the relationship attributes between an account and an organizational unit.
      *
+     * <p>The {@code extraParameters} are only replaced when provided in the record; the stored value is kept
+     * otherwise.</p>
+     *
      * @param userPrincipal        the authenticated user performing the operation
      * @param organizationalUnitId the unique identifier of the organizational unit
      * @param accountId            the unique identifier of the attached account
@@ -166,6 +169,9 @@ public interface OrganizationalUnitService {
 
     /**
      * Updates an existing organizational unit.
+     *
+     * <p>The {@code extraParameters} are only replaced when provided in the record; the stored value is kept
+     * otherwise.</p>
      *
      * @param userPrincipal the authenticated user performing the operation
      * @param id            the unique identifier of the organizational unit to update

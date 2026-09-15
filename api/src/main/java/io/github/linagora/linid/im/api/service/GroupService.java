@@ -84,7 +84,8 @@ public interface GroupService {
      * Updates the group with the given identifier.
      *
      * <p>The {@code code} must remain unique. When provided, the parent group, the organizational unit and the
-     * application must exist, and the parent group must not create a cycle in the group hierarchy.</p>
+     * application must exist, and the parent group must not create a cycle in the group hierarchy. The
+     * {@code extraParameters} are only replaced when provided in the record; the stored value is kept otherwise.</p>
      *
      * @param userPrincipal the authenticated user
      * @param id            the group UUID

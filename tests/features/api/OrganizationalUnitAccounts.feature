@@ -11,12 +11,13 @@ Feature: Test API Organizational unit account endpoints
   ## 103 Should return 404 when attaching to an unknown organizational unit
   ## 104 Should return 404 when attaching an unknown account
   ## 105 Should return 400 with a bad request payload (missing accountId)
+  ## 106 Should default the relationship extra parameters when the attach payload omits them
 
   ################## Update relationship (PUT /organizational-units/{id}/accounts/{accountId}) ##################
   ## 201 Should update the relationship extra parameters
   ## 202 Should return 404 when the account is not attached
   ## 203 Should return 404 when updating on an unknown organizational unit
-  ## 204 Should return 400 with a bad request payload (missing extraParameters)
+  ## 204 Should keep the relationship extra parameters when the update payload omits them
 
   ################## Detach (DELETE /organizational-units/{id}/accounts/{accountId}) ##################
   ## 301 Should detach an account from an organizational unit
@@ -211,6 +212,52 @@ Feature: Test API Organizational unit account endpoints
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
     Then I expect status code is 204
 
+  Scenario: 106 - Should default the relationship extra parameters when the attach payload omits them
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-account-106",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-oua-106",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john-oua-106@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.rootID}}",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts' with method 'POST' with body:
+      """
+      {
+        "accountId": "{{ctx.accountId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I expect '{{response.body.accountId}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
+    Then I expect status code is 204
+
   ###########################################################################################
   ################## Update relationship (PUT /organizational-units/{id}/accounts/{accountId})
   ###########################################################################################
@@ -324,7 +371,7 @@ Feature: Test API Organizational unit account endpoints
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.not_found'
 
-  Scenario: 204 - Should return 400 with a bad request payload (missing extraParameters)
+  Scenario: 204 - Should keep the relationship extra parameters when the update payload omits them
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
       """
       {
@@ -357,10 +404,20 @@ Feature: Test API Organizational unit account endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
+      {
+        "extraParameters": {
+          "role": "manager"
+        }
+      }
+      """
+    Then I expect status code is 200
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
       {}
       """
-    Then I expect status code is 400
-    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters.role}}' is 'manager'
 
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204

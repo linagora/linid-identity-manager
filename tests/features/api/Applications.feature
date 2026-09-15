@@ -8,6 +8,7 @@ Feature: Test API Application endpoints
   ## 102 Should return 400 with a bad request payload (missing required fields)
   ## 103 Should return 400 with another application with same code
   ## 104 Should return 400 with invalid application code
+  ## 105 Should create an application with empty extra parameters when they are omitted
 
   ################## Find All (GET /applications) ####################
   ## 201 Should return paginated list of applications
@@ -25,6 +26,7 @@ Feature: Test API Application endpoints
   ## 502 Should return 404 when updating an unknown application
   ## 503 Should return 400 when updating with a code used by another application
   ## 504 Should return 400 with a bad request payload (missing required fields)
+  ## 505 Should keep the extra parameters when the update payload omits them
 
   ################## Deploy (POST /applications/{id}/deploy) ##########
   ## 601 Should trigger deployment of an application no force
@@ -152,6 +154,27 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.error}}' is 'Validation failed'
     And  I expect '{{response.body.errorKey}}' is 'error.validation'
     And  I expect '{{response.body.status}}' is '400'
+
+  Scenario: 105 - Should create an application with empty extra parameters when they are omitted
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-105",
+        "name": "Application 105",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 201
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+    And  I store 'app105Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app105Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app105Id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   ####################################################
   ################## Find All (GET /applications) ####
@@ -391,6 +414,39 @@ Feature: Test API Application endpoints
       | name           | "app-504" | null   | "OIDC" | "{}"           |
       | type           | "app-504" | "name" | null   | "{}"           |
       | claimsTemplate | "app-504" | "name" | "OIDC" | null           |
+
+  Scenario: 505 - Should keep the extra parameters when the update payload omits them
+    When I request '{{env.E2E_API_URL}}/applications' with method 'POST' with body:
+      """
+      {
+        "code": "app-505",
+        "name": "Application 505",
+        "type": "OIDC",
+        "claimsTemplate": "{}",
+        "extraParameters": { "test": "test" }
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'app505Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app505Id}}' with method 'PUT' with body:
+      """
+      {
+        "code": "app-505",
+        "name": "Application 505 updated",
+        "type": "OIDC",
+        "claimsTemplate": "{}"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app505Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
+
+    When I request '{{env.E2E_API_URL}}/applications/{{ctx.app505Id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   ####################################################
   ################## Deploy (POST /applications/{id}/deploy) ##########

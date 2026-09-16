@@ -3,6 +3,7 @@ CREATE TABLE organizational_unit_accounts
     oua_id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     oun_id           UUID        NOT NULL REFERENCES organizational_units (oun_id) ON DELETE CASCADE,
     act_id           UUID        NOT NULL REFERENCES accounts (act_id) ON DELETE CASCADE,
+    rol_id           UUID        REFERENCES roles (rol_id) ON DELETE SET NULL,
     extra_parameters JSONB       NOT NULL DEFAULT '{}'::JSONB,
     created_by       UUID        NOT NULL,
     updated_by       UUID        NOT NULL,
@@ -13,6 +14,7 @@ CREATE TABLE organizational_unit_accounts
 
 CREATE INDEX idx_organizational_unit_accounts_oun_id ON organizational_unit_accounts (oun_id);
 CREATE INDEX idx_organizational_unit_accounts_act_id ON organizational_unit_accounts (act_id);
+CREATE INDEX idx_organizational_unit_accounts_rol_id ON organizational_unit_accounts (rol_id);
 
 CREATE TRIGGER tg_organizational_unit_accounts_set_update_date
     BEFORE UPDATE
@@ -25,6 +27,7 @@ COMMENT ON TABLE organizational_unit_accounts IS 'Stores the association between
 COMMENT ON COLUMN organizational_unit_accounts.oua_id IS 'Primary key (UUID) of the organizational unit to account association.';
 COMMENT ON COLUMN organizational_unit_accounts.oun_id IS 'Identifier of the associated organizational unit.';
 COMMENT ON COLUMN organizational_unit_accounts.act_id IS 'Identifier of the associated account.';
+COMMENT ON COLUMN organizational_unit_accounts.rol_id IS 'Identifier of the functional role held by the account within the organizational unit. Optional at database level; set to NULL when the referenced role is deleted.';
 COMMENT ON COLUMN organizational_unit_accounts.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
 COMMENT ON COLUMN organizational_unit_accounts.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_unit_accounts.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
@@ -35,5 +38,6 @@ COMMENT ON CONSTRAINT uk_organizational_unit_accounts_oun_id_act_id ON organizat
 
 COMMENT ON INDEX idx_organizational_unit_accounts_oun_id IS 'Index on organizational unit identifier to optimize lookups and joins on organizational_unit_accounts by OU.';
 COMMENT ON INDEX idx_organizational_unit_accounts_act_id IS 'Index on account identifier to optimize lookups and joins on organizational_unit_accounts by account.';
+COMMENT ON INDEX idx_organizational_unit_accounts_rol_id IS 'Index on functional role identifier to optimize lookups and joins on organizational_unit_accounts by role.';
 
 COMMENT ON TRIGGER tg_organizational_unit_accounts_set_update_date ON organizational_unit_accounts IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';

@@ -32,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **logout entry** of the user profile menu.
 - Added the **functional role** column to the accounts table of the organizational unit details page, and a role
   selector to its attach dialog and to the account creation page.
+- Added the **groups list page** (`/groups`), with its navigation menu entry, its columns (code, label, parent
+  group, description, organizational unit, application, email) and its search filters.
+- Added the **group creation page** (`/groups/new`), with its required-field and code format validation and its
+  parent group, organizational unit and application selectors.
+- Added the **group details page** (`/groups/{id}`), displaying the group label, its parent group, email,
+  description, organizational unit and application, its audit metadata, and an edit dialog reusing the creation
+  form.
 
 ### Fixed
 
@@ -54,6 +61,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Build
 
+- Seeded a **group hierarchy** in the development and E2E databases, linked to the organizational unit tree.
 - Served the **CA-signed development certificate** from the Quasar dev server.
 - Fixed flaky E2E tests caused by shared state between front and API scenarios.
 - Reformatted the E2E feature files with aligned step keywords for better readability.

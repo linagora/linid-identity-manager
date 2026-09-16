@@ -1,0 +1,40 @@
+{
+  "moduleGroupCreationPage": {
+    "buttons-card": {
+      "q-card": {},
+      "q-card-actions": { "align": "right" },
+      "cancel-button": {
+        "q-btn": { "color": "primary", "outline": true }
+      },
+      "confirm-button": {
+        "q-btn": { "color": "primary", "outline": false }
+      }
+    },
+    "form-section-general": {
+      "q-card": {},
+      "EntityAttributeField": {
+        "code": {
+          "q-input": {}
+        },
+        "name": {
+          "q-input": {}
+        },
+        "parentId": {
+          "q-select": {}
+        },
+        "description": {
+          "q-input": {}
+        },
+        "organizationalUnitId": {
+          "q-select": {}
+        },
+        "applicationId": {
+          "q-select": {}
+        },
+        "email": {
+          "q-input": {}
+        }
+      }
+    }
+  }
+}

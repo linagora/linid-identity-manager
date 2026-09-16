@@ -731,3 +731,82 @@ $$
 
     END
 $$;
+
+-- Create group hierarchy, mirroring the organizational unit tree above.
+-- UUIDs are deterministic so that e2e scenarios can target them directly
+-- through /groups/{id}. Codes match the ^[a-zA-Z-_0-9]+$ pattern enforced
+-- by the API, so a seeded group can be edited from the UI without tripping
+-- the code format validation.
+DO
+$$
+    DECLARE
+        admin_id       UUID;
+        root_id        UUID;
+        company_a_id   UUID;
+        division_a1_id UUID;
+        dept_a1_1_id   UUID;
+        linid_id       UUID;
+    BEGIN
+        SELECT act_id INTO admin_id FROM accounts WHERE email = 'admin@example.com' LIMIT 1;
+
+        SELECT oun_id INTO root_id FROM organizational_units WHERE name = 'root' LIMIT 1;
+        SELECT oun_id INTO company_a_id FROM organizational_units WHERE name = 'Company A' LIMIT 1;
+        SELECT oun_id INTO division_a1_id FROM organizational_units WHERE name = 'Division A1' LIMIT 1;
+        SELECT oun_id INTO dept_a1_1_id FROM organizational_units WHERE name = 'Dept A1-1' LIMIT 1;
+
+        SELECT app_id INTO linid_id FROM applications WHERE code = 'LINID' LIMIT 1;
+
+        -- =========================================================
+        -- 1. LEVEL 1 - ROOT GROUPS (no parent group)
+        -- =========================================================
+        INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
+                            created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009001', NULL, root_id, NULL,
+                'all-staff', 'All Staff',
+                'Every account of the organization.', 'all-staff@example.com',
+                admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009002', NULL, company_a_id, NULL,
+                'it-department', 'IT Department',
+                'Information technology department of Company A.', NULL,
+                admin_id, admin_id),
+               -- Every optional column left NULL: covers the empty cells of the
+               -- groups list and the empty information cards of the details page.
+               ('00000000-0000-4000-8000-000000009003', NULL, NULL, NULL,
+                'guests', 'Guests',
+                NULL, NULL,
+                admin_id, admin_id)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 2. LEVEL 2 - children of IT Department
+        -- =========================================================
+        INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
+                            created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009004',
+                '00000000-0000-4000-8000-000000009002', division_a1_id, linid_id,
+                'developers', 'Developers',
+                'Software development team.', 'developers@example.com',
+                admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009005',
+                '00000000-0000-4000-8000-000000009002', division_a1_id, linid_id,
+                'support', 'Support',
+                'Level 1 and level 2 user support.', 'support@example.com',
+                admin_id, admin_id)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 3. LEVEL 3 - children of Developers
+        -- Third level, so that the parent chain is deep enough to exercise
+        -- the recursive group_ancestors_view.
+        -- =========================================================
+        INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
+                            created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009006',
+                '00000000-0000-4000-8000-000000009004', dept_a1_1_id, linid_id,
+                'backend-developers', 'Backend Developers',
+                'Developers working on the API.', 'backend-developers@example.com',
+                admin_id, admin_id)
+        ON CONFLICT (code) DO NOTHING;
+
+    END
+$$;

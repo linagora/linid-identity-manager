@@ -59,7 +59,8 @@
     "design/application-details.json",
     "design/roles-page.json",
     "design/role-creation.json",
-    "design/groups-page.json"
+    "design/groups-page.json",
+    "design/group-creation.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

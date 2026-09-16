@@ -8,7 +8,8 @@
       "accounts.json",
       "applications.json",
       "organizational-units.json",
-      "roles.json"
+      "roles.json",
+      "groups.json"
     ]
   },
   "immediateActionDelay": 60,
@@ -57,7 +58,8 @@
     "design/organizational-unit-creation.json",
     "design/application-details.json",
     "design/roles-page.json",
-    "design/role-creation.json"
+    "design/role-creation.json",
+    "design/groups-page.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

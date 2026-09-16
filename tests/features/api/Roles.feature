@@ -8,6 +8,7 @@ Feature: Test API Role endpoints
   ################## Find All (GET /roles) #################
   ## 201 Should return paginated list of roles
   ## 202 Should filter roles by code
+  ## 203 Should return the organizational units in which a role is held
 
   ################## Find By Id (GET /roles/{id}) ##########
   ## 301 Should return 200 for existing role
@@ -35,6 +36,11 @@ Feature: Test API Role endpoints
     And   I store 'accessToken' as '{{response.body.access_token}}' in context
     And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And   I set http header 'Content-Type' with 'application/json'
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units?name=root&type=root' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{ response.body.content.length}}' is "1"
+    And   I store 'rootID' as '{{response.body.content[0].id}}' in context
 
   ####################################################
   ################## Create (POST /roles) #############
@@ -144,6 +150,7 @@ Feature: Test API Role endpoints
     And   I expect '{{response.body.content[0].code}}' is 'ROLE-201'
     And   I expect '{{response.body.content[0].name}}' is 'Find All Role'
     And   I expect '{{response.body.content[0].description}}' is 'Role created by scenario 201'
+    And   I expect '{{response.body.content[0].organizationalUnits}}' is empty
     And   I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.content[0].updatedBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
@@ -192,6 +199,117 @@ Feature: Test API Role endpoints
     When  I request '{{env.E2E_API_URL}}/roles/{{ctx.secondRoleId}}' with method 'DELETE'
     Then  I expect status code is 204
 
+  Scenario: 203 - Should return the organizational units in which a role is held
+    When  I request '{{env.E2E_API_URL}}/roles' with method 'POST' with body:
+      """
+      {
+        "code": "ROLE-203",
+        "name": "Held Role",
+        "description": "Role created by scenario 203",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'roleId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-role-203",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'ouId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-role-203-a",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john-role-203@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.rootID}}",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'firstAccountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-role-203-b",
+        "lastname": "Doe",
+        "firstname": "Jane",
+        "email": "jane-role-203@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.rootID}}",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'secondAccountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts' with method 'POST' with body:
+      """
+      {
+        "accountId": "{{ctx.firstAccountId}}",
+        "roleId": "{{ctx.roleId}}",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts' with method 'POST' with body:
+      """
+      {
+        "accountId": "{{ctx.secondAccountId}}",
+        "roleId": "{{ctx.roleId}}",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.id}}' is '{{ctx.roleId}}'
+    And   I expect '{{response.body.organizationalUnits}}' is 'ou-role-203'
+
+    When  I request '{{env.E2E_API_URL}}/roles?code=ROLE-203' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.totalElements}}' is '1'
+    And   I expect '{{response.body.content.length}}' is '1'
+    And   I expect '{{response.body.content[0].id}}' is '{{ctx.roleId}}'
+    And   I expect '{{response.body.content[0].organizationalUnits}}' is 'ou-role-203'
+
+    When  I request '{{env.E2E_API_URL}}/roles?organizationalUnitId={{ctx.ouId}}' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.totalElements}}' is '1'
+    And   I expect '{{response.body.content[0].id}}' is '{{ctx.roleId}}'
+
+    When  I request '{{env.E2E_API_URL}}/roles?organizationalUnitId={{ctx.rootID}}' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.totalElements}}' is '0'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.firstAccountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
   ####################################################
   ################## Find By Id (GET /roles/{id}) #####
   ####################################################
@@ -215,6 +333,7 @@ Feature: Test API Role endpoints
     And   I expect '{{response.body.code}}' is 'ROLE-301'
     And   I expect '{{response.body.name}}' is 'Find By Id Role'
     And   I expect '{{response.body.description}}' is 'Role created by scenario 301'
+    And   I expect '{{response.body.organizationalUnits}}' is empty
     And   I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
     And   I expect '{{response.body.extraParameters | dump}}' is '{}'

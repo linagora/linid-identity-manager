@@ -96,6 +96,14 @@ public class OrganizationalUnitAccount extends AbstractEntity {
     private UUID accountId;
 
     /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     * {@code null} when the role has been deleted or was never assigned.
+     */
+    @Column(name = "rol_id")
+    @FilterType(type = UUID.class)
+    private UUID roleId;
+
+    /**
      * Additional deployment-specific attributes stored as JSON.
      * <p>
      * This field allows integrators and customers to extend the standard data model

@@ -202,15 +202,17 @@ public class OrganizationalUnitController {
      *
      * @param userPrincipal        the authenticated user performing the operation
      * @param organizationalUnitId the organizational unit identifier
-     * @param record               the attachment payload (account identifier and relationship attributes)
+     * @param record               the attachment payload (account identifier, role identifier and relationship
+     *                             attributes)
      * @return the created relationship with HTTP 201 status
      */
     @PostMapping("/{organizationalUnitId}/accounts")
-    @Operation(summary = "Attach an account to an organizational unit")
+    @Operation(summary = "Attach an account to an organizational unit with a functional role")
     @ApiResponse(responseCode = "201", description = "Account successfully attached")
     @ApiResponse(responseCode = "400", description = "Invalid request body or account already attached",
         content = @Content)
-    @ApiResponse(responseCode = "404", description = "Organizational unit or account not found", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Organizational unit, account or role not found",
+        content = @Content)
     public ResponseEntity<OrganizationalUnitAccountDTO> attachAccount(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,
         @PathVariable final UUID organizationalUnitId,

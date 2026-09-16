@@ -115,11 +115,12 @@ public interface OrganizationalUnitService {
     );
 
     /**
-     * Attaches an account to an organizational unit.
+     * Attaches an account to an organizational unit with a functional role.
      *
      * @param userPrincipal        the authenticated user performing the operation
      * @param organizationalUnitId the unique identifier of the organizational unit
-     * @param record               the attachment payload (account identifier and relationship attributes)
+     * @param record               the attachment payload (account identifier, role identifier and relationship
+     *                             attributes)
      * @return the created {@link OrganizationalUnitAccount} relationship
      */
     OrganizationalUnitAccount attachAccount(

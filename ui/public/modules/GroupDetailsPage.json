@@ -1,0 +1,126 @@
+{
+  "instanceId": "moduleGroupDetailsPage",
+  "remoteName": "catalogUI",
+  "entity": "groups",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "groups",
+  "basePath": "/groups",
+  "zones": [
+    {
+      "zone": "moduleGroupDetailsPage.side-left",
+      "plugin": "catalogUI/EntityProfilePanel",
+      "props": {
+        "parentPath": "/groups",
+        "fieldOrder": [
+          "parentName",
+          "email",
+          "description",
+          "organizationalUnitName",
+          "applicationName"
+        ],
+        "avatarOptions": {
+          "seed": ["{{ entity.code }}"],
+          "style": "shapes"
+        },
+        "updateEndpoint": "/groups/{{ entity.id }}",
+        "updateBody": {
+          "code": "{{ entity.code }}",
+          "name": "{{ entity.name }}",
+          "parentId": "{{ entity.parentId }}",
+          "description": "{{ entity.description }}",
+          "email": "{{ entity.email }}",
+          "organizationalUnitId": "{{ entity.organizationalUnitId }}",
+          "applicationId": "{{ entity.applicationId }}",
+          "extraParameters": "{{ entity.extraParameters }}"
+        },
+        "formFields": [
+          {
+            "name": "code",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {
+              "pattern": "^[a-zA-Z-_0-9]+$"
+            }
+          },
+          {
+            "name": "name",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "parentId",
+            "input": "DynamicList",
+            "inputSettings": {
+              "route": "/groups?id=not_{{ entity.id }}",
+              "routeDependencies": ["entity.id"],
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          },
+          {
+            "name": "description",
+            "input": "TextArea"
+          },
+          {
+            "name": "organizationalUnitId",
+            "input": "DynamicList",
+            "inputSettings": {
+              "route": "/organizational-units",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          },
+          {
+            "name": "applicationId",
+            "input": "DynamicList",
+            "inputSettings": {
+              "route": "/applications",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          },
+          {
+            "name": "email",
+            "input": "Email"
+          }
+        ],
+        "emitOnUpdate": "group-updated"
+      }
+    }
+  ],
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericDetailsPage",
+    "pagePath": ":id",
+    "parentPath": "/groups",
+    "enableActions": false,
+    "reloadDetailsOn": ["group-updated"],
+    "sections": [
+      {
+        "key": "audit",
+        "fieldOrder": ["createdBy", "updatedBy", "insertDate", "updateDate"],
+        "formatters": [
+          {
+            "field": "insertDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          },
+          {
+            "field": "updateDate",
+            "formatter": "toDate",
+            "formatOptions": {
+              "formatKey": "application.dateFormat"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

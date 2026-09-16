@@ -42,7 +42,8 @@
     "/modules/RolesPage.json",
     "/modules/RoleCreationPage.json",
     "/modules/GroupsPage.json",
-    "/modules/GroupCreationPage.json"
+    "/modules/GroupCreationPage.json",
+    "/modules/GroupDetailsPage.json"
   ],
   "extraZones": [],
   "oidc": {
@@ -74,7 +75,8 @@
     "design/roles-page.json",
     "design/role-creation.json",
     "design/groups-page.json",
-    "design/group-creation.json"
+    "design/group-creation.json",
+    "design/group-details.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

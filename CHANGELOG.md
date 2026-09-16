@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+#### Backend
+
+- Added **groups management API** (`/groups`), including:
+  - Unique code, name, optional parent group, description and email.
+  - Optional relationships with an organizational unit and an application.
+  - Groups audit table, SQL view and recursive ancestors view.
+
+### Fixed
+
+#### Security
+
+- Validated the **audience** and **type** of the access tokens received by the API (`AUTH_AUDIENCE`, `AUTH_JWT_EXPECTED_TYPE`).
+- Returned **401 Unauthorized** when the access token is valid but no account matches it.
+- Issued the SSO cookie with the **Secure** flag and stopped exposing the LemonLDAP portal over plain HTTP.
+
+#### Frontend
+
+- Made the **RP-initiated logout** work end to end through the LemonLDAP logout confirmation page.
+
+### Build
+
+- Served the **CA-signed development certificate** from the Quasar dev server.
+- Fixed flaky E2E tests caused by shared state between front and API scenarios.
+- Reformatted the E2E feature files with aligned step keywords for better readability.
+
 ## [0.9.0] - 2026-09-08
 
 ### Added

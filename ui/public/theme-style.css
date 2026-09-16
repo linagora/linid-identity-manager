@@ -1,34 +1,101 @@
 /* Custom theme overrides - this file can be replaced per deployment */
+
+.bg-background-search-bar {
+  background: var(--q-background-search-bar) !important;
+}
+
+
 .account-deactivated-warning-banner {
   border: 2px solid var(--q-negative);
 }
 
+/* ===== Global design ===== */
+
+/* Main content background */
+main {
+  background: var(--q-background);
+}
+
+/* Design Table */
+.q-table thead {
+  height: 3.18rem;
+}
+
+/* Border-radius of all card */
+.q-card.q-card--flat,
+.generic-editable-table-card,
+.generic-details-page--section,
+.entity-profile-panel,
+.generic-creation-page--form-section{
+  border-radius: 0.5rem;
+}
+
+/* Dialog card styling */
 .q-dialog .q-card {
   width: 700px;
   max-width: 80vw;
 }
 
-/* ===== Generic details page ===== */
-
-.generic-details-page .entity-details-card--title.q-card__section {
-  padding: 0 0 8px;
+/* Design buttons */
+.q-btn.q-btn--rectangle {
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
 }
 
-.generic-details-page .entity-details-card--title h4 {
+/* Design dropdown buttons */
+.q-btn-dropdown.q-btn-dropdown--simple {
+  border-radius: 0.375rem;
+}
+
+/* Design notifications */
+.q-notification--standard {
+  border-radius: 0.5rem;
+}
+
+/* ===== Generic entity table page ===== */
+
+.generics-table-page--actions {
+  background: var(--q-background);
+}
+
+/* Design Search bar */
+.linid-smart-filter--field.q-field--standard .q-field__control:before {
+  border-bottom: none;
+  transition: none;
+}
+.linid-smart-filter--field .q-field__inner .q-field__control {
+  border-radius: 20px;
+}
+.linid-smart-filter--field .q-field__inner .q-field__control {
+  padding: 0 1rem;
+}
+.linid-smart-filter--menu {
+  border-radius: 1.25rem;
+}
+
+/* ===== Generic details page ===== */
+
+.generic-details-page--section .entity-details-card--title {
+  padding-top: 1rem;
+}
+
+/*.account-lifecycle-panel .generic-editable-table-card {
+  padding-top: 1rem;
+}*/
+
+.entity-profile-panel--navigation-section .q-card__actions {
+  margin-top: -1rem;
+}
+
+.generic-details-page .entity-details-card--title h4,
+.generic-details-page .generic-editable-table-card--title,
+.generic-details-page .generic-sortable-list-card--title {
   margin: 0;
   padding-left: 12px;
   border-left: 4px solid var(--q-primary);
   font-size: 1.05rem;
   font-weight: 600;
   line-height: 1.4;
-}
-
-/* Remove the default vertical padding around the attributes container */
-.generic-details-page
-  .entity-details-card
-  > .q-card__section:not(.entity-details-card--title) {
-  padding-top: 0;
-  padding-bottom: 0;
 }
 
 .generic-details-page .entity-details-card--container {
@@ -43,8 +110,6 @@
   padding: 12px 4px;
   border: none;
   border-radius: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: none;
   background: transparent;
 }
 
@@ -71,40 +136,12 @@
   opacity: 0.75;
 }
 
-.generic-details-page .generic-editable-table-card {
-  background: transparent;
-}
-
-.generic-details-page
-  .generic-editable-table-card
-  > .q-card__section:first-child,
-.generic-details-page
-  .generic-sortable-list-card
-  > .q-card__section:first-child {
-  padding: 0 0 8px;
-}
-
-.generic-details-page
-  .generic-editable-table-card
-  > .q-card__section:last-child,
-.generic-details-page
-  .generic-sortable-list-card
-  > .q-card__section:last-child {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.generic-details-page .generic-editable-table-card--title,
-.generic-details-page .generic-sortable-list-card--title {
-  padding-left: 12px;
-  border-left: 4px solid var(--q-primary);
-  font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
 .generic-details-page .generic-sortable-list-card--scroll-area {
   height: 300px;
+}
+
+.generic-details-page .generic-sortable-list-card--scroll-area .q-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .generic-details-page .generic-sortable-list-card--header .q-item__label {
@@ -144,8 +181,9 @@
   line-height: 1.4;
 }
 
-.q-table {
-  thead {
-    background-color: rgba(0, 0, 0, 0.12);
-  }
+/* Background buttons action */
+.generic-creation-page--actions .buttons-card {
+  background: unset;
 }
+
+

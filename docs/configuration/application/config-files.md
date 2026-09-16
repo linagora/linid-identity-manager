@@ -61,6 +61,15 @@ AUTH_ISSUER_URI=https://ui/auth
 # JWK Set URI; direct HTTPS access to LemonLDAP::NG for fetching public keys
 AUTH_JWK_SET_URI=https://ui/auth/oauth2/jwks
 
+# Expected "aud" claim of the access tokens; must match the API audience declared in LemonLDAP
+# (oidcRPMetaDataOptionsAdditionalAudiences), distinct from the OIDC client ID
+AUTH_AUDIENCE=linid-im-api
+
+# JOSE "typ" header required on access tokens (default: at+jwt)
+# Only needed if the OIDC provider issues another type
+# Leave the variable unset to use the default: an empty value is not the default and rejects every token
+AUTH_JWT_EXPECTED_TYPE=at+jwt
+
 # Path to SSL/TLS key store
 SSL_KEY_STORE=classpath:keystore.p12
 
@@ -163,9 +172,6 @@ DATALAKE_DATABASE_NAME=datalake
 ################################################################################
 #                             LEMONLDAP CONFIGURATION                          #
 ################################################################################
-
-# Port exposed by the LemonLDAP::NG portal
-LEMONLDAP_PORTAL_PORT=8080
 
 # PostgreSQL administrator username used to initialize the LemonLDAP::NG database
 LEMONLDAP_DATABASE_ADMIN_USER=admin
@@ -345,6 +351,15 @@ AUTH_ISSUER_URI=https://linid.localtest.me:9000/auth
 
 # JWK Set URI; direct HTTP access to LemonLDAP::NG for fetching public keys
 AUTH_JWK_SET_URI=https://linid.localtest.me:9000/auth/oauth2/jwks
+
+# Expected "aud" claim of the access tokens; must match the API audience declared in LemonLDAP
+# (oidcRPMetaDataOptionsAdditionalAudiences), distinct from the OIDC client ID
+AUTH_AUDIENCE=linid-im-api
+
+# JOSE "typ" header required on access tokens (default: at+jwt)
+# Only needed if the OIDC provider issues another type
+# Leave the variable unset to use the default: an empty value is not the default and rejects every token
+AUTH_JWT_EXPECTED_TYPE=at+jwt
 ```
 
 ---

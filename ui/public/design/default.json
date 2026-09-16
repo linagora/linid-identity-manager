@@ -7,6 +7,9 @@
       "noCaps": true,
       "unelevated": true
     },
+    "q-field": {
+      "bgColor": "background-search-bar"
+    },
     "q-splitter": {
       "modelValue": 25
     },

@@ -1,0 +1,27 @@
+Border-radius sur les chips de recherche/filtres (Regarder CHIP Filter (filled))
+Le background color des chips (peut etre)
+
+Regarder pour rapprocher les 3 boutons pour les favoris (des filtres de recherches)
+
+
+Faire les textField avec les border radius autour
+
+Remettre la hauteur de chaque ligne des tables et des liste a la bonne hauteur (min-height) (Attention au detail d'un compte)
+
+Remettre bien hauteur des titres dans les cards roles(dans application detail) et cards dans account detail (Peut etre faire une PR sur Community-plugin)
+
+
+Remettre contour sur les bouton annuler dans les dialogs
+
+
+Remettre bien la taille des titres de dialogs
+
+Pour les badge des comptes et application(je crois) mettre bien le padding et la taille du texte
+
+
+Demander a Swann quand utiliser la card "Intent" Si il n'y a pas de raison speciale de l'utiliser alors laisser sans bordure et peut aussi les inputs
+
+
+
+Attention quand on clique sur exporter script dans Application detail et que on annule alors on a le toast message de succès (on ne devrait pas l'avoir)
+

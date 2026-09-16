@@ -26,49 +26,29 @@
 
 package io.github.linagora.linid.im.api.persistence.repository;
 
-import io.github.linagora.linid.im.api.persistence.model.RoleView;
-import org.jspecify.annotations.NonNull;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import org.springframework.data.repository.Repository;
 
 import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Read-only Spring Data repository for {@link RoleView}.
+ * Read-only Spring Data repository for {@link RoleDistinctView}.
  *
  * <p>This repository is backed by a database view and therefore intentionally exposes only
  * read operations. It does not extend {@code JpaRepository}, preventing write operations such
  * as {@code save}, {@code delete}, or {@code flush} from being available through this repository.</p>
  *
- * <p>Extends {@link JpaSpecificationExecutor} to support dynamic filtering and pagination using
- * JPA {@link Specification specifications}.</p>
+ * <p>Filtered listing goes through the {@code spring-query-filter} executor, so this repository only
+ * exposes the lookup by identifier.</p>
  */
-public interface RoleViewRepository
-        extends Repository<RoleView, UUID>, JpaSpecificationExecutor<RoleView> {
+public interface RoleDistinctViewRepository extends Repository<RoleDistinctView, UUID> {
 
     /**
-     * Retrieves a page of role views matching the given specification.
+     * Retrieves the first row of the view matching the given role identifier.
      *
-     * @param specification the specification used to filter the role views.
-     * @param pageable the pagination and sorting information.
-     * @return a page containing the matching role views.
+     * @param id the role identifier.
+     * @return the matching role view, or empty when the role does not exist.
      */
-    @Override
-    @NonNull
-    Page<RoleView> findAll(
-            @NonNull Specification<RoleView> specification,
-            @NonNull Pageable pageable
-    );
-
-    /**
-     * Retrieves a role view by its unique identifier.
-     *
-     * @param id the unique identifier of the role.
-     * @return an optional containing the role view if found, or empty otherwise.
-     */
-    Optional<RoleView> findById(UUID id);
+    Optional<RoleDistinctView> findFirstById(UUID id);
 }

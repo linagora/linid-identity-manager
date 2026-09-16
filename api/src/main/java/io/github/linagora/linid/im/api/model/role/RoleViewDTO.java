@@ -71,6 +71,13 @@ public class RoleViewDTO {
     private String description;
 
     /**
+     * Names of the organizational units in which the role is held, represented as a comma-separated list.
+     */
+    @Schema(description = "Comma-separated names of the organizational units in which the role is held",
+        example = "Company A, Company B")
+    private String organizationalUnits;
+
+    /**
      * Full name of the account that created this record.
      */
     @Schema(description = "Full name of the record creator", example = "John Doe")

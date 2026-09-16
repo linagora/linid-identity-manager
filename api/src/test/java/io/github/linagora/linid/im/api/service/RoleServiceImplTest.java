@@ -41,11 +41,13 @@ import io.github.linagora.linid.im.api.model.role.RoleMapper;
 import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Role;
+import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
 import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
-import io.github.linagora.linid.im.api.persistence.repository.RoleViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
@@ -75,7 +77,10 @@ class RoleServiceImplTest {
     private RoleRepository roleRepository;
 
     @Mock
-    private RoleViewRepository roleViewRepository;
+    private RoleDistinctViewRepository roleDistinctViewRepository;
+
+    @Mock
+    private SpringQueryExecutor executor;
 
     @Mock
     private RoleMapper roleMapper;
@@ -115,8 +120,8 @@ class RoleServiceImplTest {
                 .build();
     }
 
-    private RoleView createSampleRoleView(final UUID id) {
-        return RoleView.builder()
+    private RoleDistinctView createSampleRoleView(final UUID id) {
+        return RoleDistinctView.builder()
                 .id(id)
                 .code("ADMINISTRATOR")
                 .name("Administrator")
@@ -178,18 +183,20 @@ class RoleServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should delegate role listing to the repository with specification and pageable")
-    void testFindAll_shouldDelegateToRepository() {
+    @DisplayName("Should delegate role listing to the executor with specification and pageable")
+    void testFindAll_shouldDelegateToExecutor() {
         var pageable = PageRequest.of(0, 10);
         var filters = new RoleViewQueryFilterDto();
         var entity = createSampleRoleView(UUID.randomUUID());
 
-        when(roleViewRepository.findAll(
+        when(executor.findDistinctPageEntities(
+                eq(RoleView.class),
+                eq(RoleDistinctView.class),
                 any(Specification.class),
                 eq(pageable)
         )).thenReturn(new PageImpl<>(List.of(entity)));
 
-        Page<RoleView> result =
+        Page<RoleDistinctView> result =
                 roleService.findAll(userPrincipal, filters, pageable);
 
         assertNotNull(result);
@@ -197,7 +204,9 @@ class RoleServiceImplTest {
         assertEquals(entity.getId(), result.getContent().getFirst().getId());
         assertEquals(entity.getCode(), result.getContent().getFirst().getCode());
 
-        verify(roleViewRepository).findAll(
+        verify(executor).findDistinctPageEntities(
+                eq(RoleView.class),
+                eq(RoleDistinctView.class),
                 any(Specification.class),
                 eq(pageable)
         );
@@ -209,15 +218,15 @@ class RoleServiceImplTest {
         UUID id = UUID.randomUUID();
         var entity = createSampleRoleView(id);
 
-        when(roleViewRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
 
-        RoleView result = roleService.findById(userPrincipal, id);
+        RoleDistinctView result = roleService.findById(userPrincipal, id);
 
         assertNotNull(result);
         assertSame(entity, result);
         assertEquals(id, result.getId());
 
-        verify(roleViewRepository).findById(id);
+        verify(roleDistinctViewRepository).findFirstById(id);
     }
 
     @Test
@@ -225,7 +234,7 @@ class RoleServiceImplTest {
     void testFindById_shouldThrow404WhenNotFound() {
         UUID id = UUID.randomUUID();
 
-        when(roleViewRepository.findById(id)).thenReturn(Optional.empty());
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(
                 ApiException.class,
@@ -238,7 +247,7 @@ class RoleServiceImplTest {
                 exception.getError().key()
         );
 
-        verify(roleViewRepository).findById(id);
+        verify(roleDistinctViewRepository).findFirstById(id);
     }
 
     @Test
@@ -272,9 +281,9 @@ class RoleServiceImplTest {
         when(roleRepository.findById(id)).thenReturn(Optional.of(existing));
         when(roleRepository.existsByCodeAndIdNot(record.code(), id)).thenReturn(false);
         when(roleRepository.saveAndFlush(existing)).thenReturn(existing);
-        when(roleViewRepository.findById(id)).thenReturn(Optional.of(view));
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
-        RoleView result = roleService.update(userPrincipal, id, record);
+        RoleDistinctView result = roleService.update(userPrincipal, id, record);
 
         assertSame(view, result);
 
@@ -289,7 +298,7 @@ class RoleServiceImplTest {
         verify(roleRepository).saveAndFlush(
             argThat(role -> userPrincipal.getId().equals(role.getUpdatedBy()))
         );
-        verify(roleViewRepository).findById(id);
+        verify(roleDistinctViewRepository).findFirstById(id);
     }
 
     @Test
@@ -313,7 +322,7 @@ class RoleServiceImplTest {
 
         verify(roleRepository).findById(id);
         verify(roleRepository, never()).saveAndFlush(any(Role.class));
-        verify(roleViewRepository, never()).findById(any(UUID.class));
+        verify(roleDistinctViewRepository, never()).findFirstById(any(UUID.class));
     }
 
     @Test
@@ -322,11 +331,11 @@ class RoleServiceImplTest {
         UUID id = UUID.randomUUID();
         var entity = createSampleRoleView(id);
 
-        when(roleViewRepository.findById(id)).thenReturn(Optional.of(entity));
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
 
         roleService.deleteById(userPrincipal, id);
 
-        verify(roleViewRepository).findById(id);
+        verify(roleDistinctViewRepository).findFirstById(id);
         verify(roleRepository).deleteById(id);
     }
 
@@ -335,7 +344,7 @@ class RoleServiceImplTest {
     void testDeleteById_shouldThrow404WhenNotFound() {
         UUID id = UUID.randomUUID();
 
-        when(roleViewRepository.findById(id)).thenReturn(Optional.empty());
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(
                 ApiException.class,
@@ -348,7 +357,7 @@ class RoleServiceImplTest {
                 exception.getError().key()
         );
 
-        verify(roleViewRepository).findById(id);
+        verify(roleDistinctViewRepository).findFirstById(id);
         verify(roleRepository, never()).deleteById(any(UUID.class));
     }
 
@@ -392,6 +401,6 @@ class RoleServiceImplTest {
         verify(roleRepository).findById(id);
         verify(roleRepository).existsByCodeAndIdNot(record.code(), id);
         verify(roleRepository, never()).saveAndFlush(any(Role.class));
-        verify(roleViewRepository, never()).findById(any(UUID.class));
+        verify(roleDistinctViewRepository, never()).findFirstById(any(UUID.class));
     }
 }

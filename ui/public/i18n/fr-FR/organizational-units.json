@@ -295,7 +295,8 @@
       "columns": {
         "lastname": "Nom",
         "firstname": "Prénom",
-        "email": "Email"
+        "email": "Email",
+        "roleName": "Rôle fonctionnel"
       },
       "ButtonsCard": {
         "add": "Attacher un compte"
@@ -310,6 +311,12 @@
         "fields": {
           "accountId": {
             "label": "Compte *",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          },
+          "roleId": {
+            "label": "Rôle fonctionnel *",
             "validation": {
               "required": "Ce champ est requis."
             }

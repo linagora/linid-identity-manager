@@ -90,6 +90,12 @@
             "label": "columns.email",
             "field": "email",
             "align": "left"
+          },
+          {
+            "name": "roleName",
+            "label": "columns.roleName",
+            "field": "roleName",
+            "align": "left"
           }
         ],
         "formFields": [
@@ -101,6 +107,17 @@
             "inputSettings": {
               "route": "/accounts",
               "optionLabel": "{{ lastname }} {{ firstname }} ({{ email }})",
+              "optionValue": "{{ id }}"
+            }
+          },
+          {
+            "name": "roleId",
+            "type": "String",
+            "input": "DynamicList",
+            "required": true,
+            "inputSettings": {
+              "route": "/roles",
+              "optionLabel": "{{ name }}",
               "optionValue": "{{ id }}"
             }
           }

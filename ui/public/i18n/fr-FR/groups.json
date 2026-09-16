@@ -217,5 +217,92 @@
         }
       }
     }
+  },
+  "moduleGroupDetailsPage": {
+    "title": "Détails du groupe",
+    "error": "Impossible de charger le groupe. Veuillez réessayer plus tard.",
+    "EntityProfilePanel": {
+      "title": "{name}",
+      "subtitle": "{code}",
+      "navigation": {
+        "ButtonsCard": {
+          "backButton": "Liste des groupes"
+        }
+      },
+      "EntityDetailsCard": {
+        "attributes": {
+          "parentName": "Groupe parent",
+          "email": "Email",
+          "description": "Description",
+          "organizationalUnitName": "Unité organisationnelle",
+          "applicationName": "Application"
+        }
+      },
+      "actions": {
+        "ButtonsCard": {
+          "editButton": {
+            "FormDialogButton": {
+              "title": "",
+              "submitSuccess": "Groupe modifié avec succès.",
+              "submitError": "Impossible de modifier le groupe. Veuillez réessayer plus tard.",
+              "FormDialog": {
+                "title": "Modifier {name}",
+                "fields": {
+                  "code": {
+                    "label": "Code *",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "pattern": "Seuls les lettres, les chiffres, les tirets et les tirets bas sont autorisés."
+                    }
+                  },
+                  "name": {
+                    "label": "Libellé *",
+                    "validation": {
+                      "required": "Ce champ est requis."
+                    }
+                  },
+                  "parentId": {
+                    "label": "Groupe parent"
+                  },
+                  "description": {
+                    "label": "Description"
+                  },
+                  "organizationalUnitId": {
+                    "label": "Unité organisationnelle"
+                  },
+                  "applicationId": {
+                    "label": "Application"
+                  },
+                  "email": {
+                    "label": "Email",
+                    "validation": {
+                      "email": "Le format de l'email est invalide."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Enregistrer",
+                  "confirmLoading": "Enregistrement...",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sections": {
+      "audit": {
+        "EntityDetailsCard": {
+          "title": "Audit",
+          "attributes": {
+            "createdBy": "Créé par",
+            "updatedBy": "Modifié par",
+            "insertDate": "Date de création",
+            "updateDate": "Dernière modification"
+          }
+        }
+      }
+    }
   }
 }

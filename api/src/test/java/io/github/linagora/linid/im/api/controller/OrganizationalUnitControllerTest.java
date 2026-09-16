@@ -142,7 +142,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should attach account to organizational unit")
     void testAttachAccount() {
         when(service.attachAccount(any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
-        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), Map.of());
+        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), UUID.randomUUID(), Map.of());
 
         var response = controller.attachAccount(userPrincipal, UUID.randomUUID(), record);
 

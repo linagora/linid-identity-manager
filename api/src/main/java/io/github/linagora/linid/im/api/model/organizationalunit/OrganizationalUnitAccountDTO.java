@@ -64,6 +64,14 @@ public class OrganizationalUnitAccountDTO {
     private UUID accountId;
 
     /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     * {@code null} when the role has been deleted or was never assigned.
+     */
+    @Schema(description = "Identifier of the functional role held by the account within the organizational unit, "
+        + "null when the role has been deleted or was never assigned", nullable = true)
+    private UUID roleId;
+
+    /**
      * Free-form attributes of the relationship.
      */
     @Schema(description = "Free-form attributes of the relationship")

@@ -52,6 +52,7 @@ import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnit
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -109,6 +110,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Repository used to check the existence of accounts to attach.
      */
     private final AccountRepository accountRepository;
+
+    /**
+     * Repository used to check the existence of the functional role held by an attached account.
+     */
+    private final RoleRepository roleRepository;
 
     /**
      * Repository used to manage organizational unit relation persistence operations.
@@ -298,6 +304,13 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             );
         }
 
+        if (!roleRepository.existsById(record.roleId())) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.role.not_found", Map.of("id", record.roleId().toString()))
+            );
+        }
+
         if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
             organizationalUnitId, record.accountId())) {
             throw new ApiException(
@@ -310,6 +323,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         var entity = OrganizationalUnitAccount.builder()
             .organizationalUnitId(organizationalUnitId)
             .accountId(record.accountId())
+            .roleId(record.roleId())
             .extraParameters(Objects.requireNonNullElseGet(record.extraParameters(), HashMap::new))
             .createdBy(userPrincipal.getId())
             .updatedBy(userPrincipal.getId())

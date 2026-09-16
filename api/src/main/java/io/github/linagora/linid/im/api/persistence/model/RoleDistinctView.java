@@ -26,13 +26,11 @@
 
 package io.github.linagora.linid.im.api.persistence.model;
 
-import io.github.zorin95670.predicate.FilterType;
-import io.github.zorin95670.processor.annotation.QueryFilter;
-import io.github.zorin95670.processor.annotation.QueryFilterField;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
@@ -45,13 +43,15 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 /**
- * Read-only entity mapped to the {@code roles_view} database view.
+ * Read-only entity mapped to the {@code roles_view} database view, returning each role once.
  *
  * <p>
- * Provides role information enriched with the human-readable names of the
- * creator and last updater accounts, together with the organizational units in which the role is held.
- * One row is returned for each organizational unit in which the role is held.
+ * Omits the {@code organizational_unit_id} column so that a role held in several organizational units is
+ * projected as a single row. The organizational units are exposed as a comma-separated list of names.
  * </p>
+ *
+ * <p>Audit information such as {@code createdBy}, {@code updatedBy}, {@code insertDate}, and {@code updateDate}
+ * is inherited from {@link AbstractViewEntity}.
  */
 @Entity
 @Table(name = "roles_view")
@@ -61,65 +61,38 @@ import org.hibernate.type.SqlTypes;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@QueryFilter
-public class RoleView extends AbstractViewEntity {
+public class RoleDistinctView extends AbstractViewEntity {
 
     /**
      * Unique identifier of the role.
      */
     @Id
     @Column(name = "rol_id")
-    @FilterType(type = UUID.class)
-    @QueryFilterField(type = UUID.class, description = "Role unique identifier")
     private UUID id;
 
     /**
      * Unique technical identifier of the role.
      */
     @Column(name = "code", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Role code")
     private String code;
 
     /**
      * Human-readable name of the role.
      */
     @Column(name = "name", nullable = false)
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Role name")
     private String name;
 
     /**
      * Optional description of the role.
      */
     @Column(name = "description")
-    @FilterType(type = String.class)
-    @QueryFilterField(type = String.class, description = "Role description")
     private String description;
-
-    /**
-     * Identifier of an organizational unit in which the role is held by at least one account.
-     * {@code null} when the role is not held anywhere.
-     */
-    @Column(name = "organizational_unit_id")
-    @FilterType(type = UUID.class)
-    @QueryFilterField(
-        type = UUID.class,
-        description = "Unique identifier of an organizational unit in which the role is held"
-    )
-    private UUID organizationalUnitId;
 
     /**
      * Names of the organizational units in which the role is held, represented as a comma-separated list.
      * {@code null} when the role is not held anywhere.
      */
     @Column(name = "organizational_units")
-    @FilterType(type = String.class)
-    @QueryFilterField(
-        type = String.class,
-        description = "Names of the organizational units in which the role is held, represented as a "
-            + "comma-separated list"
-    )
     private String organizationalUnits;
 
     /**
@@ -128,4 +101,42 @@ public class RoleView extends AbstractViewEntity {
     @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> extraParameters;
+
+    /**
+     * Creates a role view with its audit information, identity information and organizational units.
+     *
+     * <p>This constructor is intentionally provided with all view properties as parameters to allow
+     * {@code spring-query-filter} to instantiate the entity when creating filtered query projections.
+     *
+     * @param createdBy           the full name of the account that created the role.
+     * @param updatedBy           the full name of the account that last updated the role.
+     * @param insertDate          the timestamp when the role was created.
+     * @param updateDate          the timestamp when the role was last updated.
+     * @param id                  the unique identifier of the role.
+     * @param code                the unique technical identifier of the role.
+     * @param name                the human-readable name of the role.
+     * @param description         the optional description of the role.
+     * @param organizationalUnits the names of the organizational units in which the role is held, represented as a
+     *                            comma-separated list.
+     * @param extraParameters     additional deployment-specific attributes stored as JSON.
+     */
+    @SuppressWarnings("checkstyle:ParameterNumber")
+    public RoleDistinctView(final String createdBy,
+                            final String updatedBy,
+                            final OffsetDateTime insertDate,
+                            final OffsetDateTime updateDate,
+                            final UUID id,
+                            final String code,
+                            final String name,
+                            final String description,
+                            final String organizationalUnits,
+                            final Map<String, Object> extraParameters) {
+        super(createdBy, updatedBy, insertDate, updateDate);
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.organizationalUnits = organizationalUnits;
+        this.extraParameters = extraParameters;
+    }
 }

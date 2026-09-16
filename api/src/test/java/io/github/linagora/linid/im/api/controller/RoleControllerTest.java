@@ -41,7 +41,7 @@ import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.role.RoleViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Role;
-import io.github.linagora.linid.im.api.persistence.model.RoleView;
+import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.RoleService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -94,8 +94,8 @@ class RoleControllerTest {
         userPrincipal.setEmail("admin@example.com");
     }
 
-    private RoleView createSampleViewEntity() {
-        return RoleView.builder()
+    private RoleDistinctView createSampleViewEntity() {
+        return RoleDistinctView.builder()
                 .id(UUID.randomUUID())
                 .code("ADMINISTRATOR")
                 .name("Administrator")
@@ -267,7 +267,7 @@ class RoleControllerTest {
 
         assertEquals(404, thrown.getStatusCode());
         verify(roleService).findById(userPrincipal, id);
-        verify(roleMapper, never()).toDTO(any(RoleView.class));
+        verify(roleMapper, never()).toDTO(any(RoleDistinctView.class));
     }
 
     @Test
@@ -332,7 +332,7 @@ class RoleControllerTest {
 
         assertEquals(404, thrown.getStatusCode());
         verify(roleService).update(userPrincipal, id, record);
-        verify(roleMapper, never()).toDTO(any(RoleView.class));
+        verify(roleMapper, never()).toDTO(any(RoleDistinctView.class));
     }
 
     @Test

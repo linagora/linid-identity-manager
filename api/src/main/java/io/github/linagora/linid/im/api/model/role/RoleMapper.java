@@ -29,7 +29,7 @@ package io.github.linagora.linid.im.api.model.role;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Role;
-import io.github.linagora.linid.im.api.persistence.model.RoleView;
+import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import org.mapstruct.CollectionMappingStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -74,10 +74,10 @@ public interface RoleMapper {
     RoleDTO toDTO(Role role);
 
     /**
-     * Converts a {@link RoleView} entity to a {@link RoleViewDTO}.
+     * Converts a {@link RoleDistinctView} entity to a {@link RoleViewDTO}.
      *
      * @param roleView the role view entity
      * @return the corresponding view DTO
      */
-    RoleViewDTO toDTO(RoleView roleView);
+    RoleViewDTO toDTO(RoleDistinctView roleView);
 }

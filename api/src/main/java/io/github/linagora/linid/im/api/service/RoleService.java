@@ -29,7 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Role;
-import io.github.linagora.linid.im.api.persistence.model.RoleView;
+import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -57,7 +57,7 @@ public interface RoleService {
      * @param pageable      pagination information
      * @return a page of role view entities
      */
-    Page<RoleView> findAll(
+    Page<RoleDistinctView> findAll(
             UserPrincipal userPrincipal,
             RoleViewQueryFilterDto filters,
             Pageable pageable
@@ -70,7 +70,7 @@ public interface RoleService {
      * @param id            the role UUID
      * @return the role view entity
      */
-    RoleView findById(UserPrincipal userPrincipal, UUID id);
+    RoleDistinctView findById(UserPrincipal userPrincipal, UUID id);
 
     /**
      * Updates a functional role.
@@ -80,7 +80,7 @@ public interface RoleService {
      * @param record        the role update record
      * @return the refreshed role view
      */
-    RoleView update(UserPrincipal userPrincipal, UUID roleId, RoleRecord record);
+    RoleDistinctView update(UserPrincipal userPrincipal, UUID roleId, RoleRecord record);
 
     /**
      * Deletes a functional role by its unique identifier.

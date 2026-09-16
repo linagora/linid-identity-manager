@@ -30,12 +30,14 @@ import io.github.linagora.linid.im.api.model.role.RoleMapper;
 import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Role;
+import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
 import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
-import io.github.linagora.linid.im.api.persistence.repository.RoleViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import java.util.Map;
 import java.util.UUID;
@@ -63,9 +65,14 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
     /**
-     * Repository for read-only role view operations.
+     * Repository for read-only distinct role view operations.
      */
-    private final RoleViewRepository roleViewRepository;
+    private final RoleDistinctViewRepository roleDistinctViewRepository;
+
+    /**
+     * Executor building distinct projections from filtered view queries.
+     */
+    private final SpringQueryExecutor executor;
 
     /**
      * Mapper for converting role records into {@link Role} entities.
@@ -89,18 +96,23 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<RoleView> findAll(final UserPrincipal userPrincipal,
-                                  final RoleViewQueryFilterDto filters,
-                                  final Pageable pageable) {
+    public Page<RoleDistinctView> findAll(final UserPrincipal userPrincipal,
+                                          final RoleViewQueryFilterDto filters,
+                                          final Pageable pageable) {
         var specification = new SpringQueryFilterSpecification<>(RoleView.class, filters);
 
-        return roleViewRepository.findAll(specification, pageable);
+        return executor.findDistinctPageEntities(
+                RoleView.class,
+                RoleDistinctView.class,
+                specification,
+                pageable
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public RoleView findById(final UserPrincipal userPrincipal, final UUID id) {
-        return roleViewRepository.findById(id)
+    public RoleDistinctView findById(final UserPrincipal userPrincipal, final UUID id) {
+        return roleDistinctViewRepository.findFirstById(id)
                 .orElseThrow(() -> new ApiException(
                         HttpStatus.NOT_FOUND.value(),
                         I18nMessage.of(
@@ -111,7 +123,7 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
-    public RoleView update(final UserPrincipal userPrincipal, final UUID roleId, final RoleRecord record) {
+    public RoleDistinctView update(final UserPrincipal userPrincipal, final UUID roleId, final RoleRecord record) {
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ApiException(
                         HttpStatus.NOT_FOUND.value(),

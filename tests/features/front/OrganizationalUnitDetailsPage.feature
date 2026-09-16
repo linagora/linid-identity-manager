@@ -16,7 +16,7 @@ Feature: Test Organizational Unit details panel display
   ## 201 Should display an empty accounts card for an organizational unit without accounts
   ## 202 Should display the accounts card with the attached account
   ## 203 Attach dialog should close on cancel without attaching an account
-  ## 204 Should attach an existing account from the dialog
+  ## 204 Should attach an existing account with a functional role from the dialog
   ## 205 Should detach an account after confirmation
 
   Scenario: Roundtrip about Organizational Unit details
@@ -278,6 +278,18 @@ Feature: Test Organizational Unit details panel display
     Then I expect status code is 201
     And  I store 'attachedAccountId' as '{{response.body.id}}' in context
 
+    When I request '{{env.E2E_API_URL}}/roles' with method 'POST' with body:
+      """
+      {
+        "code": "ROLE-OUA-UI",
+        "name": "Role OUA UI",
+        "description": "Role created by the organizational unit details page scenarios",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'roleId' as '{{response.body.id}}' in context
+
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
     When I click on '[data-cy="linid-smart-filter-field"]'
@@ -289,6 +301,7 @@ Feature: Test Organizational Unit details panel display
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Martin"
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Paul"
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "paul-oua@example.com"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Rôle fonctionnel"
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' not contains "Aucun compte rattaché à cette unité organisationnelle."
     And  I expect the HTML element '[data-cy="edit-button_{{ctx.attachedAccountId}}"]' not exists
     And  I expect the HTML element '[data-cy="delete-button_{{ctx.attachedAccountId}}"]' contains "Détacher"
@@ -298,12 +311,13 @@ Feature: Test Organizational Unit details panel display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Attacher un compte"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_accountId"]' contains "Compte"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_roleId"]' contains "Rôle fonctionnel"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Attacher"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
-    ## 204 Should attach an existing account from the dialog
+    ## 204 Should attach an existing account with a functional role from the dialog
     When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
@@ -330,11 +344,14 @@ Feature: Test Organizational Unit details panel display
     And  I scroll to 'bottom' into '.q-menu'
     And  I scroll to 'bottom' into '.q-menu'
     And  I click on '.q-menu .q-item:contains("Durand Alice")'
+    And  I click on '[data-cy="field_roleId"]'
+    And  I click on '.q-menu .q-item:contains("Role OUA UI")'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element '.q-notification__message' contains "Compte attaché avec succès."
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Durand"
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "alice-oua@example.com"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Role OUA UI"
 
     ## 205 Should detach an account after confirmation
     When I click on '[data-cy="delete-button_{{ctx.secondAccountId}}"]'
@@ -354,4 +371,6 @@ Feature: Test Organizational Unit details panel display
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.attachedAccountId}}' with method 'DELETE'
     Then I expect status code is 204
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouAccountsId}}' with method 'DELETE'
+    Then I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
     Then I expect status code is 204

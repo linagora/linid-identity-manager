@@ -1,0 +1,206 @@
+{
+  "moduleRolesPage": {
+    "NavigationMenu": {
+      "label": "Roles"
+    },
+    "ButtonsCard": {
+      "create": "Add new role"
+    },
+    "FormDialogButton": {
+      "title": "Edit",
+      "submitSuccess": "The role has been successfully updated.",
+      "submitError": "Unable to update the role. Please try again later.",
+      "FormDialog": {
+        "title": "Edit role {name}",
+        "fields": {
+          "name": {
+            "label": "Label *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "description": {
+            "label": "Description"
+          }
+        },
+        "ButtonsCard": {
+          "cancel": "Cancel",
+          "confirm": "Save",
+          "confirmLoading": "Saving..."
+        }
+      }
+    },
+    "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
+    "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
+    "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
+    "columns": {
+      "code": "Code",
+      "name": "Label",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "error": "Unable to load the roles. Please try again later.",
+    "GenericEntityTable": {
+      "noData": "No data available",
+      "rowsPerPage": "Rows per page:",
+      "paginationLabel": "{start}-{end} of {total}"
+    },
+    "DeleteFavoriteDialog": {
+      "title": "Delete a favorite?",
+      "content": "Confirm deleting favorite \"{label}\"?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmLoading": "Deleting..."
+      }
+    },
+    "OverrideFavoriteDialog": {
+      "title": "Override the favorite?",
+      "content": "Confirm overriding favorite \"{label}\" with the current search?",
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Override",
+        "confirmLoading": "Overriding..."
+      }
+    },
+    "CreateFavoriteDialog": {
+      "title": "Create a favorite?",
+      "content": "Create favorite from current search.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name *",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Create",
+        "confirmLoading": "Creating..."
+      }
+    },
+    "RenameFavoriteDialog": {
+      "title": "Rename a favorite?",
+      "content": "Rename the favorite with a new name.",
+      "duplicateName": "The favorite '{name}' already exists.",
+      "fields": {
+        "favoriteName": {
+          "label": "Favorite's name *",
+          "validation": {
+            "required": "This field is required."
+          }
+        }
+      },
+      "ButtonsCard": {
+        "cancel": "Cancel",
+        "confirm": "Rename",
+        "confirmLoading": "Renaming..."
+      }
+    },
+    "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
+    "LinidSmartFilter": {
+      "label": "Current search filter",
+      "hint": "Enter your filter",
+      "prefix": "",
+      "suffix": "",
+      "LinidFilterChip": {
+        "code": {
+          "type": "Code",
+          "separator": "or"
+        },
+        "name": {
+          "type": "Label",
+          "separator": "or"
+        },
+        "description": {
+          "type": "Description",
+          "separator": "or"
+        }
+      },
+      "LinidFilterPanel": {
+        "title": "Filter by:",
+        "columnFilter": {
+          "code": "Code",
+          "name": "Label",
+          "description": "Description"
+        }
+      },
+      "LinidFavoritePanel": {
+        "title": "Favorites",
+        "noData": "No favorite available",
+        "createFavorite": "Create a favorite",
+        "overrideFavorite": "Override a favorite",
+        "deleteButton": ""
+      },
+      "TextSearchFilterPanel": {
+        "inputLabel": "Filter by text",
+        "inputHint": "Enter a text to search",
+        "negateLabel": "Negate",
+        "searchButton": "Search",
+        "operators": {
+          "contains": "Contains",
+          "startsWith": "Starts with",
+          "endsWith": "Ends with",
+          "equals": "Equal to",
+          "notContains": "Does not contain",
+          "notStartsWith": "Does not start with",
+          "notEndsWith": "Does not end with",
+          "notEquals": "Not equal to"
+        }
+      },
+      "DateSearchFilterPanel": {
+        "inputLabel": "Filter by date",
+        "inputHint": "Enter/select a date to search",
+        "negateLabel": "Negate",
+        "close": "Close",
+        "searchButton": "Search",
+        "operators": {
+          "inferior": "Before",
+          "superior": "After",
+          "equals": "Equal to",
+          "notInferior": "Not before",
+          "notSuperior": "Not after",
+          "notEquals": "Not equal to"
+        },
+        "validation": {
+          "invalidDate": "Incorrect date. Expected format: {format}"
+        }
+      }
+    }
+  },
+  "moduleRoleCreationPage": {
+    "title": "Create a role",
+    "error": "Unable to create the role. Please try again later.",
+    "success": "Role successfully created.",
+    "ButtonsCard": {
+      "cancel": "Back",
+      "confirm": "Create",
+      "confirmLoading": "Creating..."
+    },
+    "formSections": {
+      "general": {
+        "title": "General information"
+      }
+    },
+    "fields": {
+      "code": {
+        "label": "Code *",
+        "hint": "Must be unique.",
+        "validation": {
+          "required": "This field is required.",
+          "pattern": "Only letters, digits, hyphens and underscores are allowed."
+        }
+      },
+      "name": {
+        "label": "Label *",
+        "validation": {
+          "required": "This field is required."
+        }
+      },
+      "description": {
+        "label": "Description"
+      }
+    }
+  }
+}

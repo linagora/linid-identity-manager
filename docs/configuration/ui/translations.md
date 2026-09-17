@@ -49,7 +49,8 @@ Translation configuration is defined in the **`config.json`** file:
       "common.json",
       "accounts.json",
       "applications.json",
-      "organizational-units.json"
+      "organizational-units.json",
+      "roles.json"
     ]
   }
 }
@@ -73,12 +74,14 @@ resources/i18n/
 │   ├── common.json
 │   ├── accounts.json
 │   ├── applications.json
-│   └── organizational-units.json
+│   ├── organizational-units.json
+│   └── roles.json
 ├── en-US/
 │   ├── common.json
 │   ├── accounts.json
 │   ├── applications.json
-│   └── organizational-units.json
+│   ├── organizational-units.json
+│   └── roles.json
 ```
 
 **File purposes:**
@@ -89,6 +92,7 @@ resources/i18n/
 | `accounts.json`             | User account management (activation, suspension, deactivation, etc.) |
 | `applications.json`         | Application management and details                                   |
 | `organizational-units.json` | Organizational unit management                                       |
+| `roles.json`                | Functional role management                                           |
 
 **How files are loaded:**
 

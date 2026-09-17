@@ -1354,6 +1354,10 @@ Feature: Test API Account endpoints
     And  I expect '{{response.body.content[<indice>].name}}' is '<ou>'
     And  I expect '{{response.body.content[<indice>].type}}' is '<type>'
     And  I expect '{{response.body.content[<indice>].status}}' is 'ACTIVE'
+    And  I expect '{{response.body.content[<indice>].createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[<indice>].updatedBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[<indice>].insertDate}}' is not empty
+    And  I expect '{{response.body.content[<indice>].updateDate}}' is not empty
 
     Examples:
       | user          | ou          | type     | totalElements | indice |

@@ -7,7 +7,8 @@
       "common.json",
       "accounts.json",
       "applications.json",
-      "organizational-units.json"
+      "organizational-units.json",
+      "roles.json"
     ]
   },
   "immediateActionDelay": 60,
@@ -36,7 +37,9 @@
     "/modules/ApplicationDetailsPage.json",
     "/modules/AccountDetailsPage.json",
     "/modules/OrganizationalUnitCreationPage.json",
-    "/modules/OrganizationalUnitDetailsPage.json"
+    "/modules/OrganizationalUnitDetailsPage.json",
+    "/modules/RolesPage.json",
+    "/modules/RoleCreationPage.json"
   ],
   "extraZones": [],
   "oidc": {
@@ -64,7 +67,9 @@
     "design/account-creation.json",
     "design/organizational-units-page.json",
     "design/organizational-unit-creation.json",
-    "design/application-details.json"
+    "design/application-details.json",
+    "design/roles-page.json",
+    "design/role-creation.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

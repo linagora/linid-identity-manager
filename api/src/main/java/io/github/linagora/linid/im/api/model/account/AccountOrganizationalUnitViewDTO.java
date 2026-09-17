@@ -33,6 +33,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -80,4 +81,29 @@ public class AccountOrganizationalUnitViewDTO {
             + "the account-to-organizational-unit relationship stored as JSON"
     )
     private Map<String, Object> relationExtraParameters;
+
+    /**
+     * Full name of the account that attached the account to the organizational unit.
+     */
+    @Schema(description = "Full name of the account that attached the account to the organizational unit",
+        example = "John Doe")
+    private String createdBy;
+
+    /**
+     * Full name of the account that last updated the relationship.
+     */
+    @Schema(description = "Full name of the account that last updated the relationship", example = "John Doe")
+    private String updatedBy;
+
+    /**
+     * Date and time when the account was attached to the organizational unit.
+     */
+    @Schema(description = "Date and time when the account was attached to the organizational unit")
+    private OffsetDateTime insertDate;
+
+    /**
+     * Date and time when the relationship was last updated.
+     */
+    @Schema(description = "Date and time when the relationship was last updated")
+    private OffsetDateTime updateDate;
 }

@@ -463,6 +463,36 @@ VALUES
      '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;
 
+-- Functional roles listed by the e2e scenarios of the roles page. The UUIDs are
+-- deterministic so the scenarios can reference them directly.
+INSERT
+INTO roles (rol_id, code, name, description, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000b001', 'ADMINISTRATOR', 'Administrator',
+        'Manages user accounts, roles and system configuration.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b002', 'MANAGER', 'Manager',
+        'Oversees team operations and approves organizational changes.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b003', 'OPERATOR', 'Operator',
+        'Executes routine operational tasks across the platform.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b004', 'SUPPORT', 'Support',
+        'Provides first-line assistance to end users.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b005', 'VIEWER', 'Viewer',
+        'Read-only access to reports and dashboards.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b006', 'AUDITOR', 'Auditor',
+        'Reviews compliance and security controls.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (code) DO NOTHING;
+
 -- Create Organizational Unit tree
 DO
 $$

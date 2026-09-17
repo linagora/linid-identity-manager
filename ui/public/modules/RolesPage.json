@@ -1,0 +1,89 @@
+{
+  "instanceId": "moduleRolesPage",
+  "remoteName": "catalogUI",
+  "entity": "roles",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "roles",
+  "basePath": "/roles",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "addNavigationMenu": true,
+    "page": "catalogUI/GenericTablePage",
+    "pagePath": "",
+    "idKey": "id",
+    "enableActions": true,
+    "creationPagePath": "/roles/new",
+    "filters": [
+      {
+        "name": "code",
+        "type": "text"
+      },
+      {
+        "name": "name",
+        "type": "text"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "name": "createdBy",
+        "type": "text"
+      },
+      {
+        "name": "insertDate",
+        "type": "date"
+      }
+    ],
+    "columns": [
+      {
+        "label": "columns.code",
+        "name": "code",
+        "field": "code",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.name",
+        "name": "name",
+        "field": "name",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.description",
+        "name": "description",
+        "field": "description",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.createdBy",
+        "name": "createdBy",
+        "field": "createdBy",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.insertDate",
+        "name": "insertDate",
+        "field": "insertDate",
+        "sortable": true,
+        "align": "left",
+        "formatter": "toDate",
+        "formatOptions": {
+          "formatKey": "application.dateFormat"
+        }
+      },
+      {
+        "label": "columns.actions",
+        "name": "table_actions",
+        "field": "",
+        "sortable": false,
+        "align": "center"
+      }
+    ]
+  }
+}

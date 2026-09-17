@@ -1,0 +1,41 @@
+{
+  "instanceId": "moduleRoleCreationPage",
+  "remoteName": "catalogUI",
+  "entity": "roles",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "roles",
+  "basePath": "/roles",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericCreationPage",
+    "pagePath": "new",
+    "parentPath": "/roles",
+    "idKey": "id",
+    "formSections": [
+      {
+        "id": "general",
+        "fields": [
+          {
+            "name": "code",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {
+              "pattern": "^[a-zA-Z-_0-9]+$"
+            }
+          },
+          {
+            "name": "name",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "description",
+            "input": "TextArea"
+          }
+        ]
+      }
+    ]
+  }
+}

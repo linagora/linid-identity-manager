@@ -61,4 +61,12 @@ public interface OrganizationalUnitAccountRepository
      * @return {@code true} when the relationship exists
      */
     boolean existsByOrganizationalUnitIdAndAccountId(UUID organizationalUnitId, UUID accountId);
+
+    /**
+     * Checks whether the given functional role is held by at least one account within an organizational unit.
+     *
+     * @param roleId the functional role identifier
+     * @return {@code true} when at least one relationship holds the role
+     */
+    boolean existsByRoleId(UUID roleId);
 }

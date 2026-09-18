@@ -65,6 +65,7 @@
   "error.opa.policy.publish_failed": "Impossible de publier la politique OPA sur le serveur OPA (policyId : {policyId})",
   "error.role.not_found": "Rôle fonctionnel introuvable : {id}",
   "error.role.code.already_exists": "Un rôle fonctionnel existe déjà avec le code « {code} »",
+  "error.role.in_use": "Le rôle fonctionnel {id} est détenu par au moins un compte et ne peut pas être supprimé",
   "error.superset.file": "Impossible de charger le fichier configuration superset: {path}",
   "error.superset.access_token": "Impossible de récupérer le token d'accès",
   "error.superset.csrf_token": "Impossible de récupérer le token CSRF",

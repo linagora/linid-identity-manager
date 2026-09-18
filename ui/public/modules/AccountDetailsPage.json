@@ -84,6 +84,12 @@
             "align": "left"
           },
           {
+            "name": "roleName",
+            "label": "columns.roleName",
+            "field": "roleName",
+            "align": "left"
+          },
+          {
             "name": "status",
             "label": "columns.status",
             "field": "status",

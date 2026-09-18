@@ -672,6 +672,7 @@
       "columns": {
         "name": "Nom",
         "type": "Type",
+        "roleName": "Rôle fonctionnel",
         "status": "Statut"
       },
       "GenericEntityTable": {

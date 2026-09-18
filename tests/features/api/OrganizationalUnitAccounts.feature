@@ -75,6 +75,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -154,6 +155,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -280,6 +282,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -368,6 +371,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -419,6 +423,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -492,6 +497,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -546,6 +552,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -601,6 +608,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -658,6 +666,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -701,6 +710,7 @@ Feature: Test API Organizational unit account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """

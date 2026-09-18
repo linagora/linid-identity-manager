@@ -18,6 +18,8 @@ Feature: Test API Account endpoints
   ## 206 Should return 400 when validity period start is before current date
   ## 207 Should create an account link with an organizational unit
   ## 208 Should create an account with empty extra parameters when they are omitted
+  ## 209 Should return 400 when the functional role is missing
+  ## 210 Should return 404 when the functional role does not exist
 
   ################## Find All (GET /accounts) #############
   ## 301 Should return paginated list of accounts
@@ -108,6 +110,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -156,6 +159,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -185,6 +189,7 @@ Feature: Test API Account endpoints
         "email": "",
         "validityPeriod": null,
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -206,6 +211,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -227,6 +233,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -245,6 +252,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -266,6 +274,7 @@ Feature: Test API Account endpoints
           "end": "2030-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -286,6 +295,7 @@ Feature: Test API Account endpoints
           "end": "2030-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -306,6 +316,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -324,6 +335,8 @@ Feature: Test API Account endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000a/accounts?email=john207@example.com' with method 'GET'
     Then I expect status code is 200
+    And  I expect '{{response.body.content[0].roleId}}' is '00000000-0000-4000-8000-00000000f001'
+    And  I expect '{{response.body.content[0].roleName}}' is 'Member'
     And  I expect '{{response.body.content.length}}' is '1'
 
     When I request '{{env.E2E_API_URL}}/accounts/{{response.body.content[0].id}}' with method 'DELETE'
@@ -341,7 +354,8 @@ Feature: Test API Account endpoints
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001"
       }
       """
     Then I expect status code is 201
@@ -354,6 +368,49 @@ Feature: Test API Account endpoints
 
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.account208Id}}' with method 'DELETE'
     Then I expect status code is 204
+
+  Scenario: 209 - Should return 400 when the functional role is missing
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-209",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john209@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+
+  Scenario: 210 - Should return 404 when the functional role does not exist
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-210",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john210@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-000000000000",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.role.not_found'
+
+    When I request '{{env.E2E_API_URL}}/accounts?email=john210@example.com' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '0'
 
   ####################################################
   ################## Find All (GET /accounts) #########
@@ -372,6 +429,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -413,6 +471,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -459,6 +518,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -494,6 +554,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -536,6 +597,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -573,6 +635,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -609,6 +672,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -645,6 +709,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -700,6 +765,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -738,6 +804,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -771,6 +838,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -820,6 +888,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -866,6 +935,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -909,6 +979,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -979,6 +1050,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -1011,6 +1083,7 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -1089,6 +1162,7 @@ Feature: Test API Account endpoints
           "end": "2099-12-31T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -1158,6 +1232,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -1226,6 +1301,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -1269,6 +1345,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -1287,6 +1364,7 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """

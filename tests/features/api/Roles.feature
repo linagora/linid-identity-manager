@@ -236,6 +236,7 @@ Feature: Test API Role endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -254,6 +255,7 @@ Feature: Test API Role endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
@@ -297,7 +299,7 @@ Feature: Test API Role endpoints
     And   I expect '{{response.body.totalElements}}' is '1'
     And   I expect '{{response.body.content[0].id}}' is '{{ctx.roleId}}'
 
-    When  I request '{{env.E2E_API_URL}}/roles?organizationalUnitId={{ctx.rootID}}' with method 'GET'
+    When  I request '{{env.E2E_API_URL}}/roles?organizationalUnitId={{ctx.rootID}}&code=ROLE-203' with method 'GET'
     Then  I expect status code is 200
     And   I expect '{{response.body.totalElements}}' is '0'
 

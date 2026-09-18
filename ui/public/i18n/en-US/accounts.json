@@ -576,6 +576,12 @@
         "validation": {
           "required": "This field is required."
         }
+      },
+      "roleId": {
+        "label": "Functional role *",
+        "validation": {
+          "required": "This field is required."
+        }
       }
     }
   },

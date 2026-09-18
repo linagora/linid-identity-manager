@@ -91,7 +91,7 @@ class AccountMapperTest {
     void testToAccount_shouldDefaultExtraParameters() {
         var userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
-        var record = new AccountRecord("ext-001", "Doe", "John", "john@example.com", null, null, null);
+        var record = new AccountRecord("ext-001", "Doe", "John", "john@example.com", null, null, null, null);
 
         var account = mapper.toAccount(record, userPrincipal);
 

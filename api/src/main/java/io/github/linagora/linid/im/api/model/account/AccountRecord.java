@@ -44,6 +44,7 @@ import java.util.UUID;
  * @param email          email address, must be valid format
  * @param validityPeriod time range during which the account is valid
  * @param organizationalUnit Organizational unit uuid to which the account belongs
+ * @param roleId         identifier of the functional role held by the account within its organizational unit
  * @param extraParameters additional deployment-specific attributes stored as JSON.
  */
 @Schema(description = "Request payload for creating a new account")
@@ -65,6 +66,10 @@ public record AccountRecord(
 
     @NotNull @Schema(description = "Organizational unit uuid to which the account belongs")
     UUID organizationalUnit,
+
+    @NotNull
+    @Schema(description = "Identifier of the functional role held by the account within its organizational unit")
+    UUID roleId,
 
     @Schema(description = "Additional deployment-specific attributes stored as JSON")
     Map<String, Object> extraParameters

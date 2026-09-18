@@ -9,7 +9,12 @@ SELECT r.rol_id,
        NULLIF(CONCAT_WS(' ', creator.firstname, creator.lastname), '') AS created_by,
        NULLIF(CONCAT_WS(' ', updater.firstname, updater.lastname), '') AS updated_by,
        r.insert_date,
-       r.update_date
+       r.update_date,
+       NOT EXISTS (
+           SELECT 1
+           FROM organizational_unit_accounts held
+           WHERE held.rol_id = r.rol_id
+       ) AS deletable
 FROM roles r
 
     LEFT OUTER JOIN accounts creator
@@ -50,3 +55,4 @@ COMMENT ON COLUMN roles_view.created_by IS 'Full name of the account that create
 COMMENT ON COLUMN roles_view.updated_by IS 'Full name of the account that last updated this role, formatted as "firstname lastname". Resolved through a LEFT JOIN on the accounts table. NULL when the referenced account no longer exists.';
 COMMENT ON COLUMN roles_view.insert_date IS 'Date and time when the role was created. Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN roles_view.update_date IS 'Date and time when the role was last updated. Stored in UTC (TIMESTAMPTZ).';
+COMMENT ON COLUMN roles_view.deletable IS 'Whether the role can be deleted: TRUE when no account holds it in any organizational unit, FALSE otherwise.';

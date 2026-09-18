@@ -96,6 +96,12 @@ public class RoleDistinctView extends AbstractViewEntity {
     private String organizationalUnits;
 
     /**
+     * Whether the role can be deleted, that is when no account holds it in any organizational unit.
+     */
+    @Column(name = "deletable", nullable = false)
+    private boolean deletable;
+
+    /**
      * Additional deployment-specific attributes stored as JSONB.
      */
     @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
@@ -119,6 +125,7 @@ public class RoleDistinctView extends AbstractViewEntity {
      * @param organizationalUnits the names of the organizational units in which the role is held, represented as a
      *                            comma-separated list.
      * @param extraParameters     additional deployment-specific attributes stored as JSON.
+     * @param deletable           whether the role can be deleted.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public RoleDistinctView(final String createdBy,
@@ -130,7 +137,8 @@ public class RoleDistinctView extends AbstractViewEntity {
                             final String name,
                             final String description,
                             final String organizationalUnits,
-                            final Map<String, Object> extraParameters) {
+                            final Map<String, Object> extraParameters,
+                            final boolean deletable) {
         super(createdBy, updatedBy, insertDate, updateDate);
         this.id = id;
         this.code = code;
@@ -138,5 +146,6 @@ public class RoleDistinctView extends AbstractViewEntity {
         this.description = description;
         this.organizationalUnits = organizationalUnits;
         this.extraParameters = extraParameters;
+        this.deletable = deletable;
     }
 }

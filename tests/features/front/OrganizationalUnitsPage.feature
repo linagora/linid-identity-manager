@@ -5,6 +5,7 @@ Feature: Test Organizational Units page display
   ## 102 Should display the page with the smart filter and the OU table
   ## 103 Should show the details of a OU when click see button of a OU
   ## 104 Should show the details of another OU when click see button of a OU
+  ## 105 Should filter organizational units by functional role
 
   Scenario: Roundtrip about Organizational Units page
 
@@ -69,3 +70,15 @@ Feature: Test Organizational Units page display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/00000000-0000-4000-8000-0000000000e3"
     And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "SuspendedOuWithEnd"
     And  I expect the HTML element '[data-cy="information-card--type"] [data-cy="value"]' contains "COMPANY"
+
+    ## 105 Should filter organizational units by functional role
+    When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And  I click on '[data-cy="linid-filter-panel_item-roleNames"]'
+    And  I set the text "Manager" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?roleNames=lk_*Manager*"
+    And  I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-00000000000a"]' contains "Company A"
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-00000000000b"]' contains "Company B"

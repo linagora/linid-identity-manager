@@ -6,6 +6,9 @@ Feature: Test Role homepage display
   ## 103 Should open the edit dialog with the current description and close on cancel
   ## 104 Should edit the description and display the updated value in the table
   ## 105 Should restore the original description
+  ## 106 Should filter roles by organizational unit
+  ## 107 Should disable the deletion of a role held by an account
+  ## 108 Should delete a role after confirmation
 
   Scenario: Roundtrip about Role homepage
 
@@ -37,6 +40,8 @@ Feature: Test Role homepage display
     And   I expect the HTML element '[data-cy="cell-name_{{ctx.roleId}}"]' contains "Auditor"
     And   I expect the HTML element '[data-cy="cell-description_{{ctx.roleId}}"]' to be visible
     And   I expect the HTML element '[data-cy="cell-description_{{ctx.roleId}}"]' contains "Reviews compliance and security controls."
+    And   I expect the HTML element '[data-cy="cell-organizationalUnits_{{ctx.roleId}}"]' to be visible
+    And   I expect the HTML element '[data-cy="cell-organizationalUnits_00000000-0000-4000-8000-00000000b002"]' contains "Company A, Company B"
     And   I expect the HTML element '[data-cy="cell-table_actions_{{ctx.roleId}}"]' to be visible
 
     ## 102 Should filter roles when using advanced search
@@ -93,3 +98,63 @@ Feature: Test Role homepage display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element '.q-notification__message' contains "Le rôle a été mis à jour avec succès."
     And  I expect the HTML element '[data-cy="cell-description_{{ctx.roleId}}"]' contains "Reviews compliance and security controls."
+
+    ## 106 Should filter roles by organizational unit
+    When I click on ".linid-smart-filter"
+    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000e"]'
+    And  I click on '[data-cy="tree-search-filter-panel_search"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/roles?organizationalUnitId=00000000-0000-4000-8000-00000000000e"
+    And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    And  I expect the HTML element '[data-cy="cell-code_00000000-0000-4000-8000-00000000b005"]' contains "VIEWER"
+
+    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen
+
+    ## 107 Should disable the deletion of a role held by an account
+    And  I expect the HTML element '[data-cy="cell-table_actions_00000000-0000-4000-8000-00000000b001"] [data-cy="confirm-dialog-button"]' to be disabled
+    And  I expect the HTML element '[data-cy="cell-table_actions_{{ctx.roleId}}"] [data-cy="confirm-dialog-button"]' to be enabled
+
+    ## 108 Should delete a role after confirmation
+    Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
+    And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
+      """
+      grant_type=password&username=admin&password=password&scope=openid email profile roles
+      """
+    Then  I expect status code is 200
+    And   I store 'accessToken' as '{{response.body.access_token}}' in context
+    And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
+    And   I set http header 'Content-Type' with 'application/json'
+
+    When I request '{{env.E2E_API_URL}}/roles' with method 'POST' with body:
+      """
+      {
+        "code": "E2E-ROLE-DELETE",
+        "name": "E2E Role Delete",
+        "description": "Role created by the roles page scenarios",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+
+    When I click on ".linid-smart-filter"
+    And  I click on '[data-cy="linid-filter-panel_item-code"]'
+    And  I set the text "E2E-ROLE-DELETE" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="item-row"] [data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Supprimer le rôle E2E Role Delete"
+    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Voulez-vous vraiment supprimer le rôle E2E Role Delete ?"
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="item-row"] [data-cy="confirm-dialog-button"]'
+    And  I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Le rôle a été supprimé avec succès."
+    And  I expect the HTML element '[data-cy="item-row"]' appear 0 times on screen
+
+    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen

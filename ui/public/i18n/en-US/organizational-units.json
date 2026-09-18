@@ -93,6 +93,10 @@
           "type": "Organizational unit",
           "separator": "or"
         },
+        "roleNames": {
+          "type": "Functional role",
+          "separator": "or"
+        },
         "createdBy": {
           "type": "Created by",
           "separator": "or"
@@ -112,6 +116,7 @@
           "name": "Name",
           "type": "Type",
           "parentId": "Organizational unit",
+          "roleNames": "Functional role",
           "createdBy": "Created by",
           "insertDate": "Creation date"
         }

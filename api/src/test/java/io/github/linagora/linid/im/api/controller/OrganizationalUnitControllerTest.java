@@ -154,7 +154,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should update account relationship")
     void testUpdateAccountRelation() {
         when(service.updateAccountRelation(any(), any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of());
 
         var response = controller.updateAccountRelation(userPrincipal, UUID.randomUUID(), UUID.randomUUID(), record);
 

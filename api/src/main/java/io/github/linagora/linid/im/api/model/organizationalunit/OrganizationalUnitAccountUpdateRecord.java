@@ -28,17 +28,22 @@ package io.github.linagora.linid.im.api.model.organizationalunit;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * Request payload for updating the relationship between an account and an organizational unit.
  *
- * <p>Only the relationship {@code extraParameters} are updatable: the account and organizational
- * unit themselves are left untouched.</p>
+ * <p>Only the functional role and the relationship {@code extraParameters} are updatable: the
+ * account and organizational unit themselves are left untouched.</p>
  *
+ * @param roleId          identifier of the functional role held by the account within the organizational unit
  * @param extraParameters free-form attributes of the relationship
  */
 @Schema(description = "Request payload for updating an account-to-organizational-unit relationship")
 public record OrganizationalUnitAccountUpdateRecord(
+    @Schema(description = "Identifier of the functional role held by the account within the organizational unit")
+    UUID roleId,
+
     @Schema(description = "Free-form attributes of the relationship")
     Map<String, Object> extraParameters
 ) {

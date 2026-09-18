@@ -304,12 +304,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             );
         }
 
-        if (!roleRepository.existsById(record.roleId())) {
-            throw new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.role.not_found", Map.of("id", record.roleId().toString()))
-            );
-        }
+        assertRoleExists(record.roleId());
 
         if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
             organizationalUnitId, record.accountId())) {
@@ -342,6 +337,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         var entity = findRelation(organizationalUnitId, accountId);
 
+        if (record.roleId() != null) {
+            assertRoleExists(record.roleId());
+            entity.setRoleId(record.roleId());
+        }
+
         if (record.extraParameters() != null) {
             entity.setExtraParameters(record.extraParameters());
         }
@@ -349,6 +349,21 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         entity.setUpdatedBy(userPrincipal.getId());
 
         return organizationalUnitAccountRepository.save(entity);
+    }
+
+    /**
+     * Ensures a functional role exists.
+     *
+     * @param roleId the unique identifier of the functional role
+     * @throws ApiException with a 404 status when no role matches the identifier
+     */
+    private void assertRoleExists(final UUID roleId) {
+        if (!roleRepository.existsById(roleId)) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.role.not_found", Map.of("id", roleId.toString()))
+            );
+        }
     }
 
     @Override

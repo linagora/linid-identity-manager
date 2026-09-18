@@ -132,13 +132,13 @@ public interface OrganizationalUnitService {
     /**
      * Updates the relationship attributes between an account and an organizational unit.
      *
-     * <p>The {@code extraParameters} are only replaced when provided in the record; the stored value is kept
-     * otherwise.</p>
+     * <p>The functional role and the {@code extraParameters} are only replaced when provided in the record; the
+     * stored values are kept otherwise.</p>
      *
      * @param userPrincipal        the authenticated user performing the operation
      * @param organizationalUnitId the unique identifier of the organizational unit
      * @param accountId            the unique identifier of the attached account
-     * @param record               the update payload (relationship attributes)
+     * @param record               the update payload (functional role and relationship attributes)
      * @return the updated {@link OrganizationalUnitAccount} relationship
      */
     OrganizationalUnitAccount updateAccountRelation(

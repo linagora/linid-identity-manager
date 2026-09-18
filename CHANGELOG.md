@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **logout entry** of the user profile menu.
 - Added the **functional role** column to the accounts table of the organizational unit details page, and a role
   selector to its attach dialog and to the account creation page.
+- Added the **functional roles pages**: a list with text and date filters and an inline description editor, and a
+  creation page (code, label, description).
 
 ### Fixed
 
@@ -57,6 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Served the **CA-signed development certificate** from the Quasar dev server.
 - Fixed flaky E2E tests caused by shared state between front and API scenarios.
 - Reformatted the E2E feature files with aligned step keywords for better readability.
+- Seeded functional roles in the E2E database and waited for the roles table before seeding it.
 
 ## [0.9.0] - 2026-09-08
 

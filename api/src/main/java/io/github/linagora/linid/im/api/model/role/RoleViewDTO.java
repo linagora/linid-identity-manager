@@ -78,6 +78,13 @@ public class RoleViewDTO {
     private String organizationalUnits;
 
     /**
+     * Whether the role can be deleted, that is when no account holds it in any organizational unit.
+     */
+    @Schema(description = "Whether the role can be deleted, that is when no account holds it in any "
+        + "organizational unit", example = "true")
+    private boolean deletable;
+
+    /**
      * Full name of the account that created this record.
      */
     @Schema(description = "Full name of the record creator", example = "John Doe")

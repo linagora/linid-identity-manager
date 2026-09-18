@@ -51,6 +51,7 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
@@ -94,6 +95,7 @@ class AccountServiceImplTest {
 
     private static final UUID ADMIN_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final OffsetDateTime START = OffsetDateTime.parse("2100-01-01T00:00:00Z");
+    private static final UUID ROLE_ID = UUID.fromString("00000000-0000-0000-0000-00000000000f");
 
     @Mock
     private AccountRepository accountRepository;
@@ -109,6 +111,9 @@ class AccountServiceImplTest {
     private AccountOrganizationalUnitViewRepository accountOrganizationalUnitViewRepository;
     @Mock
     private OrganizationalUnitRepository organizationalUnitRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
     @Mock
     private AccountMapper accountMapper;
     @Spy
@@ -148,7 +153,8 @@ class AccountServiceImplTest {
     void testCreate_shouldSetAllFieldsAndChecksum() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         Account mappedAccount = new Account();
         mappedAccount.setExternalId("ext-001");
         mappedAccount.setLastname("Doe");
@@ -187,7 +193,8 @@ class AccountServiceImplTest {
     void testCreate_shouldGenerateConsistentChecksum() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
@@ -210,7 +217,8 @@ class AccountServiceImplTest {
     void testCreate_shouldCallValidator() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
         when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
@@ -231,7 +239,7 @@ class AccountServiceImplTest {
     @DisplayName("Should not save account when validator throws")
     void testCreate_shouldNotSaveWhenValidatorThrows() {
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), null, Map.of());
+            new PeriodRecord(START, null), null, ROLE_ID, Map.of());
         doThrow(new ApiException(HttpStatus.BAD_REQUEST.value(),
             I18nMessage.of("error.account.creation.validity_period_start_in_past")))
             .when(accountCreationValidator).validate(request);
@@ -251,7 +259,8 @@ class AccountServiceImplTest {
     void testCreate_shouldSaveStatusWithCorrectAuditFields() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         UUID generatedId = UUID.randomUUID();
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
@@ -282,7 +291,8 @@ class AccountServiceImplTest {
     void testCreate_shouldRespectValidatePersistAccountMapPersistStatusOrder() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-002", "Doe", "John", "john2@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
         when(accountStatusMapper.toAccountStatus(
@@ -313,7 +323,8 @@ class AccountServiceImplTest {
     void testCreate_shouldCreateOUAccountLinkWhenOUIdProvided() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-003", "Doe", "John", "john3@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         UUID accountId = UUID.randomUUID();
         Account createdAccount = new Account();
         createdAccount.setId(accountId);
@@ -335,9 +346,26 @@ class AccountServiceImplTest {
         verify(organizationalUnitAccountRepository).save(argThat(ouAccount ->
             ouAccount.getOrganizationalUnitId().equals(ouId) &&
                 ouAccount.getAccountId().equals(accountId) &&
+                ouAccount.getRoleId().equals(ROLE_ID) &&
                 ouAccount.getCreatedBy().equals(ADMIN_ID) &&
                 ouAccount.getUpdatedBy().equals(ADMIN_ID)
         ));
+    }
+
+    @Test
+    @DisplayName("create should throw 404 and persist nothing when the functional role does not exist")
+    void testCreate_shouldThrowWhenRoleDoesNotExist() {
+        var request = new AccountRecord("ext-007", "Doe", "John", "john7@example.com",
+            new PeriodRecord(START, null), UUID.randomUUID(), ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(false);
+
+        ApiException ex = assertThrows(ApiException.class,
+            () -> accountService.create(userPrincipal, request));
+
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("error.role.not_found", ex.getError().key());
+        verify(accountRepository, never()).save(any());
+        verify(organizationalUnitAccountRepository, never()).save(any());
     }
 
     @Test
@@ -346,7 +374,8 @@ class AccountServiceImplTest {
         UUID ouId = UUID.randomUUID();
         UUID accountId = UUID.randomUUID();
         var request = new AccountRecord("ext-006", "Doe", "John", "john6@example.com",
-            new PeriodRecord(START, null), ouId, Map.of());
+            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
+        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         Account createdAccount = new Account();
         createdAccount.setId(accountId);
         AccountStatus mockStatus = new AccountStatus();

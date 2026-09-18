@@ -175,7 +175,7 @@ class AccountControllerTest {
     @DisplayName("Should create account and return 201")
     void testCreate_shouldReturn201WithAccountDTO() {
         UUID ouId = UUID.randomUUID();
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null), ouId, Map.of());
+        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com", new PeriodRecord(START, null), ouId, UUID.randomUUID(), Map.of());
         var entity = createSampleEntity();
         var dto = createSampleDTO(entity);
         when(accountService.create(userPrincipal, request)).thenReturn(entity);

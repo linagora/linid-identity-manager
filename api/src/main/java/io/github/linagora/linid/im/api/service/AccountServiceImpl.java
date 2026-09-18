@@ -52,6 +52,7 @@ import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
@@ -143,6 +144,11 @@ public class AccountServiceImpl implements AccountService {
     private final OrganizationalUnitRepository organizationalUnitRepository;
 
     /**
+     * Repository used to check the existence of the functional role held by a created account.
+     */
+    private final RoleRepository roleRepository;
+
+    /**
      * Mapper for converting account records into {@link Account} entities.
      */
     private final AccountMapper accountMapper;
@@ -198,6 +204,13 @@ public class AccountServiceImpl implements AccountService {
 
         accountCreationValidator.validate(account);
 
+        if (!roleRepository.existsById(account.roleId())) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.role.not_found", Map.of("id", account.roleId().toString()))
+            );
+        }
+
         Account entity = accountMapper.toAccount(account, userPrincipal);
         entity.setPayload(DEFAULT_PAYLOAD);
         entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
@@ -210,6 +223,7 @@ public class AccountServiceImpl implements AccountService {
         OrganizationalUnitAccount ouAccount = OrganizationalUnitAccount.builder()
             .organizationalUnitId(account.organizationalUnit())
             .accountId(createdAccount.getId())
+            .roleId(account.roleId())
             .createdBy(userPrincipal.getId())
             .updatedBy(userPrincipal.getId())
             .build();

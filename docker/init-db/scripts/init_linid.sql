@@ -50,6 +50,15 @@ VALUES ('00000000-0000-4000-8000-00000000a001', 'admin',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
 
+-- Default functional role held by the accounts created by the e2e scenarios.
+-- The UUID is deterministic so the scenarios can reference it directly.
+INSERT
+INTO roles (rol_id, code, name, description, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000f001', 'MEMBER', 'Member', 'Default functional role',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (code) DO NOTHING;
+
 -- Lifecycle test accounts. Each row covers one case of the lifecycle UI
 -- matrix from issue #112. UUIDs are deterministic so that e2e scenarios can
 -- target them directly through /accounts/{id}. account_status rows below are
@@ -579,42 +588,42 @@ $$
         -- 6. Add user inside OU
         -- =========================================================
         -- Admin in OU root
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
-        VALUES (root_id, admin_id, admin_id, admin_id);
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
+        VALUES (root_id, admin_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id);
 
         -- user1 in OU Company A
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Company A'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user1'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000f001', admin_id,
                 admin_id);
 
         -- user2 in OU Company B
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Company B'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user2'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000f001', admin_id,
                 admin_id);
 
         -- user3 in OU Division A1
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division A1'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user3'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000f001', admin_id,
                 admin_id);
 
         -- user4 in OU Division A2
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division A2'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user4'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000f001', admin_id,
                 admin_id);
 
         -- Insert all users in OU Team Beta
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         SELECT (SELECT oun_id FROM organizational_units WHERE name = 'Team Beta'),
                a.act_id,
-               admin_id,
+               '00000000-0000-4000-8000-00000000f001', admin_id,
                admin_id
         FROM accounts a
         WHERE a.external_id IN (
@@ -623,10 +632,10 @@ $$
             );
 
         -- Insert all lifecycle and dialog users in OU Team Alpha
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         SELECT (SELECT oun_id FROM organizational_units WHERE name = 'Team Alpha'),
                a.act_id,
-               admin_id,
+               '00000000-0000-4000-8000-00000000f001', admin_id,
                admin_id
         FROM accounts a
         WHERE a.external_id IN (
@@ -639,10 +648,10 @@ $$
 
 
         -- user5 in OU Division B1
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division B1'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user5'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000f001', admin_id,
                 admin_id);
 
         -- =========================================================

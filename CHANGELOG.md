@@ -18,11 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added **roles management API** (`/roles`), including:
   - Unique code, name, description and extra-parameters.
   - Roles audit table and SQL view.
-  - 
+- Added a **mandatory functional role** when creating an account (`POST /accounts`) or attaching one to an
+  organizational unit (`POST /organizational-units/{id}/accounts`): the attachment is kept with a `null` role when
+  that role is deleted,
+  the accounts of an organizational unit expose their role, and the roles endpoints expose the organizational units
+  in which each role is held.
+- Exposed the **audit information** of the relationship (`createdBy`, `updatedBy`, `insertDate`, `updateDate`) on the
+  organizational units of an account (`GET /accounts/{id}/organizational-units`) and on the accounts of an
+  organizational unit (`GET /organizational-units/{id}/accounts`).
 
 #### Frontend
 
 - Added the **logout entry** of the user profile menu.
+- Added the **functional role** column to the accounts table of the organizational unit details page, and a role
+  selector to its attach dialog and to the account creation page.
 
 ### Fixed
 
@@ -40,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Frontend
 
 - Made the **RP-initiated logout** work end to end through the LemonLDAP logout confirmation page.
+- Paginated the **tables of the details pages** (organizational units of an account, accounts of an organizational
+  unit, roles of an application) on the server side, instead of displaying only the first ten rows.
 
 ### Build
 

@@ -112,7 +112,8 @@ Feature: Test Account details page display
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001"
       }
       """
     Then  I expect status code is 201
@@ -941,7 +942,8 @@ Feature: Test Account details page display
           "start": "2080-01-01T00:00:00Z",
           "end": "2100-01-01T00:00:00Z"
         },
-        "organizationalUnit": "00000000-0000-4000-8000-00000000000a"
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001"
       }
       """
     Then  I expect status code is 201

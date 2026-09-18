@@ -44,6 +44,7 @@ Feature: Test Account creation page
     And  I expect the HTML element '[data-cy="field_email"]' to be visible
     And  I expect the HTML element '[data-cy="field_validityPeriod.start"]' to be visible
     And  I expect the HTML element '[data-cy="field_organizationalUnit"]' to be visible
+    And  I expect the HTML element '[data-cy="field_roleId"]' to be visible
     And  I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And  I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 
@@ -68,6 +69,7 @@ Feature: Test Account creation page
     And  I set the text "e2e-account-creation@example.com" in the HTML element '[data-cy="field_email"]'
     And  I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.start"]'
     And  I select '.q-menu .q-item:contains("root")' in '[data-cy="field_organizationalUnit"]'
+    And  I select '.q-menu .q-item:contains("Member")' in '[data-cy="field_roleId"]'
     And  I click on '[data-cy="button_confirm"]'
 
     ## 107 Should display a success notification and redirect to the account details page

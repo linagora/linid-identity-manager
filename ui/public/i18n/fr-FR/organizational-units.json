@@ -93,6 +93,10 @@
           "type": "Unité organisationnelle",
           "separator": "ou"
         },
+        "roleNames": {
+          "type": "Rôle fonctionnel",
+          "separator": "ou"
+        },
         "createdBy": {
           "type": "Créé par",
           "separator": "ou"
@@ -112,6 +116,7 @@
           "name": "Nom",
           "type": "Type",
           "parentId": "Unité organisationnelle",
+          "roleNames": "Rôle fonctionnel",
           "createdBy": "Créé par",
           "insertDate": "Date de création"
         }

@@ -17,6 +17,7 @@ Feature: Test API Organizational unit endpoints
 
   ################## Find All (GET /organizational-units) #############
   ## 301 Should return paginated list of organizational-units
+  ## 302 Should filter organizational units by functional role
 
   ################## Find By Id (GET /organizational-units/{id}) ######
   ## 401 Should return 200 for existing organizational unit
@@ -257,6 +258,18 @@ Feature: Test API Organizational unit endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
     Then I expect status code is 204
+
+  Scenario: 302 - Should filter organizational units by functional role
+    When I request '{{env.E2E_API_URL}}/organizational-units?roleNames=lk_*Viewer*' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '00000000-0000-4000-8000-00000000000e'
+    And  I expect '{{response.body.content[0].name}}' is 'Division B1'
+    And  I expect '{{response.body.content[0].roleNames}}' is 'Viewer'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000e' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.roleNames}}' is 'Viewer'
 
   #################################################################
   ################## Find By Id (GET /organizational-units/{id}) ##

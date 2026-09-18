@@ -432,7 +432,7 @@ class OrganizationalUnitServiceImplTest {
     void testUpdateAccountRelation_shouldUpdateExtraParameters() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of("key", "updated"));
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of("key", "updated"));
         var entity = OrganizationalUnitAccount.builder()
             .id(UUID.randomUUID())
             .organizationalUnitId(organizationalUnitId)
@@ -453,11 +453,65 @@ class OrganizationalUnitServiceImplTest {
     }
 
     @Test
+    @DisplayName("should update the functional role of the relationship")
+    void testUpdateAccountRelation_shouldUpdateRole() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(roleId, null);
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .roleId(UUID.randomUUID())
+            .extraParameters(Map.of("key", "value"))
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(roleRepository.existsById(roleId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
+
+        assertEquals(roleId, result.getRoleId());
+        assertEquals(Map.of("key", "value"), result.getExtraParameters());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("should throw exception on update with unknown role")
+    void testUpdateAccountRelation_shouldThrowExceptionOnUnknownRole() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(roleId, null);
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(roleRepository.existsById(roleId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.role.not_found", exception.getError().key());
+        verify(organizationalUnitAccountRepository, never()).save(any(OrganizationalUnitAccount.class));
+    }
+
+    @Test
     @DisplayName("should throw exception on update with unknown organizational unit")
     void testUpdateAccountRelation_shouldThrowExceptionOnUnknownOrganizationalUnit() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
 
@@ -472,7 +526,7 @@ class OrganizationalUnitServiceImplTest {
     void testUpdateAccountRelation_shouldThrowExceptionOnNotAttachedAccount() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
         when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
@@ -901,7 +955,7 @@ class OrganizationalUnitServiceImplTest {
         when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
 
-        var record = new OrganizationalUnitAccountUpdateRecord(null);
+        var record = new OrganizationalUnitAccountUpdateRecord(null, null);
 
         var result = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
 

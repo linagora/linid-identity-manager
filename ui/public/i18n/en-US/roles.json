@@ -30,6 +30,20 @@
         }
       }
     },
+    "ConfirmDialogButton": {
+      "title": "Delete",
+      "submitSuccess": "The role has been successfully deleted.",
+      "submitError": "Unable to delete the role. Please try again later.",
+      "ConfirmationDialog": {
+        "title": "Delete the role {name}",
+        "content": "Do you really want to delete the role {name}?",
+        "ButtonsCard": {
+          "cancel": "Cancel",
+          "confirm": "Delete",
+          "confirmLoading": "Deleting..."
+        }
+      }
+    },
     "RemoveFavoriteNotifyMessage": "The favorite '{name}' has been removed.",
     "CreateFavoriteNotifyMessage": "The favorite '{name}' has been created.",
     "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",

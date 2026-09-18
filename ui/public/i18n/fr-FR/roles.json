@@ -30,6 +30,20 @@
         }
       }
     },
+    "ConfirmDialogButton": {
+      "title": "Supprimer",
+      "submitSuccess": "Le rôle a été supprimé avec succès.",
+      "submitError": "Impossible de supprimer le rôle. Veuillez réessayer plus tard.",
+      "ConfirmationDialog": {
+        "title": "Supprimer le rôle {name}",
+        "content": "Voulez-vous vraiment supprimer le rôle {name} ?",
+        "ButtonsCard": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "confirmLoading": "Suppression..."
+        }
+      }
+    },
     "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
     "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
     "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",

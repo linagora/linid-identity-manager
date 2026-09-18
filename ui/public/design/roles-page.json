@@ -21,6 +21,22 @@
         }
       }
     },
+    "confirm-dialog-button": {
+      "q-btn": { "color": "negative", "outline": true },
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "negative", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      }
+    },
     "linid-smart-filter": {
       "q-field": {
         "dense": false

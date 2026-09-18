@@ -116,6 +116,17 @@ public class OrganizationalUnitViewDTO {
     private String parentNames;
 
     /**
+     * Comma-separated names of the distinct functional roles held by the accounts attached to the organizational
+     * unit.
+     */
+    @Schema(
+        description = "Comma-separated names of the distinct functional roles held by the accounts attached to the "
+            + "organizational unit",
+        example = "Manager, Member"
+    )
+    private String roleNames;
+
+    /**
      * Time range during which the organizational unit is suspended.
      */
     @Schema(description = "Time range during which the organizational unit is suspended")

@@ -1006,19 +1006,22 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
     And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
     And  I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th' appear 3 times on screen
+    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th' appear 4 times on screen
     And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(1)' contains "Nom"
     And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(2)' contains "Type"
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(3)' contains "Statut"
+    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(3)' contains "Rôle fonctionnel"
+    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(4)' contains "Statut"
 
     ## 170 Should list every organizational unit of the account exactly once
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' appear 2 times on screen
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(1)' contains "Division A1"
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(2)' contains "DIVISION"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "Operator"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(4)' contains "ACTIVE"
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(1)' contains "Team Beta"
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(2)' contains "TEAM"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(3)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(3)' contains "Member"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(4)' contains "ACTIVE"
 
     ## 171 Organizational units table should be read-only
     And I expect the HTML element '[data-cy="generic-editable-table-card_add-button"]' not exists

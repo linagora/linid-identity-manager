@@ -128,6 +128,17 @@ public class OrganizationalUnitView extends AbstractViewEntity {
     private String parentNames;
 
     /**
+     * Comma-separated names of the distinct functional roles held by the accounts
+     * attached to this organizational unit.
+     */
+    @Column(name = "role_names")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class,
+        description = "Comma-separated names of the functional roles held by the accounts attached to the "
+            + "organizational unit")
+    private String roleNames;
+
+    /**
      * Time range during which the organizational unit is suspended. {@code null} when no suspension
      * is configured.
      */

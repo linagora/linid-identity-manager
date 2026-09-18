@@ -119,9 +119,21 @@ FROM accounts
 WHERE email = 'admin@example.com'
     LIMIT 1;
 
--- Default functional role held by the demo accounts within their organizational units
+-- Functional roles held by the demo accounts within their organizational units
 INSERT INTO roles (rol_id, code, name, description, created_by, updated_by)
-VALUES ('00000000-0000-4000-8000-00000000f001', 'MEMBER', 'Member', 'Default functional role', admin_id, admin_id)
+VALUES ('00000000-0000-4000-8000-00000000f001', 'MEMBER', 'Member', 'Default functional role', admin_id, admin_id),
+       ('00000000-0000-4000-8000-00000000b001', 'ADMINISTRATOR', 'Administrator',
+        'Manages user accounts, roles and system configuration.', admin_id, admin_id),
+       ('00000000-0000-4000-8000-00000000b002', 'MANAGER', 'Manager',
+        'Oversees team operations and approves organizational changes.', admin_id, admin_id),
+       ('00000000-0000-4000-8000-00000000b003', 'OPERATOR', 'Operator',
+        'Executes routine operational tasks across the platform.', admin_id, admin_id),
+       ('00000000-0000-4000-8000-00000000b004', 'SUPPORT', 'Support',
+        'Provides first-line assistance to end users.', admin_id, admin_id),
+       ('00000000-0000-4000-8000-00000000b005', 'VIEWER', 'Viewer',
+        'Read-only access to reports and dashboards.', admin_id, admin_id),
+       ('00000000-0000-4000-8000-00000000b006', 'AUDITOR', 'Auditor',
+        'Reviews compliance and security controls.', admin_id, admin_id)
     ON CONFLICT (code) DO NOTHING;
 
 -- =========================================================
@@ -254,87 +266,87 @@ VALUES (dep_recrutement_id, team_toulouse_id, admin_id, admin_id)
 
 -- Admin in root OU
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-VALUES (root_id, admin_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id)
+VALUES (root_id, admin_id, '00000000-0000-4000-8000-00000000b001', admin_id, admin_id)
     ON CONFLICT DO NOTHING;
 
 -- ── COMPANIES ──────────────────────────────────────────────
 -- jdupont and mmartin at Groupe Horizon level (global membership)
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT horizon_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT horizon_id, act_id, '00000000-0000-4000-8000-00000000b002', admin_id, admin_id
 FROM accounts WHERE external_id IN ('jdupont', 'mmartin')
     ON CONFLICT DO NOTHING;
 
 -- tlambert and clefebvre at Nova Services level (global membership)
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT nova_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT nova_id, act_id, '00000000-0000-4000-8000-00000000b002', admin_id, admin_id
 FROM accounts WHERE external_id IN ('tlambert', 'clefebvre')
     ON CONFLICT DO NOTHING;
 
 -- ── DIVISIONS ──────────────────────────────────────────────
 -- pdurand: head of Direction Commerciale
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dir_com_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dir_com_id, act_id, '00000000-0000-4000-8000-00000000b002', admin_id, admin_id
 FROM accounts WHERE external_id = 'pdurand'
     ON CONFLICT DO NOTHING;
 
 -- sbernard: head of Direction Technique
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dir_tech_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dir_tech_id, act_id, '00000000-0000-4000-8000-00000000b002', admin_id, admin_id
 FROM accounts WHERE external_id = 'sbernard'
     ON CONFLICT DO NOTHING;
 
 -- nleroy: head of Direction Relation Client
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dir_rel_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dir_rel_id, act_id, '00000000-0000-4000-8000-00000000b002', admin_id, admin_id
 FROM accounts WHERE external_id = 'nleroy'
     ON CONFLICT DO NOTHING;
 
 -- imichel: head of Direction Ressources Humaines
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dir_rh_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dir_rh_id, act_id, '00000000-0000-4000-8000-00000000b002', admin_id, admin_id
 FROM accounts WHERE external_id = 'imichel'
     ON CONFLICT DO NOTHING;
 
 -- ── DEPARTMENTS ────────────────────────────────────────────
 -- jdupont and lcolin in Ventes France
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_ventes_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_ventes_id, act_id, '00000000-0000-4000-8000-00000000b003', admin_id, admin_id
 FROM accounts WHERE external_id IN ('jdupont', 'lcolin')
     ON CONFLICT DO NOTHING;
 
 -- mmartin and efournier in Marketing
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_mkt_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_mkt_id, act_id, '00000000-0000-4000-8000-00000000b003', admin_id, admin_id
 FROM accounts WHERE external_id IN ('mmartin', 'efournier')
     ON CONFLICT DO NOTHING;
 
 -- rmoreau, agirard and ogarcia in Développement Logiciel
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_dev_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_dev_id, act_id, '00000000-0000-4000-8000-00000000b003', admin_id, admin_id
 FROM accounts WHERE external_id IN ('rmoreau', 'agirard', 'ogarcia')
     ON CONFLICT DO NOTHING;
 
 -- bsimon and ldavid in Infrastructure & Cloud
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_infra_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_infra_id, act_id, '00000000-0000-4000-8000-00000000b003', admin_id, admin_id
 FROM accounts WHERE external_id IN ('bsimon', 'ldavid')
     ON CONFLICT DO NOTHING;
 
 -- jrobert and cboyer in Support Client
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_support_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_support_id, act_id, '00000000-0000-4000-8000-00000000b004', admin_id, admin_id
 FROM accounts WHERE external_id IN ('jrobert', 'cboyer')
     ON CONFLICT DO NOTHING;
 
 -- nrichard in Qualité & Process
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_qualite_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_qualite_id, act_id, '00000000-0000-4000-8000-00000000b005', admin_id, admin_id
 FROM accounts WHERE external_id = 'nrichard'
     ON CONFLICT DO NOTHING;
 
 -- imichel and apetit in Recrutement
 INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-SELECT dep_recrutement_id, act_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id
+SELECT dep_recrutement_id, act_id, '00000000-0000-4000-8000-00000000b003', admin_id, admin_id
 FROM accounts WHERE external_id IN ('imichel', 'apetit')
     ON CONFLICT DO NOTHING;
 

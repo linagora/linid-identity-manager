@@ -52,6 +52,7 @@ class AccountOrganizationalUnitMapperTest {
     @DisplayName("Should map the organizational unit, relationship and audit information of the view")
     void testToDTO_shouldMapAllFields() {
         UUID id = UUID.randomUUID();
+        UUID roleId = UUID.randomUUID();
         OffsetDateTime insertDate = OffsetDateTime.now().minusDays(1);
         OffsetDateTime updateDate = OffsetDateTime.now();
         AccountOrganizationalUnitView view = AccountOrganizationalUnitView.builder()
@@ -61,6 +62,8 @@ class AccountOrganizationalUnitMapperTest {
             .type("DIVISION")
             .status(OrganizationalUnitStatusEnum.ACTIVE)
             .relationExtraParameters(Map.of("role", "member"))
+            .roleId(roleId)
+            .roleName("Manager")
             .createdBy("Admin User")
             .updatedBy("Other User")
             .insertDate(insertDate)
@@ -74,6 +77,8 @@ class AccountOrganizationalUnitMapperTest {
         assertEquals("DIVISION", dto.getType());
         assertEquals(OrganizationalUnitStatusEnum.ACTIVE, dto.getStatus());
         assertEquals(Map.of("role", "member"), dto.getRelationExtraParameters());
+        assertEquals(roleId, dto.getRoleId());
+        assertEquals("Manager", dto.getRoleName());
         assertEquals("Admin User", dto.getCreatedBy());
         assertEquals("Other User", dto.getUpdatedBy());
         assertEquals(insertDate, dto.getInsertDate());

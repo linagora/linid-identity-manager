@@ -83,6 +83,20 @@ public class AccountOrganizationalUnitViewDTO {
     private Map<String, Object> relationExtraParameters;
 
     /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     */
+    @Schema(description = "Identifier of the functional role held by the account within the organizational unit",
+        example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID roleId;
+
+    /**
+     * Human-readable name of the functional role held by the account within the organizational unit.
+     */
+    @Schema(description = "Name of the functional role held by the account within the organizational unit",
+        example = "Manager")
+    private String roleName;
+
+    /**
      * Full name of the account that attached the account to the organizational unit.
      */
     @Schema(description = "Full name of the account that attached the account to the organizational unit",

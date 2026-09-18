@@ -576,6 +576,12 @@
         "validation": {
           "required": "Ce champ est requis."
         }
+      },
+      "roleId": {
+        "label": "Rôle fonctionnel *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
       }
     }
   },

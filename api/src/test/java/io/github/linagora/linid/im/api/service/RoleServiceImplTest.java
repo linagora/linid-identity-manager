@@ -129,6 +129,7 @@ class RoleServiceImplTest {
                 .extraParameters(Map.of("scope", "global"))
                 .createdBy("Admin User")
                 .updatedBy("Admin User")
+                .deletable(true)
                 .build();
     }
 
@@ -337,6 +338,26 @@ class RoleServiceImplTest {
 
         verify(roleDistinctViewRepository).findFirstById(id);
         verify(roleRepository).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Should throw ApiException 400 when deleting a role held by an account")
+    void testDeleteById_shouldThrow400WhenHeld() {
+        UUID id = UUID.randomUUID();
+        var entity = createSampleRoleView(id);
+        entity.setDeletable(false);
+
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
+
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> roleService.deleteById(userPrincipal, id)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), exception.getStatusCode());
+        assertEquals("error.role.in_use", exception.getError().key());
+
+        verify(roleRepository, never()).deleteById(any(UUID.class));
     }
 
     @Test

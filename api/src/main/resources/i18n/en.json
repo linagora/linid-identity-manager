@@ -65,6 +65,7 @@
   "error.opa.policy.publish_failed": "Unable to publish the OPA policy to the OPA server (policyId: {policyId})",
   "error.role.not_found": "Functional role not found: {id}",
   "error.role.code.already_exists": "Functional role already exists for code '{code}'",
+  "error.role.in_use": "Functional role {id} is held by at least one account and cannot be deleted",
   "error.superset.file": "Unable to load the Superset configuration file: {path}",
   "error.superset.access_token": "Unable to retrieve the access token",
   "error.superset.csrf_token": "Unable to retrieve the CSRF token",

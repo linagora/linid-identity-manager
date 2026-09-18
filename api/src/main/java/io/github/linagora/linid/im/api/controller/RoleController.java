@@ -178,6 +178,7 @@ public class RoleController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a functional role by ID")
     @ApiResponse(responseCode = "204", description = "Role successfully deleted")
+    @ApiResponse(responseCode = "400", description = "Role held by at least one account", content = @Content)
     @ApiResponse(responseCode = "404", description = "Role not found", content = @Content)
     public ResponseEntity<Void> deleteById(
             @AuthenticationPrincipal final UserPrincipal userPrincipal,

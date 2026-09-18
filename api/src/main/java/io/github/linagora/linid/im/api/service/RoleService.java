@@ -85,6 +85,8 @@ public interface RoleService {
     /**
      * Deletes a functional role by its unique identifier.
      *
+     * <p>A role held by at least one account within an organizational unit cannot be deleted.</p>
+     *
      * @param userPrincipal the authenticated user
      * @param id            the role UUID
      */

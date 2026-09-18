@@ -616,37 +616,41 @@ $$
 
         -- =========================================================
         -- 6. Add user inside OU
+        -- Each account holds a functional role within its organizational
+        -- unit: administrator in root, manager in the companies, operator,
+        -- support and viewer in the divisions, member in the teams. The
+        -- auditor role is held nowhere so it stays deletable.
         -- =========================================================
         -- Admin in OU root
         INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
-        VALUES (root_id, admin_id, '00000000-0000-4000-8000-00000000f001', admin_id, admin_id);
+        VALUES (root_id, admin_id, '00000000-0000-4000-8000-00000000b001', admin_id, admin_id);
 
         -- user1 in OU Company A
         INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Company A'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user1'),
-                '00000000-0000-4000-8000-00000000f001', admin_id,
+                '00000000-0000-4000-8000-00000000b002', admin_id,
                 admin_id);
 
         -- user2 in OU Company B
         INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Company B'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user2'),
-                '00000000-0000-4000-8000-00000000f001', admin_id,
+                '00000000-0000-4000-8000-00000000b002', admin_id,
                 admin_id);
 
         -- user3 in OU Division A1
         INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division A1'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user3'),
-                '00000000-0000-4000-8000-00000000f001', admin_id,
+                '00000000-0000-4000-8000-00000000b003', admin_id,
                 admin_id);
 
         -- user4 in OU Division A2
         INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division A2'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user4'),
-                '00000000-0000-4000-8000-00000000f001', admin_id,
+                '00000000-0000-4000-8000-00000000b004', admin_id,
                 admin_id);
 
         -- Insert all users in OU Team Beta
@@ -681,7 +685,7 @@ $$
         INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division B1'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user5'),
-                '00000000-0000-4000-8000-00000000f001', admin_id,
+                '00000000-0000-4000-8000-00000000b005', admin_id,
                 admin_id);
 
         -- =========================================================

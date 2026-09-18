@@ -62,6 +62,18 @@
       {
         "name": "description",
         "type": "text"
+      },
+      {
+        "name": "organizationalUnitId",
+        "type": "tree",
+        "options": {
+          "url": "/organizational-units",
+          "idKey": "id",
+          "parentsKey": "parents",
+          "parentIdKey": "parent",
+          "nodesQuerySize": 50,
+          "typeKey": "type"
+        }
       }
     ],
     "columns": [
@@ -83,6 +95,13 @@
         "label": "columns.description",
         "name": "description",
         "field": "description",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.organizationalUnits",
+        "name": "organizationalUnits",
+        "field": "organizationalUnits",
         "sortable": true,
         "align": "left"
       },

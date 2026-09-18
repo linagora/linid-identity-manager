@@ -37,6 +37,7 @@
       "code": "Code",
       "name": "Label",
       "description": "Description",
+      "organizationalUnits": "Organizational units",
       "actions": "Actions"
     },
     "error": "Unable to load the roles. Please try again later.",
@@ -116,6 +117,10 @@
         "description": {
           "type": "Description",
           "separator": "or"
+        },
+        "organizationalUnitId": {
+          "type": "Organizational unit",
+          "separator": "or"
         }
       },
       "LinidFilterPanel": {
@@ -123,7 +128,8 @@
         "columnFilter": {
           "code": "Code",
           "name": "Label",
-          "description": "Description"
+          "description": "Description",
+          "organizationalUnitId": "Organizational unit"
         }
       },
       "LinidFavoritePanel": {
@@ -165,6 +171,28 @@
         },
         "validation": {
           "invalidDate": "Incorrect date. Expected format: {format}"
+        }
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Search",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
         }
       }
     }

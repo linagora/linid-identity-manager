@@ -37,6 +37,7 @@
       "code": "Code",
       "name": "Libellé",
       "description": "Description",
+      "organizationalUnits": "Unités organisationnelles",
       "actions": "Actions"
     },
     "error": "Impossible de charger les rôles. Veuillez réessayer plus tard.",
@@ -116,6 +117,10 @@
         "description": {
           "type": "Description",
           "separator": "ou"
+        },
+        "organizationalUnitId": {
+          "type": "Unité organisationnelle",
+          "separator": "ou"
         }
       },
       "LinidFilterPanel": {
@@ -123,7 +128,8 @@
         "columnFilter": {
           "code": "Code",
           "name": "Libellé",
-          "description": "Description"
+          "description": "Description",
+          "organizationalUnitId": "Unité organisationnelle"
         }
       },
       "LinidFavoritePanel": {
@@ -165,6 +171,28 @@
         },
         "validation": {
           "invalidDate": "Date incorrecte. Format attendu : {format}"
+        }
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Rechercher",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
         }
       }
     }

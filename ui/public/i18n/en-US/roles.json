@@ -31,6 +31,7 @@
       "code": "Code",
       "name": "Label",
       "description": "Description",
+      "organizationalUnits": "Organizational units",
       "createdBy": "Created by",
       "insertDate": "Creation date",
       "actions": "Actions"
@@ -112,6 +113,10 @@
         "description": {
           "type": "Description",
           "separator": "or"
+        },
+        "organizationalUnitId": {
+          "type": "Organizational unit",
+          "separator": "or"
         }
       },
       "LinidFilterPanel": {
@@ -120,6 +125,7 @@
           "code": "Code",
           "name": "Label",
           "description": "Description",
+          "organizationalUnitId": "Organizational unit",
           "createdBy": "Created by",
           "insertDate": "Creation date"
         }
@@ -163,6 +169,28 @@
         },
         "validation": {
           "invalidDate": "Incorrect date. Expected format: {format}"
+        }
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Search",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
         }
       }
     }

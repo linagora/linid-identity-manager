@@ -77,6 +77,16 @@
           "q-chip": {
             "square": true
           }
+        },
+        "organizationalUnitId": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "blue-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
         }
       },
       "linid-filter-panel": {
@@ -111,6 +121,15 @@
         "q-btn": { "color": "primary", "unelevated": true },
         "close": {
           "q-btn": { "flat": true }
+        }
+      },
+      "tree-search-filter-panel": {
+        "q-btn": { "color": "primary", "unelevated": true },
+        "GenericTree": {
+          "q-tree": {
+            "dense": true,
+            "defaultExpandAll": true
+          }
         }
       },
       "linid-favorite-panel": {

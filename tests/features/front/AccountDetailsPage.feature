@@ -71,8 +71,10 @@ Feature: Test Account details page display
   ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
   ## 169 Should display the organizational units card of the account
   ## 170 Should list every organizational unit of the account exactly once
-  ## 171 Organizational units table should be read-only
+  ## 171 Organizational units table should only expose the edit action
   ## 172 Should display an empty organizational units table for an unattached account
+  ## 173 Should edit the functional role held in an organizational unit
+  ## 174 Should restore the functional role held in the organizational unit
 
   Scenario: Roundtrip about Account Details
 
@@ -1006,25 +1008,27 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
     And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
     And  I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th' appear 3 times on screen
+    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th' appear 5 times on screen
     And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(1)' contains "Nom"
     And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(2)' contains "Type"
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(3)' contains "Statut"
+    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(3)' contains "Rôle fonctionnel"
+    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(4)' contains "Statut"
 
     ## 170 Should list every organizational unit of the account exactly once
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' appear 2 times on screen
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(1)' contains "Division A1"
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(2)' contains "DIVISION"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "Operator"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(4)' contains "ACTIVE"
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(1)' contains "Team Beta"
     And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(2)' contains "TEAM"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(3)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(3)' contains "Member"
+    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(4)' contains "ACTIVE"
 
-    ## 171 Organizational units table should be read-only
+    ## 171 Organizational units table should only expose the edit action
     And I expect the HTML element '[data-cy="generic-editable-table-card_add-button"]' not exists
-    And I expect the HTML element '.generic-editable-table-card--edit-button' not exists
+    And I expect the HTML element '[data-cy="edit-button_00000000-0000-4000-8000-00000000000c"]' to be visible
     And I expect the HTML element '.generic-editable-table-card--delete-button' not exists
-    And I expect the HTML element '.generic-entity-table--actions' not exists
 
     ## 172 Should display an empty organizational units table for an unattached account
     # lifecycle-c14 is the only account of the dataset with no membership at all
@@ -1041,3 +1045,31 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
     And  I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' not exists
     And  I expect the HTML element '[data-cy="generic-entity-table"] .q-table__bottom--nodata' contains "Aucune unité organisationnelle pour ce compte."
+
+    ## 173 Should edit the functional role held in an organizational unit
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    And  I set the text "user3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000a004"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000a004"
+    When I click on '[data-cy="edit-button_00000000-0000-4000-8000-00000000000c"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier le rôle fonctionnel détenu dans Division A1"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_roleId"]' to be visible
+    When I select '.q-menu .q-item:contains("Support")' in '[data-cy="field_roleId"]'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" contains "Rôle fonctionnel mis à jour avec succès."
+    And  I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "Support"
+
+    ## 174 Should restore the functional role held in the organizational unit
+    When I click on '[data-cy="edit-button_00000000-0000-4000-8000-00000000000c"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I select '.q-menu .q-item:contains("Operator")' in '[data-cy="field_roleId"]'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "Operator"

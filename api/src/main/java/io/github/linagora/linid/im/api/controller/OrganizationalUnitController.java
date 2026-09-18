@@ -236,7 +236,8 @@ public class OrganizationalUnitController {
     @Operation(summary = "Update the relationship between an account and an organizational unit")
     @ApiResponse(responseCode = "200", description = "Relationship successfully updated")
     @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
-    @ApiResponse(responseCode = "404", description = "Organizational unit not found or account not attached",
+    @ApiResponse(responseCode = "404",
+        description = "Organizational unit not found, account not attached or functional role not found",
         content = @Content)
     public ResponseEntity<OrganizationalUnitAccountDTO> updateAccountRelation(
         @AuthenticationPrincipal final UserPrincipal userPrincipal,

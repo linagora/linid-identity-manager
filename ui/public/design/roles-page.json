@@ -21,6 +21,22 @@
         }
       }
     },
+    "confirm-dialog-button": {
+      "q-btn": { "color": "negative", "outline": true },
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "negative", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      }
+    },
     "linid-smart-filter": {
       "q-field": {
         "dense": false
@@ -72,6 +88,16 @@
           "q-avatar": {
             "size": "28px",
             "color": "teal-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
+        "organizationalUnitId": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "blue-8",
             "textColor": "white"
           },
           "q-chip": {
@@ -131,6 +157,15 @@
         "q-btn": { "color": "primary", "unelevated": true },
         "close": {
           "q-btn": { "flat": true }
+        }
+      },
+      "tree-search-filter-panel": {
+        "q-btn": { "color": "primary", "unelevated": true },
+        "GenericTree": {
+          "q-tree": {
+            "dense": true,
+            "defaultExpandAll": true
+          }
         }
       },
       "linid-favorite-panel": {

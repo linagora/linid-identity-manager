@@ -123,6 +123,14 @@ public class RoleView extends AbstractViewEntity {
     private String organizationalUnits;
 
     /**
+     * Whether the role can be deleted, that is when no account holds it in any organizational unit.
+     */
+    @Column(name = "deletable", nullable = false)
+    @FilterType(type = Boolean.class)
+    @QueryFilterField(type = Boolean.class, description = "Whether the role can be deleted (held by no account)")
+    private boolean deletable;
+
+    /**
      * Additional deployment-specific attributes stored as JSONB.
      */
     @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")

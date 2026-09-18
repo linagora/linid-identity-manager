@@ -69,7 +69,7 @@
       "props": {
         "rowKey": "id",
         "enableActions": false,
-        "enableRowActions": false,
+        "enableRowActions": true,
         "columns": [
           {
             "name": "name",
@@ -84,14 +84,34 @@
             "align": "left"
           },
           {
+            "name": "roleName",
+            "label": "columns.roleName",
+            "field": "roleName",
+            "align": "left"
+          },
+          {
             "name": "status",
             "label": "columns.status",
             "field": "status",
             "align": "left"
           }
         ],
+        "formFields": [
+          {
+            "name": "roleId",
+            "type": "String",
+            "input": "DynamicList",
+            "required": true,
+            "inputSettings": {
+              "route": "/roles",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}"
+            }
+          }
+        ],
         "endpoints": {
-          "find": "/accounts/{{ entity.id }}/organizational-units?sort=name,asc"
+          "find": "/accounts/{{ entity.id }}/organizational-units?sort=name,asc",
+          "update": "/organizational-units/{{ item.id }}/accounts/{{ entity.id }}"
         }
       }
     }

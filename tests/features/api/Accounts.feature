@@ -1432,20 +1432,22 @@ Feature: Test API Account endpoints
     And  I expect '{{response.body.content[<indice>].name}}' is '<ou>'
     And  I expect '{{response.body.content[<indice>].type}}' is '<type>'
     And  I expect '{{response.body.content[<indice>].status}}' is 'ACTIVE'
+    And  I expect '{{response.body.content[<indice>].roleId}}' is not empty
+    And  I expect '{{response.body.content[<indice>].roleName}}' is '<role>'
     And  I expect '{{response.body.content[<indice>].createdBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.content[<indice>].updatedBy}}' is 'admin_fn admin_ln'
     And  I expect '{{response.body.content[<indice>].insertDate}}' is not empty
     And  I expect '{{response.body.content[<indice>].updateDate}}' is not empty
 
     Examples:
-      | user          | ou          | type     | totalElements | indice |
-      | user1         | Company A   | COMPANY  | 2             | 0      |
-      | user1         | Team Beta   | TEAM     | 2             | 1      |
-      | user2         | Company B   | COMPANY  | 2             | 0      |
-      | user2         | Team Beta   | TEAM     | 2             | 1      |
-      | user3         | Division A1 | DIVISION | 2             | 0      |
-      | user3         | Team Beta   | TEAM     | 2             | 1      |
-      | lifecycle-c10 | Team Alpha  | TEAM     | 1             | 0      |
+      | user          | ou          | type     | role     | totalElements | indice |
+      | user1         | Company A   | COMPANY  | Manager  | 2             | 0      |
+      | user1         | Team Beta   | TEAM     | Member   | 2             | 1      |
+      | user2         | Company B   | COMPANY  | Manager  | 2             | 0      |
+      | user2         | Team Beta   | TEAM     | Member   | 2             | 1      |
+      | user3         | Division A1 | DIVISION | Operator | 2             | 0      |
+      | user3         | Team Beta   | TEAM     | Member   | 2             | 1      |
+      | lifecycle-c10 | Team Alpha  | TEAM     | Member   | 1             | 0      |
 
   Scenario: 902 - Should return 404 for an unknown account
     When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/organizational-units' with method 'GET'

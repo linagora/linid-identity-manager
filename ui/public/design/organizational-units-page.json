@@ -63,6 +63,16 @@
             "square": true
           }
         },
+        "roleNames": {
+          "q-avatar": {
+            "size": "28px",
+            "color": "indigo-8",
+            "textColor": "white"
+          },
+          "q-chip": {
+            "square": true
+          }
+        },
         "createdBy": {
           "q-avatar": {
             "size": "28px",

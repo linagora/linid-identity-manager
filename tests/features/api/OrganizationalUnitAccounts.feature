@@ -4,8 +4,8 @@ Feature: Test API Organizational unit account endpoints
   # Each scenario creates its own organizational unit, account and functional role, and deletes them at the end;
   # deleting an account or an organizational unit cascades to their relationships.
   # Creating an account automatically attaches it to its organizational unit.
-  # Attaching an account through the endpoint requires a functional role, which is optional at database level:
-  # deleting the role keeps the relationship.
+  # Attaching an account through the endpoint requires a functional role; a role held by an account cannot be
+  # deleted until the relationship is detached.
 
   ################## Attach (POST /organizational-units/{id}/accounts) ##################
   ## 101 Should attach an account to an organizational unit
@@ -16,13 +16,15 @@ Feature: Test API Organizational unit account endpoints
   ## 106 Should default the relationship extra parameters when the attach payload omits them
   ## 107 Should return 400 with a bad request payload (missing roleId)
   ## 108 Should return 404 when attaching with an unknown role
-  ## 109 Should keep the relationship when the functional role is deleted
+  ## 109 Should refuse to delete the functional role while the relationship exists
 
   ################## Update relationship (PUT /organizational-units/{id}/accounts/{accountId}) ##################
   ## 201 Should update the relationship extra parameters
   ## 202 Should return 404 when the account is not attached
   ## 203 Should return 404 when updating on an unknown organizational unit
   ## 204 Should keep the relationship extra parameters when the update payload omits them
+  ## 205 Should update the functional role of the relationship
+  ## 206 Should return 404 when updating with an unknown role
 
   ################## Detach (DELETE /organizational-units/{id}/accounts/{accountId}) ##################
   ## 301 Should detach an account from an organizational unit
@@ -398,7 +400,7 @@ Feature: Test API Organizational unit account endpoints
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
     Then I expect status code is 204
 
-  Scenario: 109 - Should keep the relationship when the functional role is deleted
+  Scenario: 109 - Should refuse to delete the functional role while the relationship exists
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
       """
       {
@@ -454,14 +456,21 @@ Feature: Test API Organizational unit account endpoints
     And  I expect '{{response.body.roleId}}' is '{{ctx.roleId}}'
 
     When I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
-    Then I expect status code is 204
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.role.in_use'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts?id={{ctx.accountId}}' with method 'GET'
     Then I expect status code is 200
     And  I expect '{{response.body.content.length}}' is '1'
     And  I expect '{{response.body.content[0].id}}' is '{{ctx.accountId}}'
-    And  I expect '{{response.body.content[0].roleId}}' is empty
-    And  I expect '{{response.body.content[0].roleName}}' is empty
+    And  I expect '{{response.body.content[0].roleId}}' is '{{ctx.roleId}}'
+    And  I expect '{{response.body.content[0].roleName}}' is 'Role 109'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
+    Then I expect status code is 204
 
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204
@@ -631,6 +640,133 @@ Feature: Test API Organizational unit account endpoints
       """
     Then I expect status code is 200
     And  I expect '{{response.body.extraParameters.role}}' is 'manager'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 205 - Should update the functional role of the relationship
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-account-205",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-oua-205",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john-oua-205@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/roles' with method 'POST' with body:
+      """
+      {
+        "code": "ROLE-OUA-205",
+        "name": "Role 205",
+        "description": "Role created by scenario 205",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'roleId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "roleId": "{{ctx.roleId}}"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.organizationalUnitId}}' is '{{ctx.ouId}}'
+    And  I expect '{{response.body.accountId}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.roleId}}' is '{{ctx.roleId}}'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts?id={{ctx.accountId}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I expect '{{response.body.content[0].roleId}}' is '{{ctx.roleId}}'
+    And  I expect '{{response.body.content[0].roleName}}' is 'Role 205'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/organizational-units' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content.length}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '{{ctx.ouId}}'
+    And  I expect '{{response.body.content[0].roleId}}' is '{{ctx.roleId}}'
+    And  I expect '{{response.body.content[0].roleName}}' is 'Role 205'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
+    Then I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 206 - Should return 404 when updating with an unknown role
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-account-206",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-oua-206",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john-oua-206@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+      """
+      {
+        "roleId": "00000000-0000-4000-8000-000000000000"
+      }
+      """
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.role.not_found'
+    And  I expect '{{response.body.status}}' is '404'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts?id={{ctx.accountId}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.content[0].roleId}}' is '00000000-0000-4000-8000-00000000f001'
 
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
     Then I expect status code is 204

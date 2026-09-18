@@ -669,10 +669,30 @@
     "GenericEditableTableCard": {
       "title": "Organizational units",
       "loadError": "Unable to load the organizational units. Please try again later.",
+      "editButton": "Edit",
+      "updateSuccess": "Functional role successfully updated.",
+      "updateError": "Unable to update the functional role. Please try again later.",
       "columns": {
         "name": "Name",
         "type": "Type",
+        "roleName": "Functional role",
         "status": "Status"
+      },
+      "EditFormDialog": {
+        "title": "Edit the functional role held in {name}",
+        "ButtonsCard": {
+          "confirm": "Save",
+          "confirmLoading": "Saving...",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "roleId": {
+            "label": "Functional role *",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        }
       },
       "GenericEntityTable": {
         "noData": "No organizational unit for this account.",

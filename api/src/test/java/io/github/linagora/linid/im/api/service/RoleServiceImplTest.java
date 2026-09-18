@@ -44,6 +44,7 @@ import io.github.linagora.linid.im.api.persistence.model.Role;
 import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
 import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.RoleDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -84,6 +85,9 @@ class RoleServiceImplTest {
 
     @Mock
     private RoleMapper roleMapper;
+
+    @Mock
+    private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
 
     @InjectMocks
     private RoleServiceImpl roleService;
@@ -332,11 +336,32 @@ class RoleServiceImplTest {
         var entity = createSampleRoleView(id);
 
         when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
+        when(organizationalUnitAccountRepository.existsByRoleId(id)).thenReturn(false);
 
         roleService.deleteById(userPrincipal, id);
 
         verify(roleDistinctViewRepository).findFirstById(id);
         verify(roleRepository).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Should throw ApiException 400 when deleting a role held by an account")
+    void testDeleteById_shouldThrow400WhenHeld() {
+        UUID id = UUID.randomUUID();
+        var entity = createSampleRoleView(id);
+
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
+        when(organizationalUnitAccountRepository.existsByRoleId(id)).thenReturn(true);
+
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> roleService.deleteById(userPrincipal, id)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), exception.getStatusCode());
+        assertEquals("error.role.in_use", exception.getError().key());
+
+        verify(roleRepository, never()).deleteById(any(UUID.class));
     }
 
     @Test

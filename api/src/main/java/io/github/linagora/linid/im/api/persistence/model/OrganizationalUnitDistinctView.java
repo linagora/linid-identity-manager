@@ -109,6 +109,13 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
     private String parentNames;
 
     /**
+     * Comma-separated names of the distinct functional roles held by the accounts
+     * attached to this organizational unit.
+     */
+    @Column(name = "role_names")
+    private String roleNames;
+
+    /**
      * Time range during which the organizational unit is suspended. {@code null} when no suspension
      * is configured.
      */
@@ -194,6 +201,8 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
      * @param suspended whether the organizational unit is currently suspended.
      * @param status the computed organizational unit status.
      * @param extraParameters additional deployment-specific attributes stored as JSON.
+     * @param roleNames the names of the distinct functional roles held by the accounts attached to the
+     *                  organizational unit, represented as a comma-separated list.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public OrganizationalUnitDistinctView(final String createdBy,
@@ -212,7 +221,8 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
                                           final String reactivationComment,
                                           final boolean suspended,
                                           final OrganizationalUnitStatusEnum status,
-                                          final Map<String, Object> extraParameters) {
+                                          final Map<String, Object> extraParameters,
+                                          final String roleNames) {
         super(createdBy, updatedBy, insertDate, updateDate);
         this.id = id;
         this.name = name;
@@ -227,5 +237,6 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
         this.suspended = suspended;
         this.status = status;
         this.extraParameters = extraParameters;
+        this.roleNames = roleNames;
     }
 }

@@ -24,6 +24,20 @@
         }
       }
     },
+    "ConfirmDialogButton": {
+      "title": "Supprimer",
+      "submitSuccess": "Le rôle a été supprimé avec succès.",
+      "submitError": "Impossible de supprimer le rôle. Veuillez réessayer plus tard.",
+      "ConfirmationDialog": {
+        "title": "Supprimer le rôle {name}",
+        "content": "Voulez-vous vraiment supprimer le rôle {name} ?",
+        "ButtonsCard": {
+          "cancel": "Annuler",
+          "confirm": "Supprimer",
+          "confirmLoading": "Suppression..."
+        }
+      }
+    },
     "RemoveFavoriteNotifyMessage": "Le favori '{name}' a été supprimé.",
     "CreateFavoriteNotifyMessage": "Le favori '{name}' a été créé.",
     "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
@@ -31,6 +45,7 @@
       "code": "Code",
       "name": "Libellé",
       "description": "Description",
+      "organizationalUnits": "Unités organisationnelles",
       "createdBy": "Créé par",
       "insertDate": "Date de création",
       "actions": "Actions"
@@ -112,6 +127,10 @@
         "description": {
           "type": "Description",
           "separator": "ou"
+        },
+        "organizationalUnitId": {
+          "type": "Unité organisationnelle",
+          "separator": "ou"
         }
       },
       "LinidFilterPanel": {
@@ -120,6 +139,7 @@
           "code": "Code",
           "name": "Libellé",
           "description": "Description",
+          "organizationalUnitId": "Unité organisationnelle",
           "createdBy": "Créé par",
           "insertDate": "Date de création"
         }
@@ -163,6 +183,28 @@
         },
         "validation": {
           "invalidDate": "Date incorrecte. Format attendu : {format}"
+        }
+      },
+      "TreeSearchFilterPanel": {
+        "searchButton": "Rechercher",
+        "GenericTree": {
+          "types": {
+            "root": {
+              "label": "Linagora"
+            },
+            "COMPANY": {
+              "label": "{name}"
+            },
+            "DIVISION": {
+              "label": "{name}"
+            },
+            "DEPARTMENT": {
+              "label": "{name}"
+            },
+            "TEAM": {
+              "label": "{name}"
+            }
+          }
         }
       }
     }

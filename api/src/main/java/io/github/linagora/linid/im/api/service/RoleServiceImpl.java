@@ -33,6 +33,7 @@ import io.github.linagora.linid.im.api.persistence.model.Role;
 import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
 import io.github.linagora.linid.im.api.persistence.model.RoleViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.RoleDistinctViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -68,6 +69,8 @@ public class RoleServiceImpl implements RoleService {
      * Repository for read-only distinct role view operations.
      */
     private final RoleDistinctViewRepository roleDistinctViewRepository;
+
+    private final OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
 
     /**
      * Executor building distinct projections from filtered view queries.
@@ -159,6 +162,14 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
         findById(userPrincipal, id);
+
+        if (organizationalUnitAccountRepository.existsByRoleId(id)) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST.value(),
+                    I18nMessage.of("error.role.in_use", Map.of("id", id.toString()))
+            );
+        }
+
         roleRepository.deleteById(id);
     }
 }

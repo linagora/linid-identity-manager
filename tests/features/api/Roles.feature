@@ -13,10 +13,12 @@ Feature: Test API Role endpoints
   ################## Find By Id (GET /roles/{id}) ##########
   ## 301 Should return 200 for existing role
   ## 302 Should return 404 for unknown role id
+  ## 303 Should expose whether a role can be deleted
 
   ################## Delete (DELETE /roles/{id}) ###########
   ## 401 Should return 204 when deleting existing role
   ## 402 Should return 404 when deleting unknown role
+  ## 403 Should return 400 when deleting a role held by an account
 
   ################## Update (PUT /roles/{id}) ##############
   ## 501 Should update the editable attributes of an existing role
@@ -351,6 +353,80 @@ Feature: Test API Role endpoints
     And   I expect '{{response.body.errorKey}}' is 'error.role.not_found'
     And   I expect '{{response.body.status}}' is '404'
 
+  Scenario: 303 - Should expose whether a role can be deleted
+    When  I request '{{env.E2E_API_URL}}/roles' with method 'POST' with body:
+      """
+      {
+        "code": "ROLE-304",
+        "name": "Deletable Role",
+        "description": "Role created by scenario 304",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'roleId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.deletable}}' is 'true'
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-role-304",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'ouId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-role-304",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john-role-304@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.rootID}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}/accounts' with method 'POST' with body:
+      """
+      {
+        "accountId": "{{ctx.accountId}}",
+        "roleId": "{{ctx.roleId}}",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.deletable}}' is 'false'
+
+    When  I request '{{env.E2E_API_URL}}/roles?code=ROLE-304' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.totalElements}}' is '1'
+    And   I expect '{{response.body.content[0].deletable}}' is 'false'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
+    Then  I expect status code is 204
+
   ####################################################
   ################## Delete (DELETE /roles/{id}) ######
   ####################################################
@@ -379,6 +455,66 @@ Feature: Test API Role endpoints
     Then  I expect status code is 404
     And   I expect '{{response.body.errorKey}}' is 'error.role.not_found'
     And   I expect '{{response.body.status}}' is '404'
+
+  Scenario: 403 - Should return 400 when deleting a role held by an account
+    When  I request '{{env.E2E_API_URL}}/roles' with method 'POST' with body:
+      """
+      {
+        "code": "ROLE-403",
+        "name": "Held Role",
+        "description": "Role created by scenario 403",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'roleId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-role-403",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'ouId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-role-403",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john-role-403@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.ouId}}",
+        "roleId": "{{ctx.roleId}}",
+        "extraParameters": {}
+      }
+      """
+    Then  I expect status code is 201
+    And   I store 'accountId' as '{{response.body.id}}' in context
+
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
+    Then  I expect status code is 400
+    And   I expect '{{response.body.errorKey}}' is 'error.role.in_use'
+    And   I expect '{{response.body.status}}' is '400'
+
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.deletable}}' is 'false'
+
+    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
+    Then  I expect status code is 204
+    When  I request '{{env.E2E_API_URL}}/roles/{{ctx.roleId}}' with method 'DELETE'
+    Then  I expect status code is 204
 
   ####################################################
   ################## Update (PUT /roles/{id}) #########

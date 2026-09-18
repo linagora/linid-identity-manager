@@ -113,6 +113,29 @@
     },
     "generic-editable-table-card": {
       "q-card": { "flat": true, "bordered": false },
+      "edit-button": {
+        "q-btn": {
+          "color": "primary",
+          "icon": "edit",
+          "flat": true,
+          "dense": true
+        }
+      },
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      },
       "generic-entity-table": {
         "q-table": {}
       }

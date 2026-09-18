@@ -31,6 +31,16 @@
         ],
         "emitOnSubmit": "description-updated"
       }
+    },
+    {
+      "zone": "moduleRolesPage.row-actions",
+      "plugin": "catalogUI/ConfirmDialogButton",
+      "props": {
+        "url": "/roles/{{ entity.id }}",
+        "method": "DELETE",
+        "disableWhen": "{{ not entity.deletable }}",
+        "emitOnSubmit": "role-deleted"
+      }
     }
   ],
   "options": {
@@ -42,7 +52,7 @@
     "enableActions": true,
     "enableSeeButton": false,
     "creationPagePath": "/roles/new",
-    "reloadTableOn": ["description-updated"],
+    "reloadTableOn": ["description-updated", "role-deleted"],
     "filters": [
       {
         "name": "code",
@@ -55,6 +65,18 @@
       {
         "name": "description",
         "type": "text"
+      },
+      {
+        "name": "organizationalUnitId",
+        "type": "tree",
+        "options": {
+          "url": "/organizational-units",
+          "idKey": "id",
+          "parentsKey": "parents",
+          "parentIdKey": "parent",
+          "nodesQuerySize": 50,
+          "typeKey": "type"
+        }
       },
       {
         "name": "createdBy",
@@ -84,6 +106,13 @@
         "label": "columns.description",
         "name": "description",
         "field": "description",
+        "sortable": true,
+        "align": "left"
+      },
+      {
+        "label": "columns.organizationalUnits",
+        "name": "organizationalUnits",
+        "field": "organizationalUnits",
         "sortable": true,
         "align": "left"
       },

@@ -26,6 +26,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Exposed the **audit information** of the relationship (`createdBy`, `updatedBy`, `insertDate`, `updateDate`) on the
   organizational units of an account (`GET /accounts/{id}/organizational-units`) and on the accounts of an
   organizational unit (`GET /organizational-units/{id}/accounts`).
+- Exposed the **functional role** held by an account on each of its organizational units
+  (`GET /accounts/{id}/organizational-units`), and allowed to change it through the relationship update
+  (`PUT /organizational-units/{id}/accounts/{accountId}`).
+- Exposed the **functional roles held** in each organizational unit (`roleNames`, filterable) and whether a role
+  **can be deleted** (`deletable`); deleting a role held by an account is refused with a 400 error.
 
 #### Frontend
 
@@ -34,6 +39,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   selector to its attach dialog and to the account creation page.
 - Added the **functional roles pages**: a list with text and date filters and an inline description editor, and a
   creation page (code, label, description).
+- Added the **organizational units** column and filter to the roles list, and a **delete** action guarded by a
+  confirmation and disabled while the role is held by an account.
+- Added a **functional role** filter to the organizational units list, and the role column with its edition to the
+  organizational units table of the account details page.
 
 ### Fixed
 
@@ -59,7 +68,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Served the **CA-signed development certificate** from the Quasar dev server.
 - Fixed flaky E2E tests caused by shared state between front and API scenarios.
 - Reformatted the E2E feature files with aligned step keywords for better readability.
-- Seeded functional roles in the E2E database and waited for the roles table before seeding it.
+- Seeded functional roles, held on the organizational unit accounts of the E2E and demo databases, and waited for
+  the roles table before seeding the E2E one.
 
 ## [0.9.0] - 2026-09-08
 

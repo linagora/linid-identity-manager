@@ -34,9 +34,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`DELETE /groups/{id}/accounts/{accountId}`) an account. Deleting a group or an account detaches it.
 - Exposed the **groups of an account** (`GET /accounts/{id}/groups`), with the group code, name, parent group,
   organizational unit, application and the audit information of the relationship.
+- Added the **avatar upload and deletion endpoints** (`POST /avatars/{entity}/{id}`, `DELETE /avatars/{entity}/{id}`)
+  for accounts, applications, organizational units and groups, including:
+  - Validation of the entity type, of the entity existence, of the file extension (`avatar.extension`) and of
+    the file size (`avatar.max-size`, in MB).
+  - Storage under `{avatar.location}/{entity}/{id}.{avatar.extension}`, replacing any existing avatar through a
+    temporary file, so a failed upload never leaves the entity without its previous image.
+  - A `docker/avatars` directory shared between the API and Nginx, which serves it under `/avatars` without content
+    sniffing and fully sandboxed, seeded with a default administrator avatar.
 
 #### Frontend
 
+- Added the **avatar image import** on the account, application, organizational unit and group details pages: the
+  stored image is displayed instead of the generated avatar, and can be uploaded or deleted from the profile
+  panel.
 - Added the **logout entry** of the user profile menu.
 - Added the **functional role** column to the accounts table of the organizational unit details page, and a role
   selector to its attach dialog and to the account creation page.

@@ -19,6 +19,16 @@
           "seed": ["{{ entity.firstname }}", " ", "{{ entity.lastname }}"],
           "style": "initials"
         },
+        "avatarLocation": "/avatars/accounts/{{ entity.id }}.png",
+        "importOptions": {
+          "enabled": true,
+          "maxFileSize": 10,
+          "allowedExtensions": ["png"],
+          "endpoints": {
+            "upload": "/avatars/accounts/{{ entity.id }}",
+            "delete": "/avatars/accounts/{{ entity.id }}"
+          }
+        },
         "updateEndpoint": "/accounts/{{ entity.id }}",
         "updateBody": {
           "externalId": "{{ entity.externalId }}",

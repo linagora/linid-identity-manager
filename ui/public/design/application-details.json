@@ -18,6 +18,45 @@
           }
         }
       },
+      "avatar": {
+        "menu-button": {
+          "q-btn": { "round": true, "icon": "edit", "outline": false },
+          "q-menu": { "anchor": "bottom right" },
+          "edit-image-button": {
+            "form-dialog-button": {
+              "q-btn": {
+                "flat": true,
+                "align": "left",
+                "icon": "photo_camera",
+                "outline": false
+              },
+              "form-dialog": {
+                "buttons-card": {
+                  "confirm-button": { "q-btn": { "outline": false } }
+                }
+              }
+            }
+          },
+          "delete-image-button": {
+            "confirm-dialog-button": {
+              "q-btn": {
+                "flat": true,
+                "align": "left",
+                "icon": "delete",
+                "color": "negative",
+                "outline": false
+              },
+              "confirmation-dialog": {
+                "buttons-card": {
+                  "confirm-button": {
+                    "q-btn": { "color": "negative", "outline": false }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "actions": {
         "buttons-card": {
           "q-card": { "flat": true },

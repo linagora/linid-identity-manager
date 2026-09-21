@@ -24,6 +24,16 @@
           "seed": ["{{ entity.code }}"],
           "style": "shapes"
         },
+        "avatarLocation": "/avatars/groups/{{ entity.id }}.png",
+        "importOptions": {
+          "enabled": true,
+          "maxFileSize": 10,
+          "allowedExtensions": ["png"],
+          "endpoints": {
+            "upload": "/avatars/groups/{{ entity.id }}",
+            "delete": "/avatars/groups/{{ entity.id }}"
+          }
+        },
         "updateEndpoint": "/groups/{{ entity.id }}",
         "updateBody": {
           "code": "{{ entity.code }}",

@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Undefined]
 
+### Added
+
+#### Backend
+
+- Added the **avatar upload and deletion endpoints** (`POST /avatars/{entity}/{id}`, `DELETE /avatars/{entity}/{id}`)
+  for accounts, applications, organizational units and groups, including:
+  - Validation of the entity type, of the entity existence, of the file extension (`avatar.extension`) and of
+    the file size (`AVATAR_MAX_SIZE`, in MB, through the Spring multipart limits).
+  - Validation of the file content: the real type is detected from the bytes, and the image is re-encoded from
+    its pixels only before being stored.
+  - Storage under `{avatar.location}/{entity}/{id}.{avatar.extension}`, replacing any existing avatar through a
+    temporary file, so a failed upload never leaves the entity without its previous image.
+  - A `docker/avatars` directory shared between the API and Nginx, which serves it under `/avatars` without content
+    sniffing and fully sandboxed, seeded with a default administrator avatar.
+
+#### Frontend
+
+- Added the **avatar image import** on the account, application, organizational unit and group details pages: the
+  stored image is displayed instead of the generated avatar, and can be uploaded or deleted from the profile
+  panel.
+
 ### Fixed
 
 #### Security

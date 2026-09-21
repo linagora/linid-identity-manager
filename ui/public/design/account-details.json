@@ -27,7 +27,8 @@
               "q-btn": {
                 "color": "primary",
                 "icon": "edit",
-                "outline": false
+                "outline": false,
+                "round": true
               },
               "form-dialog": {
                 "q-dialog": { "persistent": false },
@@ -52,13 +53,13 @@
         "q-card": {},
         "externalId": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "badge" },
+            "q-icon": { "color": "secondary", "name": "badge" },
             "q-card": {}
           }
         },
         "email": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "alternate_email" },
+            "q-icon": { "color": "secondary", "name": "alternate_email" },
             "q-card": {}
           }
         }
@@ -68,28 +69,31 @@
       "lifecycle": {
         "entity-details-card": {
           "q-card": {},
+          "title-section": {
+            "q-card-section": { "horizontal": true }
+          },
           "insertDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-icon": { "color": "secondary", "name": "event_available" },
               "q-card": {}
             }
           },
           "activationAt": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event" },
+              "q-icon": { "color": "secondary", "name": "event" },
               "q-card": {}
             }
           },
           "validityPeriod": {
             "start": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             }
@@ -97,13 +101,13 @@
           "suspensionPeriod": {
             "start": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             }
@@ -113,6 +117,9 @@
     },
     "generic-editable-table-card": {
       "q-card": { "flat": true, "bordered": false },
+      "header-section": {
+        "q-card-section": { "horizontal": true }
+      },
       "generic-entity-table": {
         "q-table": {}
       }
@@ -120,6 +127,9 @@
     "groups": {
       "generic-editable-table-card": {
         "q-card": { "flat": true, "bordered": false },
+        "header-section": {
+          "q-card-section": { "horizontal": true }
+        },
         "generic-entity-table": {
           "q-table": {}
         }

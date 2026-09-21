@@ -40,11 +40,13 @@ import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
 import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -82,6 +84,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Accounts", description = "Account management endpoints")
 public class AccountController {
+
+    /**
+     * Service removing the avatar image of a deleted entity.
+     */
+    private final AvatarService avatarService;
 
     /**
      * Service handling account business logic.
@@ -278,6 +285,7 @@ public class AccountController {
         @PathVariable final UUID id) {
         log.info("[{}] Received DELETE request for account {}", userPrincipal.getEmail(), id);
         accountService.deleteById(userPrincipal, id);
+        avatarService.deleteQuietly(AvatarEntity.ACCOUNTS, id);
         return ResponseEntity.noContent().build();
     }
 

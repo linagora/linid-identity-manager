@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.group.GroupAccountDTO;
 import io.github.linagora.linid.im.api.model.group.GroupAccountMapper;
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
@@ -37,6 +38,7 @@ import io.github.linagora.linid.im.api.model.group.GroupViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -73,6 +75,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "Groups", description = "Group management endpoints")
 public class GroupController {
+
+    /**
+     * Service removing the avatar image of a deleted entity.
+     */
+    private final AvatarService avatarService;
 
     /**
      * Service handling group business logic.
@@ -273,6 +280,7 @@ public class GroupController {
         @PathVariable final UUID id) {
         log.info("[{}] Received DELETE request for group {}", userPrincipal.getEmail(), id);
         groupService.deleteById(userPrincipal, id);
+        avatarService.deleteQuietly(AvatarEntity.GROUPS, id);
         return ResponseEntity.noContent().build();
     }
 }

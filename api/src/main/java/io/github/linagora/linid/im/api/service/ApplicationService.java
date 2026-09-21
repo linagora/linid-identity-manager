@@ -75,6 +75,14 @@ public interface ApplicationService {
     Application findById(UserPrincipal userPrincipal, UUID id);
 
     /**
+     * Checks whether an application exists for the given identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the application UUID
+     */
+    void existsById(UserPrincipal userPrincipal, UUID id);
+
+    /**
      * Retrieves an application view by its unique identifier.
      *
      * @param userPrincipal the authenticated user

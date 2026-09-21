@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
@@ -40,6 +41,7 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -76,6 +78,11 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Tag(name = "Organizational units", description = "Organizational units management endpoints")
 public class OrganizationalUnitController {
+
+    /**
+     * Service removing the avatar image of a deleted entity.
+     */
+    private final AvatarService avatarService;
 
     /**
      * Service handling organizational unit business logic.
@@ -357,6 +364,7 @@ public class OrganizationalUnitController {
         @PathVariable final UUID id) {
         log.info("[{}] Received DELETE request for organizational unit {}", userPrincipal.getEmail(), id);
         service.deleteById(userPrincipal, id);
+        avatarService.deleteQuietly(AvatarEntity.ORGANIZATIONAL_UNITS, id);
         return ResponseEntity.noContent().build();
     }
 }

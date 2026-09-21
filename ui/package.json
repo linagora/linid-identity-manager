@@ -38,6 +38,7 @@
     "postinstall": "quasar prepare"
   },
   "dependencies": {
+    "@fontsource/inter": "5.3.0",
     "@linagora/linid-im-front-corelib": "0.0.102",
     "@module-federation/enhanced": "2.7.0",
     "@quasar/extras": "2.0.2",

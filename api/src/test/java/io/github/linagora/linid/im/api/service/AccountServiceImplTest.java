@@ -139,6 +139,7 @@ class AccountServiceImplTest {
     private AccountCreationValidator accountCreationValidator;
     @Mock
     private SpringQueryExecutor executor;
+
     @InjectMocks
     private AccountServiceImpl accountService;
     private UserPrincipal userPrincipal;

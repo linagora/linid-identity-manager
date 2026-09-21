@@ -92,6 +92,7 @@ services:
     volumes:
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
       - ./resources/superset.yaml:/app/superset.yaml:ro
+      - ../avatars:/app/avatars
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
       interval: 5s
@@ -120,6 +121,7 @@ services:
       - ./resources/server.crt:/etc/nginx/certs/server.crt:ro
       - ./resources/server.key:/etc/nginx/certs/server.key:ro
       - ./resources/${CONFIG_DIR}/conf/config.json:/usr/share/nginx/html/config.json
+      - ../avatars:/usr/share/nginx/html/avatars:ro
     depends_on:
       catalog-ui:
         condition: service_started

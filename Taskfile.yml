@@ -228,8 +228,18 @@ tasks:
           SERVICE_NAME: Docker services
           DIR: docker/e2e
           ENV_FILE: "{{.ENV_FILE}}"
+      - task: clean:avatars
       - echo ""
       - echo "  E2E environment stopped."
+
+  clean:avatars:
+    desc: Remove the avatars uploaded by the tests, keeping the default administrator one
+    internal: true
+    cmd: |
+      # The API container runs as root, so the uploaded files belong to root on the host: give them back
+      # to the current user before cleaning them.
+      docker run --rm -v "$(pwd)/docker/avatars:/avatars" alpine chown -R "$(id -u):$(id -g)" /avatars
+      git clean -fdxq docker/avatars
 
   restart:e2e:
     desc: Restart the full E2E environment

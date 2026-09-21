@@ -103,6 +103,7 @@ class GroupServiceImplTest {
     @Mock
     private GroupMapper mapper;
 
+
     @InjectMocks
     private GroupServiceImpl service;
 

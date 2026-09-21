@@ -225,7 +225,6 @@
     }
   },
   "moduleApplicationDetailsPage": {
-    "title": "Application details",
     "error": "Unable to load the application. Please try again later.",
     "EntityProfilePanel": {
       "title": "{name}",

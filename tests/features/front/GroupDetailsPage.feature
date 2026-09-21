@@ -75,7 +75,6 @@ Feature: Test Group details page
     When I click on '[data-cy="see-button_{{ctx.groupId}}"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups/{{ctx.groupId}}"
     And  I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-details-page_title"]' contains "Détails du groupe"
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_avatar-img"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' not exists

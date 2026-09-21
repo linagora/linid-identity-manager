@@ -219,7 +219,6 @@
     }
   },
   "moduleGroupDetailsPage": {
-    "title": "Détails du groupe",
     "error": "Impossible de charger le groupe. Veuillez réessayer plus tard.",
     "EntityProfilePanel": {
       "title": "{name}",

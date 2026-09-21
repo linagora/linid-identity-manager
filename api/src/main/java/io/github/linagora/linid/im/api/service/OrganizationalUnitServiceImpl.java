@@ -87,6 +87,11 @@ import java.util.UUID;
 public class OrganizationalUnitServiceImpl implements OrganizationalUnitService {
 
     /**
+     * Service removing the avatar image of the deleted entity.
+     */
+    private final AvatarService avatarService;
+
+    /**
      * Repository used to manage {@link OrganizationalUnit} persistence operations.
      */
     private final OrganizationalUnitRepository organizationalUnitRepository;
@@ -405,6 +410,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         existsById(userPrincipal, id);
 
         organizationalUnitRepository.deleteById(id);
+        avatarService.deleteQuietly("organizational-units", id);
     }
 
     @Override

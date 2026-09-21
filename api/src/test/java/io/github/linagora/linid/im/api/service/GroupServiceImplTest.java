@@ -103,6 +103,9 @@ class GroupServiceImplTest {
     @Mock
     private GroupMapper mapper;
 
+    @Mock
+    private AvatarService avatarService;
+
     @InjectMocks
     private GroupServiceImpl service;
 

@@ -166,4 +166,21 @@ class GlobalExceptionHandlerTest {
     assertEquals("must not be blank", errorContext.get("email"));
     assertEquals("must not be blank", errorContext.get("lastname"));
   }
+
+  @Test
+  @DisplayName("Should return 413 when the upload exceeds the multipart limits")
+  void testHandleMaxUploadSizeExceededException_shouldReturn413() {
+    Mockito.when(i18nService.translate(Mockito.any())).thenReturn("Too large");
+
+    ResponseEntity<Map<String, Object>> response =
+        handler.handleMaxUploadSizeExceededException();
+
+    assertNotNull(response);
+    assertEquals(413, response.getStatusCode().value());
+    Map<String, Object> body = response.getBody();
+    assertNotNull(body);
+    assertEquals("Too large", body.get("error"));
+    assertEquals("error.upload.too_large", body.get("errorKey"));
+    assertEquals(413, body.get("status"));
+  }
 }

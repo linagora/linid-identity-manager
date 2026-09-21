@@ -74,5 +74,11 @@
   "error.superset.guest_token": "Impossible de récupérer le token d'invité",
   "error.superset.session_cookie": "Cookie de session Superset absent",
   "error.superset.slug_configuration": "Impossible de récupérer la configuration du dashboard Superset associé au slug.",
-  "error.user_preference.not_found": "Préférence de l'utilisateur introuvable: {key}"
+  "error.user_preference.not_found": "Préférence de l'utilisateur introuvable: {key}",
+  "error.avatar.entity.unsupported": "Type d'entité non supporté pour un avatar : {entity}",
+  "error.avatar.file.empty": "Le fichier d'avatar envoyé est vide.",
+  "error.avatar.extension.invalid": "L'extension du fichier d'avatar doit être {extension}.",
+  "error.avatar.storage": "Impossible d'enregistrer l'avatar de {id}.",
+  "error.avatar.deletion": "Impossible de supprimer l'avatar de {id}.",
+  "error.upload.too_large": "Le fichier envoyé dépasse la taille maximale autorisée."
 }

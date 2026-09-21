@@ -70,6 +70,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupServiceImpl implements GroupService {
 
     /**
+     * Service removing the avatar image of the deleted entity.
+     */
+    private final AvatarService avatarService;
+
+    /**
      * Repository used to manage {@link Group} persistence operations.
      */
     private final GroupRepository groupRepository;
@@ -248,6 +253,7 @@ public class GroupServiceImpl implements GroupService {
         var entity = findById(userPrincipal, id);
 
         groupRepository.delete(entity);
+        avatarService.deleteQuietly("groups", id);
     }
 
     /**

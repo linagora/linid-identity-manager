@@ -112,3 +112,8 @@ superset:
   username: ${SUPERSET_USERNAME}
   password: ${SUPERSET_PASSWORD}
   rls-config: ${SUPERSET_RLS_CONFIG}
+
+avatar:
+  location: ${AVATAR_LOCATION:/app/avatars}
+  extension: ${AVATAR_EXTENSION:png}
+  max-size: ${AVATAR_MAX_SIZE:10}

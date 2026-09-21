@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.controller.handler;
 
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.linagora.linid.im.corelib.i18n.I18nService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -152,5 +154,19 @@ public class GlobalExceptionHandler {
         body.put("timestamp", Instant.now().toEpochMilli());
 
         return ResponseEntity.badRequest().body(body);
+    }
+
+    /**
+     * Handles uploads rejected by the servlet container because they exceed the configured multipart limits,
+     * before any controller runs.
+     *
+     * <p>Returns the same structured response as {@link #handleApiException} with HTTP 413 status.
+     *
+     * @return a {@link ResponseEntity} containing the structured error body and HTTP 413 status
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleMaxUploadSizeExceededException() {
+        return handleApiException(new ApiException(HttpStatus.PAYLOAD_TOO_LARGE.value(),
+            I18nMessage.of("error.upload.too_large")));
     }
 }

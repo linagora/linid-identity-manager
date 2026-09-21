@@ -50,6 +50,7 @@ import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
 import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
@@ -60,6 +61,7 @@ import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUn
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
@@ -84,6 +86,9 @@ import org.springframework.http.ResponseEntity;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: AccountController")
 class AccountControllerTest {
+
+    @Mock
+    private AvatarService avatarService;
 
     @Mock
     private AccountService accountService;
@@ -400,6 +405,7 @@ class AccountControllerTest {
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(accountService).deleteById(userPrincipal, id);
+        verify(avatarService).deleteQuietly(AvatarEntity.ACCOUNTS, id);
     }
 
     @Test

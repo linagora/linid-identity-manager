@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
@@ -40,6 +41,7 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -68,6 +70,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: OrganizationalUnitController")
 class OrganizationalUnitControllerTest {
+
+    @Mock
+    private AvatarService avatarService;
 
     @Mock
     private OrganizationalUnitService service;
@@ -230,11 +235,13 @@ class OrganizationalUnitControllerTest {
     @Test
     @DisplayName("Should delete organizational unit by id")
     void testDeleteById() {
+        var id = UUID.randomUUID();
         doNothing().when(service).deleteById(any(), any());
 
-        var response = controller.deleteById(userPrincipal, UUID.randomUUID());
+        var response = controller.deleteById(userPrincipal, id);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(avatarService).deleteQuietly(AvatarEntity.ORGANIZATIONAL_UNITS, id);
     }
 }

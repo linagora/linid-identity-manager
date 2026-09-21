@@ -30,9 +30,11 @@ import io.github.linagora.linid.im.api.model.application.ApplicationDTO;
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationViewDTO;
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
@@ -77,6 +79,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "Applications", description = "Application management endpoints")
 public class ApplicationController {
+
+    /**
+     * Service removing the avatar image of a deleted entity.
+     */
+    private final AvatarService avatarService;
 
     /**
      * Service handling application business logic.
@@ -198,6 +205,7 @@ public class ApplicationController {
         @PathVariable final UUID id) {
         log.info("[{}] Received DELETE request for application {}", userPrincipal.getEmail(), id);
         applicationService.deleteById(userPrincipal, id);
+        avatarService.deleteQuietly(AvatarEntity.APPLICATIONS, id);
         return ResponseEntity.noContent().build();
     }
 

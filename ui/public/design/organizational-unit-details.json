@@ -34,7 +34,8 @@
               "q-btn": {
                 "color": "primary",
                 "icon": "edit",
-                "outline": false
+                "outline": false,
+                "round": true
               },
               "form-dialog": {
                 "q-dialog": { "persistent": false },
@@ -59,7 +60,7 @@
         "q-card": {},
         "type": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "category" },
+            "q-icon": { "color": "secondary", "name": "category" },
             "q-card": {}
           }
         }
@@ -136,40 +137,43 @@
       "lifecycle": {
         "entity-details-card": {
           "q-card": {},
+          "title-section": {
+            "q-card-section": { "horizontal": true }
+          },
           "insertDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-icon": { "color": "secondary", "name": "event_available" },
               "q-card": {}
             }
           },
           "createdBy": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "person_add" },
+              "q-icon": { "color": "secondary", "name": "person_add" },
               "q-card": {}
             }
           },
           "updateDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "update" },
+              "q-icon": { "color": "secondary", "name": "update" },
               "q-card": {}
             }
           },
           "updatedBy": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "manage_accounts" },
+              "q-icon": { "color": "secondary", "name": "manage_accounts" },
               "q-card": {}
             }
           },
           "suspensionPeriod": {
             "start": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             },
             "end": {
               "information-card": {
-                "q-icon": { "color": "primary", "name": "event" },
+                "q-icon": { "color": "secondary", "name": "event" },
                 "q-card": {}
               }
             }
@@ -179,6 +183,9 @@
     },
     "generic-editable-table-card": {
       "q-card": { "flat": true, "bordered": false },
+      "header-section": {
+        "q-card-section": { "horizontal": true }
+      },
       "buttons-card": {
         "q-card": { "flat": true },
         "q-card-actions": { "align": "right" },

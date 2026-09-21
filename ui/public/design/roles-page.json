@@ -1,5 +1,12 @@
 {
   "moduleRolesPage": {
+    "buttons-card": {
+      "q-card": { "flat": true },
+      "q-card-actions": { "align": "right" },
+      "create-button": {
+        "q-btn": { "color": "primary", "outline": false }
+      }
+    },
     "generic-entity-table": {
       "q-table": {}
     },
@@ -39,9 +46,10 @@
     },
     "linid-smart-filter": {
       "q-field": {
-        "dense": false
+        "dense": false,
+        "borderless": true
       },
-      "q-menu": {},
+      "q-menu": { "fit": true },
       "q-separator": {},
       "iconSearch": {
         "q-icon": {
@@ -70,9 +78,7 @@
             "color": "deep-purple-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "name": {
           "q-avatar": {
@@ -80,9 +86,7 @@
             "color": "red-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "description": {
           "q-avatar": {
@@ -90,9 +94,7 @@
             "color": "teal-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "organizationalUnitId": {
           "q-avatar": {
@@ -100,9 +102,7 @@
             "color": "blue-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         }
       },
       "linid-filter-panel": {

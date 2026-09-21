@@ -27,7 +27,8 @@
               "q-btn": {
                 "color": "primary",
                 "icon": "edit",
-                "outline": false
+                "outline": false,
+                "round": true
               },
               "form-dialog": {
                 "q-dialog": { "persistent": false },
@@ -52,31 +53,31 @@
         "q-card": {},
         "parentName": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "account_tree" },
+            "q-icon": { "color": "secondary", "name": "account_tree" },
             "q-card": {}
           }
         },
         "email": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "mail" },
+            "q-icon": { "color": "secondary", "name": "mail" },
             "q-card": {}
           }
         },
         "description": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "description" },
+            "q-icon": { "color": "secondary", "name": "description" },
             "q-card": {}
           }
         },
         "organizationalUnitName": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "corporate_fare" },
+            "q-icon": { "color": "secondary", "name": "corporate_fare" },
             "q-card": {}
           }
         },
         "applicationName": {
           "information-card": {
-            "q-icon": { "color": "primary", "name": "apps" },
+            "q-icon": { "color": "secondary", "name": "apps" },
             "q-card": {}
           }
         }
@@ -84,6 +85,9 @@
     },
     "generic-editable-table-card": {
       "q-card": { "flat": true, "bordered": false },
+      "header-section": {
+        "q-card-section": { "horizontal": true }
+      },
       "buttons-card": {
         "q-card": { "flat": true },
         "q-card-actions": { "align": "right" },
@@ -135,27 +139,30 @@
       "audit": {
         "entity-details-card": {
           "q-card": {},
+          "title-section": {
+            "q-card-section": { "horizontal": true }
+          },
           "createdBy": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "person_add" },
+              "q-icon": { "color": "secondary", "name": "person_add" },
               "q-card": {}
             }
           },
           "updatedBy": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "manage_accounts" },
+              "q-icon": { "color": "secondary", "name": "manage_accounts" },
               "q-card": {}
             }
           },
           "insertDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "event_available" },
+              "q-icon": { "color": "secondary", "name": "event_available" },
               "q-card": {}
             }
           },
           "updateDate": {
             "information-card": {
-              "q-icon": { "color": "primary", "name": "update" },
+              "q-icon": { "color": "secondary", "name": "update" },
               "q-card": {}
             }
           }

@@ -132,6 +132,17 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
+    public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        if (applicationRepository.existsById(id)) {
+            return;
+        }
+
+        throw new ApiException(HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.application.not_found", Map.of("id", id.toString())));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ApplicationView findViewById(final UserPrincipal userPrincipal, final UUID id) {
         return applicationViewRepository.findById(id)
             .orElseThrow(() -> new ApiException(

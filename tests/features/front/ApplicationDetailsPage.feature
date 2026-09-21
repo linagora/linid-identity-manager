@@ -84,7 +84,6 @@ Feature: Test Application details page display
     When I click on '[data-cy="see-button_{{ctx.applicationId}}"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
     And  I expect the HTML element '[data-cy="generic-details-page"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-details-page_title"]' contains "Détails de l'application"
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_avatar-img"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' not exists

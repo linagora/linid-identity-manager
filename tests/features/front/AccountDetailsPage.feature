@@ -75,6 +75,10 @@ Feature: Test Account details page display
   ## 172 Both tables should be read-only
   ## 173 Should display an empty organizational units table for an unattached account
   ## 174 Should display an empty groups table for an account without group
+  ## 175 Avatar import - only the edit action is listed while no image is stored
+  ## 176 Avatar import - upload dialog requires an image and cancel closes it
+  ## 177 Avatar import - upload success displays the stored image
+  ## 178 Avatar import - delete success removes the stored image
 
   Scenario: Roundtrip about Account Details
 
@@ -1076,3 +1080,43 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]:eq(1)' contains "Groupes"
     And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) tbody tr' not exists
     And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) .q-table__bottom--nodata' contains "Aucun groupe pour ce compte."
+
+    ## 175 Avatar import - only the edit action is listed while no image is stored
+    And  I expect the HTML element '[data-cy="entity-profile-panel_avatar-menu-button"]' to be visible
+    When I click on '[data-cy="entity-profile-panel_avatar-menu-button"]'
+    Then I expect the HTML element '[data-cy="entity-profile-panel_edit-image-button"]' contains "Mettre à jour"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_delete-image-button"]' not exists
+
+    ## 176 Avatar import - upload dialog requires an image and cancel closes it
+    When I click on '[data-cy="entity-profile-panel_edit-image-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier l'image de Inactive DeactivatedReactivatable"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_file"]' to be visible
+    When I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog"] .q-field__messages' contains "Ce champ est requis."
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 177 Avatar import - upload success displays the stored image
+    When I click on '[data-cy="entity-profile-panel_avatar-menu-button"]'
+    And  I click on '[data-cy="entity-profile-panel_edit-image-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set file input '[data-cy="field_file"]' with file '../features/resources/avatar.png'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" contains "Image mise à jour avec succès."
+    When I request '{{ env.E2E_FRONT_URL }}/avatars/accounts/00000000-0000-4000-8000-0000000000ce.png' with method 'GET'
+    Then I expect status code is 200
+
+    ## 178 Avatar import - delete success removes the stored image
+    When I click on '[data-cy="entity-profile-panel_avatar-menu-button"]'
+    Then I expect the HTML element '[data-cy="entity-profile-panel_delete-image-button"]' contains "Supprimer"
+    When I click on '[data-cy="entity-profile-panel_delete-image-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Supprimer l'image de Inactive DeactivatedReactivatable ?"
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" contains "Image supprimée avec succès."
+    When I request '{{ env.E2E_FRONT_URL }}/avatars/accounts/00000000-0000-4000-8000-0000000000ce.png' with method 'GET'
+    Then I expect status code is 404

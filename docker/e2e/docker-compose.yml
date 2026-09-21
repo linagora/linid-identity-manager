@@ -92,6 +92,7 @@ services:
     volumes:
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
       - ./resources/superset.yaml:/app/superset.yaml:ro
+      - ../avatars:/app/avatars
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
       interval: 5s
@@ -126,6 +127,7 @@ services:
       - ./resources/server.crt:/etc/server/certs/server.crt:ro
       - ./resources/server.key:/etc/server/certs/server.key:ro
       - ./resources/${CONFIG_DIR}/conf/config.json:/app/spa/config.json:ro
+      - ../avatars:/app/spa/avatars:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider --no-check-certificate https://localhost/health"]
       interval: 5s

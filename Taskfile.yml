@@ -228,8 +228,15 @@ tasks:
           SERVICE_NAME: Docker services
           DIR: docker/e2e
           ENV_FILE: "{{.ENV_FILE}}"
+      - task: clean:avatars
       - echo ""
       - echo "  E2E environment stopped."
+
+  clean:avatars:
+    desc: Remove the avatars uploaded by the tests, keeping the default administrator one
+    internal: true
+    cmd: |
+      git clean -fdxq docker/avatars
 
   restart:e2e:
     desc: Restart the full E2E environment

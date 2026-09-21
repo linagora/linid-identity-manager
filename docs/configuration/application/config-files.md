@@ -109,6 +109,15 @@ SUPERSET_RLS_CONFIG=/app/superset.yaml
 # Caffeine cache spec for the Superset access token (single entry, renewed
 # before Superset's JWT_ACCESS_TOKEN_EXPIRES to avoid using an expired token)
 # SUPERSET_CACHE_OPTION=maximumSize=1,expireAfterWrite=55m,recordStats
+
+# Root directory of the avatar images, shared with the front-end web server that serves them
+AVATAR_LOCATION=/app/avatars
+
+# Only allowed avatar file extension
+AVATAR_EXTENSION=png
+
+# Maximum allowed avatar file size, in MB
+AVATAR_MAX_SIZE=10
 ```
 
 ---
@@ -422,6 +431,33 @@ The API communicates with OPA using:
 ```text
 OPA_SERVER_URL=http://opa:8181
 ```
+
+### 7. Avatars
+
+Avatar images uploaded through `POST /avatars/{entity}/{id}` are stored on the filesystem as
+`{AVATAR_LOCATION}/{entity}/{id}.{AVATAR_EXTENSION}` and served by the front-end web server, which mounts the same
+directory under `/avatars`. In this repository, that shared directory is `docker/avatars`, mounted in the `api`
+container as `/app/avatars` and in the `ui` container as `/usr/share/nginx/html/avatars`.
+
+In dev mode the two sides run natively: the API resolves `AVATAR_LOCATION` from the directory it is started in,
+`api/`, hence the `../docker/avatars` value of `docker/dev/env/api.env`, and the Quasar dev server serves that same
+directory under `/avatars`.
+
+```text
+AVATAR_LOCATION=/app/avatars
+AVATAR_EXTENSION=png
+AVATAR_MAX_SIZE=10
+```
+
+`AVATAR_MAX_SIZE` also bounds the Spring multipart limits, so a larger upload is rejected before it reaches the API:
+the file part is capped at that size, the whole request one megabyte above it to leave room for the multipart
+overhead.
+
+The uploaded files come from the users, so the front-end web server serves them without content sniffing
+(`X-Content-Type-Options: nosniff`) and fully sandboxed (`Content-Security-Policy: default-src 'none'; sandbox`):
+an image carrying a script, such as an SVG, cannot run anything when its URL is opened. Keep `AVATAR_EXTENSION` on
+an image format that cannot embed code, and mirror those headers in any other web server put in front of the
+avatars.
 
 ---
 

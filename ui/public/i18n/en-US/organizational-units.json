@@ -297,6 +297,9 @@
       "createError": "Unable to attach the account. Please try again later.",
       "deleteSuccess": "Account successfully detached.",
       "deleteError": "Unable to detach the account. Please try again later.",
+      "editButton": "Edit",
+      "updateSuccess": "Functional role successfully updated.",
+      "updateError": "Unable to update the functional role. Please try again later.",
       "columns": {
         "lastname": "Last name",
         "firstname": "First name",
@@ -320,6 +323,22 @@
               "required": "This field is required."
             }
           },
+          "roleId": {
+            "label": "Functional role *",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Edit the functional role of {lastname} {firstname}",
+        "ButtonsCard": {
+          "confirm": "Save",
+          "confirmLoading": "Saving...",
+          "cancel": "Cancel"
+        },
+        "fields": {
           "roleId": {
             "label": "Functional role *",
             "validation": {

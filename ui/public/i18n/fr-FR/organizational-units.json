@@ -297,6 +297,9 @@
       "createError": "Impossible de rattacher le compte. Veuillez réessayer plus tard.",
       "deleteSuccess": "Compte détaché avec succès.",
       "deleteError": "Impossible de détacher le compte. Veuillez réessayer plus tard.",
+      "editButton": "Modifier",
+      "updateSuccess": "Rôle fonctionnel mis à jour avec succès.",
+      "updateError": "Impossible de mettre à jour le rôle fonctionnel. Veuillez réessayer plus tard.",
       "columns": {
         "lastname": "Nom",
         "firstname": "Prénom",
@@ -320,6 +323,22 @@
               "required": "Ce champ est requis."
             }
           },
+          "roleId": {
+            "label": "Rôle fonctionnel *",
+            "validation": {
+              "required": "Ce champ est requis."
+            }
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Modifier le rôle fonctionnel de {lastname} {firstname}",
+        "ButtonsCard": {
+          "confirm": "Enregistrer",
+          "confirmLoading": "Enregistrement...",
+          "cancel": "Annuler"
+        },
+        "fields": {
           "roleId": {
             "label": "Rôle fonctionnel *",
             "validation": {

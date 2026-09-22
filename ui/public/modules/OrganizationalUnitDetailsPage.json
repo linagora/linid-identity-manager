@@ -122,10 +122,27 @@
             }
           }
         ],
+        "editFormFields": [
+          {
+            "name": "roleId",
+            "type": "String",
+            "input": "DynamicList",
+            "required": true,
+            "inputSettings": {
+              "route": "/roles",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}"
+            }
+          }
+        ],
+        "updateBody": {
+          "roleId": "{{ formData.roleId }}"
+        },
         "endpoints": {
           "find": "/organizational-units/{{ entity.id }}/accounts",
           "create": "/organizational-units/{{ entity.id }}/accounts",
-          "delete": "/organizational-units/{{ entity.id }}/accounts/{{ item.id }}"
+          "delete": "/organizational-units/{{ entity.id }}/accounts/{{ item.id }}",
+          "update": "/organizational-units/{{ entity.id }}/accounts/{{ item.id }}"
         }
       }
     }

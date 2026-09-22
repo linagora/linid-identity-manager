@@ -18,6 +18,7 @@ Feature: Test Organizational Unit details panel display
   ## 203 Attach dialog should close on cancel without attaching an account
   ## 204 Should attach an existing account with a functional role from the dialog
   ## 205 Should detach an account after confirmation
+  ## 206 Should edit the functional role of an attached account
 
   Scenario: Roundtrip about Organizational Unit details
 
@@ -304,7 +305,7 @@ Feature: Test Organizational Unit details panel display
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "paul-oua@example.com"
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Rôle fonctionnel"
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' not contains "Aucun compte rattaché à cette unité organisationnelle."
-    And  I expect the HTML element '[data-cy="edit-button_{{ctx.attachedAccountId}}"]' not exists
+    And  I expect the HTML element '[data-cy="edit-button_{{ctx.attachedAccountId}}"]' contains "Modifier"
     And  I expect the HTML element '[data-cy="delete-button_{{ctx.attachedAccountId}}"]' contains "Détacher"
 
     ## 203 Attach dialog should close on cancel without attaching an account
@@ -367,6 +368,23 @@ Feature: Test Organizational Unit details panel display
     And  I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
     And  I expect the HTML element '.q-notification__message' contains "Compte détaché avec succès."
+
+    ## 206 Should edit the functional role of an attached account
+    When I click on '[data-cy="edit-button_{{ctx.attachedAccountId}}"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier le rôle fonctionnel de Martin Paul"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_roleId"]' contains "Rôle fonctionnel"
+    And  I expect the HTML element '[data-cy="field_roleId"]' contains "Member"
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Member"
+    When I click on '[data-cy="edit-button_{{ctx.attachedAccountId}}"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I select '.q-menu .q-item:contains("Role OUA UI")' in '[data-cy="field_roleId"]'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Rôle fonctionnel mis à jour avec succès."
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Role OUA UI"
 
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
     Then I expect status code is 204

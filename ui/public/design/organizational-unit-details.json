@@ -186,6 +186,14 @@
           "q-btn": { "color": "primary", "outline": false }
         }
       },
+      "edit-button": {
+        "q-btn": {
+          "color": "primary",
+          "icon": "edit",
+          "flat": true,
+          "dense": true
+        }
+      },
       "delete-button": {
         "q-btn": {
           "color": "negative",

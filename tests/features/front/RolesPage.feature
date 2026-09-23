@@ -107,6 +107,8 @@ Feature: Test Role homepage display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/roles?organizationalUnitId=00000000-0000-4000-8000-00000000000e"
     And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And  I expect the HTML element '[data-cy="cell-code_00000000-0000-4000-8000-00000000b005"]' contains "VIEWER"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000e"
 
     When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen

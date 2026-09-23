@@ -40,12 +40,15 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountGroupViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountOrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
@@ -109,6 +112,8 @@ class AccountServiceImplTest {
     private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
     @Mock
     private AccountOrganizationalUnitViewRepository accountOrganizationalUnitViewRepository;
+    @Mock
+    private AccountGroupViewRepository accountGroupViewRepository;
     @Mock
     private OrganizationalUnitRepository organizationalUnitRepository;
 
@@ -449,6 +454,32 @@ class AccountServiceImplTest {
         assertEquals(entity.getId(), result.getContent().getFirst().getId());
         verify(accountOrganizationalUnitViewRepository).findAll(
             ArgumentMatchers.<Specification<AccountOrganizationalUnitView>>any(),
+            ArgumentMatchers.any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("Should delegate groups listing to the account group view repository")
+    void testFindAllGroups_shouldDelegateToRepository() {
+        var pageable = PageRequest.of(0, 10);
+        var entity = AccountGroupView.builder()
+            .id(UUID.randomUUID())
+            .accountId(UUID.randomUUID())
+            .code("developers")
+            .name("Developers")
+            .build();
+        var filters = new AccountGroupViewQueryFilterDto();
+        when(accountGroupViewRepository.findAll(
+            ArgumentMatchers.<Specification<AccountGroupView>>any(),
+            ArgumentMatchers.any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        Page<AccountGroupView> result = accountService.findAllGroups(userPrincipal, filters, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        assertEquals(entity.getId(), result.getContent().getFirst().getId());
+        verify(accountGroupViewRepository).findAll(
+            ArgumentMatchers.<Specification<AccountGroupView>>any(),
             ArgumentMatchers.any(Pageable.class));
     }
 

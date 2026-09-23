@@ -61,6 +61,8 @@
   "error.group.not_found": "Group not found: {id}",
   "error.group.code.already_exists": "Group already exists for code '{code}'",
   "error.group.parent.cycle": "Group {id} cannot have group {parentId} as parent: it would create a cycle in the group hierarchy.",
+  "error.group.account.already_attached": "Account {id} is already attached to this group",
+  "error.group.account.not_attached": "Account {id} is not attached to this group",
   "error.opa.template.not_readable": "Unable to read the OPA policy template (location: {location})",
   "error.opa.policy.publish_failed": "Unable to publish the OPA policy to the OPA server (policyId: {policyId})",
   "error.role.not_found": "Functional role not found: {id}",

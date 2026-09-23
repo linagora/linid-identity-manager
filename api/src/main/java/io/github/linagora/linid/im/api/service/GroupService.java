@@ -26,9 +26,13 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Group;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import java.util.UUID;
@@ -79,6 +83,45 @@ public interface GroupService {
      * @return the group view entity
      */
     GroupView findViewById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Checks whether a group exists for the given identifier.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the group UUID
+     */
+    void existsById(UserPrincipal userPrincipal, UUID id);
+
+    /**
+     * Retrieves a paginated list of the accounts attached to a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination information
+     * @return a page of {@link GroupAccountView}
+     */
+    Page<GroupAccountView> findAllAccounts(UserPrincipal userPrincipal,
+                                           GroupAccountViewQueryFilterDto filters,
+                                           Pageable pageable);
+
+    /**
+     * Attaches an account to a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param record        the attachment payload (account identifier and relationship attributes)
+     * @return the created {@link GroupAccount} relationship
+     */
+    GroupAccount attachAccount(UserPrincipal userPrincipal, UUID groupId, GroupAccountRecord record);
+
+    /**
+     * Detaches an account from a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param accountId     the attached account UUID
+     */
+    void detachAccount(UserPrincipal userPrincipal, UUID groupId, UUID accountId);
 
     /**
      * Updates the group with the given identifier.

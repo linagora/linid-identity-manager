@@ -100,6 +100,46 @@
           "find": "/accounts/{{ entity.id }}/organizational-units?sort=name,asc"
         }
       }
+    },
+    {
+      "zone": "moduleAccountDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "rowKey": "id",
+        "enableActions": false,
+        "enableRowActions": false,
+        "i18nScope": "moduleAccountDetailsPage.groups",
+        "uiNamespace": "moduleAccountDetailsPage.groups",
+        "columns": [
+          {
+            "name": "code",
+            "label": "columns.code",
+            "field": "code",
+            "align": "left"
+          },
+          {
+            "name": "name",
+            "label": "columns.name",
+            "field": "name",
+            "align": "left"
+          },
+          {
+            "name": "email",
+            "label": "columns.email",
+            "field": "email",
+            "align": "left"
+          },
+          {
+            "name": "description",
+            "label": "columns.description",
+            "field": "description",
+            "align": "left"
+          }
+        ],
+        "endpoints": {
+          "find": "/accounts/{{ entity.id }}/groups?sort=name,asc"
+        }
+      }
     }
   ],
   "options": {

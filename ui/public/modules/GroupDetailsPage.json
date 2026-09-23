@@ -91,6 +91,52 @@
         ],
         "emitOnUpdate": "group-updated"
       }
+    },
+    {
+      "zone": "moduleGroupDetailsPage.content.after",
+      "plugin": "catalogUI/GenericEditableTableCard",
+      "props": {
+        "rowKey": "id",
+        "columns": [
+          {
+            "name": "lastname",
+            "label": "columns.lastname",
+            "field": "lastname",
+            "align": "left"
+          },
+          {
+            "name": "firstname",
+            "label": "columns.firstname",
+            "field": "firstname",
+            "align": "left"
+          },
+          {
+            "name": "email",
+            "label": "columns.email",
+            "field": "email",
+            "align": "left"
+          }
+        ],
+        "formFields": [
+          {
+            "name": "accountId",
+            "type": "String",
+            "input": "DynamicList",
+            "required": true,
+            "inputSettings": {
+              "route": "/accounts",
+              "optionLabel": "{{ lastname }} {{ firstname }} ({{ email }})",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          }
+        ],
+        "endpoints": {
+          "find": "/groups/{{ entity.id }}/accounts",
+          "create": "/groups/{{ entity.id }}/accounts",
+          "delete": "/groups/{{ entity.id }}/accounts/{{ item.id }}"
+        }
+      }
     }
   ],
   "options": {

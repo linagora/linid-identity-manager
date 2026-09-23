@@ -741,6 +741,8 @@ DO
 $$
     DECLARE
         admin_id       UUID;
+        user3_id       UUID;
+        user4_id       UUID;
         root_id        UUID;
         company_a_id   UUID;
         division_a1_id UUID;
@@ -748,6 +750,8 @@ $$
         linid_id       UUID;
     BEGIN
         SELECT act_id INTO admin_id FROM accounts WHERE email = 'admin@example.com' LIMIT 1;
+        SELECT act_id INTO user3_id FROM accounts WHERE external_id = 'user3' LIMIT 1;
+        SELECT act_id INTO user4_id FROM accounts WHERE external_id = 'user4' LIMIT 1;
 
         SELECT oun_id INTO root_id FROM organizational_units WHERE name = 'root' LIMIT 1;
         SELECT oun_id INTO company_a_id FROM organizational_units WHERE name = 'Company A' LIMIT 1;
@@ -807,6 +811,20 @@ $$
                 'Developers working on the API.', 'backend-developers@example.com',
                 admin_id, admin_id)
         ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 4. GROUP MEMBERSHIPS
+        -- user3 belongs to two groups, so the groups card of the account
+        -- details page has more than one row to display, sorted by name.
+        -- lifecycle-c14 is left out of every group: it is the account the
+        -- e2e scenarios use to cover the empty groups card.
+        -- =========================================================
+        INSERT INTO group_accounts (grp_id, act_id, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009001', admin_id, admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009001', user3_id, admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009004', user3_id, admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009005', user4_id, admin_id, admin_id)
+        ON CONFLICT (grp_id, act_id) DO NOTHING;
 
     END
 $$;

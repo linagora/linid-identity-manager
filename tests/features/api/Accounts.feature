@@ -66,18 +66,23 @@ Feature: Test API Account endpoints
   ## 704 Should return 400 when validity period start is in the future
   ## 705 Should return 400 when activationAt is before validity start
   ## 706 Should return 400 when activationAt is in the future
+  ## 707 Should return 404 when activating unknown account
 
   ################## Update (PUT /accounts/{id}) #####
   ## 801 Should update the editable attributes of an existing account
   ## 802 Should return 404 when updating an unknown account
   ## 803 Should return 400 when updating with an invalid
   ## 804 Should return 400 when updating with an email or external identifier already used
-  ## 707 Should return 404 when activating unknown account
 
   ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
   ## 901 Should return <ou> for the <user> account
   ## 902 Should return 404 for an unknown account
   ## 903 Should return an empty page for an account without any organizational unit
+
+  ################## Find groups of an account (GET /accounts/{id}/groups) #####
+  ## 1001 Should return the groups the account is attached to
+  ## 1002 Should return an empty page for an account without group
+  ## 1003 Should return 404 for an unknown account
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -1460,3 +1465,123 @@ Feature: Test API Account endpoints
     Then I expect status code is 200
     And  I expect '{{response.body.totalElements}}' is '0'
     And  I expect '{{response.body.content.length}}' is '0'
+
+  ####################################################
+  ################## Find groups of an account (GET /accounts/{id}/groups) #####
+  ####################################################
+
+  Scenario: 1001 - Should return the groups the account is attached to
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-910-parent",
+        "name": "Group 910 parent",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'parentGroupId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-910",
+        "name": "Group 910",
+        "parentId": "{{ctx.parentGroupId}}",
+        "description": "A group for the account side",
+        "email": "grp-910@example.com",
+        "organizationalUnitId": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'groupId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-910",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john910@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.groupId}}/accounts' with method 'POST' with body:
+      """
+      {
+        "accountId": "{{ctx.accountId}}",
+        "extraParameters": {
+          "role": "member"
+        }
+      }
+      """
+    Then I expect status code is 201
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/groups' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '{{ctx.groupId}}'
+    And  I expect '{{response.body.content[0].code}}' is 'grp-910'
+    And  I expect '{{response.body.content[0].name}}' is 'Group 910'
+    And  I expect '{{response.body.content[0].parentId}}' is '{{ctx.parentGroupId}}'
+    And  I expect '{{response.body.content[0].parentName}}' is 'Group 910 parent'
+    And  I expect '{{response.body.content[0].description}}' is 'A group for the account side'
+    And  I expect '{{response.body.content[0].email}}' is 'grp-910@example.com'
+    And  I expect '{{response.body.content[0].organizationalUnitId}}' is '00000000-0000-4000-8000-00000000000a'
+    And  I expect '{{response.body.content[0].organizationalUnitName}}' is 'Company A'
+    And  I expect '{{response.body.content[0].relationExtraParameters.role}}' is 'member'
+    And  I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[0].insertDate}}' is not empty
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.groupId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.parentGroupId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 1002 - Should return an empty page for an account without group
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-911",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john911@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/groups' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '0'
+    And  I expect '{{response.body.content.length}}' is '0'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 1003 - Should return 404 for an unknown account
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/groups' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'

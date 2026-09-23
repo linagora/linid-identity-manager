@@ -26,20 +26,29 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Group;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupAccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAncestorRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -74,6 +83,21 @@ public class GroupServiceImpl implements GroupService {
      * Repository used to read the ancestors of a group from the recursive ancestors view.
      */
     private final GroupAncestorRepository groupAncestorRepository;
+
+    /**
+     * Repository used to manage {@link GroupAccount} relationship persistence operations.
+     */
+    private final GroupAccountRepository groupAccountRepository;
+
+    /**
+     * Repository used to manage {@link GroupAccountView} persistence operations.
+     */
+    private final GroupAccountViewRepository groupAccountViewRepository;
+
+    /**
+     * Repository used to check the existence of accounts to attach.
+     */
+    private final AccountRepository accountRepository;
 
     /**
      * Service used to check the existence of the referenced organizational unit.
@@ -124,6 +148,71 @@ public class GroupServiceImpl implements GroupService {
     @Transactional(readOnly = true)
     public GroupView findViewById(final UserPrincipal userPrincipal, final UUID id) {
         return groupViewRepository.findById(id).orElseThrow(() -> groupNotFound(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        if (groupRepository.existsById(id)) {
+            return;
+        }
+
+        throw groupNotFound(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<GroupAccountView> findAllAccounts(final UserPrincipal userPrincipal,
+                                                  final GroupAccountViewQueryFilterDto filters,
+                                                  final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(GroupAccountView.class, filters);
+
+        return groupAccountViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public GroupAccount attachAccount(final UserPrincipal userPrincipal,
+                                      final UUID groupId,
+                                      final GroupAccountRecord record) {
+        existsById(userPrincipal, groupId);
+
+        if (!accountRepository.existsById(record.accountId())) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        if (groupAccountRepository.existsByGroupIdAndAccountId(groupId, record.accountId())) {
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of("error.group.account.already_attached",
+                    Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        var entity = GroupAccount.builder()
+            .groupId(groupId)
+            .accountId(record.accountId())
+            .extraParameters(Objects.requireNonNullElseGet(record.extraParameters(), HashMap::new))
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        return groupAccountRepository.save(entity);
+    }
+
+    @Override
+    public void detachAccount(final UserPrincipal userPrincipal, final UUID groupId, final UUID accountId) {
+        existsById(userPrincipal, groupId);
+
+        var relation = groupAccountRepository.findByGroupIdAndAccountId(groupId, accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.group.account.not_attached", Map.of("id", accountId.toString()))
+            ));
+
+        groupAccountRepository.delete(relation);
     }
 
     @Override

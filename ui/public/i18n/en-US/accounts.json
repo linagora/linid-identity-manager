@@ -680,6 +680,23 @@
         "rowsPerPage": "Rows per page:",
         "paginationLabel": "{start}-{end} of {total}"
       }
+    },
+    "groups": {
+      "GenericEditableTableCard": {
+        "title": "Groups",
+        "loadError": "Unable to load the groups. Please try again later.",
+        "columns": {
+          "code": "Code",
+          "name": "Name",
+          "email": "Email",
+          "description": "Description"
+        },
+        "GenericEntityTable": {
+          "noData": "No group for this account.",
+          "rowsPerPage": "Rows per page:",
+          "paginationLabel": "{start}-{end} of {total}"
+        }
+      }
     }
   },
   "AccountLifecyclePanel": {

@@ -91,7 +91,8 @@
         },
         "parentId": {
           "type": "Organizational unit",
-          "separator": "or"
+          "separator": "or",
+          "value": "{name}"
         },
         "roleNames": {
           "type": "Functional role",

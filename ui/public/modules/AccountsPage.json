@@ -58,6 +58,11 @@
           "parentIdKey": "parent",
           "nodesQuerySize": 50,
           "typeKey": "type"
+        },
+        "dynamicLabelOptions": {
+          "url": "/organizational-units?id={{ values | join('|') }}",
+          "responseItemsPath": "content",
+          "valuePath": "id"
         }
       },
       {

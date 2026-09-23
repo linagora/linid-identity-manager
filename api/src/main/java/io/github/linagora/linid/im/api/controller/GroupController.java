@@ -26,11 +26,16 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.group.GroupAccountDTO;
+import io.github.linagora.linid.im.api.model.group.GroupAccountMapper;
+import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
+import io.github.linagora.linid.im.api.model.group.GroupAccountViewDTO;
 import io.github.linagora.linid.im.api.model.group.GroupDTO;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.group.GroupViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +43,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +83,11 @@ public class GroupController {
      * Mapper for entity-to-DTO conversion.
      */
     private final GroupMapper groupMapper;
+
+    /**
+     * Mapper for group account entity-to-DTO conversion.
+     */
+    private final GroupAccountMapper groupAccountMapper;
 
     /**
      * Resolver for paginated response HTTP status.
@@ -143,6 +154,84 @@ public class GroupController {
         log.info("[{}] Received GET request for group {}", userPrincipal.getEmail(), id);
         var entity = groupService.findViewById(userPrincipal, id);
         return ResponseEntity.ok(groupMapper.toDTO(entity));
+    }
+
+    /**
+     * Retrieves the accounts attached to a group, with pagination and filtering.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of group account view DTOs
+     */
+    @GetMapping("/{groupId}/accounts")
+    @Operation(summary = "Get all group accounts with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of group accounts")
+    @ApiResponse(responseCode = "206", description = "Partial list of group accounts (more pages available)")
+    @ApiResponse(responseCode = "404", description = "Group not found", content = @Content)
+    public ResponseEntity<Page<GroupAccountViewDTO>> findAllAccounts(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID groupId,
+        final GroupAccountViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for group {} accounts with {}", userPrincipal.getEmail(), groupId,
+            filters);
+
+        groupService.existsById(userPrincipal, groupId);
+
+        filters.setGroupId(List.of(groupId.toString()));
+
+        var pages = groupService.findAllAccounts(userPrincipal, filters, pageable)
+            .map(groupAccountMapper::toDTO);
+
+        return pagedResponseStatusResolver.resolve(pages);
+    }
+
+    /**
+     * Attaches an account to a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param record        the attachment payload (account identifier and relationship attributes)
+     * @return the created relationship with HTTP 201 status
+     */
+    @PostMapping("/{groupId}/accounts")
+    @Operation(summary = "Attach an account to a group")
+    @ApiResponse(responseCode = "201", description = "Account successfully attached")
+    @ApiResponse(responseCode = "400", description = "Invalid request body or account already attached",
+        content = @Content)
+    @ApiResponse(responseCode = "404", description = "Group or account not found", content = @Content)
+    public ResponseEntity<GroupAccountDTO> attachAccount(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID groupId,
+        @Valid @RequestBody final GroupAccountRecord record) {
+        log.info("[{}] Received POST request to attach account to group {} with {}", userPrincipal.getEmail(),
+            groupId, record);
+        var entity = groupService.attachAccount(userPrincipal, groupId, record);
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupAccountMapper.toDTO(entity));
+    }
+
+    /**
+     * Detaches an account from a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param accountId     the attached account UUID
+     * @return an empty response with HTTP 204 status
+     */
+    @DeleteMapping("/{groupId}/accounts/{accountId}")
+    @Operation(summary = "Detach an account from a group")
+    @ApiResponse(responseCode = "204", description = "Account successfully detached")
+    @ApiResponse(responseCode = "404", description = "Group not found or account not attached", content = @Content)
+    public ResponseEntity<Void> detachAccount(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID groupId,
+        @PathVariable final UUID accountId) {
+        log.info("[{}] Received DELETE request to detach account {} from group {}", userPrincipal.getEmail(),
+            accountId, groupId);
+        groupService.detachAccount(userPrincipal, groupId, accountId);
+        return ResponseEntity.noContent().build();
     }
 
     /**

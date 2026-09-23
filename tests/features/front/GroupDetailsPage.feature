@@ -10,6 +10,12 @@ Feature: Test Group details page
   ## 203 Should edit the group and display the updated values in the panel
   ## 204 Edit dialog should exclude the edited group from the parent group options
 
+  ################## Accounts of the group ##################
+  ## 301 Should display an empty accounts card for a group without account
+  ## 302 Attach dialog should close on cancel without attaching an account
+  ## 303 Should attach an existing account from the dialog
+  ## 304 Should detach an account after confirmation
+
   Scenario: Roundtrip about Group details
 
     ####################################################
@@ -163,6 +169,82 @@ Feature: Test Group details page
     And  I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
+    ####################################################
+    ################## Accounts of the group ###########
+    ####################################################
+
+    ## 301 Should display an empty accounts card for a group without account
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
+    And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Comptes"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card_add-button"]' contains "Attacher un compte"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Aucun compte rattaché à ce groupe."
+
+    ## 302 Attach dialog should close on cancel without attaching an account
+    When I click on '[data-cy="generic-editable-table-card_add-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Attacher un compte"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_accountId"]' contains "Compte"
+    And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Attacher"
+    And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Aucun compte rattaché à ce groupe."
+
+    ## 303 Should attach an existing account from the dialog
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-gra-ui-1",
+        "lastname": "Lefevre",
+        "firstname": "Chloe",
+        "email": "chloe-gra@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "{{ctx.rootId}}",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'attachedAccountId' as '{{response.body.id}}' in context
+
+    When I click on '[data-cy="generic-editable-table-card_add-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    # The account list is virtualized: the seeded accounts all fit in the first page of 50, so a
+    # single scroll renders the last options of the menu, the newly created account among them.
+    When I click on '[data-cy="field_accountId"]'
+    And  I scroll to 'bottom' into '.q-menu'
+    And  I click on '.q-menu .q-item:contains("Lefevre Chloe")'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Compte attaché avec succès."
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Lefevre"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Chloe"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "chloe-gra@example.com"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' not contains "Aucun compte rattaché à ce groupe."
+    # The relationship carries no functional role: the card offers no edit action
+    And  I expect the HTML element '[data-cy="edit-button_{{ctx.attachedAccountId}}"]' not exists
+    And  I expect the HTML element '[data-cy="delete-button_{{ctx.attachedAccountId}}"]' contains "Détacher"
+
+    ## 304 Should detach an account after confirmation
+    When I click on '[data-cy="delete-button_{{ctx.attachedAccountId}}"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Détacher le compte Lefevre Chloe"
+    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Voulez-vous vraiment détacher le compte Lefevre Chloe"
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Lefevre"
+    When I click on '[data-cy="delete-button_{{ctx.attachedAccountId}}"]'
+    And  I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element '.q-notification__message' contains "Compte détaché avec succès."
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Aucun compte rattaché à ce groupe."
+
     ## Cleanup
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.attachedAccountId}}' with method 'DELETE'
+    Then I expect status code is 204
+
     When I request '{{env.E2E_API_URL}}/groups/{{ctx.groupId}}' with method 'DELETE'
     Then I expect status code is 204

@@ -29,6 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`PUT /organizational-units/{id}/accounts/{accountId}`).
 - Exposed the **functional roles held** in each organizational unit (`roleNames`, filterable) and whether a role
   **can be deleted** (`deletable`); deleting a role held by an account is refused with a 400 error.
+- Added the **accounts of a group**: a relationship table between groups and accounts with its audit table and SQL
+  views, and the endpoints to list (`GET /groups/{id}/accounts`), attach (`POST /groups/{id}/accounts`) and detach
+  (`DELETE /groups/{id}/accounts/{accountId}`) an account. Deleting a group or an account detaches it.
+- Exposed the **groups of an account** (`GET /accounts/{id}/groups`), with the group code, name, parent group,
+  organizational unit, application and the audit information of the relationship.
 
 #### Frontend
 
@@ -49,6 +54,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **group details page** (`/groups/{id}`), displaying the group label, its parent group, email,
   description, organizational unit and application, its audit metadata, and an edit dialog reusing the creation
   form.
+- Added the **accounts table** to the group details page, with the attach dialog picking an existing account and
+  the detach action guarded by a confirmation.
+- Added the read-only **groups table** to the account details page, listing the code, label and parent group of
+  each group the account belongs to.
+
+### Changed
+
+#### Frontend
+
+- Reordered the **navigation bar entries** to list the entities handled daily first (accounts, organizational units,
+  groups), then the access configuration (roles, applications). The entries follow the order of the `modules` array
+  of `config.json`, whose declarations were regrouped by entity.
 
 ### Fixed
 

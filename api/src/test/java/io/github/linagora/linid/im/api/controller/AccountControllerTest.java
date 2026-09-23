@@ -39,6 +39,8 @@ import static org.mockito.Mockito.when;
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountGroupMapper;
+import io.github.linagora.linid.im.api.model.account.AccountGroupViewDTO;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitViewDTO;
@@ -52,6 +54,8 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
@@ -95,6 +99,9 @@ class AccountControllerTest {
 
     @Mock
     private AccountOrganizationalUnitMapper accountOrganizationalUnitMapper;
+
+    @Mock
+    private AccountGroupMapper accountGroupMapper;
 
     @InjectMocks
     private AccountController accountController;
@@ -284,6 +291,71 @@ class AccountControllerTest {
 
         assertEquals(404, exception.getStatusCode());
         verify(accountService, never()).findAllOrganizationalUnits(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should return the paginated groups of the account")
+    void testFindAllGroups_shouldReturnPaginatedDTOs() {
+        var accountId = UUID.randomUUID();
+        var entity = AccountGroupView.builder()
+            .id(UUID.randomUUID())
+            .accountId(accountId)
+            .code("developers")
+            .name("Developers")
+            .build();
+        var dto = AccountGroupViewDTO.builder()
+            .id(entity.getId())
+            .code(entity.getCode())
+            .name(entity.getName())
+            .build();
+        var filters = new AccountGroupViewQueryFilterDto();
+        when(accountService.findAllGroups(
+            any(UserPrincipal.class),
+            any(AccountGroupViewQueryFilterDto.class),
+            any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+        when(accountGroupMapper.toDTO(entity)).thenReturn(dto);
+        when(pagedResponseStatusResolver.resolve(any(Page.class)))
+            .thenAnswer(invocation -> ResponseEntity.ok(invocation.getArgument(0)));
+
+        ResponseEntity<Page<AccountGroupViewDTO>> response =
+            accountController.findAllGroups(userPrincipal, accountId, filters, PageRequest.of(0, 10));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().getTotalElements());
+        assertEquals(entity.getId(), response.getBody().getContent().getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("Should restrict the groups listing to the requested account")
+    void testFindAllGroups_shouldFilterOnAccountId() {
+        var accountId = UUID.randomUUID();
+        var filters = new AccountGroupViewQueryFilterDto();
+        when(accountService.findAllGroups(any(), any(), any()))
+            .thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any(Page.class)))
+            .thenAnswer(invocation -> ResponseEntity.ok(invocation.getArgument(0)));
+
+        accountController.findAllGroups(userPrincipal, accountId, filters, Pageable.unpaged());
+
+        assertEquals(List.of(accountId.toString()), filters.getAccountId());
+        verify(accountService).existsById(userPrincipal, accountId);
+    }
+
+    @Test
+    @DisplayName("Should propagate the 404 raised when the account of the groups listing does not exist")
+    void testFindAllGroups_shouldPropagateUnknownAccount() {
+        var accountId = UUID.randomUUID();
+        var filters = new AccountGroupViewQueryFilterDto();
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
+
+        var exception = assertThrows(ApiException.class, () -> accountController.findAllGroups(
+            userPrincipal, accountId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(accountService, never()).findAllGroups(any(), any(), any());
     }
 
     @Test

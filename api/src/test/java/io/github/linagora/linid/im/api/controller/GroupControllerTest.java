@@ -26,13 +26,19 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.group.GroupAccountMapper;
+import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Group;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.GroupService;
+import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -50,8 +56,12 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +75,9 @@ class GroupControllerTest {
     private GroupMapper groupMapper;
 
     @Mock
+    private GroupAccountMapper groupAccountMapper;
+
+    @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
 
     private GroupController controller;
@@ -75,7 +88,7 @@ class GroupControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new GroupController(groupService, groupMapper, pagedResponseStatusResolver);
+        controller = new GroupController(groupService, groupMapper, groupAccountMapper, pagedResponseStatusResolver);
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
@@ -114,6 +127,60 @@ class GroupControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should restrict the accounts listing to the requested group")
+    void testFindAllAccounts() {
+        var groupId = UUID.randomUUID();
+        var filters = new GroupAccountViewQueryFilterDto();
+        when(groupService.findAllAccounts(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
+
+        var response = controller.findAllAccounts(userPrincipal, groupId, filters, Pageable.unpaged());
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(groupId.toString()), filters.getGroupId());
+        verify(groupService).existsById(userPrincipal, groupId);
+    }
+
+    @Test
+    @DisplayName("Should propagate the 404 raised when the group does not exist")
+    void testFindAllAccounts_shouldPropagateUnknownGroup() {
+        var groupId = UUID.randomUUID();
+        var filters = new GroupAccountViewQueryFilterDto();
+        doThrow(new ApiException(404, I18nMessage.of("error.group.not_found")))
+            .when(groupService).existsById(userPrincipal, groupId);
+
+        var exception = assertThrows(ApiException.class, () -> controller.findAllAccounts(
+            userPrincipal, groupId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(groupService, never()).findAllAccounts(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should attach an account to a group")
+    void testAttachAccount() {
+        when(groupService.attachAccount(any(), any(), any())).thenReturn(new GroupAccount());
+
+        var response = controller.attachAccount(userPrincipal, UUID.randomUUID(),
+            new GroupAccountRecord(UUID.randomUUID(), Map.of()));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should detach an account from a group")
+    void testDetachAccount() {
+        doNothing().when(groupService).detachAccount(any(), any(), any());
+
+        var response = controller.detachAccount(userPrincipal, UUID.randomUUID(), UUID.randomUUID());
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test

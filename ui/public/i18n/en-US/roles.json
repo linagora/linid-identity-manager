@@ -134,7 +134,8 @@
         },
         "organizationalUnitId": {
           "type": "Organizational unit",
-          "separator": "or"
+          "separator": "or",
+          "value": "{name}"
         }
       },
       "LinidFilterPanel": {

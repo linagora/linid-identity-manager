@@ -32,18 +32,18 @@
   "modules": [
     "/modules/AccountsPage.json",
     "/modules/AccountCreationPage.json",
-    "/modules/ApplicationsPage.json",
-    "/modules/ApplicationCreationPage.json",
-    "/modules/OrganizationalUnitPage.json",
-    "/modules/ApplicationDetailsPage.json",
     "/modules/AccountDetailsPage.json",
+    "/modules/OrganizationalUnitPage.json",
     "/modules/OrganizationalUnitCreationPage.json",
     "/modules/OrganizationalUnitDetailsPage.json",
-    "/modules/RolesPage.json",
-    "/modules/RoleCreationPage.json",
     "/modules/GroupsPage.json",
     "/modules/GroupCreationPage.json",
-    "/modules/GroupDetailsPage.json"
+    "/modules/GroupDetailsPage.json",
+    "/modules/RolesPage.json",
+    "/modules/RoleCreationPage.json",
+    "/modules/ApplicationsPage.json",
+    "/modules/ApplicationCreationPage.json",
+    "/modules/ApplicationDetailsPage.json"
   ],
   "extraZones": [],
   "oidc": {

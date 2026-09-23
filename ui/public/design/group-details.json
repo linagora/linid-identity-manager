@@ -82,6 +82,55 @@
         }
       }
     },
+    "generic-editable-table-card": {
+      "q-card": { "flat": true, "bordered": false },
+      "buttons-card": {
+        "q-card": { "flat": true },
+        "q-card-actions": { "align": "right" },
+        "add-button": {
+          "q-btn": { "color": "primary", "outline": false }
+        }
+      },
+      "delete-button": {
+        "q-btn": {
+          "color": "negative",
+          "icon": "person_remove",
+          "flat": true,
+          "dense": true
+        }
+      },
+      "generic-entity-table": {
+        "q-table": {}
+      },
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
+        "q-card-actions": { "align": "right" },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      },
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      }
+    },
     "sections": {
       "audit": {
         "entity-details-card": {

@@ -71,8 +71,10 @@ Feature: Test Account details page display
   ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
   ## 169 Should display the organizational units card of the account
   ## 170 Should list every organizational unit of the account exactly once
-  ## 171 Organizational units table should be read-only
-  ## 172 Should display an empty organizational units table for an unattached account
+  ## 171 Should display the groups card of the account
+  ## 172 Both tables should be read-only
+  ## 173 Should display an empty organizational units table for an unattached account
+  ## 174 Should display an empty groups table for an account without group
 
   Scenario: Roundtrip about Account Details
 
@@ -990,8 +992,11 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "edited@example.com"
 
     ####################################################
-    ########### Organizational units of the account ####
+    ########### Organizational units and groups ########
     ####################################################
+    # The details page hosts two read-only cards in the same zone, in configuration order:
+    # :eq(0) is the organizational units card, :eq(1) is the groups card. Both render the same
+    # markup, so the positional filter is the only way to tell them apart.
 
     ## 169 Should display the organizational units card of the account
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -1003,33 +1008,51 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000a004"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000a004"
-    And  I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
-    And  I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th' appear 4 times on screen
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(1)' contains "Nom"
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(2)' contains "Type"
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(3)' contains "Rôle fonctionnel"
-    And  I expect the HTML element '[data-cy="generic-entity-table"] thead th:nth-child(4)' contains "Statut"
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"]:eq(0)' to be visible
+    And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]:eq(0)' contains "Unités organisationnelles"
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0)' to be visible
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) thead th' appear 4 times on screen
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) thead th:nth-child(1)' contains "Nom"
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) thead th:nth-child(2)' contains "Type"
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) thead th:nth-child(3)' contains "Rôle fonctionnel"
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) thead th:nth-child(4)' contains "Statut"
 
     ## 170 Should list every organizational unit of the account exactly once
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' appear 2 times on screen
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(1)' contains "Division A1"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(2)' contains "DIVISION"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(3)' contains "Operator"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(1) td:nth-child(4)' contains "ACTIVE"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(1)' contains "Team Beta"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(2)' contains "TEAM"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(3)' contains "Member"
-    And I expect the HTML element '[data-cy="generic-entity-table"] tbody tr:nth-child(2) td:nth-child(4)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr' appear 2 times on screen
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(1) td:nth-child(1)' contains "Division A1"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(1) td:nth-child(2)' contains "DIVISION"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(1) td:nth-child(3)' contains "Operator"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(1) td:nth-child(4)' contains "ACTIVE"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(2) td:nth-child(1)' contains "Team Beta"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(2) td:nth-child(2)' contains "TEAM"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(2) td:nth-child(3)' contains "Member"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr:nth-child(2) td:nth-child(4)' contains "ACTIVE"
 
-    ## 171 Organizational units table should be read-only
+    ## 171 Should display the groups card of the account
+    # user3 belongs to All Staff and Developers; the card sorts them by name
+    And I expect the HTML element '[data-cy="generic-editable-table-card"]:eq(1)' to be visible
+    And I expect the HTML element '[data-cy="generic-editable-table-card_title"]:eq(1)' contains "Groupes"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) thead th' appear 3 times on screen
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) thead th:nth-child(1)' contains "Code"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) thead th:nth-child(2)' contains "Libellé"
+    And I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) thead th:nth-child(3)' contains "Groupe parent"
+    And I expect the HTML element '[data-cy="entity-cell-code_00000000-0000-4000-8000-000000009001"]' contains "all-staff"
+    And I expect the HTML element '[data-cy="entity-cell-name_00000000-0000-4000-8000-000000009001"]' contains "All Staff"
+    And I expect the HTML element '[data-cy="entity-cell-code_00000000-0000-4000-8000-000000009004"]' contains "developers"
+    And I expect the HTML element '[data-cy="entity-cell-name_00000000-0000-4000-8000-000000009004"]' contains "Developers"
+    And I expect the HTML element '[data-cy="entity-cell-parentName_00000000-0000-4000-8000-000000009004"]' contains "IT Department"
+    # Support is seeded with user4 only: listing it here would mean the endpoint dropped the
+    # account filter and returned every group
+    And I expect the HTML element '[data-cy="entity-cell-code_00000000-0000-4000-8000-000000009005"]' not exists
+
+    ## 172 Both tables should be read-only
+    # These selectors are not scoped to either card, so they cover both at once
     And I expect the HTML element '[data-cy="generic-editable-table-card_add-button"]' not exists
     And I expect the HTML element '.generic-editable-table-card--edit-button' not exists
     And I expect the HTML element '.generic-editable-table-card--delete-button' not exists
     And I expect the HTML element '.generic-entity-table--actions' not exists
 
-    ## 172 Should display an empty organizational units table for an unattached account
+    ## 173 Should display an empty organizational units table for an unattached account
     # lifecycle-c14 is the only account of the dataset with no membership at all
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
@@ -1040,7 +1063,12 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000ce"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-0000000000ce"
-    And  I expect the HTML element '[data-cy="generic-editable-table-card"]' to be visible
-    And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]' contains "Unités organisationnelles"
-    And  I expect the HTML element '[data-cy="generic-entity-table"] tbody tr' not exists
-    And  I expect the HTML element '[data-cy="generic-entity-table"] .q-table__bottom--nodata' contains "Aucune unité organisationnelle pour ce compte."
+    And  I expect the HTML element '[data-cy="generic-editable-table-card"]:eq(0)' to be visible
+    And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]:eq(0)' contains "Unités organisationnelles"
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) tbody tr' not exists
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(0) .q-table__bottom--nodata' contains "Aucune unité organisationnelle pour ce compte."
+
+    ## 174 Should display an empty groups table for an account without group
+    And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]:eq(1)' contains "Groupes"
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) tbody tr' not exists
+    And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) .q-table__bottom--nodata' contains "Aucun groupe pour ce compte."

@@ -104,7 +104,8 @@
         },
         "organizationalUnitId": {
           "type": "Organizational unit",
-          "separator": "or"
+          "separator": "or",
+          "value": "{name}"
         },
         "createdBy": {
           "type": "Created by",

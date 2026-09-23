@@ -37,6 +37,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   stored image is displayed instead of the generated avatar, and can be uploaded or deleted from the profile
   panel.
 
+### Changed
+
+#### Frontend
+
+- Integrated the smart filter configuration that **manages how filter values are displayed** in the filter chips.
+
 ### Fixed
 
 #### Security

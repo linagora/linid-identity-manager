@@ -40,6 +40,8 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
@@ -47,6 +49,7 @@ import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountGroupViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountOrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
@@ -137,6 +140,11 @@ public class AccountServiceImpl implements AccountService {
      * Repository for read-only account organizational unit view operations, supporting dynamic filtering.
      */
     private final AccountOrganizationalUnitViewRepository accountOrganizationalUnitViewRepository;
+
+    /**
+     * Repository for read-only account group view operations, supporting dynamic filtering.
+     */
+    private final AccountGroupViewRepository accountGroupViewRepository;
 
     /**
      * Repository for organizational unit persistence operations.
@@ -256,6 +264,17 @@ public class AccountServiceImpl implements AccountService {
         var specification = new SpringQueryFilterSpecification<>(AccountOrganizationalUnitView.class, filters);
 
         return accountOrganizationalUnitViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountGroupView> findAllGroups(
+        final UserPrincipal userPrincipal,
+        final AccountGroupViewQueryFilterDto filters,
+        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(AccountGroupView.class, filters);
+
+        return accountGroupViewRepository.findAll(specification, pageable);
     }
 
     @Override

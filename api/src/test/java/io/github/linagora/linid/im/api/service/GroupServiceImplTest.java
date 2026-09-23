@@ -26,13 +26,20 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Group;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
+import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupAccountRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAncestorRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepository;
@@ -43,6 +50,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -76,6 +84,15 @@ class GroupServiceImplTest {
 
     @Mock
     private GroupViewRepository groupViewRepository;
+
+    @Mock
+    private GroupAccountRepository groupAccountRepository;
+
+    @Mock
+    private GroupAccountViewRepository groupAccountViewRepository;
+
+    @Mock
+    private AccountRepository accountRepository;
 
     @Mock
     private OrganizationalUnitService organizationalUnitService;
@@ -385,6 +402,139 @@ class GroupServiceImplTest {
         var result = service.update(userPrincipal, id, withoutExtraParameters);
 
         assertEquals(Map.of("team", "core"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("existsById should not throw when the group exists")
+    void testExistsById_shouldNotThrowWhenPresent() {
+        var id = UUID.randomUUID();
+        when(groupRepository.existsById(id)).thenReturn(true);
+
+        service.existsById(userPrincipal, id);
+    }
+
+    @Test
+    @DisplayName("existsById should throw a 404 when the group does not exist")
+    void testExistsById_shouldThrowWhenAbsent() {
+        var id = UUID.randomUUID();
+        when(groupRepository.existsById(id)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class, () -> service.existsById(userPrincipal, id));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("findAllAccounts should delegate to the group account view repository")
+    void testFindAllAccounts_shouldDelegateToRepository() {
+        var entity = GroupAccountView.builder().id(UUID.randomUUID()).groupId(UUID.randomUUID()).build();
+        var filters = new GroupAccountViewQueryFilterDto();
+        when(groupAccountViewRepository.findAll(
+            ArgumentMatchers.<Specification<GroupAccountView>>any(),
+            ArgumentMatchers.any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        var result = service.findAllAccounts(userPrincipal, filters, Pageable.unpaged());
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(entity.getId(), result.getContent().getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("attachAccount should persist the relationship with the default extra parameters")
+    void testAttachAccount_shouldPersistRelationship() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(groupAccountRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
+        when(groupAccountRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.attachAccount(userPrincipal, groupId, new GroupAccountRecord(accountId, null));
+
+        assertEquals(groupId, result.getGroupId());
+        assertEquals(accountId, result.getAccountId());
+        assertEquals(Map.of(), result.getExtraParameters());
+        assertEquals(userPrincipal.getId(), result.getCreatedBy());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("attachAccount should throw a 404 when the group does not exist")
+    void testAttachAccount_shouldThrowWhenGroupAbsent() {
+        var groupId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class, () -> service.attachAccount(
+            userPrincipal, groupId, new GroupAccountRecord(UUID.randomUUID(), Map.of())));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.not_found", exception.getError().key());
+        verify(groupAccountRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("attachAccount should throw a 404 when the account does not exist")
+    void testAttachAccount_shouldThrowWhenAccountAbsent() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class, () -> service.attachAccount(
+            userPrincipal, groupId, new GroupAccountRecord(accountId, Map.of())));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(groupAccountRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("attachAccount should throw a 400 when the account is already attached")
+    void testAttachAccount_shouldThrowWhenAlreadyAttached() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(groupAccountRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(true);
+
+        var exception = assertThrows(ApiException.class, () -> service.attachAccount(
+            userPrincipal, groupId, new GroupAccountRecord(accountId, Map.of())));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.group.account.already_attached", exception.getError().key());
+        verify(groupAccountRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("detachAccount should delete the relationship")
+    void testDetachAccount_shouldDeleteRelationship() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var relation = GroupAccount.builder().id(UUID.randomUUID()).groupId(groupId).accountId(accountId).build();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupAccountRepository.findByGroupIdAndAccountId(groupId, accountId)).thenReturn(Optional.of(relation));
+
+        service.detachAccount(userPrincipal, groupId, accountId);
+
+        verify(groupAccountRepository).delete(relation);
+    }
+
+    @Test
+    @DisplayName("detachAccount should throw a 404 when the account is not attached")
+    void testDetachAccount_shouldThrowWhenNotAttached() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupAccountRepository.findByGroupIdAndAccountId(groupId, accountId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.detachAccount(userPrincipal, groupId, accountId));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.account.not_attached", exception.getError().key());
+        verify(groupAccountRepository, never()).delete(any(GroupAccount.class));
     }
 
     @Test

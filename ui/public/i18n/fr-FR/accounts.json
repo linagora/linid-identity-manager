@@ -680,6 +680,22 @@
         "rowsPerPage": "Éléments par page :",
         "paginationLabel": "{start}-{end} sur {total}"
       }
+    },
+    "groups": {
+      "GenericEditableTableCard": {
+        "title": "Groupes",
+        "loadError": "Impossible de charger les groupes. Veuillez réessayer plus tard.",
+        "columns": {
+          "code": "Code",
+          "name": "Libellé",
+          "parentName": "Groupe parent"
+        },
+        "GenericEntityTable": {
+          "noData": "Aucun groupe pour ce compte.",
+          "rowsPerPage": "Éléments par page :",
+          "paginationLabel": "{start}-{end} sur {total}"
+        }
+      }
     }
   },
   "AccountLifecyclePanel": {

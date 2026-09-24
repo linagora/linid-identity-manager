@@ -4,3 +4,8 @@
 [submodule "linid-im-front-community-plugins"]
 	path = linid-im-front-community-plugins
 	url = git@github.com:linagora/linid-im-front-community-plugins.git
+[submodule "linid-ai-core"]
+	path = linid-ai-core
+	url = ssh://git@ci.linagora.com:7999/linagora/lrs/LinID/linid-identity-manager/linid-ai-core.git
+	branch = feature/code-review
+	update = none

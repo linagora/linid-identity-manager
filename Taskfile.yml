@@ -284,6 +284,25 @@ tasks:
       - task: start:e2e
       - npm run start:ui
 
+  # ─── AI review ─────────────────────────────────────────────────────
+
+  start:opencode:
+    desc: Start OpenCode with the review agents, skills and commands of the linid-ai-core submodule
+    interactive: true
+    preconditions:
+      - sh: command -v opencode >/dev/null
+        msg: "OpenCode is not installed: https://opencode.ai"
+      - sh: test -f linid-ai-core/opencode.json
+        msg: "linid-ai-core is not checked out: git submodule update --init --checkout linid-ai-core"
+    env:
+      LINID_AI_CORE: "{{.ROOT_DIR}}/linid-ai-core"
+      OPENCODE_CONFIG: "{{.ROOT_DIR}}/linid-ai-core/opencode.json"
+      OPENCODE_CONFIG_DIR: "{{.ROOT_DIR}}/linid-ai-core/.opencode"
+      # Review rules by absolute path: relative instructions are looked up from the working directory,
+      # where the AGENTS.md of this repository is loaded
+      OPENCODE_CONFIG_CONTENT: '{"instructions": ["{{.ROOT_DIR}}/linid-ai-core/.opencode/review-rules.md"]}'
+    cmd: opencode {{.CLI_ARGS}}
+
   # ─── Internal tasks ─────────────────────────────────────────────────────────
 
   generate:ca:

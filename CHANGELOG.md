@@ -66,6 +66,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reordered the **navigation bar entries** to list the entities handled daily first (accounts, organizational units,
   groups), then the access configuration (roles, applications). The entries follow the order of the `modules` array
   of `config.json`, whose declarations were regrouped by entity.
+- Displayed the **organizational unit name** instead of its identifier in the filter chips of the accounts, roles,
+  groups and organizational units lists.
 
 ### Fixed
 

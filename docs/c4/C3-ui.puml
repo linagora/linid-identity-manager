@@ -1,0 +1,120 @@
+@startuml C3-UI-Components
+' ============================================================================
+' LinID Identity Manager — C4 Level 3: Components of the LinID UI container
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title LinID UI (Frontend Host) — Components (C3)
+
+Container_Boundary(ui, "LinID UI (Module Federation host)") {
+
+  ' --- Boot files (initialization sequence) --------------------------------
+  Component(boot_dayjs, "dayjs boot", "Boot file", "Extends Day.js with utc & customParseFormat; registers singleton in corelib.")
+  Component(boot_pinia, "pinia boot", "Boot file", "Creates Pinia instance, registers in corelib; pre-registers catalogUI dialog plugins in zone store.")
+  Component(boot_nunjucks, "nunjucks boot", "Boot file", "Configures Nunjucks templating environment (autoescape off); registers in corelib.")
+  Component(boot_config, "config boot", "Boot file", "Fetches runtime configuration from /config.json (environment, i18n, remotes, modules, oidc, theme, design files).")
+  Component(boot_axios, "axios boot", "Boot file", "Creates Axios instance (baseURL /backend, 30s timeout); adds Bearer token interceptor & 401 redirect; registers in corelib.")
+  Component(boot_oidc, "oidc boot", "Boot file", "Initializes oidc-client-ts UserManager via AuthService.init(); retrieves user; populates corelib user store & preferences.")
+  Component(boot_i18n, "i18n boot", "Boot file", "Loads translations from API (/i18n/{lang}.json) and static files; merges; creates Vue I18n; loads Quasar language pack.")
+  Component(boot_lifecycle, "module-lifecycle boot", "Boot file", "Delegates Module Federation setup to corelib linidModuleFederation.init: registers remotes, module configs, extra zones, host-local components; executes all lifecycle phases.")
+  Component(boot_theme, "theme boot", "Boot file", "Applies theme variables from config.json as --q-{key} CSS custom properties on document root.")
+  Component(boot_ui_design, "ui-design boot", "Boot file", "Fetches design JSON files from config.json; merges; registers UI design configuration in corelib.")
+
+  ' --- Services ------------------------------------------------------------
+  Component(auth_service, "AuthService", "Service", "Wraps oidc-client-ts: init, login, logout, getUser, getAccessToken, handleCallback, silent renew, clearUser.")
+  Component(account_service, "AccountService", "Service", "REST client for account lifecycle: suspend, deactivate, reactivate, setAccountValidity (PUT /accounts/{id}/status/*).")
+  Component(application_service, "ApplicationService", "Service", "REST client: exportApplicationScript (GET /applications/{id}/script as Blob).")
+  Component(ou_service, "OrganizationalUnitService", "Service", "REST client for OU lifecycle: getById, suspend, reactivate (GET/PUT /organizational-units/{id}/*).")
+
+  ' --- Stores (from @linagora/linid-im-front-corelib) ----------------------
+  Component(user_store, "useLinidUserStore", "Pinia Store (corelib)", "Authenticated user's claims (profile).")
+  Component(user_pref_store, "useLinidUserPreference", "Pinia Store (corelib)", "Persists user preferences (e.g. selected language).")
+  Component(ui_store, "useLinidUiStore", "Pinia Store (corelib)", "Global UI state: available languages, current locale, main navigation menu items.")
+  Component(zone_store, "useLinidZoneStore", "Pinia Store (corelib)", "Zone-based plugin registry: maps zone keys to federated components/plugins.")
+
+  ' --- Composables ---------------------------------------------------------
+  Component(use_account_mapper, "useAccountMapper", "Composable", "Converts AccountDTO to AccountStatus; maps form values to API records; flattens status for dialog pre-fill.")
+  Component(use_account_lifecycle_ui, "useAccountLifecycleUi", "Composable", "Projects AccountStatus ref into deterministic lifecycle UI state (badges, banners, info text, dropdown items) across 13 cases.")
+  Component(use_ou_mapper, "useOrganizationalUnitMapper", "Composable", "Converts OrganizationalUnitDTO to OrganizationalUnitStatus; maps form values to API records.")
+  Component(use_ou_lifecycle_ui, "useOrganizationalUnitLifecycleUi", "Composable", "Projects OrganizationalUnitStatus ref into deterministic lifecycle UI state across 3 cases.")
+  Component(use_lifecycle_dialogs, "useLifecycleDialogs", "Composable", "Centralizes lifecycle dialog plumbing: openFormDialog & openConfirmationDialog emit UI events for catalogUI/FormDialog & ConfirmationDialog.")
+
+  ' --- Local components: Pages --------------------------------------------
+  Component(homepage, "Homepage", "Page", "Renders intro/open-source/license/branding HTML from i18n.")
+  Component(auth_callback, "AuthenticationCallbackPage", "Page", "Processes OIDC login callback; populates user store; resolves redirect URL.")
+  Component(auth_logout, "AuthenticationLogoutPage", "Page", "Triggers RP-initiated logout (signoutRedirect).")
+  Component(auth_logged_out, "AuthenticationLoggedOutPage", "Page", "Processes post-logout callback; re-initiates login.")
+  Component(auth_silent_renew, "AuthenticationSilentRenewPage", "Page", "Silent token renewal callback in hidden iframe.")
+
+  ' --- Local components: Panels -------------------------------------------
+  Component(account_lifecycle_panel, "AccountLifecyclePanel", "Panel", "Orchestrates account lifecycle UI: banners, info text, dialogs; calls AccountService; emits account-status-updated.")
+  Component(ou_lifecycle_panel, "OrganizationalUnitLifecyclePanel", "Panel", "Orchestrates OU lifecycle UI: suspended banner, info text, dialogs; calls OrganizationalUnitService; emits organizational-unit-status-updated.")
+
+  ' --- Local components: Buttons ------------------------------------------
+  Component(export_script_btn, "ExportApplicationScriptBtn", "Button", "Downloads application OPA Rego script as .rego file.")
+  Component(ou_create_child_btn, "OrganizationalUnitCreateChildBtn", "Button", "Navigates to /organizational-units/new?parent={id} to create child OU.")
+
+  ' --- Local components: Fields -------------------------------------------
+  Component(ou_parent_field, "OrganizationalUnitParentField", "Field", "Resolves parent OU from route query; displays name; emits parent id.")
+
+  ' --- Local components: Banners & Info texts -----------------------------
+  Component(account_banners, "Account Banners", "Banner", "AccountSuspendedBanner, AccountDeactivatedBanner, AccountDeactivatedWarningBanner.")
+  Component(ou_banners, "OU Banners", "Banner", "OrganizationalUnitSuspendedBanner.")
+  Component(account_info_texts, "Account Info Texts", "Info Text", "AccountNotActivatedInfoText, AccountSuspendedInfoText, AccountDeactivatedInfoText.")
+  Component(ou_info_texts, "OU Info Texts", "Info Text", "OrganizationalUnitSuspendedInfoText.")
+
+  ' --- Module config files (dynamic routes) -------------------------------
+  Component(module_configs, "Module Config Files", "JSON Config", "9 JSON files in /modules/: AccountsPage, AccountCreationPage, AccountDetailsPage, ApplicationsPage, ApplicationCreationPage, ApplicationDetailsPage, OrganizationalUnitPage, OrganizationalUnitCreationPage, OrganizationalUnitDetailsPage. Drive dynamic route registration via linidModuleFederation.init.")
+}
+
+' --- Module Federation remote (loaded at runtime from config.json) --------
+Container_Ext(catalog_ui, "Catalog UI (remote: catalogUI)", "Vue, Quasar, Module Federation", "Shared UI component library: BaseLayout, GenericTablePage, GenericDetailsPage, GenericCreationPage, GenericEditionPage, EntityProfilePanel, GenericEditableTableCard, GenericSortableListCard, SupersetWidgetCard, FormDialog, ConfirmationDialog, NavigationMenu, HeaderProfile, StatusBadge, LinidSmartFilter, ~40 federated modules.")
+
+' --- External systems ------------------------------------------------------
+System_Ext(api, "LinID API", "Spring Boot REST API")
+System_Ext(auth, "LemonLDAP::NG", "OIDC IdP")
+System_Ext(superset, "Apache Superset", "BI dashboard engine")
+
+' --- Relationships: boot -> services / stores -----------------------------
+Rel(boot_oidc, auth_service, "Initializes")
+Rel(boot_oidc, user_store, "Populates user store")
+Rel(boot_oidc, user_pref_store, "Populates preferences")
+Rel(boot_pinia, zone_store, "Pre-registers catalogUI dialog plugins")
+Rel(boot_lifecycle, catalog_ui, "Registers remotes & executes lifecycle", "HTTP")
+Rel(boot_lifecycle, module_configs, "Loads module configs for dynamic routes")
+Rel(boot_i18n, api, "Fetches translations", "HTTPS/REST")
+Rel(boot_config, boot_lifecycle, "Provides remotes & module config")
+Rel(boot_axios, api, "Configures base URL /backend/", "HTTPS/REST")
+Rel(boot_theme, boot_config, "Reads theme variables")
+Rel(boot_ui_design, boot_config, "Reads design file list")
+
+' --- Relationships: services -> API / Auth ---------------------------------
+Rel(auth_service, auth, "OIDC login flow (authorization code + PKCE), token renewal, RP-initiated logout", "OIDC/HTTPS")
+Rel(account_service, api, "Calls /accounts/{id}/status/*", "HTTPS/REST")
+Rel(application_service, api, "Calls /applications/{id}/script", "HTTPS/REST")
+Rel(ou_service, api, "Calls /organizational-units/{id}/*", "HTTPS/REST")
+
+' --- Relationships: panels -> services / composables -----------------------
+Rel(account_lifecycle_panel, use_account_lifecycle_ui, "Uses")
+Rel(account_lifecycle_panel, use_lifecycle_dialogs, "Uses")
+Rel(account_lifecycle_panel, account_service, "Calls lifecycle endpoints")
+Rel(ou_lifecycle_panel, use_ou_lifecycle_ui, "Uses")
+Rel(ou_lifecycle_panel, use_lifecycle_dialogs, "Uses")
+Rel(ou_lifecycle_panel, ou_service, "Calls lifecycle endpoints")
+
+' --- Relationships: composables -> services --------------------------------
+Rel(use_account_mapper, account_service, "Maps DTOs to API records")
+Rel(use_ou_mapper, ou_service, "Maps DTOs to API records")
+
+' --- Relationships: local components -> zones -----------------------------
+Rel(boot_lifecycle, account_lifecycle_panel, "Registers in account details zone")
+Rel(boot_lifecycle, ou_lifecycle_panel, "Registers in OU details zone")
+Rel(boot_lifecycle, export_script_btn, "Registers in application details zone")
+Rel(boot_lifecycle, ou_create_child_btn, "Registers in OU details zone")
+Rel(boot_lifecycle, ou_parent_field, "Registers in OU creation form zone")
+
+' --- Relationships: catalogUI -> external ----------------------------------
+Rel(catalog_ui, superset, "Embeds dashboards via @superset-ui/embedded-sdk", "HTTPS")
+
+@enduml

@@ -26,3 +26,9 @@ docker/e2e/resources/local
 docker/e2e/resources/ci
 api/**/*.jks
 api/**/*.p12
+
+# Uploaded avatars (shared API / nginx directory), except the default administrator avatar
+docker/avatars/*
+!docker/avatars/accounts/
+docker/avatars/accounts/*
+!docker/avatars/accounts/00000000-0000-4000-8000-00000000a001.png

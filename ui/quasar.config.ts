@@ -1,6 +1,8 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
+import { createReadStream, statSync } from 'node:fs';
+import { join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { federation } from '@module-federation/vite';
 import { defineConfig } from '#q-app/wrappers';
@@ -86,6 +88,59 @@ export default defineConfig((ctx) => {
           },
         };
         viteConf.plugins?.push(
+          // The API stores the avatars in docker/avatars (see AVATAR_LOCATION in docker/dev/env/api.env).
+          // Serve that directory under /avatars, as Nginx does in the Docker environments, so the profile
+          // panels display the uploaded images in dev mode too. The files all carry the configured
+          // avatar.extension, png by default, which is the type served here.
+          {
+            name: 'linid-serve-avatars',
+            apply: 'serve',
+            configureServer(server) {
+              const avatarsDir = fileURLToPath(
+                new URL('../docker/avatars', import.meta.url)
+              );
+
+              // Resolves the requested file under avatarsDir, or undefined for a
+              // malformed URL or a path leaving the directory.
+              const resolveAvatar = (url = '/') => {
+                try {
+                  const path = decodeURIComponent(url.split('?')[0] ?? '/');
+                  const file = join(avatarsDir, normalize(path));
+
+                  return file.startsWith(avatarsDir + sep) ? file : undefined;
+                } catch {
+                  return undefined;
+                }
+              };
+
+              // Always answers without calling next(): a missing avatar must get a
+              // 404, not the SPA fallback of Vite to index.html.
+              server.middlewares.use('/avatars', (request, response) => {
+                const file = resolveAvatar(request.url);
+                const stats = file
+                  ? statSync(file, { throwIfNoEntry: false })
+                  : undefined;
+
+                if (!file || !stats?.isFile()) {
+                  response.statusCode = 404;
+                  response.end();
+                  return;
+                }
+
+                response.setHeader('Content-Type', 'image/png');
+                response.setHeader('Content-Length', stats.size);
+                response.setHeader('Cache-Control', 'no-cache');
+                response.setHeader('X-Content-Type-Options', 'nosniff');
+                response.setHeader(
+                  'Content-Security-Policy',
+                  "default-src 'none'; sandbox"
+                );
+                createReadStream(file)
+                  .on('error', () => response.destroy())
+                  .pipe(response);
+              });
+            },
+          },
           federation({
             name: 'linid-identity-manager-ui',
             remotes: {},

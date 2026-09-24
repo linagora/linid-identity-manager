@@ -62,6 +62,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationServiceImpl implements ApplicationService {
 
     /**
+     * Service removing the avatar image of the deleted entity.
+     */
+    private final AvatarService avatarService;
+
+    /**
      * Repository used to manage {@link Application} persistence operations.
      */
     private final ApplicationRepository applicationRepository;
@@ -132,6 +137,17 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
+    public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        if (applicationRepository.existsById(id)) {
+            return;
+        }
+
+        throw new ApiException(HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.application.not_found", Map.of("id", id.toString())));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ApplicationView findViewById(final UserPrincipal userPrincipal, final UUID id) {
         return applicationViewRepository.findById(id)
             .orElseThrow(() -> new ApiException(
@@ -182,6 +198,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         systemApplicationValidator.ensureApplicationIsMutable(entity);
 
         applicationRepository.delete(entity);
+        avatarService.deleteQuietly("applications", id);
     }
 
     @Override

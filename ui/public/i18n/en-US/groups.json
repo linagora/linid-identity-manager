@@ -238,6 +238,51 @@
           "applicationName": "Application"
         }
       },
+      "avatar": {
+        "MenuButton": {
+          "editImageButton": {
+            "FormDialogButton": {
+              "title": "Update",
+              "submitSuccess": "Image successfully updated.",
+              "submitError": "Unable to update the image. Please try again later.",
+              "FormDialog": {
+                "title": "Edit the image of {name}",
+                "fields": {
+                  "file": {
+                    "label": "Image *",
+                    "validation": {
+                      "required": "This field is required.",
+                      "maxFileSize": "The image must not exceed {maxFileSize} MB.",
+                      "allowedExtensions": "Allowed extensions: {extensions}."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Upload",
+                  "confirmLoading": "Uploading...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          },
+          "deleteImageButton": {
+            "ConfirmDialogButton": {
+              "title": "Delete",
+              "submitSuccess": "Image successfully deleted.",
+              "submitError": "Unable to delete the image. Please try again later.",
+              "ConfirmationDialog": {
+                "title": "Delete the image of {name}?",
+                "content": "The generated avatar will be displayed instead.",
+                "ButtonsCard": {
+                  "confirm": "Delete",
+                  "confirmLoading": "Deleting...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
+        }
+      },
       "actions": {
         "ButtonsCard": {
           "editButton": {

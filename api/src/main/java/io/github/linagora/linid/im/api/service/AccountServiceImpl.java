@@ -107,6 +107,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountServiceImpl implements AccountService {
 
     /**
+     * Service removing the avatar image of the deleted entity.
+     */
+    private final AvatarService avatarService;
+
+    /**
      * Default JSON payload assigned to newly created accounts.
      */
     private static final String DEFAULT_PAYLOAD = "{}";
@@ -339,6 +344,7 @@ public class AccountServiceImpl implements AccountService {
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
         findById(userPrincipal, id);
         accountRepository.deleteById(id);
+        avatarService.deleteQuietly("accounts", id);
     }
 
     @Override

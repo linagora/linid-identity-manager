@@ -87,6 +87,9 @@ class ApplicationServiceImplTest {
     @Mock
     private SystemApplicationValidator systemApplicationValidator;
 
+    @Mock
+    private AvatarService avatarService;
+
     @InjectMocks
     private ApplicationServiceImpl service;
 
@@ -140,6 +143,27 @@ class ApplicationServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.findById(userPrincipal, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("existsById should return when the application exists")
+    void testExistsById_shouldReturnWhenPresent() {
+        var id = UUID.randomUUID();
+        when(applicationRepository.existsById(id)).thenReturn(true);
+
+        assertDoesNotThrow(() -> service.existsById(userPrincipal, id));
+    }
+
+    @Test
+    @DisplayName("existsById should throw when the application does not exist")
+    void testExistsById_shouldThrowWhenAbsent() {
+        var id = UUID.randomUUID();
+        when(applicationRepository.existsById(id)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class, () -> service.existsById(userPrincipal, id));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.application.not_found", exception.getError().key());
+        assertEquals(Map.of("id", id.toString()), exception.getError().context());
     }
 
     @Test

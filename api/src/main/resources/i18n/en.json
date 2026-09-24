@@ -74,5 +74,11 @@
   "error.superset.guest_token": "Unable to retrieve the guest token",
   "error.superset.session_cookie": "Superset session cookie is missing",
   "error.superset.slug_configuration": "Unable to retrieve the Superset dashboard configuration associated with the slug.",
-  "error.user_preference.not_found": "User preference not found: {key}"
+  "error.user_preference.not_found": "User preference not found: {key}",
+  "error.avatar.entity.unsupported": "Unsupported avatar entity type: {entity}",
+  "error.avatar.file.empty": "The uploaded avatar file is empty.",
+  "error.avatar.extension.invalid": "The avatar file extension must be {extension}.",
+  "error.avatar.storage": "Unable to store the avatar of {id}.",
+  "error.avatar.deletion": "Unable to delete the avatar of {id}.",
+  "error.upload.too_large": "The uploaded file exceeds the maximum allowed size."
 }

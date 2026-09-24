@@ -139,6 +139,9 @@ class OrganizationalUnitServiceImplTest {
     @Spy
     private OrganizationalUnitStatusMapperImpl organizationalUnitStatusMapper = new OrganizationalUnitStatusMapperImpl();
 
+    @Mock
+    private AvatarService avatarService;
+
     @InjectMocks
     private OrganizationalUnitServiceImpl service;
 

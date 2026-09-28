@@ -5,12 +5,14 @@ All services are containerized with ports exposed for debugging and test access.
 
 ## Quick Start
 
-Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build images and start everything with the following commands:
+Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build the `api`, `ui` and `superset` images and start everything with the following commands.
 
 ```bash
 task setup:e2e
 task start:e2e
 ```
+
+The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.2.133`), its version is pinned in `docker-compose.yml`.
 
 ## Services
 

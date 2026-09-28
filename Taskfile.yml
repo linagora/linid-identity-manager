@@ -375,19 +375,9 @@ tasks:
   build:images:
     desc: Build all Docker images
     cmds:
-      - task: build:image:catalog-ui
       - task: build:image:ui
       - task: build:image:api
       - task: build:image:superset
-
-  build:image:catalog-ui:
-    desc: Build catalog-ui Docker image
-    cmds:
-      - task: build:image
-        vars:
-          IMAGE_NAME: catalog-ui
-          DOCKERFILE: linid-im-front-community-plugins/docker/catalog-ui.Dockerfile
-          CONTEXT_DIR: linid-im-front-community-plugins/
 
   build:image:ui:
     desc: Build linid-identity-manager-ui Docker image

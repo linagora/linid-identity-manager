@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.10.0] - 2026-09-29
 
 ### Added
 
@@ -94,6 +94,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reformatted the E2E feature files with aligned step keywords for better readability.
 - Seeded functional roles, held on the organizational unit accounts of the E2E and demo databases, and waited for
   the roles table before seeding the E2E one.
+- Published Docker images for **linagora/linid-api** and **linagora/linid-ui**.
+- Updated the deployment stack to use the published **linagora/linid-catalog-ui** Docker image instead of building it locally.
 
 ## [0.9.0] - 2026-09-08
 
@@ -478,3 +480,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.7.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.7.0
 [0.8.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.8.0
 [0.9.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.9.0
+[0.10.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.10.0

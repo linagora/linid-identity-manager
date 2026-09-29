@@ -79,12 +79,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validated the **audience** and **type** of the access tokens received by the API (`AUTH_AUDIENCE`, `AUTH_JWT_EXPECTED_TYPE`).
 - Returned **401 Unauthorized** when the access token is valid but no account matches it.
 - Issued the SSO cookie with the **Secure** flag and stopped exposing the LemonLDAP portal over plain HTTP.
+- Sent a fresh **nonce** with each OIDC authentication request, and required it on the LemonLDAP relying party.
 
 #### Frontend
 
 - Made the **RP-initiated logout** work end to end through the LemonLDAP logout confirmation page.
 - Paginated the **tables of the details pages** (organizational units of an account, accounts of an organizational
   unit, roles of an application) on the server side, instead of displaying only the first ten rows.
+- Removed an unused sign-out handler that never fired, since remote session monitoring was disabled..
 
 ### Build
 

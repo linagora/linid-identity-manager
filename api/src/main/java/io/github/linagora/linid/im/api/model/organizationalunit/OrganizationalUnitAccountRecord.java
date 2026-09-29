@@ -35,12 +35,17 @@ import java.util.UUID;
  * Request payload for attaching an account to an organizational unit.
  *
  * @param accountId       identifier of the account to attach
+ * @param roleId          identifier of the functional role held by the account within the organizational unit
  * @param extraParameters optional free-form attributes of the relationship
  */
 @Schema(description = "Request payload for attaching an account to an organizational unit")
 public record OrganizationalUnitAccountRecord(
     @NotNull @Schema(description = "Identifier of the account to attach")
     UUID accountId,
+
+    @NotNull
+    @Schema(description = "Identifier of the functional role held by the account within the organizational unit")
+    UUID roleId,
 
     @Schema(description = "Free-form attributes of the relationship")
     Map<String, Object> extraParameters

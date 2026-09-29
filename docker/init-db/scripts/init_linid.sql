@@ -50,6 +50,15 @@ VALUES ('00000000-0000-4000-8000-00000000a001', 'admin',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
 
+-- Default functional role held by the accounts created by the e2e scenarios.
+-- The UUID is deterministic so the scenarios can reference it directly.
+INSERT
+INTO roles (rol_id, code, name, description, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000f001', 'MEMBER', 'Member', 'Default functional role',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (code) DO NOTHING;
+
 -- Lifecycle test accounts. Each row covers one case of the lifecycle UI
 -- matrix from issue #112. UUIDs are deterministic so that e2e scenarios can
 -- target them directly through /accounts/{id}. account_status rows below are
@@ -454,6 +463,36 @@ VALUES
      '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (act_id) DO NOTHING;
 
+-- Functional roles listed by the e2e scenarios of the roles page. The UUIDs are
+-- deterministic so the scenarios can reference them directly.
+INSERT
+INTO roles (rol_id, code, name, description, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000b001', 'ADMINISTRATOR', 'Administrator',
+        'Manages user accounts, roles and system configuration.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b002', 'MANAGER', 'Manager',
+        'Oversees team operations and approves organizational changes.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b003', 'OPERATOR', 'Operator',
+        'Executes routine operational tasks across the platform.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b004', 'SUPPORT', 'Support',
+        'Provides first-line assistance to end users.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b005', 'VIEWER', 'Viewer',
+        'Read-only access to reports and dashboards.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001'),
+       ('00000000-0000-4000-8000-00000000b006', 'AUDITOR', 'Auditor',
+        'Reviews compliance and security controls.',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (code) DO NOTHING;
+
 -- Create Organizational Unit tree
 DO
 $$
@@ -577,44 +616,48 @@ $$
 
         -- =========================================================
         -- 6. Add user inside OU
+        -- Each account holds a functional role within its organizational
+        -- unit: administrator in root, manager in the companies, operator,
+        -- support and viewer in the divisions, member in the teams. The
+        -- auditor role is held nowhere so it stays deletable.
         -- =========================================================
         -- Admin in OU root
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
-        VALUES (root_id, admin_id, admin_id, admin_id);
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
+        VALUES (root_id, admin_id, '00000000-0000-4000-8000-00000000b001', admin_id, admin_id);
 
         -- user1 in OU Company A
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Company A'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user1'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000b002', admin_id,
                 admin_id);
 
         -- user2 in OU Company B
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Company B'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user2'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000b002', admin_id,
                 admin_id);
 
         -- user3 in OU Division A1
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division A1'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user3'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000b003', admin_id,
                 admin_id);
 
         -- user4 in OU Division A2
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division A2'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user4'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000b004', admin_id,
                 admin_id);
 
         -- Insert all users in OU Team Beta
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         SELECT (SELECT oun_id FROM organizational_units WHERE name = 'Team Beta'),
                a.act_id,
-               admin_id,
+               '00000000-0000-4000-8000-00000000f001', admin_id,
                admin_id
         FROM accounts a
         WHERE a.external_id IN (
@@ -623,10 +666,10 @@ $$
             );
 
         -- Insert all lifecycle and dialog users in OU Team Alpha
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         SELECT (SELECT oun_id FROM organizational_units WHERE name = 'Team Alpha'),
                a.act_id,
-               admin_id,
+               '00000000-0000-4000-8000-00000000f001', admin_id,
                admin_id
         FROM accounts a
         WHERE a.external_id IN (
@@ -639,10 +682,10 @@ $$
 
 
         -- user5 in OU Division B1
-        INSERT INTO organizational_unit_accounts (oun_id, act_id, created_by, updated_by)
+        INSERT INTO organizational_unit_accounts (oun_id, act_id, rol_id, created_by, updated_by)
         VALUES ((SELECT oun_id FROM organizational_units WHERE name = 'Division B1'),
                 (SELECT act_id FROM accounts WHERE external_id = 'user5'),
-                admin_id,
+                '00000000-0000-4000-8000-00000000b005', admin_id,
                 admin_id);
 
         -- =========================================================
@@ -685,6 +728,103 @@ $$
             suspension_subreason  = 'OU Suspension Sub-reason',
             suspension_comment    = 'Suspended OU with end date'
         WHERE oun_id = '00000000-0000-4000-8000-0000000000e3';
+
+    END
+$$;
+
+-- Create group hierarchy, mirroring the organizational unit tree above.
+-- UUIDs are deterministic so that e2e scenarios can target them directly
+-- through /groups/{id}. Codes match the ^[a-zA-Z-_0-9]+$ pattern enforced
+-- by the API, so a seeded group can be edited from the UI without tripping
+-- the code format validation.
+DO
+$$
+    DECLARE
+        admin_id       UUID;
+        user3_id       UUID;
+        user4_id       UUID;
+        root_id        UUID;
+        company_a_id   UUID;
+        division_a1_id UUID;
+        dept_a1_1_id   UUID;
+        linid_id       UUID;
+    BEGIN
+        SELECT act_id INTO admin_id FROM accounts WHERE email = 'admin@example.com' LIMIT 1;
+        SELECT act_id INTO user3_id FROM accounts WHERE external_id = 'user3' LIMIT 1;
+        SELECT act_id INTO user4_id FROM accounts WHERE external_id = 'user4' LIMIT 1;
+
+        SELECT oun_id INTO root_id FROM organizational_units WHERE name = 'root' LIMIT 1;
+        SELECT oun_id INTO company_a_id FROM organizational_units WHERE name = 'Company A' LIMIT 1;
+        SELECT oun_id INTO division_a1_id FROM organizational_units WHERE name = 'Division A1' LIMIT 1;
+        SELECT oun_id INTO dept_a1_1_id FROM organizational_units WHERE name = 'Dept A1-1' LIMIT 1;
+
+        SELECT app_id INTO linid_id FROM applications WHERE code = 'LINID' LIMIT 1;
+
+        -- =========================================================
+        -- 1. LEVEL 1 - ROOT GROUPS (no parent group)
+        -- =========================================================
+        INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
+                            created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009001', NULL, root_id, NULL,
+                'all-staff', 'All Staff',
+                'Every account of the organization.', 'all-staff@example.com',
+                admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009002', NULL, company_a_id, NULL,
+                'it-department', 'IT Department',
+                'Information technology department of Company A.', NULL,
+                admin_id, admin_id),
+               -- Every optional column left NULL: covers the empty cells of the
+               -- groups list and the empty information cards of the details page.
+               ('00000000-0000-4000-8000-000000009003', NULL, NULL, NULL,
+                'guests', 'Guests',
+                NULL, NULL,
+                admin_id, admin_id)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 2. LEVEL 2 - children of IT Department
+        -- =========================================================
+        INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
+                            created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009004',
+                '00000000-0000-4000-8000-000000009002', division_a1_id, linid_id,
+                'developers', 'Developers',
+                'Software development team.', 'developers@example.com',
+                admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009005',
+                '00000000-0000-4000-8000-000000009002', division_a1_id, linid_id,
+                'support', 'Support',
+                'Level 1 and level 2 user support.', 'support@example.com',
+                admin_id, admin_id)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 3. LEVEL 3 - children of Developers
+        -- Third level, so that the parent chain is deep enough to exercise
+        -- the recursive group_ancestors_view.
+        -- =========================================================
+        INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
+                            created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009006',
+                '00000000-0000-4000-8000-000000009004', dept_a1_1_id, linid_id,
+                'backend-developers', 'Backend Developers',
+                'Developers working on the API.', 'backend-developers@example.com',
+                admin_id, admin_id)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 4. GROUP MEMBERSHIPS
+        -- user3 belongs to two groups, so the groups card of the account
+        -- details page has more than one row to display, sorted by name.
+        -- lifecycle-c14 is left out of every group: it is the account the
+        -- e2e scenarios use to cover the empty groups card.
+        -- =========================================================
+        INSERT INTO group_accounts (grp_id, act_id, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-000000009001', admin_id, admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009001', user3_id, admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009004', user3_id, admin_id, admin_id),
+               ('00000000-0000-4000-8000-000000009005', user4_id, admin_id, admin_id)
+        ON CONFLICT (grp_id, act_id) DO NOTHING;
 
     END
 $$;

@@ -26,6 +26,18 @@
     "languages": {
       "fr-FR": "Français",
       "en-US": "English (US)"
+    },
+    "logout": {
+      "label": "Se déconnecter",
+      "error": "Impossible d’atteindre la page de déconnexion.",
+      "ConfirmationDialog": {
+        "title": "Déconnexion",
+        "content": "Êtes-vous sûr de vouloir vous déconnecter ?",
+        "ButtonsCard": {
+          "confirm": "Se déconnecter",
+          "cancel": "Annuler"
+        }
+      }
     }
   },
   "Homepage": {
@@ -44,5 +56,8 @@
   },
   "AuthenticationCallbackPage": {
     "processing": "Traitement de la réponse d'authentification..."
+  },
+  "AuthenticationLoggedOutPage": {
+    "processing": "Redirection vers la page de connexion..."
   }
 }

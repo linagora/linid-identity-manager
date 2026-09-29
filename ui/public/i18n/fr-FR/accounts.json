@@ -576,6 +576,12 @@
         "validation": {
           "required": "Ce champ est requis."
         }
+      },
+      "roleId": {
+        "label": "Rôle fonctionnel *",
+        "validation": {
+          "required": "Ce champ est requis."
+        }
       }
     }
   },
@@ -666,12 +672,30 @@
       "columns": {
         "name": "Nom",
         "type": "Type",
+        "roleName": "Rôle fonctionnel",
         "status": "Statut"
       },
       "GenericEntityTable": {
         "noData": "Aucune unité organisationnelle pour ce compte.",
         "rowsPerPage": "Éléments par page :",
         "paginationLabel": "{start}-{end} sur {total}"
+      }
+    },
+    "groups": {
+      "GenericEditableTableCard": {
+        "title": "Groupes",
+        "loadError": "Impossible de charger les groupes. Veuillez réessayer plus tard.",
+        "columns": {
+          "code": "Code",
+          "name": "Libellé",
+          "email": "Email",
+          "description": "Description"
+        },
+        "GenericEntityTable": {
+          "noData": "Aucun groupe pour ce compte.",
+          "rowsPerPage": "Éléments par page :",
+          "paginationLabel": "{start}-{end} sur {total}"
+        }
       }
     }
   },

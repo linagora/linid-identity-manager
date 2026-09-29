@@ -2,10 +2,14 @@
   "default": {
     "q-btn": {
       "dense": false,
+      "rounded": true,
       "outline": true,
       "color": "primary",
       "noCaps": true,
       "unelevated": true
+    },
+    "q-field": {
+      "bgColor": "background-search-bar"
     },
     "q-splitter": {
       "modelValue": 25
@@ -40,6 +44,8 @@
     },
     "q-input": {
       "dense": true,
+      "clearable": true,
+      "clearIcon": "close",
       "outlined": true
     },
     "q-card-actions": {
@@ -48,6 +54,10 @@
     "q-avatar": {
       "size": "md",
       "color": "primary"
+    },
+    "q-chip": {
+      "square": true,
+      "iconRemove": "close"
     },
     "q-icon": {
       "size": "sm"

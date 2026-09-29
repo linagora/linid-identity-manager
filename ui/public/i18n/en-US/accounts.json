@@ -576,6 +576,12 @@
         "validation": {
           "required": "This field is required."
         }
+      },
+      "roleId": {
+        "label": "Functional role *",
+        "validation": {
+          "required": "This field is required."
+        }
       }
     }
   },
@@ -666,12 +672,30 @@
       "columns": {
         "name": "Name",
         "type": "Type",
+        "roleName": "Functional role",
         "status": "Status"
       },
       "GenericEntityTable": {
         "noData": "No organizational unit for this account.",
         "rowsPerPage": "Rows per page:",
         "paginationLabel": "{start}-{end} of {total}"
+      }
+    },
+    "groups": {
+      "GenericEditableTableCard": {
+        "title": "Groups",
+        "loadError": "Unable to load the groups. Please try again later.",
+        "columns": {
+          "code": "Code",
+          "name": "Name",
+          "email": "Email",
+          "description": "Description"
+        },
+        "GenericEntityTable": {
+          "noData": "No group for this account.",
+          "rowsPerPage": "Rows per page:",
+          "paginationLabel": "{start}-{end} of {total}"
+        }
       }
     }
   },

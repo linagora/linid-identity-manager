@@ -198,4 +198,18 @@ public class OrganizationalUnitAccountViewDTO {
             + "the account-to-organizational-unit relationship stored as JSON"
     )
     private Map<String, Object> relationExtraParameters;
+
+    /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     */
+    @Schema(description = "Identifier of the functional role held by the account within the organizational unit, "
+        + "null when the role has been deleted or was never assigned", nullable = true)
+    private UUID roleId;
+
+    /**
+     * Human-readable name of the functional role held by the account within the organizational unit.
+     */
+    @Schema(description = "Name of the functional role held by the account within the organizational unit, "
+        + "null when the role has been deleted or was never assigned", nullable = true, example = "Manager")
+    private String roleName;
 }

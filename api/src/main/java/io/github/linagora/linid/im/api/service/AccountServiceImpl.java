@@ -40,6 +40,8 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountStatus;
@@ -47,11 +49,13 @@ import io.github.linagora.linid.im.api.persistence.model.AccountView;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.AccountGroupViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountOrganizationalUnitViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.AccountStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.AccountActivationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountCreationValidator;
 import io.github.linagora.linid.im.api.service.validation.AccountDeactivationValidator;
@@ -138,9 +142,19 @@ public class AccountServiceImpl implements AccountService {
     private final AccountOrganizationalUnitViewRepository accountOrganizationalUnitViewRepository;
 
     /**
+     * Repository for read-only account group view operations, supporting dynamic filtering.
+     */
+    private final AccountGroupViewRepository accountGroupViewRepository;
+
+    /**
      * Repository for organizational unit persistence operations.
      */
     private final OrganizationalUnitRepository organizationalUnitRepository;
+
+    /**
+     * Repository used to check the existence of the functional role held by a created account.
+     */
+    private final RoleRepository roleRepository;
 
     /**
      * Mapper for converting account records into {@link Account} entities.
@@ -198,6 +212,13 @@ public class AccountServiceImpl implements AccountService {
 
         accountCreationValidator.validate(account);
 
+        if (!roleRepository.existsById(account.roleId())) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.role.not_found", Map.of("id", account.roleId().toString()))
+            );
+        }
+
         Account entity = accountMapper.toAccount(account, userPrincipal);
         entity.setPayload(DEFAULT_PAYLOAD);
         entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
@@ -210,6 +231,7 @@ public class AccountServiceImpl implements AccountService {
         OrganizationalUnitAccount ouAccount = OrganizationalUnitAccount.builder()
             .organizationalUnitId(account.organizationalUnit())
             .accountId(createdAccount.getId())
+            .roleId(account.roleId())
             .createdBy(userPrincipal.getId())
             .updatedBy(userPrincipal.getId())
             .build();
@@ -242,6 +264,17 @@ public class AccountServiceImpl implements AccountService {
         var specification = new SpringQueryFilterSpecification<>(AccountOrganizationalUnitView.class, filters);
 
         return accountOrganizationalUnitViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountGroupView> findAllGroups(
+        final UserPrincipal userPrincipal,
+        final AccountGroupViewQueryFilterDto filters,
+        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(AccountGroupView.class, filters);
+
+        return accountGroupViewRepository.findAll(specification, pageable);
     }
 
     @Override

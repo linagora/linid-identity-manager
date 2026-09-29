@@ -59,6 +59,17 @@
               "optionValue": "{{ id }}",
               "size": 50
             }
+          },
+          {
+            "name": "roleId",
+            "input": "DynamicList",
+            "required": true,
+            "inputSettings": {
+              "route": "/roles",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
           }
         ]
       }

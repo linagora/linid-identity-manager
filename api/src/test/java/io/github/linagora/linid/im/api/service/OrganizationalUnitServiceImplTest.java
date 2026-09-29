@@ -52,6 +52,7 @@ import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnit
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -107,6 +108,9 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private RoleRepository roleRepository;
 
     @Mock
     private OrganizationalUnitRelationRepository organizationalUnitRelationRepository;
@@ -331,10 +335,12 @@ class OrganizationalUnitServiceImplTest {
     void testAttachAccount_shouldSaveRelation() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountRecord(accountId, Map.of("key", "value"));
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of("key", "value"));
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
         when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(roleRepository.existsById(roleId)).thenReturn(true);
         when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
         when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
@@ -344,6 +350,7 @@ class OrganizationalUnitServiceImplTest {
 
         assertEquals(organizationalUnitId, result.getOrganizationalUnitId());
         assertEquals(accountId, result.getAccountId());
+        assertEquals(roleId, result.getRoleId());
         assertEquals(Map.of("key", "value"), result.getExtraParameters());
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
@@ -353,7 +360,7 @@ class OrganizationalUnitServiceImplTest {
     @DisplayName("should throw exception on attach with unknown organizational unit")
     void testAttachAccount_shouldThrowExceptionOnUnknownOrganizationalUnit() {
         var organizationalUnitId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), Map.of());
+        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), UUID.randomUUID(), Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
 
@@ -368,7 +375,8 @@ class OrganizationalUnitServiceImplTest {
     void testAttachAccount_shouldThrowExceptionOnUnknownAccount() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountRecord(accountId, Map.of());
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
         when(accountRepository.existsById(accountId)).thenReturn(false);
@@ -380,14 +388,35 @@ class OrganizationalUnitServiceImplTest {
     }
 
     @Test
+    @DisplayName("should throw exception on attach with unknown role")
+    void testAttachAccount_shouldThrowExceptionOnUnknownRole() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(roleRepository.existsById(roleId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.attachAccount(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.role.not_found", exception.getError().key());
+        verify(organizationalUnitAccountRepository, never()).save(any());
+    }
+
+    @Test
     @DisplayName("should throw exception on attach with already attached account")
     void testAttachAccount_shouldThrowExceptionOnAlreadyAttachedAccount() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountRecord(accountId, Map.of());
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
         when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(roleRepository.existsById(roleId)).thenReturn(true);
         when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(true);
 
@@ -403,7 +432,7 @@ class OrganizationalUnitServiceImplTest {
     void testUpdateAccountRelation_shouldUpdateExtraParameters() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of("key", "updated"));
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of("key", "updated"));
         var entity = OrganizationalUnitAccount.builder()
             .id(UUID.randomUUID())
             .organizationalUnitId(organizationalUnitId)
@@ -424,11 +453,65 @@ class OrganizationalUnitServiceImplTest {
     }
 
     @Test
+    @DisplayName("should update the functional role of the relationship")
+    void testUpdateAccountRelation_shouldUpdateRole() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(roleId, null);
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .roleId(UUID.randomUUID())
+            .extraParameters(Map.of("key", "value"))
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(roleRepository.existsById(roleId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
+
+        assertEquals(roleId, result.getRoleId());
+        assertEquals(Map.of("key", "value"), result.getExtraParameters());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("should throw exception on update with unknown role")
+    void testUpdateAccountRelation_shouldThrowExceptionOnUnknownRole() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountUpdateRecord(roleId, null);
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(roleRepository.existsById(roleId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.role.not_found", exception.getError().key());
+        verify(organizationalUnitAccountRepository, never()).save(any(OrganizationalUnitAccount.class));
+    }
+
+    @Test
     @DisplayName("should throw exception on update with unknown organizational unit")
     void testUpdateAccountRelation_shouldThrowExceptionOnUnknownOrganizationalUnit() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
 
@@ -443,7 +526,7 @@ class OrganizationalUnitServiceImplTest {
     void testUpdateAccountRelation_shouldThrowExceptionOnNotAttachedAccount() {
         var organizationalUnitId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
         when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
@@ -831,5 +914,94 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(userPrincipal.getId(), status.getUpdatedBy());
         verify(organizationalUnitReactivationValidator).validate(status, record, uuid);
         verify(organizationalUnitStatusRepository).saveAndFlush(status);
+    }
+
+    @Test
+    @DisplayName("should keep the stored extra parameters when the update record omits them")
+    void testUpdate_shouldKeepExtraParametersWhenOmitted() {
+        var uuid = UUID.randomUUID();
+        var root = OrganizationalUnit.builder().id(UUID.randomUUID()).name("root").type("root").build();
+        var entity = OrganizationalUnit.builder()
+            .id(uuid)
+            .name("old")
+            .type("old")
+            .extraParameters(Map.of("team", "core"))
+            .build();
+        when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
+        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        when(organizationalUnitRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", null);
+
+        var result = service.update(userPrincipal, uuid, record);
+
+        assertEquals(Map.of("team", "core"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("should keep the relationship extra parameters when the update record omits them")
+    void testUpdateAccountRelation_shouldKeepExtraParametersWhenOmitted() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = OrganizationalUnitAccount.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .extraParameters(Map.of("key", "value"))
+            .build();
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var record = new OrganizationalUnitAccountUpdateRecord(null, null);
+
+        var result = service.updateAccountRelation(userPrincipal, organizationalUnitId, accountId, record);
+
+        assertEquals(Map.of("key", "value"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("should attach an account with empty extra parameters when the record omits them")
+    void testAttachAccount_shouldDefaultExtraParametersWhenOmitted() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var roleId = UUID.randomUUID();
+        var record = new OrganizationalUnitAccountRecord(accountId, roleId, null);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(roleRepository.existsById(roleId)).thenReturn(true);
+        when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.attachAccount(userPrincipal, organizationalUnitId, record);
+
+        assertEquals(Map.of(), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("should replace the stored extra parameters when the update record provides them")
+    void testUpdate_shouldOverrideExtraParametersWhenProvided() {
+        var uuid = UUID.randomUUID();
+        var root = OrganizationalUnit.builder().id(UUID.randomUUID()).name("root").type("root").build();
+        var entity = OrganizationalUnit.builder()
+            .id(uuid)
+            .name("old")
+            .type("old")
+            .extraParameters(Map.of("team", "core"))
+            .build();
+        when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
+        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        when(organizationalUnitRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", Map.of("team", "platform"));
+
+        var result = service.update(userPrincipal, uuid, record);
+
+        assertEquals(Map.of("team", "platform"), result.getExtraParameters());
     }
 }

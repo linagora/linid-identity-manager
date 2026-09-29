@@ -161,10 +161,10 @@ jobs:
 
       - name: Comment PR
         if: success()
-        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          file_path: ui/coverage.txt
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: ui-unit-tests
+          path: ui/coverage.txt
 
   ui-check-dependencies:
     name: UI - Check dependencies
@@ -191,10 +191,10 @@ jobs:
           echo '```' >> dependencies.txt
 
       - name: Comment PR
-        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          file_path: ui/dependencies.txt
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: ui-check-dependencies
+          path: ui/dependencies.txt
 
   api-check-style:
     name: API - Code style
@@ -266,10 +266,10 @@ jobs:
         run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
 
       - name: Post comment
-        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          file_path: api/pitest.html
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: api-tests
+          path: api/pitest.html
 
   api-check-dependencies:
     name: API - Check dependencies
@@ -293,10 +293,10 @@ jobs:
         run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false > dependency-updates.txt
 
       - name: Post comment
-        uses: JoseThen/comment-pr@c5aa01d206f301d98f3b707e0d5077158d58fb18 # v1.2.0
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
-          file_path: api/dependency-updates.txt
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          header: api-check-dependencies
+          path: api/dependency-updates.txt
 
   e2e-check-style:
     name: E2E - Code style

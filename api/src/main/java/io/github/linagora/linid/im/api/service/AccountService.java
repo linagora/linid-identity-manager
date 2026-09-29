@@ -36,6 +36,8 @@ import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
@@ -88,6 +90,19 @@ public interface AccountService {
     Page<AccountOrganizationalUnitView> findAllOrganizationalUnits(
         UserPrincipal userPrincipal,
         AccountOrganizationalUnitViewQueryFilterDto filters,
+        Pageable pageable);
+
+    /**
+     * Retrieves a paginated list of the groups the account is attached to.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination information
+     * @return a page of {@link AccountGroupView}
+     */
+    Page<AccountGroupView> findAllGroups(
+        UserPrincipal userPrincipal,
+        AccountGroupViewQueryFilterDto filters,
         Pageable pageable);
 
     /**

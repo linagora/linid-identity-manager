@@ -7,7 +7,9 @@
       "common.json",
       "accounts.json",
       "applications.json",
-      "organizational-units.json"
+      "organizational-units.json",
+      "roles.json",
+      "groups.json"
     ]
   },
   "immediateActionDelay": 60,
@@ -33,7 +35,7 @@
     "authority": "${LEMONLDAP_PORTAL_URL}",
     "client_id": "linid-im-client",
     "redirect_uri": "${LEMONLDAP_REDIRECT_URL}/callback",
-    "post_logout_redirect_uri": "${LEMONLDAP_PORTAL_URL}/logout",
+    "post_logout_redirect_uri": "${LEMONLDAP_REDIRECT_URL}/logged-out",
     "silent_redirect_uri": "${LEMONLDAP_REDIRECT_URL}/silent-renew",
     "response_type": "code",
     "scope": "openid email profile roles"
@@ -54,7 +56,12 @@
     "design/account-creation.json",
     "design/organizational-units-page.json",
     "design/organizational-unit-creation.json",
-    "design/application-details.json"
+    "design/application-details.json",
+    "design/roles-page.json",
+    "design/role-creation.json",
+    "design/groups-page.json",
+    "design/group-creation.json",
+    "design/group-details.json"
   ],
   "accountLifecycleFields": {
     "suspension.immediate": [

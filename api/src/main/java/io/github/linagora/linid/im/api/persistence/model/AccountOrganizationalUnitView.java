@@ -36,9 +36,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -65,11 +66,12 @@ import java.util.UUID;
 @Table(name = "account_organizational_units_view")
 @Data
 @Immutable
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 @QueryFilter
-public class AccountOrganizationalUnitView {
+public class AccountOrganizationalUnitView extends AbstractViewEntity {
 
     /**
      * Identifier of the organizational unit (UUID).
@@ -121,4 +123,22 @@ public class AccountOrganizationalUnitView {
     @Column(name = "relation_extra_parameters", columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> relationExtraParameters;
+
+    /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     */
+    @Column(name = "role_id")
+    @FilterType(type = UUID.class)
+    @QueryFilterField(type = UUID.class,
+        description = "Identifier of the functional role held by the account within the organizational unit")
+    private UUID roleId;
+
+    /**
+     * Human-readable name of the functional role held by the account within the organizational unit.
+     */
+    @Column(name = "role_name")
+    @FilterType(type = String.class)
+    @QueryFilterField(type = String.class,
+        description = "Name of the functional role held by the account within the organizational unit")
+    private String roleName;
 }

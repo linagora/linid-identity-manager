@@ -99,7 +99,8 @@
         },
         "organizationalUnitId": {
           "type": "Unité organisationnelle",
-          "separator": "ou"
+          "separator": "ou",
+          "value": "{name}"
         },
         "applicationName": {
           "type": "Application",

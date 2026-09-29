@@ -10,6 +10,7 @@ Feature: Test Account homepage display
   ## 107 Should override a favorite filter set from its own override button
   ## 108 Should disable the favorite override button when no filter is active
   ## 109 Should delete a favorite filter set from its delete button
+  ## 110 Should display the organizational unit name in the tree filter chip
 
   Scenario: Roundtrip about Account homepage
 
@@ -190,3 +191,40 @@ Feature: Test Account homepage display
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
     And  I expect the HTML element ".q-notification__message" contains "Le favori 'RenamedFavorite' a été supprimé."
     And  I expect the HTML element '[data-cy="favorite-label_0"]' not exists
+
+    ## 110 Should display the organizational unit name in the tree filter chip
+    # The menu is still open from the previous deletion: close it before filtering
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    Then I expect the HTML element '[data-cy="linid-smart-filter-menu"]' not exists
+
+    # Filter on an organizational unit: its chip shows the unit name, not the filtered id
+    When I click on '[data-cy="linid-smart-filter-field"]'
+    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000e"]'
+    And  I click on '[data-cy="tree-search-filter-panel_search"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?organizationalUnitId=00000000-0000-4000-8000-00000000000e"
+    And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000e"
+
+    # Two units are resolved by the same request, whose separator must survive the URL encoding
+    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    And  I click on '[data-cy="linid-smart-filter-field"]'
+    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000c"]'
+    And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000e"]'
+    And  I click on '[data-cy="tree-search-filter-panel_search"]'
+    Then I expect current url contains "organizationalUnitId=00000000-0000-4000-8000-00000000000c"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
+
+    # The names are resolved again when the filter is restored from the URL of a freshly loaded page
+    When I visit the '{{ env.E2E_FRONT_URL }}/accounts?organizationalUnitId=00000000-0000-4000-8000-00000000000c|00000000-0000-4000-8000-00000000000e'
+    Then I expect the HTML element '.linid-smart-filter' to be visible
+    And  I expect the HTML element '[data-cy="linid-smart-filter-chips"]' to be visible
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
+
+    # Remove the chip so no filter is left active
+    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"

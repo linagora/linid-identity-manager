@@ -37,6 +37,9 @@
 		<tomcat.version>11.0.25</tomcat.version>
 		<java.version>25</java.version>
 		<postgresql.version>42.7.13</postgresql.version>
+		<!-- Overrides the Spring Boot managed versions to fix CVE-2026-68497 -->
+		<jackson-2-bom.version>2.21.6</jackson-2-bom.version>
+		<jackson-bom.version>3.1.6</jackson-bom.version>
 	</properties>
 	<dependencies>
 		<dependency>

@@ -5,6 +5,9 @@ Feature: Test API Account endpoints
 
   ################## Authentication #######################
   ## 101 Should return 401 without valid authentication
+  ## 102 Should return 401 when an ID token is used as bearer
+  ## 103 Should return 401 when the token is valid but no account matches
+  ## 104 Should return 401 without any Authorization header
 
   ################## Create (POST /accounts) ##############
   ## 201 Should create an account with valid data
@@ -14,6 +17,9 @@ Feature: Test API Account endpoints
   ## 205 Should return 400 when validity period start is null
   ## 206 Should return 400 when validity period start is before current date
   ## 207 Should create an account link with an organizational unit
+  ## 208 Should create an account with empty extra parameters when they are omitted
+  ## 209 Should return 400 when the functional role is missing
+  ## 210 Should return 404 when the functional role does not exist
 
   ################## Find All (GET /accounts) #############
   ## 301 Should return paginated list of accounts
@@ -45,8 +51,8 @@ Feature: Test API Account endpoints
   ## 621 Should return 400 when the reactivation comment is missing
   ## 622 Should return 400 when reactivating an account that is neither suspended nor deactivated
   ## 623 Should return 404 when reactivating an unknown account
-  ## 624 Should re-validate a deactivated account by pushing its validity end while preserving deactivation fields
-  ## 625 Should return 400 when re-validating a deactivated account with a validity end in the past
+  ## 624 Should return 400 when re-validating a deactivated account with a validity end in the past
+  ## 625 Should re-validate a deactivated account by pushing its validity end while preserving deactivation fields
 
   ################## Schedule Activation (PUT /accounts/{id}/status/schedule-activation) #####
   ## 630 Should schedule the validity period start
@@ -60,18 +66,23 @@ Feature: Test API Account endpoints
   ## 704 Should return 400 when validity period start is in the future
   ## 705 Should return 400 when activationAt is before validity start
   ## 706 Should return 400 when activationAt is in the future
+  ## 707 Should return 404 when activating unknown account
 
   ################## Update (PUT /accounts/{id}) #####
   ## 801 Should update the editable attributes of an existing account
   ## 802 Should return 404 when updating an unknown account
   ## 803 Should return 400 when updating with an invalid
   ## 804 Should return 400 when updating with an email or external identifier already used
-  ## 707 Should return 404 when activating unknown account
 
   ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
   ## 901 Should return <ou> for the <user> account
   ## 902 Should return 404 for an unknown account
   ## 903 Should return an empty page for an account without any organizational unit
+
+  ################## Find groups of an account (GET /accounts/{id}/groups) #####
+  ## 1001 Should return the groups the account is attached to
+  ## 1002 Should return an empty page for an account without group
+  ## 1003 Should return 404 for an unknown account
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -82,6 +93,7 @@ Feature: Test API Account endpoints
       """
     Then  I expect status code is 200
     And   I store 'accessToken' as '{{response.body.access_token}}' in context
+    And   I store 'idToken' as '{{response.body.id_token}}' in context
     And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And   I set http header 'Content-Type' with 'application/json'
 
@@ -103,17 +115,44 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
     Then  I expect status code is 401
+
+  Scenario: 102 - Should return 401 when an ID token is used as bearer
+    Given I set http header 'Authorization' with 'Bearer {{ctx.idToken}}'
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
+
+  Scenario: 103 - Should return 401 when the token is valid but no account matches
+    Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
+    And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
+      """
+      grant_type=password&username=noaccount&password=password&scope=openid email profile roles
+      """
+    Then  I expect status code is 200
+    And   I set http header 'Authorization' with 'Bearer {{response.body.access_token}}'
+    And   I set http header 'Content-Type' with 'application/json'
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
+
+  Scenario: 104 - Should return 401 without any Authorization header
+    Given I set http header 'Authorization' with ''
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'Bearer'
 
   ####################################################
   ################## Create (POST /accounts) ##########
   ####################################################
 
   Scenario: 201 - Should create an account with valid data
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-201",
@@ -125,27 +164,28 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 10
-    And   I expect '{{response.body.id}}' is not empty
-    And   I expect '{{response.body.externalId}}' is 'ext-201'
-    And   I expect '{{response.body.lastname}}' is 'Doe'
-    And   I expect '{{response.body.firstname}}' is 'John'
-    And   I expect '{{response.body.email}}' is 'john201@example.com'
-    And   I expect '{{response.body.createdBy}}' is not empty
-    And   I expect '{{response.body.updatedBy}}' is not empty
-    And   I expect '{{response.body.insertDate}}' is not empty
-    And   I expect '{{response.body.updateDate}}' is not empty
-    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
+    Then I expect status code is 201
+    And  I expect '{{response.body | dump}}' as 'json' to have length 10
+    And  I expect '{{response.body.id}}' is not empty
+    And  I expect '{{response.body.externalId}}' is 'ext-201'
+    And  I expect '{{response.body.lastname}}' is 'Doe'
+    And  I expect '{{response.body.firstname}}' is 'John'
+    And  I expect '{{response.body.email}}' is 'john201@example.com'
+    And  I expect '{{response.body.createdBy}}' is not empty
+    And  I expect '{{response.body.updatedBy}}' is not empty
+    And  I expect '{{response.body.insertDate}}' is not empty
+    And  I expect '{{response.body.updateDate}}' is not empty
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.id}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{response.body.id}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 202 - Should return 400 with missing required fields
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "",
@@ -154,16 +194,17 @@ Feature: Test API Account endpoints
         "email": "",
         "validityPeriod": null,
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.error}}' is 'Validation failed'
-    And   I expect '{{response.body.errorKey}}' is 'error.validation'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.error}}' is 'Validation failed'
+    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 203 - Should return 400 with invalid email
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-203",
@@ -175,16 +216,17 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.error}}' is 'Validation failed'
-    And   I expect '{{response.body.errorKey}}' is 'error.validation'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.error}}' is 'Validation failed'
+    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 204 - Should return 500 when creating account with duplicate email
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-204-a",
@@ -196,13 +238,14 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-204-b",
@@ -214,16 +257,17 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 500
+    Then I expect status code is 500
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 205 - Should return 400 when validity period start is null
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-205",
@@ -235,15 +279,16 @@ Feature: Test API Account endpoints
           "end": "2030-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_required'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_required'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 206 - Should return 400 when validity period start is before current date
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-206",
@@ -255,15 +300,16 @@ Feature: Test API Account endpoints
           "end": "2030-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_in_past'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.creation.validity_period_start_in_past'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 207 - Should create an account link with an organizational unit
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-207",
@@ -275,35 +321,108 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 10
-    And   I expect '{{response.body.id}}' is not empty
-    And   I expect '{{response.body.externalId}}' is 'ext-207'
-    And   I expect '{{response.body.lastname}}' is 'Doe'
-    And   I expect '{{response.body.firstname}}' is 'John'
-    And   I expect '{{response.body.email}}' is 'john207@example.com'
-    And   I expect '{{response.body.createdBy}}' is not empty
-    And   I expect '{{response.body.updatedBy}}' is not empty
-    And   I expect '{{response.body.insertDate}}' is not empty
-    And   I expect '{{response.body.updateDate}}' is not empty
-    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
+    Then I expect status code is 201
+    And  I expect '{{response.body | dump}}' as 'json' to have length 10
+    And  I expect '{{response.body.id}}' is not empty
+    And  I expect '{{response.body.externalId}}' is 'ext-207'
+    And  I expect '{{response.body.lastname}}' is 'Doe'
+    And  I expect '{{response.body.firstname}}' is 'John'
+    And  I expect '{{response.body.email}}' is 'john207@example.com'
+    And  I expect '{{response.body.createdBy}}' is not empty
+    And  I expect '{{response.body.updatedBy}}' is not empty
+    And  I expect '{{response.body.insertDate}}' is not empty
+    And  I expect '{{response.body.updateDate}}' is not empty
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000a/accounts?email=john207@example.com' with method 'GET'
     Then I expect status code is 200
+    And  I expect '{{response.body.content[0].roleId}}' is '00000000-0000-4000-8000-00000000f001'
+    And  I expect '{{response.body.content[0].roleName}}' is 'Member'
     And  I expect '{{response.body.content.length}}' is '1'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{response.body.content[0].id}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{response.body.content[0].id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 208 - Should create an account with empty extra parameters when they are omitted
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-208",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john208@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001"
+      }
+      """
+    Then I expect status code is 201
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+    And  I store 'account208Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.account208Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.account208Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 209 - Should return 400 when the functional role is missing
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-209",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john209@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+
+  Scenario: 210 - Should return 404 when the functional role does not exist
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-210",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john210@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-000000000000",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.role.not_found'
+
+    When I request '{{env.E2E_API_URL}}/accounts?email=john210@example.com' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '0'
 
   ####################################################
   ################## Find All (GET /accounts) #########
   ####################################################
 
   Scenario: 301 - Should return paginated list of accounts
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-301",
@@ -315,36 +434,37 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts?externalId=ext-301' with method 'GET'
-    Then  I expect status code is 200
-    And   I expect '{{response.body.totalElements}}' is '1'
-    And   I expect '{{response.body.content[0].id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.content[0].externalId}}' is 'ext-301'
-    And   I expect '{{response.body.content[0].lastname}}' is 'Find'
-    And   I expect '{{response.body.content[0].firstname}}' is 'All'
-    And   I expect '{{response.body.content[0].email}}' is 'findall301@example.com'
-    And   I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.content[0].updatedBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.content[0].organizationalUnits}}' is 'Company A'
-    And   I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
-    And   I expect '{{response.body.content[0].insertDate}}' is not empty
-    And   I expect '{{response.body.content[0].updateDate}}' is not empty
+    When I request '{{env.E2E_API_URL}}/accounts?externalId=ext-301' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.content[0].externalId}}' is 'ext-301'
+    And  I expect '{{response.body.content[0].lastname}}' is 'Find'
+    And  I expect '{{response.body.content[0].firstname}}' is 'All'
+    And  I expect '{{response.body.content[0].email}}' is 'findall301@example.com'
+    And  I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[0].updatedBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[0].organizationalUnits}}' is 'Company A'
+    And  I expect '{{response.body.content[0].extraParameters | dump}}' is '{}'
+    And  I expect '{{response.body.content[0].insertDate}}' is not empty
+    And  I expect '{{response.body.content[0].updateDate}}' is not empty
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   ####################################################
   ################## Find By Id (GET /accounts/{id}) ##
   ####################################################
 
   Scenario: 401 - Should return 200 for existing account
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-401",
@@ -356,41 +476,42 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'GET'
-    Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.externalId}}' is 'ext-401'
-    And   I expect '{{response.body.lastname}}' is 'Find'
-    And   I expect '{{response.body.firstname}}' is 'ById'
-    And   I expect '{{response.body.email}}' is 'findbyid401@example.com'
-    And   I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.organizationalUnits}}' is 'Company A'
-    And   I expect '{{response.body.extraParameters | dump}}' is '{}'
-    And   I expect '{{response.body.insertDate}}' is not empty
-    And   I expect '{{response.body.updateDate}}' is not empty
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.externalId}}' is 'ext-401'
+    And  I expect '{{response.body.lastname}}' is 'Find'
+    And  I expect '{{response.body.firstname}}' is 'ById'
+    And  I expect '{{response.body.email}}' is 'findbyid401@example.com'
+    And  I expect '{{response.body.createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.organizationalUnits}}' is 'Company A'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+    And  I expect '{{response.body.insertDate}}' is not empty
+    And  I expect '{{response.body.updateDate}}' is not empty
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 402 - Should return 404 for unknown account id
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'GET'
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
-    And   I expect '{{response.body.status}}' is '404'
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'
 
   ####################################################
   ################## Delete (DELETE /accounts/{id}) ###
   ####################################################
 
   Scenario: 501 - Should return 204 when deleting existing account
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-501",
@@ -402,30 +523,31 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'GET'
-    Then  I expect status code is 404
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'GET'
+    Then I expect status code is 404
 
   Scenario: 502 - Should return 404 when deleting unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'DELETE'
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
-    And   I expect '{{response.body.status}}' is '404'
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'DELETE'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'
 
   ####################################################
   ################## Suspend (PUT /accounts/{id}/status/suspend) ##
   ####################################################
 
   Scenario: 601 - Should suspend an account with a future period and reason fields
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-601",
@@ -437,13 +559,14 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -455,19 +578,19 @@ Feature: Test API Account endpoints
         "comment": "Pending review"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.suspensionPeriod.start}}' is not empty
-    And   I expect '{{response.body.suspensionPeriod.end}}' is not empty
-    And   I expect '{{response.body.suspensionReason}}' is 'Suspension Reason A'
-    And   I expect '{{response.body.suspensionSubreason}}' is 'Suspension Sub-reason A.1'
-    And   I expect '{{response.body.suspensionComment}}' is 'Pending review'
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.suspensionPeriod.start}}' is not empty
+    And  I expect '{{response.body.suspensionPeriod.end}}' is not empty
+    And  I expect '{{response.body.suspensionReason}}' is 'Suspension Reason A'
+    And  I expect '{{response.body.suspensionSubreason}}' is 'Suspension Sub-reason A.1'
+    And  I expect '{{response.body.suspensionComment}}' is 'Pending review'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 602 - Should accept an open-ended (permanent) future suspension
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-602",
@@ -479,13 +602,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -496,15 +620,15 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.suspensionPeriod.start}}' is not empty
-    And   I expect '{{response.body.suspensionPeriod.end}}' is empty
+    Then I expect status code is 200
+    And  I expect '{{response.body.suspensionPeriod.start}}' is not empty
+    And  I expect '{{response.body.suspensionPeriod.end}}' is empty
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 603 - Should return 400 when the suspension period start is after its end
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-603",
@@ -516,13 +640,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -533,14 +658,14 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_period_invalid'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_period_invalid'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 604 - Should return 400 when the suspension period start is in the past
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-604",
@@ -552,13 +677,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -569,14 +695,14 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_start_in_past'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_start_in_past'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 605 - Should return 400 when the suspension period end is in the past
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-605",
@@ -588,13 +714,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -605,14 +732,14 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_end_in_past'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.suspension_end_in_past'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 606 - Should return 404 when suspending an unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -623,15 +750,15 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
 
   ####################################################
   ################## Deactivate (PUT /accounts/{id}/status/deactivate) ##
   ####################################################
 
   Scenario: 610 - Should deactivate an account with a future date and reason fields
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-610",
@@ -643,13 +770,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/deactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/deactivate' with method 'PUT' with body:
       """
       {
         "deactivationAt": "2099-01-01T00:00:00Z",
@@ -658,18 +786,18 @@ Feature: Test API Account endpoints
         "comment": "End of contract"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.validityPeriod.end}}' is not empty
-    And   I expect '{{response.body.deactivationReason}}' is 'Deactivation Reason A'
-    And   I expect '{{response.body.deactivationSubreason}}' is 'Deactivation Sub-reason A.1'
-    And   I expect '{{response.body.deactivationComment}}' is 'End of contract'
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.validityPeriod.end}}' is not empty
+    And  I expect '{{response.body.deactivationReason}}' is 'Deactivation Reason A'
+    And  I expect '{{response.body.deactivationSubreason}}' is 'Deactivation Sub-reason A.1'
+    And  I expect '{{response.body.deactivationComment}}' is 'End of contract'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 611 - Should return 400 when the deactivation date is in the past
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-611",
@@ -681,13 +809,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/deactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/deactivate' with method 'PUT' with body:
       """
       {
         "deactivationAt": "2020-01-01T00:00:00Z",
@@ -695,14 +824,14 @@ Feature: Test API Account endpoints
         "subreason": "Deactivation Sub-reason A.1"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.deactivation_in_past'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.deactivation_in_past'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 612 - Should return 400 when the deactivation date is before the validity start
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-612",
@@ -714,13 +843,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/deactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/deactivate' with method 'PUT' with body:
       """
       {
         "deactivationAt": "2085-01-01T00:00:00Z",
@@ -728,14 +858,14 @@ Feature: Test API Account endpoints
         "subreason": "Deactivation Sub-reason A.1"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.deactivation_before_validity_start'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.deactivation_before_validity_start'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 613 - Should return 404 when deactivating an unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/deactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/deactivate' with method 'PUT' with body:
       """
       {
         "deactivationAt": "2099-01-01T00:00:00Z",
@@ -743,15 +873,15 @@ Feature: Test API Account endpoints
         "subreason": "Deactivation Sub-reason A.1"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
 
   ####################################################
   ################## Reactivate (PUT /accounts/{id}/status/reactivate) ##
   ####################################################
 
   Scenario: 620 - Should reactivate a suspended account with a justification comment
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-620",
@@ -763,13 +893,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -780,24 +911,24 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 200
+    Then I expect status code is 200
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/reactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/reactivate' with method 'PUT' with body:
       """
       {
         "comment": "Investigation closed, account cleared"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.reactivationComment}}' is 'Investigation closed, account cleared'
-    And   I expect '{{response.body.status}}' is 'INACTIVE'
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.reactivationComment}}' is 'Investigation closed, account cleared'
+    And  I expect '{{response.body.status}}' is 'INACTIVE'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 621 - Should return 400 when the reactivation comment is missing
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-621",
@@ -809,13 +940,14 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/suspend' with method 'PUT' with body:
       """
       {
         "suspensionPeriod": {
@@ -826,21 +958,21 @@ Feature: Test API Account endpoints
         "subreason": "Suspension Sub-reason A.1"
       }
       """
-    Then  I expect status code is 200
+    Then I expect status code is 200
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/reactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/reactivate' with method 'PUT' with body:
       """
       {
         "comment": ""
       }
       """
-    Then  I expect status code is 400
+    Then I expect status code is 400
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 622 - Should return 400 when reactivating an account that is neither suspended nor deactivated
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-622",
@@ -852,65 +984,66 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/reactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/reactivate' with method 'PUT' with body:
       """
       {
         "comment": "Trying to reactivate an active account"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.nothing_to_reactivate'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.nothing_to_reactivate'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 623 - Should return 404 when reactivating an unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/reactivate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/reactivate' with method 'PUT' with body:
       """
       {
         "comment": "Reactivation attempt"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
 
-  Scenario: 624 - Should re-validate a deactivated account by pushing its validity end while preserving deactivation fields
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000ce/status/reactivate' with method 'PUT' with body:
-      """
-      {
-        "comment": "Re-validated after appeal",
-        "validityEnd": "2099-12-31T00:00:00Z"
-      }
-      """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.status}}' is 'ACTIVE'
-    And   I expect '{{response.body.reactivationComment}}' is 'Re-validated after appeal'
-    And   I expect '{{response.body.deactivationReason}}' is 'Deactivation Reason A'
-    And   I expect '{{response.body.deactivationSubreason}}' is 'Deactivation Sub-reason A.1'
-
-  Scenario: 625 - Should return 400 when re-validating a deactivated account with a validity end in the past
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000cd/status/reactivate' with method 'PUT' with body:
+  Scenario: 624 - Should return 400 when re-validating a deactivated account with a validity end in the past
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000ce/status/reactivate' with method 'PUT' with body:
       """
       {
         "comment": "Re-validation with a past end",
         "validityEnd": "2000-01-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.validity_end_in_past'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.validity_end_in_past'
+
+  Scenario: 625 - Should re-validate a deactivated account by pushing its validity end while preserving deactivation fields
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-0000000000ce/status/reactivate' with method 'PUT' with body:
+      """
+      {
+        "comment": "Re-validated after appeal",
+        "validityEnd": "2099-12-31T00:00:00Z"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.status}}' is 'ACTIVE'
+    And  I expect '{{response.body.reactivationComment}}' is 'Re-validated after appeal'
+    And  I expect '{{response.body.deactivationReason}}' is 'Deactivation Reason A'
+    And  I expect '{{response.body.deactivationSubreason}}' is 'Deactivation Sub-reason A.1'
 
   ####################################################
   ################## Set validity (PUT /accounts/{id}/status/schedule-activation) ##
   ####################################################
 
   Scenario: 630 - Should schedule the validity period start
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-630",
@@ -922,27 +1055,28 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/schedule-activation' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/schedule-activation' with method 'PUT' with body:
       """
       {
         "validityStart": "2090-01-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.validityPeriod.start}}' is not empty
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.validityPeriod.start}}' is not empty
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 631 - Should return 400 when the validity start is not in the future
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-631",
@@ -954,73 +1088,74 @@ Feature: Test API Account endpoints
           "end": null
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/schedule-activation' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/schedule-activation' with method 'PUT' with body:
       """
       {
         "validityStart": "2020-01-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.validity_start_not_in_future'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.validity_start_not_in_future'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 632 - Should return 404 when setting validity of an unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/schedule-activation' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/schedule-activation' with method 'PUT' with body:
       """
       {
         "validityStart": "2090-01-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
 
   ####################################################
   ################## Activate (PUT /accounts/{id}/status/activate) ##
   ####################################################
 
   Scenario: 701 - Should activate account when business rules are satisfied
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2025-06-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.activationAt}}' is not empty
-    And   I expect '{{response.body.status}}' is 'ACTIVE'
+    Then I expect status code is 200
+    And  I expect '{{response.body.activationAt}}' is not empty
+    And  I expect '{{response.body.status}}' is 'ACTIVE'
 
   Scenario: 702 - Should return 404 when no account status row exists yet
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a001/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a001/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.not_found'
-    And   I expect '{{response.body.status}}' is '404'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.not_found'
+    And  I expect '{{response.body.status}}' is '404'
 
   Scenario: 703 - Should return 400 when account is already activated
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a002/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2025-07-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.already_activated'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.activation.already_activated'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 704 - Should return 400 when validity period start is in the future
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-704",
@@ -1032,64 +1167,65 @@ Feature: Test API Account endpoints
           "end": "2099-12-31T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.validity_in_future'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.activation.validity_in_future'
+    And  I expect '{{response.body.status}}' is '400'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 705 - Should return 400 when activationAt is before validity start
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a003/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2020-01-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.before_validity_start'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.activation.before_validity_start'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 706 - Should return 400 when activationAt is in the future
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a004/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-00000000a004/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.status.activation.in_future'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.status.activation.in_future'
+    And  I expect '{{response.body.status}}' is '400'
 
   Scenario: 707 - Should return 404 when activating unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/activate' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/status/activate' with method 'PUT' with body:
       """
       {
         "activationAt": "2099-06-01T00:00:00Z"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
-    And   I expect '{{response.body.status}}' is '404'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'
 
   ####################################################
   ################## Update (PUT /accounts/{id}) #####
   ####################################################
 
   Scenario: 801 - Should update the editable attributes of an existing account
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-801",
@@ -1101,13 +1237,14 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
       {
         "externalId": "ext-801-updated",
@@ -1117,17 +1254,17 @@ Feature: Test API Account endpoints
         "extraParameters": {"updated": true}
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And   I expect '{{response.body.externalId}}' is 'ext-801-updated'
-    And   I expect '{{response.body.lastname}}' is 'After'
-    And   I expect '{{response.body.firstname}}' is 'Updated'
-    And   I expect '{{response.body.email}}' is 'updated801@example.com'
-    And   I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
-    And   I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
+    Then I expect status code is 200
+    And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
+    And  I expect '{{response.body.externalId}}' is 'ext-801-updated'
+    And  I expect '{{response.body.lastname}}' is 'After'
+    And  I expect '{{response.body.firstname}}' is 'Updated'
+    And  I expect '{{response.body.email}}' is 'updated801@example.com'
+    And  I expect '{{response.body.updatedBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
 
     # A payload without extraParameters must preserve the stored value
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
       {
         "externalId": "ext-801-updated",
@@ -1136,14 +1273,14 @@ Feature: Test API Account endpoints
         "email": "updated801@example.com"
       }
       """
-    Then  I expect status code is 200
-    And   I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"updated":true}'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 802 - Should return 404 when updating an unknown account
-    When  I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'PUT' with body:
       """
       {
         "externalId": "ext-802",
@@ -1152,12 +1289,12 @@ Feature: Test API Account endpoints
         "email": "update802@example.com"
       }
       """
-    Then  I expect status code is 404
-    And   I expect '{{response.body.errorKey}}' is 'error.account.not_found'
-    And   I expect '{{response.body.status}}' is '404'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'
 
   Scenario Outline: 803 - Should return 400 when updating with an invalid <field>
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-803",
@@ -1169,13 +1306,14 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'accountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
       {
         "externalId": "<externalId>",
@@ -1184,13 +1322,13 @@ Feature: Test API Account endpoints
         "email": "<email>"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.error}}' is 'Validation failed'
-    And   I expect '{{response.body.errorKey}}' is 'error.validation'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.error}}' is 'Validation failed'
+    And  I expect '{{response.body.errorKey}}' is 'error.validation'
+    And  I expect '{{response.body.status}}' is '400'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
     Examples:
       | field      | externalId | lastname | firstname | email                 |
@@ -1200,7 +1338,7 @@ Feature: Test API Account endpoints
       | firstname  | ext-803    | Doe      |           | update803@example.com |
 
   Scenario: 804 - Should return 400 when updating with an email or external identifier already used
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-804-a",
@@ -1212,13 +1350,14 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'firstAccountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'firstAccountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
         "externalId": "ext-804-b",
@@ -1230,13 +1369,14 @@ Feature: Test API Account endpoints
           "end": "2100-01-01T00:00:00Z"
         },
         "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
         "extraParameters": {}
       }
       """
-    Then  I expect status code is 201
-    And   I store 'secondAccountId' as '{{response.body.id}}' in context
+    Then I expect status code is 201
+    And  I store 'secondAccountId' as '{{response.body.id}}' in context
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
       """
       {
         "externalId": "ext-804-b",
@@ -1245,11 +1385,11 @@ Feature: Test API Account endpoints
         "email": "update804-a@example.com"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.email_already_used'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.email_already_used'
+    And  I expect '{{response.body.status}}' is '400'
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
       """
       {
         "externalId": "ext-804-a",
@@ -1258,12 +1398,12 @@ Feature: Test API Account endpoints
         "email": "update804-b@example.com"
       }
       """
-    Then  I expect status code is 400
-    And   I expect '{{response.body.errorKey}}' is 'error.account.external_id_already_used'
-    And   I expect '{{response.body.status}}' is '400'
+    Then I expect status code is 400
+    And  I expect '{{response.body.errorKey}}' is 'error.account.external_id_already_used'
+    And  I expect '{{response.body.status}}' is '400'
 
     # Updating an account with its own current values must stay allowed
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
       """
       {
         "externalId": "ext-804-b",
@@ -1272,12 +1412,12 @@ Feature: Test API Account endpoints
         "email": "update804-b@example.com"
       }
       """
-    Then  I expect status code is 200
+    Then I expect status code is 200
 
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.firstAccountId}}' with method 'DELETE'
-    Then  I expect status code is 204
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.firstAccountId}}' with method 'DELETE'
+    Then I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'DELETE'
+    Then I expect status code is 204
 
   ####################################################
   ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
@@ -1297,16 +1437,22 @@ Feature: Test API Account endpoints
     And  I expect '{{response.body.content[<indice>].name}}' is '<ou>'
     And  I expect '{{response.body.content[<indice>].type}}' is '<type>'
     And  I expect '{{response.body.content[<indice>].status}}' is 'ACTIVE'
+    And  I expect '{{response.body.content[<indice>].roleId}}' is not empty
+    And  I expect '{{response.body.content[<indice>].roleName}}' is '<role>'
+    And  I expect '{{response.body.content[<indice>].createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[<indice>].updatedBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[<indice>].insertDate}}' is not empty
+    And  I expect '{{response.body.content[<indice>].updateDate}}' is not empty
 
     Examples:
-      | user          | ou          | type     | totalElements | indice |
-      | user1         | Company A   | COMPANY  | 2             | 0      |
-      | user1         | Team Beta   | TEAM     | 2             | 1      |
-      | user2         | Company B   | COMPANY  | 2             | 0      |
-      | user2         | Team Beta   | TEAM     | 2             | 1      |
-      | user3         | Division A1 | DIVISION | 2             | 0      |
-      | user3         | Team Beta   | TEAM     | 2             | 1      |
-      | lifecycle-c10 | Team Alpha  | TEAM     | 1             | 0      |
+      | user          | ou          | type     | role     | totalElements | indice |
+      | user1         | Company A   | COMPANY  | Manager  | 2             | 0      |
+      | user1         | Team Beta   | TEAM     | Member   | 2             | 1      |
+      | user2         | Company B   | COMPANY  | Manager  | 2             | 0      |
+      | user2         | Team Beta   | TEAM     | Member   | 2             | 1      |
+      | user3         | Division A1 | DIVISION | Operator | 2             | 0      |
+      | user3         | Team Beta   | TEAM     | Member   | 2             | 1      |
+      | lifecycle-c10 | Team Alpha  | TEAM     | Member   | 1             | 0      |
 
   Scenario: 902 - Should return 404 for an unknown account
     When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/organizational-units' with method 'GET'
@@ -1319,3 +1465,123 @@ Feature: Test API Account endpoints
     Then I expect status code is 200
     And  I expect '{{response.body.totalElements}}' is '0'
     And  I expect '{{response.body.content.length}}' is '0'
+
+  ####################################################
+  ################## Find groups of an account (GET /accounts/{id}/groups) #####
+  ####################################################
+
+  Scenario: 1001 - Should return the groups the account is attached to
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-910-parent",
+        "name": "Group 910 parent",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'parentGroupId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-910",
+        "name": "Group 910",
+        "parentId": "{{ctx.parentGroupId}}",
+        "description": "A group for the account side",
+        "email": "grp-910@example.com",
+        "organizationalUnitId": "00000000-0000-4000-8000-00000000000a",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'groupId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-910",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john910@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.groupId}}/accounts' with method 'POST' with body:
+      """
+      {
+        "accountId": "{{ctx.accountId}}",
+        "extraParameters": {
+          "role": "member"
+        }
+      }
+      """
+    Then I expect status code is 201
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/groups' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '{{ctx.groupId}}'
+    And  I expect '{{response.body.content[0].code}}' is 'grp-910'
+    And  I expect '{{response.body.content[0].name}}' is 'Group 910'
+    And  I expect '{{response.body.content[0].parentId}}' is '{{ctx.parentGroupId}}'
+    And  I expect '{{response.body.content[0].parentName}}' is 'Group 910 parent'
+    And  I expect '{{response.body.content[0].description}}' is 'A group for the account side'
+    And  I expect '{{response.body.content[0].email}}' is 'grp-910@example.com'
+    And  I expect '{{response.body.content[0].organizationalUnitId}}' is '00000000-0000-4000-8000-00000000000a'
+    And  I expect '{{response.body.content[0].organizationalUnitName}}' is 'Company A'
+    And  I expect '{{response.body.content[0].relationExtraParameters.role}}' is 'member'
+    And  I expect '{{response.body.content[0].createdBy}}' is 'admin_fn admin_ln'
+    And  I expect '{{response.body.content[0].insertDate}}' is not empty
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.groupId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.parentGroupId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 1002 - Should return an empty page for an account without group
+    When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
+      """
+      {
+        "externalId": "ext-911",
+        "lastname": "Doe",
+        "firstname": "John",
+        "email": "john911@example.com",
+        "validityPeriod": {
+          "start": "2080-01-01T00:00:00Z",
+          "end": "2100-01-01T00:00:00Z"
+        },
+        "organizationalUnit": "00000000-0000-4000-8000-00000000000a",
+        "roleId": "00000000-0000-4000-8000-00000000f001",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'accountId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}/groups' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '0'
+    And  I expect '{{response.body.content.length}}' is '0'
+
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 1003 - Should return 404 for an unknown account
+    When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000/groups' with method 'GET'
+    Then I expect status code is 404
+    And  I expect '{{response.body.errorKey}}' is 'error.account.not_found'
+    And  I expect '{{response.body.status}}' is '404'

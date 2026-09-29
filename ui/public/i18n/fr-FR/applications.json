@@ -225,7 +225,6 @@
     }
   },
   "moduleApplicationDetailsPage": {
-    "title": "Détails de l'application",
     "error": "Impossible de charger l'application. Veuillez réessayer plus tard.",
     "EntityProfilePanel": {
       "title": "{name}",

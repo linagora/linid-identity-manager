@@ -56,6 +56,8 @@ public interface OrganizationalUnitMapper {
     @Mapping(target = "updateDate", ignore = true)
     @Mapping(target = "createdBy", source = "userPrincipal.id")
     @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "extraParameters", source = "organizationalUnitRecord.extraParameters",
+        defaultExpression = "java(new java.util.HashMap<>())")
     OrganizationalUnit toEntity(OrganizationalUnitRecord organizationalUnitRecord, UserPrincipal userPrincipal);
 
     /**

@@ -29,6 +29,8 @@ package io.github.linagora.linid.im.api.controller;
 import io.github.linagora.linid.im.api.model.account.AccountActivationRecord;
 import io.github.linagora.linid.im.api.model.account.AccountDTO;
 import io.github.linagora.linid.im.api.model.account.AccountDeactivationRecord;
+import io.github.linagora.linid.im.api.model.account.AccountGroupMapper;
+import io.github.linagora.linid.im.api.model.account.AccountGroupViewDTO;
 import io.github.linagora.linid.im.api.model.account.AccountMapper;
 import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.account.AccountOrganizationalUnitViewDTO;
@@ -39,6 +41,7 @@ import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
@@ -104,6 +107,11 @@ public class AccountController {
      * Mapper for account organizational unit view entity-to-DTO conversion.
      */
     private final AccountOrganizationalUnitMapper accountOrganizationalUnitMapper;
+
+    /**
+     * Mapper for account group view entity-to-DTO conversion.
+     */
+    private final AccountGroupMapper accountGroupMapper;
 
     /**
      * Creates a new account.
@@ -195,6 +203,38 @@ public class AccountController {
 
         var pages = accountService.findAllOrganizationalUnits(userPrincipal, filters, pageable)
             .map(accountOrganizationalUnitMapper::toDTO);
+
+        return pagedResponseStatusResolver.resolve(pages);
+    }
+
+    /**
+     * Retrieves the groups the account is attached to, with pagination and filtering.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of group DTOs
+     */
+    @GetMapping("/{accountId}/groups")
+    @Operation(summary = "Get all account groups with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of account groups")
+    @ApiResponse(responseCode = "206", description = "Partial list of account groups (more pages available)")
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<Page<AccountGroupViewDTO>> findAllGroups(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID accountId,
+        final AccountGroupViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for account {} groups with {}", userPrincipal.getEmail(), accountId,
+            filters);
+
+        accountService.existsById(userPrincipal, accountId);
+
+        filters.setAccountId(List.of(accountId.toString()));
+
+        var pages = accountService.findAllGroups(userPrincipal, filters, pageable)
+            .map(accountGroupMapper::toDTO);
 
         return pagedResponseStatusResolver.resolve(pages);
     }

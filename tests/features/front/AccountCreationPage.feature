@@ -28,12 +28,12 @@ Feature: Test Account creation page
     Given I visit the "{{ env.E2E_FRONT_URL }}/accounts"
 
     ## 101 Test page access and cancel button
-    When  I click on '[data-cy="button_create"]'
-    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/new"
+    When I click on '[data-cy="button_create"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/new"
 
-    When  I click on '[data-cy="button_cancel"]'
-    Then  I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    When  I click on '[data-cy="button_create"]'
+    When I click on '[data-cy="button_cancel"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="button_create"]'
 
     ## 102 Should display form fields and action buttons
     Then I expect the HTML element '[data-cy="generic-creation-page"]' to be visible
@@ -44,6 +44,7 @@ Feature: Test Account creation page
     And  I expect the HTML element '[data-cy="field_email"]' to be visible
     And  I expect the HTML element '[data-cy="field_validityPeriod.start"]' to be visible
     And  I expect the HTML element '[data-cy="field_organizationalUnit"]' to be visible
+    And  I expect the HTML element '[data-cy="field_roleId"]' to be visible
     And  I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And  I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 
@@ -68,6 +69,7 @@ Feature: Test Account creation page
     And  I set the text "e2e-account-creation@example.com" in the HTML element '[data-cy="field_email"]'
     And  I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.start"]'
     And  I select '.q-menu .q-item:contains("root")' in '[data-cy="field_organizationalUnit"]'
+    And  I select '.q-menu .q-item:contains("Member")' in '[data-cy="field_roleId"]'
     And  I click on '[data-cy="button_confirm"]'
 
     ## 107 Should display a success notification and redirect to the account details page
@@ -87,8 +89,8 @@ Feature: Test Account creation page
     And   I set http header 'Authorization' with 'Bearer {{ctx.accessToken}}'
     And   I set http header 'Content-Type' with 'application/json'
 
-    When  I request '{{env.E2E_API_URL}}/accounts?externalId=E2E_ACCOUNT_CREATION' with method 'GET'
-    Then  I expect status code is 200
-    And   I store 'accountId' as '{{response.body.content[0].id}}' in context
-    When  I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/accounts?externalId=E2E_ACCOUNT_CREATION' with method 'GET'
+    Then I expect status code is 200
+    And  I store 'accountId' as '{{response.body.content[0].id}}' in context
+    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'DELETE'
+    Then I expect status code is 204

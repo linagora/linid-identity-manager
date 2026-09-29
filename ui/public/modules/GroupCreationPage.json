@@ -1,0 +1,76 @@
+{
+  "instanceId": "moduleGroupCreationPage",
+  "remoteName": "catalogUI",
+  "entity": "groups",
+  "lifecycleRemote": "catalogUI/PageLifecycle",
+  "routesRemote": "catalogUI/PageRoutes",
+  "i18nRemote": "catalogUI/EmptyI18n",
+  "apiEndpoint": "groups",
+  "basePath": "/groups",
+  "options": {
+    "layout": "catalogUI/BaseLayout",
+    "page": "catalogUI/GenericCreationPage",
+    "pagePath": "new",
+    "parentPath": "/groups",
+    "successPath": "/groups/{{ entity.id }}",
+    "idKey": "id",
+    "formSections": [
+      {
+        "id": "general",
+        "fields": [
+          {
+            "name": "code",
+            "input": "Text",
+            "required": true,
+            "inputSettings": {
+              "pattern": "^[a-zA-Z-_0-9]+$"
+            }
+          },
+          {
+            "name": "name",
+            "input": "Text",
+            "required": true
+          },
+          {
+            "name": "parentId",
+            "input": "DynamicList",
+            "inputSettings": {
+              "route": "/groups",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          },
+          {
+            "name": "description",
+            "input": "TextArea"
+          },
+          {
+            "name": "organizationalUnitId",
+            "input": "DynamicList",
+            "inputSettings": {
+              "route": "/organizational-units",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          },
+          {
+            "name": "applicationId",
+            "input": "DynamicList",
+            "inputSettings": {
+              "route": "/applications",
+              "optionLabel": "{{ name }}",
+              "optionValue": "{{ id }}",
+              "size": 50
+            }
+          },
+          {
+            "name": "email",
+            "input": "Email"
+          }
+        ]
+      }
+    ]
+  }
+}

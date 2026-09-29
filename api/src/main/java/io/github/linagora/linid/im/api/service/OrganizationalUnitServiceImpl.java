@@ -52,6 +52,7 @@ import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnit
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitDistinctViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -66,8 +67,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -107,6 +110,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Repository used to check the existence of accounts to attach.
      */
     private final AccountRepository accountRepository;
+
+    /**
+     * Repository used to check the existence of the functional role held by an attached account.
+     */
+    private final RoleRepository roleRepository;
 
     /**
      * Repository used to manage organizational unit relation persistence operations.
@@ -296,6 +304,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             );
         }
 
+        assertRoleExists(record.roleId());
+
         if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
             organizationalUnitId, record.accountId())) {
             throw new ApiException(
@@ -308,7 +318,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         var entity = OrganizationalUnitAccount.builder()
             .organizationalUnitId(organizationalUnitId)
             .accountId(record.accountId())
-            .extraParameters(record.extraParameters())
+            .roleId(record.roleId())
+            .extraParameters(Objects.requireNonNullElseGet(record.extraParameters(), HashMap::new))
             .createdBy(userPrincipal.getId())
             .updatedBy(userPrincipal.getId())
             .build();
@@ -326,10 +337,33 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         var entity = findRelation(organizationalUnitId, accountId);
 
-        entity.setExtraParameters(record.extraParameters());
+        if (record.roleId() != null) {
+            assertRoleExists(record.roleId());
+            entity.setRoleId(record.roleId());
+        }
+
+        if (record.extraParameters() != null) {
+            entity.setExtraParameters(record.extraParameters());
+        }
+
         entity.setUpdatedBy(userPrincipal.getId());
 
         return organizationalUnitAccountRepository.save(entity);
+    }
+
+    /**
+     * Ensures a functional role exists.
+     *
+     * @param roleId the unique identifier of the functional role
+     * @throws ApiException with a 404 status when no role matches the identifier
+     */
+    private void assertRoleExists(final UUID roleId) {
+        if (!roleRepository.existsById(roleId)) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.role.not_found", Map.of("id", roleId.toString()))
+            );
+        }
     }
 
     @Override
@@ -412,7 +446,10 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
         entity.setName(organizationalUnit.name());
         entity.setType(organizationalUnit.type());
-        entity.setExtraParameters(organizationalUnit.extraParameters());
+
+        if (organizationalUnit.extraParameters() != null) {
+            entity.setExtraParameters(organizationalUnit.extraParameters());
+        }
 
         return organizationalUnitRepository.save(entity);
     }

@@ -49,7 +49,9 @@ Translation configuration is defined in the **`config.json`** file:
       "common.json",
       "accounts.json",
       "applications.json",
-      "organizational-units.json"
+      "organizational-units.json",
+      "roles.json",
+      "groups.json"
     ]
   }
 }
@@ -73,22 +75,28 @@ resources/i18n/
 │   ├── common.json
 │   ├── accounts.json
 │   ├── applications.json
-│   └── organizational-units.json
+│   ├── organizational-units.json
+│   ├── roles.json
+│   └── groups.json
 ├── en-US/
 │   ├── common.json
 │   ├── accounts.json
 │   ├── applications.json
-│   └── organizational-units.json
+│   ├── organizational-units.json
+│   ├── roles.json
+│   └── groups.json
 ```
 
 **File purposes:**
 
 | File                        | Purpose                                                              |
-|-----------------------------|----------------------------------------------------------------------|
+| --------------------------- | -------------------------------------------------------------------- |
 | `common.json`               | General configuration, home page, badges, and common UI elements     |
 | `accounts.json`             | User account management (activation, suspension, deactivation, etc.) |
 | `applications.json`         | Application management and details                                   |
 | `organizational-units.json` | Organizational unit management                                       |
+| `roles.json`                | Functional role management                                           |
+| `groups.json`               | Group management                                                     |
 
 **How files are loaded:**
 

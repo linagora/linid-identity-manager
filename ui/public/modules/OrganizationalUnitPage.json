@@ -57,6 +57,10 @@
         }
       },
       {
+        "name": "roleNames",
+        "type": "text"
+      },
+      {
         "name": "createdBy",
         "type": "text"
       },

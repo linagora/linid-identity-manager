@@ -28,34 +28,34 @@ Feature: Tests API Users Preferences endpoints
     # Front features may run before this file (the spec order is filesystem-dependent) and any UI
     # login stores a "language" preference for admin. Delete it (best effort, the status code is
     # not asserted) so every scenario starts from a clean state.
-    When  I request '{{env.E2E_API_URL}}/user-preferences/language' with method 'DELETE'
+    When I request '{{env.E2E_API_URL}}/user-preferences/language' with method 'DELETE'
 
   ###############################################################
   ################## Create or Update (POST /user-preferences) ##
   ###############################################################
 
   Scenario: 101 - Should create a preference with valid data and return key/value
-    When  I request '{{env.E2E_API_URL}}/user-preferences' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/user-preferences' with method 'POST' with body:
       """
       {
         "key": "theme",
         "value": "dark"
       }
       """
-    Then  I expect status code is 201
-    And   I expect '{{response.body | dump}}' as 'json' to have length 2
-    And   I expect '{{response.body.key}}' is 'theme'
-    And   I expect '{{response.body.value}}' is 'dark'
+    Then I expect status code is 201
+    And  I expect '{{response.body | dump}}' as 'json' to have length 2
+    And  I expect '{{response.body.key}}' is 'theme'
+    And  I expect '{{response.body.value}}' is 'dark'
 
-    When  I request '{{env.E2E_API_URL}}/user-preferences/{{response.body.key}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/user-preferences/{{response.body.key}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario Outline: 102 - Should return 400 with invalid data <case>
-    When  I request '{{env.E2E_API_URL}}/user-preferences' with method 'POST' with body:
+    When I request '{{env.E2E_API_URL}}/user-preferences' with method 'POST' with body:
       """
       <body>
       """
-    Then  I expect status code is 400
+    Then I expect status code is 400
 
     Examples:
       | case          | body                                    |

@@ -67,7 +67,7 @@ class AccountCreationValidatorTest {
 
     private AccountRecord recordWithStart(final OffsetDateTime start) {
         return new AccountRecord("ext-001", "Doe", "John", EMAIL,
-            new PeriodRecord(start, null), UUID.randomUUID(), Map.of());
+            new PeriodRecord(start, null), UUID.randomUUID(), UUID.randomUUID(), Map.of());
     }
 
     // -------------------------------------------------------------------------

@@ -14,7 +14,7 @@ Feature: Test homepage
 
   Scenario: Roundtrip in the application
     Given I set the viewport size to 1920 px by 1080 px
-    And I visit the '{{ env.E2E_FRONT_URL }}/'
+    And   I visit the '{{ env.E2E_FRONT_URL }}/'
     When  I set the text "admin" in the HTML element "input#userfield"
     And   I set the text "password" in the HTML element "input#passwordfield"
     And   I click on "button.btn-success"
@@ -25,10 +25,10 @@ Feature: Test homepage
 
   ## 101 Should display application title, icon, and version
     Then I expect the HTML element '[data-cy="home-page"]' to be visible
-    And I expect the HTML element '[data-cy="application_title"]' contains 'LinID Identity Manager'
-    And I expect the HTML element '[data-cy="application_logo"]' to be visible
-    And I expect the HTML element '[data-cy="application_version"]' contains "Version de développement"
-    And I expect the HTML element '[data-cy="header_profile_button"]' to be visible
+    And  I expect the HTML element '[data-cy="application_title"]' contains 'LinID Identity Manager'
+    And  I expect the HTML element '[data-cy="application_logo"]' to be visible
+    And  I expect the HTML element '[data-cy="application_version"]' contains "Version de développement"
+    And  I expect the HTML element '[data-cy="header_profile_button"]' to be visible
 
   ####################################################
   ################## Header Profile Menu #############
@@ -37,8 +37,8 @@ Feature: Test homepage
   ## 201 Should display user's information in the user profile menu
     When I click on '[data-cy="header_profile_button"]'
     Then I expect the HTML element '[data-cy="header_profile_menu"]' to be visible
-    And I expect the HTML element '[data-cy="header_profile_name"]' contains "admin name"
-    And I expect the HTML element '[data-cy="header_profile_email"]' contains "admin@example.com"
+    And  I expect the HTML element '[data-cy="header_profile_name"]' contains "admin name"
+    And  I expect the HTML element '[data-cy="header_profile_email"]' contains "admin@example.com"
 
   ## 202 Should display the language switcher in the user profile menu
     And I expect the HTML element '[data-cy="header_profile_language"]' to be visible
@@ -49,8 +49,8 @@ Feature: Test homepage
   ## 203 Should display the list of available languages and switch the interface language
     When I click on '[data-cy="header_profile_language_select"]'
     Then I expect the HTML element '[data-cy="header_profile_language_option_en-US"]' to be visible
-    And I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"]' to be visible
-    And I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"][aria-disabled="true"]' exists
+    And  I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"]' to be visible
+    And  I expect the HTML element '[data-cy="header_profile_language_option_fr-FR"][aria-disabled="true"]' exists
     When I click on '[data-cy="header_profile_language_option_en-US"]'
     Then I expect the HTML element '[data-cy="application_version"]' contains "Development version"
 
@@ -60,7 +60,7 @@ Feature: Test homepage
     When I click on '[data-cy="header_profile_button"]'
     Then I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'English (US)'
     When I click on '[data-cy="header_profile_language_select"]'
-    And I click on '[data-cy="header_profile_language_option_fr-FR"]'
+    And  I click on '[data-cy="header_profile_language_option_fr-FR"]'
     Then I expect the HTML element '[data-cy="application_version"]' contains "Version de développement"
 
   ####################################################

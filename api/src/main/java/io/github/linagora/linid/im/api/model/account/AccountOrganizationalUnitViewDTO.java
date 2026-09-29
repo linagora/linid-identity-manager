@@ -33,6 +33,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -80,4 +81,43 @@ public class AccountOrganizationalUnitViewDTO {
             + "the account-to-organizational-unit relationship stored as JSON"
     )
     private Map<String, Object> relationExtraParameters;
+
+    /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     */
+    @Schema(description = "Identifier of the functional role held by the account within the organizational unit",
+        example = "550e8400-e29b-41d4-a716-446655440000")
+    private UUID roleId;
+
+    /**
+     * Human-readable name of the functional role held by the account within the organizational unit.
+     */
+    @Schema(description = "Name of the functional role held by the account within the organizational unit",
+        example = "Manager")
+    private String roleName;
+
+    /**
+     * Full name of the account that attached the account to the organizational unit.
+     */
+    @Schema(description = "Full name of the account that attached the account to the organizational unit",
+        example = "John Doe")
+    private String createdBy;
+
+    /**
+     * Full name of the account that last updated the relationship.
+     */
+    @Schema(description = "Full name of the account that last updated the relationship", example = "John Doe")
+    private String updatedBy;
+
+    /**
+     * Date and time when the account was attached to the organizational unit.
+     */
+    @Schema(description = "Date and time when the account was attached to the organizational unit")
+    private OffsetDateTime insertDate;
+
+    /**
+     * Date and time when the relationship was last updated.
+     */
+    @Schema(description = "Date and time when the relationship was last updated")
+    private OffsetDateTime updateDate;
 }

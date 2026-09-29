@@ -93,6 +93,10 @@
           "type": "Organizational unit",
           "separator": "or"
         },
+        "roleNames": {
+          "type": "Functional role",
+          "separator": "or"
+        },
         "createdBy": {
           "type": "Created by",
           "separator": "or"
@@ -112,6 +116,7 @@
           "name": "Name",
           "type": "Type",
           "parentId": "Organizational unit",
+          "roleNames": "Functional role",
           "createdBy": "Created by",
           "insertDate": "Creation date"
         }
@@ -292,10 +297,14 @@
       "createError": "Unable to attach the account. Please try again later.",
       "deleteSuccess": "Account successfully detached.",
       "deleteError": "Unable to detach the account. Please try again later.",
+      "editButton": "Edit",
+      "updateSuccess": "Functional role successfully updated.",
+      "updateError": "Unable to update the functional role. Please try again later.",
       "columns": {
         "lastname": "Last name",
         "firstname": "First name",
-        "email": "Email"
+        "email": "Email",
+        "roleName": "Functional role"
       },
       "ButtonsCard": {
         "add": "Attach an account"
@@ -310,6 +319,28 @@
         "fields": {
           "accountId": {
             "label": "Account *",
+            "validation": {
+              "required": "This field is required."
+            }
+          },
+          "roleId": {
+            "label": "Functional role *",
+            "validation": {
+              "required": "This field is required."
+            }
+          }
+        }
+      },
+      "EditFormDialog": {
+        "title": "Edit the functional role of {lastname} {firstname}",
+        "ButtonsCard": {
+          "confirm": "Save",
+          "confirmLoading": "Saving...",
+          "cancel": "Cancel"
+        },
+        "fields": {
+          "roleId": {
+            "label": "Functional role *",
             "validation": {
               "required": "This field is required."
             }

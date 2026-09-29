@@ -15,9 +15,10 @@
     },
     "linid-smart-filter": {
       "q-field": {
-        "dense": false
+        "dense": false,
+        "borderless": true
       },
-      "q-menu": {},
+      "q-menu": { "fit": true },
       "q-separator": {},
       "iconSearch": {
         "q-icon": {
@@ -46,9 +47,7 @@
             "color": "deep-purple-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "lastname": {
           "q-avatar": {
@@ -56,9 +55,7 @@
             "color": "red-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "email": {
           "q-avatar": {
@@ -66,9 +63,7 @@
             "color": "blue-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "status": {
           "q-avatar": {
@@ -76,9 +71,7 @@
             "color": "teal-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "organizationalUnitId": {
           "q-avatar": {
@@ -86,9 +79,7 @@
             "color": "green-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "createdBy": {
           "q-avatar": {
@@ -96,9 +87,7 @@
             "color": "pink-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         },
         "insertDate": {
           "q-avatar": {
@@ -106,9 +95,7 @@
             "color": "deep-orange-8",
             "textColor": "white"
           },
-          "q-chip": {
-            "square": true
-          }
+          "q-chip": {}
         }
       },
       "linid-filter-panel": {

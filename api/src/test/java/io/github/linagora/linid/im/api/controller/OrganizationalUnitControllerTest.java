@@ -142,7 +142,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should attach account to organizational unit")
     void testAttachAccount() {
         when(service.attachAccount(any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
-        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), Map.of());
+        var record = new OrganizationalUnitAccountRecord(UUID.randomUUID(), UUID.randomUUID(), Map.of());
 
         var response = controller.attachAccount(userPrincipal, UUID.randomUUID(), record);
 
@@ -154,7 +154,7 @@ class OrganizationalUnitControllerTest {
     @DisplayName("Should update account relationship")
     void testUpdateAccountRelation() {
         when(service.updateAccountRelation(any(), any(), any(), any())).thenReturn(new OrganizationalUnitAccount());
-        var record = new OrganizationalUnitAccountUpdateRecord(Map.of());
+        var record = new OrganizationalUnitAccountUpdateRecord(null, Map.of());
 
         var response = controller.updateAccountRelation(userPrincipal, UUID.randomUUID(), UUID.randomUUID(), record);
 

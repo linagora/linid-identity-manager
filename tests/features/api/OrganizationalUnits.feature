@@ -13,9 +13,11 @@ Feature: Test API Organizational unit endpoints
   ## 203 Should return 400 with root name/type
   ## 204 Should return 404 with unknown parent
   ## 205 Should return 400 with another organizational unit with same name and type
+  ## 206 Should create an organizational unit with empty extra parameters when they are omitted
 
   ################## Find All (GET /organizational-units) #############
   ## 301 Should return paginated list of organizational-units
+  ## 302 Should filter organizational units by functional role
 
   ################## Find By Id (GET /organizational-units/{id}) ######
   ## 401 Should return 200 for existing organizational unit
@@ -30,6 +32,7 @@ Feature: Test API Organizational unit endpoints
   ## 602 Should return 400 when trying to set root as <field>
   ## 603 Should return 400 when trying to update root organizational unit
   ## 604 Should return 400 when trying to update another organizational unit with same name and type
+  ## 605 Should keep the extra parameters when the update payload omits them
 
   ################## Update status (PUT /organizational-units/{id}/status) #######
   ## 701 Should auto-create a non-suspended status when the organizational unit is created
@@ -209,6 +212,26 @@ Feature: Test API Organizational unit endpoints
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou1ID}}' with method 'DELETE'
     Then I expect status code is 204
 
+  Scenario: 206 - Should create an organizational unit with empty extra parameters when they are omitted
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-206",
+        "type": "test"
+      }
+      """
+    Then I expect status code is 201
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+    And  I store 'ou206Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou206Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{}'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou206Id}}' with method 'DELETE'
+    Then I expect status code is 204
+
   #################################################################
   ################## Find All (GET /organizational-units) #########
   #################################################################
@@ -235,6 +258,18 @@ Feature: Test API Organizational unit endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouId}}' with method 'DELETE'
     Then I expect status code is 204
+
+  Scenario: 302 - Should filter organizational units by functional role
+    When I request '{{env.E2E_API_URL}}/organizational-units?roleNames=lk_*Viewer*' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].id}}' is '00000000-0000-4000-8000-00000000000e'
+    And  I expect '{{response.body.content[0].name}}' is 'Division B1'
+    And  I expect '{{response.body.content[0].roleNames}}' is 'Viewer'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/00000000-0000-4000-8000-00000000000e' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.roleNames}}' is 'Viewer'
 
   #################################################################
   ################## Find By Id (GET /organizational-units/{id}) ##
@@ -268,8 +303,8 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.parents[0].parent}}' is "{{ctx.rootID}}"
     And  I expect '{{response.body.parents[0].extraParameters | dump}}' is 'null'
 
-    When  I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
-    Then  I expect status code is 204
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
 
   Scenario: 402 - Should return 404 for unknown organizational unit id
     When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
@@ -461,6 +496,37 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 204
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou2_ID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 605 - Should keep the extra parameters when the update payload omits them
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-605",
+        "type": "test",
+        "extraParameters": { "test": "test" }
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ou605Id' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou605Id}}' with method 'PUT' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "ou-605-updated",
+        "type": "test"
+      }
+      """
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou605Id}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.extraParameters | dump}}' is '{"test":"test"}'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ou605Id}}' with method 'DELETE'
     Then I expect status code is 204
 
   #################################################################

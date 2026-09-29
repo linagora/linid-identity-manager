@@ -53,6 +53,17 @@ const routes: RouteRecordRaw[] = [
     ],
   },
   {
+    path: '/logged-out',
+    name: 'AuthenticationLoggedOut',
+    component: () => import('layouts/MainLayout.vue'),
+    children: [
+      {
+        path: '',
+        component: () => import('pages/AuthenticationLoggedOutPage.vue'),
+      },
+    ],
+  },
+  {
     path: '/silent-renew',
     name: 'AuthenticationSilentRenewPage',
     component: () => import('layouts/MainLayout.vue'),

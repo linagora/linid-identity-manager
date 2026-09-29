@@ -4,7 +4,7 @@
       "q-card": {},
       "q-card-actions": { "align": "right" },
       "cancel-button": {
-        "q-btn": { "color": "primary", "outline": true }
+        "q-btn": { "color": "primary", "flat": true }
       },
       "confirm-button": {
         "q-btn": { "color": "primary", "outline": false }

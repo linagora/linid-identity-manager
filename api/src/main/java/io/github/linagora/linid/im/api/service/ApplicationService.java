@@ -91,6 +91,9 @@ public interface ApplicationService {
      *
      * <p>The system-reserved application is immutable: updating it is rejected with an HTTP 400.</p>
      *
+     * <p>The {@code extraParameters} are only replaced when provided in the record; the stored value is kept
+     * otherwise.</p>
+     *
      * @param userPrincipal the authenticated user
      * @param id            the application UUID
      * @param application   the update record

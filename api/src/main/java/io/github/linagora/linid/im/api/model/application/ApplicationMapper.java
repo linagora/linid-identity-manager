@@ -61,6 +61,8 @@ public interface ApplicationMapper {
     @Mapping(target = "updateDate", ignore = true)
     @Mapping(target = "createdBy", source = "userPrincipal.id")
     @Mapping(target = "updatedBy", source = "userPrincipal.id")
+    @Mapping(target = "extraParameters", source = "record.extraParameters",
+        defaultExpression = "java(new java.util.HashMap<>())")
     Application toEntity(ApplicationRecord record, UserPrincipal userPrincipal);
 
     /**

@@ -36,7 +36,8 @@ SELECT child.oun_id,
        NULLIF(CONCAT_WS(' ', creator.firstname, creator.lastname), '') AS created_by,
        NULLIF(CONCAT_WS(' ', updater.firstname, updater.lastname), '') AS updated_by,
        child.insert_date,
-       child.update_date
+       child.update_date,
+       roles.role_names
 FROM organizational_units child
          LEFT JOIN organizational_unit_status s
                    ON s.oun_id = child.oun_id
@@ -59,9 +60,16 @@ FROM organizational_units child
              JOIN organizational_units parent
                   ON parent.oun_id = r.parent_id
     WHERE r.child_id = child.oun_id
-    ) parents ON TRUE;
+    ) parents ON TRUE
+         LEFT JOIN LATERAL (
+             SELECT STRING_AGG(DISTINCT role.name, ', ' ORDER BY role.name) AS role_names
+             FROM organizational_unit_accounts oua
+                      JOIN roles role
+                           ON role.rol_id = oua.rol_id
+             WHERE oua.oun_id = child.oun_id
+         ) roles ON TRUE;
 
-COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizational units along with their parent organizational units and their suspension status (suspension period, current-state status reason / sub-reason / comment and a computed is_suspended flag and a computed status).';
+COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizational units along with their parent organizational units and their suspension status (suspension period, current-state status reason / sub-reason / comment and a computed is_suspended flag and a computed status) and the functional roles held in them.';
 
 COMMENT ON COLUMN organizational_units_view.oun_id IS 'Primary key (UUID) of the organizational unit.';
 COMMENT ON COLUMN organizational_units_view.name IS 'Human-readable name of the organizational unit.';
@@ -81,3 +89,4 @@ COMMENT ON COLUMN organizational_units_view.created_by IS 'Identifier of the cre
 COMMENT ON COLUMN organizational_units_view.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_units_view.insert_date IS 'Date and time when the account record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN organizational_units_view.update_date IS 'Date and time when the account record was last updated. Default is now(). Stored in UTC (TIMESTAMPTZ).';
+COMMENT ON COLUMN organizational_units_view.role_names IS 'Comma-separated names of the distinct functional roles held by the accounts attached to the organizational unit, in alphabetical order. NULL when no account holds a role in it.';

@@ -37,9 +37,7 @@ export default defineConfig((ctx) => {
       // 'eva-icons',
       // 'themify',
       // 'line-awesome',
-      // 'roboto-font-latin-ext', // this or either 'roboto-font', NEVER both!
 
-      'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it
     ],
 
@@ -110,6 +108,10 @@ export default defineConfig((ctx) => {
                 singleton: true,
                 requiredVersion: '3.0.4',
               },
+              'vue-i18n': {
+                singleton: true,
+                requiredVersion: '11.4.6',
+              },
             },
           })
         );
@@ -153,7 +155,11 @@ export default defineConfig((ctx) => {
     devServer: {
       port: 9000,
       open: true, // opens browser window automatically
-      https: true,
+      // Serve the shared dev certificate signed by the local CA (see docs/configuration/certificates.md)
+      https: {
+        key: '../docker/dev/resources/server.key',
+        cert: '../docker/dev/resources/server.crt',
+      },
       proxy: {
         '/backend': {
           target: 'https://localhost:8443',

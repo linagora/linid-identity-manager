@@ -253,4 +253,28 @@ public class OrganizationalUnitAccountView extends AbstractViewEntity {
     @Column(name = "relation_extra_parameters", nullable = false, columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> relationExtraParameters;
+
+    /**
+     * Identifier of the functional role held by the account within the organizational unit.
+     * {@code null} when the role has been deleted or was never assigned.
+     */
+    @Column(name = "role_id")
+    @FilterType(type = UUID.class)
+    @QueryFilterField(
+        type = UUID.class,
+        description = "Identifier of the functional role held in the organizational unit"
+    )
+    private UUID roleId;
+
+    /**
+     * Human-readable name of the functional role held by the account within the organizational unit.
+     * {@code null} when the role has been deleted or was never assigned.
+     */
+    @Column(name = "role_name")
+    @FilterType(type = String.class)
+    @QueryFilterField(
+        type = String.class,
+        description = "Name of the functional role held in the organizational unit"
+    )
+    private String roleName;
 }

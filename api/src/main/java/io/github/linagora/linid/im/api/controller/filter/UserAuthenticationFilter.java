@@ -27,29 +27,36 @@
 package io.github.linagora.linid.im.api.controller.filter;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.service.AccountService;
-import io.github.linagora.linid.im.corelib.exception.ApiException;
-import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Filter that authenticates incoming HTTP requests based on JWT tokens.
  *
  * <p>This filter extracts the JWT from the security context, validates it, retrieves the corresponding
  * {@link UserPrincipal} and sets the authentication in the security context.
+ *
+ * <p>When a token is presented but no account matches it, the request fails through the
+ * {@link AuthenticationEntryPoint} with a {@code 401} response, as a bearer token rejected by the resource
+ * server would. Without credentials the request goes down the chain, which issues the standard challenge.
  *
  * <p>Extends {@link OncePerRequestFilter} to ensure that this filter is executed once per request.
  */
@@ -61,6 +68,11 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
      */
     private final AccountService accountService;
 
+    /**
+     * Entry point producing the {@code 401} response when no account matches the token.
+     */
+    private final AuthenticationEntryPoint entryPoint = new BearerTokenAuthenticationEntryPoint();
+
     @Override
     protected void doFilterInternal(final HttpServletRequest request,
                                     final HttpServletResponse response,
@@ -68,37 +80,44 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         throws ServletException, IOException {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
-            throw new ApiException(
-                HttpStatus.UNAUTHORIZED.value(),
-                I18nMessage.of("error.unauthorized")
-            );
+        if (authentication == null) {
+            // No credentials presented: the chain issues the standard "Bearer" challenge.
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        String email = jwt.getClaimAsString("email");
+        Optional<String> email = emailOf(authentication).filter(StringUtils::isNotBlank);
+        Optional<Account> account = email.flatMap(accountService::getAccountByEmail);
 
-        if (StringUtils.isBlank(email)) {
-            throw new ApiException(
-                HttpStatus.UNAUTHORIZED.value(),
-                I18nMessage.of("error.unauthorized")
-            );
+        if (account.isEmpty()) {
+            SecurityContextHolder.clearContext();
+            entryPoint.commence(request, response, new InvalidBearerTokenException(""));
+            return;
         }
-
-        var account = accountService.getAccountByEmail(email)
-            .orElseThrow(() -> new ApiException(
-                HttpStatus.UNAUTHORIZED.value(),
-                I18nMessage.of("error.unauthorized")
-            ));
 
         UserPrincipal user = new UserPrincipal();
-        user.setId(account.getId());
-        user.setEmail(email);
+        user.setId(account.get().getId());
+        user.setEmail(email.get());
 
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken(user, null, List.of())
         );
 
         filterChain.doFilter(request, response);
+    }
+
+    /**
+     * Returns the {@code email} claim of the JWT held by the given authentication.
+     *
+     * @param authentication the current authentication
+     * @return the email claim, empty when the principal is not a JWT or the claim is missing
+     */
+    private static Optional<String> emailOf(final Authentication authentication) {
+        if (authentication.getPrincipal() instanceof Jwt jwt) {
+            return Optional.ofNullable(jwt.getClaimAsString("email"));
+        }
+
+        return Optional.empty();
     }
 
 }

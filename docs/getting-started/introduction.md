@@ -21,7 +21,7 @@ Users represent individual identities within your organization.
 They can:
 
 * Be managed centrally
-* Be assigned to organizational units
+* Be attached to organizational units, holding a functional role in each of them
 * Receive permissions dynamically
 
 ---
@@ -33,7 +33,32 @@ Organizational Units are used to structure users logically.
 They allow you to:
 
 * Group users by department, team, or business unit
+* Attach accounts, each holding a functional role within the unit
 * Apply consistent access rules across groups
+
+---
+
+### 👥 Groups
+
+Groups are named entities identified by a unique code.
+
+They can:
+
+* Be nested under a parent group
+* Be attached to an organizational unit
+* Be attached to an application
+
+---
+
+### 🛡️ Functional Roles
+
+Functional roles are named entities identified by a unique code.
+
+They can:
+
+* Represent a business responsibility or function
+* Be held by an account within each organizational unit it is attached to
+* Be used to derive technical roles and permissions through authorization rules
 
 ---
 
@@ -50,7 +75,7 @@ For each application, you can:
 
 ---
 
-### 🏷️ Roles
+### 🏷️ Application Roles
 
 Roles define what a user can do within an application.
 

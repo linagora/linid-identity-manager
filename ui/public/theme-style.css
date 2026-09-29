@@ -1,21 +1,35 @@
 /* Custom theme overrides - this file can be replaced per deployment */
-.account-deactivated-warning-banner {
-  border: 2px solid var(--q-negative);
+
+/* ===== Global design ===== */
+
+/* Backgrounds */
+main,
+.generics-table-page--actions,
+.linid-filter-chip {
+  background: var(--q-background);
 }
 
-.q-dialog .q-card {
-  width: 700px;
-  max-width: 80vw;
+.bg-background-search-bar {
+  background: var(--q-background-search-bar) !important;
 }
 
-/* ===== Generic details page ===== */
-
-.generic-details-page .entity-details-card--title.q-card__section {
-  padding: 0 0 8px;
+/* Border radius */
+.q-card.q-card--flat,
+.generic-editable-table-card,
+.generic-details-page--section,
+.entity-profile-panel,
+.generic-creation-page--form-section,
+.linid-filter-chip,
+.q-notification--standard {
+  border-radius: 0.5rem;
 }
 
-.generic-details-page .entity-details-card--title h4 {
-  margin: 0;
+/* Section titles: left accent border */
+.generic-details-page .entity-details-card--title h4,
+.generic-details-page .generic-editable-table-card--title,
+.generic-details-page .generic-sortable-list-card--title,
+.generic-creation-page .generic-creation-page--form-section--title {
+  margin-top: 0;
   padding-left: 12px;
   border-left: 4px solid var(--q-primary);
   font-size: 1.05rem;
@@ -23,14 +37,144 @@
   line-height: 1.4;
 }
 
-/* Remove the default vertical padding around the attributes container */
-.generic-details-page
-  .entity-details-card
-  > .q-card__section:not(.entity-details-card--title) {
+/* ===== Components ===== */
+
+/* Buttons */
+
+/* Rounded buttons */
+.q-btn.q-btn--rounded {
+  padding: 0.5rem 1rem;
+}
+
+/* Dropdown buttons */
+.q-btn-dropdown.q-btn-dropdown--simple {
+  border-radius: 0.375rem;
+}
+
+/* Reduce spacing between favorite buttons */
+.linid-favorite-panel--list .q-item__section--main:has(button) {
+  flex: 0 0 auto;
+}
+
+/* Dialogs */
+
+.q-dialog .q-card {
+  width: 700px;
+  max-width: 80vw;
+}
+
+/* Dialog titles */
+.q-dialog h3 {
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 25.7px;
+  letter-spacing: normal;
+}
+
+.q-dialog .form-dialog--form > .q-card__actions {
+  padding: 0;
+}
+
+.q-dialog .q-card > .q-card__section:empty {
+  display: none;
+}
+
+.q-dialog .buttons-card {
+  margin-top: 0;
+}
+
+.q-dialog .buttons-card--actions {
+  padding: 1rem;
+}
+
+.header_profile_menu {
+  border-radius: 0.5rem;
+}
+
+.header-profile-menu .header-profile-menu--info,
+.header-profile-menu .header-profile-menu--language,
+.header-profile-menu .logout-menu-item {
+  min-height: 2.5rem;
+}
+
+/* Tables */
+
+/* Header cells: 51px */
+.q-table--dense .q-table thead th {
+  height: 51px;
+}
+
+/* Body cells: 48px */
+.q-table--dense .q-table tbody td {
+  height: 3rem;
   padding-top: 0;
   padding-bottom: 0;
 }
 
+/* Filter chips */
+
+.linid-filter-chip .linid-filter-chip--avatar {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+/* Banners */
+
+.account-deactivated-warning-banner {
+  border: 2px solid var(--q-negative);
+}
+
+/* ===== Generic table page ===== */
+
+/* Search bar */
+
+/* No underline on the smart filter */
+.linid-smart-filter--field .q-field__inner .q-field__control {
+  padding: 0 1rem;
+  border-radius: 20px;
+}
+
+.linid-smart-filter--menu {
+  border-radius: 1.25rem;
+}
+
+/* ===== Generic details page ===== */
+
+.generic-details-page--content--main .q-card__section {
+  padding-top: 1rem;
+}
+
+.entity-profile-panel--title {
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Section titles (because some have buttons and other not) */
+.generic-details-page .entity-details-card--title h4,
+.generic-details-page .generic-editable-table-card--title,
+.generic-details-page .generic-sortable-list-card--title {
+  margin-bottom: 0;
+  align-self: flex-start;
+}
+
+/* Profile panel */
+
+/* Width profile panel */
+.generic-details-page .entity-profile-panel {
+  width: 350px !important;
+  max-width: 350px;
+}
+
+.entity-profile-panel--avatar-section .entity-profile-panel--status-badge {
+  border-radius: 0.25rem;
+}
+
+.entity-profile-panel--navigation-section .q-card__actions {
+  margin-top: -1rem;
+}
+
+/* Entity details: information cards */
 .generic-details-page .entity-details-card--container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -43,8 +187,6 @@
   padding: 12px 4px;
   border: none;
   border-radius: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: none;
   background: transparent;
 }
 
@@ -65,87 +207,47 @@
   font-weight: 400;
   font-size: 1rem;
   overflow-wrap: anywhere;
+  margin-left: 2rem;
 }
 
 .generic-details-page .information-card .q-icon {
   opacity: 0.75;
 }
 
-.generic-details-page .generic-editable-table-card {
-  background: transparent;
-}
-
-.generic-details-page
-  .generic-editable-table-card
-  > .q-card__section:first-child,
-.generic-details-page
-  .generic-sortable-list-card
-  > .q-card__section:first-child {
-  padding: 0 0 8px;
-}
-
-.generic-details-page
-  .generic-editable-table-card
-  > .q-card__section:last-child,
-.generic-details-page
-  .generic-sortable-list-card
-  > .q-card__section:last-child {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.generic-details-page .generic-editable-table-card--title,
-.generic-details-page .generic-sortable-list-card--title {
-  padding-left: 12px;
-  border-left: 4px solid var(--q-primary);
-  font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.4;
-}
-
-.generic-details-page .generic-sortable-list-card--scroll-area {
-  height: 300px;
-}
+/* Sortable list card */
 
 .generic-details-page .generic-sortable-list-card--header .q-item__label {
   font-weight: 500;
   font-size: 12px;
 }
 
-/* The profile panel fills its side-left column, which is content-sized: pin its width */
-.generic-details-page .entity-profile-panel {
-  width: 350px !important;
-  max-width: 350px;
+.generic-details-page .generic-sortable-list-card--scroll-area {
+  height: 300px;
+}
+
+.generic-details-page .generic-sortable-list-card--scroll-area .q-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* ===== Generic creation & edition pages ===== */
 
-/* Compact form sections */
-.generic-creation-page--form-section--header.q-card__section,
-.generic-edition-page--form-section--header.q-card__section {
-  padding-top: 8px;
+/* Form sections */
+.generic-creation-page--form-section--header.q-card__section {
+  padding-top: 0.5rem;
   padding-bottom: 0;
 }
 
-.generic-creation-page--form-section--field.q-card__section,
-.generic-edition-page--form-section--field.q-card__section {
-  padding-top: 8px;
-  padding-bottom: 8px;
+.generic-creation-page--form-section--fields.q-card__section {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
-/* Form section titles: left accent border */
-.generic-creation-page .generic-creation-page--form-section--title,
-.generic-edition-page .generic-edition-page--form-section--title {
-  margin-top: 0;
-  padding-left: 12px;
-  border-left: 4px solid var(--q-primary);
-  font-size: 1.05rem;
-  font-weight: 600;
-  line-height: 1.4;
+/* Action buttons */
+.generic-creation-page--actions .buttons-card {
+  background: unset;
 }
 
-.q-table {
-  thead {
-    background-color: rgba(0, 0, 0, 0.12);
-  }
+/* ===== Date picker ===== */
+.q-menu:has(.q-date) {
+  border-radius: 1rem;
 }

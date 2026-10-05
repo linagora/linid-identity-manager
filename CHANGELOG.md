@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Undefined]
 
+### Fixed
+
+#### Security
+
+- Fixed CVE-2026-89407 and CVE-2026-89425 affecting Jackson Core.
+- Fixed CVE-2026-91776 and CVE-2026-91777 affecting Jackson Databind.
+
 ### Build
 
 - Update E2E-test-runner to version 2.0.0

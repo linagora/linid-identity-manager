@@ -49,6 +49,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed CVE-2026-102554 affecting com.google.guava:guava.
 
+## [Undefined]
+
+### Build
+
+- Update E2E-test-runner to version 2.0.0
+
 ## [0.11.1] - 2026-10-23
 
 ### Fixed

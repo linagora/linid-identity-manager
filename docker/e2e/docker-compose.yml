@@ -137,7 +137,7 @@ services:
       - ./resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
 
   e2e-test-runner:
-    image: vincentmoittie/e2e-test-runner:v1.13.0
+    image: vincentmoittie/e2e-test-runner:v2.0.0
     container_name: e2e-test-runner
     networks:
       - linid-e2e-network

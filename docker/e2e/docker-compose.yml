@@ -115,11 +115,17 @@ services:
       - 9000:443
     environment:
       APP_ENV: ${ENVIRONMENT}
+      SERVER_CONFIG_PATH: ${SERVER_CONFIG_PATH}
     volumes:
-      - ./resources/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./resources/server.crt:/etc/nginx/certs/server.crt:ro
-      - ./resources/server.key:/etc/nginx/certs/server.key:ro
-      - ./resources/${CONFIG_DIR}/conf/config.json:/usr/share/nginx/html/config.json
+      - ./resources/${CONFIG_DIR}/conf/server-config.json:${SERVER_CONFIG_PATH}:ro
+      - ./resources/server.crt:/etc/server/certs/server.crt:ro
+      - ./resources/server.key:/etc/server/certs/server.key:ro
+      - ./resources/${CONFIG_DIR}/conf/config.json:/app/spa/config.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --no-check-certificate https://localhost/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     depends_on:
       catalog-ui:
         condition: service_started
@@ -149,7 +155,7 @@ services:
       api:
         condition: service_healthy
       ui:
-        condition: service_started
+        condition: service_healthy
       init-db:
         condition: service_completed_successfully
     profiles:

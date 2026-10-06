@@ -1,0 +1,20 @@
+{
+  "environment": "__APP_ENV__",
+  "http": {
+    "port": 3000
+  },
+  "upstreams": {
+    "api": "https://localhost:8443",
+    "catalogUi": "http://localhost:5001",
+    "auth": "https://localhost:8080"
+  },
+  "staticDir": "../dist/spa",
+  "configJsonPath": "../dist/spa/config.json",
+  "cache": {
+    "html": "no-cache, no-store, must-revalidate",
+    "assets": {
+      "maxAge": 604800,
+      "immutable": true
+    }
+  }
+}

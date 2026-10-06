@@ -1,0 +1,24 @@
+{
+  "environment": "__APP_ENV__",
+  "http": {
+    "port": 443,
+    "tls": {
+      "cert": "${SERVER_CERT_PATH}",
+      "key": "${SERVER_KEY_PATH}"
+    }
+  },
+  "upstreams": {
+    "api": "${API_UPSTREAM}",
+    "catalogUi": "${CATALOG_UI_UPSTREAM}",
+    "auth": "${AUTH_UPSTREAM}"
+  },
+  "staticDir": "/app/spa",
+  "configJsonPath": "/app/spa/config.json",
+  "cache": {
+    "html": "no-cache, no-store, must-revalidate",
+    "assets": {
+      "maxAge": 604800,
+      "immutable": true
+    }
+  }
+}

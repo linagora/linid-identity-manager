@@ -24,5 +24,6 @@ docker/**/*.jks
 docker/dev/resources/llng
 docker/e2e/resources/local
 docker/e2e/resources/ci
+docker/demo/resources/local
 api/**/*.jks
 api/**/*.p12

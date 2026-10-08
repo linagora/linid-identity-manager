@@ -58,8 +58,7 @@ class AuthService {
   /**
    * Get the OIDC configuration and creates a configured {@link UserManager} instance.
    *
-   * This method also registers authentication event handlers for token expiration, silent renewal failures, and remote
-   * sign-out.
+   * This method also registers authentication event handlers for token expiration and silent renewal failures.
    *
    * @returns A promise resolving to the configured {@link UserManager}.
    */
@@ -88,10 +87,6 @@ class AuthService {
 
     userManager.events.addSilentRenewError((err) => {
       console.error('[auth] silent renew failed', err);
-      void this.login();
-    });
-
-    userManager.events.addUserSignedOut(() => {
       void this.login();
     });
 
@@ -130,7 +125,7 @@ class AuthService {
    * Initiates the OIDC authentication flow by redirecting the user to the Identity Provider.
    *
    * The current application route is stored in the OIDC state and can be used to restore navigation after successful
-   * authentication.
+   * authentication. A fresh nonce is generated for the request.
    *
    * This method is protected against concurrent invocations: if a login flow is already in progress, the existing
    * promise is returned instead of triggering a new redirect.
@@ -156,6 +151,7 @@ class AuthService {
       try {
         await manager.signinRedirect({
           state: { redirectUrl },
+          nonce: crypto.randomUUID(),
         });
       } finally {
         this.loginPromise = null;

@@ -16,6 +16,7 @@ export default defineConfigWithVueTs(
     ignores: [
       'dist/',
       'coverage/',
+      'server/dist/',
       '**/vite.config.*.timestamp*',
       '**/vitest.config.*.timestamp*',
       '.__mf__temp/',
@@ -156,7 +157,7 @@ export default defineConfigWithVueTs(
     },
   },
   {
-    files: ['src/**/*.{ts,js}'],
+    files: ['src/**/*.{ts,js}', 'server/src/**/*.ts'],
     plugins: {
       headers,
     },

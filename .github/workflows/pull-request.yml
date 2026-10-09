@@ -135,6 +135,9 @@ jobs:
       - name: Check style
         run: pnpm validate
 
+      - name: Check server types and style
+        run: pnpm --dir server validate
+
   ui-unit-tests:
     name: UI - Unit tests
     runs-on: ubuntu-latest
@@ -185,7 +188,7 @@ jobs:
 
       - name: Check outdated dependencies
         run: |
-          pnpm add -D npm-check-updates
+          pnpm add -w -D npm-check-updates
           echo '```bash' > dependencies.txt
           npx ncu >> dependencies.txt
           echo '```' >> dependencies.txt

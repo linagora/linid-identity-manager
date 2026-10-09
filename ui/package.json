@@ -46,7 +46,6 @@
     "dayjs": "1.11.21",
     "interactjs": "1.10.27",
     "nunjucks": "3.2.4",
-    "oidc-client-ts": "3.5.0",
     "pinia": "3.0.4",
     "quasar": "2.21.1",
     "rxjs": "7.8.2",

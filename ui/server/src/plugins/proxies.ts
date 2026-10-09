@@ -25,8 +25,9 @@
  */
 
 import { fastifyHttpProxy } from '@fastify/http-proxy';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ServerConfig } from '../config/schema.js';
+import { getAccessToken } from './auth.js';
 
 /** Reverse proxy route. */
 interface ProxyRoute {
@@ -36,10 +37,18 @@ interface ProxyRoute {
   upstream: string;
   /** Keeps the prefix in the upstream path. */
   keepPrefix?: boolean;
+  /** Runs before the request is forwarded. */
+  preHandler?: (
+    request: FastifyRequest,
+    reply: FastifyReply
+  ) => Promise<unknown>;
 }
 
 /**
  * Registers the reverse proxies to the API, the Module Federation remote and LemonLDAP::NG.
+ *
+ * The requests to the API must have the `X-Requested-With: XMLHttpRequest` header, which another site cannot send along
+ * with the session cookie (CSRF). They get the access token of the logged-in user, if any.
  *
  * @param app - Fastify instance to configure.
  * @param config - Server configuration.
@@ -49,8 +58,32 @@ export function registerProxies(
   config: ServerConfig
 ): void {
   const { upstreams } = config;
+
+  /**
+   * Rejects the requests without the CSRF header, and adds the access token of the logged-in user.
+   *
+   * @param request - Request to the API.
+   * @param reply - Reply, sent only when the CSRF header is missing.
+   * @returns The 403 reply when the CSRF header is missing.
+   */
+  async function addAccessToken(request: FastifyRequest, reply: FastifyReply) {
+    if (request.headers['x-requested-with'] !== 'XMLHttpRequest') {
+      return reply
+        .code(403)
+        .send({ message: 'Missing header X-Requested-With' });
+    }
+    const accessToken = await getAccessToken(request, config);
+    if (accessToken) {
+      request.headers.authorization = `Bearer ${accessToken}`;
+    }
+  }
+
   const routes: ProxyRoute[] = [
-    { prefix: '/backend', upstream: upstreams.api },
+    {
+      prefix: '/backend',
+      upstream: upstreams.api,
+      preHandler: addAccessToken,
+    },
     { prefix: '/catalog-ui', upstream: upstreams.catalogUi },
     { prefix: '/auth', upstream: upstreams.auth },
     { prefix: '/static', upstream: upstreams.auth, keepPrefix: true },
@@ -61,6 +94,7 @@ export function registerProxies(
       prefix: route.prefix,
       upstream: route.upstream,
       rewritePrefix: route.keepPrefix ? route.prefix : undefined,
+      preHandler: route.preHandler,
       replyOptions: {
         rewriteRequestHeaders: (request, headers) => ({
           ...headers,

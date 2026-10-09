@@ -59,7 +59,7 @@ Feature: Test logout
   ####################################################
 
   ## 201 Should sign the user back in when visiting the logged-out page with an active SSO session
-    When I visit the '{{ env.E2E_FRONT_URL }}/logged-out'
+    When I visit the '{{ env.E2E_FRONT_URL }}/auth/logged-out'
     Then I expect the HTML element '[data-cy="home-page"]' to be visible
     And  I expect the HTML element 'input#userfield' not exists
 
@@ -75,6 +75,6 @@ Feature: Test logout
     And  I expect the HTML element '[data-cy="home-page"]' not exists
 
   ## 203 Should ask for credentials when visiting the logged-out page without an SSO session
-    When I visit the '{{ env.E2E_FRONT_URL }}/logged-out'
+    When I visit the '{{ env.E2E_FRONT_URL }}/auth/logged-out'
     Then I expect the HTML element 'input#userfield' to be visible
     And  I expect the HTML element '[data-cy="home-page"]' not exists

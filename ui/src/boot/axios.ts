@@ -45,28 +45,18 @@ declare module 'vue' {
 // good idea to move this instance creation inside of the
 // "export default () => {}" function below (which runs individually
 // for each client)
-const api = axios.create({ baseURL: '/backend', timeout: 30000 });
-
-api.interceptors.request.use(async (config) => {
-  const token = await authService.getAccessToken();
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
+// The UI server adds the access token of the session; it requires this header against CSRF
+const api = axios.create({
+  baseURL: '/backend',
+  timeout: 30000,
+  headers: { 'X-Requested-With': 'XMLHttpRequest' },
 });
 
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
-      try {
-        await authService.clearUser();
-      } catch {
-        // ignored — clearUser failure must not replace the original 401 error
-      }
-      await authService.login();
+      authService.login();
     }
 
     return Promise.reject(error);

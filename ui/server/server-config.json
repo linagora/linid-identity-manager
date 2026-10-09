@@ -8,6 +8,24 @@
     "catalogUi": "http://localhost:5001",
     "auth": "https://localhost:8080"
   },
+  "oidc": {
+    "issuer": "https://localhost:8080",
+    "clientId": "linid-im-client",
+    "scope": "openid email profile roles",
+    "redirectUri": "https://localhost:9000/auth/callback",
+    "postLogoutRedirectUri": "https://localhost:9000/auth/logged-out",
+    "silentRenewPath": "/auth/silent-renew"
+  },
+  "session": {
+    "store": "memory",
+    "cookie": {
+      "name": "linid_session",
+      "sameSite": "lax",
+      "secure": true,
+      "httpOnly": true,
+      "maxAgeSeconds": 28800
+    }
+  },
   "staticDir": "../dist/spa",
   "configJsonPath": "../dist/spa/config.json",
   "cache": {

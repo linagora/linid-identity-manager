@@ -39,11 +39,5 @@ import { onMounted } from 'vue';
 
 const { t } = useScopedI18n('AuthenticationLogoutPage');
 
-onMounted(async () => {
-  try {
-    await authService.logout();
-  } catch (e) {
-    console.error('Error during OIDC logout processing:', e);
-  }
-});
+onMounted(() => authService.logout());
 </script>

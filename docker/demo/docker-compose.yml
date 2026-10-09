@@ -114,12 +114,19 @@ services:
     container_name: ui
     networks:
       - linid-demo-network
+    # The server reaches LemonLDAP through its public URL, served by this very container
+    extra_hosts:
+      - "linid.localtest.me:host-gateway"
     ports:
       - 9000:443
     environment:
       APP_ENV: ${ENVIRONMENT}
       SERVER_CONFIG_PATH: ${SERVER_CONFIG_PATH}
+      NODE_EXTRA_CA_CERTS: /etc/server/certs/ca.crt
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET}
+      SESSION_COOKIE_SECRET: ${SESSION_COOKIE_SECRET}
     volumes:
+      - ../certs/ca.crt:/etc/server/certs/ca.crt:ro
       - ./resources/${CONFIG_DIR}/conf/server-config.json:${SERVER_CONFIG_PATH}:ro
       - ./resources/server.crt:/etc/server/certs/server.crt:ro
       - ./resources/server.key:/etc/server/certs/server.key:ro
@@ -142,6 +149,19 @@ services:
         condition: service_healthy
       auth:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  redis:
+    image: redis:8.10.2-alpine
+    container_name: redis
+    networks:
+      - linid-demo-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   catalog-ui:
     image: catalog-ui

@@ -12,6 +12,25 @@
     "catalogUi": "${CATALOG_UI_UPSTREAM}",
     "auth": "${AUTH_UPSTREAM}"
   },
+  "oidc": {
+    "issuer": "${LEMONLDAP_PORTAL_URL}",
+    "clientId": "linid-im-client",
+    "scope": "openid email profile roles",
+    "redirectUri": "${LEMONLDAP_REDIRECT_URL}/auth/callback",
+    "postLogoutRedirectUri": "${LEMONLDAP_REDIRECT_URL}/auth/logged-out",
+    "silentRenewPath": "/auth/silent-renew"
+  },
+  "session": {
+    "store": "redis",
+    "redisUrl": "${SESSION_REDIS_URL}",
+    "cookie": {
+      "name": "linid_session",
+      "sameSite": "lax",
+      "secure": true,
+      "httpOnly": true,
+      "maxAgeSeconds": 28800
+    }
+  },
   "staticDir": "/app/spa",
   "configJsonPath": "/app/spa/config.json",
   "cache": {

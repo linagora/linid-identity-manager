@@ -43,7 +43,7 @@ import { authService } from 'src/services/AuthService';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-const PUBLIC_PATHS = ['/callback', '/silent-renew', '/logout', '/logged-out'];
+const PUBLIC_PATHS = ['/logout'];
 
 /**
  * Creates and configures the Vue Router instance.
@@ -75,7 +75,7 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     const user = await authService.getUser();
 
     if (!user) {
-      await authService.login(to.fullPath);
+      authService.login(to.fullPath);
       return false;
     }
 

@@ -24,29 +24,21 @@
  * LinID Identity Manager software.
  */
 
-/** OpenID Connect configuration. */
-export interface OidcConfig {
-  /** URL of the OpenID Connect authority (Identity Provider). */
-  authority: string;
+import {
+  useLinidUserStore,
+  useLinidUserPreference,
+} from '@linagora/linid-im-front-corelib';
+import { defineBoot } from '@quasar/app-vite/wrappers';
+import { authService } from 'src/services/AuthService';
 
-  /** OAuth 2.0 / OIDC client identifier. */
-  client_id: string;
+export default defineBoot(async () => {
+  const user = await authService.getUser();
 
-  /** URI where the Identity Provider redirects the user after a successful login. */
-  redirect_uri: string;
+  if (user) {
+    const userStore = useLinidUserStore();
+    const { init } = useLinidUserPreference();
 
-  /** URI where the Identity Provider redirects the user after logout. */
-  post_logout_redirect_uri?: string;
-
-  /** URI used for silent token renewal. */
-  silent_redirect_uri?: string;
-
-  /** OAuth 2.0 response type used during authentication. Typically set to `code`. */
-  response_type?: string;
-
-  /** Requested OAuth 2.0/OIDC scopes. */
-  scope?: string;
-
-  /** Additional OIDC configuration properties. */
-  [key: string]: unknown;
-}
+    userStore.setUserFromClaims(user);
+    await init();
+  }
+});

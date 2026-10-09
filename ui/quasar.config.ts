@@ -19,7 +19,7 @@ export default defineConfig((ctx) => {
       'nunjucks',
       'config',
       'axios',
-      'oidc',
+      'auth',
       'i18n',
       'module-lifecycle',
       'theme',

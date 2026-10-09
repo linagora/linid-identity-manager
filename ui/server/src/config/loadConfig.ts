@@ -28,10 +28,11 @@ import { readFileSync } from 'node:fs';
 import type { ServerConfig } from './schema.js';
 
 /**
- * Loads the file at `SERVER_CONFIG_PATH` (default: `server-config.json` in the current directory) and replaces
- * `__APP_ENV__` with `APP_ENV`.
+ * Loads the file at `SERVER_CONFIG_PATH` (default: `server-config.json` in the current directory), replaces
+ * `__APP_ENV__` with `APP_ENV`, and adds the secrets read from `OIDC_CLIENT_SECRET` and `SESSION_COOKIE_SECRET`.
  *
  * @returns The configuration.
+ * @throws {Error} When a secret environment variable is missing.
  */
 export function loadConfig(): ServerConfig {
   const path = process.env.SERVER_CONFIG_PATH || 'server-config.json';
@@ -39,5 +40,26 @@ export function loadConfig(): ServerConfig {
     '__APP_ENV__',
     process.env.APP_ENV || 'DEV'
   );
-  return JSON.parse(raw) as ServerConfig;
+  return {
+    ...JSON.parse(raw),
+    secrets: {
+      oidcClientSecret: readEnv('OIDC_CLIENT_SECRET'),
+      sessionCookieSecret: readEnv('SESSION_COOKIE_SECRET'),
+    },
+  };
+}
+
+/**
+ * Reads an environment variable that must be set.
+ *
+ * @param name - Name of the variable.
+ * @returns Its value.
+ * @throws {Error} When the variable is missing or empty.
+ */
+function readEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Missing environment variable ${name}`);
+  }
+  return value;
 }

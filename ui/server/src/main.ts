@@ -28,7 +28,7 @@ import { buildApp } from './app.js';
 import { loadConfig } from './config/loadConfig.js';
 
 const config = loadConfig();
-const app = buildApp(config);
+const app = await buildApp(config);
 
 await app.listen({ port: config.http.port, host: '::' });
 

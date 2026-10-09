@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-/** Content of `server-config.json`, with `__APP_ENV__` replaced. */
+/** Content of `server-config.json`, with `__APP_ENV__` replaced, and the secrets taken from environment variables. */
 export interface ServerConfig {
   /** Environment name. */
   environment: string;
@@ -49,6 +49,41 @@ export interface ServerConfig {
     /** LemonLDAP::NG, behind `/auth`, `/static` and `/index.psgi`. */
     auth: string;
   };
+  /** OpenID Connect client used to log the users in. */
+  oidc: {
+    /** Public URL of the OpenID provider, also used by the server to reach it. */
+    issuer: string;
+    /** Client ID. */
+    clientId: string;
+    /** Requested scopes. */
+    scope: string;
+    /** Public URL of `/auth/callback`. */
+    redirectUri: string;
+    /** Public URL the OpenID provider sends the user back to after the logout: the one of `/auth/logged-out`. */
+    postLogoutRedirectUri: string;
+    /** Path of the route renewing the tokens, e.g. `/auth/silent-renew`. */
+    silentRenewPath: string;
+  };
+  /** Session of the users, identified by a cookie. */
+  session: {
+    /** Where the sessions are kept: in the memory of the server, or in Redis. */
+    store: 'memory' | 'redis';
+    /** URL of Redis, e.g. `redis://redis:6379`, when `store` is `redis`. */
+    redisUrl?: string;
+    /** Session cookie. */
+    cookie: {
+      /** Name. */
+      name: string;
+      /** Whether the browser sends the cookie along with the requests coming from other sites. */
+      sameSite: 'lax' | 'none' | 'strict';
+      /** Sends the cookie over HTTPS only. */
+      secure: boolean;
+      /** Hides the cookie from the JavaScript of the page. */
+      httpOnly: boolean;
+      /** Lifetime of the session in seconds, extended on every request. */
+      maxAgeSeconds: number;
+    };
+  };
   /** Directory of the built SPA. */
   staticDir: string;
   /** SPA configuration served at `/config.json`, with `__APP_ENV__` substituted. */
@@ -64,5 +99,12 @@ export interface ServerConfig {
       /** Adds `immutable` to the `Cache-Control` of the assets. */
       immutable: boolean;
     };
+  };
+  /** Secrets, not in `server-config.json`: read from environment variables. */
+  secrets: {
+    /** Secret of the OpenID Connect client, from `OIDC_CLIENT_SECRET`. */
+    oidcClientSecret: string;
+    /** Secret signing the session cookie, from `SESSION_COOKIE_SECRET`. At least 32 characters. */
+    sessionCookieSecret: string;
   };
 }

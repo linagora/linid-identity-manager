@@ -23,7 +23,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
+    "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\" \"./server/src/**/*.ts\"",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"src/**/*.{js,ts,vue,json,css,scss,md}\"",

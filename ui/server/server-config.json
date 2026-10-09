@@ -1,0 +1,27 @@
+{
+  "environment": "__APP_ENV__",
+  "http": {
+    "port": 3000
+  },
+  "proxies": [
+    { "prefix": "/backend", "upstream": "https://localhost:8443" },
+    { "prefix": "/catalog-ui", "upstream": "http://localhost:5001" },
+    { "prefix": "/auth", "upstream": "https://localhost:8080" },
+    {
+      "prefix": "/static",
+      "upstream": "https://localhost:8080",
+      "keepPrefix": true
+    },
+    {
+      "prefix": "/index.psgi",
+      "upstream": "https://localhost:8080",
+      "keepPrefix": true
+    }
+  ],
+  "staticDir": "../dist/spa",
+  "configJsonPath": "../dist/spa/config.json",
+  "cache": {
+    "html": "no-cache, no-store, must-revalidate",
+    "assets": "public, max-age=604800, immutable"
+  }
+}

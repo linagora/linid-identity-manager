@@ -352,11 +352,13 @@ tasks:
     desc: Generate configuration from templates using env variables
     internal: true
     dir: "docker/{{.ENV}}/resources"
-    dotenv: ["../{{.ENV_FILE}}"]
+    # generate-config is used for e2e and demo (ui.env is not in demo but is not used when it doesn't exist)
+    dotenv: ["../{{.ENV_FILE}}", "../env/ui.env"]
     cmds:
       - rm -rf ${CONFIG_DIR}/conf
       - mkdir -p ${CONFIG_DIR}/conf
       - envsubst < config.template.json > ${CONFIG_DIR}/conf/config.json
+      - envsubst < server-config.template.json > ${CONFIG_DIR}/conf/server-config.json
 
   generate:config:lemonldap:
     desc: Generate LemonLDAP configuration from template using env variables

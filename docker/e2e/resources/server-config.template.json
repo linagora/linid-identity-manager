@@ -1,0 +1,23 @@
+{
+  "environment": "__APP_ENV__",
+  "http": {
+    "port": 443,
+    "tls": {
+      "cert": "${SERVER_CERT_PATH}",
+      "key": "${SERVER_KEY_PATH}"
+    }
+  },
+  "proxies": [
+    { "prefix": "/backend", "upstream": "${API_UPSTREAM}" },
+    { "prefix": "/catalog-ui", "upstream": "${CATALOG_UI_UPSTREAM}" },
+    { "prefix": "/auth", "upstream": "${AUTH_UPSTREAM}" },
+    { "prefix": "/static", "upstream": "${AUTH_UPSTREAM}", "keepPrefix": true },
+    { "prefix": "/index.psgi", "upstream": "${AUTH_UPSTREAM}", "keepPrefix": true }
+  ],
+  "staticDir": "/app/spa",
+  "configJsonPath": "/app/spa/config.json",
+  "cache": {
+    "html": "no-cache, no-store, must-revalidate",
+    "assets": "public, max-age=604800, immutable"
+  }
+}

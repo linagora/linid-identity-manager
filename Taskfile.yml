@@ -357,6 +357,7 @@ tasks:
       - rm -rf ${CONFIG_DIR}/conf
       - mkdir -p ${CONFIG_DIR}/conf
       - envsubst < config.template.json > ${CONFIG_DIR}/conf/config.json
+      - envsubst < server-config.template.json > ${CONFIG_DIR}/conf/server-config.json
 
   generate:config:lemonldap:
     desc: Generate LemonLDAP configuration from template using env variables

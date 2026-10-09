@@ -27,6 +27,16 @@
           "seed": ["{{ entity.code }}"],
           "style": "shape-grid"
         },
+        "avatarLocation": "/avatars/applications/{{ entity.id }}.png",
+        "importOptions": {
+          "enabled": true,
+          "maxFileSize": 10,
+          "allowedExtensions": ["png"],
+          "endpoints": {
+            "upload": "/avatars/applications/{{ entity.id }}",
+            "delete": "/avatars/applications/{{ entity.id }}"
+          }
+        },
         "updateEndpoint": "/applications/{{ entity.id }}",
         "updateBody": {
           "code": "{{ entity.code }}",

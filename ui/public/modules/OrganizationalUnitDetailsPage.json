@@ -27,6 +27,16 @@
             "animationVariant": "fast"
           }
         },
+        "avatarLocation": "/avatars/organizational-units/{{ entity.id }}.png",
+        "importOptions": {
+          "enabled": true,
+          "maxFileSize": 10,
+          "allowedExtensions": ["png"],
+          "endpoints": {
+            "upload": "/avatars/organizational-units/{{ entity.id }}",
+            "delete": "/avatars/organizational-units/{{ entity.id }}"
+          }
+        },
         "fieldOrder": [
           "type"
         ],

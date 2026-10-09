@@ -237,6 +237,51 @@
           "type": "Type"
         }
       },
+      "avatar": {
+        "MenuButton": {
+          "editImageButton": {
+            "FormDialogButton": {
+              "title": "Mettre à jour",
+              "submitSuccess": "Image mise à jour avec succès.",
+              "submitError": "Impossible de mettre à jour l'image. Veuillez réessayer plus tard.",
+              "FormDialog": {
+                "title": "Modifier l'image de {name}",
+                "fields": {
+                  "file": {
+                    "label": "Image *",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "maxFileSize": "L'image ne doit pas dépasser {maxFileSize} Mo.",
+                      "allowedExtensions": "Extensions autorisées : {extensions}."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Envoyer",
+                  "confirmLoading": "Envoi...",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          },
+          "deleteImageButton": {
+            "ConfirmDialogButton": {
+              "title": "Supprimer",
+              "submitSuccess": "Image supprimée avec succès.",
+              "submitError": "Impossible de supprimer l'image. Veuillez réessayer plus tard.",
+              "ConfirmationDialog": {
+                "title": "Supprimer l'image de {name} ?",
+                "content": "L'avatar généré sera affiché à la place.",
+                "ButtonsCard": {
+                  "confirm": "Supprimer",
+                  "confirmLoading": "Suppression...",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          }
+        }
+      },
       "actions": {
         "ButtonsCard": {
           "createChild": "Créer une OU enfant",

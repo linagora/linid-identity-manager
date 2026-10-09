@@ -27,11 +27,13 @@
 package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -64,6 +66,9 @@ import static org.mockito.Mockito.*;
 class ApplicationControllerTest {
 
     @Mock
+    private AvatarService avatarService;
+
+    @Mock
     private ApplicationService applicationService;
 
     @Mock
@@ -84,6 +89,7 @@ class ApplicationControllerTest {
     @BeforeEach
     void setUp() {
         controller = new ApplicationController(
+            avatarService,
             applicationService,
             applicationMapper,
             pagedResponseStatusResolver,
@@ -143,12 +149,14 @@ class ApplicationControllerTest {
     @Test
     @DisplayName("Should delete application by id")
     void testDeleteById() {
+        var id = UUID.randomUUID();
         doNothing().when(applicationService).deleteById(any(), any());
 
-        var response = controller.deleteById(userPrincipal, UUID.randomUUID());
+        var response = controller.deleteById(userPrincipal, id);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(avatarService).deleteQuietly(AvatarEntity.APPLICATIONS, id);
     }
 
     @Test

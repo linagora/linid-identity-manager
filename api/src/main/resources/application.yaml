@@ -38,6 +38,14 @@ spring:
       schema: ${CLIENT_DATABASE_SCHEMA:public}
       location: ${CLIENT_DATABASE_MIGRATION_PATH:}
 
+  servlet:
+    multipart:
+      # The avatar endpoints are the only multipart endpoints: the file limit matches AVATAR_MAX_SIZE, and the
+      # request size is left unbounded by default so a file of exactly the maximum size is not rejected for its
+      # multipart overhead.
+      max-file-size: ${AVATAR_MAX_SIZE:10}MB
+      max-request-size: ${SERVER_MAX_REQUEST_SIZE:-1}
+
   security:
     oauth2:
       resourceserver:
@@ -112,3 +120,8 @@ superset:
   username: ${SUPERSET_USERNAME}
   password: ${SUPERSET_PASSWORD}
   rls-config: ${SUPERSET_RLS_CONFIG}
+
+avatar:
+  location: ${AVATAR_LOCATION:/app/avatars}
+  extension: ${AVATAR_EXTENSION:png}
+  jpeg-quality: ${AVATAR_JPEG_QUALITY:0.9}

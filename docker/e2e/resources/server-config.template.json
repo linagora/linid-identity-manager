@@ -7,8 +7,19 @@
       "key": "${SERVER_KEY_PATH}"
     }
   },
+  "oidc": {
+    "issuer": "${AUTH_ISSUER_URI}",
+    "clientId": "linid-im-client",
+    "scope": "openid email profile roles",
+    "publicUrl": "${LEMONLDAP_REDIRECT_URL}"
+  },
+  "session": {
+    "secret": "${SESSION_SECRET}",
+    "cookieName": "linid.sid",
+    "maxAgeSeconds": 28800
+  },
   "proxies": [
-    { "prefix": "/backend", "upstream": "${API_UPSTREAM}" },
+    { "prefix": "/backend", "upstream": "${API_UPSTREAM}", "withAccessToken": true },
     { "prefix": "/catalog-ui", "upstream": "${CATALOG_UI_UPSTREAM}" },
     { "prefix": "/auth", "upstream": "${AUTH_UPSTREAM}" },
     { "prefix": "/static", "upstream": "${AUTH_UPSTREAM}", "keepPrefix": true },

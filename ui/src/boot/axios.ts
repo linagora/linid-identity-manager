@@ -26,7 +26,7 @@
 
 import { setHttpClient } from '@linagora/linid-im-front-corelib';
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
-import { authService } from 'src/services/AuthService';
+import { getLoginUrl } from 'src/services/AuthService';
 import { defineBoot } from '#q-app/wrappers';
 
 declare module 'vue' {
@@ -47,26 +47,12 @@ declare module 'vue' {
 // for each client)
 const api = axios.create({ baseURL: '/backend', timeout: 30000 });
 
-api.interceptors.request.use(async (config) => {
-  const token = await authService.getAccessToken();
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
-  return config;
-});
-
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    // Not logged in, or the session expired on the server
     if (error.response?.status === 401) {
-      try {
-        await authService.clearUser();
-      } catch {
-        // ignored — clearUser failure must not replace the original 401 error
-      }
-      await authService.login();
+      window.location.assign(getLoginUrl());
     }
 
     return Promise.reject(error);

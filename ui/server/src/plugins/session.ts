@@ -24,23 +24,62 @@
  * LinID Identity Manager software.
  */
 
-import {
-  useLinidUserStore,
-  useLinidUserPreference,
-} from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
-import { authService } from 'src/services/AuthService';
+import { fastifyCookie } from '@fastify/cookie';
+import { fastifySession } from '@fastify/session';
+import type { FastifyInstance } from 'fastify';
+import type { ServerConfig } from '../config/schema.js';
 
-export default defineBoot(async () => {
-  await authService.init();
-
-  const user = await authService.getUser();
-
-  if (user) {
-    const userStore = useLinidUserStore();
-    const { init } = useLinidUserPreference();
-
-    userStore.setUserFromClaims(user.profile);
-    await init();
+declare module 'fastify' {
+  /** Data stored in the user session. */
+  interface Session {
+    /** Login in progress, from `/auth/login` to `/auth/callback`. */
+    login?: {
+      /** Expected `state` parameter of the callback. */
+      state: string;
+      /** Expected `nonce` claim of the ID token. */
+      nonce: string;
+      /** PKCE code verifier. */
+      codeVerifier: string;
+      /** Path of the SPA to go back to after the login. */
+      returnTo: string;
+    };
+    /** Tokens of the logged-in user, never sent to the browser. */
+    tokens?: {
+      /** Access token sent to the API. */
+      accessToken: string;
+      /** Refresh token, used to renew the access token. */
+      refreshToken?: string;
+      /** ID token, used as a hint for the logout. */
+      idToken: string;
+      /** Expiration date of the access token, in milliseconds since the epoch. */
+      expiresAt: number;
+    };
+    /** Claims of the logged-in user, returned by `/auth/me`. */
+    claims?: Record<string, unknown>;
   }
-});
+}
+
+/**
+ * Registers the user session, stored in server memory (default store of `@fastify/session`) and identified by a cookie.
+ *
+ * @param app - Fastify instance to configure.
+ * @param config - Server configuration.
+ */
+export function registerSession(
+  app: FastifyInstance,
+  config: ServerConfig
+): void {
+  app.register(fastifyCookie);
+  app.register(fastifySession, {
+    secret: config.session.secret,
+    cookieName: config.session.cookieName,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: config.session.sameSite ?? 'lax',
+      secure: config.session.secure ?? true,
+      maxAge: config.session.maxAgeSeconds * 1000,
+      path: '/',
+    },
+  });
+}

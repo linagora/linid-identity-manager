@@ -34,16 +34,12 @@
 
 <script setup lang="ts">
 import { useScopedI18n } from '@linagora/linid-im-front-corelib';
-import { authService } from 'src/services/AuthService';
 import { onMounted } from 'vue';
 
 const { t } = useScopedI18n('AuthenticationLogoutPage');
 
-onMounted(async () => {
-  try {
-    await authService.logout();
-  } catch (e) {
-    console.error('Error during OIDC logout processing:', e);
-  }
+// Kept as a route of the application because the logout menu item navigates to it; the server does the logout
+onMounted(() => {
+  window.location.assign('/auth/logout');
 });
 </script>

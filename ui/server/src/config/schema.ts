@@ -32,6 +32,8 @@ export interface ProxyRoute {
   upstream: string;
   /** Keeps the prefix in the upstream path. */
   keepPrefix?: boolean;
+  /** Sends the access token of the user session in the `Authorization` header. */
+  withAccessToken?: boolean;
 }
 
 /** Content of `server-config.json`, with `__APP_ENV__` replaced. */
@@ -49,6 +51,32 @@ export interface ServerConfig {
       /** Path of the private key. */
       key: string;
     };
+  };
+  /** OpenID Connect client used to authenticate users. */
+  oidc: {
+    /** URL of the OpenID Connect issuer. */
+    issuer: string;
+    /** Client identifier. */
+    clientId: string;
+    /** Client secret, absent for a public client. */
+    clientSecret?: string;
+    /** Requested scopes, separated by spaces. */
+    scope: string;
+    /** Public URL of the application, used to build the redirect URIs. */
+    publicUrl: string;
+  };
+  /** User session, stored in server memory and identified by a cookie. */
+  session: {
+    /** Secret used to sign the session cookie, at least 32 characters. */
+    secret: string;
+    /** Name of the session cookie. */
+    cookieName: string;
+    /** Sends the session cookie over HTTPS only, `true` by default. */
+    secure?: boolean;
+    /** `SameSite` attribute of the session cookie, `lax` by default. */
+    sameSite?: 'lax' | 'strict' | 'none';
+    /** Lifetime of the session cookie, in seconds. */
+    maxAgeSeconds: number;
   };
   /** Reverse proxy routes. */
   proxies: ProxyRoute[];

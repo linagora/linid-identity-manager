@@ -168,13 +168,22 @@ tasks:
           HEALTHCHECK: curl -sk https://localhost:8080 >/dev/null 2>&1
           TIMEOUT: 90
           LOG_FILE: /tmp/linid-docker.log
+      - task: start:service
+        vars:
+          SERVICE_NAME: UI server (Fastify)
+          CMD: task start:dev:server
+          HEALTHCHECK: curl -s http://localhost:3000/health >/dev/null 2>&1
+          TIMEOUT: 30
+          LOG_FILE: /tmp/linid-ui-server.log
       - echo ""
       - echo "  ✔ All services ready!"
       - echo "    DB → postgresql://localhost:5432/linid"
       - echo "    LemonLDAP → https://localhost:8080"
+      - echo "    UI server → http://localhost:3000"
       - echo ""
       - echo "  Logs:"
       - echo "    Docker       /tmp/linid-docker.log"
+      - echo "    UI server    /tmp/linid-ui-server.log"
 
   stop:dev:
     desc: Stop the full dev environment
@@ -193,6 +202,13 @@ tasks:
       - task: stop:dev
       - echo ""
       - task: start:dev
+
+  start:dev:server:
+    desc: Start the Fastify server of the UI in watch mode
+    dir: ui/server
+    dotenv: ["../../docker/dev/env/ui.env"]
+    cmds:
+      - pnpm dev
 
   # ─── E2E environment ──────────────────────────────────────────────
 

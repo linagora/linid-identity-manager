@@ -19,7 +19,7 @@ export default defineConfig((ctx) => {
       'nunjucks',
       'config',
       'axios',
-      'oidc',
+      'auth',
       'i18n',
       'module-lifecycle',
       'theme',
@@ -161,17 +161,12 @@ export default defineConfig((ctx) => {
         cert: '../docker/dev/resources/server.crt',
       },
       proxy: {
+        // Fastify server (ui/server): authentication routes, then proxies to the API and LemonLDAP::NG
         '/backend': {
-          target: 'https://localhost:8443',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path: string) => path.replace(/^\/backend/, ''),
+          target: 'http://localhost:3000',
         },
         '/auth': {
-          target: 'https://localhost:8080',
-          changeOrigin: true,
-          secure: false,
-          rewrite: (path: string) => path.replace(/^\/auth/, ''),
+          target: 'http://localhost:3000',
         },
         '/static': {
           target: 'https://localhost:8080',

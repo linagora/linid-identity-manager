@@ -48,12 +48,13 @@
       "oidcRPMetaDataOptionsAllowPasswordGrant": 1,
       "oidcRPMetaDataOptionsPublic": 1,
       "oidcRPMetaDataOptionsRequirePKCE": 1,
+      "oidcRPMetaDataOptionsRefreshToken": 1,
       "oidcRPMetaDataOptionsBypassConsent": 1,
       "oidcRPMetaDataOptionsClientID": "linid-im-client",
       "oidcRPMetaDataOptionsAdditionalAudiences": "linid-im-api",
       "oidcRPMetaDataOptionsClientSecret": "linid-im-secret",
-      "oidcRPMetaDataOptionsRedirectUris": "${LEMONLDAP_REDIRECT_URL}/callback ${LEMONLDAP_REDIRECT_URL}/silent-renew",
-      "oidcRPMetaDataOptionsPostLogoutRedirectUris": "${LEMONLDAP_REDIRECT_URL}/logged-out",
+      "oidcRPMetaDataOptionsRedirectUris": "${LEMONLDAP_REDIRECT_URL}/auth/callback",
+      "oidcRPMetaDataOptionsPostLogoutRedirectUris": "${LEMONLDAP_REDIRECT_URL}/auth/logged-out",
       "oidcRPMetaDataOptionsIDTokenForceClaims": 1,
       "oidcRPMetaDataOptionsExtraClaims": {
         "roles": "roles"

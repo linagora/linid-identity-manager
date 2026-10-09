@@ -26,7 +26,6 @@
 
 import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
 import type { AccountLifecycleAction } from './accountLifecycleUi';
-import type { OidcConfig } from './oidc';
 import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 import type { Remote } from './remotes';
 import type { ThemeVariables } from './theme';
@@ -62,8 +61,6 @@ export interface AppConfig {
   modules: string[];
   /** List of additional zone definition files to be loaded for the UI. */
   extraZones?: string[];
-  /** OpenID Connect (OIDC) configuration for authentication. */
-  oidc: OidcConfig;
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
 

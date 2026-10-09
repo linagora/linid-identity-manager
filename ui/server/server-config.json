@@ -3,8 +3,24 @@
   "http": {
     "port": 3000
   },
+  "oidc": {
+    "issuer": "https://localhost:8080",
+    "clientId": "linid-im-client",
+    "scope": "openid email profile roles",
+    "publicUrl": "https://localhost:9000"
+  },
+  "session": {
+    "secret": "dev-only-session-secret-do-not-use-in-production",
+    "cookieName": "linid.sid",
+    "maxAgeSeconds": 28800,
+    "secure": false
+  },
   "proxies": [
-    { "prefix": "/backend", "upstream": "https://localhost:8443" },
+    {
+      "prefix": "/backend",
+      "upstream": "https://localhost:8443",
+      "withAccessToken": true
+    },
     { "prefix": "/catalog-ui", "upstream": "http://localhost:5001" },
     { "prefix": "/auth", "upstream": "https://localhost:8080" },
     {

@@ -28,12 +28,14 @@ import { readFileSync } from 'node:fs';
 import { fastify } from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import type { ServerConfig } from './config/schema.js';
+import { registerAuth } from './plugins/auth.js';
 import { registerProxies } from './plugins/proxies.js';
+import { registerSession } from './plugins/session.js';
 import { registerStaticFiles } from './plugins/staticFiles.js';
 
 /**
- * Builds the Fastify application, without starting it: HTTPS when `http.tls` is set, `GET /health`, reverse proxies and
- * static files.
+ * Builds the Fastify application, without starting it: HTTPS when `http.tls` is set, `GET /health`, user session,
+ * authentication routes, reverse proxies and static files.
  *
  * @param config - Server configuration.
  * @returns The configured Fastify instance.
@@ -49,7 +51,9 @@ export function buildApp(config: ServerConfig): FastifyInstance {
 
   app.get('/health', async () => ({ status: 'ok' }));
 
-  registerProxies(app, config);
+  registerSession(app, config);
+  const getFreshAccessToken = registerAuth(app, config);
+  registerProxies(app, config, getFreshAccessToken);
   registerStaticFiles(app, config);
 
   return app;

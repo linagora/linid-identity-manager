@@ -1,0 +1,29 @@
+{
+  "name": "@linagora/linid-identity-manager-ui-server",
+  "private": true,
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/main.js",
+    "format": "prettier --write \"src/**/*.{ts,js}\" \"*.{js,ts,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,js}\" \"*.{js,ts,json}\"",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "validate": "pnpm type-check && pnpm format:check"
+  },
+  "dependencies": {
+    "@fastify/http-proxy": "11.6.4",
+    "@fastify/static": "10.1.5",
+    "fastify": "5.12.5"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "prettier": "3.9.4",
+    "prettier-plugin-jsdoc": "1.8.1",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3"
+  }
+}

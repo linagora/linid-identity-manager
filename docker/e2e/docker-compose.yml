@@ -142,7 +142,7 @@ services:
         condition: service_healthy
 
   catalog-ui:
-    image: linagora/linid-catalog-ui:v0.2.133
+    image: linagora/linid-catalog-ui:v0.2.138
     container_name: catalog-ui
     networks:
       - linid-e2e-network

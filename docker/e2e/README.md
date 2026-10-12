@@ -12,7 +12,7 @@ task setup:e2e
 task start:e2e
 ```
 
-The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.2.133`), its version is pinned in `docker-compose.yml`.
+The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.2.138`), its version is pinned in `docker-compose.yml`.
 
 ## Services
 

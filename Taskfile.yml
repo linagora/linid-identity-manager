@@ -194,6 +194,13 @@ tasks:
       - echo ""
       - task: start:dev
 
+  start:dev:server:
+    desc: Start the Fastify server of the UI in watch mode
+    dir: ui/server
+    dotenv: ["../../docker/dev/env/ui.env"]
+    cmds:
+      - pnpm dev
+
   # ─── E2E environment ──────────────────────────────────────────────
 
   start:e2e:

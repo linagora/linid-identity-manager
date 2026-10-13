@@ -33,7 +33,6 @@ import {
   createWebHistory,
 } from 'vue-router';
 import routes from './routes';
-import { authService } from 'src/services/AuthService';
 
 /*
  * If not building with SSR mode, you can
@@ -43,8 +42,6 @@ import { authService } from 'src/services/AuthService';
  * async/await or return a Promise which resolves
  * with the Router instance.
  */
-const PUBLIC_PATHS = ['/callback', '/silent-renew', '/logout', '/logged-out'];
-
 /**
  * Creates and configures the Vue Router instance.
  *
@@ -65,21 +62,6 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
-  });
-
-  Router.beforeEach(async (to) => {
-    if (PUBLIC_PATHS.includes(to.path)) {
-      return true;
-    }
-
-    const user = await authService.getUser();
-
-    if (!user) {
-      await authService.login(to.fullPath);
-      return false;
-    }
-
-    return true;
   });
 
   return Router;

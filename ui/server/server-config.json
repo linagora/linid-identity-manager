@@ -27,7 +27,11 @@
     "secure": false
   },
   "proxies": [
-    { "prefix": "/backend", "upstream": "https://localhost:8443" },
+    {
+      "prefix": "/backend",
+      "upstream": "https://localhost:8443",
+      "withAccessToken": true
+    },
     { "prefix": "/catalog-ui", "upstream": "http://localhost:5001" },
     {
       "prefix": "/auth/me",

@@ -116,10 +116,15 @@ services:
       - linid-demo-network
     ports:
       - 9000:443
+    # The OIDC issuer is reached at its public URL, served by this container through the host
+    extra_hosts:
+      - "linid.localtest.me:host-gateway"
     environment:
       APP_ENV: ${ENVIRONMENT}
+      NODE_EXTRA_CA_CERTS: ${NODE_EXTRA_CA_CERTS}
       SERVER_CONFIG_PATH: ${SERVER_CONFIG_PATH}
     volumes:
+      - ../certs/ca.crt:/etc/server/certs/ca.crt:ro
       - ./resources/${CONFIG_DIR}/conf/server-config.json:${SERVER_CONFIG_PATH}:ro
       - ./resources/server.crt:/etc/server/certs/server.crt:ro
       - ./resources/server.key:/etc/server/certs/server.key:ro

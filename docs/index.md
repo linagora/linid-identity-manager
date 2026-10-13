@@ -37,6 +37,8 @@ You want to install and connect LinId to your environment.
 * [configuration/authentication/oidc](configuration/authentication/oidc.md)
 * [configuration/authentication/claims](configuration/authentication/claims.md)
 * [configuration/certificates](configuration/certificates.md)
+* [configuration/ui/server-config](configuration/ui/server-config.md)
+* [configuration/ui/server-environment](configuration/ui/server-environment.md)
 
 ---
 
@@ -64,10 +66,12 @@ You want to configure and operate the platform.
 You need deeper technical insights or troubleshooting.
 
 * Policies management
+* UI server and authentication (BFF)
 
 👉 Start here:
 
 * [advanced/policies](advanced/policies.md)
+* [advanced/bff](advanced/bff.md)
 
 ---
 

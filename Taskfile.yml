@@ -352,7 +352,8 @@ tasks:
     desc: Generate configuration from templates using env variables
     internal: true
     dir: "docker/{{.ENV}}/resources"
-    dotenv: ["../{{.ENV_FILE}}"]
+    # env/ui.env does not exist in demo: a missing dotenv file is ignored
+    dotenv: ["../{{.ENV_FILE}}", "../env/ui.env"]
     cmds:
       - rm -rf ${CONFIG_DIR}/conf
       - mkdir -p ${CONFIG_DIR}/conf

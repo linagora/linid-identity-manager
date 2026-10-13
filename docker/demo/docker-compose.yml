@@ -143,7 +143,7 @@ services:
         condition: service_healthy
 
   catalog-ui:
-    image: catalog-ui
+    image: linagora/linid-catalog-ui:v0.2.138
     container_name: catalog-ui
     networks:
       - linid-demo-network

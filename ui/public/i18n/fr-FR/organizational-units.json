@@ -91,7 +91,8 @@
         },
         "parentId": {
           "type": "Unité organisationnelle",
-          "separator": "ou"
+          "separator": "ou",
+          "value": "{name}"
         },
         "roleNames": {
           "type": "Rôle fonctionnel",

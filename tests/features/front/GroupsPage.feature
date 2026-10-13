@@ -3,6 +3,7 @@ Feature: Test Group homepage display
   ################## Group Homepage ##################
   ## 101 Should display the group homepage with all groups listed
   ## 102 Should filter groups when using advanced search
+  ## 103 Should display the organizational unit name in the tree filter chip
 
   Scenario: Roundtrip about Group homepage
 
@@ -71,4 +72,22 @@ Feature: Test Group homepage display
 
     When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009001"]' to be visible
+    And  I expect the HTML element '[data-cy="cell-name_{{ctx.groupId}}"]' to be visible
+
+    ## 103 Should display the organizational unit name in the tree filter chip
+    # Developers and Support are the two groups attached to Division A1 itself.
+    When I click on ".linid-smart-filter"
+    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000c"]'
+    And  I click on '[data-cy="tree-search-filter-panel_search"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups?organizationalUnitId=00000000-0000-4000-8000-00000000000c"
+    And  I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009004"]' contains "Developers"
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009005"]' contains "Support"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000c"
+
+    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups"
+    And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009001"]' to be visible
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.groupId}}"]' to be visible

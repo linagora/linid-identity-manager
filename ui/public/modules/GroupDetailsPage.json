@@ -103,11 +103,27 @@
       }
     },
     {
+      "zone": "moduleGroupDetailsPage.generic-editable-table-card.columns.avatar",
+      "plugin": "LinPulsar/EntityAvatar",
+      "props": {
+        "avatarOptions": {
+          "seed": ["{{ entity.firstname }}", " ", "{{ entity.lastname }}"],
+          "style": "initials"
+        }
+      }
+    },
+    {
       "zone": "moduleGroupDetailsPage.content.after",
       "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "columns": [
+          {
+            "name": "avatar",
+            "label": "columns.avatar",
+            "field": "",
+            "align": "center"
+          },
           {
             "name": "lastname",
             "label": "columns.lastname",

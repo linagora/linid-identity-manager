@@ -358,6 +358,7 @@
       "deleteSuccess": "Account successfully detached.",
       "deleteError": "Unable to detach the account. Please try again later.",
       "columns": {
+        "avatar": "",
         "lastname": "Last name",
         "firstname": "First name",
         "email": "Email"

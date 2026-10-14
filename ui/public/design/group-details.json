@@ -125,6 +125,9 @@
       }
     },
     "generic-editable-table-card": {
+      "entity-avatar": {
+        "q-avatar": { "size": "32px" }
+      },
       "q-card": { "flat": true, "bordered": false },
       "header-section": {
         "q-card-section": { "horizontal": true }
@@ -145,7 +148,12 @@
         }
       },
       "generic-entity-table": {
-        "q-table": {}
+        "q-table": {},
+        "columns": {
+          "avatar": {
+            "q-icon": { "name": "person" }
+          }
+        }
       },
       "form-dialog": {
         "q-dialog": { "persistent": false },

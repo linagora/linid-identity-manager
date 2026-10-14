@@ -11,7 +11,15 @@
       "q-btn": { "color": "primary", "outline": true }
     },
     "generic-entity-table": {
-      "q-table": {}
+      "q-table": {},
+      "columns": {
+        "avatar": {
+          "q-icon": { "name": "person" }
+        }
+      }
+    },
+    "entity-avatar": {
+      "q-avatar": { "size": "32px" }
     },
     "linid-smart-filter": {
       "q-field": {

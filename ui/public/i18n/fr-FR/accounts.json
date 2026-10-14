@@ -11,6 +11,7 @@
     "OverrideFavoriteNotifyMessage": "Le favori '{name}' a été remplacé.",
     "seeButton": "Voir",
     "columns": {
+      "avatar": "",
       "firstname": "Prénom",
       "lastname": "Nom",
       "email": "Email",

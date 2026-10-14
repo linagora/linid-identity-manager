@@ -11,6 +11,7 @@
     "OverrideFavoriteNotifyMessage": "The favorite '{name}' has been overwritten.",
     "seeButton": "See",
     "columns": {
+      "avatar": "",
       "firstname": "First name",
       "lastname": "Last name",
       "email": "Email",

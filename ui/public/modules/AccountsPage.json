@@ -7,6 +7,18 @@
   "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "accounts",
   "basePath": "/accounts",
+  "zones": [
+    {
+      "zone": "moduleAccountsPage.columns.avatar",
+      "plugin": "LinPulsar/EntityAvatar",
+      "props": {
+        "avatarOptions": {
+          "seed": ["{{ entity.firstname }}", " ", "{{ entity.lastname }}"],
+          "style": "initials"
+        }
+      }
+    }
+  ],
   "options": {
     "layout": "LinPulsar/BaseLayout",
     "addNavigationMenu": true,
@@ -75,6 +87,13 @@
       }
     ],
     "columns": [
+      {
+        "label": "columns.avatar",
+        "name": "avatar",
+        "field": "",
+        "sortable": false,
+        "align": "center"
+      },
       {
         "label": "columns.firstname",
         "name": "firstname",

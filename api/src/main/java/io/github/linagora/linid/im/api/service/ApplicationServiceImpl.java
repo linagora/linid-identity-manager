@@ -53,8 +53,9 @@ import org.springframework.transaction.annotation.Transactional;
  * Default implementation of {@link ApplicationService}.
  *
  * <p>Provides CRUD operations for applications, enforcing the uniqueness of the application code.
- * The {@code script}, its {@code scriptChecksum}, the {@code deployedAt} date and the {@code
- * configuration} are managed by a separate process and are never set from the API requests.</p>
+ * The {@code claimsTemplateChecksum} is computed from the {@code claimsTemplate}. The {@code script}, its
+ * {@code scriptChecksum}, the {@code deployedAt} date and the {@code configuration} are managed by a separate
+ * process and are never set from the API requests.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -87,7 +88,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final OpaService opaService;
 
     /**
-     * Service computing the script checksum.
+     * Service computing the claims template and script checksums.
      */
     private final ChecksumService checksumService;
 
@@ -106,6 +107,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         var entity = mapper.toEntity(application, userPrincipal);
+        entity.setClaimsTemplateChecksum(checksumService.compute(application.claimsTemplate()));
 
         return applicationRepository.save(entity);
     }
@@ -168,6 +170,10 @@ public class ApplicationServiceImpl implements ApplicationService {
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.application.code.already_exists", Map.of("code", application.code()))
             );
+        }
+
+        if (!application.claimsTemplate().equals(entity.getClaimsTemplate())) {
+            entity.setClaimsTemplateChecksum(checksumService.compute(application.claimsTemplate()));
         }
 
         entity.setCode(application.code());

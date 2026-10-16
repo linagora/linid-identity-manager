@@ -49,8 +49,8 @@ import org.hibernate.type.SqlTypes;
 /**
  * JPA entity representing an application in the system.
  *
- * <p>Maps to the {@code applications} table and includes identification fields, a claims template, an
- * optional provisioning script with its checksum, and an optional configuration.
+ * <p>Maps to the {@code applications} table and includes identification fields, a claims template with its
+ * checksum, an optional provisioning script with its checksum, and an optional configuration.
  * Inherits audit fields from {@link AbstractEntity}.</p>
  */
 @Entity
@@ -117,6 +117,13 @@ public class Application extends AbstractEntity {
     @Column(name = "claims_template", nullable = false)
     @FilterType(type = String.class)
     private String claimsTemplate;
+
+    /**
+     * SHA-256 checksum (lowercase hexadecimal) computed from the claims template for change detection.
+     */
+    @Column(name = "claims_template_checksum", nullable = false)
+    @FilterType(type = String.class)
+    private String claimsTemplateChecksum;
 
     /**
      * Optional provisioning or transformation script associated with the application.

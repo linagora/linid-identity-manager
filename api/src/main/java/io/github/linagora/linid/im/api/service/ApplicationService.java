@@ -44,9 +44,10 @@ public interface ApplicationService {
     /**
      * Creates a new application from the given request.
      *
-     * <p>The {@code code} must be unique. The {@code script}, its {@code scriptChecksum}, the {@code
-     * deployedAt} date and the {@code configuration} are managed by a separate process and are therefore
-     * never set from the creation request.</p>
+     * <p>The {@code code} must be unique. The {@code claimsTemplateChecksum} is computed from the
+     * {@code claimsTemplate}. The {@code script}, its {@code scriptChecksum}, the {@code deployedAt} date and
+     * the {@code configuration} are managed by a separate process and are therefore never set from the
+     * creation request.</p>
      *
      * @param userPrincipal the authenticated user
      * @param application   the application creation record
@@ -94,8 +95,9 @@ public interface ApplicationService {
     /**
      * Updates the application with the given identifier.
      *
-     * <p>The {@code script}, its {@code scriptChecksum}, the {@code deployedAt} date and the
-     * {@code configuration} are left untouched, as they are managed by a separate process.</p>
+     * <p>The {@code claimsTemplateChecksum} is recomputed when the {@code claimsTemplate} changes. The
+     * {@code script}, its {@code scriptChecksum}, the {@code deployedAt} date and the {@code configuration}
+     * are left untouched, as they are managed by a separate process.</p>
      *
      * <p>The system-reserved application is immutable: updating it is rejected with an HTTP 400.</p>
      *

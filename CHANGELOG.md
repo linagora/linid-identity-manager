@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     temporary file, so a failed upload never leaves the entity without its previous image.
   - A `docker/avatars` directory shared between the API and Nginx, which serves it under `/avatars` without content
     sniffing and fully sandboxed, seeded with a default administrator avatar.
+- Added a **claims template checksum** on applications (`applications.claims_template_checksum`), computed by the
+  API when an application is created or its claims template is updated, so that template changes can be detected.
 
 #### Frontend
 

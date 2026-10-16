@@ -46,6 +46,7 @@ Used by `task setup:config` to generate `server-config.json`.
 | `LEMONLDAP_REDIRECT_URL`        | `callbackUri`, `logoutUrl`, `postLogoutRedirectUri`              | `https://linid.localtest.me:9000`        | Public URL of the application                     |
 | `LEMONLDAP_PORTAL_HOSTNAME`     | `oidc.oauth2.credentials.http.headers.host`                      | `linid.localtest.me`                     | `Host` of the LemonLDAP::NG portal                |
 | `OIDC_CLIENT_ID`                | `oidc.oauth2.credentials.client.id`                              | `linid-im-client`                        | OIDC client ID                                    |
+| `OIDC_CLIENT_SECRET`            | `oidc.oauth2.credentials.client.secret`                          | `linid-im-secret`                        | OIDC client secret                                |
 | `OIDC_SCOPE`                    | `oidc.oauth2.scope`                                              | `"openid email profile roles"`           | OIDC scope                                        |
 | `OIDC_LOGOUT_PATH`              | `oidc.logoutUrl`                                                 | `/auth/oauth2/logout`                    | Path of the logout endpoint                       |
 | `OIDC_USERINFO_PATH`            | `rewritePrefix` of `/auth/me`                                    | `/oauth2/userinfo`                       | Path of the userinfo endpoint on `AUTH_UPSTREAM`  |
@@ -60,4 +61,7 @@ Used by `task setup:config` to generate `server-config.json`.
 
 `LEMONLDAP_REDIRECT_URL` and `LEMONLDAP_PORTAL_HOSTNAME` are in `e2e.env` / `local.env`, because their values differ
 between CI and local runs. `OIDC_LOGOUT_PATH` is the path of the SSO as served by the UI server, under `/auth`.
+`OIDC_CLIENT_SECRET` is in `e2e.env` / `local.env` (`dev.env` in development, `.env` in the demo), because it is also
+written in the LemonLDAP::NG configuration (`oidcRPMetaDataOptionsClientSecret`). In development, `server-config.json`
+is not generated: the secret is written in it and must match `dev.env`.
 The demo only uses the variables of its `.env`, the other values are written in its template.

@@ -10,7 +10,7 @@
   "oidc": {
     "oauth2": {
       "credentials": {
-        "client": { "id": "linid-im-client" },
+        "client": { "id": "linid-im-client", "secret": "${OIDC_CLIENT_SECRET}" },
         "options": { "authorizationMethod": "body" },
         "http": { "headers": { "host": "${LEMONLDAP_PORTAL_HOSTNAME}" } }
       },

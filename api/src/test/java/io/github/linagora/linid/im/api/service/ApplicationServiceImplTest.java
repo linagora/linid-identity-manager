@@ -104,11 +104,12 @@ class ApplicationServiceImplTest {
     }
 
     @Test
-    @DisplayName("create should persist the mapped application")
+    @DisplayName("create should persist the mapped application with the checksum of its claims template")
     void testCreate() {
         var mapped = Application.builder().code("my-app").build();
         when(applicationRepository.findByCode("my-app")).thenReturn(Optional.empty());
         when(mapper.toEntity(record, userPrincipal)).thenReturn(mapped);
+        when(checksumService.compute("{}")).thenReturn("template-checksum");
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.create(userPrincipal, record);
@@ -116,9 +117,10 @@ class ApplicationServiceImplTest {
         var captor = ArgumentCaptor.forClass(Application.class);
         verify(applicationRepository).save(captor.capture());
 
-        // The mapped entity must be the one persisted, unchanged.
+        // The mapped entity must be the one persisted, with the checksum of its claims template set.
         assertSame(mapped, captor.getValue());
         assertSame(mapped, result);
+        assertEquals("template-checksum", mapped.getClaimsTemplateChecksum());
     }
 
     @Test
@@ -187,13 +189,15 @@ class ApplicationServiceImplTest {
     }
 
     @Test
-    @DisplayName("update should apply record fields, leave externally-managed fields untouched and persist the same "
-        + "entity")
+    @DisplayName("update should apply record fields, recompute the claims template checksum, leave "
+        + "externally-managed fields untouched and persist the same entity")
     void testUpdate() {
         var id = UUID.randomUUID();
         var existing = Application.builder()
             .id(id)
             .code("old-code")
+            .claimsTemplate("{ \"sub\": \"id\" }")
+            .claimsTemplateChecksum("existing-template-checksum")
             .script("existing-script")
             .scriptChecksum("existing-checksum")
             .deployedAt(OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC))
@@ -201,6 +205,7 @@ class ApplicationServiceImplTest {
             .build();
         when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
         when(applicationRepository.findAll(any(Specification.class))).thenReturn(List.of());
+        when(checksumService.compute("{}")).thenReturn("new-template-checksum");
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, record);
@@ -218,6 +223,7 @@ class ApplicationServiceImplTest {
         assertEquals("desc", saved.getDescription());
         assertEquals("OIDC", saved.getType());
         assertEquals("{}", saved.getClaimsTemplate());
+        assertEquals("new-template-checksum", saved.getClaimsTemplateChecksum());
         assertEquals("Security", saved.getDomain());
         assertEquals(userPrincipal.getId(), saved.getUpdatedBy());
         // The script, checksum, deployedAt and configuration are managed by a separate process
@@ -226,6 +232,27 @@ class ApplicationServiceImplTest {
         assertEquals("existing-checksum", saved.getScriptChecksum());
         assertEquals(OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), saved.getDeployedAt());
         assertEquals("existing-config", saved.getConfiguration());
+    }
+
+    @Test
+    @DisplayName("update should keep the claims template checksum when the template is unchanged")
+    void testUpdate_shouldKeepClaimsTemplateChecksumWhenTemplateUnchanged() {
+        var id = UUID.randomUUID();
+        var existing = Application.builder()
+            .id(id)
+            .code("my-app")
+            .claimsTemplate("{}")
+            .claimsTemplateChecksum("kept-checksum")
+            .build();
+        when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(applicationRepository.findAll(any(Specification.class))).thenReturn(List.of());
+        when(checksumService.compute("{}")).thenReturn("kept-checksum");
+        when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.update(userPrincipal, id, record);
+
+        // The template is unchanged: its checksum is the stored one, which must be kept.
+        assertEquals("kept-checksum", result.getClaimsTemplateChecksum());
     }
 
     @Test
@@ -361,6 +388,7 @@ class ApplicationServiceImplTest {
         var existing = Application.builder().id(id).code("my-app").extraParameters(Map.of("team", "core")).build();
         when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
         when(applicationRepository.findAll(any(Specification.class))).thenReturn(List.of());
+        when(checksumService.compute("{}")).thenReturn("template-checksum");
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, withoutExtraParameters);
@@ -377,6 +405,7 @@ class ApplicationServiceImplTest {
         var existing = Application.builder().id(id).code("my-app").extraParameters(Map.of("team", "core")).build();
         when(applicationRepository.findById(id)).thenReturn(Optional.of(existing));
         when(applicationRepository.findAll(any(Specification.class))).thenReturn(List.of());
+        when(checksumService.compute("{}")).thenReturn("template-checksum");
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, withExtraParameters);

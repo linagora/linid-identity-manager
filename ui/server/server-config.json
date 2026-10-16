@@ -1,11 +1,45 @@
 {
   "environment": "__APP_ENV__",
   "http": {
-    "port": 3000
+    "port": 3000,
+    "trustProxy": false
+  },
+  "oidc": {
+    "oauth2": {
+      "credentials": {
+        "client": { "id": "linid-im-client" },
+        "options": { "authorizationMethod": "body" }
+      },
+      "discovery": { "issuer": "https://localhost:8080" },
+      "scope": ["openid", "email", "profile", "roles"],
+      "callbackUri": "https://localhost:9000/auth/callback",
+      "pkce": "S256",
+      "cookie": { "httpOnly": true, "sameSite": "lax" }
+    },
+    "logoutUrl": "https://localhost:8080/oauth2/logout",
+    "postLogoutRedirectUri": "https://localhost:9000/auth/logged-out",
+    "refreshMarginMilliseconds": 30000
+  },
+  "session": {
+    "secret": "dev-only-session-secret-do-not-use-in-production",
+    "cookieName": "linid",
+    "maxAgeMilliseconds": 28800000,
+    "lruCache": { "max": 10000, "ttl": 28800000, "ttlAutopurge": true },
+    "secure": false
   },
   "proxies": [
-    { "prefix": "/backend", "upstream": "https://localhost:8443" },
+    {
+      "prefix": "/backend",
+      "upstream": "https://localhost:8443",
+      "withAccessToken": true
+    },
     { "prefix": "/catalog-ui", "upstream": "http://localhost:5001" },
+    {
+      "prefix": "/auth/me",
+      "upstream": "https://localhost:8080",
+      "rewritePrefix": "/oauth2/userinfo",
+      "withAccessToken": true
+    },
     { "prefix": "/auth", "upstream": "https://localhost:8080" },
     {
       "prefix": "/static",

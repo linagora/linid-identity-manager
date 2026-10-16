@@ -53,11 +53,5 @@
     "INACTIVE": "Inactive",
     "SUSPENDED": "Suspended",
     "UNKNOWN": "Unknown"
-  },
-  "AuthenticationCallbackPage": {
-    "processing": "Processing authentication response..."
-  },
-  "AuthenticationLoggedOutPage": {
-    "processing": "Redirecting to the login page..."
   }
 }

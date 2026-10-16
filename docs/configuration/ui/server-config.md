@@ -28,7 +28,7 @@
   "oidc": {
     "oauth2": {
       "credentials": {
-        "client": { "id": "linid-im-client" },
+        "client": { "id": "linid-im-client", "secret": "linid-im-secret" },
         "options": { "authorizationMethod": "body" }
       },
       "discovery": { "issuer": "https://localhost:8080" },
@@ -99,6 +99,7 @@ The main ones:
 | Parameter                                   | Description                                                                                        |
 |---------------------------------------------|----------------------------------------------------------------------------------------------------|
 | `credentials.client.id`                     | Client identifier declared in the SSO                                                              |
+| `credentials.client.secret`                 | Client secret declared in the SSO, omitted for a public client                                     |
 | `discovery.issuer`                          | URL of the SSO: the endpoints are read from `{issuer}/.well-known/openid-configuration` at startup |
 | `credentials.options.authorizationMethod`   | `body` for a public client (no secret) or `client_secret_post`, `header` for `client_secret_basic` |
 | `scope`                                     | Requested scopes: array, or string separated by spaces (`openid` is required)                      |
@@ -117,7 +118,7 @@ every request to the SSO:
 
 ```json
 "credentials": {
-  "client": { "id": "linid-im-client" },
+  "client": { "id": "linid-im-client", "secret": "linid-im-secret" },
   "options": { "authorizationMethod": "body" },
   "http": { "headers": { "host": "linid.localtest.me" } }
 },

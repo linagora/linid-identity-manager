@@ -45,7 +45,8 @@ Any other `/auth/*` path is proxied to LemonLDAP::NG.
 3. The user logs in. The SSO redirects to `/auth/callback?code=…&state=…`.
 4. The server checks the `state`, exchanges the code for the tokens (server to server), regenerates the session ID
    (against session fixation) and stores the tokens in the new session.
-5. The server redirects to `returnTo` if it is a path of the application (starting with `/`, not `//`), or to `/`.
+5. The server redirects to `returnTo` if, parsed like the browser does, it stays on the origin of
+   `postLogoutRedirectUri`, or to `/`.
 
 ---
 

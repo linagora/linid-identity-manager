@@ -48,6 +48,25 @@ interface LoginRequest {
 export function registerAuth(app: FastifyInstance, config: ServerConfig) {
   const { oidc } = config;
   const refreshMargin = oidc.refreshMarginMilliseconds ?? 30_000;
+  // Public origin of the application
+  const publicOrigin = new URL(oidc.postLogoutRedirectUri).origin;
+
+  /**
+   * Gives the path to redirect to after the login.
+   *
+   * @param returnTo - Path requested by the SPA.
+   * @returns The path if it stays on the application, `/` otherwise.
+   */
+  function toLocalPath(returnTo: string): string {
+    try {
+      const url = new URL(returnTo, publicOrigin);
+      return url.origin === publicOrigin
+          ? url.pathname + url.search + url.hash
+          : '/';
+    } catch {
+      return '/';
+    }
+  }
 
   app.register(fastifyOauth2, {
     ...oidc.oauth2,
@@ -129,11 +148,7 @@ export function registerAuth(app: FastifyInstance, config: ServerConfig) {
       );
       await request.session.regenerate();
       request.session.token = token;
-      const isLocalPath =
-        returnTo.startsWith('/') &&
-        !returnTo.startsWith('//') &&
-        !returnTo.startsWith('/\\');
-      return reply.redirect(isLocalPath ? returnTo : '/');
+      return reply.redirect(toLocalPath(returnTo));
     } catch (error) {
       request.log.warn({ err: error }, 'Login callback failed');
       return reply.code(400).send({ message: 'Authentication failed' });

@@ -36,9 +36,10 @@ import java.util.Map;
  * Request payload for creating or updating an application.
  *
  * <p>The {@code roles} are intentionally omitted: they are managed as a sub-resource, through the
- * {@code /applications/{applicationId}/roles} endpoints. The {@code script}, its {@code scriptChecksum},
- * the {@code deployedAt} date and the {@code configuration} are managed by a separate process and
- * are therefore not part of the request.</p>
+ * {@code /applications/{applicationId}/roles} endpoints. The {@code claimsTemplateChecksum} is computed from
+ * the {@code claimsTemplate} by the service and is therefore not part of the request. The {@code script}, its
+ * {@code scriptChecksum}, the {@code deployedAt} date and the {@code configuration} are managed by a separate
+ * process and are therefore not part of the request.</p>
  *
  * @param code           functional unique identifier of the application
  * @param name           human-readable name of the application

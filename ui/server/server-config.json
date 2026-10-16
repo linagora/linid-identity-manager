@@ -7,7 +7,7 @@
   "oidc": {
     "oauth2": {
       "credentials": {
-        "client": { "id": "linid-im-client" },
+        "client": { "id": "linid-im-client", "secret": "linid-im-secret" },
         "options": { "authorizationMethod": "body" }
       },
       "discovery": { "issuer": "https://localhost:8080" },

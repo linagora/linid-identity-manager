@@ -11,7 +11,7 @@
   "oidc": {
     "oauth2": {
       "credentials": {
-        "client": { "id": "${OIDC_CLIENT_ID}" },
+        "client": { "id": "${OIDC_CLIENT_ID}", "secret": "${OIDC_CLIENT_SECRET}" },
         "options": { "authorizationMethod": "body" },
         "http": { "headers": { "host": "${LEMONLDAP_PORTAL_HOSTNAME}" } }
       },

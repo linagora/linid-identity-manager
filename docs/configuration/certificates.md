@@ -34,7 +34,7 @@ every hostname used in the platform:
 
 * `linid.localtest.me`
 * `localhost`
-* `ui`, `api`, `auth`, `lemon`, `superset` (internal Docker service names)
+* `ui`, `api`, `sync-api`, `auth`, `lemon`, `superset` (internal Docker service names)
 
 The same certificate is used by:
 
@@ -43,6 +43,7 @@ The same certificate is used by:
 | Nginx (UI)     | HTTPS on the frontend                              |
 | LemonLDAP::NG  | HTTPS on the SSO portal (dev environment)          |
 | LinID API      | HTTPS via `keystore.p12` (PKCS12, same key pair)   |
+| Sync API       | HTTPS via `sync-api-keystore.p12` (same key pair)  |
 | Superset       | HTTPS on the analytics instance                    |
 
 ---
@@ -91,6 +92,9 @@ Generated automatically by the certificate tasks:
 * **Keystore** (`api/src/main/resources/keystore.p12`): PKCS12 archive built from the
   shared server certificate and key. The Spring Boot API uses it to serve HTTPS, so the
   API presents the same certificate as every other service.
+* **Sync API keystore** (`docker/<env>/resources/sync-api-keystore.p12`): the same PKCS12
+  archive, used by `sync-api` to serve HTTPS. It is never packaged in the `sync-api` image:
+  the E2E environment mounts it in the container.
 * **Truststore** (`truststore.jks`): contains only the local CA certificate. Because
   every service certificate is signed by that CA, this single entry lets the API validate
   TLS connections to LemonLDAP::NG, Superset, and any future HTTPS service.

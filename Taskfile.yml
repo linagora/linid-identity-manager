@@ -419,6 +419,7 @@ tasks:
     cmds:
       - task: build:image:ui
       - task: build:image:api
+      - task: build:image:sync-api
       - task: build:image:superset
 
   build:image:ui:
@@ -438,6 +439,15 @@ tasks:
           IMAGE_NAME: linid-identity-manager-api
           DOCKERFILE: api/Dockerfile
           CONTEXT_DIR: api/
+
+  build:image:sync-api:
+    desc: Build linid-identity-manager-sync-api Docker image
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: linid-identity-manager-sync-api
+          DOCKERFILE: sync-api/Dockerfile
+          CONTEXT_DIR: sync-api/
 
   build:image:superset:
     desc: Build superset Docker image

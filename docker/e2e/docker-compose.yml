@@ -107,6 +107,28 @@ services:
       opa:
         condition: service_healthy
 
+  sync-api:
+    image: linid-identity-manager-sync-api
+    container_name: sync-api
+    networks:
+      - linid-e2e-network
+    ports:
+      - 8444:8443
+    env_file:
+      - ./env/sync-api.env
+    volumes:
+      - ./resources/sync-api-keystore.p12:/etc/ssl/keystore.p12:ro
+      - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
+      db:
+        condition: service_healthy
+
   ui:
     image: linid-identity-manager-ui
     container_name: ui

@@ -2,13 +2,14 @@
 -- Database creation
 -- ============================================================================
 -- Create one dedicated database per application.
--- This provides logical isolation between LinID, LemonLDAP and Superset.
+-- This provides logical isolation between LinID, sync-api, LemonLDAP and Superset.
 -- ============================================================================
 
 CREATE DATABASE linid;
 CREATE DATABASE lemon;
 CREATE DATABASE superset;
 CREATE DATABASE datalake;
+CREATE DATABASE sync_api;
 
 -- ============================================================================
 -- Application roles
@@ -21,12 +22,15 @@ CREATE ROLE linid_user WITH LOGIN PASSWORD 'password';
 CREATE ROLE lemon_user WITH LOGIN PASSWORD 'password';
 CREATE ROLE superset_user WITH LOGIN PASSWORD 'password';
 CREATE ROLE datalake_user WITH LOGIN PASSWORD 'password';
+CREATE ROLE sync_api_user WITH LOGIN PASSWORD 'password';
 
 -- ============================================================================
 -- Database ownership
 -- ============================================================================
 -- Assign each database to its corresponding application user.
 -- This allows each application to manage objects in its own database.
+-- The sync_api database stays owned by the administrator: the owner of a database
+-- owns its public schema, so sync_api_user could create tables in it.
 -- ============================================================================
 
 ALTER DATABASE linid OWNER TO linid_user;

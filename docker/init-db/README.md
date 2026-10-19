@@ -19,7 +19,7 @@ docker/init-db/
 
 ## Database architecture
 
-The initialization creates four dedicated PostgreSQL databases:
+The initialization creates five dedicated PostgreSQL databases:
 
 | Database   | Purpose                       | Application user |
 | ---------- | ----------------------------- | ---------------- |
@@ -27,6 +27,7 @@ The initialization creates four dedicated PostgreSQL databases:
 | `lemon`    | LemonLDAP::NG data            | `lemon_user`     |
 | `superset` | Apache Superset metadata      | `superset_user`  |
 | `datalake` | Analytical and dashboard data | `datalake_user`  |
+| `sync_api` | `sync-api` batch jobs         | `sync_api_user`  |
 
 The databases are logically isolated from each other.
 
@@ -93,6 +94,7 @@ CREATE DATABASE linid;
 CREATE DATABASE lemon;
 CREATE DATABASE superset;
 CREATE DATABASE datalake;
+CREATE DATABASE sync_api;
 ```
 
 ### PostgreSQL roles
@@ -104,9 +106,11 @@ linid_user
 lemon_user
 superset_user
 datalake_user
+sync_api_user
 ```
 
-Each database is owned by its corresponding application role.
+Each database is owned by its corresponding application role, except `sync_api`: it stays owned by the
+administrator, since the owner of a database owns its `public` schema and can create tables in it.
 
 This provides logical separation between applications and avoids using the PostgreSQL superuser from application containers.
 

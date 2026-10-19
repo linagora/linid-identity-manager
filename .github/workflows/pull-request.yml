@@ -301,6 +301,126 @@ jobs:
           header: api-check-dependencies
           path: api/dependency-updates.txt
 
+  sync-api-check-style:
+    name: Sync API - Code style
+    needs: [validate-source-branch]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: sync-api
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
+
+      - name: Execute checkstyle
+        run: mvn -ntp checkstyle:check
+
+  sync-api-javadoc:
+    name: Sync API - Javadoc
+    needs: [validate-source-branch]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: sync-api
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
+
+      - name: Generate Javadoc
+        run: mvn -ntp clean compile javadoc:javadoc
+
+  sync-api-tests:
+    name: Sync API - Unit tests
+    needs: [validate-source-branch]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: sync-api
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
+
+      - name: Execute unit tests
+        run: mvn -ntp test
+
+      - name: Execute mutation tests
+        run: mvn -ntp org.pitest:pitest-maven:mutationCoverage
+
+      - name: Extract summary from pitest
+        run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
+
+      - name: Post comment
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: sync-api-tests
+          path: sync-api/pitest.html
+
+  sync-api-check-dependencies:
+    name: Sync API - Check dependencies
+    needs: [validate-source-branch]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: sync-api
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 25 for x64 (with Maven cache)
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+          architecture: x64
+          cache: maven
+
+      - name: Execute check dependencies
+        run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
+
+      - name: Post comment
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: sync-api-check-dependencies
+          path: sync-api/dependency-updates.txt
+
   e2e-check-style:
     name: E2E - Code style
     needs: [validate-source-branch]
@@ -326,7 +446,7 @@ jobs:
   e2e-tests:
     name: E2E tests
     runs-on: ubuntu-latest
-    needs: [api-tests]
+    needs: [api-tests, sync-api-tests]
     steps:
       - uses: actions/checkout@v7
         with:

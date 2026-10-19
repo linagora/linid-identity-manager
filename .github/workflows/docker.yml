@@ -17,6 +17,8 @@ jobs:
         include:
           - component: api
             image: linagora/linid-api
+          - component: sync-api
+            image: linagora/linid-sync-api
           - component: ui
             image: linagora/linid-ui
     steps:

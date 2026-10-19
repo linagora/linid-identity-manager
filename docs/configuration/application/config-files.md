@@ -9,6 +9,7 @@ LinId uses **service-specific environment files** for its configuration. Each se
 The demo environment uses the following configuration files:
 
 * `api.env`: LinId API configuration
+* `sync-api.env`: LinId Sync API configuration (dev and E2E environments only)
 * `cert.env`: SSL/TLS configuration
 * `db.env`: PostgreSQL configuration
 * `lemon.env`: LemonLDAP::NG configuration
@@ -124,6 +125,54 @@ AVATAR_JPEG_QUALITY=0.9
 
 # Maximum width times height of the uploaded avatar images, checked before decoding
 AVATAR_MAX_PIXELS=16000000
+```
+
+---
+
+### 🔄 LinId Sync API — `sync-api.env`
+
+Used by the dev and E2E environments only: the demo does not run `sync-api`.
+
+```text
+################################################################################
+#                             LINID-SYNC-API CONFIGURATION                     #
+################################################################################
+
+# PostgreSQL database host
+DATABASE_HOST=db
+
+# PostgreSQL database port
+DATABASE_PORT=5432
+
+# Name of the database
+DATABASE_NAME=sync_api
+
+# Database username
+DATABASE_USER=sync_api_user
+
+# Database password
+DATABASE_PASSWORD=password
+
+# Path to SSL/TLS key store
+SSL_KEY_STORE=file:/etc/ssl/keystore.p12
+
+# Type of the SSL/TLS key store (PKCS12 or JKS)
+SSL_KEY_STORE_TYPE=PKCS12
+
+# Password for the individual SSL key within the key store
+SSL_KEY_PASSWORD=password
+
+# Path to SSL/TLS trust store
+SSL_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
+
+# Password for accessing the SSL/TLS trust store
+SSL_TRUSTSTORE_PASSWORD=password
+
+# Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
+SYNC_CRON="0 0 2 * * *"
+
+# Logging level (DEBUG, INFO, WARN, ERROR)
+LOGGING_LEVEL=INFO
 ```
 
 ---

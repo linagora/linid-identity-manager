@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: LinId-Sync-API
+
+  config:
+    import: optional:file:${EXTERNAL_CONFIGURATION}
+
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  batch:
+    job:
+      # Jobs are never started when the application starts
+      enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+server:
+  port: 8443
+  ssl:
+    key-store: ${SSL_KEY_STORE}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
+    key-store-password: ${SSL_KEY_PASSWORD}
+    key-password: ${SSL_KEY_PASSWORD}
+    truststore:
+      path: ${SSL_TRUSTSTORE_PATH}
+      password: ${SSL_TRUSTSTORE_PASSWORD}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL:INFO}
+
+sync:
+  # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
+  cron: "${SYNC_CRON:0 0 2 * * *}"

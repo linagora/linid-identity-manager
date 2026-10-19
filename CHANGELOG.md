@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     sniffing and fully sandboxed, seeded with a default administrator avatar.
 - Added a **claims template checksum** on applications (`applications.claims_template_checksum`), computed by the
   API when an application is created or its claims template is updated, so that template changes can be detected.
+- Added the **sync-api** application, built with Spring Boot and Spring Batch to compute the rights of the accounts,
+  with its `sync_api` database and the environment variables `DATABASE_*`, `SSL_*`, `SYNC_CRON`, `LOGGING_LEVEL` and
+  `EXTERNAL_CONFIGURATION`.
 
 #### Frontend
 
@@ -46,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Build
 
 - Update E2E-test-runner to version 2.0.0
+- Added `sync-api` to the E2E environment and its database to the dev environment, built, tested and scanned it in the
+  CI, and published the **linagora/linid-sync-api** Docker image.
 
 ## [0.11.1] - 2026-10-23
 

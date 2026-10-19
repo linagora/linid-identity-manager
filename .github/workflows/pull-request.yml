@@ -565,6 +565,12 @@ jobs:
           skip-files: /usr/bin/pebble
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          image-ref: linid-identity-manager-sync-api
+          severity: CRITICAL,HIGH
+          exit-code: "1"
+          skip-files: /usr/bin/pebble
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
           image-ref: linid-identity-manager-ui
           severity: CRITICAL,HIGH
           exit-code: "1"

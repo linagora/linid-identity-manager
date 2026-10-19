@@ -21,6 +21,7 @@ docker/**/*.crt
 docker/**/*.key
 docker/**/*.pub
 docker/**/*.jks
+docker/**/*.p12
 docker/dev/resources/llng
 docker/e2e/resources/local
 docker/e2e/resources/ci

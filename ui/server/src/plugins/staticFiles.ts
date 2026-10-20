@@ -33,9 +33,15 @@ import type { ServerConfig } from '../config/schema.js';
 /** URL prefix of the assets. */
 const ASSETS_PREFIX = '/assets/';
 
+/** URL prefix of the avatars uploaded by the users. */
+const AVATARS_PREFIX = '/avatars/';
+
 /**
  * Serves the SPA: static files from `staticDir`, `config.json` with `__APP_ENV__` substituted, and `index.html` for any
  * other `GET` so that the client-side router handles it.
+ *
+ * The avatars are user-provided files: they are served without content sniffing and fully sandboxed, so that an image
+ * carrying a script, such as an SVG, cannot run anything when its URL is opened, and a missing avatar answers 404.
  *
  * @param app - Fastify instance to configure.
  * @param config - Server configuration.
@@ -57,6 +63,10 @@ export function registerStaticFiles(
         reply.header('Cache-Control', html);
       } else if (`/${path}`.startsWith(ASSETS_PREFIX)) {
         reply.header('Cache-Control', assets);
+      } else if (`/${path}`.startsWith(AVATARS_PREFIX)) {
+        reply.header('Cache-Control', 'no-cache');
+        reply.header('X-Content-Type-Options', 'nosniff');
+        reply.header('Content-Security-Policy', "default-src 'none'; sandbox");
       }
     },
   });
@@ -73,7 +83,8 @@ export function registerStaticFiles(
   app.setNotFoundHandler((request, reply) => {
     const isPageRequest =
       (request.method === 'GET' || request.method === 'HEAD') &&
-      !request.url.startsWith(ASSETS_PREFIX);
+      !request.url.startsWith(ASSETS_PREFIX) &&
+      !request.url.startsWith(AVATARS_PREFIX);
     if (isPageRequest) {
       return reply.sendFile('index.html');
     }

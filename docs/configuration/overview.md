@@ -96,6 +96,7 @@ This domain allows customization of the application’s look and feel.
 * Theme configuration
 * Branding (logos, colors)
 * Translations (i18n)
+* UI server (`server-config.json` and environment variables)
 
 ### Why it matters:
 
@@ -105,6 +106,8 @@ It enables you to adapt LinId to your organization’s identity.
 
 * [ui/theming](ui/theming.md)
 * [ui/translations](ui/translations.md)
+* [ui/server-config](ui/server-config.md)
+* [ui/server-environment](ui/server-environment.md)
 
 ---
 

@@ -24,6 +24,10 @@
  * LinID Identity Manager software.
  */
 
+import type { FastifyOAuth2Options } from '@fastify/oauth2';
+import type { Session } from 'fastify';
+import type { LRUCache } from 'lru-cache';
+
 /** Reverse proxy route. */
 export interface ProxyRoute {
   /** Public URL prefix. */
@@ -32,6 +36,10 @@ export interface ProxyRoute {
   upstream: string;
   /** Keeps the prefix in the upstream path. */
   keepPrefix?: boolean;
+  /** Replaces the prefix with this path in the upstream path. */
+  rewritePrefix?: string;
+  /** Sends the access token of the user session in the `Authorization` header. */
+  withAccessToken?: boolean;
 }
 
 /** Content of `server-config.json`, with `__APP_ENV__` replaced. */
@@ -42,6 +50,8 @@ export interface ServerConfig {
   http: {
     /** Listening port. */
     port: number;
+    /** Trusts the `X-Forwarded-*` headers of a reverse proxy, see the `trustProxy` option of Fastify. */
+    trustProxy?: boolean | string | string[];
     /** Certificate and private key paths. */
     tls?: {
       /** Path of the certificate. */
@@ -49,6 +59,32 @@ export interface ServerConfig {
       /** Path of the private key. */
       key: string;
     };
+  };
+  /** OpenID Connect client used to authenticate users. */
+  oidc: {
+    /** Options of `@fastify/oauth2`, without `name` (set by the server). */
+    oauth2: Omit<FastifyOAuth2Options, 'name'>;
+    /** URL of the end session endpoint, where the user is redirected to log out. */
+    logoutUrl: string;
+    /** URL where the identity provider sends the user back after the logout. */
+    postLogoutRedirectUri: string;
+    /** The access token is renewed when it expires in less than this number of milliseconds, `30000` by default. */
+    refreshMarginMilliseconds?: number;
+  };
+  /** User session, stored in server memory and identified by a cookie. */
+  session: {
+    /** Secret used to sign the session cookie, at least 32 characters. */
+    secret: string;
+    /** Name of the session cookie. */
+    cookieName: string;
+    /** Sends the session cookie over HTTPS only, `true` by default. */
+    secure?: boolean;
+    /** `SameSite` attribute of the session cookie, `lax` by default. */
+    sameSite?: 'lax' | 'strict' | 'none';
+    /** Lifetime of the session cookie from the login, in milliseconds. */
+    maxAgeMilliseconds: number;
+    /** Options of `lru-cache`, the store of the sessions in memory. */
+    lruCache: LRUCache.Options<string, Session, unknown>;
   };
   /** Reverse proxy routes. */
   proxies: ProxyRoute[];

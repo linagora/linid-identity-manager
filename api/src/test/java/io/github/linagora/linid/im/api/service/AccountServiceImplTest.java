@@ -105,8 +105,6 @@ class AccountServiceImplTest {
     @Mock
     private AccountDistinctViewRepository accountDistinctViewRepository;
     @Mock
-    private ChecksumService checksumService;
-    @Mock
     private AccountStatusRepository accountStatusRepository;
     @Mock
     private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
@@ -155,8 +153,8 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should create account with correct fields and checksum")
-    void testCreate_shouldSetAllFieldsAndChecksum() {
+    @DisplayName("Should create account with correct fields")
+    void testCreate_shouldSetAllFields() {
         UUID ouId = UUID.randomUUID();
         var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
             new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
@@ -169,8 +167,6 @@ class AccountServiceImplTest {
         mappedAccount.setCreatedBy(ADMIN_ID);
         mappedAccount.setUpdatedBy(ADMIN_ID);
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(mappedAccount);
-        when(checksumService.compute("{}")).thenReturn(
-            "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a");
         when(accountRepository.save(any(Account.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
         when(accountStatusMapper.toAccountStatus(any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
@@ -187,35 +183,8 @@ class AccountServiceImplTest {
         assertEquals("Doe", result.getLastname());
         assertEquals("John", result.getFirstname());
         assertEquals("john@example.com", result.getEmail());
-        assertEquals("{}", result.getPayload());
         assertEquals(ADMIN_ID, result.getCreatedBy());
         assertEquals(ADMIN_ID, result.getUpdatedBy());
-        assertEquals("44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
-            result.getChecksum());
-    }
-
-    @Test
-    @DisplayName("Should generate consistent SHA-256 checksum for default payload")
-    void testCreate_shouldGenerateConsistentChecksum() {
-        UUID ouId = UUID.randomUUID();
-        var request = new AccountRecord("ext-001", "Doe", "John", "john@example.com",
-            new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
-        when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
-        when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
-        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
-        when(accountRepository.save(any(Account.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-        when(accountStatusMapper.toAccountStatus(any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
-            .thenReturn(new AccountStatus());
-        when(accountStatusRepository.save(any(AccountStatus.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-        when(organizationalUnitAccountRepository.save(any(OrganizationalUnitAccount.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
-
-        Account first = accountService.create(userPrincipal, request);
-        Account second = accountService.create(userPrincipal, request);
-
-        assertEquals(first.getChecksum(), second.getChecksum());
     }
 
     @Test
@@ -226,7 +195,6 @@ class AccountServiceImplTest {
             new PeriodRecord(START, null), ouId, ROLE_ID, Map.of());
         when(roleRepository.existsById(ROLE_ID)).thenReturn(true);
         when(accountMapper.toAccount(request, userPrincipal)).thenReturn(new Account());
-        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
         when(accountStatusMapper.toAccountStatus(any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
@@ -270,7 +238,6 @@ class AccountServiceImplTest {
         UUID generatedId = UUID.randomUUID();
         AccountStatus mockStatus = new AccountStatus();
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
-        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
             .thenAnswer(invocation -> {
                 Account saved = invocation.getArgument(0);
@@ -304,7 +271,6 @@ class AccountServiceImplTest {
         when(accountStatusMapper.toAccountStatus(
             any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
             .thenReturn(mockStatus);
-        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
         when(accountStatusRepository.save(any(AccountStatus.class)))
@@ -337,7 +303,6 @@ class AccountServiceImplTest {
         AccountStatus mockStatus = new AccountStatus();
 
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
-        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class))).thenReturn(createdAccount);
         when(accountStatusMapper.toAccountStatus(
             any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))
@@ -387,7 +352,6 @@ class AccountServiceImplTest {
         AccountStatus mockStatus = new AccountStatus();
 
         when(accountMapper.toAccount(eq(request), any(UserPrincipal.class))).thenReturn(new Account());
-        when(checksumService.compute("{}")).thenReturn("fixed-checksum");
         when(accountRepository.save(any(Account.class))).thenReturn(createdAccount);
         when(accountStatusMapper.toAccountStatus(
             any(AccountRecord.class), any(UserPrincipal.class), any(Account.class)))

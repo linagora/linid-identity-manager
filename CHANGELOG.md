@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   payload of each account and the rights computed by `sync-api` for each account and application pair.
 - Added the **mutual TLS between linid-api and sync-api**, with the environment variables `SYNC_API_*`,
   `SSL_CLIENT_TRUSTSTORE_*` and `SYNC_ALLOWED_CLIENT`.
+- Added a **checksum service** to sync-api, computing the SHA-256 checksum of the account payloads with the same
+  algorithm as the API, so that both applications return the same checksum for the same input.
 
 #### Frontend
 

@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **sync-api** application, built with Spring Boot and Spring Batch to compute the rights of the accounts,
   with its `sync_api` database and the environment variables `DATABASE_*`, `SSL_*`, `SYNC_CRON`, `LOGGING_LEVEL` and
   `EXTERNAL_CONFIGURATION`.
+- Added the **synchronization tables** `account_payloads` and `computed_rights`, with their audit tables, to store the
+  payload of each account and the rights computed by `sync-api` for each account and application pair.
 
 #### Frontend
 
@@ -47,6 +49,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Frontend
 
 - Integrated the smart filter configuration that **manages how filter values are displayed** in the filter chips.
+
+### Removed
+
+#### Backend
+
+- Removed the `payload` and `checksum` columns of the `accounts` table, moved to `account_payloads`.
 
 ### Fixed
 

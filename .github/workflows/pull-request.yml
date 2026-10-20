@@ -135,6 +135,9 @@ jobs:
       - name: Check style
         run: pnpm validate
 
+      - name: Check server types and style
+        run: pnpm --dir server validate
+
   ui-unit-tests:
     name: UI - Unit tests
     runs-on: ubuntu-latest
@@ -185,7 +188,7 @@ jobs:
 
       - name: Check outdated dependencies
         run: |
-          pnpm add -D npm-check-updates
+          pnpm add -w -D npm-check-updates
           echo '```bash' > dependencies.txt
           npx ncu >> dependencies.txt
           echo '```' >> dependencies.txt
@@ -290,7 +293,7 @@ jobs:
           cache: maven
 
       - name: Execute check dependencies
-        run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false > dependency-updates.txt
+        run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
 
       - name: Post comment
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5

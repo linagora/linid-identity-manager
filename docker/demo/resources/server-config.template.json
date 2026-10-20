@@ -1,0 +1,50 @@
+{
+  "environment": "__APP_ENV__",
+  "http": {
+    "port": 443,
+    "trustProxy": false,
+    "tls": {
+      "cert": "${SERVER_CERT_PATH}",
+      "key": "${SERVER_KEY_PATH}"
+    }
+  },
+  "oidc": {
+    "oauth2": {
+      "credentials": {
+        "client": { "id": "linid-im-client", "secret": "${OIDC_CLIENT_SECRET}" },
+        "options": { "authorizationMethod": "body" },
+        "http": { "headers": { "host": "${LEMONLDAP_PORTAL_HOSTNAME}" } }
+      },
+      "discovery": { "issuer": "${AUTH_UPSTREAM}" },
+      "scope": ["openid", "email", "profile", "roles"],
+      "callbackUri": "${LEMONLDAP_REDIRECT_URL}/auth/callback",
+      "pkce": "S256",
+      "cookie": { "httpOnly": true, "sameSite": "lax", "secure": true }
+    },
+    "logoutUrl": "${LEMONLDAP_REDIRECT_URL}/auth/oauth2/logout",
+    "postLogoutRedirectUri": "${LEMONLDAP_REDIRECT_URL}/auth/logged-out",
+    "refreshMarginMilliseconds": 30000
+  },
+  "session": {
+    "secret": "${SESSION_SECRET}",
+    "cookieName": "linid",
+    "secure": true,
+    "sameSite": "lax",
+    "maxAgeMilliseconds": 28800000,
+    "lruCache": { "max": 10000, "ttl": 28800000, "ttlAutopurge": true }
+  },
+  "proxies": [
+    { "prefix": "/backend", "upstream": "${API_UPSTREAM}", "withAccessToken": true },
+    { "prefix": "/catalog-ui", "upstream": "${CATALOG_UI_UPSTREAM}" },
+    { "prefix": "/auth/me", "upstream": "${AUTH_UPSTREAM}", "rewritePrefix": "/oauth2/userinfo", "withAccessToken": true },
+    { "prefix": "/auth", "upstream": "${AUTH_UPSTREAM}" },
+    { "prefix": "/static", "upstream": "${AUTH_UPSTREAM}", "keepPrefix": true },
+    { "prefix": "/index.psgi", "upstream": "${AUTH_UPSTREAM}", "keepPrefix": true }
+  ],
+  "staticDir": "/app/spa",
+  "configJsonPath": "/app/spa/config.json",
+  "cache": {
+    "html": "no-cache, no-store, must-revalidate",
+    "assets": "public, max-age=604800, immutable"
+  }
+}

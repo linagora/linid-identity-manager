@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-10-20
+
+### Added
+
+#### Frontend
+
+- Added the **OIDC authentication** to the UI server, following the Backend For Frontend pattern: the server handles
+  the login, the logout and the refresh of the tokens with the SSO, keeps the tokens in a server-side session and sends
+  the access token to the API. The browser only has a session cookie.
+- Added the **UI server** to `task start:dev`, and its stop to `task stop:dev`.
+
+### Changed
+
+#### Frontend
+
+- The SPA **delegates its authentication** to the UI server: the `oidc` section of `config.json` is removed, and the
+  OIDC client declared in the SSO must use the `/auth/callback` redirect URI, the `/auth/logged-out` post logout
+  redirect URI and allow the refresh tokens.
+
+### Fixed
+
+#### Security
+
+- The **JWT tokens are no longer exposed to the browser**: the access, refresh and ID tokens stay in the server-side
+  session of the UI server, so a script injected in the SPA can no longer read them.
+
 ## [0.10.1] - 2026-10-08
 
 ### Fixed
@@ -493,3 +519,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.9.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.9.0
 [0.10.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.10.0
 [0.10.1]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.10.1
+[0.11.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.0

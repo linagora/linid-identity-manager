@@ -1,6 +1,6 @@
 {
   "name": "@linagora/linid-identity-manager-ui",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "The host app of LinID Identity Manager",
   "productName": "LinID Identity Manager",
   "contributors": [
@@ -23,7 +23,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\"",
+    "lint": "eslint -c ./eslint.config.js \"./src*/**/*.{ts,js,cjs,mjs,vue}\" \"./server/src/**/*.ts\"",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{js,ts,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"src/**/*.{js,ts,vue,json,css,scss,md}\"",
@@ -46,7 +46,6 @@
     "dayjs": "1.11.21",
     "interactjs": "1.10.27",
     "nunjucks": "3.2.4",
-    "oidc-client-ts": "3.5.0",
     "pinia": "3.0.4",
     "quasar": "2.21.1",
     "rxjs": "7.8.2",

@@ -24,23 +24,34 @@
  * LinID Identity Manager software.
  */
 
-import {
-  useLinidUserStore,
-  useLinidUserPreference,
-} from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
-import { authService } from 'src/services/AuthService';
+import { fastifyCookie } from '@fastify/cookie';
+import { fastifySession } from '@fastify/session';
+import type { FastifyInstance } from 'fastify';
+import type { ServerConfig } from '../config/schema.js';
+import { LruSessionStore } from './lru-session-store.js';
 
-export default defineBoot(async () => {
-  await authService.init();
-
-  const user = await authService.getUser();
-
-  if (user) {
-    const userStore = useLinidUserStore();
-    const { init } = useLinidUserPreference();
-
-    userStore.setUserFromClaims(user.profile);
-    await init();
-  }
-});
+/**
+ * Registers the user session, stored in server memory and identified by a cookie.
+ *
+ * @param app - Fastify instance to configure.
+ * @param config - Server configuration.
+ */
+export function registerSession(
+  app: FastifyInstance,
+  config: ServerConfig
+): void {
+  app.register(fastifyCookie);
+  app.register(fastifySession, {
+    store: new LruSessionStore(config.session.lruCache),
+    secret: config.session.secret,
+    cookieName: config.session.cookieName,
+    saveUninitialized: false,
+    rolling: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: config.session.sameSite ?? 'lax',
+      secure: config.session.secure ?? true,
+      maxAge: config.session.maxAgeMilliseconds,
+    },
+  });
+}

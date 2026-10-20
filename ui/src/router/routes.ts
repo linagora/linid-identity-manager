@@ -31,17 +31,6 @@ import type { RouteRecordRaw } from 'vue-router';
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/callback',
-    name: 'AuthenticationCallback',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationCallbackPage.vue'),
-      },
-    ],
-  },
-  {
     path: '/logout',
     name: 'AuthenticationLogoutCallback',
     component: () => import('layouts/MainLayout.vue'),
@@ -49,28 +38,6 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         component: () => import('pages/AuthenticationLogoutPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/logged-out',
-    name: 'AuthenticationLoggedOut',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationLoggedOutPage.vue'),
-      },
-    ],
-  },
-  {
-    path: '/silent-renew',
-    name: 'AuthenticationSilentRenewPage',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [
-      {
-        path: '',
-        component: () => import('pages/AuthenticationSilentRenewPage.vue'),
       },
     ],
   },

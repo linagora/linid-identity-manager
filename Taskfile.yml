@@ -168,18 +168,32 @@ tasks:
           HEALTHCHECK: curl -sk https://localhost:8080 >/dev/null 2>&1
           TIMEOUT: 90
           LOG_FILE: /tmp/linid-docker.log
+      - task: start:service
+        vars:
+          SERVICE_NAME: BFF (Fastify)
+          CMD: '{{.TASK_EXE}} start:dev:server'
+          HEALTHCHECK: curl -s http://localhost:3000/health >/dev/null 2>&1
+          TIMEOUT: 30
+          LOG_FILE: /tmp/linid-bff-server.log
       - echo ""
       - echo "  ✔ All services ready!"
       - echo "    DB → postgresql://localhost:5432/linid"
       - echo "    LemonLDAP → https://localhost:8080"
+      - echo "    BFF (Fastify) → http://localhost:3000"
       - echo ""
       - echo "  Logs:"
       - echo "    Docker       /tmp/linid-docker.log"
+      - echo "    BFF (Fastify)    /tmp/linid-bff-server.log"
 
   stop:dev:
     desc: Stop the full dev environment
     cmds:
       - echo "Stopping all services..."
+      # Stops the watcher of tsx, which stops the BFF
+      - cmd: |
+          pnpm --dir ui/server --silent stop:dev \
+            && echo "  ✔ BFF (Fastify) stopped" \
+            || echo "  ○ BFF (Fastify) (not running)"
       - task: stop:compose
         vars:
           SERVICE_NAME: Docker services (DB + LemonLDAP)
@@ -193,6 +207,13 @@ tasks:
       - task: stop:dev
       - echo ""
       - task: start:dev
+
+  start:dev:server:
+    desc: Start the Fastify server of the UI in watch mode
+    dir: ui/server
+    dotenv: ["../../docker/dev/env/ui.env"]
+    cmds:
+      - pnpm dev
 
   # ─── E2E environment ──────────────────────────────────────────────
 
@@ -352,11 +373,13 @@ tasks:
     desc: Generate configuration from templates using env variables
     internal: true
     dir: "docker/{{.ENV}}/resources"
-    dotenv: ["../{{.ENV_FILE}}"]
+    # env/ui.env does not exist in demo: a missing dotenv file is ignored
+    dotenv: ["../{{.ENV_FILE}}", "../env/ui.env"]
     cmds:
       - rm -rf ${CONFIG_DIR}/conf
       - mkdir -p ${CONFIG_DIR}/conf
       - envsubst < config.template.json > ${CONFIG_DIR}/conf/config.json
+      - envsubst < server-config.template.json > ${CONFIG_DIR}/conf/server-config.json
 
   generate:config:lemonldap:
     desc: Generate LemonLDAP configuration from template using env variables

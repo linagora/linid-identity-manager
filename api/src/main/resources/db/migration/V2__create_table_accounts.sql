@@ -6,8 +6,6 @@ CREATE TABLE IF NOT EXISTS accounts
     lastname         VARCHAR(255) NOT NULL,
     firstname        VARCHAR(255) NOT NULL,
     extra_parameters JSONB        NOT NULL DEFAULT '{}'::JSONB,
-    payload          JSONB        NOT NULL DEFAULT '{}'::JSONB,
-    checksum         VARCHAR(64)  NOT NULL,
     created_by       UUID         NOT NULL,
     updated_by       UUID         NOT NULL,
     insert_date      TIMESTAMPTZ  NOT NULL DEFAULT now(),
@@ -30,8 +28,6 @@ COMMENT ON COLUMN accounts.email IS 'Email address associated with the account. 
 COMMENT ON COLUMN accounts.lastname IS 'Last name of the account holder.';
 COMMENT ON COLUMN accounts.firstname IS 'First name of the account holder.';
 COMMENT ON COLUMN accounts.extra_parameters IS 'JSONB column containing custom attributes and metadata defined by the deployment. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
-COMMENT ON COLUMN accounts.payload IS 'JSONB column storing the user payload from external systems. Used for access control evaluation via OPA and for generating JWT claims.';
-COMMENT ON COLUMN accounts.checksum IS 'Deterministic hash (e.g. SHA-256) computed from selected account fields (typically payload and/or external attributes). Used to detect changes, ensure data consistency, and avoid unnecessary downstream processing (e.g. JWT regeneration or policy reevaluation).';
 COMMENT ON COLUMN accounts.created_by IS 'Identifier of the creator of this record (user, service, or system).';
 COMMENT ON COLUMN accounts.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN accounts.insert_date IS 'Date and time when the account record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';

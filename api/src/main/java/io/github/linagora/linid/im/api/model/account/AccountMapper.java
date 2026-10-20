@@ -50,19 +50,15 @@ public interface AccountMapper {
      *
      * <p>Only the fields present in the record ({@code externalId}, {@code lastname}, {@code
      * firstname}, {@code email}, {@code extraParameters} defaulting to an empty map) and the
-     * principal's identifier ({@code createdBy}, {@code updatedBy}) are mapped. Computed fields
-     * ({@code payload}, {@code checksum}) are left unset and
-     * must be populated by the caller after this method returns. {@code validityPeriod} is
-     * intentionally omitted — it is stored in the companion {@code account_status} row, not on the
-     * account itself.
+     * principal's identifier ({@code createdBy}, {@code updatedBy}) are mapped.
+     * {@code validityPeriod} is intentionally omitted — it is stored in the companion
+     * {@code account_status} row, not on the account itself.
      *
      * @param record        the creation request record
      * @param userPrincipal the authenticated principal performing the creation
      * @return a partially populated {@link Account} entity
      */
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "payload", ignore = true)
-    @Mapping(target = "checksum", ignore = true)
     @Mapping(target = "insertDate", ignore = true)
     @Mapping(target = "updateDate", ignore = true)
     @Mapping(target = "createdBy", source = "userPrincipal.id")
@@ -89,8 +85,6 @@ public interface AccountMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "extraParameters", source = "record.extraParameters",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "payload", ignore = true)
-    @Mapping(target = "checksum", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "insertDate", ignore = true)
     @Mapping(target = "updateDate", ignore = true)

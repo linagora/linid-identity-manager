@@ -47,14 +47,12 @@ WITH generated AS (SELECT gen_random_uuid() AS admin_id),
          SELECT gen_random_uuid(), 'ldavid',     'lea.david@example.com',         'David',      'Léa',       admin_id FROM generated
      ),
      inserted_accounts AS (
-INSERT INTO accounts (act_id, external_id, email, lastname, firstname, payload, checksum, created_by, updated_by)
+INSERT INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
 SELECT act_id,
        external_id,
        email,
        lastname,
        firstname,
-       '{}'::jsonb,
-    encode(digest('{}', 'sha256'), 'hex'),
        created_by,
        created_by
 FROM accounts_to_insert

@@ -48,9 +48,8 @@ import java.util.UUID;
 /**
  * JPA entity representing an account in the system.
  *
- * <p>Maps to the {@code accounts} table and includes identity fields, a JSONB payload,
- * and a SHA-256 checksum for change detection. Inherits audit fields from
- * {@link AbstractEntity}.</p>
+ * <p>Maps to the {@code accounts} table and includes identity fields and deployment-specific
+ * attributes. Inherits audit fields from {@link AbstractEntity}.</p>
  */
 @Entity
 @Table(name = "accounts")
@@ -109,19 +108,4 @@ public class Account extends AbstractEntity {
     @Column(name = "extra_parameters", nullable = false, columnDefinition = "jsonb")
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, Object> extraParameters;
-
-    /**
-     * JSONB payload from external systems, used for OPA and JWT claims.
-     */
-    @Column(name = "payload", nullable = false, columnDefinition = "jsonb")
-    @JdbcTypeCode(SqlTypes.JSON)
-    @FilterType(type = String.class)
-    private String payload;
-
-    /**
-     * SHA-256 checksum computed from the payload for change detection.
-     */
-    @Column(name = "checksum", nullable = false)
-    @FilterType(type = String.class)
-    private String checksum;
 }

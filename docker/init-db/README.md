@@ -13,6 +13,7 @@ docker/init-db/
 ├── init_data.sh
 └── scripts/
     ├── init_linid.sql
+    ├── init_sync_api_linid_user.sql
     ├── init_lemon.sql
     └── init_datalake.sql
 ```
@@ -30,6 +31,9 @@ The initialization creates five dedicated PostgreSQL databases:
 | `sync_api` | `sync-api` batch jobs         | `sync_api_user`  |
 
 The databases are logically isolated from each other.
+
+`sync-api` also connects to the `linid` database with its own account, `sync_api_linid_user`, limited to the tables it
+reads and writes (see [`scripts/init_sync_api_linid_user.sql`](#scriptsinit_sync_api_linid_usersql)).
 
 In particular, Superset metadata and business/analytical data are stored separately:
 
@@ -63,7 +67,8 @@ This script creates:
 4. Required PostgreSQL extensions.
 5. Schema and table permissions.
 
-Once the LinID application has created its schema, `init_data.sh` waits for the `accounts` table to become available.
+Once the LinID application has created its schema, `init_data.sh` waits for the `computed_rights` table to become
+available.
 
 The data initialization then runs:
 
@@ -73,6 +78,8 @@ init_data.sh
     ├── Wait for LinID schema
     │
     ├── init_linid.sql
+    │
+    ├── init_sync_api_linid_user.sql
     │
     ├── init_lemon.sql
     │
@@ -107,7 +114,11 @@ lemon_user
 superset_user
 datalake_user
 sync_api_user
+sync_api_linid_user
 ```
+
+`sync_api_linid_user` is the account of `sync-api` in the `linid` database. It owns no database: its grants are given by
+`scripts/init_sync_api_linid_user.sql`, once the API migrations have created the LinID tables.
 
 Each database is owned by its corresponding application role, except `sync_api`: it stays owned by the
 administrator, since the owner of a database owns its `public` schema and can create tables in it.
@@ -160,13 +171,17 @@ so that `psql` can authenticate against PostgreSQL without interactive password 
 
 ### Waiting for the LinID schema
 
-The script waits until the LinID application's `accounts` table exists:
+The script waits until the LinID application's `computed_rights` table exists:
 
 ```sql
-SELECT to_regclass('public.accounts');
+SELECT to_regclass('public.computed_rights');
 ```
 
 This is important because the LinID schema is created by the application itself, typically through its database migration mechanism.
+
+Flyway commits each migration separately, so the script waits for the relation of the most recent migration used by
+`init_linid.sql` and `init_sync_api_linid_user.sql`: waiting for an older table would let them run before the later
+tables exist. A script that starts using a relation of a more recent migration updates this wait.
 
 The initialization script therefore does not attempt to create the LinID schema.
 
@@ -178,11 +193,13 @@ Once the schema is available, the script executes:
 
 ```text
 scripts/init_linid.sql
+scripts/init_sync_api_linid_user.sql
 scripts/init_lemon.sql
 scripts/init_datalake.sql
 ```
 
-against their respective databases.
+against their respective databases: `init_linid.sql` and `init_sync_api_linid_user.sql` both run against the `linid`
+database.
 
 ## `scripts/init_linid.sql`
 
@@ -207,6 +224,9 @@ user10
 ```
 
 The accounts are created with generated UUIDs and development email addresses.
+
+It also creates the technical account of `sync-api`, recorded as the author of its writes, with the fixed UUID
+`00000000-0000-4000-8000-00000000a012` set as `SYNC_TECHNICAL_ACCOUNT_ID` in the dev and E2E environments.
 
 The `account_status` table is also populated for the regular test users.
 
@@ -325,6 +345,18 @@ end   = now() + 30 days
 ```
 
 The relative dates ensure that these test cases remain valid regardless of when the database is initialized.
+
+## `scripts/init_sync_api_linid_user.sql`
+
+This script gives `sync_api_linid_user` the grants `sync-api` needs in the `linid` database:
+
+| Table                                           | Grants                       |
+| ----------------------------------------------- | ---------------------------- |
+| `accounts`, `applications`, `application_roles` | `SELECT`                     |
+| `account_payloads`, `computed_rights`           | `SELECT`, `INSERT`, `UPDATE` |
+
+`sync_api_linid_user` cannot change the other tables, nor create or alter a table. The audit tables of
+`account_payloads` and `computed_rights` are written by `SECURITY DEFINER` triggers and need no grant.
 
 ## `scripts/init_lemon.sql`
 
@@ -530,11 +562,12 @@ The distinction keeps PostgreSQL infrastructure configuration separate from appl
 
 ## Responsibilities
 
-| File                | Responsibility                                      |
-| ------------------- | --------------------------------------------------- |
-| `init_db.sql`       | Create databases, users, permissions and extensions |
-| `init_data.sh`      | Orchestrate data initialization                     |
-| `init_linid.sql`    | Seed LinID development/test data                    |
-| `init_lemon.sql`    | Seed LemonLDAP::NG development/test data            |
-| `init_datalake.sql` | Create and populate analytical authentication data  |
-| `README.md`         | Document the database initialization process        |
+| File                           | Responsibility                                         |
+| ------------------------------ | ------------------------------------------------------ |
+| `init_db.sql`                  | Create databases, users, permissions and extensions    |
+| `init_data.sh`                 | Orchestrate data initialization                        |
+| `init_linid.sql`               | Seed LinID development/test data                       |
+| `init_sync_api_linid_user.sql` | Grant `sync_api_linid_user` access to the LinID tables |
+| `init_lemon.sql`               | Seed LemonLDAP::NG development/test data               |
+| `init_datalake.sql`            | Create and populate analytical authentication data     |
+| `README.md`                    | Document the database initialization process           |

@@ -71,6 +71,20 @@ Some configuration depends on environment variables:
 
 ---
 
+## 🔐 Certificates
+
+LinId backend calls `sync-api` with mutual TLS, which requires:
+
+* A **client certificate for LinId backend**, with the `clientAuth` extended key usage, packaged as a PKCS12 keystore
+  (`SYNC_API_CLIENT_KEY_STORE`). LinId backend presents it to `sync-api` only.
+* The **CA trusted by `sync-api`**: a truststore holding the CA that signed this client certificate
+  (`SSL_CLIENT_TRUSTSTORE_PATH`). `sync-api` accepts any certificate chained to this CA whose subject is
+  `SYNC_ALLOWED_CLIENT`, so the certificates this CA issues to the other components must not be CA certificates.
+* A **certificate for `sync-api`** covering the hostname of `SYNC_API_URL`, trusted by the truststore of LinId backend
+  (`SSL_TRUSTSTORE_PATH`).
+
+---
+
 ## 📝 Best Practices
 
 * Install and verify **PostgreSQL and Java** before running LinId

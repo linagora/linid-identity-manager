@@ -169,6 +169,27 @@ DATABASE_USER=sync_api_user
 # Database password
 DATABASE_PASSWORD=password
 
+# PostgreSQL host of the linid-api database
+LINID_DATABASE_HOST=db
+
+# PostgreSQL port of the linid-api database
+LINID_DATABASE_PORT=5432
+
+# Name of the linid-api database
+LINID_DATABASE_NAME=linid
+
+# Username of sync-api in the linid-api database, limited to the tables it reads and writes
+LINID_DATABASE_USER=sync_api_linid_user
+
+# Password of sync-api in the linid-api database
+LINID_DATABASE_PASSWORD=password
+
+# Maximum number of connections to the linid-api database (default: 5)
+# LINID_DATABASE_MAX_POOL_SIZE=5
+
+# act_id of the technical account of sync-api, shared by its instances and recorded as the author of their writes
+SYNC_TECHNICAL_ACCOUNT_ID=00000000-0000-4000-8000-00000000a012
+
 # Path to SSL/TLS key store
 SSL_KEY_STORE=file:/etc/ssl/keystore.p12
 
@@ -405,6 +426,12 @@ E2E_DATABASE_ADMIN_PASSWORD=password
 
 # Name of the database
 E2E_DATABASE_NAME=linid
+
+# Username of sync-api in the database, the LINID_DATABASE_USER of sync-api.env
+E2E_DATABASE_SYNC_API_USER=sync_api_linid_user
+
+# Password of sync-api in the database, the LINID_DATABASE_PASSWORD of sync-api.env
+E2E_DATABASE_SYNC_API_PASSWORD=password
 
 # Timezone for the application
 TZ=Europe/Paris

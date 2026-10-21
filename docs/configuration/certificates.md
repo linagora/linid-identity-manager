@@ -99,9 +99,13 @@ Generated automatically by the certificate tasks:
 * **Sync API keystore** (`docker/<env>/resources/sync-api-keystore.p12`): the same PKCS12
   archive, used by `sync-api` to serve HTTPS. It is never packaged in the `sync-api` image:
   the E2E environment mounts it in the container.
+* **API client keystore** (`docker/<env>/resources/api-client-keystore.p12`): PKCS12 archive of a client certificate
+  (`CN=linid-api`, `clientAuth` extended key usage) signed by the local CA, presented by the API to `sync-api` only
+  (mutual TLS). It is never packaged in the API image: the E2E environment mounts it in the container.
 * **Truststore** (`truststore.jks`): contains only the local CA certificate. Because
   every service certificate is signed by that CA, this single entry lets the API validate
-  TLS connections to LemonLDAP::NG, Superset, and any future HTTPS service.
+  TLS connections to LemonLDAP::NG, Superset, and any future HTTPS service. `sync-api` also uses it to validate the
+  client certificate of the API.
 
 Passwords come from `docker/<env>/env/cert.env` (`SSL_KEY_PASSWORD`,
 `SSL_TRUSTSTORE_PASSWORD`).

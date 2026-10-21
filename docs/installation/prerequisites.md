@@ -79,6 +79,9 @@ Some configuration depends on environment variables:
 * `AUTH_AUDIENCE` (expected `aud` claim of the access tokens, i.e. the audience declared for the API at the OIDC provider, distinct from the client ID)
 * `AUTH_JWT_EXPECTED_TYPE` (optional, JOSE `typ` header required on access tokens, default `at+jwt`)
 * `I18N_EXTERNAL_PATH` (optional, for backend/plugin translations)
+* `sync-api`: `LINID_DATABASE_HOST`, `LINID_DATABASE_PORT`, `LINID_DATABASE_NAME`, `LINID_DATABASE_USER`,
+  `LINID_DATABASE_PASSWORD` (its access to the LinId database) and `SYNC_TECHNICAL_ACCOUNT_ID` (its technical
+  account), see [sync-api access to the LinId database](#-sync-api-access-to-the-linid-database)
 
 > ⚠️ A `.env` file can be used for local development
 
@@ -108,6 +111,43 @@ LinId backend calls `sync-api` with mutual TLS, which requires:
   `SYNC_ALLOWED_CLIENT`, so the certificates this CA issues to the other components must not be CA certificates.
 * A **certificate for `sync-api`** covering the hostname of `SYNC_API_URL`, trusted by the truststore of LinId backend
   (`SSL_TRUSTSTORE_PATH`).
+
+---
+
+## 🔄 sync-api access to the LinId database
+
+`sync-api` reads the account data in the LinId database and writes the payloads and the computed rights to it. It
+connects with its own PostgreSQL account (`LINID_DATABASE_USER`), limited to the tables it needs:
+
+```sql
+CREATE ROLE sync_api_linid_user WITH LOGIN PASSWORD '<password>';
+```
+
+Its grants are given once LinId backend has created its tables, since its migrations run when it starts:
+
+```sql
+GRANT USAGE ON SCHEMA public TO sync_api_linid_user;
+
+GRANT SELECT
+    ON accounts, applications, application_roles
+    TO sync_api_linid_user;
+
+GRANT SELECT, INSERT, UPDATE
+    ON account_payloads, computed_rights
+    TO sync_api_linid_user;
+```
+
+* This account must not create nor alter any table: the migrations of the LinId database stay in LinId backend.
+* The audit tables of `account_payloads` and `computed_rights` are written by their triggers and need no grant.
+
+`sync-api` also records its writes with a **technical account** of LinId as author. Create it as an account of LinId,
+then set its `act_id` as `SYNC_TECHNICAL_ACCOUNT_ID`:
+
+```sql
+INSERT INTO accounts (external_id, email, lastname, firstname, created_by, updated_by)
+VALUES ('sync-api', 'sync-api@<your-domain>', 'API', 'Sync', '<act_id of an administrator>', '<act_id of an administrator>')
+RETURNING act_id;
+```
 
 ---
 

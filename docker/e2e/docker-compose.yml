@@ -129,6 +129,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      opa:
+        condition: service_healthy
 
   ui:
     image: linid-identity-manager-ui

@@ -111,6 +111,15 @@ SUPERSET_RLS_CONFIG=/app/superset.yaml
 # before Superset's JWT_ACCESS_TOKEN_EXPIRES to avoid using an expired token)
 # SUPERSET_CACHE_OPTION=maximumSize=1,expireAfterWrite=55m,recordStats
 
+# Base URL of sync-api, called by the API with mutual TLS
+SYNC_API_URL=https://sync-api:8443
+
+# Path to the PKCS12 key store holding the client certificate presented by the API to sync-api only
+SYNC_API_CLIENT_KEY_STORE=file:/etc/ssl/api-client-keystore.p12
+
+# Password of the client key store and of its private key
+SYNC_API_CLIENT_KEY_PASSWORD=password
+
 # Root directory of the avatar images, shared with the front-end web server that serves them
 AVATAR_LOCATION=/app/avatars
 
@@ -131,7 +140,8 @@ AVATAR_MAX_PIXELS=16000000
 
 ### 🔄 LinId Sync API — `sync-api.env`
 
-Used by the dev and E2E environments only: the demo does not run `sync-api`.
+Used by the dev and E2E environments only: the demo does not run `sync-api`. `sync-api` only accepts the requests
+presenting the client certificate of the API (mutual TLS).
 
 ```text
 ################################################################################
@@ -167,6 +177,16 @@ SSL_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
 
 # Password for accessing the SSL/TLS trust store
 SSL_TRUSTSTORE_PASSWORD=password
+
+# Path to the trust store holding the CA that signed the client certificate of linid-api, used to validate the
+# client certificates
+SSL_CLIENT_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
+
+# Password for accessing the client trust store (default: SSL_TRUSTSTORE_PASSWORD)
+# SSL_CLIENT_TRUSTSTORE_PASSWORD=password
+
+# Subject of the only accepted client certificate, the one of linid-api, in the RFC 2253 format
+SYNC_ALLOWED_CLIENT=CN=linid-api
 
 # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
 SYNC_CRON="0 0 2 * * *"

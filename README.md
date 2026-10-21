@@ -86,7 +86,7 @@ Features and APIs may evolve.
 > 🚧 Minimal setup to run LinId Identity Manager in under 5 minutes
 
 LinId provides a **Taskfile** to simplify running the demo environment.
-All you need is **Docker** and **Task** installed on your machine.
+All you need is **Docker**, **Task** and **Java 25** installed on your machine.
 
 ---
 
@@ -94,6 +94,7 @@ All you need is **Docker** and **Task** installed on your machine.
 
 * **Docker 24+** and **Docker Compose 2+**
 * **Task** ([https://taskfile.dev/#/installation](https://taskfile.dev/#/installation))
+* **Java 25**, whose `keytool` builds the truststore in the certificate tasks of the Taskfile (`task setup:demo`)
 
 > ⚠️ Make sure Docker is running before executing any tasks.
 

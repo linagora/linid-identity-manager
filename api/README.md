@@ -111,6 +111,16 @@ When the token is valid but no account matches its `email` claim, the API respon
 | `SSL_TRUSTSTORE_PATH`     | Path to truststore                        | Yes                    |
 | `SSL_TRUSTSTORE_PASSWORD` | Truststore password                       | Yes                    |
 
+### Sync API
+
+The API calls `sync-api` with mutual TLS, presenting a client certificate to `sync-api` only.
+
+| Variable                       | Description                                           | Required |
+| ------------------------------ | ----------------------------------------------------- | -------- |
+| `SYNC_API_URL`                 | Base URL of `sync-api`                                | Yes      |
+| `SYNC_API_CLIENT_KEY_STORE`    | Path to the PKCS12 keystore of the client certificate | Yes      |
+| `SYNC_API_CLIENT_KEY_PASSWORD` | Password for the client keystore and its key          | Yes      |
+
 ### Application
 
 | Variable                         | Description                                  | Default                    |

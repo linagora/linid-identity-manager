@@ -46,6 +46,10 @@ The same certificate is used by:
 | Sync API       | HTTPS via `sync-api-keystore.p12` (same key pair)  |
 | Superset       | HTTPS on the analytics instance                    |
 
+It is an end-entity certificate (`CA:FALSE`), so it cannot sign other certificates. Since every service holds its
+key, a CA certificate (the default of `openssl req -x509`) would let any of them issue a client certificate with the
+subject of the API (`CN=linid-api`), accepted by `sync-api`.
+
 ---
 
 ## ✅ 3️⃣ Trust the CA (one-time setup)

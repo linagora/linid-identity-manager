@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `EXTERNAL_CONFIGURATION`.
 - Added the **synchronization tables** `account_payloads` and `computed_rights`, with their audit tables, to store the
   payload of each account and the rights computed by `sync-api` for each account and application pair.
+- Added the **mutual TLS between linid-api and sync-api**, with the environment variables `SYNC_API_*`,
+  `SSL_CLIENT_TRUSTSTORE_*` and `SYNC_ALLOWED_CLIENT`.
 
 #### Frontend
 
@@ -65,9 +67,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Build
 
-- Update E2E-test-runner to version 2.0.0
+- Update E2E-test-runner to version 2.2.0
 - Added `sync-api` to the E2E environment and its database to the dev environment, built, tested and scanned it in the
   CI, and published the **linagora/linid-sync-api** Docker image.
+- Generated the client certificate of linid-api in `task setup:certs`, mounted it in the E2E environment, and made the
+  shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
+  `sync-api`.
 
 ## [0.11.1] - 2026-10-23
 

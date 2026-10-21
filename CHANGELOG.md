@@ -43,6 +43,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   algorithm as the API, so that both applications return the same checksum for the same input.
 - Added the **Spring Batch tables** of `sync-api`, created by its Flyway migrations with the environment variables
   `DATABASE_ADMIN_USER` and `DATABASE_ADMIN_PASSWORD`.
+- Added the **connection of sync-api to the linid-api database**, with its own PostgreSQL account
+  `sync_api_linid_user`, limited to reading the accounts and the applications and to writing the payloads and the
+  computed rights, and a technical account recorded as the author of its writes, with the environment variables
+  `LINID_DATABASE_*` and `SYNC_TECHNICAL_ACCOUNT_ID`.
 
 #### Frontend
 

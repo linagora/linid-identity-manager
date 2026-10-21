@@ -58,6 +58,19 @@ spring:
           # Leave the variable unset to use the default: an empty value is not the default and rejects every token
           expected-type: ${AUTH_JWT_EXPECTED_TYPE:at+jwt}
 
+  ssl:
+    bundle:
+      jks:
+        # Client certificate presented to sync-api only (mutual TLS), and truststore validating its certificate
+        sync-api-client:
+          keystore:
+            location: ${SYNC_API_CLIENT_KEY_STORE}
+            password: ${SYNC_API_CLIENT_KEY_PASSWORD}
+            type: PKCS12
+          truststore:
+            location: ${SSL_TRUSTSTORE_PATH}
+            password: ${SSL_TRUSTSTORE_PASSWORD}
+
   cache:
     type: caffeine
     cache-names: superset-access-token
@@ -114,6 +127,9 @@ opa:
   deployment:
     server-url: ${OPA_SERVER_URL:http://opa:8181}
     interval: ${OPA_DEPLOYMENT_INTERVAL:5m}
+
+sync-api:
+  url: ${SYNC_API_URL}
 
 superset:
   url: ${SUPERSET_URL}

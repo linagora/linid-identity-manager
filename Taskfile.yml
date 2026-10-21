@@ -387,6 +387,25 @@ tasks:
             -name linid \
             -out sync-api-keystore.p12 \
             -passout pass:"$SSL_KEY_PASSWORD" >/dev/null 2>&1
+      # Client certificate presented by linid-api to sync-api only (mutual TLS), mounted in the api container
+      - cmd: rm -fv api-client.key api-client.crt api-client-keystore.p12
+      - cmd: |
+          openssl req -x509 -newkey rsa:2048 \
+            -keyout api-client.key \
+            -out api-client.crt \
+            -days 3650 -nodes \
+            -subj "/CN=linid-api" \
+            -addext "basicConstraints=critical,CA:FALSE" \
+            -addext "extendedKeyUsage=clientAuth" \
+            -CA {{.ROOT_DIR}}/docker/certs/ca.crt \
+            -CAkey {{.ROOT_DIR}}/docker/certs/ca.key >/dev/null 2>&1
+      - cmd: |
+          openssl pkcs12 -export \
+            -in api-client.crt \
+            -inkey api-client.key \
+            -name linid-api \
+            -out api-client-keystore.p12 \
+            -passout pass:"$SSL_KEY_PASSWORD" >/dev/null 2>&1
 
   generate:config:
     desc: Generate configuration from templates using env variables

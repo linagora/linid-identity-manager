@@ -8,7 +8,7 @@ echo "Init DB starting"
 echo "========================================"
 
 until psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$POSTGRES_USER" -d "$LINID_DATABASE_NAME" \
--c "SELECT to_regclass('public.roles');" | grep -q roles
+-c "SELECT to_regclass('public.computed_rights');" | grep -q computed_rights
 do
   echo "Waiting for LinID schema..."
   sleep 2
@@ -18,6 +18,11 @@ echo "========================================"
 echo "Init LinID starting"
 echo "========================================"
 psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$POSTGRES_USER" -d "$LINID_DATABASE_NAME" -f /app/scripts/init_linid.sql
+
+echo "========================================"
+echo "Init sync-api grants on LinID starting"
+echo "========================================"
+psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$POSTGRES_USER" -d "$LINID_DATABASE_NAME" -f /app/scripts/init_sync_api_linid_user.sql
 
 echo "========================================"
 echo "Init LemonLDAP::NG starting"

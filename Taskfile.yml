@@ -349,6 +349,7 @@ tasks:
             -out server.crt \
             -days 3650 -nodes \
             -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
+            -addext "basicConstraints=critical,CA:FALSE" \
             -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:api,DNS:sync-api,DNS:auth,DNS:lemon,DNS:superset,DNS:localhost" \
             -CA {{.ROOT_DIR}}/docker/certs/ca.crt \
             -CAkey {{.ROOT_DIR}}/docker/certs/ca.key >/dev/null 2>&1

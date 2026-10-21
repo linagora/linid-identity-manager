@@ -29,6 +29,10 @@ server:
     key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
     key-store-password: ${SSL_KEY_PASSWORD}
     key-password: ${SSL_KEY_PASSWORD}
+    # Mutual TLS: Tomcat rejects during the handshake any client without a certificate signed by a trusted CA
+    client-auth: need
+    trust-store: ${SSL_CLIENT_TRUSTSTORE_PATH}
+    trust-store-password: ${SSL_CLIENT_TRUSTSTORE_PASSWORD:${SSL_TRUSTSTORE_PASSWORD}}
     truststore:
       path: ${SSL_TRUSTSTORE_PATH}
       password: ${SSL_TRUSTSTORE_PASSWORD}
@@ -40,3 +44,6 @@ logging:
 sync:
   # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
   cron: "${SYNC_CRON:0 0 2 * * *}"
+  # Subject of the only accepted client certificate, since the other components have certificates signed by the
+  # same CA
+  allowed-client: ${SYNC_ALLOWED_CLIENT}

@@ -28,6 +28,7 @@
  * Business service layer for the LinID synchronization API.
  *
  * <p>This package contains service interfaces and their implementations
- * shared by the synchronization jobs, such as the computation of the checksums, and the logging of the alerts.</p>
+ * shared by the synchronization jobs, such as the computation of the checksums, the evaluation of the OPA
+ * policies, and the logging of the alerts.</p>
  */
 package io.github.linagora.linid.im.sync.service;

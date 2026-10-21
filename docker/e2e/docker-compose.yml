@@ -186,6 +186,8 @@ services:
     depends_on:
       api:
         condition: service_healthy
+      sync-api:
+        condition: service_healthy
       ui:
         condition: service_healthy
       init-db:

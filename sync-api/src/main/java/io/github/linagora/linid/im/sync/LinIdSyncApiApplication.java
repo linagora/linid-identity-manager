@@ -28,14 +28,19 @@ package io.github.linagora.linid.im.sync;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration;
 
 /**
  * Entry point for the LinID synchronization API.
  *
  * <p>This class bootstraps the Spring Boot application, initializing
  * the application context and starting the embedded server.</p>
+ *
+ * <p>The Hibernate auto-configuration is excluded: it ignores the {@code EntityManagerFactory} of the linid-api
+ * database, declared with {@code defaultCandidate = false}, and would create a second one on the {@code sync-api}
+ * database, whose transaction manager would replace the JDBC one of Spring Batch.</p>
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = HibernateJpaAutoConfiguration.class)
 public class LinIdSyncApiApplication {
 
     /**

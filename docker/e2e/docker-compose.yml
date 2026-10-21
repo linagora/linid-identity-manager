@@ -91,6 +91,7 @@ services:
       - ./env/${ENV}.env
     volumes:
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ./resources/api-client-keystore.p12:/etc/ssl/api-client-keystore.p12:ro
       - ./resources/superset.yaml:/app/superset.yaml:ro
       - ../avatars:/app/avatars
     healthcheck:

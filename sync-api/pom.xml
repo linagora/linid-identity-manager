@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.1.1</version>
-		<relativePath/>
+		<relativePath />
 	</parent>
 	<groupId>io.github.linagora.linid.im</groupId>
 	<artifactId>sync-api</artifactId>
@@ -33,7 +34,8 @@
 		<url>https://github.com/linagora/linid-identity-manager</url>
 	</scm>
 	<properties>
-		<!-- Overrides the Spring Boot managed version to fix CVE-2026-65182, CVE-2026-65905 and CVE-2026-68525 -->
+		<!-- Overrides the Spring Boot managed version to fix CVE-2026-65182, CVE-2026-65905 and
+		CVE-2026-68525 -->
 		<tomcat.version>11.0.25</tomcat.version>
 		<java.version>25</java.version>
 		<postgresql.version>42.7.13</postgresql.version>
@@ -61,6 +63,10 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

@@ -43,8 +43,9 @@ public interface ApplicationMapper {
     /**
      * Creates a new {@link Application} entity from an {@link ApplicationRecord} and the calling principal.
      *
-     * <p>Generated and externally-managed fields ({@code id}, {@code script}, {@code scriptChecksum},
-     * {@code deployedAt}, {@code configuration}, {@code insertDate}, {@code updateDate}) are left unset:
+     * <p>Generated and externally-managed fields ({@code id}, {@code claimsTemplateChecksum}, {@code script},
+     * {@code scriptChecksum}, {@code deployedAt}, {@code configuration}, {@code insertDate}, {@code updateDate})
+     * are left unset: {@code claimsTemplateChecksum} is computed by the service from the claims template, and
      * {@code script}/{@code scriptChecksum}/{@code deployedAt}/{@code configuration} are managed by a
      * separate process. The principal's identifier feeds {@code createdBy} and {@code updatedBy}.</p>
      *
@@ -53,6 +54,7 @@ public interface ApplicationMapper {
      * @return a partially populated {@link Application} entity
      */
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "claimsTemplateChecksum", ignore = true)
     @Mapping(target = "script", ignore = true)
     @Mapping(target = "scriptChecksum", ignore = true)
     @Mapping(target = "deployedAt", ignore = true)

@@ -41,6 +41,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **`account_computed_rights_view` view**, with one row per account and deployed application, read by
   `sync-api` to list the accounts whose payload is built and to select the account and application pairs whose rights
   must be computed, and the `SELECT` grant of `sync_api_linid_user` on it.
+- Added an **OPA service** to sync-api, evaluating the policy of an application for an account with the account
+  payload as the OPA input, configured by the environment variables `OPA_SERVER_URL`, `OPA_EVALUATION_PATH`,
+  `OPA_CONNECT_TIMEOUT` and `OPA_READ_TIMEOUT`.
 
 #### Frontend
 

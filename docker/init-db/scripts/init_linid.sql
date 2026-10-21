@@ -38,6 +38,15 @@ VALUES ('00000000-0000-4000-8000-00000000a001', 'admin',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
 
+-- Technical account of sync-api, recorded as the author of its writes. Its
+-- UUID is the SYNC_TECHNICAL_ACCOUNT_ID of the dev and e2e environments.
+INSERT
+INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000a012', 'sync-api', 'sync-api@example.com', 'API', 'Sync',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (email) DO NOTHING;
+
 -- Default functional role held by the accounts created by the e2e scenarios.
 -- The UUID is deterministic so the scenarios can reference it directly.
 INSERT

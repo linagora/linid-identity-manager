@@ -25,10 +25,11 @@
  */
 
 /**
- * Provides the JPA entities of the linid-api database.
+ * Provides the JPA entities of the linid-api database and the types that go with them.
  *
  * <p>This package contains the entities mapped to the tables and views of the linid-api
  * database, managed by the {@code EntityManagerFactory} of
- * {@link io.github.linagora.linid.im.sync.config.LinidDataSourceConfig}.</p>
+ * {@link io.github.linagora.linid.im.sync.config.LinidDataSourceConfig}, their composite
+ * identifiers and the projections returned by their repositories.</p>
  */
 package io.github.linagora.linid.im.sync.persistence.model;

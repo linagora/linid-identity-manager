@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `SSL_CLIENT_TRUSTSTORE_*` and `SYNC_ALLOWED_CLIENT`.
 - Added a **checksum service** to sync-api, computing the SHA-256 checksum of the account payloads with the same
   algorithm as the API, so that both applications return the same checksum for the same input.
+- Added the **Spring Batch tables** of `sync-api`, created by its Flyway migrations with the environment variables
+  `DATABASE_ADMIN_USER` and `DATABASE_ADMIN_PASSWORD`.
 
 #### Frontend
 

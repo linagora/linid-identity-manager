@@ -87,6 +87,19 @@ with a fallback, at the `WARN` level.
 
 ---
 
+## Database
+
+The Spring Batch tables of the `sync_api` database are created by the Flyway migrations of
+`src/main/resources/db/migration`, run with `DATABASE_ADMIN_USER` when `sync-api` starts. `DATABASE_USER` only reads
+and writes them.
+
+`V1__create_spring_batch_tables.sql` is the unchanged `schema-postgresql.sql` script of Spring Batch 6.0.5. When a
+Spring Batch upgrade changes the schema, its official migration script
+(`org/springframework/batch/core/migration/<version>/migration-postgresql.sql` in `spring-batch-core`) is added
+unchanged as a new Flyway version.
+
+---
+
 ## Environment Variables
 
 | Variable                         | Description                                                             | Default                   |
@@ -96,6 +109,8 @@ with a fallback, at the `WARN` level.
 | `DATABASE_NAME`                  | Database name                                                           | —                         |
 | `DATABASE_USER`                  | Database user                                                           | —                         |
 | `DATABASE_PASSWORD`              | Database password                                                       | —                         |
+| `DATABASE_ADMIN_USER`            | Database administrator user, running the Flyway migrations              | —                         |
+| `DATABASE_ADMIN_PASSWORD`        | Database administrator password                                         | —                         |
 | `SSL_KEY_STORE`                  | Path to the keystore of the server certificate                          | —                         |
 | `SSL_KEY_STORE_TYPE`             | Keystore type (`PKCS12` or `JKS`)                                       | `PKCS12`                  |
 | `SSL_KEY_PASSWORD`               | Password for the private key and the keystore                           | —                         |

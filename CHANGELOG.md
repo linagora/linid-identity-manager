@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `sync_api_linid_user`, limited to reading the accounts and the applications and to writing the payloads and the
   computed rights, and a technical account recorded as the author of its writes, with the environment variables
   `LINID_DATABASE_*` and `SYNC_TECHNICAL_ACCOUNT_ID`.
+- Added the **`account_computed_rights_view` view**, with one row per account and deployed application, read by
+  `sync-api` to list the accounts whose payload is built and to select the account and application pairs whose rights
+  must be computed, and the `SELECT` grant of `sync_api_linid_user` on it.
 
 #### Frontend
 

@@ -31,13 +31,14 @@ import {
 import { defineBoot } from '@quasar/app-vite/wrappers';
 import { getLoginUrl, getUserClaims } from 'src/services/AuthService';
 
-export default defineBoot(async ({ redirect }) => {
+export default defineBoot(async () => {
   const claims = await getUserClaims();
 
   if (!claims) {
-    // Stops the next boot files and the mounting of the application
-    redirect(getLoginUrl());
-    return;
+    window.location.replace(getLoginUrl());
+
+    // Waits for the browser to leave the page, so that Quasar does not run the next boot files and mount the application
+    await new Promise<never>(() => {});
   }
 
   const userStore = useLinidUserStore();

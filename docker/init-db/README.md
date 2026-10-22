@@ -67,8 +67,8 @@ This script creates:
 4. Required PostgreSQL extensions.
 5. Schema and table permissions.
 
-Once the LinID application has created its schema, `init_data.sh` waits for the `computed_rights` table to become
-available.
+Once the LinID application has created its schema, `init_data.sh` waits for the `account_computed_rights_view` view to
+become available.
 
 The data initialization then runs:
 
@@ -171,10 +171,10 @@ so that `psql` can authenticate against PostgreSQL without interactive password 
 
 ### Waiting for the LinID schema
 
-The script waits until the LinID application's `computed_rights` table exists:
+The script waits until the LinID application's `account_computed_rights_view` view exists:
 
 ```sql
-SELECT to_regclass('public.computed_rights');
+SELECT to_regclass('public.account_computed_rights_view');
 ```
 
 This is important because the LinID schema is created by the application itself, typically through its database migration mechanism.
@@ -350,10 +350,10 @@ The relative dates ensure that these test cases remain valid regardless of when 
 
 This script gives `sync_api_linid_user` the grants `sync-api` needs in the `linid` database:
 
-| Table                                           | Grants                       |
-| ----------------------------------------------- | ---------------------------- |
-| `accounts`, `applications`, `application_roles` | `SELECT`                     |
-| `account_payloads`, `computed_rights`           | `SELECT`, `INSERT`, `UPDATE` |
+| Table or view                                                                   | Grants                       |
+| ------------------------------------------------------------------------------- | ---------------------------- |
+| `accounts`, `applications`, `application_roles`, `account_computed_rights_view` | `SELECT`                     |
+| `account_payloads`, `computed_rights`                                           | `SELECT`, `INSERT`, `UPDATE` |
 
 `sync_api_linid_user` cannot change the other tables, nor create or alter a table. The audit tables of
 `account_payloads` and `computed_rights` are written by `SECURITY DEFINER` triggers and need no grant.

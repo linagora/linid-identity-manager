@@ -168,3 +168,33 @@ ALTER DEFAULT PRIVILEGES
     GRANT USAGE, SELECT, UPDATE
     ON SEQUENCES
     TO datalake_user;
+
+-- ============================================================================
+-- sync-api database configuration
+-- ============================================================================
+-- The Spring Batch tables are created by the Flyway migrations of sync-api,
+-- run with the administrator account: the default privileges below apply to
+-- them, so sync_api_user reads and writes them without creating any table.
+-- ============================================================================
+
+\connect sync_api
+
+GRANT USAGE ON SCHEMA public TO sync_api_user;
+
+GRANT SELECT, INSERT, UPDATE, DELETE
+    ON ALL TABLES IN SCHEMA public
+    TO sync_api_user;
+
+GRANT USAGE, SELECT
+    ON ALL SEQUENCES IN SCHEMA public
+    TO sync_api_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE
+    ON TABLES
+    TO sync_api_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT USAGE, SELECT
+    ON SEQUENCES
+    TO sync_api_user;

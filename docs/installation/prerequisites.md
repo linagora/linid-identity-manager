@@ -24,6 +24,32 @@ Ensuring these are met will allow a smooth setup and avoid common issues.
 * Database user with **create/read/write privileges**
 * Database accessible from the LinId backend
 
+`sync-api` has its own `sync_api` database, with two accounts:
+
+* An **administrator account** (`DATABASE_ADMIN_USER`), owner of the `sync_api` database, which runs the Flyway
+  migrations of `sync-api` when it starts: they create the Spring Batch tables.
+* A **runtime account** (`DATABASE_USER`), used by `sync-api` to read and write the Spring Batch tables and to use
+  their sequences. It must not own the `sync_api` database, which would let it create tables in its `public` schema.
+
+The grants of the runtime account are given by the administrator account, before the first start of `sync-api`:
+default privileges only apply to the tables and sequences later created by the account that defines them.
+
+```sql
+\connect sync_api
+
+GRANT USAGE ON SCHEMA public TO sync_api_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE
+    ON TABLES
+    TO sync_api_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT USAGE, SELECT
+    ON SEQUENCES
+    TO sync_api_user;
+```
+
 ### 2️⃣ Java Runtime
 
 * **Java 21** (LTS) or later

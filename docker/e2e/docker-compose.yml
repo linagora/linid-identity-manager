@@ -181,6 +181,8 @@ services:
       - ./env/${ENV}.env
     volumes:
       - ../../tests/features:/app/features
+      - ./resources/api-client.crt:/app/certs/api-client.crt:ro
+      - ./resources/api-client.key:/app/certs/api-client.key:ro
     depends_on:
       api:
         condition: service_healthy

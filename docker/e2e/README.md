@@ -5,7 +5,7 @@ All services are containerized with ports exposed for debugging and test access.
 
 ## Quick Start
 
-Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build the `api`, `ui` and `superset` images and start everything with the following commands.
+Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build the `api`, `sync-api`, `ui` and `superset` images and start everything with the following commands.
 
 ```bash
 task setup:e2e
@@ -20,6 +20,7 @@ The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.
 | --------------- | ------------------------------- | --------------------------- |
 | db              | (internal network)              | Default database            |
 | api             | (internal network)              | LinID Identity Manager API  |
+| sync-api        | https://localhost:8444          | LinID synchronization API   |
 | ui              | https://linid.localtest.me:9000 | LinID Identity Manager UI   |
 | catalog-ui      | (internal network)              | UI components library       |
 | auth            | (internal network)              | LemonLDAP::NG portal        |

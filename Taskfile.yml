@@ -349,7 +349,7 @@ tasks:
             -out server.crt \
             -days 3650 -nodes \
             -subj "/CN=linid.localtest.me/OU=Test/O=Test/L=Test/ST=Test/C=FR" \
-            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:api,DNS:auth,DNS:lemon,DNS:superset,DNS:localhost" \
+            -addext "subjectAltName=DNS:linid.localtest.me,DNS:ui,DNS:api,DNS:sync-api,DNS:auth,DNS:lemon,DNS:superset,DNS:localhost" \
             -CA {{.ROOT_DIR}}/docker/certs/ca.crt \
             -CAkey {{.ROOT_DIR}}/docker/certs/ca.key >/dev/null 2>&1
       # OIDC signing keys
@@ -377,6 +377,15 @@ tasks:
             -inkey server.key \
             -name linid \
             -out {{.ROOT_DIR}}/api/src/main/resources/keystore.p12 \
+            -passout pass:"$SSL_KEY_PASSWORD" >/dev/null 2>&1
+      # sync-api keystore built from the same server certificate, mounted in the sync-api container
+      - cmd: rm -fv sync-api-keystore.p12
+      - cmd: |
+          openssl pkcs12 -export \
+            -in server.crt \
+            -inkey server.key \
+            -name linid \
+            -out sync-api-keystore.p12 \
             -passout pass:"$SSL_KEY_PASSWORD" >/dev/null 2>&1
 
   generate:config:
@@ -410,6 +419,7 @@ tasks:
     cmds:
       - task: build:image:ui
       - task: build:image:api
+      - task: build:image:sync-api
       - task: build:image:superset
 
   build:image:ui:
@@ -429,6 +439,15 @@ tasks:
           IMAGE_NAME: linid-identity-manager-api
           DOCKERFILE: api/Dockerfile
           CONTEXT_DIR: api/
+
+  build:image:sync-api:
+    desc: Build linid-identity-manager-sync-api Docker image
+    cmds:
+      - task: build:image
+        vars:
+          IMAGE_NAME: linid-identity-manager-sync-api
+          DOCKERFILE: sync-api/Dockerfile
+          CONTEXT_DIR: sync-api/
 
   build:image:superset:
     desc: Build superset Docker image

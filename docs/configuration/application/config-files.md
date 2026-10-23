@@ -154,6 +154,12 @@ DATABASE_HOST=db
 # PostgreSQL database port
 DATABASE_PORT=5432
 
+# PostgreSQL database administrator username
+DATABASE_ADMIN_USER=admin
+
+# PostgreSQL database administrator password
+DATABASE_ADMIN_PASSWORD=password
+
 # Name of the database
 DATABASE_NAME=sync_api
 

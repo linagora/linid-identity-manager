@@ -218,6 +218,18 @@ SYNC_ALLOWED_CLIENT=CN=linid-api
 # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
 SYNC_CRON="0 0 2 * * *"
 
+# Base URL of the OPA server used by sync-api to evaluate the application policies
+OPA_SERVER_URL=http://opa:8181
+
+# Path of the result of an application policy on the OPA server, {code} being the application code
+OPA_EVALUATION_PATH=/v1/data/authz/{code}/result
+
+# Maximum time to establish the connection to the OPA server, as a duration (e.g. 5s, 500ms)
+OPA_CONNECT_TIMEOUT=5s
+
+# Maximum time to wait for the response of the OPA server, as a duration (e.g. 10s, 500ms)
+OPA_READ_TIMEOUT=10s
+
 # Logging level (DEBUG, INFO, WARN, ERROR)
 LOGGING_LEVEL=INFO
 ```
@@ -537,7 +549,8 @@ Apache Superset™ configuration is isolated in `superset.env` and includes:
 
 ### 6. Open Policy Agent (OPA)
 
-The API communicates with OPA using:
+The API and sync-api both communicate with OPA, through the `OPA_SERVER_URL` variable of `api.env` and of
+`sync-api.env`:
 
 ```text
 OPA_SERVER_URL=http://opa:8181

@@ -117,19 +117,19 @@ LinId backend calls `sync-api` with mutual TLS, which requires:
 ## 🔄 sync-api access to the LinId database
 
 `sync-api` reads the account data in the LinId database and writes the payloads and the computed rights to it. It
-connects with its own PostgreSQL account (`LINID_DATABASE_USER`), limited to the tables it needs:
+connects with its own PostgreSQL account (`LINID_DATABASE_USER`), limited to the tables and views it needs:
 
 ```sql
 CREATE ROLE sync_api_linid_user WITH LOGIN PASSWORD '<password>';
 ```
 
-Its grants are given once LinId backend has created its tables, since its migrations run when it starts:
+Its grants are given once LinId backend has created its tables and views, since its migrations run when it starts:
 
 ```sql
 GRANT USAGE ON SCHEMA public TO sync_api_linid_user;
 
 GRANT SELECT
-    ON accounts, applications, application_roles
+    ON accounts, applications, application_roles, account_computed_rights_view
     TO sync_api_linid_user;
 
 GRANT SELECT, INSERT, UPDATE

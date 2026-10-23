@@ -24,6 +24,11 @@ CREATE ROLE superset_user WITH LOGIN PASSWORD 'password';
 CREATE ROLE datalake_user WITH LOGIN PASSWORD 'password';
 CREATE ROLE sync_api_user WITH LOGIN PASSWORD 'password';
 
+-- Account of sync-api in the linid database, limited to the tables it reads
+-- and writes: its grants are given by scripts/init_sync_api_linid_user.sql,
+-- once the linid tables are created by the API migrations.
+CREATE ROLE sync_api_linid_user WITH LOGIN PASSWORD 'password';
+
 -- ============================================================================
 -- Database ownership
 -- ============================================================================

@@ -120,6 +120,7 @@ services:
     volumes:
       - ./resources/sync-api-keystore.p12:/etc/ssl/keystore.p12:ro
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ./resources/sync/sync-config.yaml:/app/sync-config.yaml:ro
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
       interval: 5s

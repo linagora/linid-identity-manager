@@ -26,3 +26,4 @@ Feature: Test sync-api setup
       | account_payloads             |
       | computed_rights              |
       | account_computed_rights_view |
+      | account_payload_view         |

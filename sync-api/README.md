@@ -131,33 +131,50 @@ unchanged as a new Flyway version.
 
 ---
 
+## OPA
+
+`OpaService` evaluates the policy of an application for an account, by sending the account payload unchanged as the
+OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evaluates them. It raises:
+
+- `OpaUnreachableException` when the OPA server cannot be reached, or when a gateway in front of it answers `502`,
+  `503` or `504`, after logging the `opaUnreachable` alert: the rights computation stops the cycle at this first
+  exception, so that the alert is logged once;
+- `OpaEvaluationException` when OPA returns an error or no result, such as when the policy is missing: only the pair
+  of the account and the application is in error.
+
+---
+
 ## Environment Variables
 
-| Variable                         | Description                                                             | Default                   |
-| -------------------------------- | ----------------------------------------------------------------------- | ------------------------- |
-| `DATABASE_HOST`                  | PostgreSQL host of the `sync_api` database                              | —                         |
-| `DATABASE_PORT`                  | PostgreSQL port                                                         | —                         |
-| `DATABASE_NAME`                  | Database name                                                           | —                         |
-| `DATABASE_USER`                  | Database user                                                           | —                         |
-| `DATABASE_PASSWORD`              | Database password                                                       | —                         |
-| `DATABASE_ADMIN_USER`            | Database administrator user, running the Flyway migrations              | —                         |
-| `DATABASE_ADMIN_PASSWORD`        | Database administrator password                                         | —                         |
-| `LINID_DATABASE_HOST`            | PostgreSQL host of the linid-api database                               | —                         |
-| `LINID_DATABASE_PORT`            | PostgreSQL port of the linid-api database                               | —                         |
-| `LINID_DATABASE_NAME`            | Name of the linid-api database                                          | —                         |
-| `LINID_DATABASE_USER`            | User of `sync-api` in the linid-api database                            | —                         |
-| `LINID_DATABASE_PASSWORD`        | Password of this user                                                   | —                         |
-| `LINID_DATABASE_MAX_POOL_SIZE`   | Maximum number of connections to the linid-api database                 | `5`                       |
-| `SYNC_TECHNICAL_ACCOUNT_ID`      | `act_id` of the technical account shared by the `sync-api` instances    | —                         |
-| `SSL_KEY_STORE`                  | Path to the keystore of the server certificate                          | —                         |
-| `SSL_KEY_STORE_TYPE`             | Keystore type (`PKCS12` or `JKS`)                                       | `PKCS12`                  |
-| `SSL_KEY_PASSWORD`               | Password for the private key and the keystore                           | —                         |
-| `SSL_TRUSTSTORE_PATH`            | Path to the truststore used for the outgoing TLS connections            | —                         |
-| `SSL_TRUSTSTORE_PASSWORD`        | Truststore password                                                     | —                         |
-| `SSL_CLIENT_TRUSTSTORE_PATH`     | Path to the truststore validating the client certificates               | —                         |
-| `SSL_CLIENT_TRUSTSTORE_PASSWORD` | Password of the client truststore                                       | `SSL_TRUSTSTORE_PASSWORD` |
-| `SYNC_ALLOWED_CLIENT`            | Subject of the only accepted client certificate, in the RFC 2253 format | —                         |
-| `SYNC_CRON`                      | Schedule of the global job, as a Spring cron expression                 | `0 0 2 * * *`             |
-| `LOGGING_LEVEL`                  | Root logging level                                                      | `INFO`                    |
-| `EXTERNAL_CONFIGURATION`         | Path to an external YAML configuration file, loaded when present        | —                         |
-| `SERVER_PORT`                    | HTTPS port                                                              | `8443`                    |
+| Variable                         | Description                                                                      | Default                        |
+| -------------------------------- | -------------------------------------------------------------------------------- | ------------------------------ |
+| `DATABASE_HOST`                  | PostgreSQL host of the `sync_api` database                                       | —                              |
+| `DATABASE_PORT`                  | PostgreSQL port                                                                  | —                              |
+| `DATABASE_NAME`                  | Database name                                                                    | —                              |
+| `DATABASE_USER`                  | Database user                                                                    | —                              |
+| `DATABASE_PASSWORD`              | Database password                                                                | —                              |
+| `DATABASE_ADMIN_USER`            | Database administrator user, running the Flyway migrations                       | —                              |
+| `DATABASE_ADMIN_PASSWORD`        | Database administrator password                                                  | —                              |
+| `LINID_DATABASE_HOST`            | PostgreSQL host of the linid-api database                                        | —                              |
+| `LINID_DATABASE_PORT`            | PostgreSQL port of the linid-api database                                        | —                              |
+| `LINID_DATABASE_NAME`            | Name of the linid-api database                                                   | —                              |
+| `LINID_DATABASE_USER`            | User of `sync-api` in the linid-api database                                     | —                              |
+| `LINID_DATABASE_PASSWORD`        | Password of this user                                                            | —                              |
+| `LINID_DATABASE_MAX_POOL_SIZE`   | Maximum number of connections to the linid-api database                          | `5`                            |
+| `SYNC_TECHNICAL_ACCOUNT_ID`      | `act_id` of the technical account shared by the `sync-api` instances             | —                              |
+| `SSL_KEY_STORE`                  | Path to the keystore of the server certificate                                   | —                              |
+| `SSL_KEY_STORE_TYPE`             | Keystore type (`PKCS12` or `JKS`)                                                | `PKCS12`                       |
+| `SSL_KEY_PASSWORD`               | Password for the private key and the keystore                                    | —                              |
+| `SSL_TRUSTSTORE_PATH`            | Path to the truststore used for the outgoing TLS connections                     | —                              |
+| `SSL_TRUSTSTORE_PASSWORD`        | Truststore password                                                              | —                              |
+| `SSL_CLIENT_TRUSTSTORE_PATH`     | Path to the truststore validating the client certificates                        | —                              |
+| `SSL_CLIENT_TRUSTSTORE_PASSWORD` | Password of the client truststore                                                | `SSL_TRUSTSTORE_PASSWORD`      |
+| `SYNC_ALLOWED_CLIENT`            | Subject of the only accepted client certificate, in the RFC 2253 format          | —                              |
+| `SYNC_CRON`                      | Schedule of the global job, as a Spring cron expression                          | `0 0 2 * * *`                  |
+| `OPA_SERVER_URL`                 | Base URL of the OPA server                                                       | `http://opa:8181`              |
+| `OPA_EVALUATION_PATH`            | Path of the result of an application policy, `{code}` being the application code | `/v1/data/authz/{code}/result` |
+| `OPA_CONNECT_TIMEOUT`            | Maximum time to establish the connection to the OPA server, as a duration        | `5s`                           |
+| `OPA_READ_TIMEOUT`               | Maximum time to wait for the response of the OPA server, as a duration           | `10s`                          |
+| `LOGGING_LEVEL`                  | Root logging level                                                               | `INFO`                         |
+| `EXTERNAL_CONFIGURATION`         | Path to an external YAML configuration file, loaded when present                 | —                              |
+| `SERVER_PORT`                    | HTTPS port                                                                       | `8443`                         |

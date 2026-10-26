@@ -55,6 +55,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **selection of the account and application pairs to compute** to `sync-api`: the pairs whose
   `to_compute` is true, for the global job, for one account or for one application, read by windows of
   `SYNC_COMPUTE_CHUNK_SIZE` pairs (default `100`), each one starting after the last pair read.
+- Added the **build of the account payloads** in `sync-api`, from the tables and views of the linid-api database
+  listed in the `sync-data` section of its external configuration, now required (`EXTERNAL_CONFIGURATION`), and a
+  Jinjava JSON template, with the **`account_payload_view` view**, gathering the organizational units and the groups of
+  each account in sorted arrays, and the environment variable `SYNC_PAYLOAD_CHUNK_SIZE` (default `500`).
 
 #### Frontend
 

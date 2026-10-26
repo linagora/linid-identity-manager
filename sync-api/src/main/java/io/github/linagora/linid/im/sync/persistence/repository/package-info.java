@@ -25,11 +25,15 @@
  */
 
 /**
- * Provides the Spring Data JPA repositories of the linid-api database.
+ * Provides the repositories of the linid-api database.
  *
- * <p>This package contains the repositories of the entities of the linid-api database,
- * bound to its {@code EntityManagerFactory} and transaction manager by
+ * <p>This package contains the Spring Data JPA repositories of the entities of the linid-api
+ * database, bound to its {@code EntityManagerFactory} and transaction manager by
  * {@link io.github.linagora.linid.im.sync.config.LinidDataSourceConfig}. They declare
  * derived query methods, without SQL.</p>
+ *
+ * <p>It also contains {@link io.github.linagora.linid.im.sync.persistence.repository.SourceRepository},
+ * which reads the sources of the account payloads with the {@code JdbcTemplate} of the
+ * linid-api database, since the sources are only known at runtime.</p>
  */
 package io.github.linagora.linid.im.sync.persistence.repository;

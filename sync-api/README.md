@@ -101,6 +101,23 @@ author. Its instances share it: the `sync_instance_id` column of these rows iden
 
 ---
 
+## Account payloads
+
+`PayloadService` builds the payloads of a list of accounts, used as OPA input, from the `sync-data` section of the
+file referenced by `EXTERNAL_CONFIGURATION` (see `docs/configuration/application/config-files.md`):
+
+- the `mapping` template is checked first, rendered with an empty context and parsed as JSON;
+- each source is read once for all the accounts, with `SourceRepository`, which checks and quotes the source and
+  column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns;
+- the `mapping` is rendered with Jinjava for each account, with the row of the account in each source, and parsed as
+  a JSON object.
+
+The reader of the accounts, `payloadAccountsReader` in `PayloadStepConfig`, returns every account of
+`account_computed_rights_view` once, except the technical account of `sync-api`. `SYNC_PAYLOAD_CHUNK_SIZE` sets the
+number of accounts per chunk.
+
+---
+
 ## Alerts
 
 `AlertService` logs the anomalies detected by the checks, with their context and their cause: the blocking ones,
@@ -171,11 +188,12 @@ OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evalua
 | `SSL_CLIENT_TRUSTSTORE_PASSWORD` | Password of the client truststore                                                | `SSL_TRUSTSTORE_PASSWORD`      |
 | `SYNC_ALLOWED_CLIENT`            | Subject of the only accepted client certificate, in the RFC 2253 format          | —                              |
 | `SYNC_CRON`                      | Schedule of the global job, as a Spring cron expression                          | `0 0 2 * * *`                  |
+| `SYNC_PAYLOAD_CHUNK_SIZE`        | Number of accounts per chunk of the payload build, in one transaction            | `500`                          |
 | `SYNC_COMPUTE_CHUNK_SIZE`        | Number of account and application pairs computed per chunk                       | `100`                          |
 | `OPA_SERVER_URL`                 | Base URL of the OPA server                                                       | `http://opa:8181`              |
 | `OPA_EVALUATION_PATH`            | Path of the result of an application policy, `{code}` being the application code | `/v1/data/authz/{code}/result` |
 | `OPA_CONNECT_TIMEOUT`            | Maximum time to establish the connection to the OPA server, as a duration        | `5s`                           |
 | `OPA_READ_TIMEOUT`               | Maximum time to wait for the response of the OPA server, as a duration           | `10s`                          |
 | `LOGGING_LEVEL`                  | Root logging level                                                               | `INFO`                         |
-| `EXTERNAL_CONFIGURATION`         | Path to an external YAML configuration file, loaded when present                 | —                              |
+| `EXTERNAL_CONFIGURATION`         | Path to the external YAML configuration file, holding the `sync-data` section    | —                              |
 | `SERVER_PORT`                    | HTTPS port                                                                       | `8443`                         |

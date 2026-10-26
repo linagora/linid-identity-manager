@@ -129,7 +129,7 @@ Its grants are given once LinId backend has created its tables and views, since 
 GRANT USAGE ON SCHEMA public TO sync_api_linid_user;
 
 GRANT SELECT
-    ON accounts, applications, application_roles, account_computed_rights_view
+    ON accounts, applications, application_roles, account_computed_rights_view, account_payload_view
     TO sync_api_linid_user;
 
 GRANT SELECT, INSERT, UPDATE
@@ -138,6 +138,8 @@ GRANT SELECT, INSERT, UPDATE
 ```
 
 * This account must not create nor alter any table: the migrations of the LinId database stay in LinId backend.
+* Each source of the account payloads (`sync-data.job.sources`) needs the `SELECT` grant: the grants above cover
+  `accounts` and `account_payload_view`, the sources of the example configuration.
 * The audit tables of `account_payloads` and `computed_rights` are written by their triggers and need no grant.
 
 `sync-api` also records its writes with a **technical account** of LinId as author. Create it as an account of LinId,

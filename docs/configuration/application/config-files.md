@@ -218,6 +218,9 @@ SYNC_ALLOWED_CLIENT=CN=linid-api
 # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
 SYNC_CRON="0 0 2 * * *"
 
+# Number of accounts read, built and written per chunk of the payload build, in one transaction (default: 500)
+# SYNC_PAYLOAD_CHUNK_SIZE=500
+
 # Number of account and application pairs read, computed and written per chunk by the computation of the rights
 # (default: 100)
 # SYNC_COMPUTE_CHUNK_SIZE=100
@@ -233,6 +236,9 @@ OPA_CONNECT_TIMEOUT=5s
 
 # Maximum time to wait for the response of the OPA server, as a duration (e.g. 10s, 500ms)
 OPA_READ_TIMEOUT=10s
+
+# Path to the external configuration file, holding the sources and the template of the account payloads
+EXTERNAL_CONFIGURATION=/app/sync-config.yaml
 
 # Logging level (DEBUG, INFO, WARN, ERROR)
 LOGGING_LEVEL=INFO
@@ -517,6 +523,104 @@ EXTERNAL_CONFIGURATION=/app/extra-configuration.yaml
 ```
 
 > This is optional and allows custom setups without modifying the packaged YAML.
+
+---
+
+## 🧾 Account Payloads — `sync-data`
+
+`sync-api` builds the payload of each account, the `input` document evaluated by the OPA policies of the
+applications (see [advanced/policies](../../advanced/policies.md)), from the data of the LinId database. The data read
+and the structure of the payload are set in the `sync-data` section of the file referenced by `EXTERNAL_CONFIGURATION`,
+which `sync-api` requires to start (`docker/dev/resources/sync-config.yaml` in the development environment,
+`docker/e2e/resources/sync/sync-config.yaml` in the E2E environment):
+
+| Key                                                | Default  | Description                                                        |
+| -------------------------------------------------- | -------- | ------------------------------------------------------------------ |
+| `sync-data.job.sources`                            | —        | Sources read to build the payloads, by name                        |
+| `sync-data.job.sources.<source>.account-id-column` | `act_id` | Column of the source holding the `act_id` of the account           |
+| `sync-data.job.mapping`                            | —        | JSON template of the payload, whose values are Jinjava expressions |
+
+```yaml
+sync-data:
+  job:
+    sources:
+      accounts:
+        account-id-column: act_id
+      account_payload_view:
+        account-id-column: act_id
+    mapping: |
+      {
+        "external_id": {{ accounts.external_id | tojson }},
+        "email": {{ accounts.email | tojson }},
+        "organizational_units": {{ account_payload_view.organizational_units | tojson }},
+        "groups": {{ account_payload_view.groups | tojson }}
+      }
+```
+
+Payload built for an account:
+
+```json
+{
+  "external_id": "jdoe",
+  "email": "jdoe@example.com",
+  "organizational_units": ["Paris", "R&D"],
+  "groups": ["DEV", "RND"]
+}
+```
+
+### Sources
+
+* A source is any table or view of the LinId database: a table, one of its views, or a view created for the payload.
+  The `accounts` table is not required.
+* The PostgreSQL account of `sync-api` (`LINID_DATABASE_USER`) needs the `SELECT` grant on each source.
+* Every source has the column set in `account-id-column`, of type `uuid`, and at most one row per account. Each chunk
+  of accounts filters on this column, so it must rely on an index of the underlying tables.
+* A multi-valued attribute is a PostgreSQL array column, read as a list. It must be sorted and without duplicates,
+  so that the checksum of the payload is stable. The `account_payload_view` view gives, for each account, the sorted
+  names of its organizational units (`organizational_units`) and codes of its groups (`groups`), empty arrays when it
+  has none.
+* A `json` or `jsonb` column is read as JSON: `{{ accounts.extra_parameters | tojson }}` inserts the whole object,
+  and `{{ accounts.extra_parameters.department | tojson }}` one of its fields, `null` when it is absent. A timestamp
+  column is inserted as a number of milliseconds since the epoch.
+* The source and column names must match `[a-z_][a-z0-9_]*`: they are checked and quoted before being used in the SQL
+  queries.
+
+### Template
+
+* The template is rendered once per account with Jinjava, then parsed as a JSON object.
+* Each source is a variable of the template, named after the source, holding the columns of the row of the account.
+  The variable is empty when the account has no row in the source.
+* Every value is inserted with the `tojson` filter, without quotes: a list stays a JSON array, a string is correctly
+  escaped, and an empty variable gives `null`.
+* Every `mapping` provides the `external_id` and `email` keys: the claims template of the LINID system application
+  reads them in the payload to build its `sub` and `email` claims.
+
+### Errors
+
+`sync-api` logs an alert for each error (see `sync-api/README.md`):
+
+* **Invalid mapping**: the template is checked before any source is read, rendered with an empty context and parsed.
+  A Jinjava syntax error or a value inserted without `tojson` stops the payload build: nothing is written, and the
+  rights are not computed.
+* **Unreadable source**: an unknown source, an invalid name, a missing account id column or a database error stops
+  the payload build. The chunks already written stay written, and the other accounts keep their previous payload.
+* **Account in error**: an account with several rows in a source, or whose data gives a template error or an invalid
+  JSON, keeps its previous payload, and the payloads of the other accounts are built.
+
+### Chunk size
+
+The payloads are built by chunks of accounts: for each chunk, each source is read once, with the `act_id` of the
+accounts of the chunk, then the payloads are built and written in one transaction.
+
+```text
+SYNC_PAYLOAD_CHUNK_SIZE=500
+```
+
+* Reading the sources account by account would send one query per source and per account, and reading all the
+  accounts at once would hold every row in memory and every write in one transaction. A larger chunk sends fewer
+  queries, but holds more rows in memory and a longer transaction.
+* It is set in `sync-api.env` (`sync.payload.chunk-size`), not in the `sync-data` section: the `sync-data` section
+  describes the data, while the chunk size tunes the processing of `sync-api`.
 
 ---
 

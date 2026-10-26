@@ -42,7 +42,7 @@ A minimal rule looks like this:
 ```rego
 # "admin" is added to the roles set when the user is flagged as an administrator.
 roles contains "admin" if {
-    input.user.admin == true
+    input.admin == true
 }
 ```
 
@@ -93,11 +93,11 @@ Grant a role and a simple `allow` signal to members of an organizational unit:
 
 ```rego
 roles contains "reader" if {
-    input.user.organizationalUnit == "public"
+    "public" in input.organizational_units
 }
 
 signals contains "allow" if {
-    input.user.organizationalUnit == "public"
+    "public" in input.organizational_units
 }
 ```
 
@@ -105,11 +105,11 @@ Unconditionally grant access to administrators (`force_allow`):
 
 ```rego
 roles contains "admin" if {
-    input.user.admin == true
+    input.admin == true
 }
 
 signals contains "force_allow" if {
-    input.user.admin == true
+    input.admin == true
 }
 ```
 
@@ -117,7 +117,7 @@ Always deny access to suspended users (`force_disallow`, wins over everything):
 
 ```rego
 signals contains "force_disallow" if {
-    input.user.suspended == true
+    input.suspended == true
 }
 ```
 
@@ -171,8 +171,12 @@ The policy generation is designed to be adapted to each client's needs:
 * **Template** — LinId ships a **default policy template** (`opa.script.location`, default
   `classpath:templates/opa/opa-policy.rego.j2`). It can be overridden to point to a custom template that better fits a
   client's authorization model, while still receiving the same `application` and `fragments` variables.
-* **Input definition** — the structure of the `input` document evaluated by the policies (the description of the user
-  requesting access) will be **customizable in a future release**, so clients can shape it to match their own attributes.
+* **Input definition** — the `input` document evaluated by the policies is the **payload of the account**, built by
+  `sync-api` from the data of the LinId database. Its structure is defined by the `sync-data.job.mapping` template, so
+  clients shape it to match their own attributes (see
+  [Account Payloads](../configuration/application/config-files.md#-account-payloads--sync-data)). This template is the
+  contract read by the rule authors: with the example template, a rule tests `input.organizational_units` or
+  `input.groups`, two arrays of strings, empty when the account has none.
 * **Result** — the policy result is defined by default as `{ "allow": <bool>, "roles": <set> }`. This contract can be
   **customized** (by adapting the template) to expose additional or different fields required by a client.
 

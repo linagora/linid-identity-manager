@@ -239,11 +239,11 @@ A rule must only **contribute** to the shared sets with `contains` (it must neve
 ```rego
 # Grant the "reader" role and allow access to members of the "public" organizational unit.
 roles contains "reader" if {
-    input.user.organizationalUnit == "public"
+    "public" in input.organizational_units
 }
 
 signals contains "allow" if {
-    input.user.organizationalUnit == "public"
+    "public" in input.organizational_units
 }
 ```
 
@@ -251,7 +251,7 @@ Unconditionally grant access to administrators, overriding any plain `allow`:
 
 ```rego
 signals contains "force_allow" if {
-    input.user.admin == true
+    input.admin == true
 }
 ```
 
@@ -259,7 +259,7 @@ Always deny suspended users, overriding everything else:
 
 ```rego
 signals contains "force_disallow" if {
-    input.user.suspended == true
+    input.suspended == true
 }
 ```
 

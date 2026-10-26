@@ -3,7 +3,7 @@ spring:
     name: LinId-Sync-API
 
   config:
-    import: optional:file:${EXTERNAL_CONFIGURATION}
+    import: file:${EXTERNAL_CONFIGURATION}
 
   datasource:
     url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
@@ -71,6 +71,9 @@ sync:
   # act_id of the technical account of sync-api in the linid-api database, shared by its instances and recorded as
   # the author of their writes
   technical-account-id: ${SYNC_TECHNICAL_ACCOUNT_ID}
+  payload:
+    # Number of accounts read, built and written per chunk of the payload build, in one transaction
+    chunk-size: ${SYNC_PAYLOAD_CHUNK_SIZE:500}
   compute:
     # Number of account and application pairs read, computed and written per chunk by the computation of the rights.
     # Each pair costs an OPA call, during which the chunk holds a connection of the linid-api pool

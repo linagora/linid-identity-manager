@@ -71,3 +71,13 @@ sync:
   # act_id of the technical account of sync-api in the linid-api database, shared by its instances and recorded as
   # the author of their writes
   technical-account-id: ${SYNC_TECHNICAL_ACCOUNT_ID}
+
+opa:
+  # OPA server, on which linid-api deploys the policies of the applications
+  server-url: ${OPA_SERVER_URL:http://opa:8181}
+  # Path of the result of an application policy, {code} being the application code
+  evaluation-path: ${OPA_EVALUATION_PATH:/v1/data/authz/{code}/result}
+  # Maximum time to establish the connection to the OPA server, as a duration (e.g. 5s, 500ms)
+  connect-timeout: ${OPA_CONNECT_TIMEOUT:5s}
+  # Maximum time to wait for the response of the OPA server, as a duration (e.g. 10s, 500ms)
+  read-timeout: ${OPA_READ_TIMEOUT:10s}

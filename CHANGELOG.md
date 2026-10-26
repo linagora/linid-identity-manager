@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an **OPA service** to sync-api, evaluating the policy of an application for an account with the account
   payload as the OPA input, configured by the environment variables `OPA_SERVER_URL`, `OPA_EVALUATION_PATH`,
   `OPA_CONNECT_TIMEOUT` and `OPA_READ_TIMEOUT`.
+- Added the **selection of the account and application pairs to compute** to `sync-api`: the pairs whose
+  `to_compute` is true, for the global job, for one account or for one application, read by windows of
+  `SYNC_COMPUTE_CHUNK_SIZE` pairs (default `100`), each one starting after the last pair read.
 
 #### Frontend
 

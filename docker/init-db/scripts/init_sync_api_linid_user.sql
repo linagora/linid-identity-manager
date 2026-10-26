@@ -5,7 +5,7 @@
 GRANT USAGE ON SCHEMA public TO sync_api_linid_user;
 
 GRANT SELECT
-    ON accounts, applications, application_roles, account_computed_rights_view
+    ON accounts, applications, application_roles, account_computed_rights_view, account_payload_view
     TO sync_api_linid_user;
 
 GRANT SELECT, INSERT, UPDATE

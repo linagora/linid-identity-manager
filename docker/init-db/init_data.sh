@@ -8,7 +8,7 @@ echo "Init DB starting"
 echo "========================================"
 
 until psql -h "$DATABASE_HOST" -p "$DATABASE_PORT" -U "$POSTGRES_USER" -d "$LINID_DATABASE_NAME" \
--c "SELECT to_regclass('public.account_computed_rights_view');" | grep -q account_computed_rights_view
+-c "SELECT to_regclass('public.account_payload_view');" | grep -q account_payload_view
 do
   echo "Waiting for LinID schema..."
   sleep 2

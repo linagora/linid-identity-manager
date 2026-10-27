@@ -11,7 +11,7 @@ permissions:
 jobs:
   docker-build-and-publish:
     name: Build and publish ${{ matrix.image }} Docker image
-    runs-on: ubuntu-latest
+    runs-on: linagora
     strategy:
       matrix:
         include:

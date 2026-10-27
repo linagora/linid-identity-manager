@@ -4,14 +4,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
-env:
-  NODE_VERSION: '22.22'
-  PNPM_VERSION: '11.10.0'
-
 jobs:
   delete-comments:
     name: Delete bot comment(s)
-    runs-on: ubuntu-latest
+    runs-on: linagora
     steps:
       - uses: izhangzhihao/delete-comment@d075704468e1cf74e60944d9f335351213c34d85
         with:
@@ -22,7 +18,7 @@ jobs:
   validate-source-branch:
     name: Validate source branch
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
 
     steps:
       - name: Check branch name
@@ -63,7 +59,7 @@ jobs:
   branch-naming-rules:
     name: Check branch name
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
     steps:
       - uses: deepakputhraya/action-branch-name@5f1cc199284b75145ec2d13434422e6987cf6af8
         with:
@@ -76,40 +72,38 @@ jobs:
   commit-checks:
     name: Check commit messages
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: node:22-bookworm
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install commitlint
         run: npm install --save-dev @commitlint/config-conventional @commitlint/cli
 
       - name: Run commitlint
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           echo "module.exports = { extends: ['@commitlint/config-conventional'] };" > commitlint.config.cjs
           npx commitlint --from=origin/main --to=HEAD --verbose
 
   ui-build:
     name: UI - Build application
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: node:22-bookworm
     defaults:
       run:
         working-directory: ui
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install dependencies
+        uses: ./.github/actions/pnpm-install
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           working-directory: ui
 
       - name: Build application
@@ -117,7 +111,9 @@ jobs:
 
   ui-check-style:
     name: UI - Code style
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: node:22-bookworm
     needs: [ui-build]
     defaults:
       run:
@@ -125,11 +121,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install dependencies
+        uses: ./.github/actions/pnpm-install
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           working-directory: ui
 
       - name: Check style
@@ -140,7 +134,9 @@ jobs:
 
   ui-unit-tests:
     name: UI - Unit tests
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: node:22-bookworm
     needs: [ui-build]
     defaults:
       run:
@@ -148,14 +144,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install dependencies
+        uses: ./.github/actions/pnpm-install
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           working-directory: ui
 
       - name: Run unit tests
+        # The containers run the steps with sh, which has no pipefail
+        shell: bash
         run: |
           set -o pipefail
           echo '```bash' > coverage.txt
@@ -171,7 +167,9 @@ jobs:
 
   ui-check-dependencies:
     name: UI - Check dependencies
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: node:22-bookworm
     needs: [ui-build]
     defaults:
       run:
@@ -179,11 +177,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Setup Node.js and pnpm
-        uses: ./.github/actions/setup-node-pnpm
+      - name: Install dependencies
+        uses: ./.github/actions/pnpm-install
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
           working-directory: ui
 
       - name: Check outdated dependencies
@@ -202,20 +198,14 @@ jobs:
   api-check-style:
     name: API - Code style
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
     steps:
       - uses: actions/checkout@v7
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Execute checkstyle
         run: mvn -ntp checkstyle:check
@@ -223,20 +213,14 @@ jobs:
   api-javadoc:
     name: API - Javadoc
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
     steps:
       - uses: actions/checkout@v7
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Generate Javadoc
         run: mvn -ntp clean compile javadoc:javadoc
@@ -244,20 +228,14 @@ jobs:
   api-tests:
     name: API - Unit tests
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
     steps:
       - uses: actions/checkout@v7
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Execute unit tests
         run: mvn -ntp test
@@ -277,20 +255,14 @@ jobs:
   api-check-dependencies:
     name: API - Check dependencies
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
     steps:
       - uses: actions/checkout@v7
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Execute check dependencies
         run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
@@ -304,7 +276,9 @@ jobs:
   sync-api-check-style:
     name: Sync API - Code style
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
     defaults:
@@ -314,14 +288,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Execute checkstyle
         run: mvn -ntp checkstyle:check
@@ -329,7 +295,9 @@ jobs:
   sync-api-javadoc:
     name: Sync API - Javadoc
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
     defaults:
@@ -340,21 +308,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
-
       - name: Generate Javadoc
         run: mvn -ntp clean compile javadoc:javadoc
 
   sync-api-tests:
     name: Sync API - Unit tests
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
       pull-requests: write
@@ -365,14 +327,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Execute unit tests
         run: mvn -ntp test
@@ -392,7 +346,9 @@ jobs:
   sync-api-check-dependencies:
     name: Sync API - Check dependencies
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
       pull-requests: write
@@ -403,14 +359,6 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
-        with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
 
       - name: Execute check dependencies
         run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
@@ -424,16 +372,13 @@ jobs:
   e2e-check-style:
     name: E2E - Code style
     needs: [validate-source-branch]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: node:22-bookworm
     steps:
       - uses: actions/checkout@v7
         with:
           submodules: "recursive"
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
 
       - name: Install dependencies
         working-directory: tests/e2e
@@ -445,7 +390,7 @@ jobs:
 
   e2e-tests:
     name: E2E tests
-    runs-on: ubuntu-latest
+    runs-on: linagora
     needs: [api-tests, sync-api-tests]
     steps:
       - uses: actions/checkout@v7
@@ -457,6 +402,13 @@ jobs:
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up JDK 25 for the keytool of the certificate tasks
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+      - name: Install envsubst for the config tasks
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext-base
       - name: Run e2e tests
         run: |
           task setup:e2e
@@ -477,7 +429,7 @@ jobs:
   security-malware-scan:
     name: Security - Malware Scan
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
     steps:
       - uses: actions/checkout@v7
         with:
@@ -489,7 +441,9 @@ jobs:
   security-sast:
     name: Security - SAST
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
+    container:
+      image: maven:3.9.16-eclipse-temurin-25
     permissions:
       security-events: write
       contents: read
@@ -497,13 +451,10 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Set up JDK 25 for x64 (with Maven cache)
-        uses: actions/setup-java@v5
+      - name: Set up Node.js for the TypeScript extraction of CodeQL
+        uses: actions/setup-node@v6
         with:
-          java-version: "25"
-          distribution: "temurin"
-          architecture: x64
-          cache: maven
+          node-version: "22"
       - uses: github/codeql-action/init@v4
         with:
           languages: java,javascript
@@ -517,7 +468,7 @@ jobs:
   security-dependency-review:
     name: Security - Dependency Review
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
     permissions:
       contents: read
       pull-requests: read
@@ -530,7 +481,7 @@ jobs:
   security-github-actions:
     name: Security - GitHub Actions
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
     permissions:
       contents: read
       actions: read
@@ -543,7 +494,7 @@ jobs:
   security-container:
     name: Security - Container
     needs: [delete-comments]
-    runs-on: ubuntu-latest
+    runs-on: linagora
     permissions:
       contents: read
     steps:
@@ -555,6 +506,13 @@ jobs:
         uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up JDK 25 for the keytool of the certificate tasks
+        uses: actions/setup-java@v5
+        with:
+          java-version: "25"
+          distribution: "temurin"
+      - name: Install envsubst for the config tasks
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext-base
       - name: Setup certificates for image
         run: task setup:e2e
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0

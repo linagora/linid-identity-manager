@@ -1,10 +1,10 @@
 {
   "instanceId": "moduleOrganizationalUnitDetailsPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "organizational-units",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "organizational-units",
   "basePath": "/organizational-units",
   "zones": [
@@ -14,14 +14,12 @@
     },
     {
       "zone": "moduleOrganizationalUnitDetailsPage.side-left",
-      "plugin": "catalogUI/EntityProfilePanel",
+      "plugin": "LinPulsar/EntityProfilePanel",
       "props": {
         "statusKey": "status",
         "parentPath": "/organizational-units",
         "avatarOptions": {
-          "seed": [
-            "{{ entity.name }}"
-          ],
+          "seed": ["{{ entity.name }}"],
           "style": "constellation",
           "styleOptions": {
             "animationVariant": "fast"
@@ -37,9 +35,7 @@
             "delete": "/avatars/organizational-units/{{ entity.id }}"
           }
         },
-        "fieldOrder": [
-          "type"
-        ],
+        "fieldOrder": ["type"],
         "updateEndpoint": "/organizational-units/{{ entity.id }}",
         "updateBody": {
           "parent": "{{ entity.parents[0].parent }}",
@@ -61,12 +57,7 @@
             "input": "List",
             "required": true,
             "inputSettings": {
-              "values": [
-                "COMPANY",
-                "DIVISION",
-                "DEPARTMENT",
-                "TEAM"
-              ]
+              "values": ["COMPANY", "DIVISION", "DEPARTMENT", "TEAM"]
             }
           }
         ],
@@ -79,7 +70,7 @@
     },
     {
       "zone": "moduleOrganizationalUnitDetailsPage.content.after",
-      "plugin": "catalogUI/GenericEditableTableCard",
+      "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "columns": [
@@ -158,8 +149,8 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
-    "page": "catalogUI/GenericDetailsPage",
+    "layout": "LinPulsar/BaseLayout",
+    "page": "LinPulsar/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/organizational-units",
     "enableActions": false,

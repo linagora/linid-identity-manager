@@ -45,16 +45,16 @@
 
 <script setup lang="ts">
 import {
-  type LinidQIconProps,
+  type LinPulsarQIconProps,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 
 const localUiNamespace = 'account-not-activated-info-text';
 const { t } = useScopedI18n('AccountNotActivatedInfoText');
 const { ui } = useUiDesign();
 
 const uiProps = {
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
+  icon: ui<LinPulsarQIconProps>(localUiNamespace, 'q-icon'),
 };
 </script>

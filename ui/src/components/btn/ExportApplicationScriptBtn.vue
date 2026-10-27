@@ -37,11 +37,11 @@
 
 <script setup lang="ts">
 import {
-  type LinidQBtnProps,
+  type LinPulsarQBtnProps,
   useNotify,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import { exportApplicationScript } from 'src/services/ApplicationService';
 import type { ApplicationDTO } from 'src/types/application';
 import { computed } from 'vue';
@@ -62,7 +62,7 @@ const { t } = useScopedI18n(props.i18nScope);
 const { Notify } = useNotify();
 
 const uiProps = computed(() => ({
-  btn: ui<LinidQBtnProps>(`${props.uiNamespace}.export`, 'q-btn'),
+  btn: ui<LinPulsarQBtnProps>(`${props.uiNamespace}.export`, 'q-btn'),
 }));
 
 /**

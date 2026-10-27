@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { useScopedI18n } from '@linagora/linid-im-front-corelib';
+import { useScopedI18n } from '@linagora/lin-pulsar-core';
 
 const { t } = useScopedI18n('Homepage');
 </script>

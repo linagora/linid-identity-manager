@@ -25,13 +25,8 @@
  * LinID Identity Manager software.
  */
 
-import {
-  useLinidUiStore,
-  getI18nInstance,
-} from '@linagora/linid-im-front-corelib';
 import { defineBoot } from '@quasar/app-vite/wrappers';
 import type { AppConfig } from 'src/types/appConfig';
-import { Composer } from 'vue-i18n';
 
 /**
  * Runtime application configuration loaded from `public/config.json` during boot. Undefined until the boot file has
@@ -59,7 +54,7 @@ export function getEnvironment() {
 /**
  * Application configuration boot file.
  *
- * Fetches the runtime configuration from `/config.json`, then registers navigation menu items into the UI store.
+ * Fetches the runtime configuration from `/config.json` and stores it in `appConfig`.
  *
  * @throws {Error} When the config.json file cannot be fetched.
  */

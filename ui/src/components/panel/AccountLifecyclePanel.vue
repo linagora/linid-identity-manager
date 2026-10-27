@@ -102,14 +102,14 @@
 </template>
 
 <script setup lang="ts">
-import type { DropdownClickPayload } from '@linagora/linid-im-front-corelib';
+import type { DropdownClickPayload } from '@linagora/lin-pulsar-core';
 import {
   loadAsyncComponent,
   uiEventSubject,
   useCommonMapper,
   useNotify,
   useScopedI18n,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import axios from 'axios';
 import { appConfig } from 'boot/config';
 import { dayjs } from 'src/boot/dayjs';
@@ -169,7 +169,7 @@ const accountStatus = computed<AccountStatus | null>(() =>
 
 const lifecycleUi = useAccountLifecycleUi(accountStatus);
 
-const dropdownButton = loadAsyncComponent('catalogUI/DropdownButton');
+const dropdownButton = loadAsyncComponent('LinPulsar/DropdownButton');
 
 const { openFormDialog, openConfirmationDialog } = useLifecycleDialogs(
   props.uiNamespace

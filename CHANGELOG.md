@@ -81,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Generated the client certificate of linid-api in `task setup:certs`, mounted it in the E2E environment, and made the
   shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
   `sync-api`.
+- Ran the CI jobs on the Linagora runner instead of the GitHub-hosted runners, the Node.js and Maven jobs in containers.
 
 ## [0.11.1] - 2026-10-23
 

@@ -25,7 +25,6 @@
  */
 
 import { defineRouter } from '#q-app/wrappers';
-import { useLinidUserStore } from '@linagora/linid-im-front-corelib';
 import {
   createMemoryHistory,
   createRouter,

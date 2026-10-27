@@ -39,10 +39,10 @@
 
 <script setup lang="ts">
 import {
-  type LinidQBtnProps,
+  type LinPulsarQBtnProps,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import type { OrganizationalUnitCreateChildBtnProps } from 'src/types/organizationalUnitCreateChildBtnProps';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
@@ -56,7 +56,10 @@ const { t } = useScopedI18n(props.i18nScope);
 const { ui } = useUiDesign();
 
 const uiProps = computed(() => ({
-  btn: ui<LinidQBtnProps>(`${props.uiNamespace}.create-child-button`, 'q-btn'),
+  btn: ui<LinPulsarQBtnProps>(
+    `${props.uiNamespace}.create-child-button`,
+    'q-btn'
+  ),
 }));
 
 /**

@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from '@linagora/linid-im-front-corelib';
+import { useCommonMapper } from '@linagora/lin-pulsar-core';
 import type {
   AccountDeactivationRecord,
   AccountDTO,

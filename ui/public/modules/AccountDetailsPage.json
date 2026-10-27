@@ -1,16 +1,16 @@
 {
   "instanceId": "moduleAccountDetailsPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "accounts",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "accounts",
   "basePath": "/accounts",
   "zones": [
     {
       "zone": "moduleAccountDetailsPage.side-left",
-      "plugin": "catalogUI/EntityProfilePanel",
+      "plugin": "LinPulsar/EntityProfilePanel",
       "props": {
         "statusKey": "status",
         "parentPath": "/accounts",
@@ -75,7 +75,7 @@
     },
     {
       "zone": "moduleAccountDetailsPage.content.after",
-      "plugin": "catalogUI/GenericEditableTableCard",
+      "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "enableActions": false,
@@ -113,7 +113,7 @@
     },
     {
       "zone": "moduleAccountDetailsPage.content.after",
-      "plugin": "catalogUI/GenericEditableTableCard",
+      "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "enableActions": false,
@@ -153,8 +153,8 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
-    "page": "catalogUI/GenericDetailsPage",
+    "layout": "LinPulsar/BaseLayout",
+    "page": "LinPulsar/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/accounts",
     "enableActions": false,

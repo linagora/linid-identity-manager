@@ -58,15 +58,15 @@
 
 <script lang="ts" setup>
 import type {
-  LinidQBannerProps,
-  LinidQBtnProps,
-  LinidQIconProps,
-} from '@linagora/linid-im-front-corelib';
+  LinPulsarQBannerProps,
+  LinPulsarQBtnProps,
+  LinPulsarQIconProps,
+} from '@linagora/lin-pulsar-core';
 import {
   useCommonMapper,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import type {
   AccountBannerProps,
   AccountDeactivatedBannerOutputs,
@@ -88,13 +88,13 @@ const deactivatedAt = computed(() =>
   toDate(props.accountStatus.validityPeriod.end, DATE_FORMAT_KEY)
 );
 const uiProps = {
-  banner: ui<LinidQBannerProps>(localUiNamespace, 'q-banner'),
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
-  reactivateImmediateButton: ui<LinidQBtnProps>(
+  banner: ui<LinPulsarQBannerProps>(localUiNamespace, 'q-banner'),
+  icon: ui<LinPulsarQIconProps>(localUiNamespace, 'q-icon'),
+  reactivateImmediateButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.reactivate-immediate-button`,
     'q-btn'
   ),
-  reactivateScheduledButton: ui<LinidQBtnProps>(
+  reactivateScheduledButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.reactivate-scheduled-button`,
     'q-btn'
   ),

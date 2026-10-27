@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { setHttpClient } from '@linagora/linid-im-front-corelib';
+import { setHttpClient } from '@linagora/lin-pulsar-core';
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import { getLoginUrl } from 'src/services/AuthService';
 import { defineBoot } from '#q-app/wrappers';

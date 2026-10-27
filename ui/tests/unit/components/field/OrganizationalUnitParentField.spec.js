@@ -45,7 +45,7 @@ const route = {
   query: { parent: 'parent-uuid' },
 };
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
+vi.mock('@linagora/lin-pulsar-core', () => ({
   uiEventSubject: { next: mockUiEventSubjectNext },
   useNotify: () => ({
     Notify: mockNotify,

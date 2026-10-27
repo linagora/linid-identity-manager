@@ -80,12 +80,12 @@
       }
     },
     "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
-    "LinidSmartFilter": {
+    "LinPulsarSmartFilter": {
       "label": "Current search filter",
       "hint": "Enter your filter",
       "prefix": "",
       "suffix": "",
-      "LinidFilterChip": {
+      "LinPulsarFilterChip": {
         "firstname": {
           "type": "First name",
           "separator": "or"
@@ -116,7 +116,7 @@
           "separator": "or"
         }
       },
-      "LinidFilterPanel": {
+      "LinPulsarFilterPanel": {
         "title": "Filter by:",
         "columnFilter": {
           "firstname": "First name",
@@ -128,7 +128,7 @@
           "insertDate": "Creation date"
         }
       },
-      "LinidFavoritePanel": {
+      "LinPulsarFavoritePanel": {
         "title": "Favorites",
         "noData": "No favorite available",
         "createFavorite": "Create a favorite",

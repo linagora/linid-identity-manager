@@ -4,6 +4,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# The images of the job containers come from mirror.gcr.io, Google's mirror of Docker Hub: Docker Hub rate-limits the
+# anonymous pulls of the runners
 jobs:
   delete-comments:
     name: Delete bot comment(s)
@@ -74,7 +76,7 @@ jobs:
     needs: [delete-comments]
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: mirror.gcr.io/library/node:22-bookworm
     steps:
       - uses: actions/checkout@v7
         with:
@@ -94,7 +96,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: mirror.gcr.io/library/node:22-bookworm
     defaults:
       run:
         working-directory: ui
@@ -113,7 +115,7 @@ jobs:
     name: UI - Code style
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: mirror.gcr.io/library/node:22-bookworm
     needs: [ui-build]
     defaults:
       run:
@@ -136,7 +138,7 @@ jobs:
     name: UI - Unit tests
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: mirror.gcr.io/library/node:22-bookworm
     needs: [ui-build]
     defaults:
       run:
@@ -169,7 +171,7 @@ jobs:
     name: UI - Check dependencies
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: mirror.gcr.io/library/node:22-bookworm
     needs: [ui-build]
     defaults:
       run:
@@ -200,7 +202,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
@@ -215,7 +217,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
@@ -230,7 +232,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
@@ -257,7 +259,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     defaults:
       run:
         working-directory: api
@@ -278,7 +280,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
     defaults:
@@ -297,7 +299,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
     defaults:
@@ -316,7 +318,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
       pull-requests: write
@@ -348,7 +350,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     permissions:
       contents: read
       pull-requests: write
@@ -374,7 +376,7 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: mirror.gcr.io/library/node:22-bookworm
     steps:
       - uses: actions/checkout@v7
         with:
@@ -409,6 +411,8 @@ jobs:
           distribution: "temurin"
       - name: Install envsubst for the config tasks
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext-base
+      - name: Pull the Docker Hub images from mirror.gcr.io
+        uses: ./.github/actions/docker-hub-mirror
       - name: Run e2e tests
         run: |
           task setup:e2e
@@ -443,7 +447,7 @@ jobs:
     needs: [delete-comments]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: mirror.gcr.io/library/maven:3.9.16-eclipse-temurin-25
     permissions:
       security-events: write
       contents: read
@@ -513,6 +517,8 @@ jobs:
           distribution: "temurin"
       - name: Install envsubst for the config tasks
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext-base
+      - name: Pull the Docker Hub images from mirror.gcr.io
+        uses: ./.github/actions/docker-hub-mirror
       - name: Setup certificates for image
         run: task setup:e2e
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0

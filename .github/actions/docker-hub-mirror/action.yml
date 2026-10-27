@@ -1,0 +1,31 @@
+name: 'Pull the Docker Hub images from mirror.gcr.io'
+description: >-
+  Pull the bases of the images built by Task and the images of the e2e stack from mirror.gcr.io, Google's mirror of
+  Docker Hub, and tag them under their Docker Hub names, so that docker build and docker compose find them on the
+  machine: Docker Hub rate-limits the anonymous pulls of the runners. Meant to run on the runner, before the build of
+  the images.
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Pull the Docker Hub images from mirror.gcr.io
+      shell: bash
+      run: |
+        # The images built by Task are not on Docker Hub
+        built=$(grep -oP 'IMAGE_NAME: \K\S+' Taskfile.yml)
+        images=$(
+          {
+            grep -oP 'DOCKERFILE: \K\S+' Taskfile.yml | xargs grep -hoP '^FROM\s+\K\S+'
+            grep -hoP '^\s+image:\s*\K\S+' docker/e2e/docker-compose.yml
+          } | sort -u | grep -vxF "$built"
+        )
+        for image in $images; do
+          # The official images are under library/ on the mirror
+          name=$image
+          [[ $name == */* ]] || name=library/$name
+          if docker pull -q "mirror.gcr.io/$name" >/dev/null; then
+            docker tag "mirror.gcr.io/$name" "$image"
+          else
+            echo "::warning::$image is not on mirror.gcr.io, left to Docker Hub"
+          fi
+        done

@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang="ts">
-import { uiEventSubject, type UiEvent } from '@linagora/linid-im-front-corelib';
+import { uiEventSubject, type UiEvent } from '@linagora/lin-pulsar-core';
 import { Notify, type QNotifyCreateOptions } from 'quasar';
 import { type Subscription } from 'rxjs';
 import { onMounted, onUnmounted } from 'vue';

@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { setDayjsInstance } from '@linagora/linid-im-front-corelib';
+import { setDayjsInstance } from '@linagora/lin-pulsar-core';
 import { defineBoot } from '@quasar/app-vite/wrappers';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';

@@ -1,16 +1,16 @@
 {
   "instanceId": "moduleGroupDetailsPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "groups",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "groups",
   "basePath": "/groups",
   "zones": [
     {
       "zone": "moduleGroupDetailsPage.side-left",
-      "plugin": "catalogUI/EntityProfilePanel",
+      "plugin": "LinPulsar/EntityProfilePanel",
       "props": {
         "parentPath": "/groups",
         "fieldOrder": [
@@ -104,7 +104,7 @@
     },
     {
       "zone": "moduleGroupDetailsPage.content.after",
-      "plugin": "catalogUI/GenericEditableTableCard",
+      "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "columns": [
@@ -150,8 +150,8 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
-    "page": "catalogUI/GenericDetailsPage",
+    "layout": "LinPulsar/BaseLayout",
+    "page": "LinPulsar/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/groups",
     "enableActions": false,

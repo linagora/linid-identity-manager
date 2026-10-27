@@ -25,13 +25,10 @@
  */
 
 import type {
-  LinidAttributeConfiguration,
+  LinPulsarAttributeConfiguration,
   UiEvent,
-} from '@linagora/linid-im-front-corelib';
-import {
-  getI18nInstance,
-  uiEventSubject,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
+import { getI18nInstance, uiEventSubject } from '@linagora/lin-pulsar-core';
 import type { Composer } from 'vue-i18n';
 
 /** Options shared by both lifecycle dialog kinds. */
@@ -52,7 +49,7 @@ interface BaseDialogOptions {
  */
 interface FormDialogOptions<TForm> extends BaseDialogOptions {
   /** Form fields rendered in the dialog. */
-  formFields: readonly LinidAttributeConfiguration[];
+  formFields: readonly LinPulsarAttributeConfiguration[];
   /**
    * Optional initial values used to pre-fill the form fields, for instance when editing an existing suspension. Omitted
    * for dialogs that must open empty.

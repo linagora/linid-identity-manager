@@ -114,12 +114,12 @@
       }
     },
     "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
-    "LinidSmartFilter": {
+    "LinPulsarSmartFilter": {
       "label": "Current search filter",
       "hint": "Enter your filter",
       "prefix": "",
       "suffix": "",
-      "LinidFilterChip": {
+      "LinPulsarFilterChip": {
         "code": {
           "type": "Code",
           "separator": "or"
@@ -138,7 +138,7 @@
           "value": "{name}"
         }
       },
-      "LinidFilterPanel": {
+      "LinPulsarFilterPanel": {
         "title": "Filter by:",
         "columnFilter": {
           "code": "Code",
@@ -147,7 +147,7 @@
           "organizationalUnitId": "Organizational unit"
         }
       },
-      "LinidFavoritePanel": {
+      "LinPulsarFavoritePanel": {
         "title": "Favorites",
         "noData": "No favorite available",
         "createFavorite": "Create a favorite",

@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { type FederatedModule } from '@linagora/linid-im-front-corelib';
+import { type FederatedModule } from '@linagora/lin-pulsar-core';
 import { loadRemote } from '@module-federation/enhanced/runtime';
 import type { Component } from 'vue';
 import type { RouteRecordRaw } from 'vue-router';
@@ -44,7 +44,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: async () =>
-      (await loadRemote<FederatedModule<Component>>('catalogUI/BaseLayout'))!
+      (await loadRemote<FederatedModule<Component>>('LinPulsar/BaseLayout'))!
         .default,
     children: [{ path: '', component: () => import('pages/Homepage.vue') }],
   },

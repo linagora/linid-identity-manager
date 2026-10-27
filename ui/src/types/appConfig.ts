@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import type { LinidAttributeConfiguration } from '@linagora/linid-im-front-corelib';
+import type { LinPulsarAttributeConfiguration } from '@linagora/lin-pulsar-core';
 import type { AccountLifecycleAction } from './accountLifecycleUi';
 import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 import type { Remote } from './remotes';
@@ -73,7 +73,7 @@ export interface AppConfig {
    */
   accountLifecycleFields: Record<
     AccountLifecycleAction,
-    LinidAttributeConfiguration[]
+    LinPulsarAttributeConfiguration[]
   >;
 
   // ─── Organizational units ────────────────────────────────────────────────────
@@ -84,6 +84,6 @@ export interface AppConfig {
    */
   organizationalUnitLifecycleFields: Record<
     OrganizationalUnitLifecycleAction,
-    LinidAttributeConfiguration[]
+    LinPulsarAttributeConfiguration[]
   >;
 }

@@ -5,7 +5,7 @@
 /* Backgrounds */
 main,
 .generics-table-page--actions,
-.linid-filter-chip {
+.lin-pulsar-filter-chip {
   background: var(--q-background);
 }
 
@@ -19,7 +19,7 @@ main,
 .generic-details-page--section,
 .entity-profile-panel,
 .generic-creation-page--form-section,
-.linid-filter-chip,
+.lin-pulsar-filter-chip,
 .q-notification--standard {
   border-radius: 0.5rem;
 }
@@ -52,7 +52,7 @@ main,
 }
 
 /* Reduce spacing between favorite buttons */
-.linid-favorite-panel--list .q-item__section--main:has(button) {
+.lin-pulsar-favorite-panel--list .q-item__section--main:has(button) {
   flex: 0 0 auto;
 }
 
@@ -114,7 +114,7 @@ main,
 
 /* Filter chips */
 
-.linid-filter-chip .linid-filter-chip--avatar {
+.lin-pulsar-filter-chip .lin-pulsar-filter-chip--avatar {
   border-top-left-radius: 0.5rem;
   border-bottom-left-radius: 0.5rem;
 }
@@ -130,12 +130,12 @@ main,
 /* Search bar */
 
 /* No underline on the smart filter */
-.linid-smart-filter--field .q-field__inner .q-field__control {
+.lin-pulsar-smart-filter--field .q-field__inner .q-field__control {
   padding: 0 1rem;
   border-radius: 20px;
 }
 
-.linid-smart-filter--menu {
+.lin-pulsar-smart-filter--menu {
   border-radius: 1.25rem;
 }
 

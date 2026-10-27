@@ -6,7 +6,7 @@
     "generic-entity-table": {
       "q-table": {}
     },
-    "linid-smart-filter": {
+    "lin-pulsar-smart-filter": {
       "q-field": {
         "dense": false,
         "borderless": true
@@ -33,7 +33,7 @@
           "name": "arrow_drop_down"
         }
       },
-      "linid-filter-chip": {
+      "lin-pulsar-filter-chip": {
         "name": {
           "q-avatar": {
             "size": "28px",
@@ -83,7 +83,7 @@
           "q-chip": {}
         }
       },
-      "linid-filter-panel": {
+      "lin-pulsar-filter-panel": {
         "header": {
           "q-icon": { "name": "filter_alt" },
           "q-separator": { "inset": false }
@@ -144,7 +144,7 @@
           "q-btn": { "flat": true }
         }
       },
-      "linid-favorite-panel": {
+      "lin-pulsar-favorite-panel": {
         "header": {
           "q-icon": { "name": "filter_alt" },
           "q-separator": { "inset": false }

@@ -82,6 +82,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
   `sync-api`.
 - Ran the CI jobs on the Linagora runner instead of the GitHub-hosted runners, the Node.js and Maven jobs in containers.
+- Pulled the Docker Hub images of the CI from `mirror.gcr.io`, Google's mirror of Docker Hub, since Docker Hub
+  rate-limits the anonymous pulls of the Linagora runner.
 
 ## [0.11.1] - 2026-10-23
 

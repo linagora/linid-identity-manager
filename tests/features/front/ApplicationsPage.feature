@@ -65,7 +65,7 @@ Feature: Test Application homepage display
     ## 101 Should display the application homepage with all applications listed
     When I click on '[data-cy="item_moduleApplicationsPage"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
-    And  I expect the HTML element '.linid-smart-filter' to be visible
+    And  I expect the HTML element '.lin-pulsar-smart-filter' to be visible
     And  I expect the HTML element '.generic-entity-table' to be visible
     # Three rows: the two applications created above plus the seeded LINID system application.
     And  I expect the HTML element '[data-cy="item-row"]' appear 3 times on screen
@@ -83,16 +83,16 @@ Feature: Test Application homepage display
     And  I expect the HTML element '[data-cy="cell-table_actions_{{ctx.applicationId}}"]' to be visible
 
     ## 102 Should filter applications when using advanced search
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "unknown" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications?code=lk_*unknown*"
     And  I expect the HTML element '[data-cy="item-row"]' appear 0 times on screen
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 3 times on screen
 
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "app-home-102" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications?code=lk_*app-home-102*"
@@ -100,7 +100,7 @@ Feature: Test Application homepage display
     And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.applicationId2}}"]' to be visible
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 3 times on screen
 
     ## 103 Should go to detail page when click on application detail button

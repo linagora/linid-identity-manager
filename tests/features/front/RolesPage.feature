@@ -31,7 +31,7 @@ Feature: Test Role homepage display
     Given I store "roleId" as "00000000-0000-4000-8000-00000000b006" in context
     When  I click on '[data-cy="item_moduleRolesPage"]'
     Then  I expect current url is "{{ env.E2E_FRONT_URL }}/roles"
-    And   I expect the HTML element '.linid-smart-filter' to be visible
+    And   I expect the HTML element '.lin-pulsar-smart-filter' to be visible
     And   I expect the HTML element '.generic-entity-table' to be visible
     And   I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen
     And   I expect the HTML element '[data-cy="cell-code_{{ctx.roleId}}"]' to be visible
@@ -45,16 +45,16 @@ Feature: Test Role homepage display
     And   I expect the HTML element '[data-cy="cell-table_actions_{{ctx.roleId}}"]' to be visible
 
     ## 102 Should filter roles when using advanced search
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "unknown" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/roles?code=lk_*unknown*"
     And  I expect the HTML element '[data-cy="item-row"]' appear 0 times on screen
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen
 
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "AUDITOR" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/roles?code=lk_*AUDITOR*"
@@ -62,7 +62,7 @@ Feature: Test Role homepage display
     And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And  I expect the HTML element '[data-cy="cell-code_{{ctx.roleId}}"]' to be visible
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen
 
     ## 103 Should open the edit dialog with the current description and close on cancel
@@ -100,17 +100,17 @@ Feature: Test Role homepage display
     And  I expect the HTML element '[data-cy="cell-description_{{ctx.roleId}}"]' contains "Reviews compliance and security controls."
 
     ## 106 Should filter roles by organizational unit
-    When I click on ".linid-smart-filter"
-    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    When I click on ".lin-pulsar-smart-filter"
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-organizationalUnitId"]'
     And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000e"]'
     And  I click on '[data-cy="tree-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/roles?organizationalUnitId=00000000-0000-4000-8000-00000000000e"
     And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And  I expect the HTML element '[data-cy="cell-code_00000000-0000-4000-8000-00000000b005"]' contains "VIEWER"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000e"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division B1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000e"
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen
 
     ## 107 Should disable the deletion of a role held by an account
@@ -140,8 +140,8 @@ Feature: Test Role homepage display
       """
     Then I expect status code is 201
 
-    When I click on ".linid-smart-filter"
-    And  I click on '[data-cy="linid-filter-panel_item-code"]'
+    When I click on ".lin-pulsar-smart-filter"
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-code"]'
     And  I set the text "E2E-ROLE-DELETE" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -158,5 +158,5 @@ Feature: Test Role homepage display
     And  I expect the HTML element '.q-notification__message' contains "Le rôle a été supprimé avec succès."
     And  I expect the HTML element '[data-cy="item-row"]' appear 0 times on screen
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 7 times on screen

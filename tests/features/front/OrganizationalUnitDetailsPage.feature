@@ -34,7 +34,7 @@ Feature: Test Organizational Unit details panel display
     When  I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then  I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
     And   I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
-    When  I click on '[data-cy="linid-smart-filter-field"]'
+    When  I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And   I set the text "Company A" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And   I click on '[data-cy="text-search-filter-panel_search"]'
     Then  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -107,7 +107,7 @@ Feature: Test Organizational Unit details panel display
     Given I store "suspended_ou_no_end_id" as "00000000-0000-4000-8000-0000000000e1" in context
     When  I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then  I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When  I click on '[data-cy="linid-smart-filter-field"]'
+    When  I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And   I set the text "SuspendedOuNoEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And   I click on '[data-cy="text-search-filter-panel_search"]'
     Then  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -165,7 +165,7 @@ Feature: Test Organizational Unit details panel display
     ## 111 Create child button should open the creation page with the current OU as parent
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I set the text "Company A" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -184,7 +184,7 @@ Feature: Test Organizational Unit details panel display
     ## 113 Edit the organizational unit from the profile panel
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I set the text "Dept B1-1" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -249,7 +249,7 @@ Feature: Test Organizational Unit details panel display
 
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I set the text "OU Accounts E2E" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -294,7 +294,7 @@ Feature: Test Organizational Unit details panel display
 
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I set the text "OU Accounts E2E" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen

@@ -31,6 +31,9 @@ import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightVi
 import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.ScrollPosition;
+import org.springframework.data.domain.Window;
 import org.springframework.data.repository.Repository;
 
 /**
@@ -58,4 +61,49 @@ public interface AccountComputedRightViewRepository
      *     application is deployed
      */
     List<AccountIdentity> findDistinctByActIdNotOrderByActIdAsc(UUID technicalAccountId);
+
+    /**
+     * Finds the next pairs of the cycle whose rights must be computed, ordered by account then application.
+     *
+     * <p>With a keyset position, the window starts after the pair of the position: the pairs written since the
+     * previous window are no longer {@code to_compute}, and an offset would skip as many pairs.</p>
+     *
+     * <p>The {@code actId} bound is implied by the position, but is not redundant: Spring Data writes the keyset as
+     * {@code act_id > ? OR (act_id = ? AND app_id > ?)}, which PostgreSQL cannot use on the index of the accounts, so
+     * each window would scan again the accounts already read. With this bound, the scan starts at the account of the
+     * position.</p>
+     *
+     * @param actId    the account of the position, the lowest UUID for the first window
+     * @param position the position of the last pair read, {@link ScrollPosition#keyset()} for the first window
+     * @param limit    the maximum number of pairs of the window
+     * @return the next pairs whose {@code to_compute} is true
+     */
+    Window<AccountComputedRightView> findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+        UUID actId, ScrollPosition position, Limit limit);
+
+    /**
+     * Finds the next pairs of one account whose rights must be computed, ordered by application.
+     *
+     * @param actId    the identifier of the account
+     * @param position the position of the last pair read, {@link ScrollPosition#keyset()} for the first window
+     * @param limit    the maximum number of pairs of the window
+     * @return the next pairs of the account whose {@code to_compute} is true
+     */
+    Window<AccountComputedRightView> findByActIdAndToComputeTrueOrderByAppIdAsc(
+        UUID actId, ScrollPosition position, Limit limit);
+
+    /**
+     * Finds the next pairs of one application whose rights must be computed, ordered by account.
+     *
+     * <p>The {@code actId} bound starts the scan at the account of the position, like for the pairs of the cycle: the
+     * keyset also compares the account then the application, the composite identifier being added to the order.</p>
+     *
+     * @param appId    the identifier of the application
+     * @param actId    the account of the position, the lowest UUID for the first window
+     * @param position the position of the last pair read, {@link ScrollPosition#keyset()} for the first window
+     * @param limit    the maximum number of pairs of the window
+     * @return the next pairs of the application whose {@code to_compute} is true
+     */
+    Window<AccountComputedRightView> findByAppIdAndToComputeTrueAndActIdGreaterThanEqualOrderByActIdAsc(
+        UUID appId, UUID actId, ScrollPosition position, Limit limit);
 }

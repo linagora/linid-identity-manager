@@ -71,6 +71,10 @@ sync:
   # act_id of the technical account of sync-api in the linid-api database, shared by its instances and recorded as
   # the author of their writes
   technical-account-id: ${SYNC_TECHNICAL_ACCOUNT_ID}
+  compute:
+    # Number of account and application pairs read, computed and written per chunk by the computation of the rights.
+    # Each pair costs an OPA call, during which the chunk holds a connection of the linid-api pool
+    chunk-size: ${SYNC_COMPUTE_CHUNK_SIZE:100}
 
 opa:
   # OPA server, on which linid-api deploys the policies of the applications

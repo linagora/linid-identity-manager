@@ -19,5 +19,5 @@ task start:demo
 | db         | (internal network)              | Default database           |
 | api        | (internal network)              | LinID Identity Manager API |
 | ui         | https://linid.localtest.me:9000 | LinID Identity Manager UI  |
-| catalog-ui | (internal network)              | UI components library      |
+| lin-pulsar | (internal network)              | UI components library      |
 | auth       | (internal network)              | LemonLDAP::NG portal       |

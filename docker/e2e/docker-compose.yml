@@ -159,16 +159,16 @@ services:
       timeout: 3s
       retries: 10
     depends_on:
-      catalog-ui:
+      lin-pulsar:
         condition: service_started
       api:
         condition: service_healthy
       auth:
         condition: service_healthy
 
-  catalog-ui:
-    image: linagora/linid-catalog-ui:v0.2.138
-    container_name: catalog-ui
+  lin-pulsar:
+    image: linagora/lin-pulsar:v0.3.0
+    container_name: lin-pulsar
     networks:
       - linid-e2e-network
     volumes:

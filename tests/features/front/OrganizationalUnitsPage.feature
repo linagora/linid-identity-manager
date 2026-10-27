@@ -31,11 +31,11 @@ Feature: Test Organizational Units page display
 
     ## 102 Should display the page with the smart filter and the OU table
     And I expect the HTML element '[data-cy="item-row"]' to be visible
-    And I expect the HTML element '[data-cy="linid-smart-filter-field"]' to be visible
+    And I expect the HTML element '[data-cy="lin-pulsar-smart-filter-field"]' to be visible
     And I expect the HTML element '[data-cy="generic-entity-table"]' to be visible
 
     ## 103 Should show the details of a OU when click see button of a OU
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I set the text "Team Beta" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -55,7 +55,7 @@ Feature: Test Organizational Units page display
     ## 104 Should show the details of another OU when click see button of a OU
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I set the text "SuspendedOuWithEnd" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -75,8 +75,8 @@ Feature: Test Organizational Units page display
     ## 105 Should filter organizational units by functional role
     When I click on '[data-cy="item_moduleOrganizationalUnitsPage"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/organizational-units"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-roleNames"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-roleNames"]'
     And  I set the text "Manager" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?roleNames=lk_*Manager*"
@@ -86,19 +86,19 @@ Feature: Test Organizational Units page display
 
     ## 106 Should display the organizational unit name in the tree filter chip
     # Dept A1-1 and Dept A1-2 are the two organizational units whose parent is Division A1.
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"
 
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-parentId"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-parentId"]'
     And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000c"]'
     And  I click on '[data-cy="tree-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units?parentId=00000000-0000-4000-8000-00000000000c"
     And  I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
     And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-00000000000f"]' contains "Dept A1-1"
     And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-0000000000a1"]' contains "Dept A1-2"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_parentId"]' contains "Division A1"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_parentId"]' not contains "00000000-0000-4000-8000-00000000000c"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_parentId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_parentId"]' not contains "00000000-0000-4000-8000-00000000000c"
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units"

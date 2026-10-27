@@ -65,7 +65,7 @@ Feature: Test Role creation page
     And  I expect the HTML element ".q-notification__message" contains "Rôle créé avec succès."
     And  I expect current url is "{{ env.E2E_FRONT_URL }}/roles"
 
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "E2E-ROLE-CREATION" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen

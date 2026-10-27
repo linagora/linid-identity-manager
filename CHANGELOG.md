@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.3] - 2026-10-29
+
+### Fixed
+
+#### Frontend
+
+- Fixed the **redirection to the login page when the refresh token has expired**: the UI server answered 500 instead
+  of 401 on `/auth/me` and on the API calls, because LemonLDAP::NG rejects an expired refresh token with
+  `invalid_request` instead of `invalid_grant`. Any refresh token rejected by the SSO now ends the session.
+
 ## [0.11.2] - 2026-10-28
 
 ### Fixed

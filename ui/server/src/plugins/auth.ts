@@ -98,10 +98,15 @@ export function registerAuth(app: FastifyInstance, config: ServerConfig) {
       request.session.token = newToken;
       return newToken.access_token;
     } catch (error: any) {
-      if (error?.data?.payload?.error !== 'invalid_grant') {
+      // The identity provider answers 400 when the refresh token cannot be used any more (RFC 6749 §5.2), not always
+      // with `invalid_grant`: LemonLDAP::NG answers `invalid_request` for an expired refresh token
+      if (!error?.data?.isResponseError || error.output.statusCode !== 400) {
         throw error;
       }
-      request.log.info('Refresh token rejected, session deleted');
+      request.log.info(
+        { error: error.data.payload?.error },
+        'Refresh token rejected, session deleted'
+      );
       await request.session.destroy();
       return null;
     }

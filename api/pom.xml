@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.github.linagora.linid.im</groupId>
 	<artifactId>api</artifactId>
-	<version>0.11.1</version>
+	<version>0.11.2</version>
 	<name>LinID-identity-manager-api</name>
 	<licenses>
 		<license>
@@ -41,6 +41,16 @@
 		<jackson-2-bom.version>2.21.7</jackson-2-bom.version>
 		<jackson-bom.version>3.1.7</jackson-bom.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Overrides the version brought by jinjava to fix CVE-2026-102554 -->
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>33.7.2-jre</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

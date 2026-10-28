@@ -42,13 +42,13 @@
 </template>
 
 <script setup lang="ts">
-import type { LinidQInputProps } from '@linagora/linid-im-front-corelib';
+import type { LinPulsarQInputProps } from '@linagora/lin-pulsar-core';
 import {
   uiEventSubject,
   useNotify,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import { getOrganizationalUnitById } from 'src/services/OrganizationalUnitService';
 import { type OrganizationalUnitParentFieldProps } from 'src/types/organizationalUnitParentFieldProps';
 import { onMounted, ref } from 'vue';
@@ -66,7 +66,7 @@ const { ui } = useUiDesign();
 
 const parentName = ref<string>('');
 
-const parentUiInputProps = ui<LinidQInputProps>(
+const parentUiInputProps = ui<LinPulsarQInputProps>(
   `${props.uiNamespace}.organizational-unit-parent-field`,
   'q-input'
 );

@@ -155,7 +155,7 @@ export default defineConfig((ctx) => {
                 singleton: true,
                 requiredVersion: '2.21.1',
               },
-              '@linagora/linid-im-front-corelib': {
+              '@linagora/lin-pulsar-core': {
                 singleton: true,
                 strictVersion: true,
               } as Record<string, unknown>,

@@ -36,7 +36,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
+vi.mock('@linagora/lin-pulsar-core', () => ({
   useCommonMapper: () => ({
     toDate: mockToDate('YYYY/MM/DD'),
     toDateISO: mockToDateISO(),

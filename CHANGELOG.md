@@ -5,7 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-<<<<<<< HEAD
 ## [0.11.2] - 2026-10-28
 
 ### Fixed
@@ -68,6 +67,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Frontend
 
 - Integrated the smart filter configuration that **manages how filter values are displayed** in the filter chips.
+- Replaced `@linagora/linid-im-front-corelib` by **`@linagora/lin-pulsar-core`** and the `catalogUI` Module Federation
+  remote by **`LinPulsar`** (served under `/lin-pulsar`).
+- Renamed the `CATALOG_UI_UPSTREAM` environment variable of the UI server to **`LIN_PULSAR_UPSTREAM`**.
 
 ### Removed
 
@@ -84,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Build
 
+- Replaced the **linagora/linid-catalog-ui** Docker image by **linagora/lin-pulsar** in the demo and E2E environments.
 - Update E2E-test-runner to version 2.2.0
 - Added `sync-api` to the E2E environment and its database to the dev environment, built, tested and scanned it in the
   CI, and published the **linagora/linid-sync-api** Docker image.

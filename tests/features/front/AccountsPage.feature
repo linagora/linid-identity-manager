@@ -32,7 +32,7 @@ Feature: Test Account homepage display
     ## 101 Should display the account homepage with all accounts listed
     When I click on '[data-cy="item_moduleAccountsPage"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    And  I expect the HTML element '.linid-smart-filter' to be visible
+    And  I expect the HTML element '.lin-pulsar-smart-filter' to be visible
     And  I expect the HTML element '.generic-entity-table' to be visible
     And  I expect the HTML element '[data-cy="item-row"]' appear 10 times on screen
     And  I expect the HTML element '[data-cy="cell-firstname_00000000-0000-4000-8000-0000000000d1"]' to be visible
@@ -53,7 +53,7 @@ Feature: Test Account homepage display
 
     ## 102 Should filter accounts when using advanced search
     Given I store "user_id" as "00000000-0000-4000-8000-00000000a006" in context
-    When  I click on ".linid-smart-filter"
+    When  I click on ".lin-pulsar-smart-filter"
     And   I set the text "user5_fn" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And   I click on '[data-cy="text-search-filter-panel_search"]'
     Then  I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
@@ -61,11 +61,11 @@ Feature: Test Account homepage display
     And   I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And   I expect the HTML element '[data-cy="cell-firstname_{{ctx.user_id}}"]' to be visible
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 10 times on screen
 
     ## 103 Should go to detail page when click on account detail button
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "user5_fn" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -95,39 +95,39 @@ Feature: Test Account homepage display
     # Reset the query, no filter is active yet so the clear button is not rendered
     When I click on '[data-cy="item_moduleAccountsPage"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    And  I expect the HTML element '[data-cy="linid-smart-filter-clear"]' not exists
+    And  I expect the HTML element '[data-cy="lin-pulsar-smart-filter-clear"]' not exists
 
     # Apply a first filter on firstname: the clear button becomes available
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-firstname"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-firstname"]'
     And  I set the text "user5_fn" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
-    And  I expect the HTML element '[data-cy="linid-smart-filter-chips"]' to be visible
-    And  I expect the HTML element '[data-cy="linid-smart-filter-clear"]' to be visible
+    And  I expect the HTML element '[data-cy="lin-pulsar-smart-filter-chips"]' to be visible
+    And  I expect the HTML element '[data-cy="lin-pulsar-smart-filter-clear"]' to be visible
 
     # Apply a second filter on lastname: both filters now shape the query
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-lastname"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-lastname"]'
     And  I set the text "user5_ln" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url contains "firstname=lk_*user5_fn*"
     And  I expect current url contains "lastname=lk_*user5_ln*"
 
     # Clear every filter at once: the query, the chips and the clear button are reset
-    When I click on '[data-cy="linid-smart-filter-clear"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-clear"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    And  I expect the HTML element '[data-cy="linid-smart-filter-chips"]' not exists
-    And  I expect the HTML element '[data-cy="linid-smart-filter-clear"]' not exists
+    And  I expect the HTML element '[data-cy="lin-pulsar-smart-filter-chips"]' not exists
+    And  I expect the HTML element '[data-cy="lin-pulsar-smart-filter-clear"]' not exists
 
     ## 106 Should rename a favorite filter set from its rename button
     # Apply a filter, then create a favorite out of the current search
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-firstname"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-firstname"]'
     And  I set the text "user5_fn" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
-    And  I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-smart-favorite-panel"] [data-cy="button_create"]'
+    And  I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-smart-favorite-panel"] [data-cy="button_create"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "MyFavorite" in the HTML element '[data-cy="field_favoriteName"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -151,18 +151,18 @@ Feature: Test Account homepage display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?firstname=lk_*user5_fn*"
 
     # Close the still-open menu by toggling the field, then replace the search with a lastname filter
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    Then I expect the HTML element '[data-cy="linid-smart-filter-menu"]' not exists
-    When I click on '[data-cy="linid-smart-filter-clear"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    Then I expect the HTML element '[data-cy="lin-pulsar-smart-filter-menu"]' not exists
+    When I click on '[data-cy="lin-pulsar-smart-filter-clear"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-lastname"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-lastname"]'
     And  I set the text "user6_ln" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?lastname=lk_*user6_ln*"
 
     # Override the favorite with the current search through its own override button
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     And  I click on '[data-cy="button_override_0"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
     When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
@@ -177,10 +177,10 @@ Feature: Test Account homepage display
 
     ## 108 Should disable the favorite override button when no filter is active
     # The menu is still open from the previous apply; clear the active filter
-    When I click on '[data-cy="linid-smart-filter-clear"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-clear"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"
     # With no active filter, the favorite's own override button is disabled
-    When I click on '[data-cy="linid-smart-filter-field"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
     Then I expect the HTML element '[data-cy="button_override_0"]' to be disabled
 
     ## 109 Should delete a favorite filter set from its delete button
@@ -194,39 +194,39 @@ Feature: Test Account homepage display
 
     ## 110 Should display the organizational unit name in the tree filter chip
     # The menu is still open from the previous deletion: close it before filtering
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    Then I expect the HTML element '[data-cy="linid-smart-filter-menu"]' not exists
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    Then I expect the HTML element '[data-cy="lin-pulsar-smart-filter-menu"]' not exists
 
     # Filter on an organizational unit: its chip shows the unit name, not the filtered id
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-organizationalUnitId"]'
     And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000e"]'
     And  I click on '[data-cy="tree-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?organizationalUnitId=00000000-0000-4000-8000-00000000000e"
     And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000e"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division B1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000e"
 
     # Two ticked units are labelled straight from the nodes the tree panel already holds
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
-    And  I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
+    And  I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-organizationalUnitId"]'
     And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000c"]'
     And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000e"]'
     And  I click on '[data-cy="tree-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts?organizationalUnitId=00000000-0000-4000-8000-00000000000c|00000000-0000-4000-8000-00000000000e"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division A1"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"] .linid-filter-chip--separator' contains "ou"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"] .lin-pulsar-filter-chip--separator' contains "ou"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division B1"
 
     # Restoring the filter from the URL of a freshly loaded page resolves both names with a single
     # request, whose | separator must survive the URL encoding
     When I reload to '{{ env.E2E_FRONT_URL }}/accounts?organizationalUnitId=00000000-0000-4000-8000-00000000000c|00000000-0000-4000-8000-00000000000e'
-    Then I expect the HTML element '.linid-smart-filter' to be visible
-    And  I expect the HTML element '[data-cy="linid-smart-filter-chips"]' to be visible
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division A1"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division B1"
+    Then I expect the HTML element '.lin-pulsar-smart-filter' to be visible
+    And  I expect the HTML element '[data-cy="lin-pulsar-smart-filter-chips"]' to be visible
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division B1"
 
     # Remove the chip so no filter is left active
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts"

@@ -31,7 +31,7 @@ import { describe, expect, it, vi } from 'vitest';
 const tMock = vi.fn((key) => key);
 const uiMock = vi.fn(() => ({}));
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
+vi.mock('@linagora/lin-pulsar-core', () => ({
   useScopedI18n: () => ({ t: tMock }),
   useUiDesign: () => ({ ui: uiMock }),
 }));

@@ -33,7 +33,7 @@
       "upstream": "https://localhost:8443",
       "withAccessToken": true
     },
-    { "prefix": "/catalog-ui", "upstream": "http://localhost:5001" },
+    { "prefix": "/lin-pulsar", "upstream": "http://localhost:5001" },
     {
       "prefix": "/auth/me",
       "upstream": "https://localhost:8080",

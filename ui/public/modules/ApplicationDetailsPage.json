@@ -1,16 +1,16 @@
 {
   "instanceId": "moduleApplicationDetailsPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "applications",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "applications",
   "basePath": "/applications",
   "zones": [
     {
       "zone": "moduleApplicationDetailsPage.side-left",
-      "plugin": "catalogUI/EntityProfilePanel",
+      "plugin": "LinPulsar/EntityProfilePanel",
       "props": {
         "parentPath": "/applications",
         "fieldOrder": ["type", "domain", "description", "deployedAt"],
@@ -86,7 +86,7 @@
     },
     {
       "zone": "moduleApplicationDetailsPage.content.after",
-      "plugin": "catalogUI/GenericEditableTableCard",
+      "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "columns": [
@@ -129,7 +129,7 @@
     },
     {
       "zone": "moduleApplicationDetailsPage.content.after",
-      "plugin": "catalogUI/GenericSortableListCard",
+      "plugin": "LinPulsar/GenericSortableListCard",
       "props": {
         "itemKey": "id",
         "listenToItemUpdate": "update:item",
@@ -193,7 +193,7 @@
     },
     {
       "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.item.actions",
-      "plugin": "catalogUI/EntityAttributeField",
+      "plugin": "LinPulsar/EntityAttributeField",
       "props": {
         "definition": {
           "name": "disabled",
@@ -209,8 +209,8 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
-    "page": "catalogUI/GenericDetailsPage",
+    "layout": "LinPulsar/BaseLayout",
+    "page": "LinPulsar/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/applications",
     "enableActions": false,

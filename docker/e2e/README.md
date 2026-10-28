@@ -12,7 +12,7 @@ task setup:e2e
 task start:e2e
 ```
 
-The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.2.138`), its version is pinned in `docker-compose.yml`.
+The `lin-pulsar` image is pulled from Docker Hub (`linagora/lin-pulsar:v0.3.0`), its version is pinned in `docker-compose.yml`.
 
 ## Services
 
@@ -22,7 +22,7 @@ The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.
 | api             | (internal network)              | LinID Identity Manager API  |
 | sync-api        | https://localhost:8444          | LinID synchronization API   |
 | ui              | https://linid.localtest.me:9000 | LinID Identity Manager UI   |
-| catalog-ui      | (internal network)              | UI components library       |
+| lin-pulsar      | (internal network)              | UI components library       |
 | auth            | (internal network)              | LemonLDAP::NG portal        |
 | e2e-test-runner | (internal network)              | Runner to execute e2e tests |
 

@@ -27,7 +27,7 @@ Feature: Test Group homepage display
     Given I store 'groupId' as '00000000-0000-4000-8000-000000009006' in context
     When  I click on '[data-cy="item_moduleGroupsPage"]'
     Then  I expect current url is "{{ env.E2E_FRONT_URL }}/groups"
-    And   I expect the HTML element '.linid-smart-filter' to be visible
+    And   I expect the HTML element '.lin-pulsar-smart-filter' to be visible
     And   I expect the HTML element '.generic-entity-table' to be visible
     # The seeded groups are checked by identity rather than by row count: a group left behind by
     # another spec that aborted before its cleanup would break an exact count, not this.
@@ -52,17 +52,17 @@ Feature: Test Group homepage display
     And   I expect the HTML element '[data-cy="cell-table_actions_{{ctx.groupId}}"]' to be visible
 
     ## 102 Should filter groups when using advanced search
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "unknown" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups?name=lk_*unknown*"
     And  I expect the HTML element '[data-cy="item-row"]' appear 0 times on screen
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009001"]' to be visible
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.groupId}}"]' to be visible
 
-    When I click on ".linid-smart-filter"
+    When I click on ".lin-pulsar-smart-filter"
     And  I set the text "Backend" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups?name=lk_*Backend*"
@@ -70,24 +70,24 @@ Feature: Test Group homepage display
     And  I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.groupId}}"]' to be visible
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009001"]' to be visible
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.groupId}}"]' to be visible
 
     ## 103 Should display the organizational unit name in the tree filter chip
     # Developers and Support are the two groups attached to Division A1 itself.
-    When I click on ".linid-smart-filter"
-    And  I click on '[data-cy="linid-filter-panel_item-organizationalUnitId"]'
+    When I click on ".lin-pulsar-smart-filter"
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-organizationalUnitId"]'
     And  I click on '[data-cy="generic-tree-checkbox-00000000-0000-4000-8000-00000000000c"]'
     And  I click on '[data-cy="tree-search-filter-panel_search"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups?organizationalUnitId=00000000-0000-4000-8000-00000000000c"
     And  I expect the HTML element '[data-cy="item-row"]' appear 2 times on screen
     And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009004"]' contains "Developers"
     And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009005"]' contains "Support"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' contains "Division A1"
-    And  I expect the HTML element '[data-cy="linid-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000c"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' contains "Division A1"
+    And  I expect the HTML element '[data-cy="lin-pulsar-filter-chip_organizationalUnitId"]' not contains "00000000-0000-4000-8000-00000000000c"
 
-    When I click on '[data-cy="linid-smart-filter-field"] [aria-label="Remove"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"] [aria-label="Remove"]'
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/groups"
     And  I expect the HTML element '[data-cy="cell-name_00000000-0000-4000-8000-000000009001"]' to be visible
     And  I expect the HTML element '[data-cy="cell-name_{{ctx.groupId}}"]' to be visible

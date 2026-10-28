@@ -1,16 +1,16 @@
 {
   "instanceId": "moduleRolesPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "roles",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "roles",
   "basePath": "/roles",
   "zones": [
     {
       "zone": "moduleRolesPage.row-actions",
-      "plugin": "catalogUI/FormDialogButton",
+      "plugin": "LinPulsar/FormDialogButton",
       "props": {
         "url": "/roles/{{ entity.id }}",
         "method": "PUT",
@@ -41,7 +41,7 @@
     },
     {
       "zone": "moduleRolesPage.row-actions",
-      "plugin": "catalogUI/ConfirmDialogButton",
+      "plugin": "LinPulsar/ConfirmDialogButton",
       "props": {
         "url": "/roles/{{ entity.id }}",
         "method": "DELETE",
@@ -51,9 +51,9 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
+    "layout": "LinPulsar/BaseLayout",
     "addNavigationMenu": true,
-    "page": "catalogUI/GenericTablePage",
+    "page": "LinPulsar/GenericTablePage",
     "pagePath": "",
     "idKey": "id",
     "enableActions": true,

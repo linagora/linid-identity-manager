@@ -74,7 +74,10 @@ jobs:
     needs: [delete-comments]
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: harbor.linagora.com/docker-hub-proxy/library/node:22-bookworm
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -94,7 +97,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: harbor.linagora.com/docker-hub-proxy/library/node:22-bookworm
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     defaults:
       run:
         working-directory: ui
@@ -113,7 +119,10 @@ jobs:
     name: UI - Code style
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: harbor.linagora.com/docker-hub-proxy/library/node:22-bookworm
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     needs: [ui-build]
     defaults:
       run:
@@ -136,7 +145,10 @@ jobs:
     name: UI - Unit tests
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: harbor.linagora.com/docker-hub-proxy/library/node:22-bookworm
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     needs: [ui-build]
     defaults:
       run:
@@ -169,7 +181,10 @@ jobs:
     name: UI - Check dependencies
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: harbor.linagora.com/docker-hub-proxy/library/node:22-bookworm
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     needs: [ui-build]
     defaults:
       run:
@@ -200,7 +215,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     defaults:
       run:
         working-directory: api
@@ -215,7 +233,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     defaults:
       run:
         working-directory: api
@@ -230,7 +251,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     defaults:
       run:
         working-directory: api
@@ -257,7 +281,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     defaults:
       run:
         working-directory: api
@@ -278,7 +305,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     permissions:
       contents: read
     defaults:
@@ -297,7 +327,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     permissions:
       contents: read
     defaults:
@@ -316,7 +349,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     permissions:
       contents: read
       pull-requests: write
@@ -348,7 +384,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     permissions:
       contents: read
       pull-requests: write
@@ -374,7 +413,10 @@ jobs:
     needs: [validate-source-branch]
     runs-on: linagora
     container:
-      image: node:22-bookworm
+      image: harbor.linagora.com/docker-hub-proxy/library/node:22-bookworm
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -443,7 +485,10 @@ jobs:
     needs: [delete-comments]
     runs-on: linagora
     container:
-      image: maven:3.9.16-eclipse-temurin-25
+      image: harbor.linagora.com/docker-hub-proxy/library/maven:3.9.16-eclipse-temurin-25
+      credentials:
+        username: ${{ secrets.HARBOR_USERNAME }}
+        password: ${{ secrets.HARBOR_TOKEN }}
     permissions:
       security-events: write
       contents: read

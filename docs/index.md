@@ -67,11 +67,13 @@ You need deeper technical insights or troubleshooting.
 
 * Policies management
 * UI server and authentication (BFF)
+* Architecture diagrams (C4, network flows)
 
 👉 Start here:
 
 * [advanced/policies](advanced/policies.md)
 * [advanced/bff](advanced/bff.md)
+* [c4](c4/README.md)
 
 ---
 

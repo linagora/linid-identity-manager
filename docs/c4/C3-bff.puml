@@ -1,0 +1,42 @@
+@startuml C3-BFF-Components
+' ============================================================================
+' LinID Identity Manager — C4 Level 3: Components of the UI server (BFF)
+' ============================================================================
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.13.0/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+title UI server (Backend For Frontend) — Components (C3)
+
+Person(browser, "Browser", "LinID UI (SPA), holds only the session cookie")
+
+Container_Boundary(bff, "UI server (ui/server, Fastify)") {
+  Component(config, "loadConfig", "Config", "Reads server-config.json (SERVER_CONFIG_PATH) at startup; replaces __APP_ENV__.")
+  Component(session, "Session plugin", "@fastify/cookie, @fastify/session", "Signed session cookie; sessions stored in server memory.")
+  Component(session_store, "LruSessionStore", "lru-cache", "In-memory session store: max sessions, TTL, auto-purge.")
+  Component(auth, "Auth plugin", "@fastify/oauth2", "/auth/login, /auth/callback, /auth/logout, /auth/logged-out. Authorization code + PKCE, state & returnTo cookies, session ID regeneration, token refresh before expiry.")
+  Component(proxies, "Proxies plugin", "@fastify/http-proxy", "/backend, /auth/me, /auth, /lin-pulsar… Refuses cross-site writes (CSRF, Sec-Fetch-Site / Origin), adds the Bearer access token and removes the cookie when withAccessToken.")
+  Component(static_files, "Static files plugin", "@fastify/static", "Serves the SPA, /assets (immutable cache), /avatars and /config.json (environment injected).")
+}
+
+Container_Ext(lemon, "LemonLDAP::NG", "OIDC IdP")
+Container_Ext(api, "LinID API", "Spring Boot")
+Container_Ext(lin_pulsar, "LinPulsar (LinOpenFactory)", "Module Federation remote")
+ContainerDb_Ext(avatars, "Avatars volume", "Filesystem", "Written by the API")
+
+Rel(browser, auth, "Login / logout", "HTTPS")
+Rel(browser, proxies, "API & userinfo calls, LinPulsar files", "HTTPS")
+Rel(browser, static_files, "SPA, config.json, avatars", "HTTPS")
+
+Rel(auth, session, "Stores tokens")
+Rel(session, session_store, "Uses")
+Rel(proxies, auth, "Gets a fresh access token")
+Rel(config, auth, "OIDC settings")
+Rel(config, proxies, "Proxy list")
+
+Rel(auth, lemon, "Discovery, code exchange, token refresh", "HTTP(S)")
+Rel(proxies, lemon, "/auth/* portal, /auth/me → userinfo", "HTTP")
+Rel(proxies, api, "/backend/* with Bearer token", "HTTPS")
+Rel(proxies, lin_pulsar, "/lin-pulsar/*", "HTTP")
+Rel(static_files, avatars, "Reads", "File system")
+
+@enduml

@@ -86,8 +86,9 @@ transactions of the `JdbcTemplate`. The Spring Data JPA repositories of `persist
 
 The `spring.jpa.*` properties do not apply to the linid-api `EntityManagerFactory`: its Hibernate properties go in the
 `linid.jpa.properties` block of `application.yaml`, each key written between brackets and quotes, for example
-`"[hibernate.jdbc.batch_size]"`. Hibernate never changes the schema of the linid-api database, whose migrations stay
-in linid-api.
+`"[hibernate.jdbc.batch_size]"`, set by `SYNC_JDBC_BATCH_SIZE`: Hibernate sends the inserts and updates of a
+transaction in groups of this size, one round trip per group. Hibernate never changes the schema of the linid-api
+database, whose migrations stay in linid-api.
 
 The snake_case naming of Spring Boot does not apply to it either: the entities of `persistence.model` name their tables
 and columns explicitly, with `@Table(name = …)` and `@Column(name = …)`, like in linid-api. Without it, a field `actId`
@@ -97,24 +98,45 @@ The linid-api database is part of `/actuator/health`, which is `DOWN` when this 
 `sync-api` does not start without it: Hibernate connects to it at startup to detect the dialect.
 
 The rows written in the linid-api database have the technical account of `sync-api` (`SYNC_TECHNICAL_ACCOUNT_ID`) as
-author. Its instances share it: the `sync_instance_id` column of these rows identifies the instance that wrote them.
+author. Its instances share it: the `sync_instance_id` column of these rows identifies the instance that wrote them,
+`SYNC_INSTANCE_ID`, the host name by default.
 
 ---
 
 ## Account payloads
 
-`PayloadService` builds the payloads of a list of accounts, used as OPA input, from the `sync-data` section of the
-file referenced by `EXTERNAL_CONFIGURATION` (see `docs/configuration/application/config-files.md`):
+`buildPayloadsStep`, in `PayloadStepConfig`, builds the payloads of the accounts, used as OPA input, from the
+`sync-data` section of the file referenced by `EXTERNAL_CONFIGURATION` (see
+`docs/configuration/application/config-files.md`). It is a Spring Batch chunk step: each chunk of
+`SYNC_PAYLOAD_CHUNK_SIZE` accounts is read, processed and written in its own transaction of `linidTransactionManager`,
+whose persistence context is closed at its end.
 
-- the `mapping` template is checked first, rendered with an empty context and parsed as JSON;
-- each source is read once for all the accounts, with `SourceRepository`, which checks and quotes the source and
-  column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns;
-- the `mapping` is rendered with Jinjava for each account, with the row of the account in each source, and parsed as
-  a JSON object.
+- **Read**: `payloadSourcesReader`, a `PayloadSourcesReader` extending `AbstractPagingItemReader`, reads every
+  account of `account_computed_rights_view` once, with the checksum of its current payload, except the technical
+  account of `sync-api`, by pages of the chunk size, at the first read of each chunk. Each page starts after the last
+  account of the previous one, not at an offset: an account deleted since the previous page does not shift the next
+  ones. For each page, each source is read once with `SourceRepository`, which checks and quotes the source and
+  column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns. The last account read
+  is saved with the step at each commit, so that a restarted step resumes after it.
+- **Process**: `PayloadProcessor` builds the payload with `PayloadService`, which renders the `mapping` with Jinjava,
+  with the row of the account in each source, and parses it as a JSON object. The checksum of the payload is computed
+  with `ChecksumService` on its compact JSON, with its keys sorted at every level and its arrays in their order, and
+  compared with the checksum read with the page: an unchanged payload is filtered out, without reading its row, so it
+  adds no audit row and its rights are not computed again. For a changed payload, the current row of
+  `account_payloads` is read and updated, or a new row is created when the page gave no checksum. An account deleted
+  since its page was read is filtered out, since inserting its row would fail on its foreign key: an account without
+  payload is no longer in the view, and an account with a payload no longer has its row, deleted with it.
+- **Write**: a `JpaItemWriter` persists the new rows; the changed rows, managed by the persistence context of the
+  chunk, are updated. It flushes at the end of each write, so that an error of an insert or an update is raised by
+  the writer rather than at the commit of the chunk.
 
-The reader of the accounts, `payloadAccountsReader` in `PayloadStepConfig`, returns every account of
-`account_computed_rights_view` once, except the technical account of `sync-api`. `SYNC_PAYLOAD_CHUNK_SIZE` sets the
-number of accounts per chunk.
+The `mapping` is checked before the step, rendered with an empty context and parsed as JSON: when it is invalid, the
+step fails before reading any account. An account in error (several rows in a source, template error, rendered text
+that is not a JSON object) raises a `PayloadException`, skipped by the step: it keeps its previous payload. When a
+source cannot be read, the step fails: the current chunk is not written, and the chunks already written stay written.
+`PayloadStepListener`, registered as a listener of the step, checks the `mapping` before it, logs the `payloadError`
+alert of each account skipped, and logs at its end the number of accounts of each `PayloadOutcome`: payloads inserted,
+updated and unchanged, accounts in error or deleted.
 
 ---
 
@@ -179,6 +201,7 @@ OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evalua
 | `LINID_DATABASE_PASSWORD`        | Password of this user                                                            | —                              |
 | `LINID_DATABASE_MAX_POOL_SIZE`   | Maximum number of connections to the linid-api database                          | `5`                            |
 | `SYNC_TECHNICAL_ACCOUNT_ID`      | `act_id` of the technical account shared by the `sync-api` instances             | —                              |
+| `SYNC_INSTANCE_ID`               | Identifier of the instance, written with the rows it writes                      | the host name                  |
 | `SSL_KEY_STORE`                  | Path to the keystore of the server certificate                                   | —                              |
 | `SSL_KEY_STORE_TYPE`             | Keystore type (`PKCS12` or `JKS`)                                                | `PKCS12`                       |
 | `SSL_KEY_PASSWORD`               | Password for the private key and the keystore                                    | —                              |
@@ -190,6 +213,7 @@ OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evalua
 | `SYNC_CRON`                      | Schedule of the global job, as a Spring cron expression                          | `0 0 2 * * *`                  |
 | `SYNC_PAYLOAD_CHUNK_SIZE`        | Number of accounts per chunk of the payload build, in one transaction            | `500`                          |
 | `SYNC_COMPUTE_CHUNK_SIZE`        | Number of account and application pairs computed per chunk                       | `100`                          |
+| `SYNC_JDBC_BATCH_SIZE`           | Number of inserts or updates sent together to the linid-api database             | `50`                           |
 | `OPA_SERVER_URL`                 | Base URL of the OPA server                                                       | `http://opa:8181`              |
 | `OPA_EVALUATION_PATH`            | Path of the result of an application policy, `{code}` being the application code | `/v1/data/authz/{code}/result` |
 | `OPA_CONNECT_TIMEOUT`            | Maximum time to establish the connection to the OPA server, as a duration        | `5s`                           |

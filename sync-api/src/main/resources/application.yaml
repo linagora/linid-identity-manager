@@ -61,6 +61,10 @@ linid:
     hikari:
       pool-name: linid
       maximum-pool-size: ${LINID_DATABASE_MAX_POOL_SIZE:5}
+  jpa:
+    properties:
+      # Number of inserts or updates sent together to the linid-api database, within the transaction of a chunk
+      "[hibernate.jdbc.batch_size]": ${SYNC_JDBC_BATCH_SIZE:50}
 
 sync:
   # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
@@ -71,6 +75,9 @@ sync:
   # act_id of the technical account of sync-api in the linid-api database, shared by its instances and recorded as
   # the author of their writes
   technical-account-id: ${SYNC_TECHNICAL_ACCOUNT_ID}
+  # Identifier of the instance, written with the rows it writes in the linid-api database. The host name by default,
+  # evaluated when the property is injected with @Value
+  instance-id: ${SYNC_INSTANCE_ID:#{T(java.net.InetAddress).getLocalHost().getHostName()}}
   payload:
     # Number of accounts read, built and written per chunk of the payload build, in one transaction
     chunk-size: ${SYNC_PAYLOAD_CHUNK_SIZE:500}

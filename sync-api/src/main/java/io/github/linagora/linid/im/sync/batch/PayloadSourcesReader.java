@@ -28,7 +28,7 @@ package io.github.linagora.linid.im.sync.batch;
 
 import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
+import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
 import io.github.linagora.linid.im.sync.service.AlertService;
@@ -44,14 +44,14 @@ import org.springframework.batch.infrastructure.item.database.AbstractPagingItem
 import org.springframework.data.domain.Limit;
 
 /**
- * Reader of the accounts whose payload is built: reads the accounts of {@code account_computed_rights_view} by pages,
- * and adds to each one its rows in each source.
+ * Reader of {@code buildPayloadsStep}: reads the accounts of {@code account_computed_rights_view} by pages, with the
+ * checksums of their current payloads, and adds to each one its rows in each source.
  *
  * <p>Each page starts after the last account of the previous one, not at an offset: an account deleted since the
  * previous page is no longer in the view, without shifting the next accounts. For each page, each source is read once
  * for all its accounts. With pages of the chunk size, a page is read at the first read of a chunk, in its transaction.
- * An account with several rows in a source is given as it is: the build of its payload rejects it, so that the error
- * names the account.</p>
+ * An account with several rows in a source is given as it is: the processor rejects it, so that the alert names the
+ * account.</p>
  *
  * <p>The last account read is saved in the context of the step at each commit, so that a restarted step resumes
  * after it, whatever the accounts added or deleted in between. The comparison of the accounts is made by
@@ -70,7 +70,7 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
     private static final String LAST_ACCOUNT_KEY = "last.account";
 
     /**
-     * Repository of {@code account_computed_rights_view}, giving the accounts.
+     * Repository of {@code account_computed_rights_view}, giving the accounts and the checksums of their payloads.
      */
     private final AccountComputedRightViewRepository viewRepository;
 
@@ -177,28 +177,29 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
     }
 
     /**
-     * Reads the next page: the next accounts of the view, and their rows in each source.
+     * Reads the next page: the next accounts of the view with the checksums of their current payloads, and their rows
+     * in each source.
      *
      * @throws IllegalStateException naming the source when a source cannot be read, after logging the
      *     {@code sourceUnreadable} alert
      */
     @Override
     protected void doReadPage() {
-        List<AccountIdentity> identities = viewRepository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
+        List<AccountSummary> summaries = viewRepository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
             technicalAccountId, lastPageAccountId, Limit.of(getPageSize()));
-        if (identities.isEmpty()) {
+        if (summaries.isEmpty()) {
             results = List.of();
             return;
         }
-        lastPageAccountId = identities.getLast().actId();
+        lastPageAccountId = summaries.getLast().actId();
 
-        List<UUID> actIds = identities.stream().map(AccountIdentity::actId).toList();
+        List<UUID> actIds = summaries.stream().map(AccountSummary::actId).toList();
         Map<String, Map<UUID, List<Map<String, Object>>>> pageRows = new HashMap<>();
         properties.sources().forEach((source, settings) ->
             pageRows.put(source, readSource(source, settings.accountIdColumn(), actIds)));
 
-        results = identities.stream()
-            .map(identity -> new AccountSnapshot(identity, accountRows(identity.actId(), pageRows)))
+        results = summaries.stream()
+            .map(summary -> new AccountSnapshot(summary, accountRows(summary.actId(), pageRows)))
             .toList();
     }
 

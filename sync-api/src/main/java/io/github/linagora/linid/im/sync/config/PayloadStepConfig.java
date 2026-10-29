@@ -26,18 +26,33 @@
 
 package io.github.linagora.linid.im.sync.config;
 
+import io.github.linagora.linid.im.sync.batch.PayloadProcessor;
 import io.github.linagora.linid.im.sync.batch.PayloadSourcesReader;
+import io.github.linagora.linid.im.sync.batch.PayloadStepListener;
+import io.github.linagora.linid.im.sync.exception.PayloadException;
+import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
+import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
+import jakarta.persistence.EntityManagerFactory;
 import java.util.UUID;
 import org.apache.commons.lang3.Validate;
 import org.springframework.batch.core.configuration.annotation.StepScope;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
+import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * Configuration of the payload build of the accounts: the reader of the accounts and their sources.
+ * Configuration of the payload build of the accounts: the reader of the accounts and their sources, the writer of the
+ * changed payloads, and {@code buildPayloadsStep}, chaining them with the processor building the payloads.
  */
 @Configuration
 public class PayloadStepConfig {
@@ -58,12 +73,17 @@ public class PayloadStepConfig {
     private final SyncDataProperties properties;
 
     /**
+     * Processor building the payloads.
+     */
+    private final PayloadProcessor payloadProcessor;
+
+    /**
      * Identifier of the technical account of {@code sync-api}.
      */
     private final UUID technicalAccountId;
 
     /**
-     * Number of accounts per chunk of the payload build, read by pages of the same size.
+     * Number of accounts read, built and written per chunk, in one transaction.
      */
     private final int chunkSize;
 
@@ -73,8 +93,9 @@ public class PayloadStepConfig {
      * @param repository         the repository of {@code account_computed_rights_view}
      * @param sourceRepository   the repository reading the rows of a source
      * @param properties         the configuration holding the sources
+     * @param payloadProcessor   the processor building the payloads
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
-     * @param chunkSize          the number of accounts per chunk of the payload build
+     * @param chunkSize          the number of accounts read, built and written per chunk
      * @throws NullPointerException     when the technical account is not set, since an empty value is bound as
      *     {@code null}, for which the repository would read every account
      * @throws IllegalArgumentException when the chunk size is not positive
@@ -82,6 +103,7 @@ public class PayloadStepConfig {
     public PayloadStepConfig(final AccountComputedRightViewRepository repository,
                              final SourceRepository sourceRepository,
                              final SyncDataProperties properties,
+                             final PayloadProcessor payloadProcessor,
                              @Value("${sync.technical-account-id}") final UUID technicalAccountId,
                              @Value("${sync.payload.chunk-size}") final int chunkSize) {
         Validate.notNull(technicalAccountId, "sync.technical-account-id must be set");
@@ -89,6 +111,7 @@ public class PayloadStepConfig {
         this.repository = repository;
         this.sourceRepository = sourceRepository;
         this.properties = properties;
+        this.payloadProcessor = payloadProcessor;
         this.technicalAccountId = technicalAccountId;
         this.chunkSize = chunkSize;
     }
@@ -98,9 +121,9 @@ public class PayloadStepConfig {
      * {@code account_computed_rights_view} once, with or without payload, except the technical account of
      * {@code sync-api}, whose payload is never built so that its pairs are never {@code to_compute}.
      *
-     * <p>Step-scoped, so that each execution of the step has its own reader. The accounts and their sources are read by
-     * pages of the chunk size. The reader is an {@code ItemStream}, opened, saved and closed by the step, which saves
-     * the last account read.</p>
+     * <p>Step-scoped, so that each execution of the step has its own reader. The accounts, with the checksums of
+     * their current payloads, and their sources are read by pages of the chunk size. The reader is an
+     * {@code ItemStream}, opened, saved and closed by the step, which saves the last account read.</p>
      *
      * @return the reader of the accounts and their sources, ordered by identifier
      */
@@ -109,4 +132,60 @@ public class PayloadStepConfig {
     public PayloadSourcesReader payloadSourcesReader() {
         return new PayloadSourcesReader(repository, technicalAccountId, chunkSize, properties, sourceRepository);
     }
+
+    /**
+     * Writer of the payloads, saving the rows given by the processor: a new row is persisted, and a changed row,
+     * already managed by the persistence context of the chunk, is updated.
+     *
+     * <p>The writer flushes at the end of each write, as the Spring Batch reference advises for the database writers:
+     * an error of an insert or an update is raised by the writer, not at the commit of the chunk. Hibernate still sends
+     * the statements of the chunk in groups of {@code hibernate.jdbc.batch_size}.</p>
+     *
+     * @param entityManagerFactory the {@code EntityManagerFactory} of the linid-api database
+     * @return the writer of the payloads
+     */
+    @Bean
+    public JpaItemWriter<AccountPayload> payloadWriter(
+        final @Qualifier(LinidDataSourceConfig.QUALIFIER) EntityManagerFactory entityManagerFactory) {
+        return new JpaItemWriterBuilder<AccountPayload>()
+            .entityManagerFactory(entityManagerFactory)
+            .usePersist(true)
+            .build();
+    }
+
+    /**
+     * Step building and writing the payloads of the accounts, by chunks of {@code sync.payload.chunk-size} accounts,
+     * the last one being smaller. Each chunk is read, processed and written in its own transaction of the linid-api
+     * database, whose persistence context is closed at its end.
+     *
+     * <p>An account whose payload cannot be built is skipped, without limit: it keeps its previous payload. When the
+     * {@code mapping} is invalid, the step fails before reading any account. When a source cannot be read, the step
+     * fails: the current chunk is not written, and the chunks already written stay written.</p>
+     *
+     * @param jobRepository       the repository of the Spring Batch executions
+     * @param transactionManager  the transaction manager of the linid-api database
+     * @param payloadStepListener the listener checking the {@code mapping}, alerting on the accounts skipped and
+     *     logging the outcomes of the accounts
+     * @param payloadWriter       the writer of the payloads
+     * @return the step building and writing the payloads
+     */
+    @Bean
+    public Step buildPayloadsStep(
+        final JobRepository jobRepository,
+        final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
+        final PayloadStepListener payloadStepListener,
+        final ItemWriter<AccountPayload> payloadWriter) {
+        return new StepBuilder("buildPayloadsStep", jobRepository)
+            .<AccountSnapshot, AccountPayload>chunk(chunkSize)
+            .transactionManager(transactionManager)
+            .reader(payloadSourcesReader())
+            .processor(payloadProcessor)
+            .writer(payloadWriter)
+            .listener(payloadStepListener)
+            .faultTolerant()
+            .skip(PayloadException.class)
+            .skipLimit(Long.MAX_VALUE)
+            .build();
+    }
+
 }

@@ -28,6 +28,6 @@
  * Spring Batch components of the LinID synchronization API.
  *
  * <p>This package contains the readers, processors and writers of the steps that need more than a reader or a writer
- * built in their configuration, such as the reader of the account payloads.</p>
+ * built in their configuration, such as the processor of the account payloads.</p>
  */
 package io.github.linagora.linid.im.sync.batch;

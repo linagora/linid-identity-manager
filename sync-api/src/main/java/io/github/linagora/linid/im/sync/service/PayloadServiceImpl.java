@@ -33,10 +33,13 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Default implementation of {@link PayloadService}, rendering the {@code mapping} with {@link JinjaService}.
+ * Default implementation of {@link PayloadService}, rendering the {@code mapping} with {@link JinjaService} and
+ * computing the checksums with {@link ChecksumService}.
  */
 @Service
 public class PayloadServiceImpl implements PayloadService {
@@ -63,24 +66,38 @@ public class PayloadServiceImpl implements PayloadService {
     private final JinjaService jinjaService;
 
     /**
+     * Service computing the checksums of the payloads.
+     */
+    private final ChecksumService checksumService;
+
+    /**
      * Mapper parsing the rendered template.
      */
     private final JsonMapper jsonMapper;
 
     /**
+     * Writer serializing a payload as compact JSON, with its keys sorted at every level. The arrays keep their order.
+     */
+    private final ObjectWriter sortedWriter;
+
+    /**
      * Creates the service building the payloads from the configured template.
      *
-     * @param properties   the configuration holding the template of the payloads
-     * @param jinjaService the service rendering the template
-     * @param jsonMapper   the mapper parsing the rendered template
+     * @param properties      the configuration holding the template of the payloads
+     * @param jinjaService    the service rendering the template
+     * @param checksumService the service computing the checksums of the payloads
+     * @param jsonMapper      the mapper parsing the rendered template and serializing the payloads
      */
     public PayloadServiceImpl(
         final SyncDataProperties properties,
         final JinjaService jinjaService,
+        final ChecksumService checksumService,
         final JsonMapper jsonMapper) {
         this.properties = properties;
         this.jinjaService = jinjaService;
+        this.checksumService = checksumService;
         this.jsonMapper = jsonMapper;
+        this.sortedWriter = jsonMapper.writer(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
     }
 
     @Override
@@ -101,6 +118,11 @@ public class PayloadServiceImpl implements PayloadService {
         } catch (RuntimeException e) {
             throw new PayloadException(e.getMessage(), e);
         }
+    }
+
+    @Override
+    public String checksum(final Map<String, Object> payload) {
+        return checksumService.compute(sortedWriter.writeValueAsString(payload));
     }
 
     /**

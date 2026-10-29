@@ -14,7 +14,7 @@ Feature: Test Application details page display
   ## 111 Should display the rules card with no rules
   ## 112 Add rule dialog should close on cancel without creating a rule
   ## 113 Add rule dialog should display required validation errors on empty required fields
-  ## 114 Should create a rule and display it in the list with all its sections
+  ## 114 Should create a rule, display it in the list with all its sections and enable the export button
   ## 115 Edit rule dialog should close on cancel without modifying the rule
   ## 116 Edit rule dialog should display required validation errors on empty required fields
   ## 117 Should edit a rule and display the updated values in the list
@@ -244,7 +244,7 @@ Feature: Test Application details page display
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
-    ## 114 Should create a rule and display it in the list with all its sections
+    ## 114 Should create a rule, display it in the list with all its sections and enable the export button
     When I click on '[data-cy="generic-sortable-list-card_add-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "test-rule" in the HTML element '[data-cy="field_code"]'
@@ -261,6 +261,7 @@ Feature: Test Application details page display
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_button_delete_0"]' to be visible
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to be visible
     And  I expect the HTML element '[data-cy="generic-sortable-list-card_item-0"] [data-cy="field_disabled"]' to have attribute 'aria-checked' with value 'false'
+    And  I expect the HTML element '[data-cy="button_export"]' to be enabled
 
     ## 115 Edit rule dialog should close on cancel without modifying the rule
     When I click on '[data-cy="generic-sortable-list-card_button_edit_0"]'

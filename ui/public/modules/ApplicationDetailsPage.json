@@ -133,6 +133,8 @@
       "props": {
         "itemKey": "id",
         "listenToItemUpdate": "update:item",
+        "emitOnSave": "application-updated",
+        "emitOnCreate": "application-updated",
         "fields": [
           {
             "name": "code",

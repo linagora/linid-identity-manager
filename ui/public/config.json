@@ -12,7 +12,6 @@
       "groups.json"
     ]
   },
-  "immediateActionDelay": 60,
   "themeVariables": {
     "primary": "#0A84FF",
     "secondary": "#7A7781",

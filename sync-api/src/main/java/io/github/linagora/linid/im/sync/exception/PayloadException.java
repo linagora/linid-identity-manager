@@ -30,8 +30,9 @@ package io.github.linagora.linid.im.sync.exception;
  * Exception raised when the payload of an account cannot be built from its data, such as several rows in a source, a
  * template error or a rendered text that is not a JSON object.
  *
- * <p>It only concerns the account. A failure that concerns every account, such as an invalid {@code mapping} or a
- * source that cannot be read, is not a {@code PayloadException}.</p>
+ * <p>It only concerns the account: {@code buildPayloadsStep} skips it, and the account keeps its previous payload. A
+ * failure that concerns every account, such as an invalid {@code mapping} or a source that cannot be read, is not a
+ * {@code PayloadException}, and makes the step fail.</p>
  */
 public class PayloadException extends RuntimeException {
 

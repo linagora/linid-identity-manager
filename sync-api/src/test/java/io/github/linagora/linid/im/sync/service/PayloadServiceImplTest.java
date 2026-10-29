@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.sync.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -39,6 +40,7 @@ import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.exception.PayloadException;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
@@ -62,6 +64,8 @@ class PayloadServiceImplTest {
           "groups": {{ account_payload_view.groups | tojson }}
         }
         """;
+
+    private static final ChecksumService CHECKSUM_SERVICE = new ChecksumServiceImpl();
 
     private final Logger alertLogger = (Logger) LoggerFactory.getLogger(AlertService.class);
 
@@ -158,6 +162,39 @@ class PayloadServiceImplTest {
     }
 
     @Test
+    @DisplayName("checksum should be computed on the compact JSON of the payload, with its keys sorted at every level")
+    void testChecksum() {
+        var service = service("{}");
+
+        assertEquals(CHECKSUM_SERVICE.compute(
+                "{\"account\":{\"email\":\"x@example.com\",\"external_id\":\"x\"},\"groups\":[\"DEV\",\"RND\"]}"),
+            service.checksum(ordered("groups", List.of("DEV", "RND"),
+                "account", ordered("external_id", "x", "email", "x@example.com"))));
+    }
+
+    @Test
+    @DisplayName("checksum should be the same for two payloads that only differ by the order of their keys, at every "
+        + "level")
+    void testChecksum_independentOfKeyOrder() {
+        var service = service("{}");
+
+        assertEquals(
+            service.checksum(ordered("groups", List.of("DEV", "RND"),
+                "account", ordered("email", "x@example.com", "external_id", "x"))),
+            service.checksum(ordered("account", ordered("external_id", "x", "email", "x@example.com"),
+                "groups", List.of("DEV", "RND"))));
+    }
+
+    @Test
+    @DisplayName("checksum should differ for two arrays that only differ by the order of their values")
+    void testChecksum_dependsOnArrayOrder() {
+        var service = service("{}");
+
+        assertNotEquals(service.checksum(Map.of("groups", List.of("DEV", "RND"))),
+            service.checksum(Map.of("groups", List.of("RND", "DEV"))));
+    }
+
+    @Test
     @DisplayName("checkMapping should accept a valid mapping, without alert")
     void testCheckMapping() {
         assertDoesNotThrow(() -> service(MAPPING).checkMapping());
@@ -197,6 +234,17 @@ class PayloadServiceImplTest {
 
     private static PayloadServiceImpl service(final String mapping) {
         return new PayloadServiceImpl(new SyncDataProperties(Map.of(), mapping), new JinjaServiceImpl(),
-            JsonMapper.builder().build());
+            CHECKSUM_SERVICE, JsonMapper.builder().build());
+    }
+
+    /**
+     * Gives a map keeping the order of its keys, unlike {@link Map#of}, whose order changes from one JVM to another.
+     */
+    private static Map<String, Object> ordered(final Object... keysAndValues) {
+        var map = new LinkedHashMap<String, Object>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            map.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return map;
     }
 }

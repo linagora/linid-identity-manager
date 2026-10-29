@@ -26,7 +26,6 @@
 
 package io.github.linagora.linid.im.sync.config;
 
-import io.github.linagora.linid.im.sync.model.syncdata.SyncDataProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 

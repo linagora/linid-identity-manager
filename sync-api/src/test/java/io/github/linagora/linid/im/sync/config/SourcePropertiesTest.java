@@ -24,11 +24,47 @@
  * LinID Identity Manager software.
  */
 
-/**
- * Provides the configuration of the data read to build the account payloads.
- *
- * <p>This package contains the records bound from the {@code sync-data.job} section of the
- * external configuration: the sources read for each account, and the template of the
- * payloads.</p>
- */
-package io.github.linagora.linid.im.sync.model.syncdata;
+package io.github.linagora.linid.im.sync.config;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Map;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.boot.context.properties.bind.Binder;
+import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+
+@DisplayName("Test class: SourceProperties")
+class SourcePropertiesTest {
+
+    @Test
+    @DisplayName("accountIdColumn should keep the configured column")
+    void testAccountIdColumn() {
+        assertEquals("owner_id", new SourceProperties("owner_id").accountIdColumn());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = " ")
+    @DisplayName("accountIdColumn should be act_id when it is not set")
+    void testAccountIdColumn_default(final String accountIdColumn) {
+        assertEquals("act_id", new SourceProperties(accountIdColumn).accountIdColumn());
+    }
+
+    @Test
+    @DisplayName("accountIdColumn should be act_id for a source bound without settings")
+    void testAccountIdColumn_boundWithoutSettings() {
+        // A source written as "accounts: {}" in YAML is bound from an empty value
+        var binder = new Binder(new MapConfigurationPropertySource(Map.of(
+            "sync-data.job.sources.accounts", "",
+            "sync-data.job.sources.phones.account-id-column", "owner_id")));
+
+        var properties = binder.bind("sync-data.job", SyncDataProperties.class).get();
+
+        assertEquals(Map.of("accounts", new SourceProperties("act_id"), "phones", new SourceProperties("owner_id")),
+            properties.sources());
+    }
+}

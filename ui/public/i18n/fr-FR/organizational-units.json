@@ -409,15 +409,180 @@
     }
   },
   "OrganizationalUnitLifecyclePanel": {
-    "success": {
-      "suspended": "Unité organisationnelle suspendue avec succès.",
-      "scheduled": "Suspension planifiée avec succès.",
-      "endUpdated": "Date de fin de suspension mise à jour avec succès.",
-      "reactivated": "L'unité organisationnelle a été réactivée avec succès."
-    },
-    "errors": {
-      "validation": "Données invalides. Veuillez vérifier le formulaire.",
-      "status": "Impossible de mettre à jour le statut de l'unité organisationnelle. Veuillez réessayer plus tard."
+    "LifecycleButtonsCard": {
+      "activation": {
+        "DropdownButton": {
+          "title": "Activation",
+          "reactivation": {
+            "immediate": "Réactivation immédiate"
+          }
+        }
+      },
+      "suspension": {
+        "DropdownButton": {
+          "title": "Suspension",
+          "suspension": {
+            "immediate": "Suspension immédiate",
+            "scheduled": "Planifier la suspension"
+          }
+        }
+      },
+      "submitError": "Impossible de mettre à jour le statut de l'unité organisationnelle. Veuillez réessayer plus tard.",
+      "actions": {
+        "suspension": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Planifier une suspension",
+              "content": "Choisissez une date de début pour la suspension future. Une date de fin est optionnelle.",
+              "ButtonsCard": {
+                "cancel": "Annuler",
+                "confirm": "Planifier",
+                "confirmLoading": "Planification..."
+              },
+              "fields": {
+                "suspensionPeriod": {
+                  "start": {
+                    "label": "Date de début de suspension *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  },
+                  "end": {
+                    "label": "Date de fin de suspension (optionnelle)",
+                    "close": "Fermer",
+                    "validation": {
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour.",
+                      "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
+                    }
+                  }
+                },
+                "reason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif pour la suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "subreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif pour la suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "comment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              }
+            },
+            "submitSuccess": "Suspension planifiée avec succès."
+          },
+          "modify-end": {
+            "FormDialog": {
+              "title": "Modifier la fin de suspension",
+              "content": "Définissez une nouvelle date de fin pour la suspension en cours. Laissez vide pour une suspension sans date de fin.",
+              "ButtonsCard": {
+                "cancel": "Annuler",
+                "confirm": "Mettre à jour",
+                "confirmLoading": "Mise à jour..."
+              },
+              "fields": {
+                "suspensionPeriod": {
+                  "end": {
+                    "label": "Date de fin de suspension (optionnelle)",
+                    "close": "Fermer",
+                    "validation": {
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour.",
+                      "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
+                    }
+                  }
+                },
+                "reason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif pour la suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "subreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif pour la suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "comment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              }
+            },
+            "submitSuccess": "Date de fin de suspension mise à jour avec succès."
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Suspendre l'unité organisationnelle",
+              "content": "Êtes-vous sûr de vouloir suspendre immédiatement cette unité organisationnelle ?",
+              "ButtonsCard": {
+                "cancel": "Annuler",
+                "confirm": "Suspendre",
+                "confirmLoading": "Suspension..."
+              },
+              "fields": {
+                "reason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif pour la suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "subreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif pour la suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "comment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              }
+            },
+            "submitSuccess": "Unité organisationnelle suspendue avec succès."
+          }
+        },
+        "reactivation": {
+          "immediate": {
+            "FormDialog": {
+              "title": "Réactiver l'unité organisationnelle",
+              "content": "Êtes-vous sûr de vouloir réactiver immédiatement cette unité organisationnelle ?",
+              "ButtonsCard": {
+                "cancel": "Annuler",
+                "confirm": "Réactiver",
+                "confirmLoading": "Réactivation..."
+              },
+              "fields": {
+                "comment": {
+                  "label": "Justification *",
+                  "hint": "Fournissez un commentaire obligatoire pour cette réactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                }
+              }
+            },
+            "submitSuccess": "L'unité organisationnelle a été réactivée avec succès."
+          }
+        }
+      },
+      "submitSuccess": "Suspension planifiée avec succès."
     }
   },
   "OrganizationalUnitsPage": {
@@ -431,154 +596,5 @@
   },
   "OrganizationalUnitSuspendedInfoText": {
     "message": "Cette unité organisationnelle sera suspendue le {date}."
-  },
-  "OrganizationalUnitSuspensionActions": {
-    "DropdownButton": {
-      "title": "Suspension",
-      "suspension": {
-        "immediate": "Suspension immédiate",
-        "scheduled": "Planifier la suspension"
-      }
-    }
-  },
-  "OrganizationalUnitActivationActions": {
-    "DropdownButton": {
-      "title": "Activation",
-      "reactivation": {
-        "immediate": "Réactivation immédiate"
-      }
-    }
-  },
-  "OrganizationalUnitSuspendDialog": {
-    "title": "Suspendre l'unité organisationnelle",
-    "content": "Êtes-vous sûr de vouloir suspendre immédiatement cette unité organisationnelle ?",
-    "ButtonsCard": {
-      "cancel": "Annuler",
-      "confirm": "Suspendre",
-      "confirmLoading": "Suspension..."
-    },
-    "fields": {
-      "reason": {
-        "label": "Motif *",
-        "hint": "Sélectionnez un motif pour la suspension.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      },
-      "subreason": {
-        "label": "Sous-motif *",
-        "hint": "Sélectionnez un sous-motif pour la suspension.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      },
-      "comment": {
-        "label": "Justification",
-        "hint": "Ajoutez un commentaire facultatif."
-      }
-    }
-  },
-  "OrganizationalUnitScheduleSuspensionDialog": {
-    "title": "Planifier une suspension",
-    "content": "Choisissez une date de début pour la suspension future. Une date de fin est optionnelle.",
-    "ButtonsCard": {
-      "cancel": "Annuler",
-      "confirm": "Planifier",
-      "confirmLoading": "Planification..."
-    },
-    "fields": {
-      "start": {
-        "label": "Date de début de suspension *",
-        "close": "Fermer",
-        "validation": {
-          "required": "Ce champ est requis.",
-          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-          "afterDate": "La date doit être postérieure à la date du jour."
-        }
-      },
-      "end": {
-        "label": "Date de fin de suspension (optionnelle)",
-        "close": "Fermer",
-        "validation": {
-          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-          "afterDate": "La date doit être postérieure à la date du jour.",
-          "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
-        }
-      },
-      "reason": {
-        "label": "Motif *",
-        "hint": "Sélectionnez un motif pour la suspension.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      },
-      "subreason": {
-        "label": "Sous-motif *",
-        "hint": "Sélectionnez un sous-motif pour la suspension.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      },
-      "comment": {
-        "label": "Justification",
-        "hint": "Ajoutez un commentaire facultatif."
-      }
-    }
-  },
-  "OrganizationalUnitEditSuspensionEndDialog": {
-    "title": "Modifier la fin de suspension",
-    "content": "Définissez une nouvelle date de fin pour la suspension en cours. Laissez vide pour une suspension sans date de fin.",
-    "ButtonsCard": {
-      "cancel": "Annuler",
-      "confirm": "Mettre à jour",
-      "confirmLoading": "Mise à jour..."
-    },
-    "fields": {
-      "end": {
-        "label": "Date de fin de suspension (optionnelle)",
-        "close": "Fermer",
-        "validation": {
-          "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-          "afterDate": "La date doit être postérieure à la date du jour.",
-          "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
-        }
-      },
-      "reason": {
-        "label": "Motif *",
-        "hint": "Sélectionnez un motif pour la suspension.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      },
-      "subreason": {
-        "label": "Sous-motif *",
-        "hint": "Sélectionnez un sous-motif pour la suspension.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      },
-      "comment": {
-        "label": "Justification",
-        "hint": "Ajoutez un commentaire facultatif."
-      }
-    }
-  },
-  "OrganizationalUnitReactivateDialog": {
-    "title": "Réactiver l'unité organisationnelle",
-    "content": "Êtes-vous sûr de vouloir réactiver immédiatement cette unité organisationnelle ?",
-    "ButtonsCard": {
-      "cancel": "Annuler",
-      "confirm": "Réactiver",
-      "confirmLoading": "Réactivation..."
-    },
-    "fields": {
-      "comment": {
-        "label": "Justification *",
-        "hint": "Fournissez un commentaire obligatoire pour cette réactivation.",
-        "validation": {
-          "required": "Ce champ est requis."
-        }
-      }
-    }
   }
 }

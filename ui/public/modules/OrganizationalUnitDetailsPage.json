@@ -66,7 +66,270 @@
     },
     {
       "zone": "moduleOrganizationalUnitDetailsPage.content.before",
-      "component": "OrganizationalUnitLifecyclePanel"
+      "component": "OrganizationalUnitLifecyclePanel",
+      "props": {
+        "immediateActionDelay": 60,
+        "actions": {
+          "suspension.immediate": {
+            "dialog": "form",
+            "url": "/organizational-units/{{ entity.id }}/status/suspend",
+            "method": "PUT",
+            "formFields": [
+              {
+                "name": "reason",
+                "type": "String",
+                "input": "List",
+                "required": true,
+                "inputSettings": {
+                  "values": [
+                    "Suspension Reason A",
+                    "Suspension Reason B",
+                    "Suspension Reason C"
+                  ]
+                }
+              },
+              {
+                "name": "subreason",
+                "type": "String",
+                "input": "List",
+                "required": true,
+                "inputSettings": {
+                  "values": [
+                    {
+                      "value": "Suspension Sub-reason A.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason A"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason A.2",
+                      "filterContext": {
+                        "reason": "Suspension Reason A"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason B.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason B"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason C.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason C"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "comment",
+                "type": "String",
+                "input": "TextArea",
+                "required": false
+              }
+            ],
+            "body": {
+              "suspensionPeriod": {
+                "start": "{{ immediateDate }}"
+              },
+              "reason": "{{ entity.reason }}",
+              "subreason": "{{ entity.subreason }}",
+              "comment": "{{ entity.comment }}"
+            }
+          },
+          "suspension.scheduled": {
+            "dialog": "form",
+            "url": "/organizational-units/{{ entity.id }}/status/suspend",
+            "method": "PUT",
+            "formFields": [
+              {
+                "name": "suspensionPeriod.start",
+                "type": "String",
+                "input": "Date",
+                "required": true,
+                "inputSettings": {
+                  "maskI18NKey": "application.dateFormat",
+                  "valueFormatI18NKey": "application.dateFormatApi",
+                  "options": {
+                    "afterDate": "{{ today }}"
+                  }
+                }
+              },
+              {
+                "name": "suspensionPeriod.end",
+                "type": "String",
+                "input": "Date",
+                "required": false,
+                "inputSettings": {
+                  "maskI18NKey": "application.dateFormat",
+                  "valueFormatI18NKey": "application.dateFormatApi",
+                  "options": {
+                    "afterDate": "{{ today }}",
+                    "fromDate": "{{ entity.suspensionPeriod.start }}"
+                  }
+                }
+              },
+              {
+                "name": "reason",
+                "type": "String",
+                "input": "List",
+                "required": true,
+                "inputSettings": {
+                  "values": [
+                    "Suspension Reason A",
+                    "Suspension Reason B",
+                    "Suspension Reason C"
+                  ]
+                }
+              },
+              {
+                "name": "subreason",
+                "type": "String",
+                "input": "List",
+                "required": true,
+                "inputSettings": {
+                  "values": [
+                    {
+                      "value": "Suspension Sub-reason A.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason A"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason A.2",
+                      "filterContext": {
+                        "reason": "Suspension Reason A"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason B.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason B"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason C.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason C"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "comment",
+                "type": "String",
+                "input": "TextArea",
+                "required": false
+              }
+            ],
+            "body": {
+              "suspensionPeriod": "{{ entity.suspensionPeriod }}",
+              "reason": "{{ entity.reason }}",
+              "subreason": "{{ entity.subreason }}",
+              "comment": "{{ entity.comment }}"
+            }
+          },
+          "suspension.modify-end": {
+            "dialog": "form",
+            "url": "/organizational-units/{{ entity.id }}/status/suspend",
+            "method": "PUT",
+            "fillFormWithEntity": true,
+            "formFields": [
+              {
+                "name": "suspensionPeriod.end",
+                "type": "String",
+                "input": "Date",
+                "required": false,
+                "inputSettings": {
+                  "maskI18NKey": "application.dateFormat",
+                  "valueFormatI18NKey": "application.dateFormatApi",
+                  "options": {
+                    "afterDate": "{{ today }}",
+                    "fromDate": "{{ entity.suspensionPeriod.start }}"
+                  }
+                }
+              },
+              {
+                "name": "reason",
+                "type": "String",
+                "input": "List",
+                "required": true,
+                "inputSettings": {
+                  "values": [
+                    "Suspension Reason A",
+                    "Suspension Reason B",
+                    "Suspension Reason C"
+                  ]
+                }
+              },
+              {
+                "name": "subreason",
+                "type": "String",
+                "input": "List",
+                "required": true,
+                "inputSettings": {
+                  "values": [
+                    {
+                      "value": "Suspension Sub-reason A.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason A"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason A.2",
+                      "filterContext": {
+                        "reason": "Suspension Reason A"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason B.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason B"
+                      }
+                    },
+                    {
+                      "value": "Suspension Sub-reason C.1",
+                      "filterContext": {
+                        "reason": "Suspension Reason C"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "comment",
+                "type": "String",
+                "input": "TextArea",
+                "required": false
+              }
+            ],
+            "body": {
+              "suspensionPeriod": "{{ entity.suspensionPeriod }}",
+              "reason": "{{ entity.reason }}",
+              "subreason": "{{ entity.subreason }}",
+              "comment": "{{ entity.comment }}"
+            }
+          },
+          "reactivation.immediate": {
+            "dialog": "form",
+            "url": "/organizational-units/{{ entity.id }}/status/reactivate",
+            "method": "PUT",
+            "formFields": [
+              {
+                "name": "comment",
+                "type": "String",
+                "input": "TextArea",
+                "required": true
+              }
+            ],
+            "body": {
+              "comment": "{{ entity.comment }}"
+            }
+          }
+        }
+      }
     },
     {
       "zone": "moduleOrganizationalUnitDetailsPage.content.after",

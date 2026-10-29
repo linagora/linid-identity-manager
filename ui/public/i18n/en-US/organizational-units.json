@@ -409,15 +409,180 @@
     }
   },
   "OrganizationalUnitLifecyclePanel": {
-    "success": {
-      "suspended": "Organizational unit successfully suspended.",
-      "scheduled": "Suspension successfully scheduled.",
-      "endUpdated": "Suspension end date successfully updated.",
-      "reactivated": "The organizational unit has been successfully reactivated."
-    },
-    "errors": {
-      "validation": "Invalid data. Please check the form.",
-      "status": "Unable to update the organizational unit status. Please try again later."
+    "LifecycleButtonsCard": {
+      "activation": {
+        "DropdownButton": {
+          "title": "Activation",
+          "reactivation": {
+            "immediate": "Immediate reactivation"
+          }
+        }
+      },
+      "suspension": {
+        "DropdownButton": {
+          "title": "Suspension",
+          "suspension": {
+            "immediate": "Immediate suspension",
+            "scheduled": "Schedule suspension"
+          }
+        }
+      },
+      "submitError": "Unable to update the organizational unit status. Please try again later.",
+      "actions": {
+        "suspension": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Schedule a suspension",
+              "content": "Pick a start date for the future suspension. An end date is optional.",
+              "ButtonsCard": {
+                "cancel": "Cancel",
+                "confirm": "Schedule",
+                "confirmLoading": "Scheduling..."
+              },
+              "fields": {
+                "suspensionPeriod": {
+                  "start": {
+                    "label": "Suspension start date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  },
+                  "end": {
+                    "label": "Suspension end date (optional)",
+                    "close": "Close",
+                    "validation": {
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today.",
+                      "fromDate": "The end date must be on or after {compareTo}."
+                    }
+                  }
+                },
+                "reason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "subreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "comment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              }
+            },
+            "submitSuccess": "Suspension successfully scheduled."
+          },
+          "modify-end": {
+            "FormDialog": {
+              "title": "Edit suspension end",
+              "content": "Set a new end date for the current suspension. Leave empty for an open-ended suspension.",
+              "ButtonsCard": {
+                "cancel": "Cancel",
+                "confirm": "Update",
+                "confirmLoading": "Updating..."
+              },
+              "fields": {
+                "suspensionPeriod": {
+                  "end": {
+                    "label": "Suspension end date (optional)",
+                    "close": "Close",
+                    "validation": {
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today.",
+                      "fromDate": "The end date must be on or after {compareTo}."
+                    }
+                  }
+                },
+                "reason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "subreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "comment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              }
+            },
+            "submitSuccess": "Suspension end date successfully updated."
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Suspend the organizational unit",
+              "content": "Are you sure you want to immediately suspend this organizational unit?",
+              "ButtonsCard": {
+                "cancel": "Cancel",
+                "confirm": "Suspend",
+                "confirmLoading": "Suspending..."
+              },
+              "fields": {
+                "reason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "subreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "comment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              }
+            },
+            "submitSuccess": "Organizational unit successfully suspended."
+          }
+        },
+        "reactivation": {
+          "immediate": {
+            "FormDialog": {
+              "title": "Reactivate the organizational unit",
+              "content": "Are you sure you want to immediately reactivate this organizational unit?",
+              "ButtonsCard": {
+                "cancel": "Cancel",
+                "confirm": "Reactivate",
+                "confirmLoading": "Reactivating..."
+              },
+              "fields": {
+                "comment": {
+                  "label": "Justification *",
+                  "hint": "Provide a mandatory comment for this reactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                }
+              }
+            },
+            "submitSuccess": "The organizational unit has been successfully reactivated."
+          }
+        }
+      },
+      "submitSuccess": "Suspension successfully scheduled."
     }
   },
   "OrganizationalUnitsPage": {
@@ -431,154 +596,5 @@
   },
   "OrganizationalUnitSuspendedInfoText": {
     "message": "This organizational unit will be suspended on {date}."
-  },
-  "OrganizationalUnitSuspensionActions": {
-    "DropdownButton": {
-      "title": "Suspension",
-      "suspension": {
-        "immediate": "Immediate suspension",
-        "scheduled": "Schedule suspension"
-      }
-    }
-  },
-  "OrganizationalUnitActivationActions": {
-    "DropdownButton": {
-      "title": "Activation",
-      "reactivation": {
-        "immediate": "Immediate reactivation"
-      }
-    }
-  },
-  "OrganizationalUnitSuspendDialog": {
-    "title": "Suspend the organizational unit",
-    "content": "Are you sure you want to immediately suspend this organizational unit?",
-    "ButtonsCard": {
-      "cancel": "Cancel",
-      "confirm": "Suspend",
-      "confirmLoading": "Suspending..."
-    },
-    "fields": {
-      "reason": {
-        "label": "Reason *",
-        "hint": "Select a reason for the suspension.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "subreason": {
-        "label": "Sub-reason *",
-        "hint": "Select a sub-reason for the suspension.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "comment": {
-        "label": "Justification",
-        "hint": "Add an optional comment."
-      }
-    }
-  },
-  "OrganizationalUnitScheduleSuspensionDialog": {
-    "title": "Schedule a suspension",
-    "content": "Pick a start date for the future suspension. An end date is optional.",
-    "ButtonsCard": {
-      "cancel": "Cancel",
-      "confirm": "Schedule",
-      "confirmLoading": "Scheduling..."
-    },
-    "fields": {
-      "start": {
-        "label": "Suspension start date *",
-        "close": "Close",
-        "validation": {
-          "required": "This field is required.",
-          "invalidDate": "Invalid date format. Expected format is {format}.",
-          "afterDate": "The date must be after today."
-        }
-      },
-      "end": {
-        "label": "Suspension end date (optional)",
-        "close": "Close",
-        "validation": {
-          "invalidDate": "Invalid date format. Expected format is {format}.",
-          "afterDate": "The date must be after today.",
-          "fromDate": "The end date must be on or after {compareTo}."
-        }
-      },
-      "reason": {
-        "label": "Reason *",
-        "hint": "Select a reason for the suspension.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "subreason": {
-        "label": "Sub-reason *",
-        "hint": "Select a sub-reason for the suspension.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "comment": {
-        "label": "Justification",
-        "hint": "Add an optional comment."
-      }
-    }
-  },
-  "OrganizationalUnitEditSuspensionEndDialog": {
-    "title": "Edit suspension end",
-    "content": "Set a new end date for the current suspension. Leave empty for an open-ended suspension.",
-    "ButtonsCard": {
-      "cancel": "Cancel",
-      "confirm": "Update",
-      "confirmLoading": "Updating..."
-    },
-    "fields": {
-      "end": {
-        "label": "Suspension end date (optional)",
-        "close": "Close",
-        "validation": {
-          "invalidDate": "Invalid date format. Expected format is {format}.",
-          "afterDate": "The date must be after today.",
-          "fromDate": "The end date must be on or after {compareTo}."
-        }
-      },
-      "reason": {
-        "label": "Reason *",
-        "hint": "Select a reason for the suspension.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "subreason": {
-        "label": "Sub-reason *",
-        "hint": "Select a sub-reason for the suspension.",
-        "validation": {
-          "required": "This field is required."
-        }
-      },
-      "comment": {
-        "label": "Justification",
-        "hint": "Add an optional comment."
-      }
-    }
-  },
-  "OrganizationalUnitReactivateDialog": {
-    "title": "Reactivate the organizational unit",
-    "content": "Are you sure you want to immediately reactivate this organizational unit?",
-    "ButtonsCard": {
-      "cancel": "Cancel",
-      "confirm": "Reactivate",
-      "confirmLoading": "Reactivating..."
-    },
-    "fields": {
-      "comment": {
-        "label": "Justification *",
-        "hint": "Provide a mandatory comment for this reactivation.",
-        "validation": {
-          "required": "This field is required."
-        }
-      }
-    }
   }
 }

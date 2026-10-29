@@ -27,20 +27,12 @@
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
-import { mockToDate, mockToDateISO } from '../helpers/mockCommonMapper.js';
 
 const OU_UUID = '11111111-1111-4111-8111-111111111111';
 const CREATOR_UUID = '22222222-2222-4222-8222-222222222222';
 
 vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
-}));
-
-vi.mock('@linagora/lin-pulsar-core', () => ({
-  useCommonMapper: () => ({
-    toDate: mockToDate('YYYY/MM/DD'),
-    toDateISO: mockToDateISO(),
-  }),
 }));
 
 const buildDto = (overrides = {}) => ({
@@ -97,76 +89,6 @@ describe('Test mapper: useOrganizationalUnitMapper', () => {
       expect(result).not.toHaveProperty('id');
       expect(result).not.toHaveProperty('name');
       expect(result).not.toHaveProperty('type');
-    });
-  });
-
-  describe('Test function: toOrganizationalUnitSuspensionRecord', () => {
-    it('should convert localized dates to ISO and keep reason fields', () => {
-      const { toOrganizationalUnitSuspensionRecord } =
-        useOrganizationalUnitMapper();
-
-      const result = toOrganizationalUnitSuspensionRecord({
-        start: '2099/01/01',
-        end: '2099/12/31',
-        reason: 'Suspension Reason A',
-        subreason: 'Suspension Sub-reason A.1',
-        comment: 'planned',
-      });
-
-      expect(result).toEqual({
-        suspensionPeriod: {
-          start: '2099-01-01T00:00:00.000Z',
-          end: '2099-12-31T00:00:00.000Z',
-        },
-        reason: 'Suspension Reason A',
-        subreason: 'Suspension Sub-reason A.1',
-        comment: 'planned',
-      });
-    });
-
-    it('should keep an already ISO start untouched and collapse empty values to null', () => {
-      const { toOrganizationalUnitSuspensionRecord } =
-        useOrganizationalUnitMapper();
-
-      const result = toOrganizationalUnitSuspensionRecord({
-        start: '2099-01-01T00:00:00Z',
-        end: '',
-        reason: null,
-        subreason: null,
-        comment: null,
-      });
-
-      expect(result).toEqual({
-        suspensionPeriod: {
-          start: '2099-01-01T00:00:00Z',
-          end: null,
-        },
-        reason: '',
-        subreason: '',
-        comment: null,
-      });
-    });
-  });
-
-  describe('Test function: toOrganizationalUnitReactivationRecord', () => {
-    it('should map the comment into the reactivation record', () => {
-      const { toOrganizationalUnitReactivationRecord } =
-        useOrganizationalUnitMapper();
-
-      const result = toOrganizationalUnitReactivationRecord({
-        comment: 'Merger completed',
-      });
-
-      expect(result).toEqual({ comment: 'Merger completed' });
-    });
-
-    it('should coerce a missing comment to an empty string', () => {
-      const { toOrganizationalUnitReactivationRecord } =
-        useOrganizationalUnitMapper();
-
-      expect(toOrganizationalUnitReactivationRecord({})).toEqual({
-        comment: '',
-      });
     });
   });
 });

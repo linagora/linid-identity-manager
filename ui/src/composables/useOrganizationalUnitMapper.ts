@@ -24,25 +24,18 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from '@linagora/lin-pulsar-core';
-import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
   OrganizationalUnitDTO,
-  OrganizationalUnitReactivationRecord,
   OrganizationalUnitStatus,
-  OrganizationalUnitStatusForm,
-  OrganizationalUnitSuspensionRecord,
 } from 'src/types/organizationalUnits';
 
 /**
- * Composable providing utility functions to work with organizational units: convert form values to API records, and
- * project an {@link OrganizationalUnitDTO} into its status view.
+ * Composable providing utility functions to work with organizational units: project an {@link OrganizationalUnitDTO}
+ * into its status view.
  *
  * @returns An object containing the mapping functions for organizational units.
  */
 export function useOrganizationalUnitMapper() {
-  const { toDate, toDateISO } = useCommonMapper();
-
   /**
    * Maps an {@link OrganizationalUnitDTO} to an {@link OrganizationalUnitStatus}, exposing only the suspension lifecycle
    * fields as raw ISO strings.
@@ -59,63 +52,7 @@ export function useOrganizationalUnitMapper() {
     };
   };
 
-  /**
-   * Converts an {@link OrganizationalUnitStatusForm} into an {@link OrganizationalUnitSuspensionRecord} ready to be sent
-   * to the backend. Localized start / end dates are normalized to ISO 8601 strings; empty values collapse to `null`.
-   *
-   * @param form Flattened lifecycle form values.
-   * @returns Suspension record with an ISO suspension period.
-   */
-  const toOrganizationalUnitSuspensionRecord = (
-    form: OrganizationalUnitStatusForm
-  ): OrganizationalUnitSuspensionRecord => {
-    return {
-      suspensionPeriod: {
-        start: toDateISO(form.start, DATE_FORMAT_KEY) || null,
-        end: toDateISO(form.end, DATE_FORMAT_KEY) || null,
-      },
-      reason: form.reason || '',
-      subreason: form.subreason || '',
-      comment: form.comment || null,
-    };
-  };
-
-  /**
-   * Converts an {@link OrganizationalUnitStatusForm} into an {@link OrganizationalUnitReactivationRecord} carrying the
-   * mandatory comment.
-   *
-   * @param form Flattened lifecycle form values.
-   * @returns Reactivation record ready to be sent to the backend.
-   */
-  const toOrganizationalUnitReactivationRecord = (
-    form: OrganizationalUnitStatusForm
-  ): OrganizationalUnitReactivationRecord => {
-    return {
-      comment: form.comment || '',
-    };
-  };
-
-  /**
-   * Flattens an {@link OrganizationalUnitStatus} into an {@link OrganizationalUnitStatusForm} to pre-fill the "modify"
-   * dialog with the existing suspension period bounds. The reason / sub-reason / comment fields are intentionally left
-   * empty: the read model no longer carries a generic status reason, and a modification expects a fresh justification.
-   *
-   * @param status The current organizational unit status providing the existing period bounds.
-   * @returns The flattened form values with localized suspension period dates.
-   */
-  const toOrganizationalUnitStatusForm = (
-    status: OrganizationalUnitStatus
-  ): OrganizationalUnitStatusForm => {
-    return {
-      start: toDate(status.suspensionPeriod?.start, DATE_FORMAT_KEY) || null,
-      end: toDate(status.suspensionPeriod?.end, DATE_FORMAT_KEY) || null,
-    };
-  };
-
   return {
     toOrganizationalUnitStatus,
-    toOrganizationalUnitSuspensionRecord,
-    toOrganizationalUnitReactivationRecord,
-    toOrganizationalUnitStatusForm,
   };
 }

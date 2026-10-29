@@ -34,8 +34,8 @@
     <OrganizationalUnitSuspendedBanner
       v-if="lifecycleUi.showSuspendedBanner"
       :organizational-unit-status="organizationalUnitStatus"
-      @clear-suspension="onClearSuspension"
-      @modify-suspension-end="onModifySuspensionEnd"
+      @clear-suspension="runCardAction('reactivation.immediate')"
+      @modify-suspension-end="runCardAction('suspension.modify-end')"
     />
 
     <OrganizationalUnitSuspendedInfoText
@@ -43,59 +43,33 @@
       :organizational-unit-status="organizationalUnitStatus"
     />
 
-    <div
-      v-if="hasAnyLifecycleAction"
-      class="row q-gutter-x-sm organizational-unit-lifecycle-panel--actions"
-      data-cy="organizational-unit-lifecycle-actions"
-    >
-      <component
-        :is="dropdownButton"
-        v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
-        :ui-namespace="`${uiNamespace}.activation-actions`"
-        i18n-scope="OrganizationalUnitActivationActions"
-        :items="lifecycleUi.activationMenuItems"
-        data-cy="organizational-unit-activation-actions"
-        @item-click="onLifecycleActionClick"
-      />
-      <component
-        :is="dropdownButton"
-        v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
-        :ui-namespace="`${uiNamespace}.suspension-actions`"
-        i18n-scope="OrganizationalUnitSuspensionActions"
-        :items="lifecycleUi.suspensionMenuItems"
-        data-cy="organizational-unit-suspension-actions"
-        @item-click="onLifecycleActionClick"
-      />
-    </div>
+    <component
+      :is="lifecycleButtonsCard"
+      v-if="lifecycleButtonsCard"
+      :ui-namespace="uiNamespace"
+      :i18n-scope="i18nScope"
+      :entity="entity"
+      :items="lifecycleItems"
+      :buttons="buttons"
+      :actions="actions"
+      :immediate-action-delay="immediateActionDelay"
+      :emit-on-submit="ORGANIZATIONAL_UNIT_STATUS_UPDATED_EVENT"
+      :trigger-action-on="ORGANIZATIONAL_UNIT_LIFECYCLE_ACTION_EVENT"
+    />
   </div>
   <!-- v8 ignore stop -->
 </template>
 
 <script setup lang="ts">
-import type { DropdownClickPayload } from '@linagora/lin-pulsar-core';
-import {
-  loadAsyncComponent,
-  uiEventSubject,
-  useNotify,
-  useScopedI18n,
-} from '@linagora/lin-pulsar-core';
-import axios from 'axios';
-import { appConfig } from 'boot/config';
-import { dayjs } from 'src/boot/dayjs';
+import { loadAsyncComponent, uiEventSubject } from '@linagora/lin-pulsar-core';
 import OrganizationalUnitSuspendedBanner from 'src/components/banner/OrganizationalUnitSuspendedBanner.vue';
 import OrganizationalUnitSuspendedInfoText from 'src/components/text/OrganizationalUnitSuspendedInfoText.vue';
-import { useLifecycleDialogs } from 'src/composables/useLifecycleDialogs';
 import { useOrganizationalUnitLifecycleUi } from 'src/composables/useOrganizationalUnitLifecycleUi';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
-import {
-  reactivateOrganizationalUnit,
-  suspendOrganizationalUnit,
-} from 'src/services/OrganizationalUnitService';
 import type { OrganizationalUnitLifecyclePanelProps } from 'src/types/organizationalUnitLifecyclePanelProps';
 import type {
   OrganizationalUnitDTO,
   OrganizationalUnitStatus,
-  OrganizationalUnitStatusForm,
 } from 'src/types/organizationalUnits';
 import { computed } from 'vue';
 
@@ -107,20 +81,13 @@ const props = defineProps<OrganizationalUnitLifecyclePanelProps>();
 const ORGANIZATIONAL_UNIT_STATUS_UPDATED_EVENT =
   'organizational-unit-status-updated';
 
+/** UI event key asking the lifecycle buttons card to run one of its configured actions. */
+const ORGANIZATIONAL_UNIT_LIFECYCLE_ACTION_EVENT =
+  'organizational-unit-lifecycle-action';
+
 const i18nScope = 'OrganizationalUnitLifecyclePanel';
-const organizationalUnitLifecycleUiConfiguration =
-  appConfig.organizationalUnitLifecycleFields;
 
-const { t } = useScopedI18n(i18nScope);
-const { Notify } = useNotify();
-const {
-  toOrganizationalUnitStatus,
-  toOrganizationalUnitStatusForm,
-  toOrganizationalUnitSuspensionRecord,
-  toOrganizationalUnitReactivationRecord,
-} = useOrganizationalUnitMapper();
-
-const organizationalUnitId = computed(() => props.entity.id as string);
+const { toOrganizationalUnitStatus } = useOrganizationalUnitMapper();
 
 const organizationalUnitStatus = computed<OrganizationalUnitStatus | null>(
   () =>
@@ -133,162 +100,25 @@ const organizationalUnitStatus = computed<OrganizationalUnitStatus | null>(
 
 const lifecycleUi = useOrganizationalUnitLifecycleUi(organizationalUnitStatus);
 
-const dropdownButton = loadAsyncComponent('LinPulsar/DropdownButton');
-
-const { openFormDialog } = useLifecycleDialogs(props.uiNamespace);
-
-const hasAnyLifecycleAction = computed(() =>
-  Boolean(
-    lifecycleUi.value?.activationMenuItems?.length ||
-    lifecycleUi.value?.suspensionMenuItems?.length
-  )
+const lifecycleButtonsCard = loadAsyncComponent(
+  'LinPulsar/LifecycleButtonsCard'
 );
 
-const actionDelay: number =
-  appConfig?.immediateActionDelay > 0 ? appConfig.immediateActionDelay : 5;
+/** Menu items of the lifecycle buttons card, indexed by lifecycle button type. */
+const lifecycleItems = computed(() => ({
+  activation: lifecycleUi.value?.activationMenuItems,
+  suspension: lifecycleUi.value?.suspensionMenuItems,
+}));
 
 /**
- * Dispatches a lifecycle action key (emitted by the dropdown button) to the matching dialog opening function.
+ * Asks the lifecycle buttons card to run one of its configured actions, for the actions offered by the banner.
  *
- * @param event - Click event payload emitted by the dropdown button.
- * @param event.key - Dotted lifecycle action key to dispatch, for example "suspension.immediate".
+ * @param key - The lifecycle action key, for example `suspension.modify-end`.
  */
-function onLifecycleActionClick(event: DropdownClickPayload): void {
-  switch (event.key) {
-    case 'suspension.immediate':
-      openImmediateSuspensionDialog();
-      break;
-    case 'suspension.scheduled':
-      openScheduleSuspensionDialog();
-      break;
-    case 'reactivation.immediate':
-      onClearSuspension();
-      break;
-  }
-}
-
-/**
- * Opens the form dialog for an immediate suspension. Collects a reason, sub-reason and optional comment, then submits a
- * suspension period starting shortly from now with no end date.
- */
-function openImmediateSuspensionDialog(): void {
-  openFormDialog({
-    i18nScope: 'OrganizationalUnitSuspendDialog',
-    formFields:
-      organizationalUnitLifecycleUiConfiguration['suspension.immediate'],
-    onSubmit: (formData: OrganizationalUnitStatusForm) =>
-      submitStatus(
-        () =>
-          suspendOrganizationalUnit(
-            organizationalUnitId.value,
-            toOrganizationalUnitSuspensionRecord({
-              ...formData,
-              start: dayjs().add(actionDelay, 'minute').toISOString(),
-            })
-          ),
-        'success.suspended'
-      ),
+function runCardAction(key: string): void {
+  uiEventSubject.next({
+    key: ORGANIZATIONAL_UNIT_LIFECYCLE_ACTION_EVENT,
+    data: { key },
   });
-}
-
-/** Opens the form dialog for scheduling a future suspension. */
-function openScheduleSuspensionDialog(): void {
-  openFormDialog({
-    i18nScope: 'OrganizationalUnitScheduleSuspensionDialog',
-    formFields:
-      organizationalUnitLifecycleUiConfiguration['suspension.scheduled'],
-    onSubmit: (formData: OrganizationalUnitStatusForm) =>
-      submitStatus(
-        () =>
-          suspendOrganizationalUnit(
-            organizationalUnitId.value,
-            toOrganizationalUnitSuspensionRecord(formData)
-          ),
-        'success.scheduled'
-      ),
-  });
-}
-
-/**
- * Opens the form dialog for reactivating a suspended organizational unit. The backend lifts the suspension by setting
- * its end to now.
- */
-function onClearSuspension(): void {
-  openFormDialog({
-    i18nScope: 'OrganizationalUnitReactivateDialog',
-    formFields:
-      organizationalUnitLifecycleUiConfiguration['reactivation.immediate'],
-    onSubmit: (formData: OrganizationalUnitStatusForm) =>
-      submitStatus(
-        () =>
-          reactivateOrganizationalUnit(
-            organizationalUnitId.value,
-            toOrganizationalUnitReactivationRecord(formData)
-          ),
-        'success.reactivated'
-      ),
-  });
-}
-
-/**
- * Opens the form dialog for modifying the suspension end date while the OU is currently suspended, pre-filled with the
- * existing suspension period bounds.
- */
-function onModifySuspensionEnd(): void {
-  const currentStart =
-    organizationalUnitStatus.value?.suspensionPeriod?.start ?? null;
-  if (currentStart == null) {
-    return;
-  }
-
-  openFormDialog({
-    i18nScope: 'OrganizationalUnitEditSuspensionEndDialog',
-    formFields:
-      organizationalUnitLifecycleUiConfiguration['suspension.modify-end'],
-    initialFormData: organizationalUnitStatus.value
-      ? toOrganizationalUnitStatusForm(organizationalUnitStatus.value)
-      : undefined,
-    onSubmit: (formData: OrganizationalUnitStatusForm) =>
-      submitStatus(
-        () =>
-          suspendOrganizationalUnit(
-            organizationalUnitId.value,
-            toOrganizationalUnitSuspensionRecord({
-              ...formData,
-              start: currentStart,
-            })
-          ),
-        'success.endUpdated'
-      ),
-  });
-}
-
-/**
- * Runs a status-update API call, then notifies the hosting details page through a UI event so it reloads the entity.
- * Surfaces a positive notification on success and a negative one on failure.
- *
- * @param statusUpdate - The status-mutation service call to execute, resolving to the updated OU DTO.
- * @param successKey - The i18n key used for the success notification.
- * @returns A promise that resolves once the OU status has been updated and the reload event has been emitted.
- */
-async function submitStatus(
-  statusUpdate: () => Promise<OrganizationalUnitDTO>,
-  successKey: string
-): Promise<void> {
-  try {
-    const dto = await statusUpdate();
-    uiEventSubject.next({
-      key: ORGANIZATIONAL_UNIT_STATUS_UPDATED_EVENT,
-      data: dto,
-    });
-    Notify({ type: 'positive', message: t(successKey) });
-  } catch (error) {
-    const errorMessageKey =
-      axios.isAxiosError(error) && error.response?.status === 400
-        ? 'errors.validation'
-        : 'errors.status';
-    Notify({ type: 'negative', message: t(errorMessageKey) });
-    throw error;
-  }
 }
 </script>

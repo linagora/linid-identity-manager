@@ -24,8 +24,6 @@
  * LinID Identity Manager software.
  */
 
-import type { LinPulsarAttributeConfiguration } from '@linagora/lin-pulsar-core';
-import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 import type { Remote } from './remotes';
 import type { ThemeVariables } from './theme';
 
@@ -62,15 +60,4 @@ export interface AppConfig {
   extraZones?: string[];
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
-
-  // ─── Organizational units ────────────────────────────────────────────────────
-
-  /**
-   * Form field configurations for each OU lifecycle action dialog, keyed by action identifier (e.g.
-   * `"suspension.immediate"`, `"suspension.scheduled"`).
-   */
-  organizationalUnitLifecycleFields: Record<
-    OrganizationalUnitLifecycleAction,
-    LinPulsarAttributeConfiguration[]
-  >;
 }

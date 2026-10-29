@@ -63,9 +63,9 @@ const project = (status) => {
 };
 
 const expectMenuItems = (ui, { activation, suspension, deactivation } = {}) => {
-  expect(ui?.activationMenuItems).toEqual(activation);
-  expect(ui?.suspensionMenuItems).toEqual(suspension);
-  expect(ui?.deactivationMenuItems).toEqual(deactivation);
+  expect(ui?.menuItems?.activation).toEqual(activation);
+  expect(ui?.menuItems?.suspension).toEqual(suspension);
+  expect(ui?.menuItems?.deactivation).toEqual(deactivation);
 };
 
 const item = (key) => ({ key, clickable: true });

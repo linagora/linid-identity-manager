@@ -24,7 +24,6 @@
  * LinID Identity Manager software.
  */
 
-import type { MenuItem } from '@linagora/lin-pulsar-core';
 import { useCommonMapper } from '@linagora/lin-pulsar-core';
 import type {
   OrganizationalUnitLifecycleAction,
@@ -51,38 +50,24 @@ export function useOrganizationalUnitLifecycleUi(
   const { toDayJs } = useCommonMapper();
 
   /**
-   * Result of {@link toMenuItemsByGroup}, exposing one optional menu items list per action group. Missing properties
-   * indicate empty groups.
-   */
-  interface MenuItemsByGroup {
-    /** Menu items for the suspension dropdown. */
-    suspension?: MenuItem[];
-    /** Menu items for the activation dropdown. */
-    activation?: MenuItem[];
-  }
-
-  /**
-   * Builds the per-dropdown menu items from the given ordered list of actions. Reactivation actions are grouped under
-   * activation.
+   * Builds the menu items of the lifecycle buttons card from the given ordered list of actions, indexed by lifecycle
+   * button type. Reactivation actions are grouped under activation, the others under suspension.
    *
    * @param actions - Ordered list of dotted action keys to expose.
-   * @returns Menu items split by group; missing entries when a group is empty.
+   * @returns Menu items indexed by button type; no entry for a type without action.
    */
-  function toMenuItemsByGroup(
+  function toMenuItemsByType(
     actions: OrganizationalUnitLifecycleAction[]
-  ): MenuItemsByGroup {
-    const groups = new Map<'suspension' | 'activation', MenuItem[]>();
+  ): NonNullable<OrganizationalUnitLifecycleUi['menuItems']> {
+    const menuItems: NonNullable<OrganizationalUnitLifecycleUi['menuItems']> =
+      {};
     for (const action of actions) {
-      const prefix = action.split('.')[0] as string;
-      const group = prefix === 'reactivation' ? 'activation' : 'suspension';
-      const items = groups.get(group) ?? [];
-      items.push({ key: action, clickable: true });
-      groups.set(group, items);
+      const type = action.startsWith('reactivation.')
+        ? 'activation'
+        : 'suspension';
+      (menuItems[type] ??= []).push({ key: action, clickable: true });
     }
-    return {
-      suspension: groups.get('suspension'),
-      activation: groups.get('activation'),
-    };
+    return menuItems;
   }
 
   /**
@@ -90,18 +75,13 @@ export function useOrganizationalUnitLifecycleUi(
    *
    * @param base - Visual flags (badge, banner, info text) for this case.
    * @param actions - Ordered list of dotted action keys.
-   * @returns The full UI projection with the dropdown menu item lists.
+   * @returns The full UI projection with the menu items of the lifecycle buttons card.
    */
   function withActions(
     base: OrganizationalUnitLifecycleUi,
     actions: OrganizationalUnitLifecycleAction[]
   ): OrganizationalUnitLifecycleUi {
-    const { suspension, activation } = toMenuItemsByGroup(actions);
-    return {
-      ...base,
-      suspensionMenuItems: suspension,
-      activationMenuItems: activation,
-    };
+    return { ...base, menuItems: toMenuItemsByType(actions) };
   }
 
   /**

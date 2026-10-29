@@ -49,7 +49,7 @@
       :ui-namespace="uiNamespace"
       :i18n-scope="i18nScope"
       :entity="entity"
-      :items="lifecycleItems"
+      :items="lifecycleUi.menuItems ?? {}"
       :buttons="buttons"
       :actions="actions"
       :immediate-action-delay="immediateActionDelay"
@@ -103,12 +103,6 @@ const lifecycleUi = useOrganizationalUnitLifecycleUi(organizationalUnitStatus);
 const lifecycleButtonsCard = loadAsyncComponent(
   'LinPulsar/LifecycleButtonsCard'
 );
-
-/** Menu items of the lifecycle buttons card, indexed by lifecycle button type. */
-const lifecycleItems = computed(() => ({
-  activation: lifecycleUi.value?.activationMenuItems,
-  suspension: lifecycleUi.value?.suspensionMenuItems,
-}));
 
 /**
  * Asks the lifecycle buttons card to run one of its configured actions, for the actions offered by the banner.

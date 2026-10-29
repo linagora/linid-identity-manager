@@ -24,7 +24,6 @@
  * LinID Identity Manager software.
  */
 
-import type { MenuItem } from '@linagora/lin-pulsar-core';
 import { useCommonMapper } from '@linagora/lin-pulsar-core';
 import type {
   AccountLifecycleAction,
@@ -89,48 +88,26 @@ export function useAccountLifecycleUi(
   }
 
   /**
-   * Result of {@link toMenuItemsByGroup}, exposing one optional menu items list per action group. Missing properties
-   * indicate empty groups.
-   */
-  interface MenuItemsByGroup {
-    /** Menu items for the activation dropdown. */
-    activation?: MenuItem[];
-    /** Menu items for the suspension dropdown. */
-    suspension?: MenuItem[];
-    /** Menu items for the deactivation dropdown. */
-    deactivation?: MenuItem[];
-  }
-
-  /**
-   * Builds the per-dropdown menu items from the given ordered list of actions. Actions are dispatched into three groups
-   * (activation, suspension, deactivation) so the page renders one dropdown per group with its own label and colour.
-   * Reactivation actions are grouped under activation.
+   * Builds the menu items of the lifecycle buttons card from the given ordered list of actions, indexed by lifecycle
+   * button type (activation, suspension, deactivation) so the card renders one dropdown per type with its own label and
+   * colour. Reactivation actions are grouped under activation.
    *
    * @param actions - Ordered list of dotted action keys to expose.
-   * @returns Menu items split by group; missing entries when a group is empty.
+   * @returns Menu items indexed by button type; no entry for a type without action.
    */
-  function toMenuItemsByGroup(
+  function toMenuItemsByType(
     actions: AccountLifecycleAction[]
-  ): MenuItemsByGroup {
-    const groups = new Map<
-      'activation' | 'suspension' | 'deactivation',
-      MenuItem[]
-    >();
+  ): NonNullable<AccountLifecycleUi['menuItems']> {
+    const menuItems: NonNullable<AccountLifecycleUi['menuItems']> = {};
     for (const action of actions) {
       const prefix = action.split('.')[0] as string;
-      const group =
+      const type =
         prefix === 'reactivation'
           ? 'activation'
           : (prefix as 'activation' | 'suspension' | 'deactivation');
-      const items = groups.get(group) ?? [];
-      items.push({ key: action, clickable: true });
-      groups.set(group, items);
+      (menuItems[type] ??= []).push({ key: action, clickable: true });
     }
-    return {
-      activation: groups.get('activation'),
-      suspension: groups.get('suspension'),
-      deactivation: groups.get('deactivation'),
-    };
+    return menuItems;
   }
 
   /**
@@ -138,20 +115,13 @@ export function useAccountLifecycleUi(
    *
    * @param base - Visual flags (badge, banners, info texts) for this case.
    * @param actions - Ordered list of dotted action keys.
-   * @returns The full UI projection with the three dropdown menu item lists.
+   * @returns The full UI projection with the menu items of the lifecycle buttons card.
    */
   function withActions(
     base: AccountLifecycleUi,
     actions: AccountLifecycleAction[]
   ): AccountLifecycleUi {
-    const { activation, suspension, deactivation } =
-      toMenuItemsByGroup(actions);
-    return {
-      ...base,
-      activationMenuItems: activation,
-      suspensionMenuItems: suspension,
-      deactivationMenuItems: deactivation,
-    };
+    return { ...base, menuItems: toMenuItemsByType(actions) };
   }
 
   /**

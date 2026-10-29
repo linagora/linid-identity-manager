@@ -115,42 +115,14 @@ describe('Test component: AccountLifecyclePanel', () => {
       const ui = wrapper.vm.lifecycleUi;
       expect(ui).not.toBeNull();
       expect(ui.showBadge).toBe(true);
-      expect(ui.suspensionMenuItems).toEqual([
+      expect(ui.menuItems.suspension).toEqual([
         { key: 'suspension.immediate', clickable: true },
         { key: 'suspension.scheduled', clickable: true },
       ]);
-      expect(ui.deactivationMenuItems).toEqual([
+      expect(ui.menuItems.deactivation).toEqual([
         { key: 'deactivation.immediate', clickable: true },
         { key: 'deactivation.scheduled', clickable: true },
       ]);
-    });
-  });
-
-  describe('Test computed: lifecycleItems', () => {
-    it('should be empty while the entity is not resolved', () => {
-      wrapper = mountPanel({});
-
-      expect(wrapper.vm.lifecycleItems).toEqual({
-        activation: undefined,
-        suspension: undefined,
-        deactivation: undefined,
-      });
-    });
-
-    it('should index the menu items of the lifecycle UI by button type', () => {
-      wrapper = mountPanel();
-
-      expect(wrapper.vm.lifecycleItems).toEqual({
-        activation: undefined,
-        suspension: [
-          { key: 'suspension.immediate', clickable: true },
-          { key: 'suspension.scheduled', clickable: true },
-        ],
-        deactivation: [
-          { key: 'deactivation.immediate', clickable: true },
-          { key: 'deactivation.scheduled', clickable: true },
-        ],
-      });
     });
   });
 

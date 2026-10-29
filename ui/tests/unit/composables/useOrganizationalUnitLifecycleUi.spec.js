@@ -81,11 +81,12 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
 
       expect(ui).toEqual({
         showBadge: true,
-        suspensionMenuItems: [
-          item('suspension.immediate'),
-          item('suspension.scheduled'),
-        ],
-        activationMenuItems: undefined,
+        menuItems: {
+          suspension: [
+            item('suspension.immediate'),
+            item('suspension.scheduled'),
+          ],
+        },
       });
     });
   });
@@ -102,11 +103,12 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
       expect(ui).toEqual({
         showBadge: true,
         showWillSuspendInfoText: true,
-        suspensionMenuItems: [
-          item('suspension.immediate'),
-          item('suspension.scheduled'),
-        ],
-        activationMenuItems: undefined,
+        menuItems: {
+          suspension: [
+            item('suspension.immediate'),
+            item('suspension.scheduled'),
+          ],
+        },
       });
     });
 
@@ -119,7 +121,7 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
       );
 
       expect(ui.showWillSuspendInfoText).toBeFalsy();
-      expect(ui.suspensionMenuItems).toEqual([
+      expect(ui.menuItems.suspension).toEqual([
         item('suspension.immediate'),
         item('suspension.scheduled'),
       ]);
@@ -138,8 +140,7 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
       expect(ui).toEqual({
         showBadge: true,
         showSuspendedBanner: true,
-        suspensionMenuItems: undefined,
-        activationMenuItems: undefined,
+        menuItems: {},
       });
     });
 

@@ -25,6 +25,7 @@
  */
 
 import type { MenuItem } from '@linagora/lin-pulsar-core';
+import type { LifecycleButton } from 'src/types/common';
 
 /**
  * Whitelist of dotted lifecycle action keys exposed in the OU dropdowns and banner buttons.
@@ -59,13 +60,9 @@ export interface OrganizationalUnitLifecycleUi {
   /** True when the yellow "will be suspended on …" info text must be rendered (suspension scheduled in the future). */
   showWillSuspendInfoText?: boolean;
   /**
-   * Menu items for the suspension dropdown. Undefined when no suspension action applies to the current state, for
-   * example when already suspended.
+   * Menu items of the lifecycle buttons card, indexed by lifecycle button type, the reactivation actions being grouped
+   * under activation. A type has no entry when none of its actions applies, for example the suspension when already
+   * suspended.
    */
-  suspensionMenuItems?: MenuItem[];
-  /**
-   * Menu items for the activation/reactivation dropdown. Undefined when no activation action applies, for example when
-   * the OU is not suspended.
-   */
-  activationMenuItems?: MenuItem[];
+  menuItems?: Partial<Record<LifecycleButton['type'], MenuItem[]>>;
 }

@@ -112,11 +112,11 @@ describe('Test component: OrganizationalUnitLifecyclePanel', () => {
       const ui = wrapper.vm.lifecycleUi;
       expect(ui.showBadge).toBe(true);
       expect(ui.showSuspendedBanner).toBeUndefined();
-      expect(ui.suspensionMenuItems).toEqual([
+      expect(ui.menuItems.suspension).toEqual([
         { key: 'suspension.immediate', clickable: true },
         { key: 'suspension.scheduled', clickable: true },
       ]);
-      expect(ui.activationMenuItems).toBeUndefined();
+      expect(ui.menuItems.activation).toBeUndefined();
     });
 
     it('should expose the suspended banner without dropdown actions for a suspended entity', () => {
@@ -124,31 +124,8 @@ describe('Test component: OrganizationalUnitLifecyclePanel', () => {
 
       const ui = wrapper.vm.lifecycleUi;
       expect(ui.showSuspendedBanner).toBe(true);
-      expect(ui.suspensionMenuItems).toBeUndefined();
-      expect(ui.activationMenuItems).toBeUndefined();
-    });
-  });
-
-  describe('Test computed: lifecycleItems', () => {
-    it('should be empty while the entity is not resolved', () => {
-      wrapper = mountPanel({});
-
-      expect(wrapper.vm.lifecycleItems).toEqual({
-        activation: undefined,
-        suspension: undefined,
-      });
-    });
-
-    it('should index the menu items of the lifecycle UI by button type', () => {
-      wrapper = mountPanel();
-
-      expect(wrapper.vm.lifecycleItems).toEqual({
-        activation: undefined,
-        suspension: [
-          { key: 'suspension.immediate', clickable: true },
-          { key: 'suspension.scheduled', clickable: true },
-        ],
-      });
+      expect(ui.menuItems.suspension).toBeUndefined();
+      expect(ui.menuItems.activation).toBeUndefined();
     });
   });
 

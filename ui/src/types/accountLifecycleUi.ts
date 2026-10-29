@@ -25,6 +25,7 @@
  */
 
 import type { MenuItem } from '@linagora/lin-pulsar-core';
+import type { LifecycleButton } from 'src/types/common';
 
 /**
  * Whitelist of dotted lifecycle action keys exposed in the dropdown.
@@ -75,12 +76,8 @@ export interface AccountLifecycleUi {
   /** True when the "user has not activated their account yet" info text must be rendered. */
   showNotActivatedInfoText?: boolean;
   /**
-   * Menu items for the activation dropdown (activation + reactivation actions). Undefined when no activation action
-   * applies to the current state.
+   * Menu items of the lifecycle buttons card, indexed by lifecycle button type, the reactivation actions being grouped
+   * under activation. A type has no entry when none of its actions applies to the current state.
    */
-  activationMenuItems?: MenuItem[];
-  /** Menu items for the suspension dropdown. Undefined when no suspension action applies to the current state. */
-  suspensionMenuItems?: MenuItem[];
-  /** Menu items for the deactivation dropdown. Undefined when no deactivation action applies to the current state. */
-  deactivationMenuItems?: MenuItem[];
+  menuItems?: Partial<Record<LifecycleButton['type'], MenuItem[]>>;
 }

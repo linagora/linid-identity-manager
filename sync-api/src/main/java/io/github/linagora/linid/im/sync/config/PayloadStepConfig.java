@@ -26,18 +26,18 @@
 
 package io.github.linagora.linid.im.sync.config;
 
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
+import io.github.linagora.linid.im.sync.batch.PayloadSourcesReader;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
+import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
 import java.util.UUID;
 import org.apache.commons.lang3.Validate;
 import org.springframework.batch.core.configuration.annotation.StepScope;
-import org.springframework.batch.infrastructure.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Configuration of the payload build of the accounts.
+ * Configuration of the payload build of the accounts: the reader of the accounts and their sources.
  */
 @Configuration
 public class PayloadStepConfig {
@@ -48,37 +48,65 @@ public class PayloadStepConfig {
     private final AccountComputedRightViewRepository repository;
 
     /**
+     * Repository reading the rows of a source.
+     */
+    private final SourceRepository sourceRepository;
+
+    /**
+     * Configuration holding the sources.
+     */
+    private final SyncDataProperties properties;
+
+    /**
      * Identifier of the technical account of {@code sync-api}.
      */
     private final UUID technicalAccountId;
 
     /**
+     * Number of accounts per chunk of the payload build, read by pages of the same size.
+     */
+    private final int chunkSize;
+
+    /**
      * Creates the configuration of the payload build.
      *
      * @param repository         the repository of {@code account_computed_rights_view}
+     * @param sourceRepository   the repository reading the rows of a source
+     * @param properties         the configuration holding the sources
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
-     * @throws NullPointerException when the technical account is not set, since an empty value is bound as
+     * @param chunkSize          the number of accounts per chunk of the payload build
+     * @throws NullPointerException     when the technical account is not set, since an empty value is bound as
      *     {@code null}, for which the repository would read every account
+     * @throws IllegalArgumentException when the chunk size is not positive
      */
     public PayloadStepConfig(final AccountComputedRightViewRepository repository,
-                             @Value("${sync.technical-account-id}") final UUID technicalAccountId) {
+                             final SourceRepository sourceRepository,
+                             final SyncDataProperties properties,
+                             @Value("${sync.technical-account-id}") final UUID technicalAccountId,
+                             @Value("${sync.payload.chunk-size}") final int chunkSize) {
         Validate.notNull(technicalAccountId, "sync.technical-account-id must be set");
+        Validate.isTrue(chunkSize > 0, "sync.payload.chunk-size must be positive");
         this.repository = repository;
+        this.sourceRepository = sourceRepository;
+        this.properties = properties;
         this.technicalAccountId = technicalAccountId;
+        this.chunkSize = chunkSize;
     }
 
     /**
-     * Reader of the accounts whose payload is built: every account of {@code account_computed_rights_view} once,
-     * except the technical account of {@code sync-api}, whose payload is never built so that its pairs are never
-     * {@code to_compute}.
+     * Reader of the accounts whose payload is to be built, with their rows in each source: every account of
+     * {@code account_computed_rights_view} once, with or without payload, except the technical account of
+     * {@code sync-api}, whose payload is never built so that its pairs are never {@code to_compute}.
      *
-     * <p>Step-scoped, so that the accounts are read again at each execution of the step.</p>
+     * <p>Step-scoped, so that each execution of the step has its own reader. The accounts and their sources are read by
+     * pages of the chunk size. The reader is an {@code ItemStream}, opened, saved and closed by the step, which saves
+     * the last account read.</p>
      *
-     * @return the reader of the accounts, ordered by identifier
+     * @return the reader of the accounts and their sources, ordered by identifier
      */
     @Bean
     @StepScope
-    public ListItemReader<AccountIdentity> payloadAccountsReader() {
-        return new ListItemReader<>(repository.findDistinctByActIdNotOrderByActIdAsc(technicalAccountId));
+    public PayloadSourcesReader payloadSourcesReader() {
+        return new PayloadSourcesReader(repository, technicalAccountId, chunkSize, properties, sourceRepository);
     }
 }

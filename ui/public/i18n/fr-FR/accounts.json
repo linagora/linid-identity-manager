@@ -205,320 +205,6 @@
   "AccountNotActivatedInfoText": {
     "message": "Ce compte n'a pas encore été activé."
   },
-  "AccountActivationActions": {
-    "DropdownButton": {
-      "title": "Activation",
-      "activation": {
-        "immediate": "Immédiate",
-        "scheduled": "Planifiée"
-      }
-    },
-    "ConfirmationDialog": {
-      "immediate": {
-        "title": "Activation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir activer ce compte immédiatement ?",
-        "ButtonsCard": {
-          "confirm": "Activer",
-          "cancel": "Annuler"
-        }
-      }
-    },
-    "FormDialog": {
-      "scheduled": {
-        "title": "Planifier l'activation du compte",
-        "content": "Veuillez sélectionner une date d'activation.",
-        "fields": {
-          "validityPeriodStart": {
-            "label": "Date d'activation *",
-            "close": "Fermer",
-            "validation": {
-              "required": "Ce champ est requis.",
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Planifier",
-          "confirmLoading": "Planification...",
-          "cancel": "Annuler"
-        }
-      }
-    }
-  },
-  "AccountSuspensionActions": {
-    "DropdownButton": {
-      "title": "Suspension",
-      "suspension": {
-        "immediate": "Immédiate",
-        "scheduled": "Planifiée"
-      }
-    },
-    "FormDialog": {
-      "immediate": {
-        "title": "Suspension immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?",
-        "fields": {
-          "statusReason": {
-            "label": "Motif *",
-            "hint": "Sélectionnez un motif de suspension.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sous-motif *",
-            "hint": "Sélectionnez un sous-motif de suspension.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Ajoutez un commentaire facultatif."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Suspendre",
-          "confirmLoading": "Suspension...",
-          "cancel": "Annuler"
-        }
-      },
-      "scheduled": {
-        "title": "Planifier la suspension du compte",
-        "content": "Configurez la période de suspension du compte.",
-        "fields": {
-          "suspensionPeriodStart": {
-            "label": "Date de début de suspension *",
-            "close": "Fermer",
-            "validation": {
-              "required": "Ce champ est requis.",
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour."
-            }
-          },
-          "suspensionPeriodEnd": {
-            "label": "Date de fin de suspension (optionnelle)",
-            "close": "Fermer",
-            "validation": {
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour.",
-              "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
-            }
-          },
-          "statusReason": {
-            "label": "Motif *",
-            "hint": "Sélectionnez un motif de suspension.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sous-motif *",
-            "hint": "Sélectionnez un sous-motif de suspension.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Ajoutez un commentaire facultatif."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Planifier",
-          "confirmLoading": "Planification...",
-          "cancel": "Annuler"
-        }
-      },
-      "modify": {
-        "title": "Modifier les paramètres de suspension",
-        "content": "Mettez à jour les paramètres de suspension de ce compte.",
-        "fields": {
-          "suspensionPeriodStart": {
-            "label": "Nouvelle date de début de suspension *",
-            "close": "Fermer",
-            "validation": {
-              "required": "Ce champ est requis.",
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour."
-            }
-          },
-          "suspensionPeriodEnd": {
-            "label": "Nouvelle date de fin de suspension (optionnelle)",
-            "close": "Fermer",
-            "validation": {
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour.",
-              "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
-            }
-          },
-          "statusReason": {
-            "label": "Motif *",
-            "hint": "Sélectionnez un motif de suspension.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sous-motif *",
-            "hint": "Sélectionnez un sous-motif de suspension.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Ajoutez un commentaire facultatif."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Modifier",
-          "confirmLoading": "Mise à jour...",
-          "cancel": "Annuler"
-        }
-      }
-    }
-  },
-  "AccountDeactivationActions": {
-    "DropdownButton": {
-      "title": "Désactivation",
-      "deactivation": {
-        "immediate": "Immédiate",
-        "scheduled": "Planifiée",
-        "modify": "Modifier"
-      }
-    },
-    "FormDialog": {
-      "immediate": {
-        "title": "Désactivation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?",
-        "fields": {
-          "statusReason": {
-            "label": "Motif *",
-            "hint": "Sélectionnez un motif de désactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sous-motif *",
-            "hint": "Sélectionnez un sous-motif de désactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Ajoutez un commentaire facultatif."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Désactiver",
-          "confirmLoading": "Désactivation...",
-          "cancel": "Annuler"
-        }
-      },
-      "scheduled": {
-        "title": "Planifier la désactivation du compte",
-        "content": "Sélectionnez une date de désactivation et indiquez un motif.",
-        "fields": {
-          "validityPeriodEnd": {
-            "label": "Date de désactivation *",
-            "close": "Fermer",
-            "validation": {
-              "required": "Ce champ est requis.",
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour."
-            }
-          },
-          "statusReason": {
-            "label": "Motif *",
-            "hint": "Sélectionnez un motif de désactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sous-motif *",
-            "hint": "Sélectionnez un sous-motif de désactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Ajoutez un commentaire facultatif."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Planifier",
-          "confirmLoading": "Planification...",
-          "cancel": "Annuler"
-        }
-      },
-      "modify": {
-        "title": "Modifier la date de désactivation",
-        "content": "Mettez à jour la date de désactivation planifiée pour ce compte.",
-        "fields": {
-          "validityPeriodEnd": {
-            "label": "Nouvelle date de désactivation *",
-            "close": "Fermer",
-            "validation": {
-              "required": "Ce champ est requis.",
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour."
-            }
-          },
-          "statusReason": {
-            "label": "Motif *",
-            "hint": "Sélectionnez un motif de désactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sous-motif *",
-            "hint": "Sélectionnez un sous-motif de désactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Ajoutez un commentaire facultatif."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Modifier",
-          "confirmLoading": "Mise à jour...",
-          "cancel": "Annuler"
-        }
-      }
-    }
-  },
-  "AccountReactivationActions": {
-    "FormDialog": {
-      "immediate": {
-        "title": "Réactivation immédiate du compte",
-        "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
-        "fields": {
-          "statusComment": {
-            "label": "Justification *",
-            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Réactiver",
-          "confirmLoading": "Réactivation...",
-          "cancel": "Annuler"
-        }
-      }
-    }
-  },
   "moduleAccountCreationPage": {
     "title": "Création d'un compte",
     "error": "Impossible de créer le compte. Veuillez réessayer plus tard.",
@@ -746,21 +432,408 @@
     }
   },
   "AccountLifecyclePanel": {
-    "updateStatusSuccess": "Statut du compte mis à jour avec succès.",
-    "immediateActivationSuccess": "Le compte pourra être activé dans une minute | Le compte pourra être activé dans {count} minutes",
-    "immediateSuspensionSuccess": "Le compte sera suspendu dans une minute | Le compte sera suspendu dans {count} minutes",
-    "immediateDeactivationSuccess": "Le compte sera désactivé dans une minute | Le compte sera désactivé dans {count} minutes",
-    "immediateReactivationSuccess": "Le compte sera réactivé dans une minute | Le compte sera réactivé dans {count} minutes",
-    "scheduledActivationSuccess": "Le compte pourra être activé à partir du {date}",
-    "scheduledDeactivationSuccess": "Le compte sera désactivé à partir du {date}",
-    "modifyDeactivationSuccess": "Le compte sera désactivé à partir du {date}",
-    "scheduledSuspensionSuccess": "Le compte sera suspendu à partir du {date}",
-    "modifySuspensionSuccess": "Le compte sera suspendu à partir du {date}",
-    "errors": {
-      "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
-    },
-    "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes",
-    "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
+    "LifecycleButtonsCard": {
+      "activation": {
+        "DropdownButton": {
+          "title": "Activation",
+          "activation": {
+            "immediate": "Immédiate",
+            "scheduled": "Planifiée"
+          }
+        }
+      },
+      "suspension": {
+        "DropdownButton": {
+          "title": "Suspension",
+          "suspension": {
+            "immediate": "Immédiate",
+            "scheduled": "Planifiée"
+          }
+        }
+      },
+      "deactivation": {
+        "DropdownButton": {
+          "title": "Désactivation",
+          "deactivation": {
+            "immediate": "Immédiate",
+            "scheduled": "Planifiée",
+            "modify": "Modifier"
+          }
+        }
+      },
+      "submitSuccess": "Statut du compte mis à jour avec succès.",
+      "submitError": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard.",
+      "actions": {
+        "activation": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Planifier l'activation du compte",
+              "content": "Veuillez sélectionner une date d'activation.",
+              "fields": {
+                "validityPeriod": {
+                  "start": {
+                    "label": "Date d'activation *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Planifier",
+                "confirmLoading": "Planification...",
+                "cancel": "Annuler"
+              }
+            }
+          },
+          "immediate": {
+            "ConfirmationDialog": {
+              "title": "Activation immédiate du compte",
+              "content": "Êtes-vous sûr de vouloir activer ce compte immédiatement ?",
+              "ButtonsCard": {
+                "confirm": "Activer",
+                "cancel": "Annuler"
+              }
+            },
+            "submitSuccess": "Le compte pourra être activé dans une minute | Le compte pourra être activé dans {count} minutes"
+          }
+        },
+        "suspension": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Planifier la suspension du compte",
+              "content": "Configurez la période de suspension du compte.",
+              "fields": {
+                "suspensionPeriod": {
+                  "start": {
+                    "label": "Date de début de suspension *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  },
+                  "end": {
+                    "label": "Date de fin de suspension (optionnelle)",
+                    "close": "Fermer",
+                    "validation": {
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour.",
+                      "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif de suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif de suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Planifier",
+                "confirmLoading": "Planification...",
+                "cancel": "Annuler"
+              }
+            }
+          },
+          "modify": {
+            "FormDialog": {
+              "title": "Modifier les paramètres de suspension",
+              "content": "Mettez à jour les paramètres de suspension de ce compte.",
+              "fields": {
+                "suspensionPeriod": {
+                  "start": {
+                    "label": "Nouvelle date de début de suspension *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  },
+                  "end": {
+                    "label": "Nouvelle date de fin de suspension (optionnelle)",
+                    "close": "Fermer",
+                    "validation": {
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour.",
+                      "fromDate": "La date de fin doit être égale ou postérieure au {compareTo}."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif de suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif de suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Modifier",
+                "confirmLoading": "Mise à jour...",
+                "cancel": "Annuler"
+              }
+            }
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Suspension immédiate du compte",
+              "content": "Êtes-vous sûr de vouloir suspendre ce compte immédiatement ?",
+              "fields": {
+                "statusReason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif de suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif de suspension.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Suspendre",
+                "confirmLoading": "Suspension...",
+                "cancel": "Annuler"
+              }
+            },
+            "submitSuccess": "Le compte sera suspendu dans une minute | Le compte sera suspendu dans {count} minutes"
+          }
+        },
+        "deactivation": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Planifier la désactivation du compte",
+              "content": "Sélectionnez une date de désactivation et indiquez un motif.",
+              "fields": {
+                "validityPeriod": {
+                  "end": {
+                    "label": "Date de désactivation *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif de désactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif de désactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Planifier",
+                "confirmLoading": "Planification...",
+                "cancel": "Annuler"
+              }
+            }
+          },
+          "modify": {
+            "FormDialog": {
+              "title": "Modifier la date de désactivation",
+              "content": "Mettez à jour la date de désactivation planifiée pour ce compte.",
+              "fields": {
+                "validityPeriod": {
+                  "end": {
+                    "label": "Nouvelle date de désactivation *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif de désactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif de désactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Modifier",
+                "confirmLoading": "Mise à jour...",
+                "cancel": "Annuler"
+              }
+            }
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Désactivation immédiate du compte",
+              "content": "Êtes-vous sûr de vouloir désactiver ce compte immédiatement ?",
+              "fields": {
+                "statusReason": {
+                  "label": "Motif *",
+                  "hint": "Sélectionnez un motif de désactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sous-motif *",
+                  "hint": "Sélectionnez un sous-motif de désactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Ajoutez un commentaire facultatif."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Désactiver",
+                "confirmLoading": "Désactivation...",
+                "cancel": "Annuler"
+              }
+            },
+            "submitSuccess": "Le compte sera désactivé dans une minute | Le compte sera désactivé dans {count} minutes"
+          }
+        },
+        "reactivation": {
+          "immediate": {
+            "FormDialog": {
+              "title": "Réactivation immédiate du compte",
+              "content": "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?",
+              "fields": {
+                "statusComment": {
+                  "label": "Justification *",
+                  "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Réactiver",
+                "confirmLoading": "Réactivation...",
+                "cancel": "Annuler"
+              }
+            },
+            "submitSuccess": "Le compte sera réactivé dans une minute | Le compte sera réactivé dans {count} minutes"
+          }
+        },
+        "revalidation": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Planifier la réactivation du compte",
+              "content": "Veuillez sélectionner une nouvelle date de fin de validité et fournir une justification.",
+              "fields": {
+                "validityPeriod": {
+                  "end": {
+                    "label": "Date de fin de validité *",
+                    "close": "Fermer",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "invalidDate": "Format de date invalide. Le format attendu est {format}.",
+                      "afterDate": "La date doit être postérieure à la date du jour."
+                    }
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification *",
+                  "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Planifier",
+                "confirmLoading": "Planification...",
+                "cancel": "Annuler"
+              }
+            }
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Réactivation immédiate du compte",
+              "content": "Veuillez fournir une justification pour réactiver ce compte immédiatement.",
+              "fields": {
+                "statusComment": {
+                  "label": "Justification *",
+                  "hint": "Fournissez une justification obligatoire pour cette réactivation.",
+                  "validation": {
+                    "required": "Ce champ est requis."
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Réactiver",
+                "confirmLoading": "Réactivation...",
+                "cancel": "Annuler"
+              }
+            },
+            "submitSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes"
+          }
+        }
+      }
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "Ce compte est désactivé depuis le {date}.",
@@ -777,54 +850,5 @@
     "contentWithEndDate": "Ce compte est suspendu du {date} au {endDate}.",
     "clearSuspensionButton": "Réactivation immédiate",
     "modifySuspensionButton": "Modifier les paramètres de suspension"
-  },
-  "AccountRevalidationActions": {
-    "FormDialog": {
-      "immediate": {
-        "title": "Réactivation immédiate du compte",
-        "content": "Veuillez fournir une justification pour réactiver ce compte immédiatement.",
-        "fields": {
-          "statusComment": {
-            "label": "Justification *",
-            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Réactiver",
-          "confirmLoading": "Réactivation...",
-          "cancel": "Annuler"
-        }
-      },
-      "scheduled": {
-        "title": "Planifier la réactivation du compte",
-        "content": "Veuillez sélectionner une nouvelle date de fin de validité et fournir une justification.",
-        "fields": {
-          "validityPeriodEnd": {
-            "label": "Date de fin de validité *",
-            "close": "Fermer",
-            "validation": {
-              "required": "Ce champ est requis.",
-              "invalidDate": "Format de date invalide. Le format attendu est {format}.",
-              "afterDate": "La date doit être postérieure à la date du jour."
-            }
-          },
-          "statusComment": {
-            "label": "Justification *",
-            "hint": "Fournissez une justification obligatoire pour cette réactivation.",
-            "validation": {
-              "required": "Ce champ est requis."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Planifier",
-          "confirmLoading": "Planification...",
-          "cancel": "Annuler"
-        }
-      }
-    }
   }
 }

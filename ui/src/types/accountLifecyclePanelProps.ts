@@ -24,13 +24,22 @@
  * LinID Identity Manager software.
  */
 
+import type { LifecycleButton } from 'src/types/common';
+
 /**
  * Props for the AccountLifecyclePanel component, rendered in a generic details page zone. The zone renderer provides
- * the loaded entity and the page UI namespace; other zone attributes are ignored.
+ * the loaded entity and the page UI namespace, and the zone props configure the lifecycle buttons card; other zone
+ * attributes are ignored.
  */
 export interface AccountLifecyclePanelProps {
   /** Raw account entity loaded by the generic details page; empty object while loading. */
   entity: Record<string, unknown>;
-  /** UI design namespace of the hosting page, used to resolve dropdown and dialog design properties. */
+  /** UI design namespace of the hosting page, used to resolve the design properties of the lifecycle buttons card. */
   uiNamespace: string;
+  /** Lifecycle buttons in display order; the LifecycleButtonsCard default order when not provided. */
+  buttons?: LifecycleButton[];
+  /** Actions run by the LifecycleButtonsCard, indexed by lifecycle action key. */
+  actions?: Record<string, unknown>;
+  /** Delay in minutes of the immediate actions run by the LifecycleButtonsCard. */
+  immediateActionDelay?: number;
 }

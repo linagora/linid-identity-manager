@@ -34,22 +34,22 @@
     <AccountSuspendedBanner
       v-if="lifecycleUi.showSuspendedBanner"
       :account-status="accountStatus"
-      @clear-suspension="onLifecycleAction('reactivation.immediate')"
-      @modify-suspension="onLifecycleAction('suspension.modify')"
+      @clear-suspension="runCardAction('reactivation.immediate')"
+      @modify-suspension="runCardAction('suspension.modify')"
     />
 
     <AccountDeactivatedBanner
       v-if="lifecycleUi.showDeactivatedBanner"
       :account-status="accountStatus"
-      @reactivate-immediate="onLifecycleAction('revalidation.immediate')"
-      @reactivate-scheduled="onLifecycleAction('revalidation.scheduled')"
+      @reactivate-immediate="runCardAction('revalidation.immediate')"
+      @reactivate-scheduled="runCardAction('revalidation.scheduled')"
     />
 
     <AccountDeactivatedWarningBanner
       v-if="lifecycleUi.showDeactivationWarningBanner"
       :account-status="accountStatus"
-      @deactivate-immediate="onLifecycleAction('deactivation.immediate')"
-      @modify-deactivation="onLifecycleAction('deactivation.modify')"
+      @deactivate-immediate="runCardAction('deactivation.immediate')"
+      @modify-deactivation="runCardAction('deactivation.modify')"
     />
 
     <AccountDeactivatedInfoText
@@ -64,55 +64,25 @@
 
     <AccountNotActivatedInfoText v-if="lifecycleUi.showNotActivatedInfoText" />
 
-    <div
-      v-if="hasAnyLifecycleAction"
-      class="row q-gutter-x-sm account-lifecycle-panel--actions"
-      data-cy="account-lifecycle-actions"
-    >
-      <component
-        :is="dropdownButton"
-        v-if="dropdownButton && lifecycleUi.activationMenuItems?.length"
-        :ui-namespace="`${uiNamespace}.activation-actions`"
-        i18n-scope="AccountActivationActions"
-        :items="lifecycleUi.activationMenuItems"
-        data-cy="account-activation-actions"
-        @item-click="onLifecycleAction"
-      />
-      <component
-        :is="dropdownButton"
-        v-if="dropdownButton && lifecycleUi.suspensionMenuItems?.length"
-        :ui-namespace="`${uiNamespace}.suspension-actions`"
-        i18n-scope="AccountSuspensionActions"
-        :items="lifecycleUi.suspensionMenuItems"
-        data-cy="account-suspension-actions"
-        @item-click="onLifecycleAction"
-      />
-      <component
-        :is="dropdownButton"
-        v-if="dropdownButton && lifecycleUi.deactivationMenuItems?.length"
-        :ui-namespace="`${uiNamespace}.deactivation-actions`"
-        i18n-scope="AccountDeactivationActions"
-        :items="lifecycleUi.deactivationMenuItems"
-        data-cy="account-deactivation-actions"
-        @item-click="onLifecycleAction"
-      />
-    </div>
+    <component
+      :is="lifecycleButtonsCard"
+      v-if="lifecycleButtonsCard"
+      :ui-namespace="uiNamespace"
+      :i18n-scope="i18nScope"
+      :entity="entity"
+      :items="lifecycleItems"
+      :buttons="buttons"
+      :actions="actions"
+      :immediate-action-delay="immediateActionDelay"
+      :emit-on-submit="ACCOUNT_STATUS_UPDATED_EVENT"
+      :trigger-action-on="ACCOUNT_LIFECYCLE_ACTION_EVENT"
+    />
   </div>
   <!-- v8 ignore stop -->
 </template>
 
 <script setup lang="ts">
-import type { DropdownClickPayload } from '@linagora/lin-pulsar-core';
-import {
-  loadAsyncComponent,
-  uiEventSubject,
-  useCommonMapper,
-  useNotify,
-  useScopedI18n,
-} from '@linagora/lin-pulsar-core';
-import axios from 'axios';
-import { appConfig } from 'boot/config';
-import { dayjs } from 'src/boot/dayjs';
+import { loadAsyncComponent, uiEventSubject } from '@linagora/lin-pulsar-core';
 import AccountDeactivatedBanner from 'src/components/banner/AccountDeactivatedBanner.vue';
 import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
 import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
@@ -121,20 +91,8 @@ import AccountNotActivatedInfoText from 'src/components/text/AccountNotActivated
 import AccountSuspendedInfoText from 'src/components/text/AccountSuspendedInfoText.vue';
 import { useAccountLifecycleUi } from 'src/composables/useAccountLifecycleUi';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
-import { useLifecycleDialogs } from 'src/composables/useLifecycleDialogs';
-import {
-  deactivateAccount,
-  reactivateAccount,
-  setAccountValidity,
-  suspendAccount,
-} from 'src/services/AccountService';
 import type { AccountLifecyclePanelProps } from 'src/types/accountLifecyclePanelProps';
-import type {
-  AccountDTO,
-  AccountStatus,
-  AccountStatusForm,
-} from 'src/types/accounts';
-import { DATE_FORMAT_KEY } from 'src/types/common';
+import type { AccountDTO, AccountStatus } from 'src/types/accounts';
 import { computed } from 'vue';
 
 defineOptions({ inheritAttrs: false });
@@ -144,22 +102,12 @@ const props = defineProps<AccountLifecyclePanelProps>();
 /** UI event key notifying the hosting details page that the account status changed and the entity must be reloaded. */
 const ACCOUNT_STATUS_UPDATED_EVENT = 'account-status-updated';
 
+/** UI event key asking the lifecycle buttons card to run one of its configured actions. */
+const ACCOUNT_LIFECYCLE_ACTION_EVENT = 'account-lifecycle-action';
+
 const i18nScope = 'AccountLifecyclePanel';
-const accountLifecycleUiConfiguration = appConfig.accountLifecycleFields;
 
-const { t } = useScopedI18n(i18nScope);
-const { Notify } = useNotify();
-const {
-  toAccountStatus,
-  toAccountStatusForm,
-  toAccountSuspensionRecord,
-  toAccountDeactivationRecord,
-  toAccountReactivationRecord,
-  toAccountValidityRecord,
-} = useAccountMapper();
-const { toDate } = useCommonMapper();
-
-const accountId = computed(() => props.entity.id as string);
+const { toAccountStatus } = useAccountMapper();
 
 const accountStatus = computed<AccountStatus | null>(() =>
   props.entity.id
@@ -169,326 +117,23 @@ const accountStatus = computed<AccountStatus | null>(() =>
 
 const lifecycleUi = useAccountLifecycleUi(accountStatus);
 
-const dropdownButton = loadAsyncComponent('LinPulsar/DropdownButton');
-
-const { openFormDialog, openConfirmationDialog } = useLifecycleDialogs(
-  props.uiNamespace
+const lifecycleButtonsCard = loadAsyncComponent(
+  'LinPulsar/LifecycleButtonsCard'
 );
 
-const hasAnyLifecycleAction = computed(() =>
-  Boolean(
-    lifecycleUi.value?.activationMenuItems?.length ||
-    lifecycleUi.value?.suspensionMenuItems?.length ||
-    lifecycleUi.value?.deactivationMenuItems?.length
-  )
-);
-
-const actionDelay: number =
-  appConfig?.immediateActionDelay > 0 ? appConfig.immediateActionDelay : 5;
+/** Menu items of the lifecycle buttons card, indexed by lifecycle button type. */
+const lifecycleItems = computed(() => ({
+  activation: lifecycleUi.value?.activationMenuItems,
+  suspension: lifecycleUi.value?.suspensionMenuItems,
+  deactivation: lifecycleUi.value?.deactivationMenuItems,
+}));
 
 /**
- * Handles click events on lifecycle action menu items by opening a confirmation or form dialog before executing the
- * action.
+ * Asks the lifecycle buttons card to run one of its configured actions, for the actions offered by the banners.
  *
- * @param action - The lifecycle action associated with the clicked menu item.
+ * @param key - The lifecycle action key, for example `suspension.modify`.
  */
-function onLifecycleAction(action: string | DropdownClickPayload<string>) {
-  const actionKey = typeof action === 'string' ? action : action.key;
-
-  switch (actionKey) {
-    case 'activation.immediate':
-      immediateActivation();
-      break;
-    case 'suspension.immediate':
-      immediateSuspension();
-      break;
-    case 'deactivation.immediate':
-      immediateDeactivation();
-      break;
-    case 'reactivation.immediate':
-      immediateReactivation();
-      break;
-    case 'revalidation.immediate':
-      immediateRevalidation();
-      break;
-    case 'revalidation.scheduled':
-      scheduledRevalidation();
-      break;
-    case 'activation.scheduled':
-      scheduledActivation();
-      break;
-    case 'deactivation.scheduled':
-      scheduledDeactivation();
-      break;
-    case 'deactivation.modify':
-      modifyDeactivation();
-      break;
-    case 'suspension.scheduled':
-      scheduledSuspension();
-      break;
-    case 'suspension.modify':
-      modifySuspension();
-      break;
-    default:
-      Notify({
-        type: 'negative',
-        message: t('errors.status'),
-      });
-  }
-}
-
-/** Opens a confirmation dialog for the immediate activation action. */
-function immediateActivation() {
-  openConfirmationDialog({
-    i18nScope: 'AccountActivationActions.ConfirmationDialog.immediate',
-    onConfirm: () =>
-      updateAccountStatus(
-        () =>
-          setAccountValidity(
-            accountId.value,
-            toAccountValidityRecord({
-              validityPeriodStart: dayjs()
-                .add(actionDelay, 'minute')
-                .toISOString(),
-            })
-          ),
-        'immediateActivationSuccess'
-      ),
-  });
-}
-
-/** Opens a form dialog for the immediate suspension action. */
-function immediateSuspension() {
-  openFormDialog({
-    i18nScope: 'AccountSuspensionActions.FormDialog.immediate',
-    formFields: accountLifecycleUiConfiguration['suspension.immediate'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          suspendAccount(
-            accountId.value,
-            toAccountSuspensionRecord({
-              ...formData,
-              suspensionPeriodStart: dayjs()
-                .add(actionDelay, 'minute')
-                .toISOString(),
-            })
-          ),
-        'immediateSuspensionSuccess'
-      ),
-  });
-}
-
-/** Opens a form dialog for the immediate deactivation action. */
-function immediateDeactivation() {
-  openFormDialog({
-    i18nScope: 'AccountDeactivationActions.FormDialog.immediate',
-    formFields: accountLifecycleUiConfiguration['deactivation.immediate'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          deactivateAccount(
-            accountId.value,
-            toAccountDeactivationRecord({
-              ...formData,
-              validityPeriodEnd: dayjs()
-                .add(actionDelay, 'minute')
-                .toISOString(),
-            })
-          ),
-        'immediateDeactivationSuccess'
-      ),
-  });
-}
-
-/** Opens a form dialog for the immediate reactivation action. */
-function immediateReactivation() {
-  openFormDialog({
-    i18nScope: 'AccountReactivationActions.FormDialog.immediate',
-    formFields: accountLifecycleUiConfiguration['reactivation.immediate'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          reactivateAccount(
-            accountId.value,
-            toAccountReactivationRecord(formData)
-          ),
-        'immediateReactivationSuccess'
-      ),
-  });
-}
-
-/**
- * Opens a form dialog for the immediate revalidation action of a deactivated account. The user provides a mandatory
- * justification comment, and the validity period end is pushed one hour into the future so the account becomes active
- * again shortly.
- */
-function immediateRevalidation() {
-  openFormDialog({
-    i18nScope: 'AccountRevalidationActions.FormDialog.immediate',
-    formFields: accountLifecycleUiConfiguration['revalidation.immediate'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          reactivateAccount(
-            accountId.value,
-            toAccountReactivationRecord({
-              ...formData,
-              validityPeriodEnd: dayjs()
-                .add(actionDelay, 'minute')
-                .toISOString(),
-            })
-          ),
-        'immediateRevalidationSuccess'
-      ),
-  });
-}
-
-/**
- * Opens a form dialog for the scheduled revalidation action of a deactivated account, letting the user pick a new
- * validity period end in the future.
- */
-function scheduledRevalidation() {
-  openFormDialog({
-    i18nScope: 'AccountRevalidationActions.FormDialog.scheduled',
-    formFields: accountLifecycleUiConfiguration['revalidation.scheduled'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          reactivateAccount(
-            accountId.value,
-            toAccountReactivationRecord(formData)
-          ),
-        'scheduledRevalidationSuccess',
-        formData.validityPeriodEnd
-      ),
-  });
-}
-
-/** Opens a form dialog for the scheduled activation action. */
-function scheduledActivation() {
-  openFormDialog({
-    i18nScope: 'AccountActivationActions.FormDialog.scheduled',
-    formFields: accountLifecycleUiConfiguration['activation.scheduled'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          setAccountValidity(
-            accountId.value,
-            toAccountValidityRecord(formData)
-          ),
-        'scheduledActivationSuccess',
-        toDate(formData.validityPeriodStart, DATE_FORMAT_KEY)
-      ),
-  });
-}
-
-/** Opens a form dialog for the scheduled deactivation action. */
-function scheduledDeactivation() {
-  openFormDialog({
-    i18nScope: 'AccountDeactivationActions.FormDialog.scheduled',
-    formFields: accountLifecycleUiConfiguration['deactivation.scheduled'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          deactivateAccount(
-            accountId.value,
-            toAccountDeactivationRecord(formData)
-          ),
-        'scheduledDeactivationSuccess',
-        toDate(formData.validityPeriodEnd, DATE_FORMAT_KEY)
-      ),
-  });
-}
-
-/** Opens a form dialog for the modify deactivation action, pre-filled with the existing validity period bounds. */
-function modifyDeactivation() {
-  openFormDialog({
-    i18nScope: 'AccountDeactivationActions.FormDialog.modify',
-    formFields: accountLifecycleUiConfiguration['deactivation.modify'],
-    initialFormData: accountStatus.value
-      ? toAccountStatusForm(accountStatus.value)
-      : undefined,
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          deactivateAccount(
-            accountId.value,
-            toAccountDeactivationRecord(formData)
-          ),
-        'modifyDeactivationSuccess',
-        toDate(formData.validityPeriodEnd, DATE_FORMAT_KEY)
-      ),
-  });
-}
-
-/** Opens a form dialog for the scheduled suspension action. */
-function scheduledSuspension() {
-  openFormDialog({
-    i18nScope: 'AccountSuspensionActions.FormDialog.scheduled',
-    formFields: accountLifecycleUiConfiguration['suspension.scheduled'],
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
-        'scheduledSuspensionSuccess',
-        toDate(formData.suspensionPeriodStart, DATE_FORMAT_KEY)
-      ),
-  });
-}
-
-/** Opens a form dialog for the modify suspension action, pre-filled with the existing suspension period bounds. */
-function modifySuspension() {
-  openFormDialog({
-    i18nScope: 'AccountSuspensionActions.FormDialog.modify',
-    formFields: accountLifecycleUiConfiguration['suspension.modify'],
-    initialFormData: accountStatus.value
-      ? toAccountStatusForm(accountStatus.value)
-      : undefined,
-    onSubmit: (formData: AccountStatusForm) =>
-      updateAccountStatus(
-        () =>
-          suspendAccount(accountId.value, toAccountSuspensionRecord(formData)),
-        'modifySuspensionSuccess',
-        toDate(formData.suspensionPeriodStart, DATE_FORMAT_KEY)
-      ),
-  });
-}
-
-/**
- * Runs a status-update API call, then notifies the hosting details page through a UI event so it reloads the entity.
- * Displays a notification in case of an error during the update process.
- *
- * @param statusUpdate - The status-mutation service call to execute, resolving to the updated account DTO.
- * @param successMsgKey - Optional i18n key for the success message to display upon successful update.
- * @param dateToDisplayInSuccessMsg - Optional date to display in the success message.
- * @returns A promise that resolves once the account status has been updated and the reload event has been emitted.
- */
-async function updateAccountStatus(
-  statusUpdate: () => Promise<AccountDTO>,
-  successMsgKey = 'updateStatusSuccess',
-  dateToDisplayInSuccessMsg?: string | null
-): Promise<void> {
-  try {
-    const dto = await statusUpdate();
-    uiEventSubject.next({ key: ACCOUNT_STATUS_UPDATED_EVENT, data: dto });
-
-    Notify({
-      type: 'positive',
-      message: dateToDisplayInSuccessMsg
-        ? t(successMsgKey, { date: dateToDisplayInSuccessMsg })
-        : t(successMsgKey, { count: actionDelay }),
-    });
-  } catch (error) {
-    const errorMsg = axios.isAxiosError(error)
-      ? (error.response?.data?.error ?? t('errors.status'))
-      : t('errors.status');
-
-    Notify({
-      type: 'negative',
-      message: errorMsg,
-    });
-    throw error;
-  }
+function runCardAction(key: string): void {
+  uiEventSubject.next({ key: ACCOUNT_LIFECYCLE_ACTION_EVENT, data: { key } });
 }
 </script>

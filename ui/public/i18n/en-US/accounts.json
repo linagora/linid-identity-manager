@@ -205,320 +205,6 @@
   "AccountNotActivatedInfoText": {
     "message": "This account has not been activated yet."
   },
-  "AccountActivationActions": {
-    "DropdownButton": {
-      "title": "Activation",
-      "activation": {
-        "immediate": "Immediate",
-        "scheduled": "Scheduled"
-      }
-    },
-    "ConfirmationDialog": {
-      "immediate": {
-        "title": "Immediate account activation",
-        "content": "Are you sure you want to activate this account immediately?",
-        "ButtonsCard": {
-          "confirm": "Activate",
-          "cancel": "Cancel"
-        }
-      }
-    },
-    "FormDialog": {
-      "scheduled": {
-        "title": "Schedule account activation",
-        "content": "Select a start date for activating this account.",
-        "fields": {
-          "validityPeriodStart": {
-            "label": "Activation date *",
-            "close": "Close",
-            "validation": {
-              "required": "This field is required.",
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Schedule",
-          "confirmLoading": "Scheduling...",
-          "cancel": "Cancel"
-        }
-      }
-    }
-  },
-  "AccountSuspensionActions": {
-    "DropdownButton": {
-      "title": "Suspension",
-      "suspension": {
-        "immediate": "Immediate",
-        "scheduled": "Scheduled"
-      }
-    },
-    "FormDialog": {
-      "immediate": {
-        "title": "Immediate account suspension",
-        "content": "Are you sure you want to suspend this account immediately?",
-        "fields": {
-          "statusReason": {
-            "label": "Reason *",
-            "hint": "Select a reason for the suspension.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sub-reason *",
-            "hint": "Select a sub-reason for the suspension.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Add an optional comment."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Suspend",
-          "confirmLoading": "Suspending...",
-          "cancel": "Cancel"
-        }
-      },
-      "scheduled": {
-        "title": "Schedule account suspension",
-        "content": "Configure the suspension period for this account.",
-        "fields": {
-          "suspensionPeriodStart": {
-            "label": "Suspension start date *",
-            "close": "Close",
-            "validation": {
-              "required": "This field is required.",
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today."
-            }
-          },
-          "suspensionPeriodEnd": {
-            "label": "Suspension end date (optional)",
-            "close": "Close",
-            "validation": {
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today.",
-              "fromDate": "The end date must be on or after {compareTo}."
-            }
-          },
-          "statusReason": {
-            "label": "Reason *",
-            "hint": "Select a reason for the suspension.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sub-reason *",
-            "hint": "Select a sub-reason for the suspension.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Add an optional comment."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Schedule",
-          "confirmLoading": "Scheduling...",
-          "cancel": "Cancel"
-        }
-      },
-      "modify": {
-        "title": "Modify suspension settings",
-        "content": "Update the suspension period settings for this account.",
-        "fields": {
-          "suspensionPeriodStart": {
-            "label": "New suspension start date *",
-            "close": "Close",
-            "validation": {
-              "required": "This field is required.",
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today."
-            }
-          },
-          "suspensionPeriodEnd": {
-            "label": "New suspension end date (optional)",
-            "close": "Close",
-            "validation": {
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today.",
-              "fromDate": "The end date must be on or after {compareTo}."
-            }
-          },
-          "statusReason": {
-            "label": "Reason *",
-            "hint": "Select a reason for the suspension.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sub-reason *",
-            "hint": "Select a sub-reason for the suspension.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Add an optional comment."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Update",
-          "confirmLoading": "Updating...",
-          "cancel": "Cancel"
-        }
-      }
-    }
-  },
-  "AccountDeactivationActions": {
-    "DropdownButton": {
-      "title": "Deactivation",
-      "deactivation": {
-        "immediate": "Immediate",
-        "scheduled": "Scheduled",
-        "modify": "Modify"
-      }
-    },
-    "FormDialog": {
-      "immediate": {
-        "title": "Immediate account deactivation",
-        "content": "Are you sure you want to deactivate this account immediately?",
-        "fields": {
-          "statusReason": {
-            "label": "Reason *",
-            "hint": "Select a reason for the deactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sub-reason *",
-            "hint": "Select a sub-reason for the deactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Add an optional comment."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Deactivate",
-          "confirmLoading": "Deactivating...",
-          "cancel": "Cancel"
-        }
-      },
-      "scheduled": {
-        "title": "Schedule account deactivation",
-        "content": "Select a deactivation date and provide a reason.",
-        "fields": {
-          "validityPeriodEnd": {
-            "label": "Deactivation date *",
-            "close": "Close",
-            "validation": {
-              "required": "This field is required.",
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today."
-            }
-          },
-          "statusReason": {
-            "label": "Reason *",
-            "hint": "Select a reason for the deactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sub-reason *",
-            "hint": "Select a sub-reason for the deactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Add an optional comment."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Schedule",
-          "confirmLoading": "Scheduling...",
-          "cancel": "Cancel"
-        }
-      },
-      "modify": {
-        "title": "Modify deactivation date",
-        "content": "Update the scheduled deactivation date for this account.",
-        "fields": {
-          "validityPeriodEnd": {
-            "label": "New deactivation date *",
-            "close": "Close",
-            "validation": {
-              "required": "This field is required.",
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today."
-            }
-          },
-          "statusReason": {
-            "label": "Reason *",
-            "hint": "Select a reason for the deactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusSubreason": {
-            "label": "Sub-reason *",
-            "hint": "Select a sub-reason for the deactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          },
-          "statusComment": {
-            "label": "Justification",
-            "hint": "Add an optional comment."
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Update",
-          "confirmLoading": "Updating...",
-          "cancel": "Cancel"
-        }
-      }
-    }
-  },
-  "AccountReactivationActions": {
-    "FormDialog": {
-      "immediate": {
-        "title": "Immediate account reactivation",
-        "content": "Are you sure you want to reactivate this account immediately?",
-        "fields": {
-          "statusComment": {
-            "label": "Justification *",
-            "hint": "Provide a mandatory justification for this reactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Reactivate",
-          "confirmLoading": "Reactivating...",
-          "cancel": "Cancel"
-        }
-      }
-    }
-  },
   "moduleAccountCreationPage": {
     "title": "Create an account",
     "error": "Unable to create the account. Please try again later.",
@@ -746,21 +432,408 @@
     }
   },
   "AccountLifecyclePanel": {
-    "updateStatusSuccess": "Account status successfully updated.",
-    "immediateActivationSuccess": "The account can be activated within one minute | The account can be activated within {count} minutes",
-    "immediateSuspensionSuccess": "The account will be suspended in one minute | The account will be suspended in {count} minutes",
-    "immediateDeactivationSuccess": "The account will be deactivated in one minute | The account will be deactivated in {count} minutes",
-    "immediateReactivationSuccess": "The account will be reactivated in one minute | The account will be reactivated in {count} minutes",
-    "scheduledActivationSuccess": "The account can be activated from {date}",
-    "scheduledDeactivationSuccess": "The account will be deactivated from {date}",
-    "modifyDeactivationSuccess": "The account will be deactivated from {date}",
-    "scheduledSuspensionSuccess": "The account will be suspended from {date}",
-    "modifySuspensionSuccess": "The account will be suspended from {date}",
-    "errors": {
-      "status": "Unable to update the account status. Please try again later."
-    },
-    "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
-    "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
+    "LifecycleButtonsCard": {
+      "activation": {
+        "DropdownButton": {
+          "title": "Activation",
+          "activation": {
+            "immediate": "Immediate",
+            "scheduled": "Scheduled"
+          }
+        }
+      },
+      "suspension": {
+        "DropdownButton": {
+          "title": "Suspension",
+          "suspension": {
+            "immediate": "Immediate",
+            "scheduled": "Scheduled"
+          }
+        }
+      },
+      "deactivation": {
+        "DropdownButton": {
+          "title": "Deactivation",
+          "deactivation": {
+            "immediate": "Immediate",
+            "scheduled": "Scheduled",
+            "modify": "Modify"
+          }
+        }
+      },
+      "submitSuccess": "Account status successfully updated.",
+      "submitError": "Unable to update the account status. Please try again later.",
+      "actions": {
+        "activation": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Schedule account activation",
+              "content": "Select a start date for activating this account.",
+              "fields": {
+                "validityPeriod": {
+                  "start": {
+                    "label": "Activation date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Schedule",
+                "confirmLoading": "Scheduling...",
+                "cancel": "Cancel"
+              }
+            }
+          },
+          "immediate": {
+            "ConfirmationDialog": {
+              "title": "Immediate account activation",
+              "content": "Are you sure you want to activate this account immediately?",
+              "ButtonsCard": {
+                "confirm": "Activate",
+                "cancel": "Cancel"
+              }
+            },
+            "submitSuccess": "The account can be activated within one minute | The account can be activated within {count} minutes"
+          }
+        },
+        "suspension": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Schedule account suspension",
+              "content": "Configure the suspension period for this account.",
+              "fields": {
+                "suspensionPeriod": {
+                  "start": {
+                    "label": "Suspension start date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  },
+                  "end": {
+                    "label": "Suspension end date (optional)",
+                    "close": "Close",
+                    "validation": {
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today.",
+                      "fromDate": "The end date must be on or after {compareTo}."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Schedule",
+                "confirmLoading": "Scheduling...",
+                "cancel": "Cancel"
+              }
+            }
+          },
+          "modify": {
+            "FormDialog": {
+              "title": "Modify suspension settings",
+              "content": "Update the suspension period settings for this account.",
+              "fields": {
+                "suspensionPeriod": {
+                  "start": {
+                    "label": "New suspension start date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  },
+                  "end": {
+                    "label": "New suspension end date (optional)",
+                    "close": "Close",
+                    "validation": {
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today.",
+                      "fromDate": "The end date must be on or after {compareTo}."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Update",
+                "confirmLoading": "Updating...",
+                "cancel": "Cancel"
+              }
+            }
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Immediate account suspension",
+              "content": "Are you sure you want to suspend this account immediately?",
+              "fields": {
+                "statusReason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the suspension.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Suspend",
+                "confirmLoading": "Suspending...",
+                "cancel": "Cancel"
+              }
+            },
+            "submitSuccess": "The account will be suspended in one minute | The account will be suspended in {count} minutes"
+          }
+        },
+        "deactivation": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Schedule account deactivation",
+              "content": "Select a deactivation date and provide a reason.",
+              "fields": {
+                "validityPeriod": {
+                  "end": {
+                    "label": "Deactivation date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the deactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the deactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Schedule",
+                "confirmLoading": "Scheduling...",
+                "cancel": "Cancel"
+              }
+            }
+          },
+          "modify": {
+            "FormDialog": {
+              "title": "Modify deactivation date",
+              "content": "Update the scheduled deactivation date for this account.",
+              "fields": {
+                "validityPeriod": {
+                  "end": {
+                    "label": "New deactivation date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  }
+                },
+                "statusReason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the deactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the deactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Update",
+                "confirmLoading": "Updating...",
+                "cancel": "Cancel"
+              }
+            }
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Immediate account deactivation",
+              "content": "Are you sure you want to deactivate this account immediately?",
+              "fields": {
+                "statusReason": {
+                  "label": "Reason *",
+                  "hint": "Select a reason for the deactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusSubreason": {
+                  "label": "Sub-reason *",
+                  "hint": "Select a sub-reason for the deactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification",
+                  "hint": "Add an optional comment."
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Deactivate",
+                "confirmLoading": "Deactivating...",
+                "cancel": "Cancel"
+              }
+            },
+            "submitSuccess": "The account will be deactivated in one minute | The account will be deactivated in {count} minutes"
+          }
+        },
+        "reactivation": {
+          "immediate": {
+            "FormDialog": {
+              "title": "Immediate account reactivation",
+              "content": "Are you sure you want to reactivate this account immediately?",
+              "fields": {
+                "statusComment": {
+                  "label": "Justification *",
+                  "hint": "Provide a mandatory justification for this reactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Reactivate",
+                "confirmLoading": "Reactivating...",
+                "cancel": "Cancel"
+              }
+            },
+            "submitSuccess": "The account will be reactivated in one minute | The account will be reactivated in {count} minutes"
+          }
+        },
+        "revalidation": {
+          "scheduled": {
+            "FormDialog": {
+              "title": "Schedule account reactivation",
+              "content": "Please select a new validity period end date and provide a justification.",
+              "fields": {
+                "validityPeriod": {
+                  "end": {
+                    "label": "Validity period end date *",
+                    "close": "Close",
+                    "validation": {
+                      "required": "This field is required.",
+                      "invalidDate": "Invalid date format. Expected format is {format}.",
+                      "afterDate": "The date must be after today."
+                    }
+                  }
+                },
+                "statusComment": {
+                  "label": "Justification *",
+                  "hint": "Provide a mandatory justification for this reactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Schedule",
+                "confirmLoading": "Scheduling...",
+                "cancel": "Cancel"
+              }
+            }
+          },
+          "immediate": {
+            "FormDialog": {
+              "title": "Immediate account reactivation",
+              "content": "Please provide a justification to reactivate this account immediately.",
+              "fields": {
+                "statusComment": {
+                  "label": "Justification *",
+                  "hint": "Provide a mandatory justification for this reactivation.",
+                  "validation": {
+                    "required": "This field is required."
+                  }
+                }
+              },
+              "ButtonsCard": {
+                "confirm": "Reactivate",
+                "confirmLoading": "Reactivating...",
+                "cancel": "Cancel"
+              }
+            },
+            "submitSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes"
+          }
+        }
+      }
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "This account has been deactivated since {date}.",
@@ -777,54 +850,5 @@
     "contentWithEndDate": "This account has been suspended from {date} until {endDate}.",
     "clearSuspensionButton": "Immediate reactivation",
     "modifySuspensionButton": "Adjust suspension settings"
-  },
-  "AccountRevalidationActions": {
-    "FormDialog": {
-      "immediate": {
-        "title": "Immediate account reactivation",
-        "content": "Please provide a justification to reactivate this account immediately.",
-        "fields": {
-          "statusComment": {
-            "label": "Justification *",
-            "hint": "Provide a mandatory justification for this reactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Reactivate",
-          "confirmLoading": "Reactivating...",
-          "cancel": "Cancel"
-        }
-      },
-      "scheduled": {
-        "title": "Schedule account reactivation",
-        "content": "Please select a new validity period end date and provide a justification.",
-        "fields": {
-          "validityPeriodEnd": {
-            "label": "Validity period end date *",
-            "close": "Close",
-            "validation": {
-              "required": "This field is required.",
-              "invalidDate": "Invalid date format. Expected format is {format}.",
-              "afterDate": "The date must be after today."
-            }
-          },
-          "statusComment": {
-            "label": "Justification *",
-            "hint": "Provide a mandatory justification for this reactivation.",
-            "validation": {
-              "required": "This field is required."
-            }
-          }
-        },
-        "ButtonsCard": {
-          "confirm": "Schedule",
-          "confirmLoading": "Scheduling...",
-          "cancel": "Cancel"
-        }
-      }
-    }
   }
 }

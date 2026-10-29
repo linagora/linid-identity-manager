@@ -176,109 +176,115 @@
         }
       }
     },
-    "activation-actions": {
-      "dropdown-button": {
-        "q-btn-dropdown": { "color": "positive", "outline": false },
-        "q-list": {},
-        "q-menu": {},
-        "menu-trigger": {
-          "q-item-section": {},
-          "q-icon": {}
-        },
-        "items": {
-          "suspension": {
-            "scheduled": {
-              "q-item": {},
-              "icon": {
-                "q-icon": {},
-                "q-item-section": {}
-              },
-              "label": {
-                "q-item-section": {},
-                "q-item-label": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "suspension-actions": {
-      "dropdown-button": {
-        "q-btn-dropdown": { "color": "warning", "outline": false },
-        "q-list": {},
-        "q-menu": {},
-        "menu-trigger": {
-          "q-item-section": {},
-          "q-icon": {}
-        },
-        "items": {
-          "suspension": {
-            "scheduled": {
-              "q-item": {},
-              "icon": {
-                "q-icon": {},
-                "q-item-section": {}
-              },
-              "label": {
-                "q-item-section": {},
-                "q-item-label": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "deactivation-actions": {
-      "dropdown-button": {
-        "q-btn-dropdown": { "color": "negative", "outline": false },
-        "q-list": {},
-        "q-menu": {},
-        "menu-trigger": {
-          "q-item-section": {},
-          "q-icon": {}
-        },
-        "items": {
-          "suspension": {
-            "scheduled": {
-              "q-item": {},
-              "icon": {
-                "q-icon": {},
-                "q-item-section": {}
-              },
-              "label": {
-                "q-item-section": {},
-                "q-item-label": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "confirmation-dialog": {
-      "q-dialog": { "persistent": false },
+    "lifecycle-buttons-card": {
       "buttons-card": {
         "q-card": { "flat": true },
-        "q-card-actions": { "align": "right" },
-        "confirm-button": {
-          "q-btn": { "color": "primary", "outline": false }
-        },
-        "cancel-button": {
-          "q-btn": { "color": "primary", "outline": true }
+        "q-card-actions": { "align": "left" }
+      },
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
-      }
-    },
-    "form-dialog": {
-      "q-dialog": { "persistent": false },
-      "q-card": { "flat": true, "bordered": false },
-      "q-card-actions": { "align": "right" },
-      "buttons-card": {
-        "q-card": { "flat": true },
+      },
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
         "q-card-actions": { "align": "right" },
-        "confirm-button": {
-          "q-btn": { "color": "primary", "outline": false }
-        },
-        "cancel-button": {
-          "q-btn": { "color": "primary", "outline": true }
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
+        }
+      },
+      "activation": {
+        "dropdown-button": {
+          "q-btn-dropdown": { "color": "positive", "outline": false },
+          "q-list": {},
+          "q-menu": {},
+          "menu-trigger": {
+            "q-item-section": {},
+            "q-icon": {}
+          },
+          "items": {
+            "suspension": {
+              "scheduled": {
+                "q-item": {},
+                "icon": {
+                  "q-icon": {},
+                  "q-item-section": {}
+                },
+                "label": {
+                  "q-item-section": {},
+                  "q-item-label": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "suspension": {
+        "dropdown-button": {
+          "q-btn-dropdown": { "color": "warning", "outline": false },
+          "q-list": {},
+          "q-menu": {},
+          "menu-trigger": {
+            "q-item-section": {},
+            "q-icon": {}
+          },
+          "items": {
+            "suspension": {
+              "scheduled": {
+                "q-item": {},
+                "icon": {
+                  "q-icon": {},
+                  "q-item-section": {}
+                },
+                "label": {
+                  "q-item-section": {},
+                  "q-item-label": {}
+                }
+              }
+            }
+          }
+        }
+      },
+      "deactivation": {
+        "dropdown-button": {
+          "q-btn-dropdown": { "color": "negative", "outline": false },
+          "q-list": {},
+          "q-menu": {},
+          "menu-trigger": {
+            "q-item-section": {},
+            "q-icon": {}
+          },
+          "items": {
+            "suspension": {
+              "scheduled": {
+                "q-item": {},
+                "icon": {
+                  "q-icon": {},
+                  "q-item-section": {}
+                },
+                "label": {
+                  "q-item-section": {},
+                  "q-item-label": {}
+                }
+              }
+            }
+          }
         }
       }
     }

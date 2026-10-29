@@ -35,3 +35,14 @@ export interface Period {
 
 /** I18n key of the application-wide date format, consumed by useCommonMapper's toDate/toDateISO. */
 export const DATE_FORMAT_KEY = 'application.dateFormat';
+
+/** Display configuration of a button of the LinPulsar `LifecycleButtonsCard`, read from the zone props of a panel. */
+export interface LifecycleButton {
+  /** Lifecycle type of the button. */
+  type: 'activation' | 'suspension' | 'deactivation';
+  /**
+   * Whether the button is disabled; false by default. Either a boolean, or a Nunjucks template rendered with the entity
+   * that disables the button when it renders to `true`.
+   */
+  disable?: string | boolean;
+}

@@ -24,17 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from '@linagora/lin-pulsar-core';
-import type {
-  AccountDeactivationRecord,
-  AccountDTO,
-  AccountReactivationRecord,
-  AccountStatus,
-  AccountStatusForm,
-  AccountSuspensionRecord,
-  AccountValidityRecord,
-} from 'src/types/accounts';
-import { DATE_FORMAT_KEY } from 'src/types/common';
+import type { AccountDTO, AccountStatus } from 'src/types/accounts';
 
 /**
  * Mapper for accounts-related data transformations.
@@ -42,8 +32,6 @@ import { DATE_FORMAT_KEY } from 'src/types/common';
  * @returns Functions to convert API records to UI-friendly formats.
  */
 export function useAccountMapper() {
-  const { toDateISO } = useCommonMapper();
-
   /**
    * Maps an AccountDTO to an AccountStatus, exposing only the lifecycle status fields. Identity fields (firstname,
    * lastname, ...) are intentionally not included.
@@ -61,107 +49,7 @@ export function useAccountMapper() {
     };
   };
 
-  /**
-   * Transforms form data into an AccountSuspensionRecord, nesting the flat suspension start/end fields into a
-   * suspension period object.
-   *
-   * @param formData - Record containing the raw form data entered by the user for suspending the account (flat
-   *   suspension period fields plus reason, sub-reason and comment).
-   * @returns AccountSuspensionRecord ready for API consumption.
-   */
-  const toAccountSuspensionRecord = (
-    formData: AccountStatusForm
-  ): AccountSuspensionRecord => {
-    return {
-      suspensionPeriod: {
-        start:
-          toDateISO(formData.suspensionPeriodStart, DATE_FORMAT_KEY) || null,
-        end: toDateISO(formData.suspensionPeriodEnd, DATE_FORMAT_KEY) || null,
-      },
-      reason: formData.statusReason || '',
-      subreason: formData.statusSubreason || '',
-      comment: formData.statusComment || null,
-    };
-  };
-
-  /**
-   * Transforms form data into an AccountDeactivationRecord. The validity period end date becomes the deactivation
-   * timestamp.
-   *
-   * @param formData - The flattened account status form data.
-   * @returns AccountDeactivationRecord ready for API consumption.
-   */
-  const toAccountDeactivationRecord = (
-    formData: AccountStatusForm
-  ): AccountDeactivationRecord => {
-    return {
-      deactivationAt: toDateISO(formData.validityPeriodEnd, DATE_FORMAT_KEY),
-      reason: formData.statusReason || '',
-      subreason: formData.statusSubreason || '',
-      comment: formData.statusComment || null,
-    };
-  };
-
-  /**
-   * Transforms form data into an AccountReactivationRecord carrying the mandatory justification comment.
-   *
-   * @param formData - The flattened account status form data.
-   * @returns AccountReactivationRecord ready for API consumption.
-   */
-  const toAccountReactivationRecord = (
-    formData: AccountStatusForm
-  ): AccountReactivationRecord => {
-    const record: AccountReactivationRecord = {
-      comment: formData.statusComment || '',
-    };
-
-    const validityEnd = toDateISO(formData.validityPeriodEnd, DATE_FORMAT_KEY);
-    if (validityEnd) {
-      record.validityEnd = validityEnd;
-    }
-
-    return record;
-  };
-
-  /**
-   * Transforms form data into an AccountValidityRecord carrying the validity period start.
-   *
-   * @param formData - The flattened account status form data.
-   * @returns AccountValidityRecord ready for API consumption.
-   */
-  const toAccountValidityRecord = (
-    formData: AccountStatusForm
-  ): AccountValidityRecord => {
-    return {
-      validityStart: toDateISO(formData.validityPeriodStart, DATE_FORMAT_KEY),
-    };
-  };
-
-  /**
-   * Flattens an {@link AccountStatus} into an {@link AccountStatusForm} to pre-fill the "modify" dialogs with the
-   * existing validity and suspension period bounds. The reason / sub-reason / comment fields are intentionally left
-   * empty: the read model no longer carries a generic status reason, and a modification expects a fresh justification.
-   *
-   * @param accountStatus - The current account status providing the existing period bounds.
-   * @returns The flattened form values with localized period dates.
-   */
-  const toAccountStatusForm = (
-    accountStatus: AccountStatus
-  ): AccountStatusForm => {
-    return {
-      validityPeriodStart: accountStatus.validityPeriod?.start,
-      validityPeriodEnd: accountStatus.validityPeriod?.end,
-      suspensionPeriodStart: accountStatus.suspensionPeriod?.start,
-      suspensionPeriodEnd: accountStatus.suspensionPeriod?.end,
-    };
-  };
-
   return {
     toAccountStatus,
-    toAccountSuspensionRecord,
-    toAccountDeactivationRecord,
-    toAccountReactivationRecord,
-    toAccountValidityRecord,
-    toAccountStatusForm,
   };
 }

@@ -27,23 +27,16 @@
 package io.github.linagora.linid.im.sync.service;
 
 import io.github.linagora.linid.im.sync.config.SyncDataProperties;
-import io.github.linagora.linid.im.sync.model.payload.PayloadItem;
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
-import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
-import java.util.ArrayList;
-import java.util.Collection;
+import io.github.linagora.linid.im.sync.exception.PayloadException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Default implementation of {@link PayloadService}, reading the sources with {@link SourceRepository} and rendering the
- * {@code mapping} with {@link JinjaService}.
+ * Default implementation of {@link PayloadService}, rendering the {@code mapping} with {@link JinjaService}.
  */
 @Service
 public class PayloadServiceImpl implements PayloadService {
@@ -60,14 +53,9 @@ public class PayloadServiceImpl implements PayloadService {
     };
 
     /**
-     * Configuration holding the sources and the template of the payloads.
+     * Configuration holding the template of the payloads.
      */
     private final SyncDataProperties properties;
-
-    /**
-     * Repository reading the rows of a source.
-     */
-    private final SourceRepository sourceRepository;
 
     /**
      * Service rendering the template of the payloads.
@@ -82,46 +70,21 @@ public class PayloadServiceImpl implements PayloadService {
     /**
      * Creates the service building the payloads from the configured template.
      *
-     * @param properties       the configuration holding the sources and the template of the payloads
-     * @param sourceRepository the repository reading the rows of a source
-     * @param jinjaService     the service rendering the template
-     * @param jsonMapper       the mapper parsing the rendered template
+     * @param properties   the configuration holding the template of the payloads
+     * @param jinjaService the service rendering the template
+     * @param jsonMapper   the mapper parsing the rendered template
      */
     public PayloadServiceImpl(
         final SyncDataProperties properties,
-        final SourceRepository sourceRepository,
         final JinjaService jinjaService,
         final JsonMapper jsonMapper) {
         this.properties = properties;
-        this.sourceRepository = sourceRepository;
         this.jinjaService = jinjaService;
         this.jsonMapper = jsonMapper;
     }
 
     @Override
-    public List<PayloadItem> build(final List<AccountIdentity> accounts) {
-        checkMapping();
-        Map<String, Map<UUID, List<Map<String, Object>>>> rowsBySource =
-            readSources(accounts.stream().map(AccountIdentity::actId).toList());
-        List<PayloadItem> items = new ArrayList<>();
-        for (AccountIdentity account : accounts) {
-            try {
-                Map<String, Object> payload = render(context(rowsBySource, account.actId()));
-                items.add(new PayloadItem(account.actId(), account.externalId(), payload));
-            } catch (RuntimeException e) {
-                AlertService.payloadError("account=" + account.externalId(), e);
-            }
-        }
-        return items;
-    }
-
-    /**
-     * Checks the template by rendering it with an empty context, where each source gives {@code null} through
-     * {@code tojson}, so that a valid template gives a JSON object.
-     *
-     * @throws IllegalStateException when the template is invalid
-     */
-    private void checkMapping() {
+    public void checkMapping() {
         try {
             render(Map.of());
         } catch (RuntimeException e) {
@@ -130,40 +93,13 @@ public class PayloadServiceImpl implements PayloadService {
         }
     }
 
-    /**
-     * Reads every source of the configuration once for the given accounts, and groups their rows by account.
-     *
-     * @param actIds the identifiers of the accounts
-     * @return the rows of each source by source name, then by {@code act_id}, an account without row in a source being
-     *     absent from its map
-     * @throws IllegalStateException when a source cannot be read
-     */
-    private Map<String, Map<UUID, List<Map<String, Object>>>> readSources(final Collection<UUID> actIds) {
-        Map<String, Map<UUID, List<Map<String, Object>>>> rowsBySource = new HashMap<>();
-        properties.sources().forEach((source, settings) ->
-            rowsBySource.put(source, readSource(source, settings.accountIdColumn(), actIds)));
-        return rowsBySource;
-    }
-
-    /**
-     * Reads the rows of a source for the given accounts, and groups them by account.
-     *
-     * @param source          the name of the source
-     * @param accountIdColumn the column of the source holding the {@code act_id} of the account
-     * @param actIds          the identifiers of the accounts
-     * @return the rows of the source by {@code act_id}
-     * @throws IllegalStateException naming the source, after logging the {@code sourceUnreadable} alert
-     */
-    private Map<UUID, List<Map<String, Object>>> readSource(
-        final String source,
-        final String accountIdColumn,
-        final Collection<UUID> actIds) {
+    @Override
+    public Map<String, Object> build(final Map<String, List<Map<String, Object>>> rowsBySource) {
+        Map<String, Object> context = context(rowsBySource);
         try {
-            return sourceRepository.findAllByAccountIds(source, accountIdColumn, actIds).stream()
-                .collect(Collectors.groupingBy(row -> (UUID) row.get(accountIdColumn)));
+            return render(context);
         } catch (RuntimeException e) {
-            AlertService.sourceUnreadable("source=" + source, e);
-            throw new IllegalStateException("Unable to read the source " + source, e);
+            throw new PayloadException(e.getMessage(), e);
         }
     }
 
@@ -171,21 +107,17 @@ public class PayloadServiceImpl implements PayloadService {
      * Builds the context of the template for an account: each source is a variable named after it, holding the
      * columns of the row of the account, empty when the account has no row in the source.
      *
-     * @param rowsBySource the rows of each source, grouped by account
-     * @param actId        the identifier of the account
+     * @param rowsBySource the rows of the account in each source, by source name
      * @return the variables of the template
-     * @throws IllegalStateException when the account has several rows in a source
+     * @throws PayloadException when the account has several rows in a source
      */
-    private static Map<String, Object> context(
-        final Map<String, Map<UUID, List<Map<String, Object>>>> rowsBySource,
-        final UUID actId) {
+    private static Map<String, Object> context(final Map<String, List<Map<String, Object>>> rowsBySource) {
         Map<String, Object> context = new HashMap<>();
-        rowsBySource.forEach((source, rowsByAccount) -> {
-            List<Map<String, Object>> rows = rowsByAccount.getOrDefault(actId, List.of());
-            if (rows.size() > 1) {
-                throw new IllegalStateException("The account has " + rows.size() + " rows in the source " + source);
+        rowsBySource.forEach((source, sourceRows) -> {
+            if (sourceRows.size() > 1) {
+                throw new PayloadException("The account has " + sourceRows.size() + " rows in the source " + source);
             }
-            context.put(source, rows.stream().findFirst().orElse(Map.of()));
+            context.put(source, sourceRows.stream().findFirst().orElse(Map.of()));
         });
         return context;
     }

@@ -33,41 +33,93 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
+import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Limit;
 
 @DisplayName("Test class: PayloadStepConfig")
 class PayloadStepConfigTest {
 
     private static final UUID TECHNICAL_ACCOUNT_ID = UUID.fromString("00000000-0000-4000-8000-00000000a012");
 
+    private static final AccountIdentity JDOE =
+        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe");
+
+    private static final AccountIdentity ASMITH =
+        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith");
+
+    private final AccountComputedRightViewRepository repository = mock(AccountComputedRightViewRepository.class);
+
+    private final SourceRepository sourceRepository = mock(SourceRepository.class);
+
     @Test
-    @DisplayName("payloadAccountsReader should read every account once, except the technical account, in order")
-    void testAccountIdentityReader() {
-        var repository = mock(AccountComputedRightViewRepository.class);
-        var jdoe = new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe");
-        var asmith = new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith");
-        when(repository.findDistinctByActIdNotOrderByActIdAsc(TECHNICAL_ACCOUNT_ID)).thenReturn(List.of(jdoe, asmith));
+    @DisplayName("payloadSourcesReader should read every account once, except the technical account, in order, by "
+        + "pages of the chunk size, with its rows in each source")
+    void testPayloadSourcesReader() throws Exception {
+        page(new UUID(0L, 0L), JDOE, ASMITH);
+        page(ASMITH.actId());
+        rows(List.of(JDOE, ASMITH), row(JDOE, "jdoe@example.com"));
 
-        var reader = new PayloadStepConfig(repository, TECHNICAL_ACCOUNT_ID).payloadAccountsReader();
+        var reader = config(2).payloadSourcesReader();
 
-        assertEquals(jdoe, reader.read());
-        assertEquals(asmith, reader.read());
+        assertEquals(new AccountSnapshot(JDOE, Map.of("accounts", List.of(row(JDOE, "jdoe@example.com")))),
+            reader.read());
+        assertEquals(new AccountSnapshot(ASMITH, Map.of("accounts", List.of())), reader.read());
         assertNull(reader.read());
     }
 
     @Test
     @DisplayName("constructor should reject a technical account that is not set, before any read")
     void testConstructor_technicalAccountNotSet() {
-        var repository = mock(AccountComputedRightViewRepository.class);
-
-        var exception = assertThrows(NullPointerException.class, () -> new PayloadStepConfig(repository, null));
+        var exception = assertThrows(NullPointerException.class,
+            () -> new PayloadStepConfig(repository, sourceRepository, properties(), null, 2));
 
         assertEquals("sync.technical-account-id must be set", exception.getMessage());
         verifyNoInteractions(repository);
+    }
+
+    @Test
+    @DisplayName("constructor should reject a chunk size that is not positive")
+    void testConstructor_chunkSizeNotPositive() {
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> new PayloadStepConfig(repository, sourceRepository, properties(), TECHNICAL_ACCOUNT_ID, 0));
+
+        assertEquals("sync.payload.chunk-size must be positive", exception.getMessage());
+    }
+
+    private PayloadStepConfig config(final int chunkSize) {
+        return new PayloadStepConfig(repository, sourceRepository, properties(), TECHNICAL_ACCOUNT_ID, chunkSize);
+    }
+
+    /**
+     * Gives the accounts of the page following the given account, by pages of 2 accounts.
+     */
+    private void page(final UUID after, final AccountIdentity... accounts) {
+        when(repository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(TECHNICAL_ACCOUNT_ID, after,
+            Limit.of(2))).thenReturn(List.of(accounts));
+    }
+
+    private static SyncDataProperties properties() {
+        return new SyncDataProperties(Map.of("accounts", new SourceProperties("act_id")), "{}");
+    }
+
+    /**
+     * Gives the rows of the {@code accounts} source for a page of accounts.
+     */
+    @SafeVarargs
+    private void rows(final List<AccountIdentity> page, final Map<String, Object>... rows) {
+        when(sourceRepository.findAllByAccountIds("accounts", "act_id",
+            page.stream().map(AccountIdentity::actId).toList())).thenReturn(List.of(rows));
+    }
+
+    private static Map<String, Object> row(final AccountIdentity account, final String email) {
+        return Map.of("act_id", account.actId(), "email", email);
     }
 }

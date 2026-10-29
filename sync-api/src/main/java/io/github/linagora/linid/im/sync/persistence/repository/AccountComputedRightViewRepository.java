@@ -46,21 +46,24 @@ public interface AccountComputedRightViewRepository
     extends Repository<AccountComputedRightView, AccountApplicationPairId> {
 
     /**
-     * Finds every account of the view once, except the technical account of {@code sync-api}, ordered by its
-     * identifier.
+     * Finds the next page of the accounts of the view, each one once, except the technical account of {@code sync-api},
+     * ordered by identifier.
      *
-     * <p>The {@link AccountIdentity} projection only selects the identifiers of the accounts, so that the distinct
-     * applies to them and not to the whole rows. The result is a {@link List}, read before the chunks of the payload
-     * build: a JPA stream cannot stay open across their transactions.</p>
+     * <p>The page starts after the given account, not at an offset: an account deleted since the previous page does not
+     * shift the next ones. The {@link AccountIdentity} projection only selects the identifiers of the accounts, so that
+     * the distinct applies to them and not to the whole rows.</p>
      *
      * <p>The technical account gets no payload, so its pairs are never {@code to_compute} and are never selected for
      * the computation of the rights.</p>
      *
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
-     * @return the identifiers of every other account, including the accounts never computed, empty when no
-     *     application is deployed
+     * @param actId              the last account of the previous page, the lowest UUID for the first page
+     * @param limit              the maximum number of accounts of the page
+     * @return the identifiers of the next accounts, including the accounts never computed, empty when no application is
+     *     deployed or when every account was read
      */
-    List<AccountIdentity> findDistinctByActIdNotOrderByActIdAsc(UUID technicalAccountId);
+    List<AccountIdentity> findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
+        UUID technicalAccountId, UUID actId, Limit limit);
 
     /**
      * Finds the next pairs of the cycle whose rights must be computed, ordered by account then application.

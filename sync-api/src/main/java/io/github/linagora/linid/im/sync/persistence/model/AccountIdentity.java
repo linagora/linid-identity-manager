@@ -33,8 +33,7 @@ import java.util.UUID;
  * pairs.
  *
  * <p>A record rather than an interface projection: Spring Data builds it with its constructor, while an interface
- * projection creates a proxy per row, several times heavier in the list of every account read by the payload
- * build.</p>
+ * projection creates a proxy per row, several times heavier in the pages of accounts read by the payload build.</p>
  *
  * @param actId      the identifier of the account
  * @param externalId the external identifier of the account, used to identify it in the alerts and the logs

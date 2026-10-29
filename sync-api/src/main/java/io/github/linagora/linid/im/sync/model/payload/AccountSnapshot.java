@@ -26,15 +26,16 @@
 
 package io.github.linagora.linid.im.sync.model.payload;
 
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 /**
- * Payload built for an account, used as OPA input.
+ * Snapshot of an account whose payload is to be built, read with its page: its rows in each source. It is the item read
+ * by {@code PayloadSourcesReader}.
  *
- * @param actId      the identifier of the account
- * @param externalId the external identifier of the account, used to identify it in the alerts and the logs
- * @param payload    the payload, the {@code mapping} rendered for the account and parsed as a JSON object
+ * @param account      the account
+ * @param rowsBySource the rows of the account in each source, by source name, an empty list for a source without row
  */
-public record PayloadItem(UUID actId, String externalId, Map<String, Object> payload) {
+public record AccountSnapshot(AccountIdentity account, Map<String, List<Map<String, Object>>> rowsBySource) {
 }

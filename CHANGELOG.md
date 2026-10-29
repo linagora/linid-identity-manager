@@ -77,12 +77,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced `@linagora/linid-im-front-corelib` by **`@linagora/lin-pulsar-core`** and the `catalogUI` Module Federation
   remote by **`LinPulsar`** (served under `/lin-pulsar`).
 - Renamed the `CATALOG_UI_UPSTREAM` environment variable of the UI server to **`LIN_PULSAR_UPSTREAM`**.
+- Moved the **lifecycle actions** of the account and organizational unit details pages to the `LifecycleButtonsCard`
+  of LinPulsar: their dropdowns, dialogs and requests are configured by the `buttons`, `actions` and
+  `immediateActionDelay` props of the `AccountLifecyclePanel` and `OrganizationalUnitLifecyclePanel` zones.
 
 ### Removed
 
 #### Backend
 
 - Removed the `payload` and `checksum` columns of the `accounts` table, moved to `account_payloads`.
+
+#### Frontend
+
+- Removed the `immediateActionDelay`, `accountLifecycleFields` and `organizationalUnitLifecycleFields` settings of
+  `config.json`, replaced by the props of the lifecycle panel zones.
 
 ### Fixed
 

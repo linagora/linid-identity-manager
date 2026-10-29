@@ -190,6 +190,9 @@ LINID_DATABASE_PASSWORD=password
 # act_id of the technical account of sync-api, shared by its instances and recorded as the author of their writes
 SYNC_TECHNICAL_ACCOUNT_ID=00000000-0000-4000-8000-00000000a012
 
+# Identifier of the instance, written with the rows it writes in the linid-api database (default: the host name)
+# SYNC_INSTANCE_ID=sync-api-1
+
 # Path to SSL/TLS key store
 SSL_KEY_STORE=file:/etc/ssl/keystore.p12
 
@@ -224,6 +227,10 @@ SYNC_CRON="0 0 2 * * *"
 # Number of account and application pairs read, computed and written per chunk by the computation of the rights
 # (default: 100)
 # SYNC_COMPUTE_CHUNK_SIZE=100
+
+# Number of inserts or updates sent together to the linid-api database, within the transaction of a chunk
+# (default: 50)
+# SYNC_JDBC_BATCH_SIZE=50
 
 # Base URL of the OPA server used by sync-api to evaluate the application policies
 OPA_SERVER_URL=http://opa:8181
@@ -621,6 +628,25 @@ SYNC_PAYLOAD_CHUNK_SIZE=500
   queries, but holds more rows in memory and a longer transaction.
 * It is set in `sync-api.env` (`sync.payload.chunk-size`), not in the `sync-data` section: the `sync-data` section
   describes the data, while the chunk size tunes the processing of `sync-api`.
+
+### Writing
+
+The payload of each account is written in the `account_payloads` table of the LinId database only when its checksum
+changed. The checksum is computed on its compact JSON, with its keys sorted at every level: the order of the keys in
+the template does not change it. The arrays keep their order. An account deleted since the start of the payload
+build is left out.
+
+```text
+SYNC_JDBC_BATCH_SIZE=50
+SYNC_INSTANCE_ID=sync-api-1
+```
+
+* `SYNC_JDBC_BATCH_SIZE` (default `50`) is the number of `INSERT` or `UPDATE` statements sent together to the LinId
+  database when a chunk is written, just before its commit, one round trip per group: a chunk of 500 changed payloads
+  takes 10 round trips instead of 500, and a chunk without change sends nothing. It does not change the chunk size, the
+  number of accounts per transaction.
+* `SYNC_INSTANCE_ID` (default: the host name) is the identifier of the instance, written in the `sync_instance_id`
+  column of the rows it writes.
 
 ---
 

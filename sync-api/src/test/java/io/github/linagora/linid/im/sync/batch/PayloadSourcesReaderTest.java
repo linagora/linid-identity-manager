@@ -47,7 +47,7 @@ import ch.qos.logback.core.read.ListAppender;
 import io.github.linagora.linid.im.sync.config.SourceProperties;
 import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
+import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
 import io.github.linagora.linid.im.sync.service.AlertService;
@@ -76,14 +76,14 @@ class PayloadSourcesReaderTest {
 
     private static final String READ_COUNT_KEY = "payloadSourcesReader.read.count";
 
-    private static final AccountIdentity JDOE =
-        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe");
+    private static final AccountSummary JDOE =
+        new AccountSummary(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe", "checksum-1");
 
-    private static final AccountIdentity ASMITH =
-        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith");
+    private static final AccountSummary ASMITH =
+        new AccountSummary(UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith", null);
 
-    private static final AccountIdentity BLEE =
-        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000003"), "blee");
+    private static final AccountSummary BLEE =
+        new AccountSummary(UUID.fromString("00000000-0000-4000-8000-000000000003"), "blee", null);
 
     private final AccountComputedRightViewRepository viewRepository = mock(AccountComputedRightViewRepository.class);
 
@@ -109,7 +109,7 @@ class PayloadSourcesReaderTest {
 
     @Test
     @DisplayName("read should give the accounts of the view by pages starting after the last account of the previous "
-        + "page, with their rows in each source, read once per page")
+        + "page, with the checksum of their payload, and their rows in each source, read once per page")
     void testRead() throws Exception {
         sources.put("accounts", new SourceProperties("act_id"));
         sources.put("account_payload_view", new SourceProperties("owner_id"));
@@ -243,7 +243,7 @@ class PayloadSourcesReaderTest {
         assertEquals(ASMITH.actId().toString(), context.getString(LAST_ACCOUNT_KEY));
     }
 
-    private void page(final UUID after, final AccountIdentity... accounts) {
+    private void page(final UUID after, final AccountSummary... accounts) {
         when(viewRepository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
             TECHNICAL_ACCOUNT_ID, after, Limit.of(2))).thenReturn(List.of(accounts));
     }

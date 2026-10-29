@@ -53,4 +53,13 @@ public interface PayloadService {
      *     source, the template raises an error, or the rendered text is not a JSON object
      */
     Map<String, Object> build(Map<String, List<Map<String, Object>>> rowsBySource);
+
+    /**
+     * Computes the checksum of a payload on its compact JSON, with its keys sorted at every level, so that it does not
+     * depend on the order of the keys in the {@code mapping}. The arrays keep their order.
+     *
+     * @param payload the payload of an account
+     * @return the checksum of the payload
+     */
+    String checksum(Map<String, Object> payload);
 }

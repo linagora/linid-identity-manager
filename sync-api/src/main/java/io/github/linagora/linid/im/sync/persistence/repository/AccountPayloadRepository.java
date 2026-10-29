@@ -24,19 +24,23 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.persistence.model;
+package io.github.linagora.linid.im.sync.persistence.repository;
 
+import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
+import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Projection holding the identifiers of an account of {@link AccountComputedRightView}, without the columns of its
- * pairs.
- *
- * <p>A record rather than an interface projection: Spring Data builds it with its constructor, while an interface
- * projection creates a proxy per row, several times heavier in the pages of accounts read by the payload build.</p>
- *
- * @param actId      the identifier of the account
- * @param externalId the external identifier of the account, used to identify it in the alerts and the logs
+ * Spring Data repository for {@link AccountPayload}.
  */
-public record AccountIdentity(UUID actId, String externalId) {
+public interface AccountPayloadRepository extends JpaRepository<AccountPayload, UUID> {
+
+    /**
+     * Finds the payload of an account.
+     *
+     * @param actId the identifier of the account
+     * @return the payload of the account, empty when it has none yet
+     */
+    Optional<AccountPayload> findByActId(UUID actId);
 }

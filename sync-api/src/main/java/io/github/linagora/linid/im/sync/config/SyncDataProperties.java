@@ -24,47 +24,21 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.model.syncdata;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package io.github.linagora.linid.im.sync.config;
 
 import java.util.Map;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.context.properties.bind.Binder;
-import org.springframework.boot.context.properties.source.MapConfigurationPropertySource;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
-@DisplayName("Test class: SourceProperties")
-class SourcePropertiesTest {
-
-    @Test
-    @DisplayName("accountIdColumn should keep the configured column")
-    void testAccountIdColumn() {
-        assertEquals("owner_id", new SourceProperties("owner_id").accountIdColumn());
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = " ")
-    @DisplayName("accountIdColumn should be act_id when it is not set")
-    void testAccountIdColumn_default(final String accountIdColumn) {
-        assertEquals("act_id", new SourceProperties(accountIdColumn).accountIdColumn());
-    }
-
-    @Test
-    @DisplayName("accountIdColumn should be act_id for a source bound without settings")
-    void testAccountIdColumn_boundWithoutSettings() {
-        // A source written as "accounts: {}" in YAML is bound from an empty value
-        var binder = new Binder(new MapConfigurationPropertySource(Map.of(
-            "sync-data.job.sources.accounts", "",
-            "sync-data.job.sources.phones.account-id-column", "owner_id")));
-
-        var properties = binder.bind("sync-data.job", SyncDataProperties.class).get();
-
-        assertEquals(Map.of("accounts", new SourceProperties("act_id"), "phones", new SourceProperties("owner_id")),
-            properties.sources());
-    }
+/**
+ * Configuration of the {@code sync-data.job} section: the sources read to build the account payloads, and the
+ * template of the payloads.
+ *
+ * @param sources settings of each source by name, the name of a table or a view of the linid-api database, empty when
+ *     no source is configured
+ * @param mapping JSON template of the payload, whose values are Jinjava expressions inserted with the {@code tojson}
+ *     filter, and whose variables are the sources, holding the columns of the row of the account
+ */
+@ConfigurationProperties(prefix = "sync-data.job")
+public record SyncDataProperties(@DefaultValue Map<String, SourceProperties> sources, String mapping) {
 }

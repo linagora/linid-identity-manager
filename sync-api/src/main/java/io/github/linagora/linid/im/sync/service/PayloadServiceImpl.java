@@ -26,8 +26,8 @@
 
 package io.github.linagora.linid.im.sync.service;
 
+import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.PayloadItem;
-import io.github.linagora.linid.im.sync.model.syncdata.SyncDataProperties;
 import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
 import java.util.ArrayList;

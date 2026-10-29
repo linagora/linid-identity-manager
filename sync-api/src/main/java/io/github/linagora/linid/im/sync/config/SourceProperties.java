@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.model.syncdata;
+package io.github.linagora.linid.im.sync.config;
 
 import org.apache.commons.lang3.StringUtils;
 

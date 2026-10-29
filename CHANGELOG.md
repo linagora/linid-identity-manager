@@ -59,6 +59,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   listed in the `sync-data` section of its external configuration, now required (`EXTERNAL_CONFIGURATION`), and a
   Jinjava JSON template, with the **`account_payload_view` view**, gathering the organizational units and the groups of
   each account in sorted arrays, and the environment variable `SYNC_PAYLOAD_CHUNK_SIZE` (default `500`).
+- Added the **writing of the account payloads** in `sync-api`: the payload of each account is written in
+  `account_payloads` only when its checksum, computed on its JSON with sorted keys, changed, with the environment
+  variables `SYNC_JDBC_BATCH_SIZE` (default `50`) and `SYNC_INSTANCE_ID` (default: the host name).
 
 #### Frontend
 

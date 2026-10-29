@@ -181,7 +181,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And  I expect the HTML element '[data-cy="account-not-activated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 108 Lifecycle case 2 - INACTIVE, not activated yet
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -196,7 +196,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And  I expect the HTML element '[data-cy="account-not-activated-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 109 Lifecycle case 3 - ACTIVE, no end date, no suspension
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -213,7 +213,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 110 Lifecycle case 4 - ACTIVE, end > 15 days, no suspension
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -229,7 +229,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 111 Lifecycle case 5 - ACTIVE, end <= 15 days, no suspension
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -245,7 +245,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 112 Lifecycle case 6 - ACTIVE, no end date, suspension planned
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -262,7 +262,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -279,7 +279,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -296,7 +296,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -312,7 +312,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -328,7 +328,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -344,7 +344,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -360,7 +360,7 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 119 Immediate activation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
@@ -373,10 +373,10 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d1"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
-    When I click on '[data-cy="account-activation-actions"]'
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_activation"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_activation"]' contains "Activation"
+    When I click on '[data-cy="lifecycle-buttons-card_activation"]'
     Then I expect the HTML element '[data-cy="dropdown-button_item_activation.immediate"]' to be visible
     When I click on '[data-cy="dropdown-button_item_activation.immediate"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
@@ -390,7 +390,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
 
     ## 121 Immediate activation - success, account status updated after form submission
-    When I click on '[data-cy="account-activation-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_activation"]'
     And  I click on '[data-cy="dropdown-button_item_activation.immediate"]'
     Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
     When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
@@ -409,16 +409,16 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d5"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-activation-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-activation-actions"]' contains "Activation"
-    When I click on '[data-cy="account-activation-actions"]'
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_activation"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_activation"]' contains "Activation"
+    When I click on '[data-cy="lifecycle-buttons-card_activation"]'
     Then I expect the HTML element '[data-cy="dropdown-button_item_activation.scheduled"]' to be visible
     When I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier l'activation du compte"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Veuillez sélectionner une date d'activation."
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "Date d'activation"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.start"]' contains "Date d'activation"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_cancel"]' contains "Annuler"
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
 
@@ -427,28 +427,28 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 124 Scheduled activation - validityPeriodStart invalidDate validation error
-    When I click on '[data-cy="account-activation-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_activation"]'
     And  I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriodStart"]'
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.start"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 125 Scheduled activation - validityPeriodStart afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-activation-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_activation"]'
     And  I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodStart"]'
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodStart"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.start"]' contains "La date doit être postérieure à la date du jour."
 
     ## 126 Scheduled activation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-activation-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_activation"]'
     And  I click on '[data-cy="dropdown-button_item_activation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element ".q-notification__message" to be visible
@@ -465,10 +465,10 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d2"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
-    When I click on '[data-cy="account-suspension-actions"]'
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_suspension"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_suspension"]' contains "Suspension"
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     Then I expect the HTML element '[data-cy="dropdown-button_item_suspension.immediate"]' to be visible
     When I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
@@ -485,7 +485,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 129 Immediate suspension - success, account status updated after form submission
-    When I click on '[data-cy="account-suspension-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_statusReason"]'
@@ -506,17 +506,17 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d8"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspension-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspension-actions"]' contains "Suspension"
-    When I click on '[data-cy="account-suspension-actions"]'
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_suspension"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_suspension"]' contains "Suspension"
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     Then I expect the HTML element '[data-cy="dropdown-button_item_suspension.scheduled"]' to be visible
     When I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la suspension du compte"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Configurez la période de suspension du compte."
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Date de début de suspension"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Date de fin de suspension"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "Date de début de suspension"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "Date de fin de suspension"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -528,69 +528,69 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 132 Scheduled suspension - validation errors on required fields
-    When I click on '[data-cy="account-suspension-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Ce champ est requis."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "Ce champ est requis."
 
     ## 133 Scheduled suspension - suspensionPeriodStart invalidDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspension-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 134 Scheduled suspension - suspensionPeriodEnd invalidDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspension-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "2100/09/23" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "2100/09/23" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 135 Scheduled suspension - suspensionPeriodStart afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspension-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "La date doit être postérieure à la date du jour."
 
     ## 136 Scheduled suspension - suspensionPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspension-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "La date doit être postérieure à la date du jour."
 
     ## 137 Scheduled suspension - suspensionPeriodEnd fromDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspension-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "01/06/2099" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "01/06/2099" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être égale ou postérieure au 01/01/2100."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "La date de fin doit être égale ou postérieure au 01/01/2100."
 
     ## 138 Scheduled suspension - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspension-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
     And  I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_statusReason"]'
     And  I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
@@ -617,11 +617,11 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier les paramètres de suspension"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Mettez à jour les paramètres de suspension de ce compte."
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Nouvelle date de début de suspension"
-    And  I expect the HTML element '[data-cy="field_suspensionPeriodStart"]' to be visible
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Nouvelle date de fin de suspension (optionnelle)"
-    And  I expect the HTML element '[data-cy="field_suspensionPeriodEnd"]' to be visible
-    And  I expect the HTML element '[data-cy="field_suspensionPeriodEnd"]' to have value "31/12/2099"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "Nouvelle date de début de suspension"
+    And  I expect the HTML element '[data-cy="field_suspensionPeriod.start"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "Nouvelle date de fin de suspension (optionnelle)"
+    And  I expect the HTML element '[data-cy="field_suspensionPeriod.end"]' to be visible
+    And  I expect the HTML element '[data-cy="field_suspensionPeriod.end"]' to have value "31/12/2099"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -635,55 +635,55 @@ Feature: Test Account details page display
     ## 141 Modify suspension - suspensionPeriodStart invalidDate validation error
     When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 142 Modify suspension - suspensionPeriodStart afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodStart"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' contains "La date doit être postérieure à la date du jour."
 
     ## 143 Modify suspension - suspensionPeriodEnd invalidDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 144 Modify suspension - suspensionPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "La date doit être postérieure à la date du jour."
 
     ## 145 Modify suspension - suspensionPeriodEnd fromDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriodEnd"]' contains "La date de fin doit être égale ou postérieure au 01/06/2100."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' contains "La date de fin doit être égale ou postérieure au 01/06/2100."
 
     ## 146 Modify suspension - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriodStart"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
-    And  I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriodEnd"]'
+    And  I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I click on '[data-cy="form-dialog_title"]'
     And  I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_statusReason"]'
     And  I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
@@ -738,10 +738,10 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d3"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
-    When I click on '[data-cy="account-deactivation-actions"]'
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_deactivation"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_deactivation"]' contains "Désactivation"
+    When I click on '[data-cy="lifecycle-buttons-card_deactivation"]'
     Then I expect the HTML element '[data-cy="dropdown-button_item_deactivation.immediate"]' to be visible
     When I click on '[data-cy="dropdown-button_item_deactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
@@ -758,7 +758,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 152 Immediate deactivation - success, account status updated after form submission
-    When I click on '[data-cy="account-deactivation-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_deactivation"]'
     And  I click on '[data-cy="dropdown-button_item_deactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I select '.q-menu .q-item:contains("Deactivation Reason A")' in '[data-cy="field_statusReason"]'
@@ -779,16 +779,16 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000d6"]'
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-lifecycle-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivation-actions"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivation-actions"]' contains "Désactivation"
-    When I click on '[data-cy="account-deactivation-actions"]'
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_deactivation"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-buttons-card_deactivation"]' contains "Désactivation"
+    When I click on '[data-cy="lifecycle-buttons-card_deactivation"]'
     Then I expect the HTML element '[data-cy="dropdown-button_item_deactivation.scheduled"]' to be visible
     When I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la désactivation du compte"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Sélectionnez une date de désactivation et indiquez un motif."
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Date de désactivation"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "Date de désactivation"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -800,28 +800,28 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 155 Scheduled deactivation - validityPeriodEnd invalidDate validation error
-    When I click on '[data-cy="account-deactivation-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_deactivation"]'
     And  I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 156 Scheduled deactivation - validityPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-deactivation-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_deactivation"]'
     And  I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "La date doit être postérieure à la date du jour."
 
     ## 157 Scheduled deactivation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-deactivation-actions"]'
+    And  I click on '[data-cy="lifecycle-buttons-card_deactivation"]'
     And  I click on '[data-cy="dropdown-button_item_deactivation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog_title"]'
     And  I select '.q-menu .q-item:contains("Deactivation Reason A")' in '[data-cy="field_statusReason"]'
     And  I select '.q-menu .q-item:contains("Deactivation Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
@@ -848,8 +848,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier la date de désactivation"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Mettez à jour la date de désactivation planifiée pour ce compte."
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Nouvelle date de désactivation"
-    And  I expect the HTML element '[data-cy="field_validityPeriodEnd"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "Nouvelle date de désactivation"
+    And  I expect the HTML element '[data-cy="field_validityPeriod.end"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' contains "Motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' contains "Sous-motif"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -863,23 +863,23 @@ Feature: Test Account details page display
     ## 160 Modify deactivation - validityPeriodEnd invalidDate validation error
     When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "Format de date invalide. Le format attendu est DD/MM/YYYY."
 
     ## 161 Modify deactivation - validityPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
-    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "La date doit être postérieure à la date du jour."
+    Then I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "La date doit être postérieure à la date du jour."
 
     ## 162 Modify deactivation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     And  I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog_title"]'
     And  I select '.q-menu .q-item:contains("Deactivation Reason A")' in '[data-cy="field_statusReason"]'
     And  I select '.q-menu .q-item:contains("Deactivation Sub-reason A.1")' in '[data-cy="field_statusSubreason"]'
@@ -921,14 +921,14 @@ Feature: Test Account details page display
     When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la réactivation du compte"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriodEnd"]' contains "Date de fin de validité"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "Date de fin de validité"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusReason"]' not exists
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusSubreason"]' not exists
     And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="button_confirm"]' contains "Planifier"
 
     ## 167 Scheduled revalidation - success, account re-validated after form submission
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriodEnd"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I set the text "Re-validated by e2e scheduled flow" in the HTML element '[data-cy="field_statusComment"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists

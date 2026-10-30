@@ -80,6 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Moved the **lifecycle actions** of the account and organizational unit details pages to the `LifecycleButtonsCard`
   of LinPulsar: their dropdowns, dialogs and requests are configured by the `buttons`, `actions` and
   `immediateActionDelay` props of the `AccountLifecyclePanel` and `OrganizationalUnitLifecyclePanel` zones.
+- Moved the **lifecycle banners** of the account and organizational unit details pages to the `LifecycleBannersCard`
+  of LinPulsar: their contents, dates and buttons are configured by the `banners` prop of the same zones, and their
+  design by the `lifecycle-banners-card` namespace of the details pages.
 
 ### Removed
 
@@ -91,6 +94,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed the `immediateActionDelay`, `accountLifecycleFields` and `organizationalUnitLifecycleFields` settings of
   `config.json`, replaced by the props of the lifecycle panel zones.
+- Removed the `design/account-banner.json` and `design/organizational-unit-banner.json` design files, replaced by the
+  `lifecycle-banners-card` namespace of `account-details.json` and `organizational-unit-details.json`: a `config.json`
+  still listing them fails to load the UI design.
 
 ### Fixed
 

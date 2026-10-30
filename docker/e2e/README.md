@@ -12,7 +12,7 @@ task setup:e2e
 task start:e2e
 ```
 
-The `lin-pulsar` image is pulled from Docker Hub (`linagora/lin-pulsar:v0.3.0`), its version is pinned in `docker-compose.yml`.
+The `lin-pulsar` image is pulled from Docker Hub (`linagora/lin-pulsar:v0.3.1`), its version is pinned in `docker-compose.yml`.
 
 ## Services
 

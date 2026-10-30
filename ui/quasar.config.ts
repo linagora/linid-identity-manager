@@ -145,7 +145,7 @@ export default defineConfig((ctx) => {
             shared: {
               vue: {
                 singleton: true,
-                requiredVersion: '3.5.39',
+                requiredVersion: '3.5.44',
               },
               'vue-router': {
                 singleton: true,
@@ -153,7 +153,7 @@ export default defineConfig((ctx) => {
               },
               quasar: {
                 singleton: true,
-                requiredVersion: '2.21.1',
+                requiredVersion: '2.32.2',
               },
               '@linagora/lin-pulsar-core': {
                 singleton: true,

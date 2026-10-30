@@ -27,6 +27,7 @@
 /**
  * Provides the data of the account payloads build.
  *
- * <p>This package contains the payloads built for the accounts.</p>
+ * <p>This package contains the accounts whose payload is to be built, with their rows in each source, and the
+ * outcomes of the accounts counted by the build.</p>
  */
 package io.github.linagora.linid.im.sync.model.payload;

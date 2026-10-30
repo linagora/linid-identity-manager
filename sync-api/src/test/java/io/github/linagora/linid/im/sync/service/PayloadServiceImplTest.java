@@ -26,36 +26,23 @@
 
 package io.github.linagora.linid.im.sync.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import io.github.linagora.linid.im.sync.model.payload.PayloadItem;
-import io.github.linagora.linid.im.sync.model.syncdata.SourceProperties;
-import io.github.linagora.linid.im.sync.model.syncdata.SyncDataProperties;
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
-import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
-import java.sql.SQLException;
+import io.github.linagora.linid.im.sync.config.SyncDataProperties;
+import io.github.linagora.linid.im.sync.exception.PayloadException;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,15 +51,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.BadSqlGrammarException;
 import tools.jackson.databind.json.JsonMapper;
 
 @DisplayName("Test class: PayloadServiceImpl")
 class PayloadServiceImplTest {
-
-    private static final Map<String, SourceProperties> SOURCES = Map.of(
-        "accounts", new SourceProperties("act_id"),
-        "account_payload_view", new SourceProperties("act_id"));
 
     private static final String MAPPING = """
         {
@@ -83,16 +65,7 @@ class PayloadServiceImplTest {
         }
         """;
 
-    private static final AccountIdentity JDOE =
-        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe");
-
-    private static final AccountIdentity ASMITH =
-        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith");
-
-    private static final AccountIdentity BLEE =
-        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000003"), "blee");
-
-    private final SourceRepository sourceRepository = mock(SourceRepository.class);
+    private static final ChecksumService CHECKSUM_SERVICE = new ChecksumServiceImpl();
 
     private final Logger alertLogger = (Logger) LoggerFactory.getLogger(AlertService.class);
 
@@ -111,139 +84,121 @@ class PayloadServiceImplTest {
     }
 
     @Test
-    @DisplayName("build should read each source once, and render the mapping with the row of each account in it")
+    @DisplayName("build should render the mapping with the row of the account in each source")
     void testBuild() {
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", actIds(JDOE, ASMITH))).thenReturn(List.of(
-            Map.of("act_id", JDOE.actId(), "external_id", "jdoe", "email", "jdoe@example.com"),
-            Map.of("act_id", ASMITH.actId(), "external_id", "asmith", "email", "asmith@example.com")));
-        when(sourceRepository.findAllByAccountIds("account_payload_view", "act_id", actIds(JDOE, ASMITH)))
-            .thenReturn(List.of(
-                Map.of("act_id", JDOE.actId(), "organizational_units", List.of("Paris", "R&D"),
-                    "groups", List.of("DEV", "RND")),
-                Map.of("act_id", ASMITH.actId(), "organizational_units", List.of(), "groups", List.of())));
+        var payload = service(MAPPING).build(Map.of(
+            "accounts", List.of(Map.of("external_id", "jdoe", "email", "jdoe@example.com")),
+            "account_payload_view", List.of(Map.of(
+                "organizational_units", List.of("Paris", "R&D"), "groups", List.of("DEV", "RND")))));
 
-        var items = service(MAPPING).build(List.of(JDOE, ASMITH));
-
-        assertEquals(List.of(
-            new PayloadItem(JDOE.actId(), "jdoe", Map.of(
-                "external_id", "jdoe",
-                "email", "jdoe@example.com",
-                "organizational_units", List.of("Paris", "R&D"),
-                "groups", List.of("DEV", "RND"))),
-            new PayloadItem(ASMITH.actId(), "asmith", Map.of(
-                "external_id", "asmith",
-                "email", "asmith@example.com",
-                "organizational_units", List.of(),
-                "groups", List.of()))), items);
-        verify(sourceRepository).findAllByAccountIds("accounts", "act_id", actIds(JDOE, ASMITH));
-        verify(sourceRepository).findAllByAccountIds("account_payload_view", "act_id", actIds(JDOE, ASMITH));
-        verifyNoMoreInteractions(sourceRepository);
+        assertEquals(Map.of(
+            "external_id", "jdoe",
+            "email", "jdoe@example.com",
+            "organizational_units", List.of("Paris", "R&D"),
+            "groups", List.of("DEV", "RND")), payload);
         assertTrue(alertAppender.list.isEmpty());
     }
 
     @Test
-    @DisplayName("build should give each account the rows of a source holding its act_id in the account id column")
-    void testBuild_accountIdColumn() {
-        when(sourceRepository.findAllByAccountIds("phones", "owner_id", actIds(JDOE, ASMITH))).thenReturn(List.of(
-            Map.of("owner_id", ASMITH.actId(), "number", "0607080910"),
-            Map.of("owner_id", JDOE.actId(), "number", "0102030405")));
-        var service = service(Map.of("phones", new SourceProperties("owner_id")),
-            "{\"phone\": {{ phones.number | tojson }}}");
-
-        var items = service.build(List.of(JDOE, ASMITH));
-
-        assertEquals(List.of(
-            new PayloadItem(JDOE.actId(), "jdoe", Map.of("phone", "0102030405")),
-            new PayloadItem(ASMITH.actId(), "asmith", Map.of("phone", "0607080910"))), items);
-    }
-
-    @Test
-    @DisplayName("build should filter a source on act_id when its account id column is not set")
-    void testBuild_defaultAccountIdColumn() {
-        service(Map.of("accounts", new SourceProperties(null)), "{}").build(List.of(JDOE));
-
-        verify(sourceRepository).findAllByAccountIds("accounts", "act_id", actIds(JDOE));
-    }
-
-    @Test
-    @DisplayName("build should render a source without row for an account as an empty variable")
+    @DisplayName("build should render a source without row for the account as an empty variable")
     void testBuild_noRow() {
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", actIds(JDOE))).thenReturn(List.of(
-            Map.of("act_id", JDOE.actId(), "external_id", "jdoe", "email", "jdoe@example.com")));
+        var payload = service(MAPPING).build(Map.of(
+            "accounts", List.of(Map.of("external_id", "jdoe", "email", "jdoe@example.com")),
+            "account_payload_view", List.of()));
 
-        var items = service(MAPPING).build(List.of(JDOE));
-
-        var payload = new HashMap<String, Object>();
-        payload.put("external_id", "jdoe");
-        payload.put("email", "jdoe@example.com");
-        payload.put("organizational_units", null);
-        payload.put("groups", null);
-        assertEquals(List.of(new PayloadItem(JDOE.actId(), "jdoe", payload)), items);
+        var expected = new HashMap<String, Object>();
+        expected.put("external_id", "jdoe");
+        expected.put("email", "jdoe@example.com");
+        expected.put("organizational_units", null);
+        expected.put("groups", null);
+        assertEquals(expected, payload);
     }
 
     @Test
     @DisplayName("build should render the mapping without any source")
     void testBuild_noSource() {
-        var items = service(Map.of(), "{\"application\": \"linid\"}").build(List.of(JDOE));
-
-        assertEquals(List.of(new PayloadItem(JDOE.actId(), "jdoe", Map.of("application", "linid"))), items);
-        verifyNoInteractions(sourceRepository);
+        assertEquals(Map.of("application", "linid"), service("{\"application\": \"linid\"}").build(Map.of()));
     }
 
     @Test
-    @DisplayName("build should leave out an account with several rows in a source, and build the other accounts")
+    @DisplayName("build should raise a PayloadException when the account has several rows in a source, without alert")
     void testBuild_severalRows() {
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", actIds(JDOE, ASMITH))).thenReturn(List.of(
-            Map.of("act_id", JDOE.actId(), "email", "jdoe@example.com"),
-            Map.of("act_id", JDOE.actId(), "email", "john@example.com"),
-            Map.of("act_id", ASMITH.actId(), "email", "asmith@example.com")));
+        var service = service("{\"email\": {{ accounts.email | tojson }}}");
+        Map<String, List<Map<String, Object>>> rowsBySource = Map.of("accounts", List.of(
+            Map.of("email", "jdoe@example.com"), Map.of("email", "john@example.com")));
 
-        var items = service("{\"email\": {{ accounts.email | tojson }}}").build(List.of(JDOE, ASMITH));
+        var exception = assertThrows(PayloadException.class, () -> service.build(rowsBySource));
 
-        assertEquals(List.of(new PayloadItem(ASMITH.actId(), "asmith", Map.of("email", "asmith@example.com"))), items);
-        assertPayloadError("account=jdoe", "The account has 2 rows in the source accounts");
+        assertEquals("The account has 2 rows in the source accounts", exception.getMessage());
+        assertTrue(alertAppender.list.isEmpty());
     }
 
     @Test
-    @DisplayName("build should leave out an account whose data raises a template error, and build the other accounts")
+    @DisplayName("build should raise a PayloadException when the data of the account raises a template error")
     void testBuild_templateError() {
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", actIds(JDOE, ASMITH))).thenReturn(List.of(
-            Map.of("act_id", JDOE.actId(), "birth_date", LocalDate.of(1990, 1, 1)),
-            Map.of("act_id", ASMITH.actId(), "birth_date", "1990-01-01")));
+        var service = service("{\"birth_date\": {{ accounts.birth_date | tojson }}}");
+        Map<String, List<Map<String, Object>>> rowsBySource =
+            Map.of("accounts", List.of(Map.of("birth_date", LocalDate.of(1990, 1, 1))));
 
-        var items = service("{\"birth_date\": {{ accounts.birth_date | tojson }}}").build(List.of(JDOE, ASMITH));
+        var exception = assertThrows(PayloadException.class, () -> service.build(rowsBySource));
 
-        assertEquals(List.of(new PayloadItem(ASMITH.actId(), "asmith", Map.of("birth_date", "1990-01-01"))), items);
-        assertPayloadError("account=jdoe", "Invalid input for 'tojson'");
+        assertTrue(exception.getMessage().contains("Invalid input for 'tojson'"), exception.getMessage());
     }
 
     @Test
-    @DisplayName("build should leave out an account whose data gives an invalid JSON, and build the other accounts")
+    @DisplayName("build should raise a PayloadException when the data of the account gives an invalid JSON")
     void testBuild_invalidJson() {
-        when(sourceRepository.findAllByAccountIds("account_payload_view", "act_id", actIds(JDOE, ASMITH, BLEE)))
-            .thenReturn(List.of(
-                Map.of("act_id", JDOE.actId(), "groups", List.of("DEV", "RND")),
-                Map.of("act_id", ASMITH.actId(), "groups", List.of("DEV")),
-                Map.of("act_id", BLEE.actId(), "groups", List.of())));
         // The separator between the groups is missing: only an account with several groups gives an invalid JSON
-        var mapping = "{\"groups\": [{% for group in account_payload_view.groups %}{{ group | tojson }}{% endfor %}]}";
+        var service = service(
+            "{\"groups\": [{% for group in account_payload_view.groups %}{{ group | tojson }}{% endfor %}]}");
+        Map<String, List<Map<String, Object>>> rowsBySource =
+            Map.of("account_payload_view", List.of(Map.of("groups", List.of("DEV", "RND"))));
 
-        var items = service(mapping).build(List.of(JDOE, ASMITH, BLEE));
+        var exception = assertThrows(PayloadException.class, () -> service.build(rowsBySource));
 
-        assertEquals(List.of(
-            new PayloadItem(ASMITH.actId(), "asmith", Map.of("groups", List.of("DEV"))),
-            new PayloadItem(BLEE.actId(), "blee", Map.of("groups", List.of()))), items);
-        assertPayloadError("account=jdoe", "Unexpected character");
+        assertTrue(exception.getMessage().contains("Unexpected character"), exception.getMessage());
+        assertEquals(Map.of("groups", List.of("DEV")),
+            service.build(Map.of("account_payload_view", List.of(Map.of("groups", List.of("DEV"))))));
     }
 
     @Test
-    @DisplayName("build should return no payload when every account is in error")
-    void testBuild_everyAccountInError() {
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", actIds(JDOE))).thenReturn(List.of(
-            Map.of("act_id", JDOE.actId()), Map.of("act_id", JDOE.actId())));
+    @DisplayName("checksum should be computed on the compact JSON of the payload, with its keys sorted at every level")
+    void testChecksum() {
+        var service = service("{}");
 
-        assertEquals(List.of(), service(MAPPING).build(List.of(JDOE)));
-        assertEquals(1, alertAppender.list.size());
+        assertEquals(CHECKSUM_SERVICE.compute(
+                "{\"account\":{\"email\":\"x@example.com\",\"external_id\":\"x\"},\"groups\":[\"DEV\",\"RND\"]}"),
+            service.checksum(ordered("groups", List.of("DEV", "RND"),
+                "account", ordered("external_id", "x", "email", "x@example.com"))));
+    }
+
+    @Test
+    @DisplayName("checksum should be the same for two payloads that only differ by the order of their keys, at every "
+        + "level")
+    void testChecksum_independentOfKeyOrder() {
+        var service = service("{}");
+
+        assertEquals(
+            service.checksum(ordered("groups", List.of("DEV", "RND"),
+                "account", ordered("email", "x@example.com", "external_id", "x"))),
+            service.checksum(ordered("account", ordered("external_id", "x", "email", "x@example.com"),
+                "groups", List.of("DEV", "RND"))));
+    }
+
+    @Test
+    @DisplayName("checksum should differ for two arrays that only differ by the order of their values")
+    void testChecksum_dependsOnArrayOrder() {
+        var service = service("{}");
+
+        assertNotEquals(service.checksum(Map.of("groups", List.of("DEV", "RND"))),
+            service.checksum(Map.of("groups", List.of("RND", "DEV"))));
+    }
+
+    @Test
+    @DisplayName("checkMapping should accept a valid mapping, without alert")
+    void testCheckMapping() {
+        assertDoesNotThrow(() -> service(MAPPING).checkMapping());
+        assertTrue(alertAppender.list.isEmpty());
     }
 
     @ParameterizedTest
@@ -263,15 +218,13 @@ class PayloadServiceImplTest {
         "{{ accounts.email | tojson }}",
         "{\"email\": {{ accounts.email | tojson }}} {}"
     })
-    @DisplayName("build should raise an exception before reading any source when the mapping is invalid")
-    void testBuild_invalidMapping(final String mapping) {
+    @DisplayName("checkMapping should raise an exception after a blocking alert when the mapping is invalid")
+    void testCheckMapping_invalidMapping(final String mapping) {
         var service = service(mapping);
-        var accounts = List.of(JDOE);
 
-        var exception = assertThrows(IllegalStateException.class, () -> service.build(accounts));
+        var exception = assertThrows(IllegalStateException.class, service::checkMapping);
 
         assertEquals("Invalid template sync-data.job.mapping", exception.getMessage());
-        verifyNoInteractions(sourceRepository);
         assertEquals(1, alertAppender.list.size());
         var alert = alertAppender.list.getFirst();
         assertEquals(Level.ERROR, alert.getLevel());
@@ -279,63 +232,19 @@ class PayloadServiceImplTest {
             alert.getFormattedMessage());
     }
 
-    @Test
-    @DisplayName("build should raise an exception naming the source that cannot be read, after a blocking alert")
-    void testBuild_unreadableSource() {
-        var cause = new BadSqlGrammarException("read", "SELECT", new SQLException("relation does not exist"));
-        when(sourceRepository.findAllByAccountIds(eq("unknown_view"), any(), anyCollection())).thenThrow(cause);
-        var sources = new LinkedHashMap<String, SourceProperties>();
-        sources.put("accounts", new SourceProperties("act_id"));
-        sources.put("unknown_view", new SourceProperties("act_id"));
-        var service = service(sources, MAPPING);
-        var accounts = List.of(JDOE);
-
-        var exception = assertThrows(IllegalStateException.class, () -> service.build(accounts));
-
-        assertEquals("Unable to read the source unknown_view", exception.getMessage());
-        assertSame(cause, exception.getCause());
-        assertEquals(1, alertAppender.list.size());
-        var alert = alertAppender.list.getFirst();
-        assertEquals(Level.ERROR, alert.getLevel());
-        assertEquals("Source unreadable, payload build aborted — source=unknown_view", alert.getFormattedMessage());
+    private static PayloadServiceImpl service(final String mapping) {
+        return new PayloadServiceImpl(new SyncDataProperties(Map.of(), mapping), new JinjaServiceImpl(),
+            CHECKSUM_SERVICE, JsonMapper.builder().build());
     }
 
-    @Test
-    @DisplayName("build should raise an exception naming the source whose name is invalid")
-    void testBuild_invalidSourceName() {
-        var cause = new IllegalArgumentException("Invalid source or column name: Accounts");
-        when(sourceRepository.findAllByAccountIds("Accounts", "act_id", actIds(JDOE))).thenThrow(cause);
-        var service = service(Map.of("Accounts", new SourceProperties("act_id")), "{}");
-        var accounts = List.of(JDOE);
-
-        var exception = assertThrows(IllegalStateException.class, () -> service.build(accounts));
-
-        assertEquals("Unable to read the source Accounts", exception.getMessage());
-        assertSame(cause, exception.getCause());
-        assertEquals("Source unreadable, payload build aborted — source=Accounts",
-            alertAppender.list.getFirst().getFormattedMessage());
-    }
-
-    private PayloadService service(final String mapping) {
-        return service(SOURCES, mapping);
-    }
-
-    private PayloadService service(final Map<String, SourceProperties> sources, final String mapping) {
-        return new PayloadServiceImpl(new SyncDataProperties(sources, mapping), sourceRepository,
-            new JinjaServiceImpl(), JsonMapper.builder().build());
-    }
-
-    private static List<UUID> actIds(final AccountIdentity... accounts) {
-        return Stream.of(accounts).map(AccountIdentity::actId).toList();
-    }
-
-    private void assertPayloadError(final String context, final String causeMessage) {
-        assertEquals(1, alertAppender.list.size());
-        var alert = alertAppender.list.getFirst();
-        assertEquals(Level.WARN, alert.getLevel());
-        assertEquals("Account in error during payload build, keeping previous payload — " + context,
-            alert.getFormattedMessage());
-        assertTrue(alert.getThrowableProxy().getMessage().contains(causeMessage),
-            alert.getThrowableProxy().getMessage());
+    /**
+     * Gives a map keeping the order of its keys, unlike {@link Map#of}, whose order changes from one JVM to another.
+     */
+    private static Map<String, Object> ordered(final Object... keysAndValues) {
+        var map = new LinkedHashMap<String, Object>();
+        for (int i = 0; i < keysAndValues.length; i += 2) {
+            map.put((String) keysAndValues[i], keysAndValues[i + 1]);
+        }
+        return map;
     }
 }

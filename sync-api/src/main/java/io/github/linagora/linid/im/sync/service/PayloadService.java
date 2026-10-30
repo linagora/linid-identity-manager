@@ -26,30 +26,40 @@
 
 package io.github.linagora.linid.im.sync.service;
 
-import io.github.linagora.linid.im.sync.model.payload.PayloadItem;
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Builds the account payloads from the sources and the {@code mapping} of the {@code sync-data.job} section.
+ * Builds the account payloads from the {@code mapping} of the {@code sync-data.job} section.
  */
 public interface PayloadService {
 
     /**
-     * Builds the payloads of the given accounts: each source is read once for all of them, then the {@code mapping} is
-     * rendered for each account, with the row of the account in each source, and parsed as a JSON object.
+     * Checks the {@code mapping} by rendering it with an empty context, where each source gives {@code null} through
+     * {@code tojson}, so that a valid {@code mapping} gives a JSON object.
      *
-     * <p>The {@code mapping} is checked first, rendered with an empty context and parsed: when it is invalid, such as
-     * a Jinjava syntax error or a value inserted without {@code tojson}, an {@link IllegalStateException} is raised,
-     * after logging the {@code invalidMapping} alert, before any source is read. A source that cannot be read, such as
-     * an unknown source, an invalid name, a missing account id column or a database error, raises an
-     * {@link IllegalStateException} naming the source, after logging the {@code sourceUnreadable} alert.</p>
-     *
-     * <p>An account with several rows in a source, a template error or a rendered text that is not a JSON object is
-     * left out, after logging the {@code payloadError} alert, and the payloads of the other accounts are built.</p>
-     *
-     * @param accounts the accounts whose payload is built
-     * @return the payloads built, without the accounts in error
+     * @throws IllegalStateException when the {@code mapping} is invalid, such as a Jinjava syntax error or a value
+     *     inserted without {@code tojson}, after logging the {@code invalidMapping} alert
      */
-    List<PayloadItem> build(List<AccountIdentity> accounts);
+    void checkMapping();
+
+    /**
+     * Builds the payload of an account: the {@code mapping} is rendered with, for each source, a variable named after
+     * it holding the columns of the row of the account, empty when it has no row, and parsed as a JSON object.
+     *
+     * @param rowsBySource the rows of the account in each source, by source name
+     * @return the payload of the account
+     * @throws io.github.linagora.linid.im.sync.exception.PayloadException when the account has several rows in a
+     *     source, the template raises an error, or the rendered text is not a JSON object
+     */
+    Map<String, Object> build(Map<String, List<Map<String, Object>>> rowsBySource);
+
+    /**
+     * Computes the checksum of a payload on its compact JSON, with its keys sorted at every level, so that it does not
+     * depend on the order of the keys in the {@code mapping}. The arrays keep their order.
+     *
+     * @param payload the payload of an account
+     * @return the checksum of the payload
+     */
+    String checksum(Map<String, Object> payload);
 }

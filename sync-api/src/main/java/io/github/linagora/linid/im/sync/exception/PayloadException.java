@@ -24,17 +24,34 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.model.payload;
-
-import java.util.Map;
-import java.util.UUID;
+package io.github.linagora.linid.im.sync.exception;
 
 /**
- * Payload built for an account, used as OPA input.
+ * Exception raised when the payload of an account cannot be built from its data, such as several rows in a source, a
+ * template error or a rendered text that is not a JSON object.
  *
- * @param actId      the identifier of the account
- * @param externalId the external identifier of the account, used to identify it in the alerts and the logs
- * @param payload    the payload, the {@code mapping} rendered for the account and parsed as a JSON object
+ * <p>It only concerns the account: {@code buildPayloadsStep} skips it, and the account keeps its previous payload. A
+ * failure that concerns every account, such as an invalid {@code mapping} or a source that cannot be read, is not a
+ * {@code PayloadException}, and makes the step fail.</p>
  */
-public record PayloadItem(UUID actId, String externalId, Map<String, Object> payload) {
+public class PayloadException extends RuntimeException {
+
+    /**
+     * Creates the exception.
+     *
+     * @param message the detail message
+     */
+    public PayloadException(final String message) {
+        super(message);
+    }
+
+    /**
+     * Creates the exception.
+     *
+     * @param message the detail message
+     * @param cause the cause of the failure
+     */
+    public PayloadException(final String message, final Throwable cause) {
+        super(message, cause);
+    }
 }

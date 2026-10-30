@@ -28,7 +28,7 @@ package io.github.linagora.linid.im.sync.persistence.repository;
 
 import io.github.linagora.linid.im.sync.persistence.model.AccountApplicationPairId;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
-import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
+import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Limit;
@@ -46,21 +46,36 @@ public interface AccountComputedRightViewRepository
     extends Repository<AccountComputedRightView, AccountApplicationPairId> {
 
     /**
-     * Finds every account of the view once, except the technical account of {@code sync-api}, ordered by its
-     * identifier.
+     * Finds the next page of the accounts of the view, each one once, except the technical account of {@code sync-api},
+     * ordered by identifier.
      *
-     * <p>The {@link AccountIdentity} projection only selects the identifiers of the accounts, so that the distinct
-     * applies to them and not to the whole rows. The result is a {@link List}, read before the chunks of the payload
-     * build: a JPA stream cannot stay open across their transactions.</p>
+     * <p>The page starts after the given account, not at an offset: an account deleted since the previous page does not
+     * shift the next ones. The {@link AccountSummary} projection only selects the identifiers of the accounts and the
+     * checksums of their payloads, so that the distinct applies to them and not to the whole rows: an account has at
+     * most one payload, so it is selected once.</p>
      *
      * <p>The technical account gets no payload, so its pairs are never {@code to_compute} and are never selected for
      * the computation of the rights.</p>
      *
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
-     * @return the identifiers of every other account, including the accounts never computed, empty when no
-     *     application is deployed
+     * @param actId              the last account of the previous page, the lowest UUID for the first page
+     * @param limit              the maximum number of accounts of the page
+     * @return the next accounts with the checksums of their payloads, including the accounts without payload yet,
+     *     empty when no application is deployed or when every account was read
      */
-    List<AccountIdentity> findDistinctByActIdNotOrderByActIdAsc(UUID technicalAccountId);
+    List<AccountSummary> findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
+        UUID technicalAccountId, UUID actId, Limit limit);
+
+    /**
+     * Tells whether an account is still in the view.
+     *
+     * <p>The payload build reads the accounts by pages: an account deleted since its page was read is no longer in
+     * the view, and inserting its payload would fail on the foreign key.</p>
+     *
+     * @param actId the identifier of the account
+     * @return {@code true} when the account is still in the view
+     */
+    boolean existsByActId(UUID actId);
 
     /**
      * Finds the next pairs of the cycle whose rights must be computed, ordered by account then application.

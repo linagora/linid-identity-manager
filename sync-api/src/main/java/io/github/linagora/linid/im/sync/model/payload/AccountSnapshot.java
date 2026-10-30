@@ -24,11 +24,18 @@
  * LinID Identity Manager software.
  */
 
+package io.github.linagora.linid.im.sync.model.payload;
+
+import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import java.util.List;
+import java.util.Map;
+
 /**
- * Provides the configuration of the data read to build the account payloads.
+ * Snapshot of an account whose payload is to be built, read with its page: the account with the checksum of its current
+ * payload, and its rows in each source. It is the item read by {@code buildPayloadsStep}.
  *
- * <p>This package contains the records bound from the {@code sync-data.job} section of the
- * external configuration: the sources read for each account, and the template of the
- * payloads.</p>
+ * @param account      the account, with the checksum of its current payload
+ * @param rowsBySource the rows of the account in each source, by source name, an empty list for a source without row
  */
-package io.github.linagora.linid.im.sync.model.syncdata;
+public record AccountSnapshot(AccountSummary account, Map<String, List<Map<String, Object>>> rowsBySource) {
+}

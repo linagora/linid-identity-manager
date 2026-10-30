@@ -24,21 +24,20 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.model.syncdata;
+package io.github.linagora.linid.im.sync.persistence.model;
 
-import java.util.Map;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import java.util.UUID;
 
 /**
- * Configuration of the {@code sync-data.job} section: the sources read to build the account payloads, and the
- * template of the payloads.
+ * Projection holding an account of {@link AccountComputedRightView} read by the payload build: its identifiers and the
+ * checksum of its current payload, without the columns of its pairs.
  *
- * @param sources settings of each source by name, the name of a table or a view of the linid-api database, empty when
- *     no source is configured
- * @param mapping JSON template of the payload, whose values are Jinjava expressions inserted with the {@code tojson}
- *     filter, and whose variables are the sources, holding the columns of the row of the account
+ * <p>A record rather than an interface projection: Spring Data builds it with its constructor, while an interface
+ * projection creates a proxy per row, several times heavier in the pages of accounts read by the payload build.</p>
+ *
+ * @param actId           the identifier of the account
+ * @param externalId      the external identifier of the account, used to identify it in the alerts and the logs
+ * @param payloadChecksum the checksum of the current payload of the account, {@code null} when it has none yet
  */
-@ConfigurationProperties(prefix = "sync-data.job")
-public record SyncDataProperties(@DefaultValue Map<String, SourceProperties> sources, String mapping) {
+public record AccountSummary(UUID actId, String externalId, String payloadChecksum) {
 }

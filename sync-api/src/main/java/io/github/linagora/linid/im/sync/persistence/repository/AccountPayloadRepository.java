@@ -24,33 +24,23 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.model.syncdata;
+package io.github.linagora.linid.im.sync.persistence.repository;
 
-import org.apache.commons.lang3.StringUtils;
+import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Configuration of a source of the account payloads.
- *
- * <p>The default is set in the constructor rather than with {@code @DefaultValue}: a source written without settings,
- * such as {@code accounts: {}}, is bound with an empty column name, not with a missing one.</p>
- *
- * @param accountIdColumn column of the source holding the {@code act_id} of the account,
- *     {@value #DEFAULT_ACCOUNT_ID_COLUMN} when it is not set
+ * Spring Data repository for {@link AccountPayload}.
  */
-public record SourceProperties(String accountIdColumn) {
+public interface AccountPayloadRepository extends JpaRepository<AccountPayload, UUID> {
 
     /**
-     * Account id column of a source when it is not set.
-     */
-    public static final String DEFAULT_ACCOUNT_ID_COLUMN = "act_id";
-
-    /**
-     * Creates the settings of a source, with {@value #DEFAULT_ACCOUNT_ID_COLUMN} as account id column when it is not
-     * set.
+     * Finds the payload of an account.
      *
-     * @param accountIdColumn column of the source holding the {@code act_id} of the account, or a blank value
+     * @param actId the identifier of the account
+     * @return the payload of the account, empty when it has none yet
      */
-    public SourceProperties {
-        accountIdColumn = StringUtils.defaultIfBlank(accountIdColumn, DEFAULT_ACCOUNT_ID_COLUMN);
-    }
+    Optional<AccountPayload> findByActId(UUID actId);
 }

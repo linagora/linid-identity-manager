@@ -24,20 +24,70 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.persistence.model;
+package io.github.linagora.linid.im.sync.model.payload;
 
-import java.util.UUID;
+import java.util.Locale;
 
 /**
- * Projection holding the identifiers of an account of {@link AccountComputedRightView}, without the columns of its
- * pairs.
- *
- * <p>A record rather than an interface projection: Spring Data builds it with its constructor, while an interface
- * projection creates a proxy per row, several times heavier in the list of every account read by the payload
- * build.</p>
- *
- * @param actId      the identifier of the account
- * @param externalId the external identifier of the account, used to identify it in the alerts and the logs
+ * Outcome of an account in {@code buildPayloadsStep}, counted in the execution context of the step and logged at its
+ * end, in the order of the values.
  */
-public record AccountIdentity(UUID actId, String externalId) {
+public enum PayloadOutcome {
+
+    /**
+     * Payload inserted, the account having none yet.
+     */
+    INSERTED("inserted"),
+
+    /**
+     * Payload updated, its checksum having changed.
+     */
+    UPDATED("updated"),
+
+    /**
+     * Payload unchanged, not written.
+     */
+    UNCHANGED("unchanged"),
+
+    /**
+     * Account in error, skipped: it keeps its previous payload.
+     */
+    IN_ERROR("in error"),
+
+    /**
+     * Account deleted since its page was read, not written.
+     */
+    DELETED("deleted");
+
+    /**
+     * Label of the outcome in the log of the step.
+     */
+    private final String label;
+
+    /**
+     * Creates an outcome with its label.
+     *
+     * @param label the label of the outcome in the log of the step
+     */
+    PayloadOutcome(final String label) {
+        this.label = label;
+    }
+
+    /**
+     * Gives the label of the outcome in the log of the step.
+     *
+     * @return the label of the outcome
+     */
+    public String label() {
+        return label;
+    }
+
+    /**
+     * Gives the key of the counter of the outcome in the execution context of the step.
+     *
+     * @return the key of the counter, such as {@code payloads.inserted}
+     */
+    public String key() {
+        return "payloads." + name().toLowerCase(Locale.ROOT);
+    }
 }

@@ -29,16 +29,36 @@ package io.github.linagora.linid.im.sync.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import io.github.linagora.linid.im.sync.batch.ComputeRightsProcessor;
+import io.github.linagora.linid.im.sync.batch.ComputeRightsStepListener;
+import io.github.linagora.linid.im.sync.exception.OpaUnreachableException;
+import io.github.linagora.linid.im.sync.exception.RightsComputationException;
+import io.github.linagora.linid.im.sync.model.rights.ComputedRightRecord;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
+import io.github.linagora.linid.im.sync.persistence.model.ComputedRight;
+import io.github.linagora.linid.im.sync.persistence.model.PairChecksums;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
+import io.github.linagora.linid.im.sync.persistence.repository.ApplicationRoleRepository;
+import io.github.linagora.linid.im.sync.persistence.repository.ComputedRightRepository;
+import io.github.linagora.linid.im.sync.service.RightsComputationService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,10 +66,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.repository.support.ResourcelessJobRepository;
+import org.springframework.batch.core.step.Step;
+import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.batch.infrastructure.item.ItemReader;
+import org.springframework.batch.infrastructure.item.ItemWriter;
+import org.springframework.batch.test.MetaDataInstanceFactory;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.ScrollPosition;
 import org.springframework.data.domain.Window;
+import org.springframework.orm.jpa.EntityManagerHolder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.SimpleTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.web.client.ResourceAccessException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: ComputeRightsStepConfig")
@@ -69,8 +101,26 @@ class ComputeRightsStepConfigTest {
 
     private static final Limit LIMIT = Limit.of(CHUNK_SIZE);
 
+    private static final UUID TECHNICAL_ACCOUNT_ID = UUID.fromString("00000000-0000-4000-8000-00000000a012");
+
+    private static final ComputedRightRecord RIGHTS = new ComputedRightRecord(true, List.of("Administrator"), "{}");
+
     @Mock
     private AccountComputedRightViewRepository repository;
+
+    @Mock
+    private RightsComputationService rightsComputationService;
+
+    @Mock
+    private ApplicationRoleRepository applicationRoleRepository;
+
+    @Mock
+    private ComputedRightRepository computedRightRepository;
+
+    @Mock
+    private PlatformTransactionManager transactionManager;
+
+    private final List<ComputedRight> written = new ArrayList<>();
 
     private ComputeRightsStepConfig config;
 
@@ -144,6 +194,112 @@ class ComputeRightsStepConfigTest {
         assertEquals(second, reader.read());
         assertNull(reader.read());
         verifyNoMoreInteractions(repository);
+    }
+
+    @Test
+    @DisplayName("computedRightWriter should persist the new rows, leave the managed rows to the persistence context, "
+        + "and flush at each write")
+    void testComputedRightWriter() throws Exception {
+        var entityManagerFactory = mock(EntityManagerFactory.class);
+        var entityManager = mock(EntityManager.class);
+        var newRow = new ComputedRight();
+        newRow.setActId(ACCOUNT_ID);
+        var managedRow = new ComputedRight();
+        managedRow.setActId(OTHER_ACCOUNT_ID);
+        when(entityManager.contains(newRow)).thenReturn(false);
+        when(entityManager.contains(managedRow)).thenReturn(true);
+        TransactionSynchronizationManager.bindResource(entityManagerFactory, new EntityManagerHolder(entityManager));
+        try {
+            config.computedRightWriter(entityManagerFactory).write(new Chunk<>(newRow, managedRow));
+        } finally {
+            TransactionSynchronizationManager.unbindResource(entityManagerFactory);
+        }
+
+        var order = inOrder(entityManager);
+        order.verify(entityManager).persist(newRow);
+        order.verify(entityManager).flush();
+        verify(entityManager, never()).persist(managedRow);
+        verify(entityManager, never()).merge(any());
+    }
+
+    @Test
+    @DisplayName("computeRightsStep should read, compute and write the pairs of the cycle by chunks, each one in a "
+        + "transaction, skipping the pairs in error and filtering out the pairs changed since they were read")
+    void testComputeRightsStep() throws Exception {
+        var first = pair(ACCOUNT_ID, APPLICATION_ID);
+        var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
+        var third = pair(OTHER_ACCOUNT_ID, APPLICATION_ID);
+        cycleWindows(first, second, third);
+        when(rightsComputationService.compute(first, Set.of())).thenReturn(RIGHTS);
+        when(rightsComputationService.compute(second, Set.of())).thenThrow(new RightsComputationException(
+            "Unable to compute the rights of the pair", new IllegalStateException("Unclosed tag")));
+        when(rightsComputationService.compute(third, Set.of())).thenReturn(RIGHTS);
+        when(repository.findChecksumsByActIdAndAppId(ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.of(new PairChecksums(ACCOUNT_ID, APPLICATION_ID, null, null, null)));
+        when(repository.findChecksumsByActIdAndAppId(OTHER_ACCOUNT_ID, APPLICATION_ID)).thenReturn(Optional.empty());
+        when(computedRightRepository.findByActIdAndAppId(ACCOUNT_ID, APPLICATION_ID)).thenReturn(Optional.empty());
+        var stepExecution = stepExecution();
+
+        step().execute(stepExecution);
+
+        assertEquals(BatchStatus.COMPLETED, stepExecution.getStatus());
+        assertEquals(3, stepExecution.getReadCount());
+        assertEquals(1, stepExecution.getWriteCount());
+        assertEquals(1, stepExecution.getProcessSkipCount());
+        assertEquals(1, stepExecution.getFilterCount());
+        assertEquals(1, written.size());
+        assertEquals(ACCOUNT_ID, written.getFirst().getActId());
+        assertEquals(APPLICATION_ID, written.getFirst().getAppId());
+        verify(transactionManager, times(2)).commit(any());
+    }
+
+    @Test
+    @DisplayName("computeRightsStep should fail at the first pair whose OPA call cannot reach OPA, without writing the "
+        + "chunk")
+    void testComputeRightsStep_opaUnreachable() throws Exception {
+        var first = pair(ACCOUNT_ID, APPLICATION_ID);
+        var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
+        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+            LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
+            .thenReturn(window(false, first, second));
+        when(rightsComputationService.compute(first, Set.of())).thenThrow(new OpaUnreachableException(
+            "Unable to reach the OPA server", new ResourceAccessException("Connection refused")));
+        var stepExecution = stepExecution();
+
+        step().execute(stepExecution);
+
+        assertEquals(BatchStatus.FAILED, stepExecution.getStatus());
+        verify(rightsComputationService, never()).compute(second, Set.of());
+        assertTrue(written.isEmpty());
+        verifyNoInteractions(computedRightRepository);
+        verify(transactionManager).rollback(any());
+    }
+
+    private Step step() {
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        ItemWriter<ComputedRight> writer = chunk -> written.addAll(chunk.getItems());
+        return config.computeRightsStep(new ResourcelessJobRepository(), transactionManager,
+            new ComputeRightsProcessor(rightsComputationService, applicationRoleRepository, repository,
+                computedRightRepository, TECHNICAL_ACCOUNT_ID, "sync-api-1"),
+            writer, new ComputeRightsStepListener());
+    }
+
+    /**
+     * Gives the pairs of the cycle by windows of 2 pairs.
+     */
+    private void cycleWindows(final AccountComputedRightView first, final AccountComputedRightView second,
+                              final AccountComputedRightView third) {
+        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+            LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
+            .thenReturn(window(true, first, second));
+        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+            second.getActId(), positionOf(second), LIMIT))
+            .thenReturn(window(false, third));
+    }
+
+    private static StepExecution stepExecution() {
+        return MetaDataInstanceFactory.createStepExecution(
+            MetaDataInstanceFactory.createJobExecution(42L), "computeRightsStep", 7L);
     }
 
     private static AccountComputedRightView pair(final UUID actId, final UUID appId) {

@@ -29,7 +29,9 @@ package io.github.linagora.linid.im.sync.persistence.repository;
 import io.github.linagora.linid.im.sync.persistence.model.AccountApplicationPairId;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
 import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.PairChecksums;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.ScrollPosition;
@@ -121,4 +123,17 @@ public interface AccountComputedRightViewRepository
      */
     Window<AccountComputedRightView> findByAppIdAndToComputeTrueAndActIdGreaterThanEqualOrderByActIdAsc(
         UUID appId, UUID actId, ScrollPosition position, Limit limit);
+
+    /**
+     * Finds the current checksums of a pair, to check before writing its result that it did not change since it was
+     * read.
+     *
+     * <p>The {@link PairChecksums} projection only selects the identifiers and the checksums of the pair: unlike the
+     * entity, it is not taken from the persistence context of the chunk, which already holds the pair read.</p>
+     *
+     * @param actId the identifier of the account
+     * @param appId the identifier of the application
+     * @return the pair with its current checksums, empty when its application is no longer deployed
+     */
+    Optional<PairChecksums> findChecksumsByActIdAndAppId(UUID actId, UUID appId);
 }

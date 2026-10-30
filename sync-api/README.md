@@ -87,8 +87,10 @@ transactions of the `JdbcTemplate`. The Spring Data JPA repositories of `persist
 The `spring.jpa.*` properties do not apply to the linid-api `EntityManagerFactory`: its Hibernate properties go in the
 `linid.jpa.properties` block of `application.yaml`, each key written between brackets and quotes, for example
 `"[hibernate.jdbc.batch_size]"`, set by `SYNC_JDBC_BATCH_SIZE`: Hibernate sends the inserts and updates of a
-transaction in groups of this size, one round trip per group. Hibernate never changes the schema of the linid-api
-database, whose migrations stay in linid-api.
+transaction in groups of this size, one round trip per group. `"[org.hibernate.flushMode]"` is `COMMIT`: a query does
+not flush the pending changes of the chunk, which its writer flushes at once. Otherwise, a processor reading a row of a
+table already changed in the chunk would send each change alone, outside the groups. Hibernate never changes the schema
+of the linid-api database, whose migrations stay in linid-api.
 
 The snake_case naming of Spring Boot does not apply to it either: the entities of `persistence.model` name their tables
 and columns explicitly, with `@Table(name = …)` and `@Column(name = …)`, like in linid-api. Without it, a field `actId`
@@ -118,14 +120,15 @@ whose persistence context is closed at its end.
   ones. For each page, each source is read once with `SourceRepository`, which checks and quotes the source and
   column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns. The last account read
   is saved with the step at each commit, so that a restarted step resumes after it.
-- **Process**: `PayloadProcessor` builds the payload with `PayloadService`, which renders the `mapping` with Jinjava,
-  with the row of the account in each source, and parses it as a JSON object. The checksum of the payload is computed
-  with `ChecksumService` on its compact JSON, with its keys sorted at every level and its arrays in their order, and
-  compared with the checksum read with the page: an unchanged payload is filtered out, without reading its row, so it
-  adds no audit row and its rights are not computed again. For a changed payload, the current row of
-  `account_payloads` is read and updated, or a new row is created when the page gave no checksum. An account deleted
-  since its page was read is filtered out, since inserting its row would fail on its foreign key: an account without
-  payload is no longer in the view, and an account with a payload no longer has its row, deleted with it.
+- **Process**: `PayloadProcessor`, step-scoped to receive the job execution of its step, builds the payload with
+  `PayloadService`, which renders the `mapping` with Jinjava, with the row of the account in each source, and parses
+  it as a JSON object. The checksum of the payload is computed with `ChecksumService` on its compact JSON, with its
+  keys sorted at every level and its arrays in their order, and compared with the checksum read with the page: an
+  unchanged payload is filtered out, without reading its row, so it adds no audit row and its rights are not computed
+  again. For a changed payload, the current row of `account_payloads` is read and updated, or a new row is created
+  when the page gave no checksum. An account deleted since its page was read is filtered out, since inserting its row
+  would fail on its foreign key: an account without payload is no longer in the view, and an account with a payload no
+  longer has its row, deleted with it.
 - **Write**: a `JpaItemWriter` persists the new rows; the changed rows, managed by the persistence context of the
   chunk, are updated. It flushes at the end of each write, so that an error of an insert or an update is raised by
   the writer rather than at the commit of the chunk.
@@ -137,6 +140,42 @@ source cannot be read, the step fails: the current chunk is not written, and the
 `PayloadStepListener`, registered as a listener of the step, checks the `mapping` before it, logs the `payloadError`
 alert of each account skipped, and logs at its end the number of accounts of each `PayloadOutcome`: payloads inserted,
 updated and unchanged, accounts in error or deleted.
+
+---
+
+## Rights computation
+
+`computeRightsStep`, in `ComputeRightsStepConfig`, computes the rights of the account and application pairs whose
+`to_compute` is true in `account_computed_rights_view`, and writes them in the `computed_rights` table. It is a Spring
+Batch chunk step: each chunk of `SYNC_COMPUTE_CHUNK_SIZE` pairs is read, processed and written in its own transaction
+of `linidTransactionManager`, whose persistence context is closed at its end. It is not part of the global job yet.
+Its processor and its writer are beans, to be shared with the recomputations of an account and of an application.
+
+- **Read**: `cyclePairsReader`, an `IteratorItemReader`, reads the pairs to compute by windows of the chunk size, each
+  one starting after the last pair of the previous one.
+- **Process**: `ComputeRightsProcessor`, step-scoped, gives each pair to `RightsComputationService`, with the role
+  names of its application, read with `ApplicationRoleRepository` at its first pair in the step and kept until its
+  end. The service evaluates the policy of the application with `OpaService`, sending the payload of the account,
+  checks the roles returned against the role names, and renders the claims template of the application with Jinjava,
+  with the variables `payload`, `allow` and `roles`, as a JSON object. The processor then reads the current checksums
+  of the pair, as a `PairChecksums` projection rather than the entity already held by the persistence context of the
+  chunk: a pair whose payload, script or claims template checksum changed since it was read is filtered out, as well
+  as a pair no longer in the view, its account or its application being deleted or no longer deployed, since inserting
+  the row of a deleted account would fail on its foreign key. Otherwise, it gives the current row of the pair updated,
+  or a new row when the pair was never computed, with the checksums read with the pair, the technical account, the
+  instance and the job execution.
+- **Write**: a `JpaItemWriter` persists the new rows; the changed rows, managed by the persistence context of the
+  chunk, are updated. It flushes at the end of each write, so that an error of an insert or an update is raised by the
+  writer rather than at the commit of the chunk.
+
+A role missing from the roles of the application raises the `unknownRole` alert, and the rights are written anyway. A
+pair in error (failed evaluation, template error, rendered text that is not a JSON object) raises a
+`RightsComputationException`, skipped by the step: its row, if any, keeps its previous rights and its outdated
+checksums, so it is computed again at the next cycle. When OPA cannot be reached, `OpaService` raises the
+`opaUnreachable` alert and the step fails. `ComputeRightsStepListener`, registered as a listener of the step, logs the
+`pairError` alert of each pair skipped, with the message of its root cause and without its stack trace, since an error
+of the claims template of an application puts all its pairs in error, and logs at its end the number of pairs written,
+in error and discarded: the write count, the process skip count and the filter count of the step.
 
 ---
 

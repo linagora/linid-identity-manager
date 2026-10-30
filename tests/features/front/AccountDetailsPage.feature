@@ -180,7 +180,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And  I expect the HTML element '[data-cy="account-not-activated-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 108 Lifecycle case 2 - INACTIVE, not activated yet
@@ -195,7 +195,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
     And  I expect the HTML element '[data-cy="account-not-activated-info-text"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 109 Lifecycle case 3 - ACTIVE, no end date, no suspension
@@ -211,8 +211,8 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 110 Lifecycle case 4 - ACTIVE, end > 15 days, no suspension
@@ -227,7 +227,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
@@ -242,7 +242,7 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c5"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
@@ -260,8 +260,8 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
@@ -277,8 +277,8 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
@@ -292,10 +292,10 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c8"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' to be visible
     And  I expect the HTML element '[data-cy="account-suspended-info-text"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
@@ -309,8 +309,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000c9"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
@@ -325,8 +325,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000a"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
@@ -341,9 +341,9 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000b"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
@@ -357,8 +357,8 @@ Feature: Test Account details page display
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000000c"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' to be visible
     And  I expect the HTML element '[data-cy="account-deactivated-info-text"]' not exists
     And  I expect the HTML element '[data-cy="lifecycle-buttons-card"]' to be visible
 
@@ -612,8 +612,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And  I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
+    When I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier les paramètres de suspension"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Mettez à jour les paramètres de suspension de ce compte."
@@ -633,7 +633,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 141 Modify suspension - suspensionPeriodStart invalidDate validation error
-    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    When I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "99/99/9999" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -641,7 +641,7 @@ Feature: Test Account details page display
 
     ## 142 Modify suspension - suspensionPeriodStart afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    And  I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -649,7 +649,7 @@ Feature: Test Account details page display
 
     ## 143 Modify suspension - suspensionPeriodEnd invalidDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    And  I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
@@ -659,7 +659,7 @@ Feature: Test Account details page display
 
     ## 144 Modify suspension - suspensionPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    And  I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
@@ -669,7 +669,7 @@ Feature: Test Account details page display
 
     ## 145 Modify suspension - suspensionPeriodEnd fromDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    And  I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/06/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
@@ -679,7 +679,7 @@ Feature: Test Account details page display
 
     ## 146 Modify suspension - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-suspended-banner"] [data-cy="button_modify-suspension"]'
+    And  I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
     And  I click on '[data-cy="form-dialog_title"]'
@@ -705,8 +705,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And  I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' to be visible
-    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
+    When I click on '[data-cy="lifecycle-banners-card_suspended_reactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Êtes-vous sûr de vouloir réactiver ce compte immédiatement ?"
@@ -719,7 +719,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 149 Immediate reactivation - success, account status updated after form submission
-    When I click on '[data-cy="account-suspended-banner"] [data-cy="button_clear-suspension"]'
+    When I click on '[data-cy="lifecycle-banners-card_suspended_reactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "Réactivation immédiate pour test e2e" in the HTML element '[data-cy="field_statusComment"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -843,8 +843,8 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="generic-details-page"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel"]' to be visible
     And  I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' to be visible
-    When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' to be visible
+    When I click on '[data-cy="lifecycle-banners-card_deactivation-warning_deactivation.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier la date de désactivation"
     And  I expect the HTML element '[data-cy="form-dialog_content"]' contains "Mettez à jour la date de désactivation planifiée pour ce compte."
@@ -861,7 +861,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 160 Modify deactivation - validityPeriodEnd invalidDate validation error
-    When I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    When I click on '[data-cy="lifecycle-banners-card_deactivation-warning_deactivation.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "99/99/9999" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -869,7 +869,7 @@ Feature: Test Account details page display
 
     ## 161 Modify deactivation - validityPeriodEnd afterDate validation error
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    And  I click on '[data-cy="lifecycle-banners-card_deactivation-warning_deactivation.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2020" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -877,7 +877,7 @@ Feature: Test Account details page display
 
     ## 162 Modify deactivation - success, account status updated after form submission
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
-    And  I click on '[data-cy="account-deactivated-warning-banner"] [data-cy="button_modify-deactivation"]'
+    And  I click on '[data-cy="lifecycle-banners-card_deactivation-warning_deactivation.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "01/01/2100" in the HTML element '[data-cy="field_validityPeriod.end"]'
     And  I click on '[data-cy="form-dialog_title"]'
@@ -899,13 +899,13 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
     When I click on '[data-cy="see-button_00000000-0000-4000-8000-0000000000cd"]'
     Then I expect the HTML element '[data-cy="account-lifecycle-panel"]' to be visible
-    And  I expect the HTML element '[data-cy="account-deactivated-banner"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivated"]' to be visible
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Inactif"
-    And  I expect the HTML element '[data-cy="account-suspended-banner"]' not exists
-    And  I expect the HTML element '[data-cy="account-deactivated-warning-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_deactivation-warning"]' not exists
 
     ## 164 Immediate revalidation - dialog opens with a mandatory justification field
-    When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-immediate"]'
+    When I click on '[data-cy="lifecycle-banners-card_deactivated_revalidation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactivation immédiate du compte"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_statusComment"]' contains "Justification"
@@ -918,7 +918,7 @@ Feature: Test Account details page display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 166 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
-    When I click on '[data-cy="account-deactivated-banner"] [data-cy="button_reactivate-scheduled"]'
+    When I click on '[data-cy="lifecycle-banners-card_deactivated_revalidation.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier la réactivation du compte"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_validityPeriod.end"]' contains "Date de fin de validité"

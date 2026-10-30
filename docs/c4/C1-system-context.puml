@@ -2,46 +2,49 @@
 ' ============================================================================
 ' LinID Identity Manager — C4 Level 1: System Context
 ' ============================================================================
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.13.0/C4_Context.puml
+
+AddElementTag("future", $fontColor="#777777", $borderColor="#999999", $borderStyle=DashedLine(), $legendText="future (target architecture)")
+AddElementTag("optional", $borderStyle=DottedLine(), $legendText="optional")
+AddRelTag("future", $textColor="#777777", $lineColor="#999999", $lineStyle=DashedLine(), $legendText="future flow")
 
 LAYOUT_WITH_LEGEND()
 title LinID Identity Manager — System Context (C1)
 
 ' --- Actors -----------------------------------------------------------------
-Person(admin, "Administrator", "Manages user accounts, organizational units, applications, application roles & OPA authorization rules. Triggers OPA policy deployment and configures Superset dashboards.")
-Person(enduser, "End user", "Authenticates through LemonLDAP::NG, uses the application UI, manages own preferences and consumes embedded Superset dashboards.")
+Person(admin, "Administrator / manager", "Manages accounts, organizational units, groups, roles, applications and authorization rules.")
+Person(enduser, "End user", "Logs in, views own account and preferences, views embedded dashboards.")
 
 ' --- System -----------------------------------------------------------------
-System(linid, "LinID Identity Manager", "Centralized IAM platform: manages identities, organizational structure, application permissions, OIDC authentication configuration and policy-based authorization (PBAC) across an organization's applications.")
+System(linid, "LinID Identity Manager", "IAM platform: identities, organizational structure, application permissions and policy-based authorization (PBAC) with an embedded Open Policy Agent.")
 
 ' --- External systems (current) --------------------------------------------
-System_Ext(lemonldap, "LemonLDAP::NG", "OIDC Identity Provider & SSO portal. Authenticates users against its directory and issues JWT tokens (RS256). In the target architecture, a LemonLDAP script will convert synced claims & entitlements into per-application JWT tokens.")
-System_Ext(opa, "Open Policy Agent (OPA)", "Policy decision point. Stores Rego policies compiled by the API and evaluates access decisions (allow/deny + roles) per application.")
-System_Ext(superset, "Apache Superset", "Embedded BI dashboard engine. The API generates guest tokens with Row Level Security (RLS) rules; the frontend embeds dashboards via the Superset Embedded SDK.")
-System_Ext(postgres, "PostgreSQL", "Relational data store hosting four isolated databases: linid (business data), lemon (LemonLDAP directory & sessions), superset (metadata), datalake (analytical data).")
+System_Ext(lof, "LinOpenFactory", "LINAGORA front-end platform. Provides LinPulsar, the shared UI component library loaded at runtime by the LinID UI.")
+System_Ext(lemonldap, "LemonLDAP::NG", "OIDC Identity Provider & SSO portal.")
+System_Ext(superset, "Apache Superset", "BI engine serving embedded dashboards with Row Level Security.", $tags="optional")
+System_Ext(postgres, "PostgreSQL", "Databases: linid, sync_api, lemon, superset, datalake.")
 
-' --- External systems (future / target architecture) -----------------------
-System_Ext(flink, "Apache Flink (future)", "Synchronization brick that reads reference identity data from external referentials, computes per account/application profiles (claims + entitlements) by evaluating OPA decisions, stores them in the account_application_profiles table, syncs referential data into the LinID database, and syncs claims & entitlements to the LDAP directory linked to the user.")
-System_Ext(ldap, "LDAP Directory (future)", "Stores claims & entitlements per user, written by the Flink sync brick and read by LemonLDAP::NG to build per-application JWT tokens.")
-System_Ext(referentiel, "External Referential (future)", "Master data source (e.g. HR system) providing reference identity data (accounts, organizational units) that the Flink sync brick reads to update the LinID database.")
+' --- External systems (future) ---------------------------------------------
+System_Ext(ldap, "LDAP Directory", "Claims & entitlements per user, read by LemonLDAP::NG to build per-application tokens.", $tags="future")
+System_Ext(referentiel, "External Referential", "Master data source (e.g. HR system) for accounts and organizational units.", $tags="future")
 
 ' --- Relationships (current) ------------------------------------------------
-Rel(admin, linid, "Manages identities, applications, rules, dashboards", "HTTPS")
-Rel(enduser, linid, "Authenticates, uses UI, manages preferences, views dashboards", "HTTPS")
+Rel(admin, linid, "Manages identities, applications, rules", "HTTPS")
+Rel(enduser, linid, "Logs in, manages preferences", "HTTPS")
+Rel(admin, superset, "Creates dashboards", "HTTPS")
+Rel(enduser, superset, "Views embedded dashboards (guest token)", "HTTPS")
 
-Rel(linid, lemonldap, "OIDC authentication (authorization code + PKCE), JWT validation via JWKS", "OIDC/HTTPS")
-Rel(linid, opa, "Publishes Rego policies (PUT /v1/policies/{id})", "REST/HTTP")
-Rel(linid, superset, "Generates guest tokens with RLS, embeds dashboards", "REST/HTTPS")
-Rel(linid, postgres, "Reads/writes business data (linid DB)", "JDBC")
+Rel(linid, lof, "Loads shared UI components (LinPulsar)", "Module Federation/HTTP")
+Rel(linid, lemonldap, "OIDC authentication, JWT validation via JWKS", "OIDC/HTTP(S)")
+Rel(linid, superset, "Generates guest tokens with RLS", "REST/HTTPS")
+Rel(linid, postgres, "Reads/writes business data", "JDBC")
 
 Rel(lemonldap, postgres, "Reads user directory (lemon DB)", "DBI/PostgreSQL")
-Rel(superset, postgres, "Reads/writes metadata (superset DB) & analytical data (datalake DB)", "SQLAlchemy/psycopg2")
+Rel(superset, postgres, "Reads/writes metadata & analytical data", "SQLAlchemy/psycopg2")
 
-' --- Relationships (future / target architecture) --------------------------
-Rel(flink, referentiel, "Reads source reference data (accounts, organizational units)", "REST/HTTPS")
-Rel(flink, opa, "Evaluates decisions to compute entitlements", "REST/HTTP")
-Rel(flink, postgres, "Syncs referential data & writes computed profiles (account_application_profiles)", "JDBC")
-Rel(flink, ldap, "Syncs claims & entitlements per user", "LDAP")
-Rel(lemonldap, ldap, "Reads claims & entitlements to build per-application JWT", "LDAP")
+' --- Relationships (future) -------------------------------------------------
+Rel(linid, referentiel, "Reads reference data (sync-api)", "REST/HTTPS", $tags="future")
+Rel(linid, ldap, "Syncs claims & entitlements (sync-api)", "LDAP", $tags="future")
+Rel(lemonldap, ldap, "Reads claims & entitlements", "LDAP", $tags="future")
 
 @enduml

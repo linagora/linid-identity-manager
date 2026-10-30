@@ -2,7 +2,7 @@
 ' ============================================================================
 ' LinID Identity Manager — C4 Level 3: Components of the LinID API container
 ' ============================================================================
-!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/v2.13.0/C4_Component.puml
 
 LAYOUT_WITH_LEGEND()
 title LinID API — Components (C3)
@@ -15,6 +15,7 @@ Container_Boundary(api, "LinID API") {
   Component(scheduling_config, "SchedulingConfig", "Config", "Enables @EnableScheduling for the OPA deployment scheduler.")
   Component(flyway_config, "FlywayConfig", "Config", "Two Flyway beans: flywayCore (public schema) and flywayClient (client-specific schema).")
   Component(ssl_config, "SslConfig", "Config", "Sets JVM truststore system properties for HTTPS calls to external services.")
+  Component(sync_api_config, "SyncApiConfig", "Config", "Creates the RestClient bean targeting sync-api, with the client certificate of the sync-api-client SSL bundle (mutual TLS).")
 
   ' --- Filters & Exception handler ----------------------------------------
   Component(user_auth_filter, "UserAuthenticationFilter", "Security Filter", "Runs after JWT Bearer filter; extracts email claim, resolves LinID account, sets UserPrincipal in security context. Rejects 401 if no account matches.")
@@ -22,6 +23,7 @@ Container_Boundary(api, "LinID API") {
   Component(exception_handler, "GlobalExceptionHandler", "Controller Advice", "Intercepts ApiException & validation exceptions, translates messages via i18n, returns standardized error body.")
 
   ' --- Controllers --------------------------------------------------------
+  Component(avatar_ctrl, "AvatarController", "REST Controller (/avatars)", "Uploads (multipart) and deletes the avatar of an entity (POST/DELETE /avatars/{entity}/{id}).")
   Component(account_ctrl, "AccountController", "REST Controller (/accounts)", "CRUD & lifecycle (suspend, deactivate, reactivate, activate, schedule-activation) for accounts; lists account OUs (GET /accounts/{id}/organizational-units) and groups (GET /accounts/{id}/groups).")
   Component(application_ctrl, "ApplicationController", "REST Controller (/applications)", "CRUD for applications; triggers OPA policy deployment; exports Rego script.")
   Component(app_role_ctrl, "ApplicationRoleController", "REST Controller (/applications/{id}/roles)", "CRUD for application roles.")
@@ -41,6 +43,8 @@ Container_Boundary(api, "LinID API") {
   Component(group_svc, "GroupService", "Service", "CRUD for groups; parent-group cycle detection; unique-code enforcement; group memberships (attach/detach accounts, list accounts); checks referenced OU, application and account existence.")
   Component(ou_svc, "OrganizationalUnitService", "Service", "CRUD & lifecycle for organizational units; account attach (requires a functional role)/detach/update relation; paginated search; checks role existence.")
   Component(role_svc, "RoleService", "Service", "CRUD for functional roles; unique-code enforcement; refuses deletion when role held by an account (isDeletable flag).")
+  Component(avatar_svc, "AvatarService", "Service", "Checks size and extension, stores the avatar file as {location}/{entity}/{id}.{extension}, deletes it.")
+  Component(image_sanitizer, "ImageSanitizer", "Service", "Checks the real image type (magic bytes) and dimensions, then redraws the image from its pixels: metadata and trailing payloads are dropped.")
   Component(user_pref_svc, "UserPreferenceService", "Service", "Key/value preference store scoped to the authenticated user.")
   Component(opa_svc, "OpaService", "Service / Adapter", "Generates Rego policy from active rules (Jinja template) and publishes it to OPA (PUT /v1/policies/{id}).")
   Component(opa_deployer, "OpaApplicationDeployerService", "Service", "Deploys a single application policy to OPA in its own transaction (REQUIRES_NEW); updates deployedAt.")
@@ -70,9 +74,12 @@ Container_Boundary(api, "LinID API") {
 System_Ext(opa, "OPA", "Open Policy Agent")
 System_Ext(superset, "Apache Superset", "BI dashboard engine")
 System_Ext(lemonldap, "LemonLDAP::NG", "OIDC IdP")
+Container_Ext(sync_api, "LinID Sync API", "Spring Boot, Spring Batch", "Computes the rights of each account")
 ContainerDb_Ext(db, "PostgreSQL (linid DB)", "PostgreSQL", "LinID business data")
+ContainerDb_Ext(avatars, "Avatars volume", "Filesystem", "Avatar files, served to the browser by the UI server under /avatars/")
 
 ' --- Relationships: controllers -> services -------------------------------
+Rel(avatar_ctrl, avatar_svc, "Uses")
 Rel(account_ctrl, account_svc, "Uses")
 Rel(account_ctrl, ou_svc, "Checks OU exists")
 Rel(application_ctrl, application_svc, "Uses")
@@ -114,8 +121,8 @@ Rel(opa_scheduler, opa_deployer, "Deploys pending applications")
 Rel(opa_deployer, application_repos, "Updates deployedAt")
 
 ' --- Relationships: services -> Superset ----------------------------------
-Rel(superset_svc, superset_cache_svc, "Caches access token")
-Rel(superset_cache_svc, superset_svc, "Evicts on 401/403")
+Rel(superset_svc, superset_cache_svc, "Caches access token, evicts it on 401/403")
+Rel(avatar_svc, image_sanitizer, "Sanitizes uploaded image")
 
 ' --- Relationships: filters -> services -----------------------------------
 Rel(user_auth_filter, account_svc, "Resolves account by email")
@@ -125,8 +132,9 @@ Rel(exception_handler, i18n_svc, "Translates error messages")
 ' --- Relationships: external ----------------------------------------------
 Rel(opa_svc, opa, "Publishes Rego policies (PUT /v1/policies/{id})", "REST/HTTP")
 Rel(superset_svc, superset, "Login, CSRF, guest token, dashboard config", "REST/HTTPS")
-Rel(security_config, lemonldap, "JWT validation via JWKS", "OIDC/HTTPS")
-Rel(user_auth_filter, lemonldap, "Reads email claim from JWT", "JWT")
+Rel(security_config, lemonldap, "Fetches JWKS to validate JWTs (through the UI server /auth/ proxy)", "HTTPS")
+Rel(sync_api_config, sync_api, "Calls sync-api", "REST/HTTPS, mutual TLS")
+Rel(avatar_svc, avatars, "Writes/deletes avatar files", "File system")
 
 Rel(account_repos, db, "Reads/writes", "JDBC")
 Rel(application_repos, db, "Reads/writes", "JDBC")

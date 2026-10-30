@@ -29,6 +29,7 @@
  *
  * <p>This package contains service interfaces and their implementations
  * shared by the synchronization jobs, such as the computation of the checksums, the build and the writing of the
- * account payloads, the evaluation of the OPA policies, and the logging of the alerts.</p>
+ * account payloads, the evaluation of the OPA policies, the computation of the rights and claims of the account and
+ * application pairs, and the logging of the alerts.</p>
  */
 package io.github.linagora.linid.im.sync.service;

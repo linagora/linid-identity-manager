@@ -62,6 +62,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **writing of the account payloads** in `sync-api`: the payload of each account is written in
   `account_payloads` only when its checksum, computed on its JSON with sorted keys, changed, with the environment
   variables `SYNC_JDBC_BATCH_SIZE` (default `50`) and `SYNC_INSTANCE_ID` (default: the host name).
+- Added the **computation of the rights and claims** of each account and application pair in `sync-api`: the `allow`
+  and the `roles` returned by OPA, and the claims rendered from the claims template of the application with the
+  `payload`, `allow` and `roles` variables, stored in `computed_rights` with the checksums used. A pair in error keeps
+  its previous result and is computed again at the next cycle. No component reads them yet: they will be pushed to the
+  LDAP in a later release.
 
 #### Frontend
 

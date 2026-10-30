@@ -140,6 +140,39 @@ updated and unchanged, accounts in error or deleted.
 
 ---
 
+## Rights computation
+
+`computeRightsStep`, in `ComputeRightsStepConfig`, computes the rights of the account and application pairs whose
+`to_compute` is true in `account_computed_rights_view`, and writes them in the `computed_rights` table. It is a Spring
+Batch chunk step: each chunk of `SYNC_COMPUTE_CHUNK_SIZE` pairs is read, processed and written in its own transaction
+of `linidTransactionManager`, whose persistence context is closed at its end. It is not part of the global job yet.
+Its processor and its writer are beans, to be shared with the recomputations of an account and of an application.
+
+- **Read**: `cyclePairsReader`, an `IteratorItemReader`, reads the pairs to compute by windows of the chunk size, each
+  one starting after the last pair of the previous one.
+- **Process**: `ComputeRightsProcessor`, step-scoped, gives each pair to `RightsComputationService`, with the role
+  names of its application, read with `ApplicationRoleRepository` at its first pair in the step and kept until its
+  end. The service evaluates the policy of the application with `OpaService`, sending the payload of the account,
+  checks the roles returned against the role names, and renders the claims template of the application with Jinjava,
+  with the variables `payload`, `allow` and `roles`, as a JSON object. The processor then reads the current checksums
+  of the pair, as a `PairChecksums` projection rather than the entity already held by the persistence context of the
+  chunk: a pair whose payload, script or claims template checksum changed since it was read, or no longer in the view,
+  is filtered out. Otherwise, it gives the current row of the pair updated, or a new row when the pair was never
+  computed, with the checksums read with the pair, the technical account, the instance and the job execution.
+- **Write**: a `JpaItemWriter` persists the new rows; the changed rows, managed by the persistence context of the
+  chunk, are updated. It flushes at the end of each write, so that an error of an insert or an update is raised by the
+  writer rather than at the commit of the chunk.
+
+A role missing from the roles of the application raises the `unknownRole` alert, and the rights are written anyway. A
+pair in error (failed evaluation, template error, rendered text that is not a JSON object) raises a
+`RightsComputationException`, skipped by the step: its row, if any, keeps its previous rights and its outdated
+checksums, so it is computed again at the next cycle. When OPA cannot be reached, `OpaService` raises the
+`opaUnreachable` alert and the step fails. `ComputeRightsStepListener`, registered as a listener of the step, logs the
+`pairError` alert of each pair skipped, and logs at its end the number of pairs written, in error and discarded: the
+write count, the process skip count and the filter count of the step.
+
+---
+
 ## Alerts
 
 `AlertService` logs the anomalies detected by the checks, with their context and their cause: the blocking ones,

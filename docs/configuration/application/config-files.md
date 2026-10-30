@@ -650,6 +650,37 @@ SYNC_INSTANCE_ID=sync-api-1
 
 ---
 
+## 🎫 Claims Template
+
+For each account and each deployed application, `sync-api` evaluates the OPA policy of the application with the
+payload of the account, then renders the claims template of the application with Jinjava. The result is stored in the
+`computed_rights` table of the LinId database: the `allow` and the `roles` returned by OPA, and the rendered claims.
+
+The claims template is a JSON template, whose values are Jinjava expressions, with these variables:
+
+| Variable  | Content                                                                    |
+| --------- | -------------------------------------------------------------------------- |
+| `payload` | Payload of the account, built from the `mapping` of `sync-data`            |
+| `allow`   | `allow` returned by OPA, `true` or `false`                                 |
+| `roles`   | Roles returned by OPA, a sorted list of role names, empty when it has none |
+
+```jinja
+{
+  "sub": {{ payload.external_id | tojson }},
+  "email": {{ payload.email | tojson }},
+  "roles": {{ roles | tojson }}
+}
+```
+
+* As in the `mapping`, every value is inserted with the `tojson` filter, without quotes.
+* The rendered text must be a JSON object. The template is not checked when the application is saved: a template
+  error or a rendered text that is not a JSON object puts the pair in error. A pair in error raises an alert and
+  keeps its previous result, and is computed again at the next cycle.
+* A role returned by OPA and missing from the roles of the application raises an alert, and the result is stored
+  anyway.
+
+---
+
 ## 🏷️ Key Configuration Domains
 
 ### 1. Database

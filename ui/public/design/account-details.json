@@ -176,6 +176,94 @@
         }
       }
     },
+    "lifecycle-banners-card": {
+      "q-card": {
+        "flat": true,
+        "class": "bg-transparent"
+      },
+      "suspended": {
+        "q-banner": {
+          "class": "bg-warning text-white"
+        },
+        "q-icon": {
+          "color": "white",
+          "name": "warning"
+        },
+        "actions": {
+          "reactivation": {
+            "immediate": {
+              "q-btn": {
+                "color": "white",
+                "textColor": "warning",
+                "outline": false,
+                "icon": "error"
+              }
+            }
+          },
+          "suspension": {
+            "modify": {
+              "q-btn": {
+                "color": "white",
+                "outline": true
+              }
+            }
+          }
+        }
+      },
+      "deactivated": {
+        "q-banner": {
+          "class": "bg-negative text-white"
+        },
+        "q-icon": {
+          "color": "white",
+          "name": "warning"
+        },
+        "actions": {
+          "revalidation": {
+            "immediate": {
+              "q-btn": {
+                "color": "white",
+                "textColor": "negative",
+                "outline": false,
+                "icon": "error"
+              }
+            },
+            "scheduled": {
+              "q-btn": {
+                "color": "white",
+                "outline": true
+              }
+            }
+          }
+        }
+      },
+      "deactivation-warning": {
+        "q-banner": {
+          "class": "bg-white text-negative"
+        },
+        "q-icon": {
+          "color": "negative",
+          "name": "warning"
+        },
+        "actions": {
+          "deactivation": {
+            "immediate": {
+              "q-btn": {
+                "color": "negative",
+                "outline": false,
+                "icon": "error"
+              }
+            },
+            "modify": {
+              "q-btn": {
+                "color": "negative",
+                "outline": true
+              }
+            }
+          }
+        }
+      }
+    },
     "lifecycle-buttons-card": {
       "buttons-card": {
         "q-card": { "flat": true },

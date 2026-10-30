@@ -36,6 +36,14 @@ export interface Period {
 /** I18n key of the application-wide date format, consumed by useCommonMapper's toDate/toDateISO. */
 export const DATE_FORMAT_KEY = 'application.dateFormat';
 
+/** Configuration of a banner of the LinPulsar `LifecycleBannersCard`, read from the zone props of a panel. */
+export interface LifecycleBanner {
+  /** Key of the banner, matched against the banners of the lifecycle UI projection. */
+  key: string;
+  /** Other properties of the banner (actions, params, content), forwarded unchanged to the card. */
+  [property: string]: unknown;
+}
+
 /** Display configuration of a button of the LinPulsar `LifecycleButtonsCard`, read from the zone props of a panel. */
 export interface LifecycleButton {
   /** Lifecycle type of the button. */

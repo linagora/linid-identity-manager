@@ -31,25 +31,14 @@
     class="column q-gutter-y-sm q-mb-md account-lifecycle-panel"
     data-cy="account-lifecycle-panel"
   >
-    <AccountSuspendedBanner
-      v-if="lifecycleUi.showSuspendedBanner"
-      :account-status="accountStatus"
-      @clear-suspension="runCardAction('reactivation.immediate')"
-      @modify-suspension="runCardAction('suspension.modify')"
-    />
-
-    <AccountDeactivatedBanner
-      v-if="lifecycleUi.showDeactivatedBanner"
-      :account-status="accountStatus"
-      @reactivate-immediate="runCardAction('revalidation.immediate')"
-      @reactivate-scheduled="runCardAction('revalidation.scheduled')"
-    />
-
-    <AccountDeactivatedWarningBanner
-      v-if="lifecycleUi.showDeactivationWarningBanner"
-      :account-status="accountStatus"
-      @deactivate-immediate="runCardAction('deactivation.immediate')"
-      @modify-deactivation="runCardAction('deactivation.modify')"
+    <component
+      :is="lifecycleBannersCard"
+      v-if="lifecycleBannersCard"
+      :ui-namespace="uiNamespace"
+      :i18n-scope="i18nScope"
+      :entity="entity"
+      :banners="displayedBanners"
+      :emit-on-click="ACCOUNT_LIFECYCLE_ACTION_EVENT"
     />
 
     <AccountDeactivatedInfoText
@@ -82,10 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { loadAsyncComponent, uiEventSubject } from '@linagora/lin-pulsar-core';
-import AccountDeactivatedBanner from 'src/components/banner/AccountDeactivatedBanner.vue';
-import AccountDeactivatedWarningBanner from 'src/components/banner/AccountDeactivatedWarningBanner.vue';
-import AccountSuspendedBanner from 'src/components/banner/AccountSuspendedBanner.vue';
+import { loadAsyncComponent } from '@linagora/lin-pulsar-core';
 import AccountDeactivatedInfoText from 'src/components/text/AccountDeactivatedInfoText.vue';
 import AccountNotActivatedInfoText from 'src/components/text/AccountNotActivatedInfoText.vue';
 import AccountSuspendedInfoText from 'src/components/text/AccountSuspendedInfoText.vue';
@@ -102,7 +88,7 @@ const props = defineProps<AccountLifecyclePanelProps>();
 /** UI event key notifying the hosting details page that the account status changed and the entity must be reloaded. */
 const ACCOUNT_STATUS_UPDATED_EVENT = 'account-status-updated';
 
-/** UI event key asking the lifecycle buttons card to run one of its configured actions. */
+/** UI event key published by the lifecycle banners card to run one of the actions of the lifecycle buttons card. */
 const ACCOUNT_LIFECYCLE_ACTION_EVENT = 'account-lifecycle-action';
 
 const i18nScope = 'AccountLifecyclePanel';
@@ -117,16 +103,18 @@ const accountStatus = computed<AccountStatus | null>(() =>
 
 const lifecycleUi = useAccountLifecycleUi(accountStatus);
 
+/** Configured banners matching the account status, in configuration order. */
+const displayedBanners = computed(() =>
+  (props.banners ?? []).filter(({ key }) =>
+    lifecycleUi.value?.banners?.includes(key)
+  )
+);
+
+const lifecycleBannersCard = loadAsyncComponent(
+  'LinPulsar/LifecycleBannersCard'
+);
+
 const lifecycleButtonsCard = loadAsyncComponent(
   'LinPulsar/LifecycleButtonsCard'
 );
-
-/**
- * Asks the lifecycle buttons card to run one of its configured actions, for the actions offered by the banners.
- *
- * @param key - The lifecycle action key, for example `suspension.modify`.
- */
-function runCardAction(key: string): void {
-  uiEventSubject.next({ key: ACCOUNT_LIFECYCLE_ACTION_EVENT, data: { key } });
-}
 </script>

@@ -188,7 +188,7 @@ export function useAccountLifecycleUi(
       validityEnd != null &&
       validityEnd.isBefore(now)
     ) {
-      return withActions({ showBadge: true, showDeactivatedBanner: true }, []);
+      return withActions({ showBadge: true, banners: ['deactivated'] }, []);
     }
   }
 
@@ -262,7 +262,7 @@ export function useAccountLifecycleUi(
       !hasFutureSuspension(status, now)
     ) {
       return withActions(
-        { showBadge: true, showDeactivationWarningBanner: true },
+        { showBadge: true, banners: ['deactivation-warning'] },
         ['suspension.immediate', 'suspension.scheduled']
       );
     }
@@ -344,7 +344,7 @@ export function useAccountLifecycleUi(
       return withActions(
         {
           showBadge: true,
-          showDeactivationWarningBanner: true,
+          banners: ['deactivation-warning'],
           showWillSuspendInfoText: true,
         },
         ['suspension.immediate', 'suspension.scheduled']
@@ -366,7 +366,7 @@ export function useAccountLifecycleUi(
       status.validityPeriod?.end == null &&
       toDayJs(status.suspensionPeriod?.end) == null
     ) {
-      return withActions({ showSuspendedBanner: true }, [
+      return withActions({ banners: ['suspended'] }, [
         'deactivation.immediate',
         'deactivation.scheduled',
       ]);
@@ -387,7 +387,7 @@ export function useAccountLifecycleUi(
       status.validityPeriod?.end == null &&
       toDayJs(status.suspensionPeriod?.end) != null
     ) {
-      return withActions({ showSuspendedBanner: true }, [
+      return withActions({ banners: ['suspended'] }, [
         'deactivation.immediate',
         'deactivation.scheduled',
       ]);
@@ -406,7 +406,7 @@ export function useAccountLifecycleUi(
     if (status.status === 'SUSPENDED' && isMoreThan15Days(status)) {
       return withActions(
         {
-          showSuspendedBanner: true,
+          banners: ['suspended'],
           showWillDeactivateInfoText: true,
         },
         ['deactivation.immediate', 'deactivation.scheduled']
@@ -426,8 +426,7 @@ export function useAccountLifecycleUi(
     if (status.status === 'SUSPENDED' && isWithin15Days(status)) {
       return withActions(
         {
-          showSuspendedBanner: true,
-          showDeactivationWarningBanner: true,
+          banners: ['suspended', 'deactivation-warning'],
         },
         ['deactivation.immediate', 'deactivation.scheduled']
       );

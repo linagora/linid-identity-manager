@@ -181,6 +181,23 @@ describe('Test case: INACTIVE — not activated yet', () => {
   });
 });
 
+describe('Test case: INACTIVE — deactivated', () => {
+  it('shows only the deactivated banner when the validity end is past', () => {
+    const ui = project(
+      buildStatus({
+        status: 'INACTIVE',
+        validityPeriod: {
+          start: '2026-01-01T00:00:00Z',
+          end: '2026-05-01T00:00:00Z',
+        },
+      })
+    );
+    expect(ui?.showBadge).toBe(true);
+    expect(ui?.banners).toEqual(['deactivated']);
+    expectMenuItems(ui);
+  });
+});
+
 describe('Test case: ACTIVE — no end date, no future suspension', () => {
   it('matches and exposes the full action set', () => {
     const ui = project(
@@ -233,7 +250,7 @@ describe('Test case: ACTIVE — end date > 15 days, no future suspension', () =>
     );
     expect(ui?.showBadge).toBe(true);
     expect(ui?.showWillDeactivateInfoText).toBe(true);
-    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+    expect(ui?.banners).toBeUndefined();
     expectMenuItems(ui, {
       suspension: [item('suspension.immediate'), item('suspension.scheduled')],
       deactivation: [
@@ -271,7 +288,7 @@ describe('ACTIVE — end date <= 15 days, no future suspension', () => {
       })
     );
     expect(ui?.showBadge).toBe(true);
-    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.banners).toEqual(['deactivation-warning']);
     expect(ui?.showWillDeactivateInfoText).toBeFalsy();
     expectMenuItems(ui, {
       suspension: [item('suspension.immediate'), item('suspension.scheduled')],
@@ -289,7 +306,7 @@ describe('ACTIVE — end date <= 15 days, no future suspension', () => {
         daysBeforeDeactivation: 15,
       })
     );
-    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.banners).toEqual(['deactivation-warning']);
   });
 });
 
@@ -354,7 +371,7 @@ describe('Test case: ACTIVE — end date <= 15 days + future suspension', () => 
         daysBeforeDeactivation: 8,
       })
     );
-    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.banners).toEqual(['deactivation-warning']);
     expect(ui?.showWillSuspendInfoText).toBe(true);
     expect(ui?.showWillDeactivateInfoText).toBeFalsy();
     expectMenuItems(ui, {
@@ -374,8 +391,7 @@ describe('Test case: SUSPENDED — no validity end, no suspension end', () => {
       })
     );
     expect(ui?.showBadge).toBeFalsy();
-    expect(ui?.showSuspendedBanner).toBe(true);
-    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+    expect(ui?.banners).toEqual(['suspended']);
     expectMenuItems(ui, {
       deactivation: [
         item('deactivation.immediate'),
@@ -398,8 +414,7 @@ describe('Test case: SUSPENDED — no validity end, with suspension end', () => 
         daysBeforeDeactivation: null,
       })
     );
-    expect(ui?.showSuspendedBanner).toBe(true);
-    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
+    expect(ui?.banners).toEqual(['suspended']);
   });
 });
 
@@ -417,9 +432,8 @@ describe('Test case: SUSPENDED — end date > 15 days', () => {
       })
     );
     expect(ui?.showBadge).toBeFalsy();
-    expect(ui?.showSuspendedBanner).toBe(true);
+    expect(ui?.banners).toEqual(['suspended']);
     expect(ui?.showWillDeactivateInfoText).toBe(true);
-    expect(ui?.showDeactivationWarningBanner).toBeFalsy();
   });
 });
 
@@ -436,8 +450,7 @@ describe('Test case: SUSPENDED — end date <= 15 days', () => {
         daysBeforeDeactivation: 8,
       })
     );
-    expect(ui?.showSuspendedBanner).toBe(true);
-    expect(ui?.showDeactivationWarningBanner).toBe(true);
+    expect(ui?.banners).toEqual(['suspended', 'deactivation-warning']);
     expect(ui?.showWillDeactivateInfoText).toBeFalsy();
   });
 });

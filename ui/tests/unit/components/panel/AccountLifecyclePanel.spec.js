@@ -29,13 +29,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AccountLifecyclePanel from '../../../../src/components/panel/AccountLifecyclePanel.vue';
 import { mockToDayJs } from '../../helpers/mockCommonMapper.js';
 
-const { mockUiEventSubjectNext } = vi.hoisted(() => ({
-  mockUiEventSubjectNext: vi.fn(),
-}));
-
 vi.mock('@linagora/lin-pulsar-core', () => ({
   loadAsyncComponent: vi.fn(() => null),
-  uiEventSubject: { next: mockUiEventSubjectNext },
   useCommonMapper: () => ({
     toDayJs: mockToDayJs(),
   }),
@@ -126,16 +121,38 @@ describe('Test component: AccountLifecyclePanel', () => {
     });
   });
 
-  describe('Test function: runCardAction', () => {
-    it('should ask the lifecycle buttons card to run the action', () => {
-      wrapper = mountPanel();
+  describe('Test computed: displayedBanners', () => {
+    const banners = [
+      { key: 'suspended', actions: ['suspension.modify'] },
+      { key: 'deactivated' },
+      { key: 'deactivation-warning' },
+    ];
 
-      wrapper.vm.runCardAction('suspension.modify');
-
-      expect(mockUiEventSubjectNext).toHaveBeenCalledWith({
-        key: 'account-lifecycle-action',
-        data: { key: 'suspension.modify' },
+    it('should keep the configured banners listed by the lifecycle UI, in configuration order', () => {
+      wrapper = shallowMount(AccountLifecyclePanel, {
+        props: {
+          entity: {
+            ...accountDto,
+            status: 'SUSPENDED',
+            suspensionPeriod: { start: '2026-04-01T00:00:00Z', end: null },
+            validityPeriod: {
+              start: '2026-01-01T00:00:00Z',
+              end: '2026-05-12T00:00:00Z',
+            },
+            daysBeforeDeactivation: 8,
+          },
+          uiNamespace: 'moduleAccountDetailsPage',
+          banners,
+        },
       });
+
+      expect(wrapper.vm.displayedBanners).toEqual([banners[0], banners[2]]);
+    });
+
+    it('should be empty without configured banners', () => {
+      wrapper = mountPanel({ ...accountDto, status: 'SUSPENDED' });
+
+      expect(wrapper.vm.displayedBanners).toEqual([]);
     });
   });
 });

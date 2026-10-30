@@ -73,6 +73,58 @@
       "zone": "moduleAccountDetailsPage.content.before",
       "component": "AccountLifecyclePanel",
       "props": {
+        "banners": [
+          {
+            "key": "suspended",
+            "actions": ["reactivation.immediate", "suspension.modify"],
+            "content": "{{ 'contentWithEndDate' if entity.suspensionPeriod.end else 'content' }}",
+            "params": {
+              "date": {
+                "field": "suspensionPeriod.start",
+                "formatter": "toDate",
+                "formatOptions": {
+                  "formatKey": "application.dateFormat"
+                }
+              },
+              "endDate": {
+                "field": "suspensionPeriod.end",
+                "formatter": "toDate",
+                "formatOptions": {
+                  "formatKey": "application.dateFormat"
+                }
+              }
+            }
+          },
+          {
+            "key": "deactivated",
+            "actions": ["revalidation.immediate", "revalidation.scheduled"],
+            "params": {
+              "date": {
+                "field": "validityPeriod.end",
+                "formatter": "toDate",
+                "formatOptions": {
+                  "formatKey": "application.dateFormat"
+                }
+              }
+            }
+          },
+          {
+            "key": "deactivation-warning",
+            "actions": ["deactivation.immediate", "deactivation.modify"],
+            "params": {
+              "count": {
+                "field": "daysBeforeDeactivation"
+              },
+              "date": {
+                "field": "validityPeriod.end",
+                "formatter": "toDate",
+                "formatOptions": {
+                  "formatKey": "application.dateFormat"
+                }
+              }
+            }
+          }
+        ],
         "immediateActionDelay": 60,
         "actions": {
           "activation.immediate": {

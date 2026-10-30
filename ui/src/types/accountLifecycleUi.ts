@@ -60,15 +60,11 @@ export type AccountLifecycleAction = (typeof ACCOUNT_LIFECYCLE_ACTIONS)[number];
 export interface AccountLifecycleUi {
   /** Badge to display, or undefined when a banner replaces the badge. */
   showBadge?: boolean;
-  /** True when the yellow suspension banner must be rendered. */
-  showSuspendedBanner?: boolean;
   /**
-   * True when the red deactivated banner must be rendered (account already deactivated: its validity period end is in
-   * the past).
+   * Keys of the banners of the lifecycle banners card to render: `suspended`, `deactivated` (validity period end in the
+   * past) or `deactivation-warning` (deactivation within 15 days).
    */
-  showDeactivatedBanner?: boolean;
-  /** True when the light red deactivation warning banner must be rendered. */
-  showDeactivationWarningBanner?: boolean;
+  banners?: string[];
   /** True when the red "will be deactivated" info text must be rendered. */
   showWillDeactivateInfoText?: boolean;
   /** True when the yellow "will be suspended" info text must be rendered. */

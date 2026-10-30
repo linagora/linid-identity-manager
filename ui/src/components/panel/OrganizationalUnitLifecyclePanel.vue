@@ -31,11 +31,14 @@
     class="column q-gutter-y-sm q-mb-md organizational-unit-lifecycle-panel"
     data-cy="organizational-unit-lifecycle-panel"
   >
-    <OrganizationalUnitSuspendedBanner
-      v-if="lifecycleUi.showSuspendedBanner"
-      :organizational-unit-status="organizationalUnitStatus"
-      @clear-suspension="runCardAction('reactivation.immediate')"
-      @modify-suspension-end="runCardAction('suspension.modify-end')"
+    <component
+      :is="lifecycleBannersCard"
+      v-if="lifecycleBannersCard"
+      :ui-namespace="uiNamespace"
+      :i18n-scope="i18nScope"
+      :entity="entity"
+      :banners="displayedBanners"
+      :emit-on-click="ORGANIZATIONAL_UNIT_LIFECYCLE_ACTION_EVENT"
     />
 
     <OrganizationalUnitSuspendedInfoText
@@ -61,8 +64,7 @@
 </template>
 
 <script setup lang="ts">
-import { loadAsyncComponent, uiEventSubject } from '@linagora/lin-pulsar-core';
-import OrganizationalUnitSuspendedBanner from 'src/components/banner/OrganizationalUnitSuspendedBanner.vue';
+import { loadAsyncComponent } from '@linagora/lin-pulsar-core';
 import OrganizationalUnitSuspendedInfoText from 'src/components/text/OrganizationalUnitSuspendedInfoText.vue';
 import { useOrganizationalUnitLifecycleUi } from 'src/composables/useOrganizationalUnitLifecycleUi';
 import { useOrganizationalUnitMapper } from 'src/composables/useOrganizationalUnitMapper';
@@ -81,7 +83,7 @@ const props = defineProps<OrganizationalUnitLifecyclePanelProps>();
 const ORGANIZATIONAL_UNIT_STATUS_UPDATED_EVENT =
   'organizational-unit-status-updated';
 
-/** UI event key asking the lifecycle buttons card to run one of its configured actions. */
+/** UI event key published by the lifecycle banners card to run one of the actions of the lifecycle buttons card. */
 const ORGANIZATIONAL_UNIT_LIFECYCLE_ACTION_EVENT =
   'organizational-unit-lifecycle-action';
 
@@ -100,19 +102,18 @@ const organizationalUnitStatus = computed<OrganizationalUnitStatus | null>(
 
 const lifecycleUi = useOrganizationalUnitLifecycleUi(organizationalUnitStatus);
 
+/** Configured banners matching the OU status, in configuration order. */
+const displayedBanners = computed(() =>
+  (props.banners ?? []).filter(({ key }) =>
+    lifecycleUi.value?.banners?.includes(key)
+  )
+);
+
+const lifecycleBannersCard = loadAsyncComponent(
+  'LinPulsar/LifecycleBannersCard'
+);
+
 const lifecycleButtonsCard = loadAsyncComponent(
   'LinPulsar/LifecycleButtonsCard'
 );
-
-/**
- * Asks the lifecycle buttons card to run one of its configured actions, for the actions offered by the banner.
- *
- * @param key - The lifecycle action key, for example `suspension.modify-end`.
- */
-function runCardAction(key: string): void {
-  uiEventSubject.next({
-    key: ORGANIZATIONAL_UNIT_LIFECYCLE_ACTION_EVENT,
-    data: { key },
-  });
-}
 </script>

@@ -95,7 +95,7 @@ export function useOrganizationalUnitLifecycleUi(
     status: OrganizationalUnitStatus
   ): OrganizationalUnitLifecycleUi | undefined {
     if (status.isSuspended) {
-      return withActions({ showBadge: true, showSuspendedBanner: true }, []);
+      return withActions({ showBadge: true, banners: ['suspended'] }, []);
     }
   }
 

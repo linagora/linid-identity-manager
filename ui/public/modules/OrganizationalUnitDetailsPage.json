@@ -68,6 +68,29 @@
       "zone": "moduleOrganizationalUnitDetailsPage.content.before",
       "component": "OrganizationalUnitLifecyclePanel",
       "props": {
+        "banners": [
+          {
+            "key": "suspended",
+            "actions": ["reactivation.immediate", "suspension.modify-end"],
+            "content": "{{ 'contentWithEndDate' if entity.suspensionPeriod.end else 'content' }}",
+            "params": {
+              "date": {
+                "field": "suspensionPeriod.start",
+                "formatter": "toDate",
+                "formatOptions": {
+                  "formatKey": "application.dateFormat"
+                }
+              },
+              "endDate": {
+                "field": "suspensionPeriod.end",
+                "formatter": "toDate",
+                "formatOptions": {
+                  "formatKey": "application.dateFormat"
+                }
+              }
+            }
+          }
+        ],
         "immediateActionDelay": 60,
         "actions": {
           "suspension.immediate": {

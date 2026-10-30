@@ -107,6 +107,41 @@
         }
       }
     },
+    "lifecycle-banners-card": {
+      "q-card": {
+        "flat": true,
+        "class": "bg-transparent"
+      },
+      "suspended": {
+        "q-banner": {
+          "class": "bg-warning text-white"
+        },
+        "q-icon": {
+          "color": "white",
+          "name": "warning"
+        },
+        "actions": {
+          "reactivation": {
+            "immediate": {
+              "q-btn": {
+                "color": "white",
+                "textColor": "warning",
+                "outline": false,
+                "icon": "error"
+              }
+            }
+          },
+          "suspension": {
+            "modify-end": {
+              "q-btn": {
+                "color": "white",
+                "outline": true
+              }
+            }
+          }
+        }
+      }
+    },
     "lifecycle-buttons-card": {
       "buttons-card": {
         "q-card": { "flat": true },

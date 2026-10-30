@@ -29,13 +29,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import OrganizationalUnitLifecyclePanel from '../../../../src/components/panel/OrganizationalUnitLifecyclePanel.vue';
 import { mockToDayJs } from '../../helpers/mockCommonMapper.js';
 
-const { mockUiEventSubjectNext } = vi.hoisted(() => ({
-  mockUiEventSubjectNext: vi.fn(),
-}));
-
 vi.mock('@linagora/lin-pulsar-core', () => ({
   loadAsyncComponent: vi.fn(() => null),
-  uiEventSubject: { next: mockUiEventSubjectNext },
   useCommonMapper: () => ({
     toDayJs: mockToDayJs(),
   }),
@@ -111,7 +106,7 @@ describe('Test component: OrganizationalUnitLifecyclePanel', () => {
 
       const ui = wrapper.vm.lifecycleUi;
       expect(ui.showBadge).toBe(true);
-      expect(ui.showSuspendedBanner).toBeUndefined();
+      expect(ui.banners).toBeUndefined();
       expect(ui.menuItems.suspension).toEqual([
         { key: 'suspension.immediate', clickable: true },
         { key: 'suspension.scheduled', clickable: true },
@@ -123,22 +118,37 @@ describe('Test component: OrganizationalUnitLifecyclePanel', () => {
       wrapper = mountPanel(suspendedOrganizationalUnitDto);
 
       const ui = wrapper.vm.lifecycleUi;
-      expect(ui.showSuspendedBanner).toBe(true);
+      expect(ui.banners).toEqual(['suspended']);
       expect(ui.menuItems.suspension).toBeUndefined();
       expect(ui.menuItems.activation).toBeUndefined();
     });
   });
 
-  describe('Test function: runCardAction', () => {
-    it('should ask the lifecycle buttons card to run the action', () => {
-      wrapper = mountPanel(suspendedOrganizationalUnitDto);
+  describe('Test computed: displayedBanners', () => {
+    const banners = [{ key: 'suspended', actions: ['reactivation.immediate'] }];
 
-      wrapper.vm.runCardAction('suspension.modify-end');
-
-      expect(mockUiEventSubjectNext).toHaveBeenCalledWith({
-        key: 'organizational-unit-lifecycle-action',
-        data: { key: 'suspension.modify-end' },
+    it('should keep the suspended banner for a suspended entity', () => {
+      wrapper = shallowMount(OrganizationalUnitLifecyclePanel, {
+        props: {
+          entity: suspendedOrganizationalUnitDto,
+          uiNamespace: 'moduleOrganizationalUnitDetailsPage',
+          banners,
+        },
       });
+
+      expect(wrapper.vm.displayedBanners).toEqual(banners);
+    });
+
+    it('should be empty for a non-suspended entity', () => {
+      wrapper = shallowMount(OrganizationalUnitLifecyclePanel, {
+        props: {
+          entity: activeOrganizationalUnitDto,
+          uiNamespace: 'moduleOrganizationalUnitDetailsPage',
+          banners,
+        },
+      });
+
+      expect(wrapper.vm.displayedBanners).toEqual([]);
     });
   });
 });

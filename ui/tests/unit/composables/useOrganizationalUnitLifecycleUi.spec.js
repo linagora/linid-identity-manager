@@ -139,7 +139,7 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
 
       expect(ui).toEqual({
         showBadge: true,
-        showSuspendedBanner: true,
+        banners: ['suspended'],
         menuItems: {},
       });
     });
@@ -155,7 +155,7 @@ describe('Test composable: useOrganizationalUnitLifecycleUi', () => {
         })
       );
 
-      expect(ui.showSuspendedBanner).toBe(true);
+      expect(ui.banners).toEqual(['suspended']);
       expect(ui.showWillSuspendInfoText).toBeFalsy();
     });
   });

@@ -409,6 +409,20 @@
     }
   },
   "OrganizationalUnitLifecyclePanel": {
+    "LifecycleBannersCard": {
+      "suspended": {
+        "content": "This organizational unit has been suspended since {date}.",
+        "contentWithEndDate": "This organizational unit has been suspended from {date} until {endDate}.",
+        "actions": {
+          "reactivation": {
+            "immediate": "Immediate reactivation"
+          },
+          "suspension": {
+            "modify-end": "Edit suspension end"
+          }
+        }
+      }
+    },
     "LifecycleButtonsCard": {
       "activation": {
         "DropdownButton": {
@@ -587,12 +601,6 @@
   },
   "OrganizationalUnitsPage": {
     "menuTitle": "Organizational units"
-  },
-  "OrganizationalUnitSuspendedBanner": {
-    "content": "This organizational unit has been suspended since {date}.",
-    "contentWithEndDate": "This organizational unit has been suspended from {date} until {endDate}.",
-    "clearSuspensionButton": "Immediate reactivation",
-    "modifySuspensionEndButton": "Edit suspension end"
   },
   "OrganizationalUnitSuspendedInfoText": {
     "message": "This organizational unit will be suspended on {date}."

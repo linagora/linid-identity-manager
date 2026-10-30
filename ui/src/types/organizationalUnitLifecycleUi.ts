@@ -55,8 +55,8 @@ export type OrganizationalUnitLifecycleAction =
 export interface OrganizationalUnitLifecycleUi {
   /** True when the status badge must be rendered next to the page title. */
   showBadge?: boolean;
-  /** True when the yellow suspension banner must be rendered (OU currently suspended). */
-  showSuspendedBanner?: boolean;
+  /** Keys of the banners of the lifecycle banners card to render: `suspended` when the OU is currently suspended. */
+  banners?: string[];
   /** True when the yellow "will be suspended on …" info text must be rendered (suspension scheduled in the future). */
   showWillSuspendInfoText?: boolean;
   /**

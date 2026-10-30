@@ -105,7 +105,7 @@ public final class AlertService {
      * is written for the pair.
      *
      * @param context the entities in error
-     * @param cause the cause of the error
+     * @param cause the cause of the error, or {@code null} when the context already describes it
      */
     public static void pairError(final String context, final Throwable cause) {
         log.warn("Pair in error, nothing written — {}", StringUtils.normalizeSpace(context), cause);

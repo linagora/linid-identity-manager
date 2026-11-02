@@ -27,7 +27,7 @@
 import { setHttpClient } from '@linagora/lin-pulsar-core';
 import axios, { type AxiosError, type AxiosInstance } from 'axios';
 import { getLoginUrl } from 'src/services/AuthService';
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '#q-app';
 
 declare module 'vue' {
   /** Augmenting Vue's ComponentCustomProperties interface to include $axios and $api properties for Axios instances. */

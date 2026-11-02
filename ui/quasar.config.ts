@@ -5,7 +5,7 @@ import { createReadStream, statSync } from 'node:fs';
 import { join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { federation } from '@module-federation/vite';
-import { defineConfig } from '#q-app/wrappers';
+import { defineConfig } from '#q-app';
 
 export default defineConfig((ctx) => {
   return {
@@ -45,6 +45,13 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
+      alias: {
+        src: ctx.appPaths.srcDir,
+        components: ctx.appPaths.resolve.src('components'),
+        layouts: ctx.appPaths.resolve.src('layouts'),
+        pages: ctx.appPaths.resolve.src('pages'),
+        boot: ctx.appPaths.resolve.src('boot'),
+      },
       target: {
         browser: ['es2022', 'firefox115', 'chrome115', 'safari14', 'brave115'],
         node: 'node22',
@@ -59,7 +66,7 @@ export default defineConfig((ctx) => {
       vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
-      // vueOptionsAPI: false,
+      vueOptionsAPI: true,
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
@@ -142,6 +149,7 @@ export default defineConfig((ctx) => {
           federation({
             name: 'linid-identity-manager-ui',
             remotes: {},
+            dts: false,
             shared: {
               vue: {
                 singleton: true,

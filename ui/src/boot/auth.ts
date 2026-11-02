@@ -28,8 +28,8 @@ import {
   useLinPulsarUserStore,
   useLinPulsarUserPreference,
 } from '@linagora/lin-pulsar-core';
-import { defineBoot } from '@quasar/app-vite/wrappers';
 import { getLoginUrl, getUserClaims } from 'src/services/AuthService';
+import { defineBoot } from '#q-app';
 
 export default defineBoot(async () => {
   const claims = await getUserClaims();

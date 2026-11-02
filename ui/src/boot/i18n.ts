@@ -36,7 +36,7 @@ import { appConfig } from 'boot/config';
 import { Quasar } from 'quasar';
 import type messages from 'src/i18n';
 import { createI18n, type I18n } from 'vue-i18n';
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '#q-app';
 
 /** Type defining the available message languages. */
 export type MessageLanguages = keyof typeof messages;

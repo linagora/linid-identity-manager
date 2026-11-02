@@ -25,10 +25,10 @@
  */
 
 import { setDayjsInstance } from '@linagora/lin-pulsar-core';
-import { defineBoot } from '@quasar/app-vite/wrappers';
 import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import utc from 'dayjs/plugin/utc';
+import { defineBoot } from '#q-app';
 
 /**
  * Boot file to configure Day.js and add it to the global Vue properties.

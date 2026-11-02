@@ -46,10 +46,12 @@ import io.github.linagora.linid.im.sync.batch.PayloadStepListener;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.model.payload.PayloadOutcome;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
-import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.AccountChecksum;
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
+import io.github.linagora.linid.im.sync.service.AccountLockService;
 import io.github.linagora.linid.im.sync.service.ChecksumService;
 import io.github.linagora.linid.im.sync.service.ChecksumServiceImpl;
 import io.github.linagora.linid.im.sync.service.JinjaServiceImpl;
@@ -60,6 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -86,21 +89,24 @@ class PayloadStepConfigTest {
 
     private static final ChecksumService CHECKSUM_SERVICE = new ChecksumServiceImpl();
 
-    private static final AccountSummary JDOE =
-        new AccountSummary(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe", null);
+    private static final AccountIdentity JDOE =
+        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe");
 
-    private static final AccountSummary ASMITH = new AccountSummary(
-        UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith",
-        CHECKSUM_SERVICE.compute("{\"email\":\"asmith@example.com\"}"));
+    private static final AccountIdentity ASMITH =
+        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000002"), "asmith");
 
-    private static final AccountSummary BLEE =
-        new AccountSummary(UUID.fromString("00000000-0000-4000-8000-000000000003"), "blee", null);
+    private static final String ASMITH_CHECKSUM = CHECKSUM_SERVICE.compute("{\"email\":\"asmith@example.com\"}");
+
+    private static final AccountIdentity BLEE =
+        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000003"), "blee");
 
     private final AccountComputedRightViewRepository repository = mock(AccountComputedRightViewRepository.class);
 
     private final SourceRepository sourceRepository = mock(SourceRepository.class);
 
     private final AccountPayloadRepository payloadRepository = mock(AccountPayloadRepository.class);
+
+    private final AccountLockService accountLockService = mock(AccountLockService.class);
 
     private final PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
 
@@ -127,9 +133,9 @@ class PayloadStepConfigTest {
 
         var reader = config(MAPPING, 2).payloadSourcesReader();
 
-        assertEquals(new AccountSnapshot(JDOE, Map.of("accounts", List.of(row(JDOE, "jdoe@example.com")))),
+        assertEquals(new AccountSnapshot(JDOE, null, Map.of("accounts", List.of(row(JDOE, "jdoe@example.com")))),
             reader.read());
-        assertEquals(new AccountSnapshot(ASMITH, Map.of("accounts", List.of())), reader.read());
+        assertEquals(new AccountSnapshot(ASMITH, ASMITH_CHECKSUM, Map.of("accounts", List.of())), reader.read());
         assertNull(reader.read());
     }
 
@@ -175,6 +181,13 @@ class PayloadStepConfigTest {
         assertEquals(1, stepExecution.getExecutionContext().getInt(PayloadOutcome.UNCHANGED.key()));
         assertEquals(List.of(newRow(JDOE, "jdoe@example.com")), written);
         verify(transactionManager, times(2)).commit(any());
+        var order = inOrder(transactionManager, accountLockService);
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(JDOE.accountId(), ASMITH.accountId()));
+        order.verify(transactionManager).commit(any());
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(BLEE.accountId()));
+        order.verify(transactionManager).commit(any());
     }
 
     @Test
@@ -211,7 +224,7 @@ class PayloadStepConfigTest {
             }
         };
 
-        config(MAPPING, 2).buildPayloadsStep(new ResourcelessJobRepository(), transactionManager,
+        config(MAPPING, 2).buildPayloadsStep(new ResourcelessJobRepository(), transactionManager, processor(MAPPING),
             new PayloadStepListener(payloadService(MAPPING)), failingWriter).execute(stepExecution);
 
         assertEquals(BatchStatus.FAILED, stepExecution.getStatus());
@@ -225,7 +238,7 @@ class PayloadStepConfigTest {
     @DisplayName("constructor should reject a technical account that is not set, before any read")
     void testConstructor_technicalAccountNotSet() {
         var exception = assertThrows(NullPointerException.class, () -> new PayloadStepConfig(repository,
-            sourceRepository, properties(MAPPING), processor(MAPPING), null, 2));
+            payloadRepository, sourceRepository, properties(MAPPING), accountLockService, null, 2));
 
         assertEquals("sync.technical-account-id must be set", exception.getMessage());
         verifyNoInteractions(repository);
@@ -235,27 +248,31 @@ class PayloadStepConfigTest {
     @DisplayName("constructor should reject a chunk size that is not positive")
     void testConstructor_chunkSizeNotPositive() {
         var exception = assertThrows(IllegalArgumentException.class, () -> new PayloadStepConfig(repository,
-            sourceRepository, properties(MAPPING), processor(MAPPING), TECHNICAL_ACCOUNT_ID, 0));
+            payloadRepository, sourceRepository, properties(MAPPING), accountLockService, TECHNICAL_ACCOUNT_ID, 0));
 
         assertEquals("sync.payload.chunk-size must be positive", exception.getMessage());
     }
 
     private PayloadStepConfig config(final String mapping, final int chunkSize) {
-        return new PayloadStepConfig(repository, sourceRepository, properties(mapping), processor(mapping),
-            TECHNICAL_ACCOUNT_ID, chunkSize);
+        return new PayloadStepConfig(repository, payloadRepository, sourceRepository, properties(mapping),
+            accountLockService, TECHNICAL_ACCOUNT_ID, chunkSize);
     }
 
     /**
-     * Gives the accounts of the page following the given account, by pages of 2 accounts.
+     * Gives the accounts of the page following the given account, by pages of 2 accounts, and the checksums of their
+     * payloads, read under the locks: only asmith has a payload, unchanged.
      */
-    private void page(final UUID after, final AccountSummary... accounts) {
+    private void page(final UUID after, final AccountIdentity... accounts) {
         when(repository.findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
             TECHNICAL_ACCOUNT_ID, after, Limit.of(2))).thenReturn(List.of(accounts));
+        when(payloadRepository.findByAccountIdIn(Stream.of(accounts).map(AccountIdentity::accountId).toList()))
+            .thenReturn(Stream.of(accounts).filter(ASMITH::equals)
+                .map(account -> new AccountChecksum(account.accountId(), ASMITH_CHECKSUM)).toList());
     }
 
     private Step step(final String mapping, final int chunkSize) {
         return config(mapping, chunkSize).buildPayloadsStep(new ResourcelessJobRepository(), transactionManager,
-            new PayloadStepListener(payloadService(mapping)), writer);
+            processor(mapping), new PayloadStepListener(payloadService(mapping)), writer);
     }
 
     private static SyncDataProperties properties(final String mapping) {
@@ -276,16 +293,16 @@ class PayloadStepConfigTest {
      * Gives the rows of the {@code accounts} source for a page of accounts.
      */
     @SafeVarargs
-    private void rows(final List<AccountSummary> page, final Map<String, Object>... rows) {
+    private void rows(final List<AccountIdentity> page, final Map<String, Object>... rows) {
         when(sourceRepository.findAllByAccountIds("accounts", "act_id",
-            page.stream().map(AccountSummary::accountId).toList())).thenReturn(List.of(rows));
+            page.stream().map(AccountIdentity::accountId).toList())).thenReturn(List.of(rows));
     }
 
-    private static Map<String, Object> row(final AccountSummary account, final String email) {
+    private static Map<String, Object> row(final AccountIdentity account, final String email) {
         return Map.of("act_id", account.accountId(), "email", email);
     }
 
-    private AccountPayload newRow(final AccountSummary account, final String email) {
+    private AccountPayload newRow(final AccountIdentity account, final String email) {
         var row = new AccountPayload();
         row.setAccountId(account.accountId());
         row.setPayload(Map.of("email", email));

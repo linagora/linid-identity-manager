@@ -26,7 +26,10 @@
 
 package io.github.linagora.linid.im.sync.persistence.repository;
 
+import io.github.linagora.linid.im.sync.persistence.model.AccountChecksum;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -43,4 +46,17 @@ public interface AccountPayloadRepository extends JpaRepository<AccountPayload, 
      * @return the payload of the account, empty when it has none yet
      */
     Optional<AccountPayload> findByAccountId(UUID accountId);
+
+    /**
+     * Finds the checksums of the current payloads of the given accounts.
+     *
+     * <p>The payload build reads them once the accounts of a page are locked: a processing that held the locks may
+     * have written their payloads since the page was read. The {@link AccountChecksum} projection only selects the
+     * account and the checksum of its payload, through the unique index on {@code act_id}.</p>
+     *
+     * @param accountIds the identifiers of the accounts
+     * @return the checksums of the accounts with a payload, in no particular order, an account without payload yet or
+     *     deleted since being absent
+     */
+    List<AccountChecksum> findByAccountIdIn(Collection<UUID> accountIds);
 }

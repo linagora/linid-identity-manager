@@ -46,7 +46,7 @@ import io.github.linagora.linid.im.sync.exception.PayloadException;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.model.payload.PayloadOutcome;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
-import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
 import io.github.linagora.linid.im.sync.service.AlertService;
@@ -260,7 +260,7 @@ class PayloadProcessorTest {
 
     private static AccountSnapshot item(final Map<String, List<Map<String, Object>>> rowsBySource,
                                        final String payloadChecksum) {
-        return new AccountSnapshot(new AccountSummary(JDOE, "jdoe", payloadChecksum), rowsBySource);
+        return new AccountSnapshot(new AccountIdentity(JDOE, "jdoe"), payloadChecksum, rowsBySource);
     }
 
     private static AccountPayload row(final Map<String, Object> payload, final String checksum) {

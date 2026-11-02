@@ -24,20 +24,22 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.persistence.model;
+package io.github.linagora.linid.im.sync.service;
 
+import java.util.Collection;
 import java.util.UUID;
 
 /**
- * Projection holding an account of {@link AccountComputedRightView} read by the payload build: its identifiers and the
- * checksum of its current payload, without the columns of its pairs.
- *
- * <p>A record rather than an interface projection: Spring Data builds it with its constructor, while an interface
- * projection creates a proxy per row, several times heavier in the pages of accounts read by the payload build.</p>
- *
- * @param accountId       the identifier of the account
- * @param externalId      the external identifier of the account, used to identify it in the alerts and the logs
- * @param payloadChecksum the checksum of the current payload of the account, {@code null} when it has none yet
+ * Service interface for taking the per-account locks, so that two processings never write the same account at the
+ * same time.
  */
-public record AccountSummary(UUID accountId, String externalId, String payloadChecksum) {
+public interface AccountLockService {
+
+    /**
+     * Takes the locks of the given accounts in the current transaction of the linid-api database, waiting for the
+     * transactions holding them. The locks are released at the end of the transaction.
+     *
+     * @param accountIds the identifiers of the accounts, duplicates included
+     */
+    void lockAccounts(Collection<UUID> accountIds);
 }

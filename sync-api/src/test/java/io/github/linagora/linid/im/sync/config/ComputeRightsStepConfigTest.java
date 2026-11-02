@@ -51,6 +51,7 @@ import io.github.linagora.linid.im.sync.persistence.model.PairChecksums;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.ApplicationRoleRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.ComputedRightRepository;
+import io.github.linagora.linid.im.sync.service.AccountLockService;
 import io.github.linagora.linid.im.sync.service.RightsComputationService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
@@ -119,6 +120,9 @@ class ComputeRightsStepConfigTest {
 
     @Mock
     private PlatformTransactionManager transactionManager;
+
+    @Mock
+    private AccountLockService accountLockService;
 
     private final List<ComputedRight> written = new ArrayList<>();
 
@@ -225,8 +229,9 @@ class ComputeRightsStepConfigTest {
 
     @Test
     @DisplayName("computeRightsStep should read, compute and write the pairs of the cycle by chunks, each one in a "
-        + "transaction, skipping the pairs in error without computing the other pairs of their chunk again, and "
-        + "filtering out the pairs changed since they were read")
+        + "transaction where the accounts of the chunk are locked before its pairs are computed, skipping the pairs "
+        + "in error without computing the other pairs of their chunk again, and filtering out the pairs changed since "
+        + "they were read")
     void testComputeRightsStep() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
         var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
@@ -258,6 +263,15 @@ class ComputeRightsStepConfigTest {
         verify(rightsComputationService).compute(first, Set.of());
         verify(rightsComputationService).compute(second, Set.of());
         verify(transactionManager, times(2)).commit(any());
+        var order = inOrder(transactionManager, accountLockService, rightsComputationService);
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(ACCOUNT_ID, ACCOUNT_ID));
+        order.verify(rightsComputationService).compute(first, Set.of());
+        order.verify(transactionManager).commit(any());
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(OTHER_ACCOUNT_ID));
+        order.verify(rightsComputationService).compute(third, Set.of());
+        order.verify(transactionManager).commit(any());
     }
 
     @Test
@@ -288,7 +302,7 @@ class ComputeRightsStepConfigTest {
         return config.computeRightsStep(new ResourcelessJobRepository(), transactionManager,
             new ComputeRightsProcessor(rightsComputationService, applicationRoleRepository, repository,
                 computedRightRepository, TECHNICAL_ACCOUNT_ID, "sync-api-1", 42L),
-            writer, new ComputeRightsStepListener());
+            writer, new ComputeRightsStepListener(accountLockService));
     }
 
     /**

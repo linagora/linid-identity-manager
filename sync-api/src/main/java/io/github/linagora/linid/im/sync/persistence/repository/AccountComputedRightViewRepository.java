@@ -28,7 +28,7 @@ package io.github.linagora.linid.im.sync.persistence.repository;
 
 import io.github.linagora.linid.im.sync.persistence.model.AccountApplicationPairId;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
-import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.model.PairChecksums;
 import java.util.List;
 import java.util.Optional;
@@ -52,9 +52,8 @@ public interface AccountComputedRightViewRepository
      * ordered by identifier.
      *
      * <p>The page starts after the given account, not at an offset: an account deleted since the previous page does not
-     * shift the next ones. The {@link AccountSummary} projection only selects the identifiers of the accounts and the
-     * checksums of their payloads, so that the distinct applies to them and not to the whole rows: an account has at
-     * most one payload, so it is selected once.</p>
+     * shift the next ones. The {@link AccountIdentity} projection only selects the identifiers of the accounts, so that
+     * the distinct applies to them and not to the whole rows: each account is selected once.</p>
      *
      * <p>The technical account gets no payload, so its pairs are never {@code to_compute} and are never selected for
      * the computation of the rights.</p>
@@ -62,10 +61,10 @@ public interface AccountComputedRightViewRepository
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
      * @param accountId          the last account of the previous page, the lowest UUID for the first page
      * @param limit              the maximum number of accounts of the page
-     * @return the next accounts with the checksums of their payloads, including the accounts without payload yet,
-     *     empty when no application is deployed or when every account was read
+     * @return the next accounts, with or without payload, empty when no application is deployed or when every account
+     *     was read
      */
-    List<AccountSummary> findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
+    List<AccountIdentity> findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
         UUID technicalAccountId, UUID accountId, Limit limit);
 
     /**

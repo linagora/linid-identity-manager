@@ -41,6 +41,12 @@ public final class LockNamespaces {
      */
     public static final int CYCLE = 1;
 
+    /**
+     * Namespace of the per-account lock, taken in the linid-api database by the transaction writing an account, with
+     * the hash code of its {@code act_id} as key.
+     */
+    public static final int ACCOUNT = 2;
+
     private LockNamespaces() {
     }
 }

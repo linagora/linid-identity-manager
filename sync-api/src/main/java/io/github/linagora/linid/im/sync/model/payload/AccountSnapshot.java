@@ -26,16 +26,21 @@
 
 package io.github.linagora.linid.im.sync.model.payload;
 
-import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Snapshot of an account whose payload is to be built, read with its page: the account with the checksum of its current
- * payload, and its rows in each source. It is the item read by {@code buildPayloadsStep}.
+ * Snapshot of an account whose payload is to be built, read with its page: the account, the checksum of its current
+ * payload and its rows in each source, read once the account is locked. It is the item read by
+ * {@code buildPayloadsStep}.
  *
- * @param account      the account, with the checksum of its current payload
- * @param rowsBySource the rows of the account in each source, by source name, an empty list for a source without row
+ * @param account         the account
+ * @param payloadChecksum the checksum of the current payload of the account, {@code null} when it has none yet or was
+ *     deleted since its page was read
+ * @param rowsBySource    the rows of the account in each source, by source name, an empty list for a source without
+ *     row
  */
-public record AccountSnapshot(AccountSummary account, Map<String, List<Map<String, Object>>> rowsBySource) {
+public record AccountSnapshot(AccountIdentity account, String payloadChecksum,
+                              Map<String, List<Map<String, Object>>> rowsBySource) {
 }

@@ -5,36 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.11.3] - 2026-10-30
-
-### Fixed
-
-#### Security
-
-- Fixed CVE-2026-75140 affecting org.jsoup:jsoup, shaded in com.hubspot.jinjava:jinjava.
-- Fixed CVE-2026-109383, CVE-2026-109829, CVE-2026-109869 and CVE-2026-87018 affecting undici, used by the UI server.
-- Fixed CVE-2026-102276, CVE-2026-102278, CVE-2026-13149, CVE-2026-14257 and CVE-2026-69152 affecting brace-expansion,
-  shipped with npm in the UI image.
-- Fixed CVE-2026-69192 affecting ip-address, shipped with npm in the UI image.
-- Fixed CVE-2026-9496 affecting pacote, shipped with npm in the UI image.
-- Fixed CVE-2026-33671 affecting picomatch, shipped with npm in the UI image.
-- Fixed CVE-2026-48815 affecting sigstore, shipped with npm in the UI image.
-- The CVEs affecting packages shipped with npm are fixed by **removing npm, corepack and yarn from the UI image**, which
-  only needs node at runtime.
-
-### Build
-
-- Changed the **Security - Container** CI job to scan the API and UI images in parallel, each job building only the
-  image it scans.
-
-## [0.11.2] - 2026-10-28
-
-### Fixed
-
-#### Security
-
-- Fixed CVE-2026-102554 affecting com.google.guava:guava.
-
 ## [Undefined]
 
 ### Added
@@ -99,6 +69,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Replaced `@linagora/linid-im-front-corelib` by **`@linagora/lin-pulsar-core`** and the `catalogUI` Module Federation
   remote by **`LinPulsar`** (served under `/lin-pulsar`).
 - Renamed the `CATALOG_UI_UPSTREAM` environment variable of the UI server to **`LIN_PULSAR_UPSTREAM`**.
+- Upgraded `@linagora/lin-pulsar-core` to **0.1.6** and the dependencies of the UI and of the UI server, including
+  ESLint 10, Pinia 4, Quasar 2.35, Vue Router 5.4, Vite 8.3 and Vitest 5.
+- Upgraded `@quasar/app-vite` to **3.10.3**: the Quasar wrappers are now imported from `#q-app` and the folder aliases
+  (`src`, `boot`, `components`...) are declared in `quasar.config.ts`.
+- Raised the minimum Node.js version to **22.22** and dropped Node.js 20, as required by `@quasar/app-vite` 3.
 
 ### Removed
 
@@ -106,12 +81,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed the `payload` and `checksum` columns of the `accounts` table, moved to `account_payloads`.
 
+#### Frontend
+
+- Removed the unused `@quasar/quasar-app-extension-testing-unit-vitest`, `@testing-library/jest-dom` and
+  `@testing-library/vue` dependencies.
+
 ### Fixed
 
 #### Security
 
 - Fixed CVE-2026-89407 and CVE-2026-89425 affecting Jackson Core.
 - Fixed CVE-2026-91776 and CVE-2026-91777 affecting Jackson Databind.
+- Fixed CVE-2026-39244, CVE-2026-77301, CVE-2026-92000, CVE-2026-102282 and CVE-2026-114102 affecting adm-zip.
+- Fixed CVE-2026-101898, CVE-2026-101901, CVE-2026-101903, CVE-2026-101905, CVE-2026-101906, CVE-2026-101907 and
+  CVE-2026-101909 affecting axios.
+- Fixed CVE-2026-111181 affecting body-parser.
+- Fixed CVE-2026-110095, CVE-2026-110180, CVE-2026-110306 and CVE-2026-110725 affecting fast-uri, used by the UI server.
+- Fixed CVE-2026-111755, CVE-2026-111756 and CVE-2026-116689 affecting follow-redirects.
+- Fixed CVE-2025-61927, CVE-2026-33943, CVE-2026-34226, CVE-2026-115895 and CVE-2026-118660 affecting happy-dom.
+- Fixed CVE-2026-118772 affecting joi, used by the UI server.
+- Fixed CVE-2026-106102 and CVE-2026-106104 affecting Quasar.
+- Fixed CVE-2026-106105, CVE-2026-106106 and CVE-2026-106107 affecting `@quasar/app-vite`.
+- Fixed CVE-2026-93749 affecting source-map-js.
+- Fixed CVE-2026-13697, CVE-2026-19534, CVE-2026-84961, CVE-2026-87018, CVE-2026-109383, CVE-2026-109829 and
+  CVE-2026-109869 affecting undici, used by `@module-federation/dts-plugin`.
+- Fixed CVE-2026-112942 affecting Vite.
+- Fixed CVE-2026-118257 affecting vue-i18n, `@intlify/core-base` and `@intlify/shared`.
+- Fixed GHSA-g2v6-rqmx-r4w6 affecting `@vue/server-renderer`.
 
 ### Build
 
@@ -123,6 +119,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
   `sync-api`.
 - Ran the CI jobs on the Linagora runner instead of the GitHub-hosted runners, the Node.js and Maven jobs in containers.
+- Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.3 in the demo and E2E environments.
+
+## [0.11.3] - 2026-10-30
+
+### Fixed
+
+#### Security
+
+- Fixed CVE-2026-75140 affecting org.jsoup:jsoup, shaded in com.hubspot.jinjava:jinjava.
+- Fixed CVE-2026-109383, CVE-2026-109829, CVE-2026-109869 and CVE-2026-87018 affecting undici, used by the UI server.
+- Fixed CVE-2026-102276, CVE-2026-102278, CVE-2026-13149, CVE-2026-14257 and CVE-2026-69152 affecting brace-expansion,
+  shipped with npm in the UI image.
+- Fixed CVE-2026-69192 affecting ip-address, shipped with npm in the UI image.
+- Fixed CVE-2026-9496 affecting pacote, shipped with npm in the UI image.
+- Fixed CVE-2026-33671 affecting picomatch, shipped with npm in the UI image.
+- Fixed CVE-2026-48815 affecting sigstore, shipped with npm in the UI image.
+- The CVEs affecting packages shipped with npm are fixed by **removing npm, corepack and yarn from the UI image**, which
+  only needs node at runtime.
+
+### Build
+
+- Changed the **Security - Container** CI job to scan the API and UI images in parallel, each job building only the
+  image it scans.
+
+## [0.11.2] - 2026-10-28
+
+### Fixed
+
+#### Security
+
+- Fixed CVE-2026-102554 affecting com.google.guava:guava.
 
 ## [0.11.1] - 2026-10-23
 

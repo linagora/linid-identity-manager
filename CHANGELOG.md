@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.3] - 2026-10-30
+
+### Fixed
+
+#### Security
+
+- Fixed CVE-2026-75140 affecting org.jsoup:jsoup, shaded in com.hubspot.jinjava:jinjava.
+- Fixed CVE-2026-109383, CVE-2026-109829, CVE-2026-109869 and CVE-2026-87018 affecting undici, used by the UI server.
+- Fixed CVE-2026-102276, CVE-2026-102278, CVE-2026-13149, CVE-2026-14257 and CVE-2026-69152 affecting brace-expansion,
+  shipped with npm in the UI image.
+- Fixed CVE-2026-69192 affecting ip-address, shipped with npm in the UI image.
+- Fixed CVE-2026-9496 affecting pacote, shipped with npm in the UI image.
+- Fixed CVE-2026-33671 affecting picomatch, shipped with npm in the UI image.
+- Fixed CVE-2026-48815 affecting sigstore, shipped with npm in the UI image.
+- The CVEs affecting packages shipped with npm are fixed by **removing npm, corepack and yarn from the UI image**, which
+  only needs node at runtime.
+
+### Build
+
+- Changed the **Security - Container** CI job to scan the API and UI images in parallel, each job building only the
+  image it scans.
+
 ## [0.11.2] - 2026-10-28
 
 ### Fixed
@@ -539,3 +561,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.11.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.0
 [0.11.1]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.1
 [0.11.2]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.2
+[0.11.3]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.3

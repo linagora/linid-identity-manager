@@ -11,7 +11,10 @@ RUN pnpm --filter @linagora/linid-identity-manager-ui-server build
 RUN pnpm --filter @linagora/linid-identity-manager-ui-server --prod --config.inject-workspace-packages=true deploy /deploy/server
 
 FROM node:22-alpine
-RUN apk upgrade --no-cache
+# Only node runs here: the npm, corepack and yarn shipped by the official image are removed
+RUN apk upgrade --no-cache \
+    && rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+              /opt/yarn-v* /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /app
 COPY --from=builder /deploy/server ./server
 COPY --from=builder /app/dist/spa ./spa

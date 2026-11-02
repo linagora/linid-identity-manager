@@ -59,6 +59,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `payload`, `allow` and `roles` variables, stored in `computed_rights` with the checksums used. A pair in error keeps
   its previous result and is computed again at the next cycle. No component reads them yet: they will be pushed to the
   LDAP in a later release.
+- Added the **scheduled synchronization** in `sync-api`: at the time of the cron `SYNC_CRON` (default `0 0 2 * * *`, in
+  UTC), the global job builds the payloads of all the accounts, then computes the rights of the pairs to compute, only
+  when the payloads were built. Several instances can run at the same time: only one of them runs each cycle, a cycle
+  never starts while the previous one is running, and two processings never write the same account at the same time.
+  A failed cycle is not restarted: the next cycle computes everything again. `SYNC_LOCK_TIMEOUT` (default `30m`) limits
+  the wait for the accounts locked by another processing.
 
 #### Frontend
 

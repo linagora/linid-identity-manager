@@ -25,8 +25,8 @@
  */
 
 import { setUiDesign } from '@linagora/lin-pulsar-core';
-import { defineBoot } from '@quasar/app-vite/wrappers';
 import { appConfig } from 'boot/config';
+import { defineBoot } from '#q-app';
 
 /**
  * Boot file that registers ui design configuration.

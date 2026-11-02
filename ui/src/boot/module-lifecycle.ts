@@ -25,13 +25,13 @@
  */
 
 import { linPulsarModuleFederation } from '@linagora/lin-pulsar-core';
-import { defineBoot } from '@quasar/app-vite/wrappers';
 import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
 import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
 import OrganizationalUnitParentField from 'components/field/OrganizationalUnitParentField.vue';
 import AccountLifecyclePanel from 'components/panel/AccountLifecyclePanel.vue';
 import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
 import { appConfig } from './config';
+import { defineBoot } from '#q-app';
 
 /**
  * Application bootstrapping entry point.

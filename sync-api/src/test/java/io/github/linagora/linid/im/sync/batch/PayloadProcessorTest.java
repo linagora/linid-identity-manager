@@ -65,6 +65,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.scope.StepScope;
 import org.springframework.batch.core.scope.context.StepSynchronizationManager;
 import org.springframework.batch.core.step.StepExecution;
 import org.springframework.batch.test.MetaDataInstanceFactory;
@@ -200,7 +201,7 @@ class PayloadProcessorTest {
 
     @Test
     @DisplayName("process should write the host name as instance when SYNC_INSTANCE_ID is not set, the default of "
-        + "sync.instance-id in application.yaml")
+        + "sync.instance-id in application.yaml, and the job execution of the step bound by the step scope")
     void testProcess_defaultInstance() throws Exception {
         var environment = new StandardEnvironment();
         var sources = environment.getPropertySources();
@@ -214,6 +215,7 @@ class PayloadProcessorTest {
 
         try (var context = new AnnotationConfigApplicationContext()) {
             context.setEnvironment(environment);
+            context.registerBean(StepScope.class);
             context.registerBean(PayloadService.class, () -> payloadService(EMAIL_MAPPING));
             context.registerBean(AccountComputedRightViewRepository.class, () -> viewRepository);
             context.registerBean(AccountPayloadRepository.class, () -> payloadRepository);
@@ -223,6 +225,7 @@ class PayloadProcessorTest {
             var row = context.getBean(PayloadProcessor.class).process(item(ROWS_BY_SOURCE, null));
 
             assertEquals(InetAddress.getLocalHost().getHostName(), row.getSyncInstanceId());
+            assertEquals(JOB_EXECUTION_ID, row.getSyncJobExecutionId());
         }
     }
 
@@ -247,7 +250,7 @@ class PayloadProcessorTest {
 
     private PayloadProcessor processor(final String mapping) {
         return new PayloadProcessor(payloadService(mapping), viewRepository, payloadRepository, TECHNICAL_ACCOUNT_ID,
-            INSTANCE_ID);
+            INSTANCE_ID, JOB_EXECUTION_ID);
     }
 
     private static PayloadServiceImpl payloadService(final String mapping) {

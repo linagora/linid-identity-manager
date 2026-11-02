@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.sync.batch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -72,6 +71,7 @@ class PayloadSourcesReaderTest {
 
     private static final UUID LOWEST_ACCOUNT_ID = new UUID(0L, 0L);
 
+    // Keys of the restart state of the reader, saved by its previous versions
     private static final String LAST_ACCOUNT_KEY = "payloadSourcesReader.last.account";
 
     private static final String READ_COUNT_KEY = "payloadSourcesReader.read.count";
@@ -196,52 +196,22 @@ class PayloadSourcesReaderTest {
     }
 
     @Test
-    @DisplayName("update should save the last account read, not the last account of the page, and the number of "
-        + "accounts read")
-    void testUpdate() throws Exception {
+    @DisplayName("open and update should neither restore nor save any state for a restart, the reading starting from "
+        + "the first account")
+    void testNoRestartState() throws Exception {
         page(LOWEST_ACCOUNT_ID, JDOE, ASMITH);
-        var context = new ExecutionContext();
-        var reader = reader(2, context);
-
-        reader.update(context);
-        assertFalse(context.containsKey(LAST_ACCOUNT_KEY));
-        reader.read();
-        reader.update(context);
-
-        assertEquals(JDOE.accountId().toString(), context.getString(LAST_ACCOUNT_KEY));
-        assertEquals(1, context.getInt(READ_COUNT_KEY));
-    }
-
-    @Test
-    @DisplayName("open should resume the reading after the last account read by the previous execution, and its "
-        + "number of accounts read")
-    void testOpen_restart() throws Exception {
-        page(JDOE.accountId(), ASMITH);
         var context = new ExecutionContext();
         context.putString(LAST_ACCOUNT_KEY, JDOE.accountId().toString());
         context.putInt(READ_COUNT_KEY, 1);
         var reader = reader(2, context);
 
+        assertEquals(JDOE, reader.read().account());
         assertEquals(ASMITH, reader.read().account());
         reader.update(context);
-        assertNull(reader.read());
-        verify(viewRepository).findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
-            TECHNICAL_ACCOUNT_ID, JDOE.accountId(), Limit.of(2));
-        assertEquals(2, context.getInt(READ_COUNT_KEY));
-    }
 
-    @Test
-    @DisplayName("open and update should neither restore nor save the last account read when the state is not saved")
-    void testSaveStateDisabled() throws Exception {
-        page(LOWEST_ACCOUNT_ID, JDOE);
-        var context = new ExecutionContext();
-        context.putString(LAST_ACCOUNT_KEY, ASMITH.accountId().toString());
-        var reader = reader(2, context, false);
-
-        assertEquals(JDOE, reader.read().account());
-        reader.update(context);
-
-        assertEquals(ASMITH.accountId().toString(), context.getString(LAST_ACCOUNT_KEY));
+        assertEquals(JDOE.accountId().toString(), context.getString(LAST_ACCOUNT_KEY));
+        assertEquals(1, context.getInt(READ_COUNT_KEY));
+        assertEquals(2, context.size());
     }
 
     private void page(final UUID after, final AccountSummary... accounts) {
@@ -250,13 +220,8 @@ class PayloadSourcesReaderTest {
     }
 
     private PayloadSourcesReader reader(final int pageSize, final ExecutionContext context) {
-        return reader(pageSize, context, true);
-    }
-
-    private PayloadSourcesReader reader(final int pageSize, final ExecutionContext context, final boolean saveState) {
         var reader = new PayloadSourcesReader(viewRepository, TECHNICAL_ACCOUNT_ID, pageSize,
             new SyncDataProperties(sources, "{}"), sourceRepository);
-        reader.setSaveState(saveState);
         reader.open(context);
         return reader;
     }

@@ -123,7 +123,7 @@ public class PayloadStepConfig {
      *
      * <p>Step-scoped, so that each execution of the step has its own reader. The accounts, with the checksums of
      * their current payloads, and their sources are read by pages of the chunk size. The reader is an
-     * {@code ItemStream}, opened, saved and closed by the step, which saves the last account read.</p>
+     * {@code ItemStream}, opened and closed by the step, without state saved for a restart.</p>
      *
      * @return the reader of the accounts and their sources, ordered by identifier
      */

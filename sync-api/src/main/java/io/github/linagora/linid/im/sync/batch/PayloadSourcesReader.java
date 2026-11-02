@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.batch.infrastructure.item.ExecutionContext;
-import org.springframework.batch.infrastructure.item.ItemStreamException;
 import org.springframework.batch.infrastructure.item.database.AbstractPagingItemReader;
 import org.springframework.data.domain.Limit;
 
@@ -53,9 +51,10 @@ import org.springframework.data.domain.Limit;
  * An account with several rows in a source is given as it is: the processor rejects it, so that the alert names the
  * account.</p>
  *
- * <p>The last account read is saved in the context of the step at each commit, so that a restarted step resumes
- * after it, whatever the accounts added or deleted in between. The comparison of the accounts is made by
- * PostgreSQL.</p>
+ * <p>The reader keeps no state for a restart: each cycle is a new job instance, whose step reads every account from
+ * the first one, so that every payload is built from the current sources. Its state is not saved either: by default,
+ * a restarted {@code AbstractPagingItemReader} would skip the number of accounts read before, which shifts with the
+ * accounts added or deleted in between.</p>
  */
 public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapshot> {
 
@@ -63,11 +62,6 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
      * Lowest UUID, bound of the first page: PostgreSQL orders it before every other UUID.
      */
     private static final UUID LOWEST_ACCOUNT_ID = new UUID(0L, 0L);
-
-    /**
-     * Key of the last account read, in the context of the step.
-     */
-    private static final String LAST_ACCOUNT_KEY = "last.account";
 
     /**
      * Repository of {@code account_computed_rights_view}, giving the accounts and the checksums of their payloads.
@@ -95,11 +89,6 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
     private UUID lastPageAccountId = LOWEST_ACCOUNT_ID;
 
     /**
-     * Last account returned, saved in the context of the step.
-     */
-    private UUID lastReadAccountId;
-
-    /**
      * Creates the reader of the accounts and their sources.
      *
      * @param viewRepository     the repository of {@code account_computed_rights_view}
@@ -119,61 +108,7 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
         this.properties = properties;
         this.sourceRepository = sourceRepository;
         setPageSize(pageSize);
-        setName("payloadSourcesReader");
-    }
-
-    /**
-     * Restores the last account read by a previous execution of the step, after which the reading resumes.
-     *
-     * @param executionContext the context of the step
-     */
-    @Override
-    public void open(final ExecutionContext executionContext) throws ItemStreamException {
-        super.open(executionContext);
-        String key = getExecutionContextKey(LAST_ACCOUNT_KEY);
-        if (isSaveState() && executionContext.containsKey(key)) {
-            lastPageAccountId = UUID.fromString(executionContext.getString(key));
-            lastReadAccountId = lastPageAccountId;
-        }
-    }
-
-    /**
-     * Saves the last account read in the context of the step, at each commit.
-     *
-     * @param executionContext the context of the step
-     */
-    @Override
-    public void update(final ExecutionContext executionContext) throws ItemStreamException {
-        super.update(executionContext);
-        if (isSaveState() && lastReadAccountId != null) {
-            executionContext.putString(getExecutionContextKey(LAST_ACCOUNT_KEY), lastReadAccountId.toString());
-        }
-    }
-
-    /**
-     * Reads the next account, and keeps it as the last account read.
-     *
-     * @return the next account with its rows, {@code null} when every account was read
-     * @throws Exception when a page cannot be read
-     */
-    @Override
-    protected AccountSnapshot doRead() throws Exception {
-        AccountSnapshot item = super.doRead();
-        if (item != null) {
-            lastReadAccountId = item.account().accountId();
-        }
-        return item;
-    }
-
-    /**
-     * Does not move by the number of items read: the reading resumes after the last account read, restored by
-     * {@link #open(ExecutionContext)}.
-     *
-     * @param itemIndex the number of items read by the previous execution
-     */
-    @Override
-    protected void jumpToItem(final int itemIndex) {
-        // The position is the last account read, not a number of items
+        setSaveState(false);
     }
 
     /**

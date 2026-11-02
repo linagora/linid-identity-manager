@@ -35,7 +35,7 @@ import io.github.linagora.linid.im.sync.service.PayloadService;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.batch.core.scope.context.StepSynchronizationManager;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.infrastructure.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -51,8 +51,11 @@ import org.springframework.stereotype.Component;
  * the {@code payloadError} alert: the account keeps its previous payload.</p>
  *
  * <p>The outcome of each account is counted with {@link PayloadStepListener#count(PayloadOutcome)}.</p>
+ *
+ * <p>The processor is step-scoped, so that it receives the job execution of its step when it is created.</p>
  */
 @Component
+@StepScope
 public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountPayload> {
 
     /**
@@ -81,6 +84,11 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
     private final String instanceId;
 
     /**
+     * Identifier of the job execution of the step, written with the payloads.
+     */
+    private final long jobExecutionId;
+
+    /**
      * Creates the processor of the payloads.
      *
      * @param payloadService     the service building the payloads
@@ -88,18 +96,21 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
      * @param payloadRepository  the repository of {@code account_payloads}
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
      * @param instanceId         the identifier of the {@code sync-api} instance
+     * @param jobExecutionId     the identifier of the job execution of the step
      */
     public PayloadProcessor(
         final PayloadService payloadService,
         final AccountComputedRightViewRepository viewRepository,
         final AccountPayloadRepository payloadRepository,
         @Value("${sync.technical-account-id}") final UUID technicalAccountId,
-        @Value("${sync.instance-id}") final String instanceId) {
+        @Value("${sync.instance-id}") final String instanceId,
+        @Value("#{stepExecution.jobExecutionId}") final long jobExecutionId) {
         this.payloadService = payloadService;
         this.viewRepository = viewRepository;
         this.payloadRepository = payloadRepository;
         this.technicalAccountId = technicalAccountId;
         this.instanceId = instanceId;
+        this.jobExecutionId = jobExecutionId;
     }
 
     /**
@@ -182,7 +193,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
         row.setPayload(payload);
         row.setChecksum(checksum);
         row.setSyncInstanceId(instanceId);
-        row.setSyncJobExecutionId(StepSynchronizationManager.getContext().getStepExecution().getJobExecutionId());
+        row.setSyncJobExecutionId(jobExecutionId);
         row.setUpdatedBy(technicalAccountId);
         return row;
     }

@@ -118,8 +118,8 @@ whose persistence context is closed at its end.
   account of `sync-api`, by pages of the chunk size, at the first read of each chunk. Each page starts after the last
   account of the previous one, not at an offset: an account deleted since the previous page does not shift the next
   ones. For each page, each source is read once with `SourceRepository`, which checks and quotes the source and
-  column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns. The last account read
-  is saved with the step at each commit, so that a restarted step resumes after it.
+  column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns. The reader keeps no
+  state for a restart: each cycle reads every account from the first one.
 - **Process**: `PayloadProcessor`, step-scoped to receive the job execution of its step, builds the payload with
   `PayloadService`, which renders the `mapping` with Jinjava, with the row of the account in each source, and parses
   it as a JSON object. The checksum of the payload is computed with `ChecksumService` on its compact JSON, with its

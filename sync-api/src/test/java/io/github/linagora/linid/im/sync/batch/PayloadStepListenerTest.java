@@ -39,7 +39,7 @@ import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.exception.PayloadException;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.model.payload.PayloadOutcome;
-import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.service.AlertService;
 import io.github.linagora.linid.im.sync.service.ChecksumServiceImpl;
 import io.github.linagora.linid.im.sync.service.JinjaServiceImpl;
@@ -63,7 +63,7 @@ class PayloadStepListenerTest {
     private static final String EMAIL_MAPPING = "{\"email\": {{ accounts.email | tojson }}}";
 
     private static final AccountSnapshot JDOE = new AccountSnapshot(
-        new AccountSummary(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe", null), Map.of());
+        new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000001"), "jdoe"), null, Map.of());
 
     private final Logger alertLogger = (Logger) LoggerFactory.getLogger(AlertService.class);
 

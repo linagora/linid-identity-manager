@@ -82,6 +82,9 @@ sync:
   # Identifier of the instance, written with the rows it writes in the linid-api database. The host name by default,
   # evaluated when the property is injected with @Value
   instance-id: ${SYNC_INSTANCE_ID:#{T(java.net.InetAddress).getLocalHost().getHostName()}}
+  # Maximum wait for the per-account locks of a chunk, held by another processing, as a duration (e.g. 30m, 90s):
+  # beyond it, the chunk fails. Above the longest chunk, whose OPA calls are made under the locks
+  lock-timeout: ${SYNC_LOCK_TIMEOUT:30m}
   payload:
     # Number of accounts read, built and written per chunk of the payload build, in one transaction
     chunk-size: ${SYNC_PAYLOAD_CHUNK_SIZE:500}

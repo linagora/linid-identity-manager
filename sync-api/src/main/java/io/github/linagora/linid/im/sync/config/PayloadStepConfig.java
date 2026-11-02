@@ -33,7 +33,9 @@ import io.github.linagora.linid.im.sync.exception.PayloadException;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
+import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
+import io.github.linagora.linid.im.sync.service.AccountLockService;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.UUID;
 import org.apache.commons.lang3.Validate;
@@ -63,6 +65,11 @@ public class PayloadStepConfig {
     private final AccountComputedRightViewRepository repository;
 
     /**
+     * Repository of {@code account_payloads}.
+     */
+    private final AccountPayloadRepository payloadRepository;
+
+    /**
      * Repository reading the rows of a source.
      */
     private final SourceRepository sourceRepository;
@@ -73,9 +80,9 @@ public class PayloadStepConfig {
     private final SyncDataProperties properties;
 
     /**
-     * Processor building the payloads.
+     * Service taking the locks of the accounts read.
      */
-    private final PayloadProcessor payloadProcessor;
+    private final AccountLockService accountLockService;
 
     /**
      * Identifier of the technical account of {@code sync-api}.
@@ -91,9 +98,10 @@ public class PayloadStepConfig {
      * Creates the configuration of the payload build.
      *
      * @param repository         the repository of {@code account_computed_rights_view}
+     * @param payloadRepository  the repository of {@code account_payloads}
      * @param sourceRepository   the repository reading the rows of a source
      * @param properties         the configuration holding the sources
-     * @param payloadProcessor   the processor building the payloads
+     * @param accountLockService the service taking the locks of the accounts read
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
      * @param chunkSize          the number of accounts read, built and written per chunk
      * @throws NullPointerException     when the technical account is not set, since an empty value is bound as
@@ -101,17 +109,19 @@ public class PayloadStepConfig {
      * @throws IllegalArgumentException when the chunk size is not positive
      */
     public PayloadStepConfig(final AccountComputedRightViewRepository repository,
+                             final AccountPayloadRepository payloadRepository,
                              final SourceRepository sourceRepository,
                              final SyncDataProperties properties,
-                             final PayloadProcessor payloadProcessor,
+                             final AccountLockService accountLockService,
                              @Value("${sync.technical-account-id}") final UUID technicalAccountId,
                              @Value("${sync.payload.chunk-size}") final int chunkSize) {
         Validate.notNull(technicalAccountId, "sync.technical-account-id must be set");
         Validate.isTrue(chunkSize > 0, "sync.payload.chunk-size must be positive");
         this.repository = repository;
+        this.payloadRepository = payloadRepository;
         this.sourceRepository = sourceRepository;
         this.properties = properties;
-        this.payloadProcessor = payloadProcessor;
+        this.accountLockService = accountLockService;
         this.technicalAccountId = technicalAccountId;
         this.chunkSize = chunkSize;
     }
@@ -122,15 +132,17 @@ public class PayloadStepConfig {
      * {@code sync-api}, whose payload is never built so that its pairs are never {@code to_compute}.
      *
      * <p>Step-scoped, so that each execution of the step has its own reader. The accounts, with the checksums of
-     * their current payloads, and their sources are read by pages of the chunk size. The reader is an
-     * {@code ItemStream}, opened and closed by the step, without state saved for a restart.</p>
+     * their current payloads, and their sources are read by pages of the chunk size, the accounts of a page being
+     * locked before their checksums and their sources are read. The reader is an {@code ItemStream}, opened and closed
+     * by the step, without state saved for a restart.</p>
      *
      * @return the reader of the accounts and their sources, ordered by identifier
      */
     @Bean
     @StepScope
     public PayloadSourcesReader payloadSourcesReader() {
-        return new PayloadSourcesReader(repository, technicalAccountId, chunkSize, properties, sourceRepository);
+        return new PayloadSourcesReader(repository, payloadRepository, technicalAccountId, chunkSize, properties,
+            sourceRepository, accountLockService);
     }
 
     /**
@@ -164,6 +176,7 @@ public class PayloadStepConfig {
      *
      * @param jobRepository       the repository of the Spring Batch executions
      * @param transactionManager  the transaction manager of the linid-api database
+     * @param payloadProcessor    the processor building the payloads
      * @param payloadStepListener the listener checking the {@code mapping}, alerting on the accounts skipped and
      *     logging the outcomes of the accounts
      * @param payloadWriter       the writer of the payloads
@@ -173,6 +186,7 @@ public class PayloadStepConfig {
     public Step buildPayloadsStep(
         final JobRepository jobRepository,
         final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
+        final PayloadProcessor payloadProcessor,
         final PayloadStepListener payloadStepListener,
         final ItemWriter<AccountPayload> payloadWriter) {
         return new StepBuilder("buildPayloadsStep", jobRepository)

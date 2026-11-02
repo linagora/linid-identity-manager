@@ -28,9 +28,12 @@ package io.github.linagora.linid.im.sync.batch;
 
 import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
-import io.github.linagora.linid.im.sync.persistence.model.AccountSummary;
+import io.github.linagora.linid.im.sync.persistence.model.AccountChecksum;
+import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
+import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
 import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
+import io.github.linagora.linid.im.sync.service.AccountLockService;
 import io.github.linagora.linid.im.sync.service.AlertService;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,13 +46,18 @@ import org.springframework.data.domain.Limit;
 
 /**
  * Reader of {@code buildPayloadsStep}: reads the accounts of {@code account_computed_rights_view} by pages, with the
- * checksums of their current payloads, and adds to each one its rows in each source.
+ * checksums of their current payloads, read in {@code account_payloads}, and adds to each one its rows in each
+ * source.
  *
  * <p>Each page starts after the last account of the previous one, not at an offset: an account deleted since the
  * previous page is no longer in the view, without shifting the next accounts. For each page, each source is read once
  * for all its accounts. With pages of the chunk size, a page is read at the first read of a chunk, in its transaction.
  * An account with several rows in a source is given as it is: the processor rejects it, so that the alert names the
  * account.</p>
+ *
+ * <p>The accounts of a page are locked with {@link AccountLockService} before the checksums of their payloads and
+ * their sources are read: the locks are held until the commit of the chunk, so that two processings of the same
+ * account read and write one after the other, the later one reading the fresher data.</p>
  *
  * <p>The reader keeps no state for a restart: each cycle is a new job instance, whose step reads every account from
  * the first one, so that every payload is built from the current sources. Its state is not saved either: by default,
@@ -64,9 +72,14 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
     private static final UUID LOWEST_ACCOUNT_ID = new UUID(0L, 0L);
 
     /**
-     * Repository of {@code account_computed_rights_view}, giving the accounts and the checksums of their payloads.
+     * Repository of {@code account_computed_rights_view}, giving the accounts.
      */
     private final AccountComputedRightViewRepository viewRepository;
+
+    /**
+     * Repository of {@code account_payloads}, giving the checksums of the payloads of the accounts.
+     */
+    private final AccountPayloadRepository payloadRepository;
 
     /**
      * Identifier of the technical account of {@code sync-api}, whose payload is never built.
@@ -84,6 +97,11 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
     private final SourceRepository sourceRepository;
 
     /**
+     * Service taking the locks of the accounts of a page.
+     */
+    private final AccountLockService accountLockService;
+
+    /**
      * Last account of the pages read, after which the next page starts.
      */
     private UUID lastPageAccountId = LOWEST_ACCOUNT_ID;
@@ -92,50 +110,67 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
      * Creates the reader of the accounts and their sources.
      *
      * @param viewRepository     the repository of {@code account_computed_rights_view}
+     * @param payloadRepository  the repository of {@code account_payloads}
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
      * @param pageSize           the number of accounts per page
      * @param properties         the configuration holding the sources
      * @param sourceRepository   the repository reading the rows of a source
+     * @param accountLockService the service taking the locks of the accounts of a page
      */
     public PayloadSourcesReader(
         final AccountComputedRightViewRepository viewRepository,
+        final AccountPayloadRepository payloadRepository,
         final UUID technicalAccountId,
         final int pageSize,
         final SyncDataProperties properties,
-        final SourceRepository sourceRepository) {
+        final SourceRepository sourceRepository,
+        final AccountLockService accountLockService) {
         this.viewRepository = viewRepository;
+        this.payloadRepository = payloadRepository;
         this.technicalAccountId = technicalAccountId;
         this.properties = properties;
         this.sourceRepository = sourceRepository;
+        this.accountLockService = accountLockService;
         setPageSize(pageSize);
         setSaveState(false);
     }
 
     /**
-     * Reads the next page: the next accounts of the view with the checksums of their current payloads, and their rows
-     * in each source.
+     * Reads the next page: the next accounts of the view, then, once they are locked, the checksums of their current
+     * payloads and their rows in each source.
+     *
+     * <p>The checksums are read under the locks: a processing that held them may have written the payloads of the page
+     * since it was read, and the processor would compare the new payloads with outdated checksums. An account without
+     * checksum has no payload yet, or was deleted since its page was read: the processor tells them apart. Every
+     * account of the page is given, so that the page keeps its size, since a page shorter than the page size ends the
+     * reading.</p>
      *
      * @throws IllegalStateException naming the source when a source cannot be read, after logging the
      *     {@code sourceUnreadable} alert
      */
     @Override
     protected void doReadPage() {
-        List<AccountSummary> summaries = viewRepository
+        List<AccountIdentity> page = viewRepository
             .findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
                 technicalAccountId, lastPageAccountId, Limit.of(getPageSize()));
-        if (summaries.isEmpty()) {
+        if (page.isEmpty()) {
             results = List.of();
             return;
         }
-        lastPageAccountId = summaries.getLast().accountId();
+        lastPageAccountId = page.getLast().accountId();
 
-        List<UUID> accountIds = summaries.stream().map(AccountSummary::accountId).toList();
+        List<UUID> accountIds = page.stream().map(AccountIdentity::accountId).toList();
+        accountLockService.lockAccounts(accountIds);
+        Map<UUID, String> checksums = payloadRepository.findByAccountIdIn(accountIds).stream()
+            .collect(Collectors.toMap(AccountChecksum::accountId, AccountChecksum::checksum));
+
         Map<String, Map<UUID, List<Map<String, Object>>>> pageRows = new HashMap<>();
         properties.sources().forEach((source, settings) ->
             pageRows.put(source, readSource(source, settings.accountIdColumn(), accountIds)));
 
-        results = summaries.stream()
-            .map(summary -> new AccountSnapshot(summary, accountRows(summary.accountId(), pageRows)))
+        results = page.stream()
+            .map(account -> new AccountSnapshot(account, checksums.get(account.accountId()),
+                accountRows(account.accountId(), pageRows)))
             .toList();
     }
 

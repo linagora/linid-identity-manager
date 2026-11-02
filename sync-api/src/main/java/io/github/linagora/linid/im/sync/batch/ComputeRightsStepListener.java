@@ -28,18 +28,22 @@ package io.github.linagora.linid.im.sync.batch;
 
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
 import io.github.linagora.linid.im.sync.persistence.model.ComputedRight;
+import io.github.linagora.linid.im.sync.service.AccountLockService;
 import io.github.linagora.linid.im.sync.service.AlertService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.batch.core.ExitStatus;
+import org.springframework.batch.core.listener.ChunkListener;
 import org.springframework.batch.core.listener.SkipListener;
 import org.springframework.batch.core.listener.StepExecutionListener;
 import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.stereotype.Component;
 
 /**
- * Listener of the steps computing the rights: logs the {@code pairError} alert of each pair skipped, and logs at the
- * end of the step the number of pairs written, in error and discarded.
+ * Listener of the steps computing the rights: takes the locks of the accounts of each chunk before its pairs are
+ * computed, logs the {@code pairError} alert of each pair skipped, and logs at the end of the step the number of pairs
+ * written, in error and discarded.
  *
  * <p>The numbers are the counters of the step: the pairs written are its write count, the pairs in error, skipped,
  * its process skip count, and the pairs discarded because they changed since they were read, filtered out by
@@ -48,7 +52,40 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ComputeRightsStepListener implements StepExecutionListener,
-    SkipListener<AccountComputedRightView, ComputedRight> {
+    SkipListener<AccountComputedRightView, ComputedRight>, ChunkListener<AccountComputedRightView, ComputedRight> {
+
+    /**
+     * Service taking the locks of the accounts of a chunk.
+     */
+    private final AccountLockService accountLockService;
+
+    /**
+     * Creates the listener of the steps computing the rights.
+     *
+     * @param accountLockService the service taking the locks of the accounts of a chunk
+     */
+    public ComputeRightsStepListener(final AccountLockService accountLockService) {
+        this.accountLockService = accountLockService;
+    }
+
+    /**
+     * Takes the locks of the accounts of the chunk, once its pairs are read, in its transaction: they are held while
+     * {@link ComputeRightsProcessor} computes the pairs, checks their checksums and reads their current rows, and
+     * while the writer writes them, until the commit of the chunk.
+     *
+     * <p>The locks are taken for the whole chunk, not pair by pair by the processor: the accounts would then be locked
+     * in the order of the pairs, not of the keys, and two processings could take the same keys in different orders and
+     * deadlock.</p>
+     *
+     * <p>Spring Batch also calls this method with the rows written, in the scan mode that follows a skippable write
+     * error: the steps never enter it, since they only skip the pairs in error during the processing.</p>
+     *
+     * @param chunk the pairs of the chunk
+     */
+    @Override
+    public void beforeChunk(final Chunk<AccountComputedRightView> chunk) {
+        accountLockService.lockAccounts(chunk.getItems().stream().map(AccountComputedRightView::getAccountId).toList());
+    }
 
     /**
      * Logs the {@code pairError} alert for a pair skipped, with the message of its root cause and without its stack

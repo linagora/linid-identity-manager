@@ -44,8 +44,8 @@ import org.springframework.stereotype.Component;
  * Processor of {@code buildPayloadsStep}: builds the payload of an account and its checksum with
  * {@link PayloadService}, and gives the row to write when the checksum changed.
  *
- * <p>An unchanged payload is filtered out, compared with the checksum read with the page of the account, without
- * reading its row. An account deleted since its page was read is also filtered out: its payload is deleted with it, and
+ * <p>An unchanged payload is filtered out, compared with the checksum read with the account, without reading its
+ * row. An account deleted since its page was read is also filtered out: its payload is deleted with it, and
  * inserting it again would fail on the foreign key. Both are counted in the filter count of the step. An account in
  * error raises a {@link io.github.linagora.linid.im.sync.exception.PayloadException}, skipped by the step, which logs
  * the {@code payloadError} alert: the account keeps its previous payload.</p>
@@ -127,7 +127,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
         Map<String, Object> payload = payloadService.build(item.rowsBySource());
 
         String checksum = payloadService.checksum(payload);
-        if (checksum.equals(item.account().payloadChecksum())) {
+        if (checksum.equals(item.payloadChecksum())) {
             PayloadStepListener.count(PayloadOutcome.UNCHANGED);
             return null;
         }
@@ -149,13 +149,13 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
     }
 
     /**
-     * Reads the current row of an account, only when its page gave the checksum of a payload.
+     * Reads the current row of an account, only when the reader gave the checksum of a payload.
      *
      * @param item the account, with the checksum of its current payload
      * @return the current row, empty when the account has no payload, or was deleted since its page was read
      */
     private Optional<AccountPayload> currentRow(final AccountSnapshot item) {
-        if (item.account().payloadChecksum() == null) {
+        if (item.payloadChecksum() == null) {
             return Optional.empty();
         }
         return payloadRepository.findByAccountId(item.account().accountId());
@@ -170,7 +170,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
      * @return {@code true} when the account was deleted
      */
     private boolean isDeleted(final AccountSnapshot item, final Optional<AccountPayload> current) {
-        if (item.account().payloadChecksum() == null) {
+        if (item.payloadChecksum() == null) {
             return !viewRepository.existsByAccountId(item.account().accountId());
         }
         // The payload is deleted with its account

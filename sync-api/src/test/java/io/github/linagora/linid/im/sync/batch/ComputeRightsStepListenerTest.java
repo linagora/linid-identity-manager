@@ -28,6 +28,8 @@ package io.github.linagora.linid.im.sync.batch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -35,7 +37,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import io.github.linagora.linid.im.sync.exception.RightsComputationException;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
+import io.github.linagora.linid.im.sync.service.AccountLockService;
 import io.github.linagora.linid.im.sync.service.AlertService;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
@@ -44,6 +48,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.step.StepExecution;
+import org.springframework.batch.infrastructure.item.Chunk;
 import org.springframework.batch.test.MetaDataInstanceFactory;
 
 @DisplayName("Test class: ComputeRightsStepListener")
@@ -53,7 +58,9 @@ class ComputeRightsStepListenerTest {
 
     private final Logger listenerLogger = (Logger) LoggerFactory.getLogger(ComputeRightsStepListener.class);
 
-    private final ComputeRightsStepListener listener = new ComputeRightsStepListener();
+    private final AccountLockService accountLockService = mock(AccountLockService.class);
+
+    private final ComputeRightsStepListener listener = new ComputeRightsStepListener(accountLockService);
 
     private ListAppender<ILoggingEvent> alertAppender;
 
@@ -77,6 +84,19 @@ class ComputeRightsStepListenerTest {
     void tearDown() {
         alertLogger.detachAppender(alertAppender);
         listenerLogger.detachAppender(listenerAppender);
+    }
+
+    @Test
+    @DisplayName("beforeChunk should take the locks of the accounts of the pairs of the chunk")
+    void testBeforeChunk() {
+        var jdoe = UUID.fromString("00000000-0000-4000-8000-000000000001");
+        var asmith = UUID.fromString("00000000-0000-4000-8000-000000000002");
+        var app = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
+        var otherApp = UUID.fromString("00000000-0000-4000-8000-0000000000a2");
+
+        listener.beforeChunk(new Chunk<>(pair(jdoe, app), pair(jdoe, otherApp), pair(asmith, app)));
+
+        verify(accountLockService).lockAccounts(List.of(jdoe, jdoe, asmith));
     }
 
     @Test
@@ -112,5 +132,12 @@ class ComputeRightsStepListenerTest {
         assertEquals(Level.INFO, listenerAppender.list.getFirst().getLevel());
         assertEquals("Rights computation of step computeRightsStep: 5 written, 2 in error, 1 discarded",
             listenerAppender.list.getFirst().getFormattedMessage());
+    }
+
+    private static AccountComputedRightView pair(final UUID accountId, final UUID applicationId) {
+        var pair = new AccountComputedRightView();
+        pair.setAccountId(accountId);
+        pair.setApplicationId(applicationId);
+        return pair;
     }
 }

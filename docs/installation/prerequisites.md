@@ -50,6 +50,12 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
     TO sync_api_user;
 ```
 
+Several `sync-api` instances coordinate with PostgreSQL advisory locks, which need no grant. The lock of the
+synchronization cycle is a session lock of the `sync_api` database, held by a connection that stays idle during the
+whole cycle: the `sync_api` database must not be reached through PgBouncer in transaction pooling mode, and
+`idle_session_timeout` must not be set for the runtime account. This connection is opened outside the connection pool:
+count one connection more than the pool per instance in `max_connections`.
+
 ### 2️⃣ Java Runtime
 
 * **Java 21** (LTS) or later

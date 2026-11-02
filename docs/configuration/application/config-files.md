@@ -190,7 +190,8 @@ LINID_DATABASE_PASSWORD=password
 # act_id of the technical account of sync-api, shared by its instances and recorded as the author of their writes
 SYNC_TECHNICAL_ACCOUNT_ID=00000000-0000-4000-8000-00000000a012
 
-# Identifier of the instance, written with the rows it writes in the linid-api database (default: the host name)
+# Identifier of the instance, written with the rows it writes in the linid-api database, in its logs and in the
+# parameters of its jobs (default: the host name)
 # SYNC_INSTANCE_ID=sync-api-1
 
 # Path to SSL/TLS key store
@@ -218,7 +219,8 @@ SSL_CLIENT_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
 # Subject of the only accepted client certificate, the one of linid-api, in the RFC 2253 format
 SYNC_ALLOWED_CLIENT=CN=linid-api
 
-# Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)
+# Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week),
+# in UTC whatever the time zone of the server. When several instances run, only one of them runs each cycle
 SYNC_CRON="0 0 2 * * *"
 
 # Number of accounts read, built and written per chunk of the payload build, in one transaction (default: 500)
@@ -231,6 +233,10 @@ SYNC_CRON="0 0 2 * * *"
 # Number of inserts or updates sent together to the linid-api database, within the transaction of a chunk
 # (default: 50)
 # SYNC_JDBC_BATCH_SIZE=50
+
+# Maximum wait for the accounts of a chunk locked by another processing, as a duration (e.g. 30m, 90s): beyond it, the
+# chunk and the cycle fail. Keep it above the longest chunk, whose OPA calls are made under the locks (default: 30m)
+# SYNC_LOCK_TIMEOUT=30m
 
 # Base URL of the OPA server used by sync-api to evaluate the application policies
 OPA_SERVER_URL=http://opa:8181
@@ -646,7 +652,7 @@ SYNC_INSTANCE_ID=sync-api-1
   takes 10 round trips instead of 500, and a chunk without change sends nothing. It does not change the chunk size, the
   number of accounts per transaction.
 * `SYNC_INSTANCE_ID` (default: the host name) is the identifier of the instance, written in the `sync_instance_id`
-  column of the rows it writes.
+  column of the rows it writes, in its logs and in the parameters of its jobs.
 
 ---
 

@@ -74,7 +74,7 @@ curl --cacert ../docker/certs/ca.crt \
 
 `sync-api` connects to two databases:
 
-- Its own `sync_api` database (`DATABASE_*`), the default datasource, used by Spring Batch.
+- Its own `sync_api` database (`DATABASE_*`), the default datasource, used by Spring Batch and by the cycle lock.
 - The linid-api database (`LINID_DATABASE_*`), where it reads the account data and writes the payloads and the
   computed rights, with its own PostgreSQL account limited to these tables.
 
@@ -105,6 +105,28 @@ author. Its instances share it: the `sync_instance_id` column of these rows iden
 
 ---
 
+## Synchronization cycle
+
+`syncJob`, in `SyncJobConfig`, is the global job: it runs `buildPayloadsStep`, then `computeRightsStep`.
+`computeRightsStep` only runs when `buildPayloadsStep` succeeds: when the payload build fails, the job stops and ends
+`FAILED`, since computing a new script with the previous payloads would store wrong rights.
+
+`SyncScheduler` starts it at the time of the cron `SYNC_CRON` (`0 0 2 * * *` by default, every day at 2:00 UTC), with
+`@Scheduled`, enabled by `SchedulingConfig`. The cron runs in UTC, whatever the time zone of the JVM, so that the
+changes of the daylight saving time never skip nor repeat a cycle. The job runs synchronously, in the thread of the
+scheduler. Its parameters are `scheduledAt`, the time of the cron in UTC (the start date rounded to the nearest
+second, since the scheduler may call it slightly early), identifying, so that each time of the cron is one job
+instance, and `instanceId`, the `SYNC_INSTANCE_ID` of the instance running it, non-identifying, logged by Spring Batch
+with the parameters of the job.
+
+`syncJob` is not restartable: Spring Batch refuses to start a job instance that already exists. An instance whose
+clock is late, taking the cycle lock once the cycle of the same time ended on another instance, skips it and logs it,
+instead of running it again. A failed cycle is neither resumed nor restarted: the next cycle is a new job instance,
+which builds the payloads from the first account and computes all the pairs still `to_compute`, including the ones
+left by the failed cycle.
+
+---
+
 ## Account payloads
 
 `buildPayloadsStep`, in `PayloadStepConfig`, builds the payloads of the accounts, used as OPA input, from the
@@ -114,19 +136,20 @@ author. Its instances share it: the `sync_instance_id` column of these rows iden
 whose persistence context is closed at its end.
 
 - **Read**: `payloadSourcesReader`, a `PayloadSourcesReader` extending `AbstractPagingItemReader`, reads every
-  account of `account_computed_rights_view` once, with the checksum of its current payload, except the technical
-  account of `sync-api`, by pages of the chunk size, at the first read of each chunk. Each page starts after the last
-  account of the previous one, not at an offset: an account deleted since the previous page does not shift the next
-  ones. For each page, each source is read once with `SourceRepository`, which checks and quotes the source and
-  column names, reads the PostgreSQL arrays as lists, and parses the `json` and `jsonb` columns. The reader keeps no
-  state for a restart: each cycle reads every account from the first one.
+  account of `account_computed_rights_view` once, except the technical account of `sync-api`, by pages of the chunk
+  size, at the first read of each chunk. Each page starts after the last account of the previous one, not at an
+  offset: an account deleted since the previous page does not shift the next ones. The accounts of the page are then
+  locked (see [Several instances](#several-instances)), before the checksums of their current payloads are read in
+  `account_payloads`, through its unique index on `act_id`, then each source once, with `SourceRepository`, which
+  checks and quotes the source and column names, reads the PostgreSQL arrays as lists, and parses the `json` and
+  `jsonb` columns. The reader keeps no state for a restart: each cycle reads every account from the first one.
 - **Process**: `PayloadProcessor`, step-scoped to receive the job execution of its step, builds the payload with
   `PayloadService`, which renders the `mapping` with Jinjava, with the row of the account in each source, and parses
   it as a JSON object. The checksum of the payload is computed with `ChecksumService` on its compact JSON, with its
-  keys sorted at every level and its arrays in their order, and compared with the checksum read with the page: an
+  keys sorted at every level and its arrays in their order, and compared with the checksum read by the reader: an
   unchanged payload is filtered out, without reading its row, so it adds no audit row and its rights are not computed
   again. For a changed payload, the current row of `account_payloads` is read and updated, or a new row is created
-  when the page gave no checksum. An account deleted since its page was read is filtered out, since inserting its row
+  when the reader gave no checksum. An account deleted since it was read is filtered out, since inserting its row
   would fail on its foreign key: an account without payload is no longer in the view, and an account with a payload no
   longer has its row, deleted with it.
 - **Write**: a `JpaItemWriter` persists the new rows; the changed rows, managed by the persistence context of the
@@ -148,8 +171,8 @@ updated and unchanged, accounts in error or deleted.
 `computeRightsStep`, in `ComputeRightsStepConfig`, computes the rights of the account and application pairs whose
 `to_compute` is true in `account_computed_rights_view`, and writes them in the `computed_rights` table. It is a Spring
 Batch chunk step: each chunk of `SYNC_COMPUTE_CHUNK_SIZE` pairs is read, processed and written in its own transaction
-of `linidTransactionManager`, whose persistence context is closed at its end. It is not part of the global job yet.
-Its processor and its writer are beans, to be shared with the recomputations of an account and of an application.
+of `linidTransactionManager`, whose persistence context is closed at its end. It is the second step of `syncJob`. Its
+processor and its writer are beans, to be shared with the recomputations of an account and of an application.
 
 - **Read**: `cyclePairsReader`, an `IteratorItemReader`, reads the pairs to compute by windows of the chunk size, each
   one starting after the last pair of the previous one.
@@ -172,10 +195,67 @@ A role missing from the roles of the application raises the `unknownRole` alert,
 pair in error (failed evaluation, template error, rendered text that is not a JSON object) raises a
 `RightsComputationException`, skipped by the step: its row, if any, keeps its previous rights and its outdated
 checksums, so it is computed again at the next cycle. When OPA cannot be reached, `OpaService` raises the
-`opaUnreachable` alert and the step fails. `ComputeRightsStepListener`, registered as a listener of the step, logs the
+`opaUnreachable` alert and the step fails. `ComputeRightsStepListener`, registered as a listener of the step, locks
+the accounts of each chunk before its pairs are computed (see [Several instances](#several-instances)), logs the
 `pairError` alert of each pair skipped, with the message of its root cause and without its stack trace, since an error
 of the claims template of an application puts all its pairs in error, and logs at its end the number of pairs written,
 in error and discarded: the write count, the process skip count and the filter count of the step.
+
+---
+
+## Several instances
+
+Several `sync-api` instances can run at the same time, each one with its own `SYNC_INSTANCE_ID`. They coordinate with
+PostgreSQL advisory locks, in their two-integer form `(namespace, key)`, each kind of lock having its own namespace in
+`LockNamespaces`. Flyway takes an advisory lock too, in the one-key form, which never meets the two-key form.
+
+- **Cycle lock** `(LockNamespaces.CYCLE, 0)`: before starting `syncJob`, `SyncScheduler` takes it with
+  `pg_try_advisory_lock` in the `sync_api` database, on a dedicated connection outside the pool, opened by the
+  `sessionLockDataSource` of `SchedulingConfig`, the datasource of the session locks, and kept during the whole
+  cycle. When it is already held, by another instance or by the previous cycle still running, the instance skips the
+  cycle and logs it with its `SYNC_INSTANCE_ID`. The lock is never released explicitly: closing the connection at the
+  end of the cycle ends its session, and PostgreSQL releases the lock with it. A pooled connection would go back to
+  the pool with the lock still held whenever its release failed, until Hikari retires it (`maxLifetime`, 30 minutes
+  by default), and the other instances would skip their cycles meanwhile. An instance that crashes during the cycle
+  does not block the next ones either. Only the cycle takes it, so that a recomputation never makes a cycle skip.
+- **Per-account lock** `(LockNamespaces.ACCOUNT, accountId.hashCode())`: the payload build and the computation of the
+  rights take `pg_advisory_xact_lock` on the accounts of each chunk, in its transaction of the linid-api database, so
+  that two processings, cycles or recomputations, never write the same account at the same time. `PayloadSourcesReader`
+  locks the accounts of a page before reading the checksums of their payloads and their sources, and
+  `ComputeRightsStepListener` locks the accounts of the pairs of a chunk in `beforeChunk`, once they are read and
+  before they are computed. The locks are released at the commit of the chunk: the processings of different accounts
+  go on in parallel, and a processing of an account being written waits for the end of the other chunk.
+  `AccountLockServiceImpl` takes them with one query per chunk: the keys are deduplicated and sorted in Java, and
+  `unnest` reads them in the order of the array, so that two processings always take their common keys in the same
+  order, without deadlock. A UUID is too large for a key: two accounts with the same hash code only wait for each
+  other. It requires a transaction of the linid-api database (`Propagation.MANDATORY`): outside of it, the locks would
+  be released at the end of their own statement. The wait for the locks is limited by `SYNC_LOCK_TIMEOUT`, set as the
+  `lock_timeout` of the transaction: a transaction left open by a frozen or disconnected instance makes the chunk, and
+  so the cycle, fail instead of blocking it without end. It must stay above the longest chunk, whose OPA calls are made
+  under the locks.
+
+The per-account lock guarantees that a slower processing never overwrites the data of a more recent one. The checksums
+and the sources of the payloads are read under the lock, and the payloads are written in the same transaction, so the
+later processing reads the fresher data. The computation of the rights reads again the checksums of each pair under
+the lock, after its OPA call, and discards a result computed with outdated data.
+
+The locks constrain the deployment:
+
+- The cycle lock needs a stable session on the `sync_api` database: no PgBouncer in transaction pooling mode in front
+  of it, since it does not support the session advisory locks, and no `idle_session_timeout` for `DATABASE_USER`, since
+  the connection of the lock stays idle during the cycle. A session lost during the cycle releases the lock: another
+  instance could start a cycle, the per-account locks still protecting the writes. Its connection is outside the pool:
+  an instance opens one connection to the `sync_api` database more than its pool during a cycle.
+- A chunk of the payload build holds up to `SYNC_PAYLOAD_CHUNK_SIZE` per-account locks, in the lock table shared by the
+  sessions of the linid-api PostgreSQL server and sized by `max_locks_per_transaction` and `max_connections`.
+- An instance killed while a chunk waits for a per-account lock (`kill -9`, OOM killer, `SIGKILL` at the end of the
+  grace period) leaves a backend on the linid-api server that keeps the locks already taken by the chunk until its
+  wait ends, up to `SYNC_LOCK_TIMEOUT`: PostgreSQL only notices the lost client when it next talks to it. Setting
+  `client_connection_check_interval` for `LINID_DATABASE_USER` (PostgreSQL 14 or later, e.g.
+  `ALTER ROLE sync_api_user SET client_connection_check_interval = '10s'`) makes the backend check the client during
+  the wait and release the locks within this interval. It does not detect a frozen host or a network cut, which are
+  left to `SYNC_LOCK_TIMEOUT`.
+- The advisory lock functions need no grant: the PostgreSQL accounts of `sync-api` use them without any privilege.
 
 ---
 
@@ -240,7 +320,7 @@ OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evalua
 | `LINID_DATABASE_PASSWORD`        | Password of this user                                                            | —                              |
 | `LINID_DATABASE_MAX_POOL_SIZE`   | Maximum number of connections to the linid-api database                          | `5`                            |
 | `SYNC_TECHNICAL_ACCOUNT_ID`      | `act_id` of the technical account shared by the `sync-api` instances             | —                              |
-| `SYNC_INSTANCE_ID`               | Identifier of the instance, written with the rows it writes                      | the host name                  |
+| `SYNC_INSTANCE_ID`               | Identifier of the instance, written in its rows, its logs and its job parameters | the host name                  |
 | `SSL_KEY_STORE`                  | Path to the keystore of the server certificate                                   | —                              |
 | `SSL_KEY_STORE_TYPE`             | Keystore type (`PKCS12` or `JKS`)                                                | `PKCS12`                       |
 | `SSL_KEY_PASSWORD`               | Password for the private key and the keystore                                    | —                              |
@@ -249,9 +329,10 @@ OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evalua
 | `SSL_CLIENT_TRUSTSTORE_PATH`     | Path to the truststore validating the client certificates                        | —                              |
 | `SSL_CLIENT_TRUSTSTORE_PASSWORD` | Password of the client truststore                                                | `SSL_TRUSTSTORE_PASSWORD`      |
 | `SYNC_ALLOWED_CLIENT`            | Subject of the only accepted client certificate, in the RFC 2253 format          | —                              |
-| `SYNC_CRON`                      | Schedule of the global job, as a Spring cron expression                          | `0 0 2 * * *`                  |
+| `SYNC_CRON`                      | Schedule of the global job, as a Spring cron expression, in UTC                  | `0 0 2 * * *`                  |
 | `SYNC_PAYLOAD_CHUNK_SIZE`        | Number of accounts per chunk of the payload build, in one transaction            | `500`                          |
 | `SYNC_COMPUTE_CHUNK_SIZE`        | Number of account and application pairs computed per chunk                       | `100`                          |
+| `SYNC_LOCK_TIMEOUT`              | Maximum wait for the per-account locks of a chunk, as a duration                 | `30m`                          |
 | `SYNC_JDBC_BATCH_SIZE`           | Number of inserts or updates sent together to the linid-api database             | `50`                           |
 | `OPA_SERVER_URL`                 | Base URL of the OPA server                                                       | `http://opa:8181`              |
 | `OPA_EVALUATION_PATH`            | Path of the result of an application policy, `{code}` being the application code | `/v1/data/authz/{code}/result` |

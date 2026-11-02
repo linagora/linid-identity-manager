@@ -65,6 +65,9 @@ linid:
     properties:
       # Number of inserts or updates sent together to the linid-api database, within the transaction of a chunk
       "[hibernate.jdbc.batch_size]": ${SYNC_JDBC_BATCH_SIZE:50}
+      # The queries of a chunk do not flush its pending changes, which its writer flushes at once: otherwise, each
+      # query reading a table already changed in the chunk would send these changes one by one, outside the groups
+      "[org.hibernate.flushMode]": COMMIT
 
 sync:
   # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week)

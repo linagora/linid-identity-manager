@@ -47,7 +47,7 @@ export default defineConfig((ctx) => {
     build: {
       target: {
         browser: ['es2022', 'firefox115', 'chrome115', 'safari14', 'brave115'],
-        node: 'node20',
+        node: 'node22',
       },
 
       typescript: {
@@ -145,15 +145,15 @@ export default defineConfig((ctx) => {
             shared: {
               vue: {
                 singleton: true,
-                requiredVersion: '3.5.39',
+                requiredVersion: '3.5.44',
               },
               'vue-router': {
                 singleton: true,
-                requiredVersion: '5.1.0',
+                requiredVersion: '5.4.0',
               },
               quasar: {
                 singleton: true,
-                requiredVersion: '2.21.1',
+                requiredVersion: '2.35.2',
               },
               '@linagora/lin-pulsar-core': {
                 singleton: true,
@@ -161,11 +161,11 @@ export default defineConfig((ctx) => {
               } as Record<string, unknown>,
               pinia: {
                 singleton: true,
-                requiredVersion: '3.0.4',
+                requiredVersion: '4.1.0',
               },
               'vue-i18n': {
                 singleton: true,
-                requiredVersion: '11.4.6',
+                requiredVersion: '11.4.16',
               },
             },
           })

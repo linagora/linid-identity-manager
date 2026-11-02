@@ -41,10 +41,10 @@ Feature: Test Group creation page
     And  I expect the HTML element '[data-cy="generic-creation-page_title"]' contains "Création d'un groupe"
     And  I expect the HTML element '[data-cy="field_code"]' to be visible
     And  I expect the HTML element '[data-cy="field_name"]' to be visible
-    And  I expect the HTML element '[data-cy="field_parentId"]' to be visible
+    And  I expect the HTML element '.q-field:has([data-cy="field_parentId"])' to be visible
     And  I expect the HTML element '[data-cy="field_description"]' to be visible
-    And  I expect the HTML element '[data-cy="field_organizationalUnitId"]' to be visible
-    And  I expect the HTML element '[data-cy="field_applicationId"]' to be visible
+    And  I expect the HTML element '.q-field:has([data-cy="field_organizationalUnitId"])' to be visible
+    And  I expect the HTML element '.q-field:has([data-cy="field_applicationId"])' to be visible
     And  I expect the HTML element '[data-cy="field_email"]' to be visible
     And  I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And  I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"

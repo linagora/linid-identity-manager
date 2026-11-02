@@ -197,7 +197,7 @@ Feature: Test Organizational Unit details panel display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog"]' contains "Modifier Dept B1-1"
     And  I expect the HTML element '[data-cy="field_name"]' to have value "Dept B1-1"
-    And  I expect the HTML element '[data-cy="field_type"]' contains "DEPARTMENT"
+    And  I expect the HTML element '.q-field:has([data-cy="field_type"])' contains "DEPARTMENT"
 
     # Cancelling the dialog must not change anything
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
@@ -374,7 +374,7 @@ Feature: Test Organizational Unit details panel display
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier le rôle fonctionnel de Martin Paul"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_roleId"]' contains "Rôle fonctionnel"
-    And  I expect the HTML element '[data-cy="field_roleId"]' contains "Member"
+    And  I expect the HTML element '.q-field:has([data-cy="field_roleId"])' contains "Member"
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element '[data-cy="generic-editable-table-card"] [data-cy="generic-entity-table"]' contains "Member"

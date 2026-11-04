@@ -216,7 +216,7 @@ class ComputeRightsProcessorTest {
         new YamlPropertySourceLoader().load("application.yaml", new ClassPathResource("application.yaml"))
             .forEach(sources::addLast);
         StepSynchronizationManager.register(MetaDataInstanceFactory.createStepExecution(
-            MetaDataInstanceFactory.createJobExecution(JOB_EXECUTION_ID), "computeRightsStep", 7L));
+            MetaDataInstanceFactory.createJobExecution(JOB_EXECUTION_ID), "allPairsComputeRightsStep", 7L));
 
         try (var context = new AnnotationConfigApplicationContext()) {
             context.setEnvironment(environment);

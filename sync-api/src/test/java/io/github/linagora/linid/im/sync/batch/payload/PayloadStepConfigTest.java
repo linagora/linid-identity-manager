@@ -125,13 +125,13 @@ class PayloadStepConfigTest {
     }
 
     @Test
-    @DisplayName("payloadSourcesReader should read every account once, except the technical account, in order, by "
+    @DisplayName("allAccountSnapshotsReader should read every account once, except the technical account, in order, by "
         + "pages of the chunk size, with its rows in each source")
-    void testPayloadSourcesReader() throws Exception {
+    void testAllAccountSnapshotsReader() throws Exception {
         page(ASMITH.accountId());
         rows(List.of(JDOE, ASMITH), row(JDOE, "jdoe@example.com"));
 
-        var reader = config(MAPPING, 2).payloadSourcesReader();
+        var reader = config(MAPPING, 2).allAccountSnapshotsReader();
 
         assertEquals(new AccountSnapshot(JDOE, null, Map.of("accounts", List.of(row(JDOE, "jdoe@example.com")))),
             reader.read());
@@ -163,9 +163,9 @@ class PayloadStepConfigTest {
     }
 
     @Test
-    @DisplayName("buildPayloadsStep should read, process and write the accounts by chunks, each one in a transaction, "
-        + "filtering out the unchanged payloads and skipping the accounts in error")
-    void testBuildPayloadsStep() throws Exception {
+    @DisplayName("allAccountsPayloadStep should read, process and write the accounts by chunks, each one in a "
+        + "transaction, filtering out the unchanged payloads and skipping the accounts in error")
+    void testAllAccountsPayloadStep() throws Exception {
         rows(List.of(JDOE, ASMITH), row(JDOE, "jdoe@example.com"), row(ASMITH, "asmith@example.com"));
         rows(List.of(BLEE), row(BLEE, "blee@example.com"), row(BLEE, "bruce@example.com"));
 
@@ -191,8 +191,8 @@ class PayloadStepConfigTest {
     }
 
     @Test
-    @DisplayName("buildPayloadsStep should fail before reading any source when the mapping is invalid")
-    void testBuildPayloadsStep_invalidMapping() throws Exception {
+    @DisplayName("allAccountsPayloadStep should fail before reading any source when the mapping is invalid")
+    void testAllAccountsPayloadStep_invalidMapping() throws Exception {
         step("{\"email\": {{ accounts.email }}}", 2).execute(stepExecution);
 
         assertEquals(BatchStatus.FAILED, stepExecution.getStatus());
@@ -201,8 +201,8 @@ class PayloadStepConfigTest {
     }
 
     @Test
-    @DisplayName("buildPayloadsStep should fail when a source cannot be read, without writing the chunk")
-    void testBuildPayloadsStep_unreadableSource() throws Exception {
+    @DisplayName("allAccountsPayloadStep should fail when a source cannot be read, without writing the chunk")
+    void testAllAccountsPayloadStep_unreadableSource() throws Exception {
         when(sourceRepository.findAllByAccountIds(anyString(), anyString(), anyCollection()))
             .thenThrow(new IllegalStateException("relation does not exist"));
 
@@ -214,8 +214,8 @@ class PayloadStepConfigTest {
     }
 
     @Test
-    @DisplayName("buildPayloadsStep should fail when a chunk cannot be written, without counting its accounts")
-    void testBuildPayloadsStep_writeError() throws Exception {
+    @DisplayName("allAccountsPayloadStep should fail when a chunk cannot be written, without counting its accounts")
+    void testAllAccountsPayloadStep_writeError() throws Exception {
         rows(List.of(JDOE, ASMITH), row(JDOE, "jdoe@example.com"), row(ASMITH, "asmith@example.com"));
         rows(List.of(BLEE), row(BLEE, "blee@example.com"));
         ItemWriter<AccountPayload> failingWriter = chunk -> {
@@ -224,8 +224,8 @@ class PayloadStepConfigTest {
             }
         };
 
-        config(MAPPING, 2).buildPayloadsStep(new ResourcelessJobRepository(), transactionManager, processor(MAPPING),
-            new PayloadStepListener(payloadService(MAPPING)), failingWriter).execute(stepExecution);
+        config(MAPPING, 2).allAccountsPayloadStep(new ResourcelessJobRepository(), transactionManager,
+            processor(MAPPING), new PayloadStepListener(payloadService(MAPPING)), failingWriter).execute(stepExecution);
 
         assertEquals(BatchStatus.FAILED, stepExecution.getStatus());
         assertEquals(1, stepExecution.getExecutionContext().getInt(PayloadOutcome.INSERTED.key()));
@@ -271,7 +271,7 @@ class PayloadStepConfigTest {
     }
 
     private Step step(final String mapping, final int chunkSize) {
-        return config(mapping, chunkSize).buildPayloadsStep(new ResourcelessJobRepository(), transactionManager,
+        return config(mapping, chunkSize).allAccountsPayloadStep(new ResourcelessJobRepository(), transactionManager,
             processor(mapping), new PayloadStepListener(payloadService(mapping)), writer);
     }
 

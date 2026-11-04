@@ -45,8 +45,8 @@ import org.springframework.batch.infrastructure.item.database.AbstractPagingItem
 import org.springframework.data.domain.Limit;
 
 /**
- * Reader of {@code buildPayloadsStep}: reads the accounts of {@code account_computed_rights_view} by pages, with the
- * checksums of their current payloads, read in {@code account_payloads}, and adds to each one its rows in each
+ * Reader of {@code allAccountsPayloadStep}: reads the accounts of {@code account_computed_rights_view} by pages, with
+ * the checksums of their current payloads, read in {@code account_payloads}, and adds to each one its rows in each
  * source.
  *
  * <p>Each page starts after the last account of the previous one, not at an offset: an account deleted since the
@@ -64,7 +64,7 @@ import org.springframework.data.domain.Limit;
  * a restarted {@code AbstractPagingItemReader} would skip the number of accounts read before, which shifts with the
  * accounts added or deleted in between.</p>
  */
-public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapshot> {
+public class AllAccountSnapshotsReader extends AbstractPagingItemReader<AccountSnapshot> {
 
     /**
      * Lowest UUID, bound of the first page: PostgreSQL orders it before every other UUID.
@@ -117,7 +117,7 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
      * @param sourceRepository   the repository reading the rows of a source
      * @param accountLockService the service taking the locks of the accounts of a page
      */
-    public PayloadSourcesReader(
+    public AllAccountSnapshotsReader(
         final AccountComputedRightViewRepository viewRepository,
         final AccountPayloadRepository payloadRepository,
         final UUID technicalAccountId,

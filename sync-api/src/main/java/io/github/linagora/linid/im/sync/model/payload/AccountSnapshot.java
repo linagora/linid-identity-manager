@@ -33,7 +33,7 @@ import java.util.Map;
 /**
  * Snapshot of an account whose payload is to be built, read with its page: the account, the checksum of its current
  * payload and its rows in each source, read once the account is locked. It is the item read by
- * {@code buildPayloadsStep}.
+ * {@code allAccountsPayloadStep}.
  *
  * @param account         the account
  * @param payloadChecksum the checksum of the current payload of the account, {@code null} when it has none yet or was

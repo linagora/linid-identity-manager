@@ -55,33 +55,33 @@ class SyncJobConfigTest {
     @Test
     @DisplayName("syncJob should build the payloads, then compute the rights")
     void testSyncJob() throws Exception {
-        JobExecution execution = run(step("buildPayloadsStep", false), step("computeRightsStep", false));
+        JobExecution execution = run(step("allAccountsPayloadStep", false), step("allPairsComputeRightsStep", false));
 
         assertEquals("syncJob", execution.getJobInstance().getJobName());
         assertEquals(BatchStatus.COMPLETED, execution.getStatus());
-        assertEquals(List.of("buildPayloadsStep", "computeRightsStep"), executedSteps);
+        assertEquals(List.of("allAccountsPayloadStep", "allPairsComputeRightsStep"), executedSteps);
     }
 
     @Test
     @DisplayName("syncJob should end FAILED without computing the rights when the payload build fails")
     void testSyncJob_payloadsFailed() throws Exception {
-        JobExecution execution = run(step("buildPayloadsStep", true), step("computeRightsStep", false));
+        JobExecution execution = run(step("allAccountsPayloadStep", true), step("allPairsComputeRightsStep", false));
 
         assertEquals(BatchStatus.FAILED, execution.getStatus());
-        assertEquals(List.of("buildPayloadsStep"), executedSteps);
+        assertEquals(List.of("allAccountsPayloadStep"), executedSteps);
     }
 
     @Test
     @DisplayName("syncJob should not be restartable, so that the cycle of a time of the cron runs once")
     void testSyncJob_notRestartable() {
-        Job job = new SyncJobConfig().syncJob(jobRepository, step("buildPayloadsStep", false),
-            step("computeRightsStep", false));
+        Job job = new SyncJobConfig().syncJob(jobRepository, step("allAccountsPayloadStep", false),
+            step("allPairsComputeRightsStep", false));
 
         assertFalse(job.isRestartable());
     }
 
-    private JobExecution run(final Step buildPayloadsStep, final Step computeRightsStep) throws Exception {
-        Job job = new SyncJobConfig().syncJob(jobRepository, buildPayloadsStep, computeRightsStep);
+    private JobExecution run(final Step allAccountsPayloadStep, final Step allPairsComputeRightsStep) throws Exception {
+        Job job = new SyncJobConfig().syncJob(jobRepository, allAccountsPayloadStep, allPairsComputeRightsStep);
         JobParameters parameters = new JobParameters();
         JobInstance instance = jobRepository.createJobInstance(job.getName(), parameters);
         JobExecution execution = jobRepository.createJobExecution(instance, parameters, new ExecutionContext());

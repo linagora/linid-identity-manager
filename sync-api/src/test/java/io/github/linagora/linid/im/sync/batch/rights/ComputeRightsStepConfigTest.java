@@ -138,7 +138,7 @@ class ComputeRightsStepConfigTest {
     }
 
     @Test
-    @DisplayName("cyclePairsReader should read the pairs by windows, each one starting after the last pair read and "
+    @DisplayName("allPairsReader should read the pairs by windows, each one starting after the last pair read and "
         + "bounded by its account")
     void testCyclePairsReader() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
@@ -151,7 +151,7 @@ class ComputeRightsStepConfigTest {
             ACCOUNT_ID, positionOf(second), LIMIT))
             .thenReturn(window(false, third));
 
-        ItemReader<AccountComputedRightView> reader = config.cyclePairsReader();
+        ItemReader<AccountComputedRightView> reader = config.allPairsReader();
 
         verifyNoInteractions(repository);
         assertEquals(first, reader.read());
@@ -226,11 +226,11 @@ class ComputeRightsStepConfigTest {
     }
 
     @Test
-    @DisplayName("computeRightsStep should read, compute and write the pairs of the cycle by chunks, each one in a "
-        + "transaction where the accounts of the chunk are locked before its pairs are computed, skipping the pairs "
-        + "in error without computing the other pairs of their chunk again, and filtering out the pairs changed since "
-        + "they were read")
-    void testComputeRightsStep() throws Exception {
+    @DisplayName("allPairsComputeRightsStep should read, compute and write the pairs of the cycle by chunks, each one "
+        + "in a transaction where the accounts of the chunk are locked before its pairs are computed, skipping the "
+        + "pairs in error without computing the other pairs of their chunk again, and filtering out the pairs changed "
+        + "since they were read")
+    void testAllPairsComputeRightsStep() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
         var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
         var third = pair(OTHER_ACCOUNT_ID, APPLICATION_ID);
@@ -273,9 +273,9 @@ class ComputeRightsStepConfigTest {
     }
 
     @Test
-    @DisplayName("computeRightsStep should fail at the first pair whose OPA call cannot reach OPA, without writing the "
-        + "chunk")
-    void testComputeRightsStep_opaUnreachable() throws Exception {
+    @DisplayName("allPairsComputeRightsStep should fail at the first pair whose OPA call cannot reach OPA, without "
+        + "writing the chunk")
+    void testAllPairsComputeRightsStep_opaUnreachable() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
         var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
         when(repository.findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
@@ -297,7 +297,7 @@ class ComputeRightsStepConfigTest {
     private Step step() {
         when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
         ItemWriter<ComputedRight> writer = chunk -> written.addAll(chunk.getItems());
-        return config.computeRightsStep(new ResourcelessJobRepository(), transactionManager,
+        return config.allPairsComputeRightsStep(new ResourcelessJobRepository(), transactionManager,
             new ComputeRightsProcessor(rightsComputationService, applicationRoleRepository, repository,
                 computedRightRepository, TECHNICAL_ACCOUNT_ID, "sync-api-1", 42L),
             writer, new ComputeRightsStepListener(accountLockService));
@@ -318,7 +318,7 @@ class ComputeRightsStepConfigTest {
 
     private static StepExecution stepExecution() {
         return MetaDataInstanceFactory.createStepExecution(
-            MetaDataInstanceFactory.createJobExecution(42L), "computeRightsStep", 7L);
+            MetaDataInstanceFactory.createJobExecution(42L), "allPairsComputeRightsStep", 7L);
     }
 
     private static AccountComputedRightView pair(final UUID accountId, final UUID applicationId) {

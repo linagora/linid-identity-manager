@@ -78,7 +78,7 @@ class PayloadStepListenerTest {
     @BeforeEach
     void setUp() {
         stepExecution = MetaDataInstanceFactory.createStepExecution(
-            MetaDataInstanceFactory.createJobExecution(42L), "buildPayloadsStep", 7L);
+            MetaDataInstanceFactory.createJobExecution(42L), "allAccountsPayloadStep", 7L);
         StepSynchronizationManager.register(stepExecution);
         alertAppender = new ListAppender<>();
         alertAppender.start();
@@ -179,7 +179,7 @@ class PayloadStepListenerTest {
         listener(EMAIL_MAPPING).afterStep(stepExecution);
 
         assertEquals(1, listenerAppender.list.size());
-        assertEquals("Payload build of step buildPayloadsStep: 1 inserted, 2 updated, 0 unchanged, 1 in error, "
+        assertEquals("Payload build of step allAccountsPayloadStep: 1 inserted, 2 updated, 0 unchanged, 1 in error, "
             + "0 deleted", listenerAppender.list.getFirst().getFormattedMessage());
     }
 

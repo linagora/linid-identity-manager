@@ -107,9 +107,9 @@ author. Its instances share it: the `sync_instance_id` column of these rows iden
 
 ## Synchronization cycle
 
-`syncJob`, in `SyncJobConfig`, is the global job: it runs `buildPayloadsStep`, then `computeRightsStep`.
-`computeRightsStep` only runs when `buildPayloadsStep` succeeds: when the payload build fails, the job stops and ends
-`FAILED`, since computing a new script with the previous payloads would store wrong rights.
+`syncJob`, in `SyncJobConfig`, is the global job: it runs `allAccountsPayloadStep`, then `allPairsComputeRightsStep`.
+`allPairsComputeRightsStep` only runs when `allAccountsPayloadStep` succeeds: when the payload build fails, the job
+stops and ends `FAILED`, since computing a new script with the previous payloads would store wrong rights.
 
 `SyncScheduler` starts it at the time of the cron `SYNC_CRON` (`0 0 2 * * *` by default, every day at 2:00 UTC), with
 `@Scheduled`, enabled by `SchedulingConfig`. The cron runs in UTC, whatever the time zone of the JVM, so that the
@@ -129,13 +129,13 @@ left by the failed cycle.
 
 ## Account payloads
 
-`buildPayloadsStep`, in `PayloadStepConfig`, builds the payloads of the accounts, used as OPA input, from the
+`allAccountsPayloadStep`, in `PayloadStepConfig`, builds the payloads of the accounts, used as OPA input, from the
 `sync-data` section of the file referenced by `EXTERNAL_CONFIGURATION` (see
 `docs/configuration/application/config-files.md`). It is a Spring Batch chunk step: each chunk of
 `SYNC_PAYLOAD_CHUNK_SIZE` accounts is read, processed and written in its own transaction of `linidTransactionManager`,
 whose persistence context is closed at its end.
 
-- **Read**: `payloadSourcesReader`, a `PayloadSourcesReader` extending `AbstractPagingItemReader`, reads every
+- **Read**: `allAccountSnapshotsReader`, a `AllAccountSnapshotsReader` extending `AbstractPagingItemReader`, reads every
   account of `account_computed_rights_view` once, except the technical account of `sync-api`, by pages of the chunk
   size, at the first read of each chunk. Each page starts after the last account of the previous one, not at an
   offset: an account deleted since the previous page does not shift the next ones. The accounts of the page are then
@@ -168,13 +168,14 @@ updated and unchanged, accounts in error or deleted.
 
 ## Rights computation
 
-`computeRightsStep`, in `ComputeRightsStepConfig`, computes the rights of the account and application pairs whose
-`to_compute` is true in `account_computed_rights_view`, and writes them in the `computed_rights` table. It is a Spring
-Batch chunk step: each chunk of `SYNC_COMPUTE_CHUNK_SIZE` pairs is read, processed and written in its own transaction
-of `linidTransactionManager`, whose persistence context is closed at its end. It is the second step of `syncJob`. Its
-processor and its writer are beans, to be shared with the recomputations of an account and of an application.
+`allPairsComputeRightsStep`, in `ComputeRightsStepConfig`, computes the rights of the account and application pairs
+whose `to_compute` is true in `account_computed_rights_view`, and writes them in the `computed_rights` table. It is a
+Spring Batch chunk step: each chunk of `SYNC_COMPUTE_CHUNK_SIZE` pairs is read, processed and written in its own
+transaction of `linidTransactionManager`, whose persistence context is closed at its end. It is the second step of
+`syncJob`. Its processor and its writer are beans, to be shared with the recomputations of an account and of an
+application.
 
-- **Read**: `cyclePairsReader`, an `IteratorItemReader`, reads the pairs to compute by windows of the chunk size, each
+- **Read**: `allPairsReader`, an `IteratorItemReader`, reads the pairs to compute by windows of the chunk size, each
   one starting after the last pair of the previous one.
 - **Process**: `ComputeRightsProcessor`, step-scoped, gives each pair to `RightsComputationService`, with the role
   names of its application, read with `ApplicationRoleRepository` at its first pair in the step and kept until its
@@ -220,8 +221,8 @@ PostgreSQL advisory locks, in their two-integer form `(namespace, key)`, each ki
   does not block the next ones either. Only the cycle takes it, so that a recomputation never makes a cycle skip.
 - **Per-account lock** `(LockNamespaces.ACCOUNT, accountId.hashCode())`: the payload build and the computation of the
   rights take `pg_advisory_xact_lock` on the accounts of each chunk, in its transaction of the linid-api database, so
-  that two processings, cycles or recomputations, never write the same account at the same time. `PayloadSourcesReader`
-  locks the accounts of a page before reading the checksums of their payloads and their sources, and
+  that two processings, cycles or recomputations, never write the same account at the same time.
+  `AllAccountSnapshotsReader` locks the accounts of a page before reading their payload checksums and sources, and
   `ComputeRightsStepListener` locks the accounts of the pairs of a chunk in `beforeChunk`, once they are read and
   before they are computed. The locks are released at the commit of the chunk: the processings of different accounts
   go on in parallel, and a processing of an account being written waits for the end of the other chunk.

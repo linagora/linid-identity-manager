@@ -71,7 +71,7 @@ class ComputeRightsStepListenerTest {
     @BeforeEach
     void setUp() {
         stepExecution = MetaDataInstanceFactory.createStepExecution(
-            MetaDataInstanceFactory.createJobExecution(42L), "computeRightsStep", 7L);
+            MetaDataInstanceFactory.createJobExecution(42L), "allPairsComputeRightsStep", 7L);
         alertAppender = new ListAppender<>();
         alertAppender.start();
         alertLogger.addAppender(alertAppender);
@@ -130,7 +130,7 @@ class ComputeRightsStepListenerTest {
 
         assertEquals(1, listenerAppender.list.size());
         assertEquals(Level.INFO, listenerAppender.list.getFirst().getLevel());
-        assertEquals("Rights computation of step computeRightsStep: 5 written, 2 in error, 1 discarded",
+        assertEquals("Rights computation of step allPairsComputeRightsStep: 5 written, 2 in error, 1 discarded",
             listenerAppender.list.getFirst().getFormattedMessage());
     }
 

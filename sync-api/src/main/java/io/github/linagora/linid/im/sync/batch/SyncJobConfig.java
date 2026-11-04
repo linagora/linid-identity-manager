@@ -44,25 +44,27 @@ public class SyncJobConfig {
      * Global job: builds and writes the payloads of all the accounts, then computes the rights of the pairs of the
      * cycle.
      *
-     * <p>{@code computeRightsStep} only runs when {@code buildPayloadsStep} succeeds: when it fails, the job stops and
-     * ends {@code FAILED}, and the rights are computed at the next cycle, since computing a new script with the
-     * previous payloads would store wrong rights.</p>
+     * <p>{@code allPairsComputeRightsStep} only runs when {@code allAccountsPayloadStep} succeeds: when it fails, the
+     * job stops and ends {@code FAILED}, and the rights are computed at the next cycle, since computing a new script
+     * with the previous payloads would store wrong rights.</p>
      *
      * <p>The job is not restartable: each time of the cron is one job instance, and Spring Batch refuses to start a
      * job instance that already exists, so that another instance never runs the cycle of the same time again, nor
      * restarts a failed one.</p>
      *
-     * @param jobRepository     the repository of the Spring Batch executions
-     * @param buildPayloadsStep the step building and writing the payloads
-     * @param computeRightsStep the step computing and writing the rights of the pairs of the cycle
+     * @param jobRepository             the repository of the Spring Batch executions
+     * @param allAccountsPayloadStep    the step building and writing the payloads
+     * @param allPairsComputeRightsStep the step computing and writing the rights of the pairs of the cycle
      * @return the global job
      */
     @Bean
-    public Job syncJob(final JobRepository jobRepository, final Step buildPayloadsStep, final Step computeRightsStep) {
+    public Job syncJob(final JobRepository jobRepository,
+                       final Step allAccountsPayloadStep,
+                       final Step allPairsComputeRightsStep) {
         return new JobBuilder("syncJob", jobRepository)
             .preventRestart()
-            .start(buildPayloadsStep)
-            .next(computeRightsStep)
+            .start(allAccountsPayloadStep)
+            .next(allPairsComputeRightsStep)
             .build();
     }
 }

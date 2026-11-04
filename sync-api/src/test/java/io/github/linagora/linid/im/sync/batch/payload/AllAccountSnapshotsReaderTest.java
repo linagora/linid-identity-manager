@@ -69,8 +69,8 @@ import org.springframework.batch.infrastructure.item.ExecutionContext;
 import org.springframework.data.domain.Limit;
 import org.springframework.jdbc.BadSqlGrammarException;
 
-@DisplayName("Test class: PayloadSourcesReader")
-class PayloadSourcesReaderTest {
+@DisplayName("Test class: AllAccountSnapshotsReader")
+class AllAccountSnapshotsReaderTest {
 
     private static final UUID TECHNICAL_ACCOUNT_ID = UUID.fromString("00000000-0000-4000-8000-00000000a012");
 
@@ -273,8 +273,8 @@ class PayloadSourcesReaderTest {
                 .map(account -> new AccountChecksum(account.accountId(), JDOE_CHECKSUM)).toList());
     }
 
-    private PayloadSourcesReader reader(final int pageSize, final ExecutionContext context) {
-        var reader = new PayloadSourcesReader(viewRepository, payloadRepository, TECHNICAL_ACCOUNT_ID, pageSize,
+    private AllAccountSnapshotsReader reader(final int pageSize, final ExecutionContext context) {
+        var reader = new AllAccountSnapshotsReader(viewRepository, payloadRepository, TECHNICAL_ACCOUNT_ID, pageSize,
             new SyncDataProperties(sources, "{}"), sourceRepository, accountLockService);
         reader.open(context);
         return reader;

@@ -109,7 +109,7 @@ class PayloadProcessorTest {
     @BeforeEach
     void setUp() {
         stepExecution = MetaDataInstanceFactory.createStepExecution(
-            MetaDataInstanceFactory.createJobExecution(JOB_EXECUTION_ID), "buildPayloadsStep", 7L);
+            MetaDataInstanceFactory.createJobExecution(JOB_EXECUTION_ID), "allAccountsPayloadStep", 7L);
         StepSynchronizationManager.register(stepExecution);
         when(viewRepository.existsByAccountId(JDOE)).thenReturn(true);
         alertAppender = new ListAppender<>();

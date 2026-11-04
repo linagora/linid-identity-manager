@@ -48,7 +48,7 @@ import org.springframework.batch.infrastructure.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Listener of {@code buildPayloadsStep}: checks the {@code mapping} before the step, logs the {@code payloadError}
+ * Listener of {@code allAccountsPayloadStep}: checks the {@code mapping} before the step, logs the {@code payloadError}
  * alert of each account skipped, and logs the number of accounts of each {@link PayloadOutcome} at the end of the
  * step.
  *

@@ -57,8 +57,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configuration of the computation of the rights: the readers of the account and application pairs to compute, the
- * writer of their rights, and {@code computeRightsStep}, chaining the reader of the pairs of the cycle, the processor
- * computing the rights and the writer.
+ * writer of their rights, and {@code allPairsComputeRightsStep}, chaining the reader of the pairs of the cycle, the
+ * processor computing the rights and the writer.
  *
  * <p>There is one step-scoped reader per step of the computation: the pairs of the cycle for the global job, the pairs
  * of one account for its recomputation, and the pairs of one application for its recomputation. Each reader gives the
@@ -105,13 +105,13 @@ public class ComputeRightsStepConfig {
     }
 
     /**
-     * Reader of the pairs of the cycle whose rights must be computed, used by the global job.
+     * Reader of all the pairs whose rights must be computed, used by the global job.
      *
      * @return the reader of the pairs, ordered by account then application
      */
     @Bean
     @StepScope
-    public ItemReader<AccountComputedRightView> cyclePairsReader() {
+    public ItemReader<AccountComputedRightView> allPairsReader() {
         return windowReader((position, limit) -> repository
             .findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
                 accountOf(position), position, limit));
@@ -185,16 +185,16 @@ public class ComputeRightsStepConfig {
      * @return the step computing and writing the rights of the pairs of the cycle
      */
     @Bean
-    public Step computeRightsStep(
+    public Step allPairsComputeRightsStep(
         final JobRepository jobRepository,
         final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
         final ComputeRightsProcessor computeRightsProcessor,
         final ItemWriter<ComputedRight> computedRightWriter,
         final ComputeRightsStepListener computeRightsStepListener) {
-        return new StepBuilder("computeRightsStep", jobRepository)
+        return new StepBuilder("allPairsComputeRightsStep", jobRepository)
             .<AccountComputedRightView, ComputedRight>chunk(chunkSize)
             .transactionManager(transactionManager)
-            .reader(cyclePairsReader())
+            .reader(allPairsReader())
             .processor(computeRightsProcessor)
             .writer(computedRightWriter)
             .listener(computeRightsStepListener)

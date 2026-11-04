@@ -53,7 +53,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configuration of the payload build of the accounts: the reader of the accounts and their sources, the writer of the
- * changed payloads, and {@code buildPayloadsStep}, chaining them with the processor building the payloads.
+ * changed payloads, and {@code allAccountsPayloadStep}, chaining them with the processor building the payloads.
  */
 @Configuration
 public class PayloadStepConfig {
@@ -139,8 +139,8 @@ public class PayloadStepConfig {
      */
     @Bean
     @StepScope
-    public PayloadSourcesReader payloadSourcesReader() {
-        return new PayloadSourcesReader(repository, payloadRepository, technicalAccountId, chunkSize, properties,
+    public AllAccountSnapshotsReader allAccountSnapshotsReader() {
+        return new AllAccountSnapshotsReader(repository, payloadRepository, technicalAccountId, chunkSize, properties,
             sourceRepository, accountLockService);
     }
 
@@ -182,16 +182,16 @@ public class PayloadStepConfig {
      * @return the step building and writing the payloads
      */
     @Bean
-    public Step buildPayloadsStep(
+    public Step allAccountsPayloadStep(
         final JobRepository jobRepository,
         final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
         final PayloadProcessor payloadProcessor,
         final PayloadStepListener payloadStepListener,
         final ItemWriter<AccountPayload> payloadWriter) {
-        return new StepBuilder("buildPayloadsStep", jobRepository)
+        return new StepBuilder("allAccountsPayloadStep", jobRepository)
             .<AccountSnapshot, AccountPayload>chunk(chunkSize)
             .transactionManager(transactionManager)
-            .reader(payloadSourcesReader())
+            .reader(allAccountSnapshotsReader())
             .processor(payloadProcessor)
             .writer(payloadWriter)
             .listener(payloadStepListener)

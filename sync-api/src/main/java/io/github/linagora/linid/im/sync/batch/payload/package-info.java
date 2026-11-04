@@ -28,7 +28,8 @@
  * Provides the steps of the account payloads build.
  *
  * <p>This package contains the steps building and writing the payloads of the accounts, for the cycle and for the
- * recomputation of an account, with the reader of the accounts and their rows in each source, the processor of the
+ * recomputation of an account, with the reader of the account snapshots, the loader it delegates to, which locks the
+ * accounts before reading the checksums of their payloads and their rows in each source, the processor of the
  * payloads and the listener of the steps.</p>
  */
 package io.github.linagora.linid.im.sync.batch.payload;

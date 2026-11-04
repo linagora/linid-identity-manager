@@ -27,14 +27,10 @@
 package io.github.linagora.linid.im.sync.batch.payload;
 
 import io.github.linagora.linid.im.sync.config.LinidDataSourceConfig;
-import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.exception.PayloadException;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
-import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
-import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
-import io.github.linagora.linid.im.sync.service.AccountLockService;
 import jakarta.persistence.EntityManagerFactory;
 import java.util.UUID;
 import org.apache.commons.lang3.Validate;
@@ -52,8 +48,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * Configuration of the payload build of the accounts: the reader of the accounts and their sources, the writer of the
- * changed payloads, and {@code allAccountsPayloadStep}, chaining them with the processor building the payloads.
+ * Configuration of the payload build of the accounts: the reader of the account snapshots, the writer of the changed
+ * payloads, and {@code allAccountsPayloadStep}, chaining them with the processor building the payloads.
  */
 @Configuration
 public class PayloadStepConfig {
@@ -64,24 +60,9 @@ public class PayloadStepConfig {
     private final AccountComputedRightViewRepository repository;
 
     /**
-     * Repository of {@code account_payloads}.
+     * Loader of the account snapshots, shared by the readers.
      */
-    private final AccountPayloadRepository payloadRepository;
-
-    /**
-     * Repository reading the rows of a source.
-     */
-    private final SourceRepository sourceRepository;
-
-    /**
-     * Configuration holding the sources.
-     */
-    private final SyncDataProperties properties;
-
-    /**
-     * Service taking the locks of the accounts read.
-     */
-    private final AccountLockService accountLockService;
+    private final AccountSnapshotLoader loader;
 
     /**
      * Identifier of the technical account of {@code sync-api}.
@@ -97,10 +78,7 @@ public class PayloadStepConfig {
      * Creates the configuration of the payload build.
      *
      * @param repository         the repository of {@code account_computed_rights_view}
-     * @param payloadRepository  the repository of {@code account_payloads}
-     * @param sourceRepository   the repository reading the rows of a source
-     * @param properties         the configuration holding the sources
-     * @param accountLockService the service taking the locks of the accounts read
+     * @param loader             the loader of the account snapshots, shared by the readers
      * @param technicalAccountId the identifier of the technical account of {@code sync-api}
      * @param chunkSize          the number of accounts read, built and written per chunk
      * @throws NullPointerException     when the technical account is not set, since an empty value is bound as
@@ -108,40 +86,33 @@ public class PayloadStepConfig {
      * @throws IllegalArgumentException when the chunk size is not positive
      */
     public PayloadStepConfig(final AccountComputedRightViewRepository repository,
-                             final AccountPayloadRepository payloadRepository,
-                             final SourceRepository sourceRepository,
-                             final SyncDataProperties properties,
-                             final AccountLockService accountLockService,
+                             final AccountSnapshotLoader loader,
                              @Value("${sync.technical-account-id}") final UUID technicalAccountId,
                              @Value("${sync.payload.chunk-size}") final int chunkSize) {
         Validate.notNull(technicalAccountId, "sync.technical-account-id must be set");
         Validate.isTrue(chunkSize > 0, "sync.payload.chunk-size must be positive");
         this.repository = repository;
-        this.payloadRepository = payloadRepository;
-        this.sourceRepository = sourceRepository;
-        this.properties = properties;
-        this.accountLockService = accountLockService;
+        this.loader = loader;
         this.technicalAccountId = technicalAccountId;
         this.chunkSize = chunkSize;
     }
 
     /**
-     * Reader of the accounts whose payload is to be built, with their rows in each source: every account of
+     * Reader of the snapshots of the accounts whose payload is to be built: every account of
      * {@code account_computed_rights_view} once, with or without payload, except the technical account of
      * {@code sync-api}, whose payload is never built so that its pairs are never {@code to_compute}.
      *
-     * <p>Step-scoped, so that each execution of the step has its own reader. The accounts, with the checksums of
-     * their current payloads, and their sources are read by pages of the chunk size, the accounts of a page being
-     * locked before their checksums and their sources are read. The reader is an {@code ItemStream}, opened and closed
-     * by the step, without state saved for a restart.</p>
+     * <p>Step-scoped, so that each execution of the step has its own reader. The accounts are read by pages of the
+     * chunk size, the accounts of a page being locked before the checksums of their payloads and their rows in each
+     * source are read. The reader is an {@code ItemStream}, opened and closed by the step, without state saved for a
+     * restart.</p>
      *
-     * @return the reader of the accounts and their sources, ordered by identifier
+     * @return the reader of the snapshots of every account, ordered by identifier
      */
     @Bean
     @StepScope
     public AllAccountSnapshotsReader allAccountSnapshotsReader() {
-        return new AllAccountSnapshotsReader(repository, payloadRepository, technicalAccountId, chunkSize, properties,
-            sourceRepository, accountLockService);
+        return new AllAccountSnapshotsReader(repository, technicalAccountId, chunkSize, loader);
     }
 
     /**

@@ -237,8 +237,8 @@ class PayloadStepConfigTest {
     @Test
     @DisplayName("constructor should reject a technical account that is not set, before any read")
     void testConstructor_technicalAccountNotSet() {
-        var exception = assertThrows(NullPointerException.class, () -> new PayloadStepConfig(repository,
-            payloadRepository, sourceRepository, properties(MAPPING), accountLockService, null, 2));
+        var exception = assertThrows(NullPointerException.class,
+            () -> new PayloadStepConfig(repository, loader(MAPPING), null, 2));
 
         assertEquals("sync.technical-account-id must be set", exception.getMessage());
         verifyNoInteractions(repository);
@@ -247,15 +247,18 @@ class PayloadStepConfigTest {
     @Test
     @DisplayName("constructor should reject a chunk size that is not positive")
     void testConstructor_chunkSizeNotPositive() {
-        var exception = assertThrows(IllegalArgumentException.class, () -> new PayloadStepConfig(repository,
-            payloadRepository, sourceRepository, properties(MAPPING), accountLockService, TECHNICAL_ACCOUNT_ID, 0));
+        var exception = assertThrows(IllegalArgumentException.class,
+            () -> new PayloadStepConfig(repository, loader(MAPPING), TECHNICAL_ACCOUNT_ID, 0));
 
         assertEquals("sync.payload.chunk-size must be positive", exception.getMessage());
     }
 
     private PayloadStepConfig config(final String mapping, final int chunkSize) {
-        return new PayloadStepConfig(repository, payloadRepository, sourceRepository, properties(mapping),
-            accountLockService, TECHNICAL_ACCOUNT_ID, chunkSize);
+        return new PayloadStepConfig(repository, loader(mapping), TECHNICAL_ACCOUNT_ID, chunkSize);
+    }
+
+    private AccountSnapshotLoader loader(final String mapping) {
+        return new AccountSnapshotLoader(payloadRepository, properties(mapping), sourceRepository, accountLockService);
     }
 
     /**

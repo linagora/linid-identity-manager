@@ -135,14 +135,15 @@ left by the failed cycle.
 `SYNC_PAYLOAD_CHUNK_SIZE` accounts is read, processed and written in its own transaction of `linidTransactionManager`,
 whose persistence context is closed at its end.
 
-- **Read**: `allAccountSnapshotsReader`, a `AllAccountSnapshotsReader` extending `AbstractPagingItemReader`, reads every
-  account of `account_computed_rights_view` once, except the technical account of `sync-api`, by pages of the chunk
-  size, at the first read of each chunk. Each page starts after the last account of the previous one, not at an
-  offset: an account deleted since the previous page does not shift the next ones. The accounts of the page are then
-  locked (see [Several instances](#several-instances)), before the checksums of their current payloads are read in
-  `account_payloads`, through its unique index on `act_id`, then each source once, with `SourceRepository`, which
-  checks and quotes the source and column names, reads the PostgreSQL arrays as lists, and parses the `json` and
-  `jsonb` columns. The reader keeps no state for a restart: each cycle reads every account from the first one.
+- **Read**: `allAccountSnapshotsReader`, an `AllAccountSnapshotsReader` extending `AbstractPagingItemReader`, reads
+  every account of `account_computed_rights_view` once, except the technical account of `sync-api`, by pages of the
+  chunk size, at the first read of each chunk. Each page starts after the last account of the previous one, not at an
+  offset: an account deleted since the previous page does not shift the next ones. `AccountSnapshotLoader` then locks
+  the accounts of the page (see [Several instances](#several-instances)), before reading the checksums of their current
+  payloads in `account_payloads`, through its unique index on `act_id`, then each source once, with
+  `SourceRepository`, which checks and quotes the source and column names, reads the PostgreSQL arrays as lists, and
+  parses the `json` and `jsonb` columns. The reader keeps no state for a restart: each cycle reads every account from
+  the first one.
 - **Process**: `PayloadProcessor`, step-scoped to receive the job execution of its step, builds the payload with
   `PayloadService`, which renders the `mapping` with Jinjava, with the row of the account in each source, and parses
   it as a JSON object. The checksum of the payload is computed with `ChecksumService` on its compact JSON, with its
@@ -221,8 +222,8 @@ PostgreSQL advisory locks, in their two-integer form `(namespace, key)`, each ki
   does not block the next ones either. Only the cycle takes it, so that a recomputation never makes a cycle skip.
 - **Per-account lock** `(LockNamespaces.ACCOUNT, accountId.hashCode())`: the payload build and the computation of the
   rights take `pg_advisory_xact_lock` on the accounts of each chunk, in its transaction of the linid-api database, so
-  that two processings, cycles or recomputations, never write the same account at the same time.
-  `AllAccountSnapshotsReader` locks the accounts of a page before reading their payload checksums and sources, and
+  that two processings, cycles or recomputations, never write the same account at the same time. `AccountSnapshotLoader`
+  locks the accounts read before reading the checksums of their payloads and their sources, and
   `ComputeRightsStepListener` locks the accounts of the pairs of a chunk in `beforeChunk`, once they are read and
   before they are computed. The locks are released at the commit of the chunk: the processings of different accounts
   go on in parallel, and a processing of an account being written waits for the end of the other chunk.

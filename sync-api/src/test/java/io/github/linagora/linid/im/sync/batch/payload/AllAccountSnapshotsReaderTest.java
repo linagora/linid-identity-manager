@@ -28,46 +28,22 @@ package io.github.linagora.linid.im.sync.batch.payload;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
-import io.github.linagora.linid.im.sync.config.SourceProperties;
-import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
-import io.github.linagora.linid.im.sync.persistence.model.AccountChecksum;
 import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
-import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
-import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
-import io.github.linagora.linid.im.sync.service.AccountLockService;
-import io.github.linagora.linid.im.sync.service.AlertService;
-import java.sql.SQLException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 import org.springframework.batch.infrastructure.item.ExecutionContext;
 import org.springframework.data.domain.Limit;
-import org.springframework.jdbc.BadSqlGrammarException;
 
 @DisplayName("Test class: AllAccountSnapshotsReader")
 class AllAccountSnapshotsReaderTest {
@@ -90,156 +66,52 @@ class AllAccountSnapshotsReaderTest {
     private static final AccountIdentity BLEE =
         new AccountIdentity(UUID.fromString("00000000-0000-4000-8000-000000000003"), "blee");
 
-    private static final String JDOE_CHECKSUM = "checksum-1";
-
     private final AccountComputedRightViewRepository viewRepository = mock(AccountComputedRightViewRepository.class);
 
-    private final AccountPayloadRepository payloadRepository = mock(AccountPayloadRepository.class);
-
-    private final SourceRepository sourceRepository = mock(SourceRepository.class);
-
-    private final AccountLockService accountLockService = mock(AccountLockService.class);
-
-    private final Logger alertLogger = (Logger) LoggerFactory.getLogger(AlertService.class);
-
-    private final Map<String, SourceProperties> sources = new LinkedHashMap<>();
-
-    private ListAppender<ILoggingEvent> alertAppender;
-
-    @BeforeEach
-    void setUp() {
-        alertAppender = new ListAppender<>();
-        alertAppender.start();
-        alertLogger.addAppender(alertAppender);
-    }
-
-    @AfterEach
-    void tearDown() {
-        alertLogger.detachAppender(alertAppender);
-    }
+    private final AccountSnapshotLoader loader = mock(AccountSnapshotLoader.class);
 
     @Test
-    @DisplayName("read should give the accounts of the view by pages starting after the last account of the previous "
-        + "page, with the checksum of their payload, null without payload, and their rows in each source, read once "
-        + "per page")
+    @DisplayName("read should give the snapshots of the accounts of the view, except the technical account, by pages "
+        + "starting after the last account of the previous page, each page being loaded once")
     void testRead() throws Exception {
-        sources.put("accounts", new SourceProperties("act_id"));
-        sources.put("account_payload_view", new SourceProperties("owner_id"));
         page(LOWEST_ACCOUNT_ID, JDOE, ASMITH);
         page(ASMITH.accountId(), BLEE);
-        var jdoeRow = Map.<String, Object>of("act_id", JDOE.accountId(), "email", "jdoe@example.com");
-        var asmithRow = Map.<String, Object>of("act_id", ASMITH.accountId(), "email", "asmith@example.com");
-        var bleeRow = Map.<String, Object>of("act_id", BLEE.accountId(), "email", "blee@example.com");
-        var devRow = Map.<String, Object>of("owner_id", JDOE.accountId(), "groups", List.of("DEV"));
-        var rndRow = Map.<String, Object>of("owner_id", JDOE.accountId(), "groups", List.of("RND"));
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", List.of(JDOE.accountId(), ASMITH.accountId())))
-            .thenReturn(List.of(jdoeRow, asmithRow));
-        when(sourceRepository.findAllByAccountIds("account_payload_view", "owner_id",
-            List.of(JDOE.accountId(), ASMITH.accountId()))).thenReturn(List.of(devRow, rndRow));
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", List.of(BLEE.accountId())))
-            .thenReturn(List.of(bleeRow));
-        when(sourceRepository.findAllByAccountIds("account_payload_view", "owner_id", List.of(BLEE.accountId())))
-            .thenReturn(List.of());
-        var reader = reader(2, new ExecutionContext());
+        var reader = reader(new ExecutionContext());
 
-        assertEquals(new AccountSnapshot(JDOE, JDOE_CHECKSUM,
-            Map.of("accounts", List.of(jdoeRow), "account_payload_view", List.of(devRow, rndRow))), reader.read());
-        assertEquals(new AccountSnapshot(ASMITH, null,
-            Map.of("accounts", List.of(asmithRow), "account_payload_view", List.of())), reader.read());
-        assertEquals(new AccountSnapshot(BLEE, null,
-            Map.of("accounts", List.of(bleeRow), "account_payload_view", List.of())), reader.read());
+        assertEquals(snapshot(JDOE), reader.read());
+        assertEquals(snapshot(ASMITH), reader.read());
+        assertEquals(snapshot(BLEE), reader.read());
         assertNull(reader.read());
-        verify(viewRepository, times(2))
-            .findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(any(), any(), any());
-        verify(sourceRepository, times(4)).findAllByAccountIds(any(), any(), anyCollection());
-    }
-
-    @Test
-    @DisplayName("read should lock the accounts of a page before reading the checksums of their payloads and their "
-        + "sources")
-    void testRead_locksFirst() throws Exception {
-        sources.put("accounts", new SourceProperties("act_id"));
-        page(LOWEST_ACCOUNT_ID, JDOE, ASMITH);
-        var accountIds = List.of(JDOE.accountId(), ASMITH.accountId());
-
-        reader(2, new ExecutionContext()).read();
-
-        var order = inOrder(viewRepository, accountLockService, payloadRepository, sourceRepository);
+        var order = inOrder(viewRepository, loader);
         order.verify(viewRepository).findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
             TECHNICAL_ACCOUNT_ID, LOWEST_ACCOUNT_ID, Limit.of(2));
-        order.verify(accountLockService).lockAccounts(accountIds);
-        order.verify(payloadRepository).findByAccountIdIn(accountIds);
-        order.verify(sourceRepository).findAllByAccountIds("accounts", "act_id", accountIds);
-    }
-
-    @Test
-    @DisplayName("read should give every account of a page, with a null checksum for an account without checksum "
-        + "under the locks, so that the page keeps its size and the reading goes on")
-    void testRead_accountWithoutChecksum() throws Exception {
-        page(LOWEST_ACCOUNT_ID, JDOE, ASMITH);
-        page(ASMITH.accountId(), BLEE);
-        // jdoe deleted since its page was read: its payload was deleted with it
-        when(payloadRepository.findByAccountIdIn(List.of(JDOE.accountId(), ASMITH.accountId())))
-            .thenReturn(List.of());
-        var reader = reader(2, new ExecutionContext());
-
-        assertEquals(new AccountSnapshot(JDOE, null, Map.of()), reader.read());
-        assertEquals(new AccountSnapshot(ASMITH, null, Map.of()), reader.read());
-        assertEquals(BLEE, reader.read().account());
-        assertNull(reader.read());
+        order.verify(loader).load(List.of(JDOE, ASMITH));
+        order.verify(viewRepository).findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
+            TECHNICAL_ACCOUNT_ID, ASMITH.accountId(), Limit.of(2));
+        order.verify(loader).load(List.of(BLEE));
     }
 
     @Test
     @DisplayName("read should give null after a full last page, once the next page is empty")
     void testRead_fullLastPage() throws Exception {
         page(LOWEST_ACCOUNT_ID, JDOE, ASMITH);
-        var reader = reader(2, new ExecutionContext());
+        page(ASMITH.accountId());
+        var reader = reader(new ExecutionContext());
 
-        assertEquals(JDOE, reader.read().account());
-        assertEquals(ASMITH, reader.read().account());
+        assertEquals(snapshot(JDOE), reader.read());
+        assertEquals(snapshot(ASMITH), reader.read());
         assertNull(reader.read());
         verify(viewRepository).findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
             TECHNICAL_ACCOUNT_ID, ASMITH.accountId(), Limit.of(2));
     }
 
     @Test
-    @DisplayName("read should give the accounts without rows when there is no source")
-    void testRead_noSource() throws Exception {
-        page(LOWEST_ACCOUNT_ID, JDOE);
-        var reader = reader(2, new ExecutionContext());
-
-        assertEquals(new AccountSnapshot(JDOE, JDOE_CHECKSUM, Map.of()), reader.read());
-        assertNull(reader.read());
-        verifyNoInteractions(sourceRepository);
-    }
-
-    @Test
-    @DisplayName("read should give null without reading any source when there is no account")
+    @DisplayName("read should give null when there is no account")
     void testRead_noAccount() throws Exception {
-        sources.put("accounts", new SourceProperties("act_id"));
+        page(LOWEST_ACCOUNT_ID);
 
-        assertNull(reader(2, new ExecutionContext()).read());
-        verifyNoInteractions(sourceRepository, accountLockService);
-    }
-
-    @Test
-    @DisplayName("read should raise an exception naming the source that cannot be read, after a blocking alert")
-    void testRead_unreadableSource() {
-        sources.put("accounts", new SourceProperties("act_id"));
-        sources.put("unknown_view", new SourceProperties("act_id"));
-        page(LOWEST_ACCOUNT_ID, JDOE);
-        var cause = new BadSqlGrammarException("read", "SELECT", new SQLException("relation does not exist"));
-        when(sourceRepository.findAllByAccountIds(eq("unknown_view"), any(), anyCollection())).thenThrow(cause);
-        var reader = reader(2, new ExecutionContext());
-
-        var exception = assertThrows(IllegalStateException.class, reader::read);
-
-        assertEquals("Unable to read the source unknown_view", exception.getMessage());
-        assertSame(cause, exception.getCause());
-        assertEquals(1, alertAppender.list.size());
-        var alert = alertAppender.list.getFirst();
-        assertEquals(Level.ERROR, alert.getLevel());
-        assertEquals("Source unreadable, payload build aborted — source=unknown_view", alert.getFormattedMessage());
+        assertNull(reader(new ExecutionContext()).read());
+        verify(loader).load(List.of());
     }
 
     @Test
@@ -250,10 +122,10 @@ class AllAccountSnapshotsReaderTest {
         var context = new ExecutionContext();
         context.putString(LAST_ACCOUNT_KEY, JDOE.accountId().toString());
         context.putInt(READ_COUNT_KEY, 1);
-        var reader = reader(2, context);
+        var reader = reader(context);
 
-        assertEquals(JDOE, reader.read().account());
-        assertEquals(ASMITH, reader.read().account());
+        assertEquals(snapshot(JDOE), reader.read());
+        assertEquals(snapshot(ASMITH), reader.read());
         reader.update(context);
 
         assertEquals(JDOE.accountId().toString(), context.getString(LAST_ACCOUNT_KEY));
@@ -262,20 +134,21 @@ class AllAccountSnapshotsReaderTest {
     }
 
     /**
-     * Gives the accounts of the page following the given account, by pages of 2 accounts, and the checksums of their
-     * payloads, read under the locks: only jdoe has a payload.
+     * Gives the accounts of the page following the given account, by pages of 2 accounts, and their snapshots.
      */
     private void page(final UUID after, final AccountIdentity... accounts) {
+        var page = List.of(accounts);
         when(viewRepository.findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
-            TECHNICAL_ACCOUNT_ID, after, Limit.of(2))).thenReturn(List.of(accounts));
-        when(payloadRepository.findByAccountIdIn(Stream.of(accounts).map(AccountIdentity::accountId).toList()))
-            .thenReturn(Stream.of(accounts).filter(JDOE::equals)
-                .map(account -> new AccountChecksum(account.accountId(), JDOE_CHECKSUM)).toList());
+            TECHNICAL_ACCOUNT_ID, after, Limit.of(2))).thenReturn(page);
+        when(loader.load(page)).thenReturn(Stream.of(accounts).map(AllAccountSnapshotsReaderTest::snapshot).toList());
     }
 
-    private AllAccountSnapshotsReader reader(final int pageSize, final ExecutionContext context) {
-        var reader = new AllAccountSnapshotsReader(viewRepository, payloadRepository, TECHNICAL_ACCOUNT_ID, pageSize,
-            new SyncDataProperties(sources, "{}"), sourceRepository, accountLockService);
+    private static AccountSnapshot snapshot(final AccountIdentity account) {
+        return new AccountSnapshot(account, null, Map.of());
+    }
+
+    private AllAccountSnapshotsReader reader(final ExecutionContext context) {
+        var reader = new AllAccountSnapshotsReader(viewRepository, TECHNICAL_ACCOUNT_ID, 2, loader);
         reader.open(context);
         return reader;
     }

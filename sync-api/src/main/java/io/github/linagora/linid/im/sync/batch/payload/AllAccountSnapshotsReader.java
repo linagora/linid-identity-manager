@@ -26,38 +26,23 @@
 
 package io.github.linagora.linid.im.sync.batch.payload;
 
-import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
-import io.github.linagora.linid.im.sync.persistence.model.AccountChecksum;
 import io.github.linagora.linid.im.sync.persistence.model.AccountIdentity;
 import io.github.linagora.linid.im.sync.persistence.repository.AccountComputedRightViewRepository;
-import io.github.linagora.linid.im.sync.persistence.repository.AccountPayloadRepository;
-import io.github.linagora.linid.im.sync.persistence.repository.SourceRepository;
-import io.github.linagora.linid.im.sync.service.AccountLockService;
-import io.github.linagora.linid.im.sync.service.AlertService;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.springframework.batch.infrastructure.item.database.AbstractPagingItemReader;
 import org.springframework.data.domain.Limit;
 
 /**
- * Reader of {@code allAccountsPayloadStep}: reads the accounts of {@code account_computed_rights_view} by pages, with
- * the checksums of their current payloads, read in {@code account_payloads}, and adds to each one its rows in each
+ * Reader of {@code allAccountsPayloadStep}: reads every account of {@code account_computed_rights_view} once, except
+ * the technical account of {@code sync-api}, by pages, and gives the snapshots of each page, loaded by
+ * {@link AccountSnapshotLoader}: the accounts with the checksums of their current payloads and their rows in each
  * source.
  *
  * <p>Each page starts after the last account of the previous one, not at an offset: an account deleted since the
- * previous page is no longer in the view, without shifting the next accounts. For each page, each source is read once
- * for all its accounts. With pages of the chunk size, a page is read at the first read of a chunk, in its transaction.
- * An account with several rows in a source is given as it is: the processor rejects it, so that the alert names the
- * account.</p>
- *
- * <p>The accounts of a page are locked with {@link AccountLockService} before the checksums of their payloads and
- * their sources are read: the locks are held until the commit of the chunk, so that two processings of the same
- * account read and write one after the other, the later one reading the fresher data.</p>
+ * previous page is no longer in the view, without shifting the next accounts. With pages of the chunk size, a page is
+ * read at the first read of a chunk, in its transaction, in which the loader locks its accounts.</p>
  *
  * <p>The reader keeps no state for a restart: each cycle is a new job instance, whose step reads every account from
  * the first one, so that every payload is built from the current sources. Its state is not saved either: by default,
@@ -72,34 +57,19 @@ public class AllAccountSnapshotsReader extends AbstractPagingItemReader<AccountS
     private static final UUID LOWEST_ACCOUNT_ID = new UUID(0L, 0L);
 
     /**
-     * Repository of {@code account_computed_rights_view}, giving the accounts.
+     * Repository of {@code account_computed_rights_view}, giving the pages of accounts.
      */
     private final AccountComputedRightViewRepository viewRepository;
 
     /**
-     * Repository of {@code account_payloads}, giving the checksums of the payloads of the accounts.
-     */
-    private final AccountPayloadRepository payloadRepository;
-
-    /**
-     * Identifier of the technical account of {@code sync-api}, whose payload is never built.
+     * Identifier of the technical account of {@code sync-api}, never read.
      */
     private final UUID technicalAccountId;
 
     /**
-     * Configuration holding the sources.
+     * Loader of the snapshots of the accounts of a page.
      */
-    private final SyncDataProperties properties;
-
-    /**
-     * Repository reading the rows of a source.
-     */
-    private final SourceRepository sourceRepository;
-
-    /**
-     * Service taking the locks of the accounts of a page.
-     */
-    private final AccountLockService accountLockService;
+    private final AccountSnapshotLoader loader;
 
     /**
      * Last account of the pages read, after which the next page starts.
@@ -107,43 +77,26 @@ public class AllAccountSnapshotsReader extends AbstractPagingItemReader<AccountS
     private UUID lastPageAccountId = LOWEST_ACCOUNT_ID;
 
     /**
-     * Creates the reader of the accounts and their sources.
+     * Creates the reader of the snapshots of every account.
      *
      * @param viewRepository     the repository of {@code account_computed_rights_view}
-     * @param payloadRepository  the repository of {@code account_payloads}
-     * @param technicalAccountId the identifier of the technical account of {@code sync-api}
+     * @param technicalAccountId the identifier of the technical account of {@code sync-api}, never read
      * @param pageSize           the number of accounts per page
-     * @param properties         the configuration holding the sources
-     * @param sourceRepository   the repository reading the rows of a source
-     * @param accountLockService the service taking the locks of the accounts of a page
+     * @param loader             the loader of the snapshots of the accounts of a page
      */
-    public AllAccountSnapshotsReader(
-        final AccountComputedRightViewRepository viewRepository,
-        final AccountPayloadRepository payloadRepository,
-        final UUID technicalAccountId,
-        final int pageSize,
-        final SyncDataProperties properties,
-        final SourceRepository sourceRepository,
-        final AccountLockService accountLockService) {
+    public AllAccountSnapshotsReader(final AccountComputedRightViewRepository viewRepository,
+                                     final UUID technicalAccountId,
+                                     final int pageSize,
+                                     final AccountSnapshotLoader loader) {
         this.viewRepository = viewRepository;
-        this.payloadRepository = payloadRepository;
         this.technicalAccountId = technicalAccountId;
-        this.properties = properties;
-        this.sourceRepository = sourceRepository;
-        this.accountLockService = accountLockService;
+        this.loader = loader;
         setPageSize(pageSize);
         setSaveState(false);
     }
 
     /**
-     * Reads the next page: the next accounts of the view, then, once they are locked, the checksums of their current
-     * payloads and their rows in each source.
-     *
-     * <p>The checksums are read under the locks: a processing that held them may have written the payloads of the page
-     * since it was read, and the processor would compare the new payloads with outdated checksums. An account without
-     * checksum has no payload yet, or was deleted since its page was read: the processor tells them apart. Every
-     * account of the page is given, so that the page keeps its size, since a page shorter than the page size ends the
-     * reading.</p>
+     * Reads the next page: the next accounts of the view, then their snapshots, loaded once they are locked.
      *
      * @throws IllegalStateException naming the source when a source cannot be read, after logging the
      *     {@code sourceUnreadable} alert
@@ -153,61 +106,9 @@ public class AllAccountSnapshotsReader extends AbstractPagingItemReader<AccountS
         List<AccountIdentity> page = viewRepository
             .findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
                 technicalAccountId, lastPageAccountId, Limit.of(getPageSize()));
-        if (page.isEmpty()) {
-            results = List.of();
-            return;
+        if (!page.isEmpty()) {
+            lastPageAccountId = page.getLast().accountId();
         }
-        lastPageAccountId = page.getLast().accountId();
-
-        List<UUID> accountIds = page.stream().map(AccountIdentity::accountId).toList();
-        accountLockService.lockAccounts(accountIds);
-        Map<UUID, String> checksums = payloadRepository.findByAccountIdIn(accountIds).stream()
-            .collect(Collectors.toMap(AccountChecksum::accountId, AccountChecksum::checksum));
-
-        Map<String, Map<UUID, List<Map<String, Object>>>> pageRows = new HashMap<>();
-        properties.sources().forEach((source, settings) ->
-            pageRows.put(source, readSource(source, settings.accountIdColumn(), accountIds)));
-
-        results = page.stream()
-            .map(account -> new AccountSnapshot(account, checksums.get(account.accountId()),
-                accountRows(account.accountId(), pageRows)))
-            .toList();
-    }
-
-    /**
-     * Gives the rows of an account in each source of its page, an empty list for a source without row.
-     *
-     * @param accountId the identifier of the account
-     * @param pageRows  the rows of the page, by source then by {@code act_id}
-     * @return the rows of the account, by source name
-     */
-    private static Map<String, List<Map<String, Object>>> accountRows(
-        final UUID accountId,
-        final Map<String, Map<UUID, List<Map<String, Object>>>> pageRows) {
-        return pageRows.entrySet().stream()
-            .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
-                entry -> entry.getValue().getOrDefault(accountId, List.of())));
-    }
-
-    /**
-     * Reads the rows of a source for the given accounts, and groups them by account.
-     *
-     * @param source          the name of the source
-     * @param accountIdColumn the column of the source holding the {@code act_id} of the account
-     * @param accountIds      the identifiers of the accounts
-     * @return the rows of the source by {@code act_id}, an account without row being absent
-     * @throws IllegalStateException naming the source, after logging the {@code sourceUnreadable} alert
-     */
-    private Map<UUID, List<Map<String, Object>>> readSource(
-        final String source,
-        final String accountIdColumn,
-        final Collection<UUID> accountIds) {
-        try {
-            return sourceRepository.findAllByAccountIds(source, accountIdColumn, accountIds).stream()
-                .collect(Collectors.groupingBy(row -> (UUID) row.get(accountIdColumn)));
-        } catch (RuntimeException e) {
-            AlertService.sourceUnreadable("source=" + source, e);
-            throw new IllegalStateException("Unable to read the source " + source, e);
-        }
+        results = loader.load(page);
     }
 }

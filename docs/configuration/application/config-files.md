@@ -114,6 +114,12 @@ SUPERSET_RLS_CONFIG=/app/superset.yaml
 # Base URL of sync-api, called by the API with mutual TLS
 SYNC_API_URL=https://sync-api:8443
 
+# Maximum time to establish the connection to sync-api, as a duration (e.g. 5s, 500ms)
+SYNC_API_CONNECT_TIMEOUT=5s
+
+# Maximum time to wait for the response of sync-api, as a duration (e.g. 10s, 500ms)
+SYNC_API_READ_TIMEOUT=10s
+
 # Path to the PKCS12 key store holding the client certificate presented by the API to sync-api only
 SYNC_API_CLIENT_KEY_STORE=file:/etc/ssl/api-client-keystore.p12
 
@@ -184,7 +190,8 @@ LINID_DATABASE_USER=sync_api_linid_user
 # Password of sync-api in the linid-api database
 LINID_DATABASE_PASSWORD=password
 
-# Maximum number of connections to the linid-api database (default: 5)
+# Maximum number of connections to the linid-api database, shared by the cycle and the recomputations: it should grow
+# with spring.task.execution.pool.core-size, up to core-size + 1 for all of them to run at once (default: 5)
 # LINID_DATABASE_MAX_POOL_SIZE=5
 
 # act_id of the technical account of sync-api, shared by its instances and recorded as the author of their writes

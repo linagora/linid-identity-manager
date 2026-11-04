@@ -35,9 +35,9 @@ import java.util.UUID;
  * <p>A record rather than an interface projection: Spring Data builds it with its constructor, while an interface
  * projection creates a proxy per row, several times heavier in the pages of accounts read by the payload build.</p>
  *
- * @param actId           the identifier of the account
+ * @param accountId       the identifier of the account
  * @param externalId      the external identifier of the account, used to identify it in the alerts and the logs
  * @param payloadChecksum the checksum of the current payload of the account, {@code null} when it has none yet
  */
-public record AccountSummary(UUID actId, String externalId, String payloadChecksum) {
+public record AccountSummary(UUID accountId, String externalId, String payloadChecksum) {
 }

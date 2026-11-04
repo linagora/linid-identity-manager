@@ -132,7 +132,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
             return null;
         }
 
-        UUID accountId = item.account().actId();
+        UUID accountId = item.account().accountId();
         Optional<AccountPayload> current = currentRow(item);
         // Account deleted since its page was read: inserting its payload would fail on the foreign key
         if (isDeleted(item, current)) {
@@ -158,7 +158,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
         if (item.account().payloadChecksum() == null) {
             return Optional.empty();
         }
-        return payloadRepository.findByActId(item.account().actId());
+        return payloadRepository.findByAccountId(item.account().accountId());
     }
 
     /**
@@ -171,7 +171,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
      */
     private boolean isDeleted(final AccountSnapshot item, final Optional<AccountPayload> current) {
         if (item.account().payloadChecksum() == null) {
-            return !viewRepository.existsByActId(item.account().actId());
+            return !viewRepository.existsByAccountId(item.account().accountId());
         }
         // The payload is deleted with its account
         return current.isEmpty();
@@ -206,7 +206,7 @@ public class PayloadProcessor implements ItemProcessor<AccountSnapshot, AccountP
      */
     private AccountPayload newRow(final UUID accountId) {
         AccountPayload row = new AccountPayload();
-        row.setActId(accountId);
+        row.setAccountId(accountId);
         row.setCreatedBy(technicalAccountId);
         return row;
     }

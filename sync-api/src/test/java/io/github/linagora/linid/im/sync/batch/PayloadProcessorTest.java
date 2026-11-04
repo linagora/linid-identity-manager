@@ -111,7 +111,7 @@ class PayloadProcessorTest {
         stepExecution = MetaDataInstanceFactory.createStepExecution(
             MetaDataInstanceFactory.createJobExecution(JOB_EXECUTION_ID), "buildPayloadsStep", 7L);
         StepSynchronizationManager.register(stepExecution);
-        when(viewRepository.existsByActId(JDOE)).thenReturn(true);
+        when(viewRepository.existsByAccountId(JDOE)).thenReturn(true);
         alertAppender = new ListAppender<>();
         alertAppender.start();
         alertLogger.addAppender(alertAppender);
@@ -139,22 +139,22 @@ class PayloadProcessorTest {
         + "the instance and the job execution, keeping its author, without checking that the account still exists")
     void testProcess_changedPayload() {
         var current = new AccountPayload();
-        current.setAcpId(UUID.randomUUID());
-        current.setActId(JDOE);
+        current.setId(UUID.randomUUID());
+        current.setAccountId(JDOE);
         current.setChecksum("previous");
         current.setCreatedBy(OTHER_ACCOUNT_ID);
         current.setUpdatedBy(OTHER_ACCOUNT_ID);
-        when(payloadRepository.findByActId(JDOE)).thenReturn(Optional.of(current));
+        when(payloadRepository.findByAccountId(JDOE)).thenReturn(Optional.of(current));
 
         var row = processor(EMAIL_MAPPING).process(item(ROWS_BY_SOURCE, "previous"));
 
         assertSame(current, row);
         var expected = row(Map.of("email", "jdoe@example.com"),
             CHECKSUM_SERVICE.compute("{\"email\":\"jdoe@example.com\"}"));
-        expected.setAcpId(current.getAcpId());
+        expected.setId(current.getId());
         expected.setCreatedBy(OTHER_ACCOUNT_ID);
         assertEquals(expected, row);
-        verify(viewRepository, never()).existsByActId(any());
+        verify(viewRepository, never()).existsByAccountId(any());
     }
 
     @Test
@@ -168,7 +168,7 @@ class PayloadProcessorTest {
     @Test
     @DisplayName("process should filter out an account without payload deleted since the accounts were read")
     void testProcess_deletedAccount() {
-        when(viewRepository.existsByActId(JDOE)).thenReturn(false);
+        when(viewRepository.existsByAccountId(JDOE)).thenReturn(false);
 
         assertNull(processor(EMAIL_MAPPING).process(item(ROWS_BY_SOURCE, null)));
         verifyNoInteractions(payloadRepository);
@@ -178,10 +178,10 @@ class PayloadProcessorTest {
     @DisplayName("process should filter out an account with a payload deleted since the accounts were read, its row "
         + "being deleted with it, without checking that the account still exists")
     void testProcess_deletedAccountWithPayload() {
-        when(payloadRepository.findByActId(JDOE)).thenReturn(Optional.empty());
+        when(payloadRepository.findByAccountId(JDOE)).thenReturn(Optional.empty());
 
         assertNull(processor(EMAIL_MAPPING).process(item(ROWS_BY_SOURCE, "previous")));
-        verify(viewRepository, never()).existsByActId(any());
+        verify(viewRepository, never()).existsByAccountId(any());
     }
 
     @Test
@@ -236,9 +236,9 @@ class PayloadProcessorTest {
         var checksum = CHECKSUM_SERVICE.compute("{\"email\":\"jdoe@example.com\"}");
         processor.process(item(ROWS_BY_SOURCE, null));
         processor.process(item(ROWS_BY_SOURCE, checksum));
-        when(payloadRepository.findByActId(JDOE)).thenReturn(Optional.of(new AccountPayload()));
+        when(payloadRepository.findByAccountId(JDOE)).thenReturn(Optional.of(new AccountPayload()));
         processor.process(item(ROWS_BY_SOURCE, "previous"));
-        when(payloadRepository.findByActId(JDOE)).thenReturn(Optional.empty());
+        when(payloadRepository.findByAccountId(JDOE)).thenReturn(Optional.empty());
         processor.process(item(ROWS_BY_SOURCE, "previous"));
 
         var context = stepExecution.getExecutionContext();
@@ -265,7 +265,7 @@ class PayloadProcessorTest {
 
     private static AccountPayload row(final Map<String, Object> payload, final String checksum) {
         var row = new AccountPayload();
-        row.setActId(JDOE);
+        row.setAccountId(JDOE);
         row.setPayload(payload);
         row.setChecksum(checksum);
         row.setSyncInstanceId(INSTANCE_ID);

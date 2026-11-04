@@ -39,8 +39,8 @@ public interface AccountPayloadRepository extends JpaRepository<AccountPayload, 
     /**
      * Finds the payload of an account.
      *
-     * @param actId the identifier of the account
+     * @param accountId the identifier of the account
      * @return the payload of the account, empty when it has none yet
      */
-    Optional<AccountPayload> findByActId(UUID actId);
+    Optional<AccountPayload> findByAccountId(UUID accountId);
 }

@@ -80,7 +80,7 @@ public class RightsComputationServiceImpl implements RightsComputationService {
     @Override
     public ComputedRightRecord compute(final AccountComputedRightView pair, final Set<String> roleNames) {
         try {
-            OpaResult result = opaService.evaluate(pair.getAppCode(), pair.getPayload());
+            OpaResult result = opaService.evaluate(pair.getApplicationCode(), pair.getPayload());
             String claims = claims(pair, result);
             alertUnknownRoles(pair, result.roles(), roleNames);
             return new ComputedRightRecord(result.allow(), result.roles(), claims);
@@ -138,6 +138,6 @@ public class RightsComputationServiceImpl implements RightsComputationService {
      * @return the external identifier of the account and the code of the application
      */
     private static String context(final AccountComputedRightView pair) {
-        return "account=" + pair.getExternalId() + ", application=" + pair.getAppCode();
+        return "account=" + pair.getExternalId() + ", application=" + pair.getApplicationCode();
     }
 }

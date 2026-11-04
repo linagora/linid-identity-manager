@@ -60,7 +60,7 @@ public class ComputeRightsStepListener implements StepExecutionListener,
      */
     @Override
     public void onSkipInProcess(final AccountComputedRightView item, final Throwable t) {
-        AlertService.pairError("account=" + item.getExternalId() + ", application=" + item.getAppCode()
+        AlertService.pairError("account=" + item.getExternalId() + ", application=" + item.getApplicationCode()
             + ", cause=" + ExceptionUtils.getRootCauseMessage(t), null);
     }
 

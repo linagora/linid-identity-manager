@@ -47,9 +47,9 @@ public interface SourceRepository {
      *
      * @param source          the name of the table or view
      * @param accountIdColumn the column of the source holding the {@code act_id} of the account
-     * @param actIds          the identifiers of the accounts
+     * @param accountIds      the identifiers of the accounts
      * @return the rows found, each mapping the name of each column to its value, a PostgreSQL array being read as a
      *     {@link List}, and a {@code json} or {@code jsonb} value as parsed JSON
      */
-    List<Map<String, Object>> findAllByAccountIds(String source, String accountIdColumn, Collection<UUID> actIds);
+    List<Map<String, Object>> findAllByAccountIds(String source, String accountIdColumn, Collection<UUID> accountIds);
 }

@@ -53,10 +53,10 @@ public class AccountApplicationPairId implements Serializable {
     /**
      * Identifier of the account.
      */
-    private UUID actId;
+    private UUID accountId;
 
     /**
      * Identifier of the application.
      */
-    private UUID appId;
+    private UUID applicationId;
 }

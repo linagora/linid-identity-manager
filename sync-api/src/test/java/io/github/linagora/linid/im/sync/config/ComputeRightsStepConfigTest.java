@@ -142,10 +142,10 @@ class ComputeRightsStepConfigTest {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
         var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
         var third = pair(OTHER_ACCOUNT_ID, APPLICATION_ID);
-        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+        when(repository.findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
             LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
             .thenReturn(window(true, first, second));
-        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+        when(repository.findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
             ACCOUNT_ID, positionOf(second), LIMIT))
             .thenReturn(window(false, third));
 
@@ -154,7 +154,7 @@ class ComputeRightsStepConfigTest {
         verifyNoInteractions(repository);
         assertEquals(first, reader.read());
         assertEquals(second, reader.read());
-        verify(repository, never()).findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+        verify(repository, never()).findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
             ACCOUNT_ID, positionOf(second), LIMIT);
         assertEquals(third, reader.read());
         assertNull(reader.read());
@@ -162,10 +162,11 @@ class ComputeRightsStepConfigTest {
     }
 
     @Test
-    @DisplayName("accountPairsReader should read the pairs of the account of the actId job parameter")
+    @DisplayName("accountPairsReader should read the pairs of the account of the accountId job parameter")
     void testAccountPairsReader() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
-        when(repository.findByActIdAndToComputeTrueOrderByAppIdAsc(ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
+        when(repository.findByAccountIdAndToComputeTrueOrderByApplicationIdAsc(
+            ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
             .thenReturn(window(false, first));
 
         ItemReader<AccountComputedRightView> reader = config.accountPairsReader(ACCOUNT_ID);
@@ -176,15 +177,15 @@ class ComputeRightsStepConfigTest {
     }
 
     @Test
-    @DisplayName("applicationPairsReader should read the pairs of the application of the appId job parameter, each "
-        + "window bounded by the account of the last pair read")
+    @DisplayName("applicationPairsReader should read the pairs of the application of the applicationId job parameter, "
+        + "each window bounded by the account of the last pair read")
     void testApplicationPairsReader() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
         var second = pair(OTHER_ACCOUNT_ID, APPLICATION_ID);
-        when(repository.findByAppIdAndToComputeTrueAndActIdGreaterThanEqualOrderByActIdAsc(
+        when(repository.findByApplicationIdAndToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAsc(
             APPLICATION_ID, LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
             .thenReturn(window(true, first));
-        when(repository.findByAppIdAndToComputeTrueAndActIdGreaterThanEqualOrderByActIdAsc(
+        when(repository.findByApplicationIdAndToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAsc(
             APPLICATION_ID, ACCOUNT_ID, positionOf(first), LIMIT))
             .thenReturn(window(false, second));
 
@@ -235,9 +236,10 @@ class ComputeRightsStepConfigTest {
         when(rightsComputationService.compute(second, Set.of())).thenThrow(new RightsComputationException(
             "Unable to compute the rights of the pair", new IllegalStateException("Unclosed tag")));
         when(rightsComputationService.compute(third, Set.of())).thenReturn(RIGHTS);
-        when(repository.findChecksumsByActIdAndAppId(ACCOUNT_ID, APPLICATION_ID))
+        when(repository.findChecksumsByAccountIdAndApplicationId(ACCOUNT_ID, APPLICATION_ID))
             .thenReturn(Optional.of(new PairChecksums(null, null, null)));
-        when(repository.findChecksumsByActIdAndAppId(OTHER_ACCOUNT_ID, APPLICATION_ID)).thenReturn(Optional.empty());
+        when(repository.findChecksumsByAccountIdAndApplicationId(OTHER_ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.empty());
         when(computedRightRepository.findByAccountIdAndApplicationId(ACCOUNT_ID, APPLICATION_ID))
             .thenReturn(Optional.empty());
         var stepExecution = stepExecution();
@@ -264,7 +266,7 @@ class ComputeRightsStepConfigTest {
     void testComputeRightsStep_opaUnreachable() throws Exception {
         var first = pair(ACCOUNT_ID, APPLICATION_ID);
         var second = pair(ACCOUNT_ID, OTHER_APPLICATION_ID);
-        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+        when(repository.findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
             LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
             .thenReturn(window(false, first, second));
         when(rightsComputationService.compute(first, Set.of())).thenThrow(new OpaUnreachableException(
@@ -294,11 +296,11 @@ class ComputeRightsStepConfigTest {
      */
     private void cycleWindows(final AccountComputedRightView first, final AccountComputedRightView second,
                               final AccountComputedRightView third) {
-        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
+        when(repository.findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
             LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
             .thenReturn(window(true, first, second));
-        when(repository.findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(
-            second.getActId(), positionOf(second), LIMIT))
+        when(repository.findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
+            second.getAccountId(), positionOf(second), LIMIT))
             .thenReturn(window(false, third));
     }
 
@@ -307,10 +309,10 @@ class ComputeRightsStepConfigTest {
             MetaDataInstanceFactory.createJobExecution(42L), "computeRightsStep", 7L);
     }
 
-    private static AccountComputedRightView pair(final UUID actId, final UUID appId) {
+    private static AccountComputedRightView pair(final UUID accountId, final UUID applicationId) {
         var pair = new AccountComputedRightView();
-        pair.setActId(actId);
-        pair.setAppId(appId);
+        pair.setAccountId(accountId);
+        pair.setApplicationId(applicationId);
         pair.setToCompute(true);
         return pair;
     }
@@ -321,6 +323,7 @@ class ComputeRightsStepConfigTest {
     }
 
     private static ScrollPosition positionOf(final AccountComputedRightView pair) {
-        return ScrollPosition.forward(Map.of("actId", pair.getActId(), "appId", pair.getAppId()));
+        return ScrollPosition.forward(
+            Map.of("accountId", pair.getAccountId(), "applicationId", pair.getApplicationId()));
     }
 }

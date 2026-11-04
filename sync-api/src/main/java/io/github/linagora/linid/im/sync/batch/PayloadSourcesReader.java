@@ -160,7 +160,7 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
     protected AccountSnapshot doRead() throws Exception {
         AccountSnapshot item = super.doRead();
         if (item != null) {
-            lastReadAccountId = item.account().actId();
+            lastReadAccountId = item.account().accountId();
         }
         return item;
     }
@@ -185,37 +185,38 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
      */
     @Override
     protected void doReadPage() {
-        List<AccountSummary> summaries = viewRepository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
-            technicalAccountId, lastPageAccountId, Limit.of(getPageSize()));
+        List<AccountSummary> summaries = viewRepository
+            .findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
+                technicalAccountId, lastPageAccountId, Limit.of(getPageSize()));
         if (summaries.isEmpty()) {
             results = List.of();
             return;
         }
-        lastPageAccountId = summaries.getLast().actId();
+        lastPageAccountId = summaries.getLast().accountId();
 
-        List<UUID> actIds = summaries.stream().map(AccountSummary::actId).toList();
+        List<UUID> accountIds = summaries.stream().map(AccountSummary::accountId).toList();
         Map<String, Map<UUID, List<Map<String, Object>>>> pageRows = new HashMap<>();
         properties.sources().forEach((source, settings) ->
-            pageRows.put(source, readSource(source, settings.accountIdColumn(), actIds)));
+            pageRows.put(source, readSource(source, settings.accountIdColumn(), accountIds)));
 
         results = summaries.stream()
-            .map(summary -> new AccountSnapshot(summary, accountRows(summary.actId(), pageRows)))
+            .map(summary -> new AccountSnapshot(summary, accountRows(summary.accountId(), pageRows)))
             .toList();
     }
 
     /**
      * Gives the rows of an account in each source of its page, an empty list for a source without row.
      *
-     * @param actId    the identifier of the account
-     * @param pageRows the rows of the page, by source then by {@code act_id}
+     * @param accountId the identifier of the account
+     * @param pageRows  the rows of the page, by source then by {@code act_id}
      * @return the rows of the account, by source name
      */
     private static Map<String, List<Map<String, Object>>> accountRows(
-        final UUID actId,
+        final UUID accountId,
         final Map<String, Map<UUID, List<Map<String, Object>>>> pageRows) {
         return pageRows.entrySet().stream()
             .collect(Collectors.toUnmodifiableMap(Map.Entry::getKey,
-                entry -> entry.getValue().getOrDefault(actId, List.of())));
+                entry -> entry.getValue().getOrDefault(accountId, List.of())));
     }
 
     /**
@@ -223,16 +224,16 @@ public class PayloadSourcesReader extends AbstractPagingItemReader<AccountSnapsh
      *
      * @param source          the name of the source
      * @param accountIdColumn the column of the source holding the {@code act_id} of the account
-     * @param actIds          the identifiers of the accounts
+     * @param accountIds      the identifiers of the accounts
      * @return the rows of the source by {@code act_id}, an account without row being absent
      * @throws IllegalStateException naming the source, after logging the {@code sourceUnreadable} alert
      */
     private Map<UUID, List<Map<String, Object>>> readSource(
         final String source,
         final String accountIdColumn,
-        final Collection<UUID> actIds) {
+        final Collection<UUID> accountIds) {
         try {
-            return sourceRepository.findAllByAccountIds(source, accountIdColumn, actIds).stream()
+            return sourceRepository.findAllByAccountIds(source, accountIdColumn, accountIds).stream()
                 .collect(Collectors.groupingBy(row -> (UUID) row.get(accountIdColumn)));
         } catch (RuntimeException e) {
             AlertService.sourceUnreadable("source=" + source, e);

@@ -147,17 +147,19 @@ public class ComputeRightsProcessor implements ItemProcessor<AccountComputedRigh
      */
     @Override
     public ComputedRight process(final AccountComputedRightView item) {
-        ComputedRightRecord rights = rightsComputationService.compute(item, roleNames(item.getAppId()));
+        ComputedRightRecord rights = rightsComputationService.compute(item, roleNames(item.getApplicationId()));
 
         // Pair changed since it was read: its rights are outdated. Pair no longer in the view: its account or its
         // application was deleted or undeployed, and inserting the row of a deleted account would fail on its
         // foreign key
-        Optional<PairChecksums> current = viewRepository.findChecksumsByActIdAndAppId(item.getActId(), item.getAppId());
+        Optional<PairChecksums> current = viewRepository.findChecksumsByAccountIdAndApplicationId(
+            item.getAccountId(), item.getApplicationId());
         if (current.isEmpty() || !hasSameChecksums(item, current.get())) {
             return null;
         }
 
-        ComputedRight row = computedRightRepository.findByAccountIdAndApplicationId(item.getActId(), item.getAppId())
+        ComputedRight row = computedRightRepository
+            .findByAccountIdAndApplicationId(item.getAccountId(), item.getApplicationId())
             .orElseGet(() -> newRow(item));
         row.setAllow(rights.allow());
         row.setRoles(rights.roles());
@@ -174,11 +176,12 @@ public class ComputeRightsProcessor implements ItemProcessor<AccountComputedRigh
     /**
      * Gives the role names of an application, read at its first pair in the step.
      *
-     * @param appId the identifier of the application
+     * @param applicationId the identifier of the application
      * @return the names of the roles of the application
      */
-    private Set<String> roleNames(final UUID appId) {
-        return roleNamesByApplication.computeIfAbsent(appId, id -> applicationRoleRepository.findAllByApplicationId(id)
+    private Set<String> roleNames(final UUID applicationId) {
+        return roleNamesByApplication.computeIfAbsent(applicationId, id -> applicationRoleRepository
+            .findAllByApplicationId(id)
             .stream()
             .map(ApplicationRole::getName)
             .collect(Collectors.toSet()));
@@ -206,8 +209,8 @@ public class ComputeRightsProcessor implements ItemProcessor<AccountComputedRigh
      */
     private ComputedRight newRow(final AccountComputedRightView pair) {
         ComputedRight row = new ComputedRight();
-        row.setAccountId(pair.getActId());
-        row.setApplicationId(pair.getAppId());
+        row.setAccountId(pair.getAccountId());
+        row.setApplicationId(pair.getApplicationId());
         row.setCreatedBy(technicalAccountId);
         return row;
     }

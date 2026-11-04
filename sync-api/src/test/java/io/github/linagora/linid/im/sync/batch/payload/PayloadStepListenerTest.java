@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.batch;
+package io.github.linagora.linid.im.sync.batch.payload;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -30,6 +30,7 @@
  * <p>This package contains configuration-related components such as
  * Spring configuration classes, beans definitions, and integration setup
  * for the synchronization API, and the records bound from the configuration,
- * such as the {@code sync-data.job} section of the external configuration.</p>
+ * such as the {@code sync-data.job} section of the external configuration. The jobs
+ * and their steps are configured in the {@code batch} package.</p>
  */
 package io.github.linagora.linid.im.sync.config;

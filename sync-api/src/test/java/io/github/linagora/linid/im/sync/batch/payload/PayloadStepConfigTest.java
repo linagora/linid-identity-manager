@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.config;
+package io.github.linagora.linid.im.sync.batch.payload;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -41,8 +41,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import io.github.linagora.linid.im.sync.batch.PayloadProcessor;
-import io.github.linagora.linid.im.sync.batch.PayloadStepListener;
+import io.github.linagora.linid.im.sync.config.SourceProperties;
+import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.model.payload.PayloadOutcome;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;

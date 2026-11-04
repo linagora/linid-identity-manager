@@ -24,11 +24,10 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.config;
+package io.github.linagora.linid.im.sync.batch.payload;
 
-import io.github.linagora.linid.im.sync.batch.PayloadProcessor;
-import io.github.linagora.linid.im.sync.batch.PayloadSourcesReader;
-import io.github.linagora.linid.im.sync.batch.PayloadStepListener;
+import io.github.linagora.linid.im.sync.config.LinidDataSourceConfig;
+import io.github.linagora.linid.im.sync.config.SyncDataProperties;
 import io.github.linagora.linid.im.sync.exception.PayloadException;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.persistence.model.AccountPayload;

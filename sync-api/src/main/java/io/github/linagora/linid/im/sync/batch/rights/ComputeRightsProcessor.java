@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.batch;
+package io.github.linagora.linid.im.sync.batch.rights;
 
 import io.github.linagora.linid.im.sync.model.rights.ComputedRightRecord;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;

@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.batch;
+package io.github.linagora.linid.im.sync.batch.payload;
 
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
 import io.github.linagora.linid.im.sync.model.payload.PayloadOutcome;

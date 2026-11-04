@@ -25,9 +25,10 @@
  */
 
 /**
- * Spring Batch components of the LinID synchronization API.
+ * Provides the Spring Batch jobs of the LinID synchronization API.
  *
- * <p>This package contains the readers, processors and writers of the steps that need more than a reader or a writer
- * built in their configuration, such as the processors of the account payloads and of the rights.</p>
+ * <p>This package contains one configuration per job, with its parameters, chaining the steps of its phases. The
+ * steps, with their readers, processors and listeners, are grouped by phase in the subpackages: {@code payload} for
+ * the build of the account payloads, {@code rights} for the computation of the rights.</p>
  */
 package io.github.linagora.linid.im.sync.batch;

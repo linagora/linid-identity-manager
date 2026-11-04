@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-package io.github.linagora.linid.im.sync.config;
+package io.github.linagora.linid.im.sync.batch.rights;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -40,8 +40,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import io.github.linagora.linid.im.sync.batch.ComputeRightsProcessor;
-import io.github.linagora.linid.im.sync.batch.ComputeRightsStepListener;
 import io.github.linagora.linid.im.sync.exception.OpaUnreachableException;
 import io.github.linagora.linid.im.sync.exception.RightsComputationException;
 import io.github.linagora.linid.im.sync.model.rights.ComputedRightRecord;

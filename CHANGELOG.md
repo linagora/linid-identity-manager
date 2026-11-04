@@ -65,6 +65,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   never starts while the previous one is running, and two processings never write the same account at the same time.
   A failed cycle is not restarted: the next cycle computes everything again. `SYNC_LOCK_TIMEOUT` (default `30m`) limits
   the wait for the accounts locked by another processing.
+- Added the **immediate recomputation of the rights of an account** with `POST /accounts/{id}/recompute-rights`, answering
+  `202` at once: `sync-api` rebuilds the payload of the account, then computes its rights on the deployed applications
+  whose pair changed, in the background, without calling OPA when nothing changed. `alreadyRunning` is `true` when a
+  recomputation of the account is already running, on any instance, and no new one is started. An instance runs 8
+  recomputations at a time and keeps 16 waiting: beyond them, the endpoint answers `503`.
+- Added `GET /sync/cycle`, answering `running: true` while the daily synchronization cycle runs. Both endpoints answer
+  `503` when `sync-api` cannot be reached or does not answer within `SYNC_API_CONNECT_TIMEOUT` (default `5s`) and
+  `SYNC_API_READ_TIMEOUT` (default `10s`), and `502` when it answers with an error or an empty body.
 
 #### Frontend
 

@@ -73,7 +73,7 @@ class SourceRepositoryImplTest {
         when(jdbcTemplate.query(
             eq("SELECT * FROM \"account_payload_view\" WHERE \"owner_id\" = ANY(?)"),
             any(RowMapper.class),
-            actIds(ACCOUNT_1, ACCOUNT_2)))
+            accountIds(ACCOUNT_1, ACCOUNT_2)))
             .thenReturn(rows);
 
         assertEquals(rows, repository.findAllByAccountIds("account_payload_view", "owner_id",
@@ -109,7 +109,7 @@ class SourceRepositoryImplTest {
         repository.findAllByAccountIds("_source_2", "account_id_1", List.of(ACCOUNT_1));
 
         verify(jdbcTemplate).query(eq("SELECT * FROM \"_source_2\" WHERE \"account_id_1\" = ANY(?)"),
-            any(RowMapper.class), actIds(ACCOUNT_1));
+            any(RowMapper.class), accountIds(ACCOUNT_1));
     }
 
     @Test
@@ -171,15 +171,15 @@ class SourceRepositoryImplTest {
      * Matches the array of {@code act_id} bound to the query, a matcher typed as an array being applied by Mockito to
      * the whole varargs instead.
      */
-    private static Object actIds(final UUID... actIds) {
-        return argThat((UUID[] actual) -> Arrays.equals(actIds, actual));
+    private static Object accountIds(final UUID... accountIds) {
+        return argThat((UUID[] actual) -> Arrays.equals(accountIds, actual));
     }
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> mapRow(final ResultSet resultSet) throws Exception {
         repository.findAllByAccountIds("account_payload_view", "act_id", List.of(ACCOUNT_1));
         var rowMapper = ArgumentCaptor.forClass(RowMapper.class);
-        verify(jdbcTemplate).query(any(String.class), rowMapper.capture(), actIds(ACCOUNT_1));
+        verify(jdbcTemplate).query(any(String.class), rowMapper.capture(), accountIds(ACCOUNT_1));
         return (Map<String, Object>) rowMapper.getValue().mapRow(resultSet, 0);
     }
 }

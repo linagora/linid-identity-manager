@@ -108,7 +108,8 @@ class ComputeRightsProcessorTest {
         when(applicationRoleRepository.findAllByApplicationId(APPLICATION_ID))
             .thenReturn(List.of(role(APPLICATION_ID, "Administrator"), role(APPLICATION_ID, "Reader")));
         when(rightsComputationService.compute(any(), any())).thenReturn(RIGHTS);
-        when(viewRepository.findChecksumsByActIdAndAppId(any(), any())).thenReturn(Optional.of(CURRENT_CHECKSUMS));
+        when(viewRepository.findChecksumsByAccountIdAndApplicationId(any(), any()))
+            .thenReturn(Optional.of(CURRENT_CHECKSUMS));
         when(computedRightRepository.findByAccountIdAndApplicationId(any(), any())).thenReturn(Optional.empty());
     }
 
@@ -143,7 +144,8 @@ class ComputeRightsProcessorTest {
     @DisplayName("process should filter out a pair whose payload, script or claims template checksum changed since it "
         + "was read, without reading its row")
     void testProcess_changedChecksum(final PairChecksums changed) {
-        when(viewRepository.findChecksumsByActIdAndAppId(JDOE, APPLICATION_ID)).thenReturn(Optional.of(changed));
+        when(viewRepository.findChecksumsByAccountIdAndApplicationId(JDOE, APPLICATION_ID))
+            .thenReturn(Optional.of(changed));
 
         assertNull(processor().process(pair(JDOE, APPLICATION_ID)));
         verifyNoInteractions(computedRightRepository);
@@ -153,7 +155,8 @@ class ComputeRightsProcessorTest {
     @DisplayName("process should filter out a pair no longer in the view, its account or its application being deleted "
         + "or no longer deployed")
     void testProcess_pairLeftView() {
-        when(viewRepository.findChecksumsByActIdAndAppId(JDOE, APPLICATION_ID)).thenReturn(Optional.empty());
+        when(viewRepository.findChecksumsByAccountIdAndApplicationId(JDOE, APPLICATION_ID))
+            .thenReturn(Optional.empty());
 
         assertNull(processor().process(pair(JDOE, APPLICATION_ID)));
         verifyNoInteractions(computedRightRepository);
@@ -247,13 +250,13 @@ class ComputeRightsProcessorTest {
             new PairChecksums("payload-checksum", "script-checksum", "new-claims-template-checksum"));
     }
 
-    private static AccountComputedRightView pair(final UUID actId, final UUID appId) {
-        return new AccountComputedRightView(actId, "jdoe", appId, "APP", "{}", Map.of("sub", "jdoe"),
+    private static AccountComputedRightView pair(final UUID accountId, final UUID applicationId) {
+        return new AccountComputedRightView(accountId, "jdoe", applicationId, "APP", "{}", Map.of("sub", "jdoe"),
             "payload-checksum", "script-checksum", "claims-template-checksum", true);
     }
 
-    private static ApplicationRole role(final UUID appId, final String name) {
-        return new ApplicationRole(UUID.randomUUID(), appId, name);
+    private static ApplicationRole role(final UUID applicationId, final String name) {
+        return new ApplicationRole(UUID.randomUUID(), applicationId, name);
     }
 
     /**

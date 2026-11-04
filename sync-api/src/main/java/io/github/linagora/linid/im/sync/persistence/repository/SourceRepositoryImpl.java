@@ -104,9 +104,9 @@ public class SourceRepositoryImpl implements SourceRepository {
     public List<Map<String, Object>> findAllByAccountIds(
         final String source,
         final String accountIdColumn,
-        final Collection<UUID> actIds) {
+        final Collection<UUID> accountIds) {
         String sql = "SELECT * FROM %s WHERE %s = ANY(?)".formatted(quote(source), quote(accountIdColumn));
-        return jdbcTemplate.query(sql, rowMapper, (Object) actIds.toArray(UUID[]::new));
+        return jdbcTemplate.query(sql, rowMapper, (Object) accountIds.toArray(UUID[]::new));
     }
 
     /**

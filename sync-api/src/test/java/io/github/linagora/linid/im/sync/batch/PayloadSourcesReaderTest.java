@@ -114,19 +114,19 @@ class PayloadSourcesReaderTest {
         sources.put("accounts", new SourceProperties("act_id"));
         sources.put("account_payload_view", new SourceProperties("owner_id"));
         page(LOWEST_ACCOUNT_ID, JDOE, ASMITH);
-        page(ASMITH.actId(), BLEE);
-        var jdoeRow = Map.<String, Object>of("act_id", JDOE.actId(), "email", "jdoe@example.com");
-        var asmithRow = Map.<String, Object>of("act_id", ASMITH.actId(), "email", "asmith@example.com");
-        var bleeRow = Map.<String, Object>of("act_id", BLEE.actId(), "email", "blee@example.com");
-        var devRow = Map.<String, Object>of("owner_id", JDOE.actId(), "groups", List.of("DEV"));
-        var rndRow = Map.<String, Object>of("owner_id", JDOE.actId(), "groups", List.of("RND"));
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", List.of(JDOE.actId(), ASMITH.actId())))
+        page(ASMITH.accountId(), BLEE);
+        var jdoeRow = Map.<String, Object>of("act_id", JDOE.accountId(), "email", "jdoe@example.com");
+        var asmithRow = Map.<String, Object>of("act_id", ASMITH.accountId(), "email", "asmith@example.com");
+        var bleeRow = Map.<String, Object>of("act_id", BLEE.accountId(), "email", "blee@example.com");
+        var devRow = Map.<String, Object>of("owner_id", JDOE.accountId(), "groups", List.of("DEV"));
+        var rndRow = Map.<String, Object>of("owner_id", JDOE.accountId(), "groups", List.of("RND"));
+        when(sourceRepository.findAllByAccountIds("accounts", "act_id", List.of(JDOE.accountId(), ASMITH.accountId())))
             .thenReturn(List.of(jdoeRow, asmithRow));
         when(sourceRepository.findAllByAccountIds("account_payload_view", "owner_id",
-            List.of(JDOE.actId(), ASMITH.actId()))).thenReturn(List.of(devRow, rndRow));
-        when(sourceRepository.findAllByAccountIds("accounts", "act_id", List.of(BLEE.actId())))
+            List.of(JDOE.accountId(), ASMITH.accountId()))).thenReturn(List.of(devRow, rndRow));
+        when(sourceRepository.findAllByAccountIds("accounts", "act_id", List.of(BLEE.accountId())))
             .thenReturn(List.of(bleeRow));
-        when(sourceRepository.findAllByAccountIds("account_payload_view", "owner_id", List.of(BLEE.actId())))
+        when(sourceRepository.findAllByAccountIds("account_payload_view", "owner_id", List.of(BLEE.accountId())))
             .thenReturn(List.of());
         var reader = reader(2, new ExecutionContext());
 
@@ -137,7 +137,8 @@ class PayloadSourcesReaderTest {
         assertEquals(new AccountSnapshot(BLEE,
             Map.of("accounts", List.of(bleeRow), "account_payload_view", List.of())), reader.read());
         assertNull(reader.read());
-        verify(viewRepository, times(2)).findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(any(), any(), any());
+        verify(viewRepository, times(2))
+            .findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(any(), any(), any());
         verify(sourceRepository, times(4)).findAllByAccountIds(any(), any(), anyCollection());
     }
 
@@ -150,8 +151,8 @@ class PayloadSourcesReaderTest {
         assertEquals(JDOE, reader.read().account());
         assertEquals(ASMITH, reader.read().account());
         assertNull(reader.read());
-        verify(viewRepository).findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
-            TECHNICAL_ACCOUNT_ID, ASMITH.actId(), Limit.of(2));
+        verify(viewRepository).findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
+            TECHNICAL_ACCOUNT_ID, ASMITH.accountId(), Limit.of(2));
     }
 
     @Test
@@ -207,7 +208,7 @@ class PayloadSourcesReaderTest {
         reader.read();
         reader.update(context);
 
-        assertEquals(JDOE.actId().toString(), context.getString(LAST_ACCOUNT_KEY));
+        assertEquals(JDOE.accountId().toString(), context.getString(LAST_ACCOUNT_KEY));
         assertEquals(1, context.getInt(READ_COUNT_KEY));
     }
 
@@ -215,17 +216,17 @@ class PayloadSourcesReaderTest {
     @DisplayName("open should resume the reading after the last account read by the previous execution, and its "
         + "number of accounts read")
     void testOpen_restart() throws Exception {
-        page(JDOE.actId(), ASMITH);
+        page(JDOE.accountId(), ASMITH);
         var context = new ExecutionContext();
-        context.putString(LAST_ACCOUNT_KEY, JDOE.actId().toString());
+        context.putString(LAST_ACCOUNT_KEY, JDOE.accountId().toString());
         context.putInt(READ_COUNT_KEY, 1);
         var reader = reader(2, context);
 
         assertEquals(ASMITH, reader.read().account());
         reader.update(context);
         assertNull(reader.read());
-        verify(viewRepository).findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
-            TECHNICAL_ACCOUNT_ID, JDOE.actId(), Limit.of(2));
+        verify(viewRepository).findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
+            TECHNICAL_ACCOUNT_ID, JDOE.accountId(), Limit.of(2));
         assertEquals(2, context.getInt(READ_COUNT_KEY));
     }
 
@@ -234,17 +235,17 @@ class PayloadSourcesReaderTest {
     void testSaveStateDisabled() throws Exception {
         page(LOWEST_ACCOUNT_ID, JDOE);
         var context = new ExecutionContext();
-        context.putString(LAST_ACCOUNT_KEY, ASMITH.actId().toString());
+        context.putString(LAST_ACCOUNT_KEY, ASMITH.accountId().toString());
         var reader = reader(2, context, false);
 
         assertEquals(JDOE, reader.read().account());
         reader.update(context);
 
-        assertEquals(ASMITH.actId().toString(), context.getString(LAST_ACCOUNT_KEY));
+        assertEquals(ASMITH.accountId().toString(), context.getString(LAST_ACCOUNT_KEY));
     }
 
     private void page(final UUID after, final AccountSummary... accounts) {
-        when(viewRepository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(
+        when(viewRepository.findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
             TECHNICAL_ACCOUNT_ID, after, Limit.of(2))).thenReturn(List.of(accounts));
     }
 

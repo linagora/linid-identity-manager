@@ -114,37 +114,38 @@ public class ComputeRightsStepConfig {
     @StepScope
     public ItemReader<AccountComputedRightView> cyclePairsReader() {
         return windowReader((position, limit) -> repository
-            .findByToComputeTrueAndActIdGreaterThanEqualOrderByActIdAscAppIdAsc(accountOf(position), position, limit));
+            .findByToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAscApplicationIdAsc(
+                accountOf(position), position, limit));
     }
 
     /**
      * Reader of the pairs of one account whose rights must be computed, used by the recomputation of the account.
      *
-     * @param actId the identifier of the account, from the {@code actId} job parameter
+     * @param accountId the identifier of the account, from the {@code accountId} job parameter
      * @return the reader of the pairs of the account, ordered by application
      */
     @Bean
     @StepScope
     public ItemReader<AccountComputedRightView> accountPairsReader(
-        @Value("#{jobParameters['actId']}") final UUID actId) {
+        @Value("#{jobParameters['accountId']}") final UUID accountId) {
         return windowReader((position, limit) ->
-            repository.findByActIdAndToComputeTrueOrderByAppIdAsc(actId, position, limit));
+            repository.findByAccountIdAndToComputeTrueOrderByApplicationIdAsc(accountId, position, limit));
     }
 
     /**
      * Reader of the pairs of one application whose rights must be computed, used by the recomputation of the
      * application.
      *
-     * @param appId the identifier of the application, from the {@code appId} job parameter
+     * @param applicationId the identifier of the application, from the {@code applicationId} job parameter
      * @return the reader of the pairs of the application, ordered by account
      */
     @Bean
     @StepScope
     public ItemReader<AccountComputedRightView> applicationPairsReader(
-        @Value("#{jobParameters['appId']}") final UUID appId) {
+        @Value("#{jobParameters['applicationId']}") final UUID applicationId) {
         return windowReader((position, limit) -> repository
-            .findByAppIdAndToComputeTrueAndActIdGreaterThanEqualOrderByActIdAsc(
-                appId, accountOf(position), position, limit));
+            .findByApplicationIdAndToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAsc(
+                applicationId, accountOf(position), position, limit));
     }
 
     /**
@@ -211,7 +212,7 @@ public class ComputeRightsStepConfig {
      * @return the account of the position, the lowest UUID for the first window
      */
     private static UUID accountOf(final ScrollPosition position) {
-        return (UUID) ((KeysetScrollPosition) position).getKeys().getOrDefault("actId", LOWEST_ACCOUNT_ID);
+        return (UUID) ((KeysetScrollPosition) position).getKeys().getOrDefault("accountId", LOWEST_ACCOUNT_ID);
     }
 
     /**

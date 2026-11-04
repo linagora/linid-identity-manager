@@ -93,8 +93,8 @@ table already changed in the chunk would send each change alone, outside the gro
 of the linid-api database, whose migrations stay in linid-api.
 
 The snake_case naming of Spring Boot does not apply to it either: the entities of `persistence.model` name their tables
-and columns explicitly, with `@Table(name = …)` and `@Column(name = …)`, like in linid-api. Without it, a field `actId`
-would be mapped to a column `actid`.
+and columns explicitly, with `@Table(name = …)` and `@Column(name = …)`, like in linid-api. Without it, a field
+`accountId` would be mapped to a column `accountid`.
 
 The linid-api database is part of `/actuator/health`, which is `DOWN` when this database is unreachable, and
 `sync-api` does not start without it: Hibernate connects to it at startup to detect the dialect.

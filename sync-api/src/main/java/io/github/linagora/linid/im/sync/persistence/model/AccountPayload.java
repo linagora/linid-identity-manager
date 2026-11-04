@@ -61,13 +61,13 @@ public class AccountPayload {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "acp_id")
-    private UUID acpId;
+    private UUID id;
 
     /**
      * Identifier of the account the payload belongs to.
      */
     @Column(name = "act_id")
-    private UUID actId;
+    private UUID accountId;
 
     /**
      * Payload of the account, used as OPA input.

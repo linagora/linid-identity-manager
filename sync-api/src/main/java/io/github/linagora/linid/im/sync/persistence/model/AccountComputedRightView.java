@@ -66,7 +66,7 @@ public class AccountComputedRightView {
      */
     @Id
     @Column(name = "act_id")
-    private UUID actId;
+    private UUID accountId;
 
     /**
      * External identifier of the account, used to identify it in the alerts and the logs.
@@ -79,13 +79,13 @@ public class AccountComputedRightView {
      */
     @Id
     @Column(name = "app_id")
-    private UUID appId;
+    private UUID applicationId;
 
     /**
      * Functional unique identifier of the application, used by the OPA call.
      */
     @Column(name = "app_code")
-    private String appCode;
+    private String applicationCode;
 
     /**
      * Template used to render the claims of the application from the OPA result.

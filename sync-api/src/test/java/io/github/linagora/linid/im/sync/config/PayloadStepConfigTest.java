@@ -114,15 +114,15 @@ class PayloadStepConfigTest {
     void setUp() {
         when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
         page(new UUID(0L, 0L), JDOE, ASMITH);
-        page(ASMITH.actId(), BLEE);
-        when(repository.existsByActId(any())).thenReturn(true);
+        page(ASMITH.accountId(), BLEE);
+        when(repository.existsByAccountId(any())).thenReturn(true);
     }
 
     @Test
     @DisplayName("payloadSourcesReader should read every account once, except the technical account, in order, by "
         + "pages of the chunk size, with its rows in each source")
     void testPayloadSourcesReader() throws Exception {
-        page(ASMITH.actId());
+        page(ASMITH.accountId());
         rows(List.of(JDOE, ASMITH), row(JDOE, "jdoe@example.com"));
 
         var reader = config(MAPPING, 2).payloadSourcesReader();
@@ -206,7 +206,7 @@ class PayloadStepConfigTest {
         rows(List.of(JDOE, ASMITH), row(JDOE, "jdoe@example.com"), row(ASMITH, "asmith@example.com"));
         rows(List.of(BLEE), row(BLEE, "blee@example.com"));
         ItemWriter<AccountPayload> failingWriter = chunk -> {
-            if (chunk.getItems().getFirst().getActId().equals(BLEE.actId())) {
+            if (chunk.getItems().getFirst().getAccountId().equals(BLEE.accountId())) {
                 throw new IllegalStateException("duplicate key value violates unique constraint");
             }
         };
@@ -249,8 +249,8 @@ class PayloadStepConfigTest {
      * Gives the accounts of the page following the given account, by pages of 2 accounts.
      */
     private void page(final UUID after, final AccountSummary... accounts) {
-        when(repository.findDistinctByActIdNotAndActIdGreaterThanOrderByActIdAsc(TECHNICAL_ACCOUNT_ID, after,
-            Limit.of(2))).thenReturn(List.of(accounts));
+        when(repository.findDistinctByAccountIdNotAndAccountIdGreaterThanOrderByAccountIdAsc(
+            TECHNICAL_ACCOUNT_ID, after, Limit.of(2))).thenReturn(List.of(accounts));
     }
 
     private Step step(final String mapping, final int chunkSize) {
@@ -278,16 +278,16 @@ class PayloadStepConfigTest {
     @SafeVarargs
     private void rows(final List<AccountSummary> page, final Map<String, Object>... rows) {
         when(sourceRepository.findAllByAccountIds("accounts", "act_id",
-            page.stream().map(AccountSummary::actId).toList())).thenReturn(List.of(rows));
+            page.stream().map(AccountSummary::accountId).toList())).thenReturn(List.of(rows));
     }
 
     private static Map<String, Object> row(final AccountSummary account, final String email) {
-        return Map.of("act_id", account.actId(), "email", email);
+        return Map.of("act_id", account.accountId(), "email", email);
     }
 
     private AccountPayload newRow(final AccountSummary account, final String email) {
         var row = new AccountPayload();
-        row.setActId(account.actId());
+        row.setAccountId(account.accountId());
         row.setPayload(Map.of("email", email));
         row.setChecksum(CHECKSUM_SERVICE.compute("{\"email\":\"" + email + "\"}"));
         row.setSyncInstanceId("sync-api-1");

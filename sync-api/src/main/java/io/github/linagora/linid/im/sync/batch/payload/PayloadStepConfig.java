@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.sync.batch.payload;
 
+import io.github.linagora.linid.im.sync.batch.AccountRecomputeJobConfig;
 import io.github.linagora.linid.im.sync.config.LinidDataSourceConfig;
 import io.github.linagora.linid.im.sync.exception.PayloadException;
 import io.github.linagora.linid.im.sync.model.payload.AccountSnapshot;
@@ -38,6 +39,7 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.Step;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.infrastructure.item.ItemReader;
 import org.springframework.batch.infrastructure.item.ItemWriter;
 import org.springframework.batch.infrastructure.item.database.JpaItemWriter;
 import org.springframework.batch.infrastructure.item.database.builder.JpaItemWriterBuilder;
@@ -48,8 +50,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
- * Configuration of the payload build of the accounts: the reader of the account snapshots, the writer of the changed
- * payloads, and {@code allAccountsPayloadStep}, chaining them with the processor building the payloads.
+ * Configuration of the payload build of the accounts: the readers of the account snapshots, the writer of the changed
+ * payloads, and the steps chaining them with the processor building the payloads:
+ * {@code allAccountsPayloadStep}, for every account, used by the global job, and {@code accountPayloadStep}, for one
+ * account, used by its recomputation.
  */
 @Configuration
 public class PayloadStepConfig {
@@ -116,6 +120,23 @@ public class PayloadStepConfig {
     }
 
     /**
+     * Reader of the snapshot of the account whose payload is recomputed, loaded at its first read, in the transaction
+     * of the chunk: none when the account has no row in {@code account_computed_rights_view}, since no application is
+     * deployed, nor for the technical account of {@code sync-api}, without any query.
+     *
+     * <p>Step-scoped, to read the {@code accountId} job parameter.</p>
+     *
+     * @param accountId the identifier of the account, from the {@code accountId} job parameter
+     * @return the reader of the snapshot of the account
+     */
+    @Bean
+    @StepScope
+    public AccountSnapshotReader accountSnapshotReader(
+        @Value("#{jobParameters['" + AccountRecomputeJobConfig.ACCOUNT_ID + "']}") final UUID accountId) {
+        return new AccountSnapshotReader(accountId, technicalAccountId, repository, loader);
+    }
+
+    /**
      * Writer of the payloads, saving the rows given by the processor: a new row is persisted, and a changed row,
      * already managed by the persistence context of the chunk, is updated.
      *
@@ -159,10 +180,65 @@ public class PayloadStepConfig {
         final PayloadProcessor payloadProcessor,
         final PayloadStepListener payloadStepListener,
         final ItemWriter<AccountPayload> payloadWriter) {
-        return new StepBuilder("allAccountsPayloadStep", jobRepository)
+        return payloadStep("allAccountsPayloadStep", jobRepository, transactionManager, allAccountSnapshotsReader(),
+            payloadProcessor, payloadStepListener, payloadWriter);
+    }
+
+    /**
+     * Step building and writing the payload of one account, for its recomputation, built like
+     * {@code allAccountsPayloadStep}, with the same processor, writer and listener, on the reader of the account.
+     *
+     * <p>The account is locked, its sources read and its payload written in one transaction of the linid-api
+     * database. An account whose payload cannot be built is skipped: it keeps its previous payload. When the
+     * {@code mapping} is invalid or a source cannot be read, the step fails, and the job with it.</p>
+     *
+     * @param jobRepository         the repository of the Spring Batch executions
+     * @param transactionManager    the transaction manager of the linid-api database
+     * @param accountSnapshotReader the reader of the snapshot of the account, step-scoped
+     * @param payloadProcessor      the processor building the payloads
+     * @param payloadStepListener   the listener checking the {@code mapping}, alerting on the account skipped and
+     *     logging its outcome
+     * @param payloadWriter         the writer of the payloads
+     * @return the step building and writing the payload of the account
+     */
+    @Bean
+    public Step accountPayloadStep(
+        final JobRepository jobRepository,
+        final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
+        final @Qualifier("accountSnapshotReader") ItemReader<AccountSnapshot> accountSnapshotReader,
+        final PayloadProcessor payloadProcessor,
+        final PayloadStepListener payloadStepListener,
+        final ItemWriter<AccountPayload> payloadWriter) {
+        return payloadStep("accountPayloadStep", jobRepository, transactionManager, accountSnapshotReader,
+            payloadProcessor, payloadStepListener, payloadWriter);
+    }
+
+    /**
+     * Builds a step building and writing the payloads of the accounts of a reader, by chunks of
+     * {@code sync.payload.chunk-size} accounts, each one read, processed and written in its own transaction, the
+     * accounts in error being skipped without limit.
+     *
+     * @param name                the name of the step
+     * @param jobRepository       the repository of the Spring Batch executions
+     * @param transactionManager  the transaction manager of the linid-api database
+     * @param reader              the reader of the account snapshots
+     * @param payloadProcessor    the processor building the payloads
+     * @param payloadStepListener the listener checking the {@code mapping}, alerting on the accounts skipped and
+     *     logging the outcomes of the accounts
+     * @param payloadWriter       the writer of the payloads
+     * @return the step building and writing the payloads
+     */
+    private Step payloadStep(final String name,
+                             final JobRepository jobRepository,
+                             final PlatformTransactionManager transactionManager,
+                             final ItemReader<AccountSnapshot> reader,
+                             final PayloadProcessor payloadProcessor,
+                             final PayloadStepListener payloadStepListener,
+                             final ItemWriter<AccountPayload> payloadWriter) {
+        return new StepBuilder(name, jobRepository)
             .<AccountSnapshot, AccountPayload>chunk(chunkSize)
             .transactionManager(transactionManager)
-            .reader(allAccountSnapshotsReader())
+            .reader(reader)
             .processor(payloadProcessor)
             .writer(payloadWriter)
             .listener(payloadStepListener)
@@ -171,5 +247,4 @@ public class PayloadStepConfig {
             .skipLimit(Long.MAX_VALUE)
             .build();
     }
-
 }

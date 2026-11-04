@@ -294,13 +294,51 @@ class ComputeRightsStepConfigTest {
         verify(transactionManager).rollback(any());
     }
 
+    @Test
+    @DisplayName("accountComputeRightsStep should read, compute and write the pairs of the account, in a transaction "
+        + "where the account is locked before its pairs are computed")
+    void testAccountComputeRightsStep() throws Exception {
+        var first = pair(ACCOUNT_ID, APPLICATION_ID);
+        when(repository.findByAccountIdAndToComputeTrueOrderByApplicationIdAsc(
+            ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
+            .thenReturn(window(false, first));
+        when(rightsComputationService.compute(first, Set.of())).thenReturn(RIGHTS);
+        when(repository.findChecksumsByAccountIdAndApplicationId(ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.of(new PairChecksums(null, null, null)));
+        when(computedRightRepository.findByAccountIdAndApplicationId(ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.empty());
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        var stepExecution = stepExecution();
+
+        config.accountComputeRightsStep(new ResourcelessJobRepository(), transactionManager,
+            config.accountPairsReader(ACCOUNT_ID), processor(), writer(),
+            new ComputeRightsStepListener(accountLockService)).execute(stepExecution);
+
+        assertEquals(BatchStatus.COMPLETED, stepExecution.getStatus());
+        assertEquals(1, stepExecution.getWriteCount());
+        assertEquals(1, written.size());
+        assertEquals(ACCOUNT_ID, written.getFirst().getAccountId());
+        assertEquals(APPLICATION_ID, written.getFirst().getApplicationId());
+        var order = inOrder(transactionManager, accountLockService, rightsComputationService);
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(ACCOUNT_ID));
+        order.verify(rightsComputationService).compute(first, Set.of());
+        order.verify(transactionManager).commit(any());
+    }
+
     private Step step() {
         when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
-        ItemWriter<ComputedRight> writer = chunk -> written.addAll(chunk.getItems());
-        return config.allPairsComputeRightsStep(new ResourcelessJobRepository(), transactionManager,
-            new ComputeRightsProcessor(rightsComputationService, applicationRoleRepository, repository,
-                computedRightRepository, TECHNICAL_ACCOUNT_ID, "sync-api-1", 42L),
-            writer, new ComputeRightsStepListener(accountLockService));
+        return config.allPairsComputeRightsStep(new ResourcelessJobRepository(), transactionManager, processor(),
+            writer(), new ComputeRightsStepListener(accountLockService));
+    }
+
+    private ComputeRightsProcessor processor() {
+        return new ComputeRightsProcessor(rightsComputationService, applicationRoleRepository, repository,
+            computedRightRepository, TECHNICAL_ACCOUNT_ID, "sync-api-1", 42L);
+    }
+
+    private ItemWriter<ComputedRight> writer() {
+        return chunk -> written.addAll(chunk.getItems());
     }
 
     /**

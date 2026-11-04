@@ -68,6 +68,17 @@ public interface AccountComputedRightViewRepository
         UUID technicalAccountId, UUID accountId, Limit limit);
 
     /**
+     * Finds one account of the view, used by the recomputation of its payload.
+     *
+     * <p>The {@link AccountIdentity} projection only selects the identifiers of the account, so that the distinct
+     * applies to them: the account is selected once, whatever the number of its pairs.</p>
+     *
+     * @param accountId the identifier of the account
+     * @return the account, empty when it has no row, since no application is deployed
+     */
+    Optional<AccountIdentity> findDistinctByAccountId(UUID accountId);
+
+    /**
      * Tells whether an account is still in the view.
      *
      * <p>The payload build reads the accounts by pages: an account deleted since its page was read is no longer in

@@ -39,6 +39,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.sync.config.SourceProperties;
@@ -61,6 +62,7 @@ import jakarta.persistence.EntityManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,6 +139,66 @@ class PayloadStepConfigTest {
             reader.read());
         assertEquals(new AccountSnapshot(ASMITH, ASMITH_CHECKSUM, Map.of("accounts", List.of())), reader.read());
         assertNull(reader.read());
+    }
+
+    @Test
+    @DisplayName("accountSnapshotReader should read the account of the accountId job parameter, with its rows only")
+    void testAccountSnapshotReader() throws Exception {
+        accountPage(ASMITH);
+        when(payloadRepository.findByAccountIdIn(List.of(ASMITH.accountId())))
+            .thenReturn(List.of(new AccountChecksum(ASMITH.accountId(), ASMITH_CHECKSUM)));
+        rows(List.of(ASMITH), row(ASMITH, "asmith@example.com"));
+
+        var reader = config(MAPPING, 2).accountSnapshotReader(ASMITH.accountId());
+
+        assertEquals(new AccountSnapshot(ASMITH, ASMITH_CHECKSUM,
+            Map.of("accounts", List.of(row(ASMITH, "asmith@example.com")))), reader.read());
+        assertNull(reader.read());
+        verify(sourceRepository).findAllByAccountIds("accounts", "act_id", List.of(ASMITH.accountId()));
+        verifyNoMoreInteractions(sourceRepository);
+    }
+
+    @Test
+    @DisplayName("accountSnapshotReader should read no account when the account has no row in the view")
+    void testAccountSnapshotReader_accountWithoutRow() throws Exception {
+        when(repository.findDistinctByAccountId(BLEE.accountId())).thenReturn(Optional.empty());
+
+        assertNull(config(MAPPING, 2).accountSnapshotReader(BLEE.accountId()).read());
+
+        verifyNoInteractions(accountLockService, payloadRepository, sourceRepository);
+    }
+
+    @Test
+    @DisplayName("accountSnapshotReader should read no account for the technical account, without any query")
+    void testAccountSnapshotReader_technicalAccount() throws Exception {
+        assertNull(config(MAPPING, 2).accountSnapshotReader(TECHNICAL_ACCOUNT_ID).read());
+
+        verify(repository, never()).findDistinctByAccountId(any());
+        verifyNoInteractions(accountLockService, payloadRepository, sourceRepository);
+    }
+
+    @Test
+    @DisplayName("accountPayloadStep should rebuild the payload of the account from its rows only, in a transaction "
+        + "where the account is locked before its sources are read")
+    void testAccountPayloadStep() throws Exception {
+        accountPage(ASMITH);
+        rows(List.of(ASMITH), row(ASMITH, "asmith@example.com"));
+        var config = config(MAPPING, 2);
+
+        config.accountPayloadStep(new ResourcelessJobRepository(), transactionManager,
+            config.accountSnapshotReader(ASMITH.accountId()), processor(MAPPING),
+            new PayloadStepListener(payloadService(MAPPING)), writer).execute(stepExecution);
+
+        assertEquals(BatchStatus.COMPLETED, stepExecution.getStatus());
+        assertEquals(1, stepExecution.getReadCount());
+        assertEquals(List.of(newRow(ASMITH, "asmith@example.com")), written);
+        verify(sourceRepository).findAllByAccountIds("accounts", "act_id", List.of(ASMITH.accountId()));
+        verifyNoMoreInteractions(sourceRepository);
+        var order = inOrder(transactionManager, accountLockService, sourceRepository);
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(ASMITH.accountId()));
+        order.verify(sourceRepository).findAllByAccountIds("accounts", "act_id", List.of(ASMITH.accountId()));
+        order.verify(transactionManager).commit(any());
     }
 
     @Test
@@ -271,6 +333,13 @@ class PayloadStepConfigTest {
         when(payloadRepository.findByAccountIdIn(Stream.of(accounts).map(AccountIdentity::accountId).toList()))
             .thenReturn(Stream.of(accounts).filter(ASMITH::equals)
                 .map(account -> new AccountChecksum(account.accountId(), ASMITH_CHECKSUM)).toList());
+    }
+
+    /**
+     * Gives the account read by the reader of one account.
+     */
+    private void accountPage(final AccountIdentity account) {
+        when(repository.findDistinctByAccountId(account.accountId())).thenReturn(Optional.of(account));
     }
 
     private Step step(final String mapping, final int chunkSize) {

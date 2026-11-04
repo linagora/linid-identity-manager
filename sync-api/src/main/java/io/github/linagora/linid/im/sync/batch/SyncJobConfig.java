@@ -55,13 +55,16 @@ public class SyncJobConfig {
      * @param jobRepository             the repository of the Spring Batch executions
      * @param allAccountsPayloadStep    the step building and writing the payloads
      * @param allPairsComputeRightsStep the step computing and writing the rights of the pairs of the cycle
+     * @param jobStatusListener         the listener raising the alert of a job that did not complete
      * @return the global job
      */
     @Bean
     public Job syncJob(final JobRepository jobRepository,
                        final Step allAccountsPayloadStep,
-                       final Step allPairsComputeRightsStep) {
+                       final Step allPairsComputeRightsStep,
+                       final JobStatusListener jobStatusListener) {
         return new JobBuilder("syncJob", jobRepository)
+            .listener(jobStatusListener)
             .preventRestart()
             .start(allAccountsPayloadStep)
             .next(allPairsComputeRightsStep)

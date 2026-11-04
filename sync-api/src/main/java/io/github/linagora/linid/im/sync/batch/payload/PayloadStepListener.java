@@ -48,9 +48,9 @@ import org.springframework.batch.infrastructure.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
 /**
- * Listener of {@code allAccountsPayloadStep}: checks the {@code mapping} before the step, logs the {@code payloadError}
- * alert of each account skipped, and logs the number of accounts of each {@link PayloadOutcome} at the end of the
- * step.
+ * Listener of the steps building the payloads: checks the {@code mapping} before the step, logs the
+ * {@code payloadError} alert of each account skipped, and logs the number of accounts of each {@link PayloadOutcome} at
+ * the end of the step.
  *
  * <p>The accounts are counted by {@link #count(PayloadOutcome)}, in the execution context of the step. The accounts
  * of a chunk that fails are not counted: its rows are rolled back, and the counters, saved with the step even when it

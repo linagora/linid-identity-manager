@@ -41,7 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * Processor of {@code allAccountsPayloadStep}: builds the payload of an account and its checksum with
+ * Processor of the steps building the payloads: builds the payload of an account and its checksum with
  * {@link PayloadService}, and gives the row to write when the checksum changed.
  *
  * <p>An unchanged payload is filtered out, compared with the checksum read with the account, without reading its

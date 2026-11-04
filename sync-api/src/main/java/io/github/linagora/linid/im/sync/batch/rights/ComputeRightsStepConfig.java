@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.sync.batch.rights;
 
+import io.github.linagora.linid.im.sync.batch.AccountRecomputeJobConfig;
 import io.github.linagora.linid.im.sync.config.LinidDataSourceConfig;
 import io.github.linagora.linid.im.sync.exception.RightsComputationException;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
@@ -57,8 +58,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Configuration of the computation of the rights: the readers of the account and application pairs to compute, the
- * writer of their rights, and {@code allPairsComputeRightsStep}, chaining the reader of the pairs of the cycle, the
- * processor computing the rights and the writer.
+ * writer of their rights, and the steps chaining a reader, the processor computing the rights and the writer:
+ * {@code allPairsComputeRightsStep}, on the pairs of the cycle, and {@code accountComputeRightsStep}, on the pairs of
+ * one account.
  *
  * <p>There is one step-scoped reader per step of the computation: the pairs of the cycle for the global job, the pairs
  * of one account for its recomputation, and the pairs of one application for its recomputation. Each reader gives the
@@ -126,7 +128,7 @@ public class ComputeRightsStepConfig {
     @Bean
     @StepScope
     public ItemReader<AccountComputedRightView> accountPairsReader(
-        @Value("#{jobParameters['accountId']}") final UUID accountId) {
+        @Value("#{jobParameters['" + AccountRecomputeJobConfig.ACCOUNT_ID + "']}") final UUID accountId) {
         return windowReader((position, limit) ->
             repository.findByAccountIdAndToComputeTrueOrderByApplicationIdAsc(accountId, position, limit));
     }
@@ -191,10 +193,66 @@ public class ComputeRightsStepConfig {
         final ComputeRightsProcessor computeRightsProcessor,
         final ItemWriter<ComputedRight> computedRightWriter,
         final ComputeRightsStepListener computeRightsStepListener) {
-        return new StepBuilder("allPairsComputeRightsStep", jobRepository)
+        return computeStep("allPairsComputeRightsStep", jobRepository, transactionManager, allPairsReader(),
+            computeRightsProcessor, computedRightWriter, computeRightsStepListener);
+    }
+
+    /**
+     * Step computing and writing the rights of the pairs of one account, for its recomputation, built like
+     * {@code allPairsComputeRightsStep}, with the same processor, writer and listener, on the reader of the pairs of
+     * the account.
+     *
+     * <p>Only the pairs of the account whose payload, script or claims template checksum changed are read. The lock of
+     * the account, the check of the checksums and the writing of the results belong to the transaction of the chunk. A
+     * pair in error is skipped: it stays {@code to_compute}.</p>
+     *
+     * @param jobRepository             the repository of the Spring Batch executions
+     * @param transactionManager        the transaction manager of the linid-api database
+     * @param accountPairsReader        the reader of the pairs of the account, step-scoped
+     * @param computeRightsProcessor    the processor computing the rights of the pairs
+     * @param computedRightWriter       the writer of the rights
+     * @param computeRightsStepListener the listener locking the account, alerting on the pairs skipped and logging the
+     *     numbers of pairs written, in error and discarded
+     * @return the step computing and writing the rights of the pairs of the account
+     */
+    @Bean
+    public Step accountComputeRightsStep(
+        final JobRepository jobRepository,
+        final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
+        final @Qualifier("accountPairsReader") ItemReader<AccountComputedRightView> accountPairsReader,
+        final ComputeRightsProcessor computeRightsProcessor,
+        final ItemWriter<ComputedRight> computedRightWriter,
+        final ComputeRightsStepListener computeRightsStepListener) {
+        return computeStep("accountComputeRightsStep", jobRepository, transactionManager, accountPairsReader,
+            computeRightsProcessor, computedRightWriter, computeRightsStepListener);
+    }
+
+    /**
+     * Builds a step computing and writing the rights of the pairs of a reader, by chunks of
+     * {@code sync.compute.chunk-size} pairs, each one read, processed and written in its own transaction, the pairs in
+     * error being skipped without limit.
+     *
+     * @param name                      the name of the step
+     * @param jobRepository             the repository of the Spring Batch executions
+     * @param transactionManager        the transaction manager of the linid-api database
+     * @param reader                    the reader of the pairs
+     * @param computeRightsProcessor    the processor computing the rights of the pairs
+     * @param computedRightWriter       the writer of the rights
+     * @param computeRightsStepListener the listener locking the accounts, alerting on the pairs skipped and logging the
+     *     numbers of pairs written, in error and discarded
+     * @return the step computing and writing the rights of the pairs
+     */
+    private Step computeStep(final String name,
+                             final JobRepository jobRepository,
+                             final PlatformTransactionManager transactionManager,
+                             final ItemReader<AccountComputedRightView> reader,
+                             final ComputeRightsProcessor computeRightsProcessor,
+                             final ItemWriter<ComputedRight> computedRightWriter,
+                             final ComputeRightsStepListener computeRightsStepListener) {
+        return new StepBuilder(name, jobRepository)
             .<AccountComputedRightView, ComputedRight>chunk(chunkSize)
             .transactionManager(transactionManager)
-            .reader(allPairsReader())
+            .reader(reader)
             .processor(computeRightsProcessor)
             .writer(computedRightWriter)
             .listener(computeRightsStepListener)

@@ -47,9 +47,10 @@ import org.springframework.stereotype.Component;
  * payloads, in {@code account_payloads}, and their rows in each source, each source being read once for all the
  * accounts.
  *
- * <p>Called by {@link AllAccountSnapshotsReader} at the first read of a chunk, in its transaction, and kept apart from
- * it so that the readers of the payload build can share it: the locks are held until the commit of the chunk, so that
- * two processings of the same account read and write one after the other, the later one reading the fresher data.</p>
+ * <p>Shared by the readers of the payload build, {@link AllAccountSnapshotsReader} for every account and
+ * {@link AccountSnapshotReader} for one account, which call it at the first read of a chunk, in its transaction: the
+ * locks are held until the commit of the chunk, so that two processings of the same account read and write one after
+ * the other, the later one reading the fresher data.</p>
  *
  * <p>An account with several rows in a source is given as it is: the processor rejects it, so that the alert names the
  * account.</p>
@@ -127,6 +128,19 @@ public class AccountSnapshotLoader {
             .map(account -> new AccountSnapshot(account, checksums.get(account.accountId()),
                 accountRows(account.accountId(), sourceRows)))
             .toList();
+    }
+
+    /**
+     * Loads the snapshot of one account, like {@link #load(List)}: locks it, then reads the checksum of its current
+     * payload and its rows in each source.
+     *
+     * @param account the account read in {@code account_computed_rights_view}
+     * @return the snapshot of the account
+     * @throws IllegalStateException naming the source when a source cannot be read, after logging the
+     *     {@code sourceUnreadable} alert
+     */
+    public AccountSnapshot load(final AccountIdentity account) {
+        return load(List.of(account)).getFirst();
     }
 
     /**

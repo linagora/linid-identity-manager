@@ -28,6 +28,8 @@ package io.github.linagora.linid.im.sync.batch;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +54,8 @@ class SyncJobConfigTest {
 
     private final List<String> executedSteps = new ArrayList<>();
 
+    private final JobStatusListener jobStatusListener = mock(JobStatusListener.class);
+
     @Test
     @DisplayName("syncJob should build the payloads, then compute the rights")
     void testSyncJob() throws Exception {
@@ -63,25 +67,28 @@ class SyncJobConfigTest {
     }
 
     @Test
-    @DisplayName("syncJob should end FAILED without computing the rights when the payload build fails")
+    @DisplayName("syncJob should end FAILED, without computing the rights and telling its listener, when the payload "
+        + "build fails")
     void testSyncJob_payloadsFailed() throws Exception {
         JobExecution execution = run(step("allAccountsPayloadStep", true), step("allPairsComputeRightsStep", false));
 
         assertEquals(BatchStatus.FAILED, execution.getStatus());
         assertEquals(List.of("allAccountsPayloadStep"), executedSteps);
+        verify(jobStatusListener).afterJob(execution);
     }
 
     @Test
     @DisplayName("syncJob should not be restartable, so that the cycle of a time of the cron runs once")
     void testSyncJob_notRestartable() {
         Job job = new SyncJobConfig().syncJob(jobRepository, step("allAccountsPayloadStep", false),
-            step("allPairsComputeRightsStep", false));
+            step("allPairsComputeRightsStep", false), jobStatusListener);
 
         assertFalse(job.isRestartable());
     }
 
     private JobExecution run(final Step allAccountsPayloadStep, final Step allPairsComputeRightsStep) throws Exception {
-        Job job = new SyncJobConfig().syncJob(jobRepository, allAccountsPayloadStep, allPairsComputeRightsStep);
+        Job job = new SyncJobConfig().syncJob(jobRepository, allAccountsPayloadStep, allPairsComputeRightsStep,
+            jobStatusListener);
         JobParameters parameters = new JobParameters();
         JobInstance instance = jobRepository.createJobInstance(job.getName(), parameters);
         JobExecution execution = jobRepository.createJobExecution(instance, parameters, new ExecutionContext());

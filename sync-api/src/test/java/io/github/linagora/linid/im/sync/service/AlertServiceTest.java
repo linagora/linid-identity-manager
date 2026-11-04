@@ -72,6 +72,8 @@ class AlertServiceTest {
                 "Source unreadable, payload build aborted — account=a1"),
             Arguments.of(alert("opaUnreachable", AlertService::opaUnreachable), Level.ERROR,
                 "OPA unreachable, authorization check aborted — account=a1"),
+            Arguments.of(alert("jobNotCompleted", AlertService::jobNotCompleted), Level.ERROR,
+                "Job not completed, left to the next cycle — account=a1"),
             Arguments.of(alert("payloadError", AlertService::payloadError), Level.WARN,
                 "Account in error during payload build, keeping previous payload — account=a1"),
             Arguments.of(alert("unknownRole", AlertService::unknownRole), Level.WARN,

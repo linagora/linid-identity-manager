@@ -190,6 +190,25 @@ class AccountSnapshotLoaderTest {
         assertEquals("Source unreadable, payload build aborted — source=unknown_view", alert.getFormattedMessage());
     }
 
+    @Test
+    @DisplayName("load of one account should lock it, then read the checksum of its payload and its rows only, and "
+        + "give its snapshot")
+    void testLoad_oneAccount() {
+        sources.put("accounts", new SourceProperties("act_id"));
+        var accountIds = List.of(JDOE.accountId());
+        var jdoeRow = Map.<String, Object>of("act_id", JDOE.accountId(), "email", "jdoe@example.com");
+        when(payloadRepository.findByAccountIdIn(accountIds))
+            .thenReturn(List.of(new AccountChecksum(JDOE.accountId(), JDOE_CHECKSUM)));
+        when(sourceRepository.findAllByAccountIds("accounts", "act_id", accountIds)).thenReturn(List.of(jdoeRow));
+
+        assertEquals(new AccountSnapshot(JDOE, JDOE_CHECKSUM, Map.of("accounts", List.of(jdoeRow))),
+            loader().load(JDOE));
+        var order = inOrder(accountLockService, payloadRepository, sourceRepository);
+        order.verify(accountLockService).lockAccounts(accountIds);
+        order.verify(payloadRepository).findByAccountIdIn(accountIds);
+        order.verify(sourceRepository).findAllByAccountIds("accounts", "act_id", accountIds);
+    }
+
     private AccountSnapshotLoader loader() {
         return new AccountSnapshotLoader(payloadRepository, new SyncDataProperties(sources, "{}"), sourceRepository,
             accountLockService);

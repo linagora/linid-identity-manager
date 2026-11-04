@@ -75,6 +75,16 @@ public final class AlertService {
         log.error("OPA unreachable, authorization check aborted — {}", StringUtils.normalizeSpace(context), cause);
     }
 
+    /**
+     * Logs a job ending with another status than {@code COMPLETED}: its work is left to the next cycle.
+     *
+     * @param context the entities in error
+     * @param cause the cause of the error, or {@code null} when there is none
+     */
+    public static void jobNotCompleted(final String context, final Throwable cause) {
+        log.error("Job not completed, left to the next cycle — {}", StringUtils.normalizeSpace(context), cause);
+    }
+
     // ── Non-blocking ───────────────────────────────────────────────────────
 
     /**

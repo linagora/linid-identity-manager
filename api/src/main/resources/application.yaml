@@ -130,6 +130,10 @@ opa:
 
 sync-api:
   url: ${SYNC_API_URL}
+  # Maximum time to establish the connection to sync-api, as a duration (e.g. 5s, 500ms)
+  connect-timeout: ${SYNC_API_CONNECT_TIMEOUT:5s}
+  # Maximum time to wait for the response of sync-api, as a duration (e.g. 10s, 500ms)
+  read-timeout: ${SYNC_API_READ_TIMEOUT:10s}
 
 superset:
   url: ${SUPERSET_URL}

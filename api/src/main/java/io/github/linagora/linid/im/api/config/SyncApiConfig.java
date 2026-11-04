@@ -27,6 +27,8 @@
 package io.github.linagora.linid.im.api.config;
 
 import java.net.http.HttpClient;
+import java.time.Duration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ssl.SslBundles;
 import org.springframework.context.annotation.Bean;
@@ -41,28 +43,39 @@ import org.springframework.web.client.RestClient;
  * truststore come from the {@code sync-api-client} SSL bundle and are attached to this client only: a client
  * certificate set at the JVM level, like the truststore of {@link SslConfig}, would be presented to every server the
  * API calls.</p>
+ *
+ * <p>The connect and read timeouts prevent a stuck sync-api from blocking the threads of the requests: a timeout is
+ * raised as a {@code ResourceAccessException}, so sync-api is considered unreachable.</p>
  */
+@Slf4j
 @Configuration
 public class SyncApiConfig {
 
     /**
      * Builds the {@link RestClient} targeting sync-api, presenting the client certificate of the
-     * {@code sync-api-client} SSL bundle.
+     * {@code sync-api-client} SSL bundle, with the configured timeouts.
      *
-     * @param serverUrl  the sync-api base URL
-     * @param sslBundles the SSL bundles declared in the application properties
+     * @param serverUrl      the sync-api base URL
+     * @param connectTimeout the maximum time to establish the connection to sync-api
+     * @param readTimeout    the maximum time to wait for the response of sync-api
+     * @param sslBundles     the SSL bundles declared in the application properties
      * @return the configured sync-api {@link RestClient}
      */
     @Bean
     public RestClient syncApiRestClient(@Value("${sync-api.url}") final String serverUrl,
+                                        @Value("${sync-api.connect-timeout}") final Duration connectTimeout,
+                                        @Value("${sync-api.read-timeout}") final Duration readTimeout,
                                         final SslBundles sslBundles) {
-        HttpClient httpClient = HttpClient.newBuilder()
+        var requestFactory = new JdkClientHttpRequestFactory(HttpClient.newBuilder()
+            .connectTimeout(connectTimeout)
             .sslContext(sslBundles.getBundle("sync-api-client").createSslContext())
-            .build();
+            .build());
+        requestFactory.setReadTimeout(readTimeout);
+        log.info("Timeouts of the sync-api client: connect {}, read {}", connectTimeout, readTimeout);
 
         return RestClient.builder()
             .baseUrl(serverUrl)
-            .requestFactory(new JdkClientHttpRequestFactory(httpClient))
+            .requestFactory(requestFactory)
             .build();
     }
 }

@@ -74,6 +74,8 @@
   "error.superset.guest_token": "Impossible de récupérer le token d'invité",
   "error.superset.session_cookie": "Cookie de session Superset absent",
   "error.superset.slug_configuration": "Impossible de récupérer la configuration du dashboard Superset associé au slug.",
+  "error.sync_api.unavailable": "Le service de synchronisation est indisponible",
+  "error.sync_api.bad_gateway": "Le service de synchronisation a répondu par une erreur",
   "error.user_preference.not_found": "Préférence de l'utilisateur introuvable: {key}",
   "error.avatar.entity.unsupported": "Type d'entité non supporté pour un avatar : {entity}",
   "error.avatar.file.empty": "Le fichier d'avatar envoyé est vide.",

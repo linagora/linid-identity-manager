@@ -52,6 +52,7 @@ import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
 import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
+import io.github.linagora.linid.im.api.model.sync.RecomputeRightsDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
@@ -63,6 +64,7 @@ import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterD
 import io.github.linagora.linid.im.api.service.AccountService;
 import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
+import io.github.linagora.linid.im.api.service.SyncApiService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import java.time.OffsetDateTime;
@@ -107,6 +109,9 @@ class AccountControllerTest {
 
     @Mock
     private AccountGroupMapper accountGroupMapper;
+
+    @Mock
+    private SyncApiService syncApiService;
 
     @InjectMocks
     private AccountController accountController;
@@ -406,6 +411,35 @@ class AccountControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(accountService).deleteById(userPrincipal, id);
         verify(avatarService).deleteQuietly(AvatarEntity.ACCOUNTS, id);
+    }
+
+    @Test
+    @DisplayName("recomputeRights should check that the account exists, then answer 202 with the answer of sync-api")
+    void testRecomputeRights_shouldReturn202WithTheAnswerOfSyncApi() {
+        UUID id = UUID.randomUUID();
+        var answer = new RecomputeRightsDTO(true);
+        when(syncApiService.recomputeAccountRights(id)).thenReturn(answer);
+
+        ResponseEntity<RecomputeRightsDTO> response = accountController.recomputeRights(userPrincipal, id);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        assertEquals(answer, response.getBody());
+        var order = inOrder(accountService, syncApiService);
+        order.verify(accountService).existsById(userPrincipal, id);
+        order.verify(syncApiService).recomputeAccountRights(id);
+    }
+
+    @Test
+    @DisplayName("recomputeRights should propagate the 404 of an unknown account without calling sync-api")
+    void testRecomputeRights_shouldPropagateUnknownAccount() {
+        UUID id = UUID.randomUUID();
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, id);
+
+        var exception = assertThrows(ApiException.class, () -> accountController.recomputeRights(userPrincipal, id));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(syncApiService, never()).recomputeAccountRights(any());
     }
 
     @Test

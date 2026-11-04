@@ -264,7 +264,7 @@ class PayloadStepConfigTest {
 
     private PayloadProcessor processor(final String mapping) {
         return new PayloadProcessor(payloadService(mapping), repository, payloadRepository,
-            TECHNICAL_ACCOUNT_ID, "sync-api-1");
+            TECHNICAL_ACCOUNT_ID, "sync-api-1", stepExecution.getJobExecutionId());
     }
 
     private static PayloadServiceImpl payloadService(final String mapping) {

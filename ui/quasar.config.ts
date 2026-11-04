@@ -5,7 +5,7 @@ import { createReadStream, statSync } from 'node:fs';
 import { join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { federation } from '@module-federation/vite';
-import { defineConfig } from '#q-app/wrappers';
+import { defineConfig } from '#q-app';
 
 export default defineConfig((ctx) => {
   return {
@@ -45,9 +45,16 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
+      alias: {
+        src: ctx.appPaths.srcDir,
+        components: ctx.appPaths.resolve.src('components'),
+        layouts: ctx.appPaths.resolve.src('layouts'),
+        pages: ctx.appPaths.resolve.src('pages'),
+        boot: ctx.appPaths.resolve.src('boot'),
+      },
       target: {
         browser: ['es2022', 'firefox115', 'chrome115', 'safari14', 'brave115'],
-        node: 'node20',
+        node: 'node22',
       },
 
       typescript: {
@@ -59,7 +66,7 @@ export default defineConfig((ctx) => {
       vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
-      // vueOptionsAPI: false,
+      vueOptionsAPI: true,
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
@@ -142,18 +149,19 @@ export default defineConfig((ctx) => {
           federation({
             name: 'linid-identity-manager-ui',
             remotes: {},
+            dts: false,
             shared: {
               vue: {
                 singleton: true,
-                requiredVersion: '3.5.39',
+                requiredVersion: '3.5.44',
               },
               'vue-router': {
                 singleton: true,
-                requiredVersion: '5.1.0',
+                requiredVersion: '5.4.0',
               },
               quasar: {
                 singleton: true,
-                requiredVersion: '2.21.1',
+                requiredVersion: '2.35.2',
               },
               '@linagora/lin-pulsar-core': {
                 singleton: true,
@@ -161,11 +169,11 @@ export default defineConfig((ctx) => {
               } as Record<string, unknown>,
               pinia: {
                 singleton: true,
-                requiredVersion: '3.0.4',
+                requiredVersion: '4.1.0',
               },
               'vue-i18n': {
                 singleton: true,
-                requiredVersion: '11.4.6',
+                requiredVersion: '11.4.16',
               },
             },
           })

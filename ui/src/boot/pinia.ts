@@ -28,7 +28,7 @@ import {
   setPiniaStore,
   useLinPulsarZoneStore,
 } from '@linagora/lin-pulsar-core';
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '#q-app';
 
 /** Boot file that initializes Pinia and registers it in the corelib. */
 export default defineBoot(async ({ app }) => {

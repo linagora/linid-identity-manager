@@ -4,5 +4,11 @@
     "forceConsistentCasingInFileNames": true,
     "exactOptionalPropertyTypes": false
   },
-  "include": ["src", "quasar.config.ts", "vitest.config.mts", "tests"]
+  "include": [
+    "src",
+    "quasar.config.ts",
+    "vitest.config.mts",
+    "tests",
+    ".quasar/*.d.ts"
+  ]
 }

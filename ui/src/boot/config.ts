@@ -25,8 +25,8 @@
  * LinID Identity Manager software.
  */
 
-import { defineBoot } from '@quasar/app-vite/wrappers';
 import type { AppConfig } from 'src/types/appConfig';
+import { defineBoot } from '#q-app';
 
 /**
  * Runtime application configuration loaded from `public/config.json` during boot. Undefined until the boot file has

@@ -43,8 +43,8 @@ Feature: Test Account creation page
     And  I expect the HTML element '[data-cy="field_firstname"]' to be visible
     And  I expect the HTML element '[data-cy="field_email"]' to be visible
     And  I expect the HTML element '[data-cy="field_validityPeriod.start"]' to be visible
-    And  I expect the HTML element '[data-cy="field_organizationalUnit"]' to be visible
-    And  I expect the HTML element '[data-cy="field_roleId"]' to be visible
+    And  I expect the HTML element '.q-field:has([data-cy="field_organizationalUnit"])' to be visible
+    And  I expect the HTML element '.q-field:has([data-cy="field_roleId"])' to be visible
     And  I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And  I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 

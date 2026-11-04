@@ -57,8 +57,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 
 ### 3️⃣ Node.js / Frontend
 
-* **Node.js 22** or later (for development and local builds)
-* **npm 9** or **pnpm 10**
+* **Node.js 22.22** or later (for development and local builds)
+* **pnpm 11**
 
 > ⚠️ Required only if you plan to build or customize the frontend locally. Docker images include prebuilt frontend.
 

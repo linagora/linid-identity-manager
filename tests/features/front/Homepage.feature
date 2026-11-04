@@ -42,9 +42,9 @@ Feature: Test homepage
 
   ## 202 Should display the language switcher in the user profile menu
     And I expect the HTML element '[data-cy="header_profile_language"]' to be visible
-    And I expect the HTML element '[data-cy="header_profile_language_select"]' to be visible
-    And I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'Français'
-    And I expect the HTML element '[data-cy="header_profile_language_select"] img' to be visible
+    And I expect the HTML element '.q-field:has([data-cy="header_profile_language_select"])' to be visible
+    And I expect the HTML element '.q-field:has([data-cy="header_profile_language_select"])' contains 'Français'
+    And I expect the HTML element '.q-field:has([data-cy="header_profile_language_select"]) img' to be visible
 
   ## 203 Should display the list of available languages and switch the interface language
     When I click on '[data-cy="header_profile_language_select"]'
@@ -58,7 +58,7 @@ Feature: Test homepage
     When I visit the '{{ env.E2E_FRONT_URL }}/'
     Then I expect the HTML element '[data-cy="application_version"]' contains "Development version"
     When I click on '[data-cy="header_profile_button"]'
-    Then I expect the HTML element '[data-cy="header_profile_language_select"]' contains 'English (US)'
+    Then I expect the HTML element '.q-field:has([data-cy="header_profile_language_select"])' contains 'English (US)'
     When I click on '[data-cy="header_profile_language_select"]'
     And  I click on '[data-cy="header_profile_language_option_fr-FR"]'
     Then I expect the HTML element '[data-cy="application_version"]' contains "Version de développement"

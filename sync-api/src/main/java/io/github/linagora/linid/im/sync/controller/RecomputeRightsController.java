@@ -74,4 +74,24 @@ public class RecomputeRightsController {
         log.info("Received POST request to recompute the rights of account {}", id);
         return ResponseEntity.accepted().body(recomputeJobService.recomputeAccountRights(id));
     }
+
+    /**
+     * Starts the recomputation of the rights of all the accounts on an application: the payloads of all the accounts
+     * are rebuilt, then the rights on the application of the accounts whose pair changed are computed, in the
+     * background.
+     *
+     * <p>Responses: {@code 202} as soon as the request is handled, with a {@link RecomputeRightsDTO} whose
+     * {@code alreadyRunning} is {@code false} when the job is started, and {@code true} when a recomputation of the
+     * application is already running, on any instance, and no job is started. {@code 503} when too many recomputations
+     * are already waiting. No {@code 404}: linid-api checks that the application exists and is deployed before calling
+     * this endpoint. No end notification is sent.</p>
+     *
+     * @param id the identifier of the application
+     * @return {@code 202} with whether a recomputation of the application was already running
+     */
+    @PostMapping("/applications/{id}/recompute-rights")
+    public ResponseEntity<RecomputeRightsDTO> recomputeApplicationRights(@PathVariable final UUID id) {
+        log.info("Received POST request to recompute the rights of application {}", id);
+        return ResponseEntity.accepted().body(recomputeJobService.recomputeApplicationRights(id));
+    }
 }

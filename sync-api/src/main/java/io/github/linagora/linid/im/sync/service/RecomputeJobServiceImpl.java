@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.sync.service;
 
 import io.github.linagora.linid.im.sync.batch.AccountRecomputeJobConfig;
+import io.github.linagora.linid.im.sync.batch.ApplicationRecomputeJobConfig;
 import io.github.linagora.linid.im.sync.model.recompute.RecomputeRightsDTO;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -49,9 +50,11 @@ import org.springframework.stereotype.Service;
  * Implementation of {@link RecomputeJobService}, with session advisory locks of the {@code sync-api} database.
  *
  * <p>A recomputation of an account takes the lock {@code (LockNamespaces.ACCOUNT_RECOMPUTE, key)}, the key being the
- * hash code of its {@code act_id}, with {@link SessionLockService}, kept during the whole job: an instance that crashes
- * during the job does not block the next recomputations. Two accounts with the same key share the lock: while one is
- * recomputed, the recomputation of the other one is not started, and is reported as already running.</p>
+ * hash code of its {@code act_id}, and a recomputation of an application the lock
+ * {@code (LockNamespaces.APPLICATION_RECOMPUTE, key)}, the key being the hash code of its {@code app_id}, with
+ * {@link SessionLockService}, kept during the whole job: an instance that crashes during the job does not block the
+ * next recomputations. Two accounts, or two applications, with the same key share the lock: while one is recomputed,
+ * the recomputation of the other one is not started, and is reported as already running.</p>
  *
  * <p>The job runs in a task of the application task executor, so that the request is answered without waiting for
  * it. In the task, {@link JobOperator} runs the job synchronously, then the lock is closed, even when the job fails or
@@ -87,22 +90,30 @@ public class RecomputeJobServiceImpl implements RecomputeJobService {
     private final Job accountRecomputeJob;
 
     /**
+     * Job recomputing the rights of all the accounts on one application.
+     */
+    private final Job applicationRecomputeJob;
+
+    /**
      * Creates the service of the recomputations of the rights.
      *
-     * @param sessionLockService  the service taking the session locks
-     * @param taskExecutor        the application task executor, running the jobs in the background
-     * @param jobOperator         the operator starting the jobs
-     * @param accountRecomputeJob the job recomputing the rights of one account
+     * @param sessionLockService      the service taking the session locks
+     * @param taskExecutor            the application task executor, running the jobs in the background
+     * @param jobOperator             the operator starting the jobs
+     * @param accountRecomputeJob     the job recomputing the rights of one account
+     * @param applicationRecomputeJob the job recomputing the rights of all the accounts on one application
      */
     public RecomputeJobServiceImpl(
         final SessionLockService sessionLockService,
         @Qualifier(TaskExecutionAutoConfiguration.APPLICATION_TASK_EXECUTOR_BEAN_NAME) final TaskExecutor taskExecutor,
         final JobOperator jobOperator,
-        final Job accountRecomputeJob) {
+        final Job accountRecomputeJob,
+        final Job applicationRecomputeJob) {
         this.sessionLockService = sessionLockService;
         this.taskExecutor = taskExecutor;
         this.jobOperator = jobOperator;
         this.accountRecomputeJob = accountRecomputeJob;
+        this.applicationRecomputeJob = applicationRecomputeJob;
     }
 
     /**
@@ -118,17 +129,52 @@ public class RecomputeJobServiceImpl implements RecomputeJobService {
      */
     @Override
     public RecomputeRightsDTO recomputeAccountRights(final UUID accountId) {
-        JobParameters parameters = new JobParametersBuilder()
-            .addJobParameter(AccountRecomputeJobConfig.ACCOUNT_ID, accountId, UUID.class)
-            .addLocalDateTime(AccountRecomputeJobConfig.REQUESTED_AT, LocalDateTime.now(ZoneOffset.UTC))
-            .toJobParameters();
-        Optional<SessionLock> lock = sessionLockService.tryLock(LockNamespaces.ACCOUNT_RECOMPUTE, accountId.hashCode());
+        return recompute(LockNamespaces.ACCOUNT_RECOMPUTE, "account", accountId, accountRecomputeJob,
+            AccountRecomputeJobConfig.ACCOUNT_ID, AccountRecomputeJobConfig.REQUESTED_AT);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Takes the lock of the recomputation of the application, then submits the job to the executor, with the
+     * application and the date of the request as identifying parameters. When the submission fails, the lock is closed
+     * at once.</p>
+     *
+     * @throws org.springframework.dao.DataAccessException when the {@code sync-api} database cannot be reached or the
+     *     lock cannot be requested
+     * @throws org.springframework.core.task.TaskRejectedException when the queue of the executor is full
+     */
+    @Override
+    public RecomputeRightsDTO recomputeApplicationRights(final UUID applicationId) {
+        return recompute(LockNamespaces.APPLICATION_RECOMPUTE, "application", applicationId, applicationRecomputeJob,
+            ApplicationRecomputeJobConfig.APPLICATION_ID, ApplicationRecomputeJobConfig.REQUESTED_AT);
+    }
+
+    /**
+     * Takes the lock of a recomputation, then submits its job to the executor, with the entity and the date of the
+     * request as identifying parameters.
+     *
+     * @param namespace            the namespace of the lock
+     * @param target               the kind of entity recomputed, in the logs and the alerts
+     * @param id                   the identifier of the entity, whose hash code is the key of the lock
+     * @param job                  the job of the recomputation
+     * @param idParameter          the name of the job parameter holding the identifier of the entity
+     * @param requestedAtParameter the name of the job parameter holding the date of the request
+     * @return whether a recomputation of the entity was already running
+     */
+    private RecomputeRightsDTO recompute(final int namespace, final String target, final UUID id, final Job job,
+                                         final String idParameter, final String requestedAtParameter) {
+        Optional<SessionLock> lock = sessionLockService.tryLock(namespace, id.hashCode());
         if (lock.isEmpty()) {
-            log.info("Recomputation of account {} not started: a recomputation of the account is already running",
-                accountId);
+            log.info("Recomputation of {} {} not started: a recomputation of the {} is already running", target, id,
+                target);
             return new RecomputeRightsDTO(true);
         }
-        submitJob(lock.get(), accountId, parameters);
+        JobParameters parameters = new JobParametersBuilder()
+            .addJobParameter(idParameter, id, UUID.class)
+            .addLocalDateTime(requestedAtParameter, LocalDateTime.now(ZoneOffset.UTC))
+            .toJobParameters();
+        submitJob(lock.get(), job, parameters, "job=%s, %s=%s".formatted(job.getName(), target, id));
         return new RecomputeRightsDTO(false);
     }
 
@@ -137,17 +183,19 @@ public class RecomputeJobServiceImpl implements RecomputeJobService {
      * executor cancels the task before it starts, the instance stopping.
      *
      * @param lock       the lock of the recomputation
-     * @param accountId  the identifier of the account
+     * @param job        the job of the recomputation
      * @param parameters the parameters of the job
+     * @param context    the context of the alert raised when the job is not started
      */
-    private void submitJob(final SessionLock lock, final UUID accountId, final JobParameters parameters) {
+    private void submitJob(final SessionLock lock, final Job job, final JobParameters parameters,
+                           final String context) {
         try {
-            taskExecutor.execute(new FutureTask<Void>(() -> runJob(lock, accountId, parameters), null) {
+            taskExecutor.execute(new FutureTask<Void>(() -> runJob(lock, job, parameters, context), null) {
                 @Override
                 protected void done() {
                     if (isCancelled()) {
                         lock.close();
-                        alertJobNotStarted(accountId, new CancellationException("The instance is stopping"));
+                        AlertService.jobNotStarted(context, new CancellationException("The instance is stopping"));
                     }
                 }
             });
@@ -162,24 +210,15 @@ public class RecomputeJobServiceImpl implements RecomputeJobService {
      * is already answered.
      *
      * @param lock       the lock of the recomputation
-     * @param accountId  the identifier of the account
+     * @param job        the job of the recomputation
      * @param parameters the parameters of the job
+     * @param context    the context of the alert raised when the job is not started
      */
-    private void runJob(final SessionLock lock, final UUID accountId, final JobParameters parameters) {
+    private void runJob(final SessionLock lock, final Job job, final JobParameters parameters, final String context) {
         try (lock) {
-            jobOperator.start(accountRecomputeJob, parameters);
+            jobOperator.start(job, parameters);
         } catch (JobExecutionException | RuntimeException e) {
-            alertJobNotStarted(accountId, e);
+            AlertService.jobNotStarted(context, e);
         }
-    }
-
-    /**
-     * Raises the alert of a recomputation whose job is not started.
-     *
-     * @param accountId the identifier of the account
-     * @param cause     the cause of the error
-     */
-    private void alertJobNotStarted(final UUID accountId, final Exception cause) {
-        AlertService.jobNotStarted("job=accountRecomputeJob, account=" + accountId, cause);
     }
 }

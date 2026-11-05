@@ -46,6 +46,8 @@ class RecomputeRightsControllerTest {
 
     private static final UUID ACCOUNT_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
 
+    private static final UUID APPLICATION_ID = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
+
     @Mock
     private RecomputeJobService recomputeJobService;
 
@@ -62,6 +64,17 @@ class RecomputeRightsControllerTest {
         when(recomputeJobService.recomputeAccountRights(ACCOUNT_ID)).thenReturn(new RecomputeRightsDTO(true));
 
         var response = controller.recomputeAccountRights(ACCOUNT_ID);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        assertEquals(new RecomputeRightsDTO(true), response.getBody());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should answer 202 with the answer of the service")
+    void testRecomputeApplicationRights() {
+        when(recomputeJobService.recomputeApplicationRights(APPLICATION_ID)).thenReturn(new RecomputeRightsDTO(true));
+
+        var response = controller.recomputeApplicationRights(APPLICATION_ID);
 
         assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
         assertEquals(new RecomputeRightsDTO(true), response.getBody());

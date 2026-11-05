@@ -42,4 +42,13 @@ public interface RecomputeJobService {
      * @return whether a recomputation of the account was already running
      */
     RecomputeRightsDTO recomputeAccountRights(UUID accountId);
+
+    /**
+     * Starts the recomputation of the rights of all the accounts on an application in the background, unless one is
+     * already running for this application, on any instance.
+     *
+     * @param applicationId the identifier of the application, which linid-api checks is deployed
+     * @return whether a recomputation of the application was already running
+     */
+    RecomputeRightsDTO recomputeApplicationRights(UUID applicationId);
 }

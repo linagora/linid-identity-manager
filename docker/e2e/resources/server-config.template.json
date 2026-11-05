@@ -48,5 +48,6 @@
   "cache": {
     "html": "no-cache, no-store, must-revalidate",
     "assets": "public, max-age=604800, immutable"
-  }
+  },
+  "contentSecurityPolicy": "${CONTENT_SECURITY_POLICY}"
 }

@@ -85,5 +85,7 @@ are kept. If the renewal fails, the session is destroyed and the server answers 
 * `SameSite=Lax` blocks the cookie on cross-site `POST`, `PUT`, `PATCH` and `DELETE`.
 * On the `withAccessToken` routes, these methods are also refused with `403` when the request comes from another
   site: `Sec-Fetch-Site`, set by the browser, must be `same-origin`.
+* `contentSecurityPolicy` sets the `Content-Security-Policy` header of `index.html`, see the
+  [server configuration](../configuration/ui/server-config.md#contentsecuritypolicy).
 
 ---

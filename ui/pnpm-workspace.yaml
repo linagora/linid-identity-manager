@@ -4,6 +4,8 @@ packages:
 allowBuilds:
   '@parcel/watcher': true
   esbuild: true
+overrides:
+  joi: 17.13.9
 minimumReleaseAgeExclude:
   - '@module-federation/bridge-react-webpack-plugin@2.7.0'
   - '@module-federation/cli@2.7.0'

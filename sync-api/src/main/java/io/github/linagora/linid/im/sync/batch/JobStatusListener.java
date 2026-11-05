@@ -44,9 +44,12 @@ public class JobStatusListener implements JobExecutionListener {
     /**
      * {@inheritDoc}
      *
-     * <p>Any status other than {@code COMPLETED} raises the alert, such as {@code STOPPED} for a job interrupted by the
-     * shutdown of the instance: its work is not done either. The cause is one of the failures of the job, which Spring
-     * Batch gives without order, a job usually having one since it stops at its first failed step.</p>
+     * <p>Any status other than {@code COMPLETED} raises the alert, such as {@code STOPPED}: the work of the job is not
+     * done either. The cause is one of the failures of the job, which Spring Batch gives without order, a job usually
+     * having one since it stops at its first failed step.</p>
+     *
+     * <p>A job failing on the closed pools of a stopping instance does not reach this listener: Spring Batch cannot
+     * save its execution, which stays {@code STARTED}, and raises the exception to the code starting the job.</p>
      */
     @Override
     public void afterJob(final JobExecution jobExecution) {

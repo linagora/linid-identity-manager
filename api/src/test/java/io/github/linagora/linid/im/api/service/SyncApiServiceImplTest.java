@@ -54,6 +54,8 @@ class SyncApiServiceImplTest {
 
     private static final UUID ACCOUNT_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
 
+    private static final UUID APPLICATION_ID = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
+
     private MockRestServiceServer server;
 
     private SyncApiServiceImpl service;
@@ -75,6 +77,66 @@ class SyncApiServiceImplTest {
 
         assertEquals(new RecomputeRightsDTO(true), service.recomputeAccountRights(ACCOUNT_ID));
         server.verify();
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should post the recomputation to sync-api and give its answer")
+    void testRecomputeApplicationRights() {
+        server.expect(requestTo("https://sync-api:8443/applications/" + APPLICATION_ID + "/recompute-rights"))
+            .andExpect(method(HttpMethod.POST))
+            .andRespond(withStatus(HttpStatus.ACCEPTED).contentType(MediaType.APPLICATION_JSON)
+                .body("{\"alreadyRunning\":true}"));
+
+        assertEquals(new RecomputeRightsDTO(true), service.recomputeApplicationRights(APPLICATION_ID));
+        server.verify();
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should raise a 503 ApiException when sync-api cannot be reached")
+    void testRecomputeApplicationRights_unreachable() {
+        server.expect(requestTo("https://sync-api:8443/applications/" + APPLICATION_ID + "/recompute-rights"))
+            .andRespond(withException(new IOException("Connection refused")));
+
+        var exception = assertThrows(ApiException.class, () -> service.recomputeApplicationRights(APPLICATION_ID));
+
+        assertEquals(503, exception.getStatusCode());
+        assertEquals("error.sync_api.unavailable", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should raise a 503 ApiException when sync-api answers 503")
+    void testRecomputeApplicationRights_tooManyWaiting() {
+        server.expect(requestTo("https://sync-api:8443/applications/" + APPLICATION_ID + "/recompute-rights"))
+            .andRespond(withStatus(HttpStatus.SERVICE_UNAVAILABLE));
+
+        var exception = assertThrows(ApiException.class, () -> service.recomputeApplicationRights(APPLICATION_ID));
+
+        assertEquals(503, exception.getStatusCode());
+        assertEquals("error.sync_api.unavailable", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should raise a 502 ApiException when sync-api answers with an error")
+    void testRecomputeApplicationRights_errorAnswered() {
+        server.expect(requestTo("https://sync-api:8443/applications/" + APPLICATION_ID + "/recompute-rights"))
+            .andRespond(withServerError());
+
+        var exception = assertThrows(ApiException.class, () -> service.recomputeApplicationRights(APPLICATION_ID));
+
+        assertEquals(502, exception.getStatusCode());
+        assertEquals("error.sync_api.bad_gateway", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should raise a 502 ApiException when sync-api answers with an empty body")
+    void testRecomputeApplicationRights_emptyBody() {
+        server.expect(requestTo("https://sync-api:8443/applications/" + APPLICATION_ID + "/recompute-rights"))
+            .andRespond(withStatus(HttpStatus.ACCEPTED));
+
+        var exception = assertThrows(ApiException.class, () -> service.recomputeApplicationRights(APPLICATION_ID));
+
+        assertEquals(502, exception.getStatusCode());
+        assertEquals("error.sync_api.bad_gateway", exception.getError().key());
     }
 
     @Test

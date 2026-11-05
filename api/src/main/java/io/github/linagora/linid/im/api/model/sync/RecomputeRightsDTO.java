@@ -33,20 +33,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Data transfer object representing the answer of sync-api to the recomputation of the rights of an account.
+ * Data transfer object representing the answer of sync-api to the recomputation of the rights of an account or of an
+ * application.
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Answer of the recomputation of the rights of an account")
+@Schema(description = "Answer of the recomputation of the rights of an account or of an application")
 public class RecomputeRightsDTO {
 
     /**
-     * Whether a recomputation of the rights of the account was already running, in which case no new one was started.
+     * Whether a recomputation of the rights of the account or of the application was already running, in which case no
+     * new one was started.
      */
-    @Schema(description = "True when a recomputation of the rights of the account was already running and no new one "
-        + "was started",
+    @Schema(description = "True when a recomputation of the rights of the account or of the application was already "
+        + "running and no new one was started",
         example = "false")
     private boolean alreadyRunning;
 }

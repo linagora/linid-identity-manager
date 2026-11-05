@@ -76,6 +76,14 @@ public class SyncApiServiceImpl implements SyncApiService {
     }
 
     @Override
+    public RecomputeRightsDTO recomputeApplicationRights(final UUID id) {
+        return call(() -> restClient.post()
+            .uri("/applications/{id}/recompute-rights", id)
+            .retrieve()
+            .body(RecomputeRightsDTO.class));
+    }
+
+    @Override
     public CycleStatusDTO getCycleStatus() {
         return call(() -> restClient.get()
             .uri("/cycle")

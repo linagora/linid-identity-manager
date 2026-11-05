@@ -27,7 +27,7 @@
 /**
  * Model classes for the sync-api integration.
  *
- * <p>This package contains the DTOs relayed from sync-api: the answer of the recomputation of an account and the
- * status of the daily synchronization cycle.</p>
+ * <p>This package contains the DTOs relayed from sync-api: the answer of the recomputation of an account or of an
+ * application, and the status of the daily synchronization cycle.</p>
  */
 package io.github.linagora.linid.im.api.model.sync;

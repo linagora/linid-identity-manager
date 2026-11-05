@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.common.AvatarEntity;
+import io.github.linagora.linid.im.api.model.sync.RecomputeRightsDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
@@ -35,8 +36,10 @@ import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFil
 import io.github.linagora.linid.im.api.service.ApplicationService;
 import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
+import io.github.linagora.linid.im.api.service.SyncApiService;
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -80,6 +84,9 @@ class ApplicationControllerTest {
     @Mock
     private ApplicationMapper applicationMapper;
 
+    @Mock
+    private SyncApiService syncApiService;
+
     private ApplicationController controller;
 
     private UserPrincipal userPrincipal;
@@ -93,7 +100,8 @@ class ApplicationControllerTest {
             applicationService,
             applicationMapper,
             pagedResponseStatusResolver,
-            opaApplicationDeployerService
+            opaApplicationDeployerService,
+            syncApiService
         );
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
@@ -190,6 +198,47 @@ class ApplicationControllerTest {
     }
 
     @Test
+    @DisplayName("recomputeRights should check that the application is deployed, then answer 202 with the answer of "
+        + "sync-api")
+    void testRecomputeRights_shouldReturn202WithTheAnswerOfSyncApi() {
+        var id = UUID.randomUUID();
+        var answer = new RecomputeRightsDTO(true);
+        when(applicationService.findViewById(userPrincipal, id))
+            .thenReturn(applicationView(true, OffsetDateTime.now()));
+        when(syncApiService.recomputeApplicationRights(id)).thenReturn(answer);
+
+        var response = controller.recomputeRights(userPrincipal, id);
+
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
+        assertEquals(answer, response.getBody());
+    }
+
+    @Test
+    @DisplayName("recomputeRights should propagate the 404 of an unknown application without calling sync-api")
+    void testRecomputeRights_shouldPropagateUnknownApplication() {
+        var id = UUID.randomUUID();
+        when(applicationService.findViewById(userPrincipal, id))
+            .thenThrow(new ApiException(404, I18nMessage.of("error.application.not_found")));
+
+        var exception = assertThrows(ApiException.class, () -> controller.recomputeRights(userPrincipal, id));
+
+        assertEquals(404, exception.getStatusCode());
+        verifyNoInteractions(syncApiService);
+    }
+
+    @Test
+    @DisplayName("recomputeRights should answer 400 without calling sync-api when the application has no script")
+    void testRecomputeRights_whenScriptIsMissing() {
+        assertNotDeployed(applicationView(false, OffsetDateTime.now()));
+    }
+
+    @Test
+    @DisplayName("recomputeRights should answer 400 without calling sync-api when deployedAt is null")
+    void testRecomputeRights_whenNotDeployed() {
+        assertNotDeployed(applicationView(true, null));
+    }
+
+    @Test
     @DisplayName("Should export application Rego script")
     void testExportScript() {
         var id = UUID.randomUUID();
@@ -258,5 +307,24 @@ class ApplicationControllerTest {
         assertEquals(HttpStatus.NOT_FOUND.value(), exception.getStatusCode());
 
         verify(applicationService).findViewById(userPrincipal, id);
+    }
+
+    private void assertNotDeployed(final ApplicationView application) {
+        var id = UUID.randomUUID();
+        when(applicationService.findViewById(userPrincipal, id)).thenReturn(application);
+
+        var exception = assertThrows(ApiException.class, () -> controller.recomputeRights(userPrincipal, id));
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), exception.getStatusCode());
+        assertEquals("error.application.not_deployed", exception.getError().key());
+        assertEquals(Map.of("id", id.toString()), exception.getError().context());
+        verifyNoInteractions(syncApiService);
+    }
+
+    private static ApplicationView applicationView(final boolean hasScript, final OffsetDateTime deployedAt) {
+        var application = new ApplicationView();
+        application.setHasScript(hasScript);
+        application.setDeployedAt(deployedAt);
+        return application;
     }
 }

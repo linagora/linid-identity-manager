@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.sync.batch.rights;
 
 import io.github.linagora.linid.im.sync.batch.AccountRecomputeJobConfig;
+import io.github.linagora.linid.im.sync.batch.ApplicationRecomputeJobConfig;
 import io.github.linagora.linid.im.sync.config.LinidDataSourceConfig;
 import io.github.linagora.linid.im.sync.exception.RightsComputationException;
 import io.github.linagora.linid.im.sync.persistence.model.AccountComputedRightView;
@@ -59,8 +60,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * Configuration of the computation of the rights: the readers of the account and application pairs to compute, the
  * writer of their rights, and the steps chaining a reader, the processor computing the rights and the writer:
- * {@code allPairsComputeRightsStep}, on the pairs of the cycle, and {@code accountComputeRightsStep}, on the pairs of
- * one account.
+ * {@code allPairsComputeRightsStep}, on the pairs of the cycle, {@code accountComputeRightsStep}, on the pairs of one
+ * account, and {@code applicationComputeRightsStep}, on the pairs of one application.
  *
  * <p>There is one step-scoped reader per step of the computation: the pairs of the cycle for the global job, the pairs
  * of one account for its recomputation, and the pairs of one application for its recomputation. Each reader gives the
@@ -143,7 +144,7 @@ public class ComputeRightsStepConfig {
     @Bean
     @StepScope
     public ItemReader<AccountComputedRightView> applicationPairsReader(
-        @Value("#{jobParameters['applicationId']}") final UUID applicationId) {
+        @Value("#{jobParameters['" + ApplicationRecomputeJobConfig.APPLICATION_ID + "']}") final UUID applicationId) {
         return windowReader((position, limit) -> repository
             .findByApplicationIdAndToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAsc(
                 applicationId, accountOf(position), position, limit));
@@ -224,6 +225,37 @@ public class ComputeRightsStepConfig {
         final ItemWriter<ComputedRight> computedRightWriter,
         final ComputeRightsStepListener computeRightsStepListener) {
         return computeStep("accountComputeRightsStep", jobRepository, transactionManager, accountPairsReader,
+            computeRightsProcessor, computedRightWriter, computeRightsStepListener);
+    }
+
+    /**
+     * Step computing and writing the rights of the pairs of one application, for its recomputation, built like
+     * {@code allPairsComputeRightsStep}, with the same processor, writer and listener, on the reader of the pairs of
+     * the application.
+     *
+     * <p>Only the pairs of the application whose payload, script or claims template checksum changed are read, once
+     * the payloads are rebuilt: the accounts without any role yet are read too, since OPA decides who gets a role. The
+     * locks of the accounts of a chunk, the check of the checksums and the writing of the results belong to the
+     * transaction of the chunk. A pair in error is skipped: it stays {@code to_compute}.</p>
+     *
+     * @param jobRepository             the repository of the Spring Batch executions
+     * @param transactionManager        the transaction manager of the linid-api database
+     * @param applicationPairsReader    the reader of the pairs of the application, step-scoped
+     * @param computeRightsProcessor    the processor computing the rights of the pairs
+     * @param computedRightWriter       the writer of the rights
+     * @param computeRightsStepListener the listener locking the accounts, alerting on the pairs skipped and logging the
+     *     numbers of pairs written, in error and discarded
+     * @return the step computing and writing the rights of the pairs of the application
+     */
+    @Bean
+    public Step applicationComputeRightsStep(
+        final JobRepository jobRepository,
+        final @Qualifier(LinidDataSourceConfig.QUALIFIER) PlatformTransactionManager transactionManager,
+        final @Qualifier("applicationPairsReader") ItemReader<AccountComputedRightView> applicationPairsReader,
+        final ComputeRightsProcessor computeRightsProcessor,
+        final ItemWriter<ComputedRight> computedRightWriter,
+        final ComputeRightsStepListener computeRightsStepListener) {
+        return computeStep("applicationComputeRightsStep", jobRepository, transactionManager, applicationPairsReader,
             computeRightsProcessor, computedRightWriter, computeRightsStepListener);
     }
 

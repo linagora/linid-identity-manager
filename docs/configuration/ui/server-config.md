@@ -71,16 +71,17 @@
 
 ### General
 
-| Parameter          | Description                                                 |
-|--------------------|-------------------------------------------------------------|
-| `environment`      | Environment name, injected in the SPA `/config.json`        |
-| `http.port`        | Listening port                                              |
-| `http.tls`         | Optional. `cert` and `key` paths (PEM) to listen in HTTPS   |
-| `http.trustProxy`  | Optional, `false` by default. See below                     |
-| `staticDir`        | Directory of the built SPA                                  |
-| `configJsonPath`   | SPA configuration served at `/config.json`                  |
-| `cache.html`       | `Cache-Control` of `index.html` and `/config.json`          |
-| `cache.assets`     | `Cache-Control` of the files under `/assets/`               |
+| Parameter               | Description                                                    |
+|-------------------------|----------------------------------------------------------------|
+| `environment`           | Environment name, injected in the SPA `/config.json`           |
+| `http.port`             | Listening port                                                 |
+| `http.tls`              | Optional. `cert` and `key` paths (PEM) to listen in HTTPS      |
+| `http.trustProxy`       | Optional, `false` by default. See below                        |
+| `staticDir`             | Directory of the built SPA                                     |
+| `configJsonPath`        | SPA configuration served at `/config.json`                     |
+| `cache.html`            | `Cache-Control` of `index.html` and `/config.json`             |
+| `cache.assets`          | `Cache-Control` of the files under `/assets/`                  |
+| `contentSecurityPolicy` | Optional. `Content-Security-Policy` of `index.html`. See below |
 
 ### `http.trustProxy`
 
@@ -94,6 +95,29 @@ the server then receives HTTP, and without it, the session cookie (`secure` by d
 | `"10.0.0.1"`, `"10.0.0.0/8"`  | The proxies with these addresses (string or array)               |
 
 Prefer the addresses of the proxy to `true`.
+
+### `contentSecurityPolicy`
+
+Value of the `Content-Security-Policy` header, sent as is with `index.html`, so for every page of the SPA.
+
+The responses of the `proxies` are not changed: each service keeps its own policy, like the login page of the SSO.
+
+```json
+"contentSecurityPolicy": "default-src 'self'; script-src 'self' 'unsafe-eval'; img-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+```
+
+* `script-src` must allow `'unsafe-eval'`: Nunjucks compiles the templates of the SPA in the browser, and cannot render
+  them without it.
+* A remote served from another origin must be allowed in `connect-src` (its manifest), `script-src`, `style-src`,
+  `font-src` (if it loads fonts) and `img-src` (if it loads images). Keep `'self'` in each of them: a directive
+  replaces `default-src`, so with only the origin of the remote, the SPA can no longer load `/config.json`,
+  `/auth/me`, `/backend/*`, its CSS or its fonts.
+* The `SupersetWidgetCard` of the catalog displays its dashboard in an iframe: its `supersetDomain` must be allowed in
+  `frame-src`.
+
+The E2E and demo configurations use this value, set with the `CONTENT_SECURITY_POLICY` variable.
+
+Adapt this example to the deployment, and check the browser console for blocked resources before using it in production.
 
 ### `oidc`
 

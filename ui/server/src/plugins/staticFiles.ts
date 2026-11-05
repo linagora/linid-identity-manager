@@ -45,6 +45,7 @@ export function registerStaticFiles(
   config: ServerConfig
 ): void {
   const { html, assets } = config.cache;
+  const { contentSecurityPolicy } = config;
 
   const root = resolve(config.staticDir);
 
@@ -55,6 +56,9 @@ export function registerStaticFiles(
       const path = relative(root, filePath).split(sep).join('/');
       if (path === 'index.html') {
         reply.header('Cache-Control', html);
+        if (contentSecurityPolicy) {
+          reply.header('Content-Security-Policy', contentSecurityPolicy);
+        }
       } else if (`/${path}`.startsWith(ASSETS_PREFIX)) {
         reply.header('Cache-Control', assets);
       }

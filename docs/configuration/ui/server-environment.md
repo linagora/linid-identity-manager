@@ -59,6 +59,7 @@ Used by `task setup:config` to generate `server-config.json`.
 | `SESSION_LRU_CACHE_MAX`         | `session.lruCache.max`                                           | `10000`                                  | Maximum number of sessions in memory              |
 | `SESSION_LRU_CACHE_TTL`         | `session.lruCache.ttl`                                           | `28800000` (8 hours)                     | Lifetime of a session after its last change, ms   |
 | `SESSION_LRU_CACHE_TTL_AUTOPURGE` | `session.lruCache.ttlAutopurge`                                | `true`                                   | Deletes each session as soon as it expires        |
+| `CONTENT_SECURITY_POLICY`       | `contentSecurityPolicy`                                          | `"default-src 'self'; ..."`              | `Content-Security-Policy` of `index.html`         |
 
 `LEMONLDAP_REDIRECT_URL` and `LEMONLDAP_PORTAL_HOSTNAME` are in `e2e.env` / `local.env`, because their values differ
 between CI and local runs. `OIDC_LOGOUT_PATH` is the path of the SSO as served by the UI server, under `/auth`.

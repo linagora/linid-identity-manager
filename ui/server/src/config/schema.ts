@@ -99,4 +99,6 @@ export interface ServerConfig {
     /** `Cache-Control` of the fingerprinted build output served under `/assets/`. */
     assets: string;
   };
+  /** Value of the `Content-Security-Policy` header of `index.html`, no header if not set. */
+  contentSecurityPolicy?: string;
 }

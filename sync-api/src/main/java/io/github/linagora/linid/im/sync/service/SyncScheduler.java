@@ -26,14 +26,11 @@
 
 package io.github.linagora.linid.im.sync.service;
 
-import io.github.linagora.linid.im.sync.config.SchedulingConfig;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import javax.sql.DataSource;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.job.Job;
 import org.springframework.batch.core.job.JobExecutionException;
@@ -43,12 +40,9 @@ import org.springframework.batch.core.launch.JobExecutionAlreadyRunningException
 import org.springframework.batch.core.launch.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.JobRestartException;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.jdbc.support.JdbcUtils;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -57,26 +51,20 @@ import org.springframework.stereotype.Component;
  * {@code sync-api} only.
  *
  * <p>Before starting the job, the instance takes the cycle lock, a session advisory lock of the {@code sync-api}
- * database, on a dedicated connection outside the pool, kept during the whole cycle and closed at its end. Closing it
- * ends the session, and PostgreSQL releases the lock with it: the lock is never left held, and an instance that
- * crashes during the cycle does not block the next ones. When the lock is already held, by another instance or by the
- * previous cycle still running, the cycle is skipped.</p>
+ * database, with {@link SessionLockService}, kept during the whole cycle and closed at its end: the lock is never left
+ * held, and an instance that crashes during the cycle does not block the next ones. When the lock is already held, by
+ * another instance or by the previous cycle still running, the cycle is skipped.</p>
  *
  * <p>The cron runs in UTC, so that the changes of the daylight saving time never skip nor repeat a cycle. Each time of
  * the cron is one job instance, identified by this time, and {@code syncJob} is not restartable: an instance that
  * takes the lock once the cycle of the same time ended, its clock being late, does not run it again.</p>
  *
- * <p>The job is started synchronously, Spring Batch running it in the thread of the scheduler: the connection is
- * closed once the job ended.</p>
+ * <p>The job is started synchronously, Spring Batch running it in the thread of the scheduler: the lock is closed once
+ * the job ended.</p>
  */
 @Slf4j
 @Component
 public class SyncScheduler {
-
-    /**
-     * Takes the cycle lock without waiting, giving whether it was taken. PostgreSQL releases it when the session ends.
-     */
-    static final String TRY_LOCK_SQL = "SELECT pg_try_advisory_lock(?, 0)";
 
     /**
      * Half a second, added to the start date before truncating it to the second, so that the start date is rounded to
@@ -85,9 +73,9 @@ public class SyncScheduler {
     private static final Duration HALF_SECOND = Duration.ofMillis(500);
 
     /**
-     * Datasource of the session locks, opening a new session of the {@code sync-api} database at each connection.
+     * Service taking the session locks.
      */
-    private final DataSource sessionLockDataSource;
+    private final SessionLockService sessionLockService;
 
     /**
      * Operator starting the jobs.
@@ -107,16 +95,16 @@ public class SyncScheduler {
     /**
      * Creates the scheduler of the global job.
      *
-     * @param sessionLockDataSource the datasource of the session locks, without pool
-     * @param jobOperator           the operator starting the jobs
-     * @param syncJob               the global job of the synchronization cycle
-     * @param instanceId            the identifier of the {@code sync-api} instance
+     * @param sessionLockService the service taking the session locks
+     * @param jobOperator        the operator starting the jobs
+     * @param syncJob            the global job of the synchronization cycle
+     * @param instanceId         the identifier of the {@code sync-api} instance
      */
-    public SyncScheduler(@Qualifier(SchedulingConfig.SESSION_LOCK_QUALIFIER) final DataSource sessionLockDataSource,
+    public SyncScheduler(final SessionLockService sessionLockService,
                          final JobOperator jobOperator,
                          final Job syncJob,
                          @Value("${sync.instance-id}") final String instanceId) {
-        this.sessionLockDataSource = sessionLockDataSource;
+        this.sessionLockService = sessionLockService;
         this.jobOperator = jobOperator;
         this.syncJob = syncJob;
         this.instanceId = instanceId;
@@ -124,32 +112,21 @@ public class SyncScheduler {
 
     /**
      * Runs a synchronization cycle: takes the cycle lock, starts {@code syncJob} for the time of the cron and closes
-     * the connection of the lock, or skips the cycle when the lock is already held.
+     * the lock, or skips the cycle when the lock is already held.
      *
-     * <p>The time of the cron is the start date, in UTC, rounded to the nearest second, read before opening the
-     * connection: the scheduler calls the method at the time of the cron, with a gap far below a second, late or
+     * <p>The time of the cron is the start date, in UTC, rounded to the nearest second, read before taking the
+     * lock: the scheduler calls the method at the time of the cron, with a gap far below a second, late or
      * slightly early, which Spring's {@code CronTrigger} allows for. Truncated, a start date slightly early would give
      * the previous second, and another job instance.</p>
      */
     @Scheduled(cron = "${sync.cron}", zone = "UTC")
     public void runCycle() {
         LocalDateTime scheduledAt = timeOfCron(LocalDateTime.now(ZoneOffset.UTC));
-        Connection connection;
-        try {
-            connection = sessionLockDataSource.getConnection();
-        } catch (SQLException e) {
-            log.error("Synchronization cycle of instance {} aborted: the sync-api database cannot be reached",
-                instanceId, e);
-            return;
-        }
-        try {
-            if (tryLock(connection)) {
+        tryLock().ifPresent(lock -> {
+            try (lock) {
                 startJob(scheduledAt);
             }
-        } finally {
-            // Ends the session, which releases the cycle lock: an error on close is only logged at debug level
-            JdbcUtils.closeConnection(connection);
-        }
+        });
     }
 
     /**
@@ -163,23 +140,24 @@ public class SyncScheduler {
     }
 
     /**
-     * Takes the cycle lock on the connection, without waiting, and logs why the cycle is skipped when it is not taken.
+     * Takes the cycle lock, without waiting, and logs why the cycle is skipped when it is not taken.
      *
-     * @param connection the dedicated connection of the cycle
-     * @return {@code true} when the lock was taken, {@code false} when it is already held or cannot be requested
+     * @return the cycle lock, or empty when it is already held or cannot be requested
      */
-    private boolean tryLock(final Connection connection) {
+    private Optional<SessionLock> tryLock() {
         try {
-            JdbcTemplate jdbcTemplate = new JdbcTemplate(new SingleConnectionDataSource(connection, true));
-            if (Boolean.TRUE.equals(jdbcTemplate.queryForObject(TRY_LOCK_SQL, Boolean.class, LockNamespaces.CYCLE))) {
-                return true;
+            Optional<SessionLock> lock = sessionLockService.tryLock(LockNamespaces.CYCLE, LockNamespaces.CYCLE_KEY);
+            if (lock.isEmpty()) {
+                log.info("Synchronization cycle skipped by instance {}: the cycle lock is held by a running cycle",
+                    instanceId);
             }
-            log.info("Synchronization cycle skipped by instance {}: the cycle lock is held by a running cycle",
-                instanceId);
+            return lock;
+        } catch (CannotGetJdbcConnectionException e) {
+            cycleNotStarted("the sync-api database cannot be reached", e);
         } catch (DataAccessException e) {
-            log.error("Synchronization cycle of instance {} aborted: the cycle lock cannot be taken", instanceId, e);
+            cycleNotStarted("the cycle lock cannot be taken", e);
         }
-        return false;
+        return Optional.empty();
     }
 
     /**
@@ -187,7 +165,8 @@ public class SyncScheduler {
      * cron is one job instance, and the identifier of the instance as non-identifying parameter.
      *
      * <p>Since {@code syncJob} is not restartable, Spring Batch refuses a time of the cron whose job instance already
-     * exists: the cycle of this time was already started, by an instance whose clock is ahead, and is skipped.</p>
+     * exists: the cycle of this time was already started, by an instance whose clock is ahead, and is skipped. Any
+     * other exception raises the alert of the cycle.</p>
      *
      * @param scheduledAt the time of the cron, in UTC
      */
@@ -201,8 +180,18 @@ public class SyncScheduler {
         } catch (JobInstanceAlreadyCompleteException | JobRestartException | JobExecutionAlreadyRunningException e) {
             log.info("Synchronization cycle of {} UTC skipped by instance {}: it was already started", scheduledAt,
                 instanceId);
-        } catch (JobExecutionException e) {
-            log.error("Synchronization cycle not started by instance {}", instanceId, e);
+        } catch (JobExecutionException | RuntimeException e) {
+            cycleNotStarted("the job cannot be launched", e);
         }
+    }
+
+    /**
+     * Raises the alert of a cycle that cannot be started by this instance.
+     *
+     * @param reason why the cycle cannot be started
+     * @param cause  the cause of the error
+     */
+    private void cycleNotStarted(final String reason, final Exception cause) {
+        AlertService.jobNotStarted("job=syncJob, instance=" + instanceId + ", reason=" + reason, cause);
     }
 }

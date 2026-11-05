@@ -30,9 +30,9 @@ package io.github.linagora.linid.im.sync.exception;
  * Exception raised when the rights of an account and application pair cannot be computed, such as a failed OPA
  * evaluation, a claims template error or rendered claims that are not a JSON object.
  *
- * <p>It only concerns the pair: {@code computeRightsStep} skips it, and the pair keeps its previous result. An OPA
- * server that cannot be reached concerns every pair: it raises an
- * {@link OpaUnreachableException}, not a {@code RightsComputationException}, and makes the step fail.</p>
+ * <p>It only concerns the pair: the steps computing the rights skip it, and the pair keeps its previous result. An
+ * OPA server that cannot be reached concerns every pair: it raises an {@link OpaUnreachableException}, not a
+ * {@code RightsComputationException}, and makes the step fail.</p>
  */
 public class RightsComputationException extends RuntimeException {
 

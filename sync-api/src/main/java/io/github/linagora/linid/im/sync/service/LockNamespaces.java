@@ -27,7 +27,7 @@
 package io.github.linagora.linid.im.sync.service;
 
 /**
- * Namespaces of the PostgreSQL advisory locks taken by {@code sync-api}.
+ * Namespaces of the PostgreSQL advisory locks taken by {@code sync-api}, and the key of the cycle lock.
  *
  * <p>The locks are taken in their two-integer form, {@code (namespace, key)}: each kind of lock has its own namespace,
  * so that it never meets the locks of another kind. The one-key form, used by the lock of Flyway, does not overlap the
@@ -36,16 +36,28 @@ package io.github.linagora.linid.im.sync.service;
 public final class LockNamespaces {
 
     /**
-     * Namespace of the cycle lock, taken with the key {@code 0} in the {@code sync-api} database by the instance
-     * running the global job.
+     * Namespace of the cycle lock, taken with the key {@link #CYCLE_KEY} in the {@code sync-api} database by the
+     * instance running the global job.
      */
     public static final int CYCLE = 1;
+
+    /**
+     * Key of the cycle lock in its namespace, the only one of {@link #CYCLE}.
+     */
+    public static final int CYCLE_KEY = 0;
 
     /**
      * Namespace of the per-account lock, taken in the linid-api database by the transaction writing an account, with
      * the hash code of its {@code act_id} as key.
      */
     public static final int ACCOUNT = 2;
+
+    /**
+     * Namespace of the lock of the recomputation of an account, taken in the {@code sync-api} database for the whole
+     * job, with the hash code of the {@code act_id} of the account as key: one recomputation of an account at a time,
+     * whatever the instance.
+     */
+    public static final int ACCOUNT_RECOMPUTE = 3;
 
     private LockNamespaces() {
     }

@@ -29,8 +29,8 @@ package io.github.linagora.linid.im.sync.model.payload;
 import java.util.Locale;
 
 /**
- * Outcome of an account in {@code buildPayloadsStep}, counted in the execution context of the step and logged at its
- * end, in the order of the values.
+ * Outcome of an account in a step building the payloads, counted in the execution context of the step and logged at
+ * its end, in the order of the values.
  */
 public enum PayloadOutcome {
 

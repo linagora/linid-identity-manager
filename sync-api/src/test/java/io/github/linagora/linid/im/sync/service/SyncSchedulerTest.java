@@ -30,11 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -45,15 +43,10 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.read.ListAppender;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 import java.util.stream.Stream;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -75,6 +68,8 @@ import org.springframework.batch.core.launch.JobExecutionAlreadyRunningException
 import org.springframework.batch.core.launch.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.batch.core.launch.JobRestartException;
+import org.springframework.dao.QueryTimeoutException;
+import org.springframework.jdbc.CannotGetJdbcConnectionException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: SyncScheduler")
@@ -83,19 +78,10 @@ class SyncSchedulerTest {
     private static final String INSTANCE_ID = "sync-api-1";
 
     @Mock
-    private DataSource sessionLockDataSource;
+    private SessionLockService sessionLockService;
 
     @Mock
-    private Connection connection;
-
-    @Mock
-    private PreparedStatement tryLockStatement;
-
-    @Mock
-    private ResultSet resultSet;
-
-    @Mock
-    private ResultSetMetaData resultSetMetaData;
+    private SessionLock lock;
 
     @Mock
     private JobOperator jobOperator;
@@ -105,40 +91,45 @@ class SyncSchedulerTest {
 
     private final Logger logger = (Logger) LoggerFactory.getLogger(SyncScheduler.class);
 
+    private final Logger alertLogger = (Logger) LoggerFactory.getLogger(AlertService.class);
+
     private ListAppender<ILoggingEvent> appender;
+
+    private ListAppender<ILoggingEvent> alertAppender;
 
     private SyncScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new SyncScheduler(sessionLockDataSource, jobOperator, syncJob, INSTANCE_ID);
+        scheduler = new SyncScheduler(sessionLockService, jobOperator, syncJob, INSTANCE_ID);
         appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
+        alertAppender = new ListAppender<>();
+        alertAppender.start();
+        alertLogger.addAppender(alertAppender);
     }
 
     @AfterEach
     void tearDown() {
         logger.detachAppender(appender);
+        alertLogger.detachAppender(alertAppender);
     }
 
     @Test
     @DisplayName("runCycle should take the cycle lock, start syncJob with the time of the cron in UTC as identifying "
-        + "parameter and the instance as non-identifying parameter, then close the connection, which releases the "
-        + "lock")
+        + "parameter and the instance as non-identifying parameter, then close the lock")
     void testRunCycle_lockFree() throws Exception {
-        cycleLock(true);
+        cycleLock(Optional.of(lock));
         var before = SyncScheduler.timeOfCron(LocalDateTime.now(ZoneOffset.UTC));
 
         scheduler.runCycle();
 
         var parameters = ArgumentCaptor.forClass(JobParameters.class);
-        var order = inOrder(tryLockStatement, jobOperator, connection);
-        order.verify(tryLockStatement).setObject(1, LockNamespaces.CYCLE);
-        order.verify(tryLockStatement).executeQuery();
+        var order = inOrder(sessionLockService, jobOperator, lock);
+        order.verify(sessionLockService).tryLock(LockNamespaces.CYCLE, 0);
         order.verify(jobOperator).start(eq(syncJob), parameters.capture());
-        order.verify(connection).close();
-        verify(tryLockStatement).close();
+        order.verify(lock).close();
 
         JobParameter<?> scheduledAt = parameters.getValue().getParameter("scheduledAt");
         assertNotNull(scheduledAt);
@@ -155,15 +146,13 @@ class SyncSchedulerTest {
     }
 
     @Test
-    @DisplayName("runCycle should skip the cycle, log it with the instance and close the connection when the cycle lock "
-        + "is already held")
-    void testRunCycle_lockHeld() throws Exception {
-        cycleLock(false);
+    @DisplayName("runCycle should skip the cycle and log it with the instance when the cycle lock is already held")
+    void testRunCycle_lockHeld() {
+        cycleLock(Optional.empty());
 
         scheduler.runCycle();
 
         verifyNoInteractions(jobOperator);
-        verify(connection).close();
         assertEquals(1, appender.list.size());
         assertEquals(Level.INFO, appender.list.getFirst().getLevel());
         assertEquals("Synchronization cycle skipped by instance sync-api-1: the cycle lock is held by a running cycle",
@@ -171,28 +160,17 @@ class SyncSchedulerTest {
     }
 
     @Test
-    @DisplayName("runCycle should close the connection and let the exception of syncJob through")
+    @DisplayName("runCycle should raise the alert with the instance and close the lock on an unexpected exception of "
+        + "syncJob")
     void testRunCycle_jobException() throws Exception {
-        cycleLock(true);
+        cycleLock(Optional.of(lock));
         var exception = new IllegalStateException("job repository unreachable");
         when(jobOperator.start(eq(syncJob), any())).thenThrow(exception);
-        doThrow(new SQLException("connection reset")).when(connection).close();
-
-        assertSame(exception, assertThrows(IllegalStateException.class, scheduler::runCycle));
-
-        verify(connection).close();
-    }
-
-    @Test
-    @DisplayName("runCycle should not log an error when the connection cannot be closed once the cycle ended")
-    void testRunCycle_closeError() throws Exception {
-        cycleLock(true);
-        doThrow(new SQLException("connection reset")).when(connection).close();
 
         scheduler.runCycle();
 
-        verify(jobOperator).start(eq(syncJob), any());
-        assertTrue(appender.list.isEmpty());
+        verify(lock).close();
+        assertCycleNotStarted("the job cannot be launched", exception);
     }
 
     @ParameterizedTest
@@ -200,12 +178,12 @@ class SyncSchedulerTest {
     @DisplayName("runCycle should skip the cycle and log it with the instance when the job instance of the time of the "
         + "cron already exists")
     void testRunCycle_alreadyStarted(final JobExecutionException exception) throws Exception {
-        cycleLock(true);
+        cycleLock(Optional.of(lock));
         when(jobOperator.start(eq(syncJob), any())).thenThrow(exception);
 
         scheduler.runCycle();
 
-        verify(connection).close();
+        verify(lock).close();
         assertEquals(1, appender.list.size());
         assertEquals(Level.INFO, appender.list.getFirst().getLevel());
         assertTrue(appender.list.getFirst().getFormattedMessage().matches(
@@ -214,53 +192,42 @@ class SyncSchedulerTest {
     }
 
     @Test
-    @DisplayName("runCycle should log an error with the instance and close the connection when syncJob cannot be "
-        + "started")
+    @DisplayName("runCycle should raise the alert with the instance and close the lock when syncJob cannot be started")
     void testRunCycle_jobNotStarted() throws Exception {
-        cycleLock(true);
+        cycleLock(Optional.of(lock));
         var exception = new InvalidJobParametersException("invalid parameters");
         when(jobOperator.start(eq(syncJob), any())).thenThrow(exception);
 
         scheduler.runCycle();
 
-        verify(connection).close();
-        assertEquals(1, appender.list.size());
-        assertEquals(Level.ERROR, appender.list.getFirst().getLevel());
-        assertEquals("Synchronization cycle not started by instance sync-api-1",
-            appender.list.getFirst().getFormattedMessage());
-        assertSame(exception, ((ThrowableProxy) appender.list.getFirst().getThrowableProxy()).getThrowable());
+        verify(lock).close();
+        assertCycleNotStarted("the job cannot be launched", exception);
     }
 
     @Test
-    @DisplayName("runCycle should log an error with the instance, without starting syncJob, when the sync-api database "
-        + "cannot be reached")
-    void testRunCycle_noConnection() throws Exception {
-        when(sessionLockDataSource.getConnection()).thenThrow(new SQLException("connection refused"));
+    @DisplayName("runCycle should raise the alert with the instance, without starting syncJob, when the sync-api "
+        + "database cannot be reached")
+    void testRunCycle_noConnection() {
+        var exception = new CannotGetJdbcConnectionException("connection refused");
+        when(sessionLockService.tryLock(LockNamespaces.CYCLE, 0)).thenThrow(exception);
 
         scheduler.runCycle();
 
         verifyNoInteractions(jobOperator);
-        assertEquals(1, appender.list.size());
-        assertEquals(Level.ERROR, appender.list.getFirst().getLevel());
-        assertEquals("Synchronization cycle of instance sync-api-1 aborted: the sync-api database cannot be reached",
-            appender.list.getFirst().getFormattedMessage());
+        assertCycleNotStarted("the sync-api database cannot be reached", exception);
     }
 
     @Test
-    @DisplayName("runCycle should log an error with the instance, without starting syncJob, and close the connection "
-        + "when the cycle lock cannot be requested")
-    void testRunCycle_lockError() throws Exception {
-        when(sessionLockDataSource.getConnection()).thenReturn(connection);
-        when(connection.prepareStatement(SyncScheduler.TRY_LOCK_SQL)).thenThrow(new SQLException("statement timeout"));
+    @DisplayName("runCycle should raise the alert with the instance, without starting syncJob, when the cycle lock "
+        + "cannot be requested")
+    void testRunCycle_lockError() {
+        var exception = new QueryTimeoutException("statement timeout");
+        when(sessionLockService.tryLock(LockNamespaces.CYCLE, 0)).thenThrow(exception);
 
         scheduler.runCycle();
 
         verifyNoInteractions(jobOperator);
-        verify(connection).close();
-        assertEquals(1, appender.list.size());
-        assertEquals(Level.ERROR, appender.list.getFirst().getLevel());
-        assertEquals("Synchronization cycle of instance sync-api-1 aborted: the cycle lock cannot be taken",
-            appender.list.getFirst().getFormattedMessage());
+        assertCycleNotStarted("the cycle lock cannot be taken", exception);
     }
 
     @ParameterizedTest
@@ -287,13 +254,16 @@ class SyncSchedulerTest {
             new JobExecutionAlreadyRunningException("left running by a crashed instance"));
     }
 
-    private void cycleLock(final boolean taken) throws SQLException {
-        when(sessionLockDataSource.getConnection()).thenReturn(connection);
-        when(connection.prepareStatement(SyncScheduler.TRY_LOCK_SQL)).thenReturn(tryLockStatement);
-        when(tryLockStatement.executeQuery()).thenReturn(resultSet);
-        when(resultSet.next()).thenReturn(true, false);
-        when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
-        when(resultSetMetaData.getColumnCount()).thenReturn(1);
-        when(resultSet.getBoolean(1)).thenReturn(taken);
+    private void assertCycleNotStarted(final String reason, final Exception exception) {
+        assertTrue(appender.list.isEmpty());
+        assertEquals(1, alertAppender.list.size());
+        assertEquals(Level.ERROR, alertAppender.list.getFirst().getLevel());
+        assertEquals("Job not started, left to the next cycle — job=syncJob, instance=sync-api-1, reason=" + reason,
+            alertAppender.list.getFirst().getFormattedMessage());
+        assertSame(exception, ((ThrowableProxy) alertAppender.list.getFirst().getThrowableProxy()).getThrowable());
+    }
+
+    private void cycleLock(final Optional<SessionLock> cycleLock) {
+        when(sessionLockService.tryLock(LockNamespaces.CYCLE, 0)).thenReturn(cycleLock);
     }
 }

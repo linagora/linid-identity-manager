@@ -176,125 +176,188 @@
         }
       }
     },
-    "lifecycle-actions": {
-      "confirm-dialog-button": {
-        "q-btn": {
-          "color": "primary",
-          "icon": "sync",
-          "outline": false
+    "lifecycle-panel": {
+      "lifecycle-banners-card": {
+        "q-card": {
+          "flat": true,
+          "class": "bg-transparent"
         },
-        "confirmation-dialog": {
-          "buttons-card": {
-            "confirm-button": {
-              "q-btn": { "color": "primary", "outline": false }
+        "suspended": {
+          "q-banner": {
+            "class": "bg-warning text-white"
+          },
+          "q-icon": {
+            "color": "white",
+            "name": "warning"
+          },
+          "actions": {
+            "reactivation": {
+              "immediate": {
+                "q-btn": {
+                  "color": "white",
+                  "textColor": "warning",
+                  "outline": false,
+                  "icon": "error"
+                }
+              }
+            },
+            "suspension": {
+              "modify": {
+                "q-btn": {
+                  "color": "white",
+                  "outline": true
+                }
+              }
             }
           }
-        }
-      }
-    },
-    "activation-actions": {
-      "dropdown-button": {
-        "q-btn-dropdown": { "color": "positive", "outline": false },
-        "q-list": {},
-        "q-menu": {},
-        "menu-trigger": {
-          "q-item-section": {},
-          "q-icon": {}
         },
-        "items": {
-          "suspension": {
-            "scheduled": {
-              "q-item": {},
-              "icon": {
-                "q-icon": {},
-                "q-item-section": {}
+        "deactivated": {
+          "q-banner": {
+            "class": "bg-negative text-white"
+          },
+          "q-icon": {
+            "color": "white",
+            "name": "warning"
+          },
+          "actions": {
+            "revalidation": {
+              "immediate": {
+                "q-btn": {
+                  "color": "white",
+                  "textColor": "negative",
+                  "outline": false,
+                  "icon": "error"
+                }
               },
-              "label": {
-                "q-item-section": {},
-                "q-item-label": {}
+              "scheduled": {
+                "q-btn": {
+                  "color": "white",
+                  "outline": true
+                }
+              }
+            }
+          }
+        },
+        "deactivationWarning": {
+          "q-banner": {
+            "class": "bg-white text-negative account-deactivated-warning-banner"
+          },
+          "q-icon": {
+            "color": "negative",
+            "name": "warning"
+          },
+          "actions": {
+            "deactivation": {
+              "immediate": {
+                "q-btn": {
+                  "color": "negative",
+                  "outline": false,
+                  "icon": "error"
+                }
+              },
+              "modify": {
+                "q-btn": {
+                  "color": "negative",
+                  "outline": true
+                }
               }
             }
           }
         }
-      }
-    },
-    "suspension-actions": {
-      "dropdown-button": {
-        "q-btn-dropdown": { "color": "warning", "outline": false },
-        "q-list": {},
-        "q-menu": {},
-        "menu-trigger": {
-          "q-item-section": {},
-          "q-icon": {}
+      },
+      "info-texts": {
+        "willDeactivate": {
+          "q-icon": { "name": "warning", "size": "xs", "color": "negative" },
+          "q-item-label": { "class": "text-negative" }
         },
-        "items": {
-          "suspension": {
-            "scheduled": {
-              "q-item": {},
-              "icon": {
-                "q-icon": {},
-                "q-item-section": {}
-              },
-              "label": {
-                "q-item-section": {},
-                "q-item-label": {}
+        "willSuspend": {
+          "q-icon": { "name": "warning", "size": "xs", "color": "warning" },
+          "q-item-label": { "class": "text-warning" }
+        },
+        "notActivated": {
+          "q-icon": { "name": "info", "size": "xs", "color": "grey-8" },
+          "q-item-label": { "class": "text-grey-8" }
+        }
+      },
+      "lifecycle-buttons-card": {
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "left" }
+        },
+        "confirm-dialog-button": {
+          "q-btn": {
+            "color": "primary",
+            "icon": "sync",
+            "outline": false
+          },
+          "confirmation-dialog": {
+            "buttons-card": {
+              "confirm-button": {
+                "q-btn": { "color": "primary", "outline": false }
               }
             }
           }
-        }
-      }
-    },
-    "deactivation-actions": {
-      "dropdown-button": {
-        "q-btn-dropdown": { "color": "negative", "outline": false },
-        "q-list": {},
-        "q-menu": {},
-        "menu-trigger": {
-          "q-item-section": {},
-          "q-icon": {}
         },
-        "items": {
-          "suspension": {
-            "scheduled": {
-              "q-item": {},
-              "icon": {
-                "q-icon": {},
-                "q-item-section": {}
-              },
-              "label": {
-                "q-item-section": {},
-                "q-item-label": {}
-              }
+        "activation": {
+          "dropdown-button": {
+            "q-btn-dropdown": { "color": "positive", "outline": false },
+            "q-list": {},
+            "q-menu": {},
+            "menu-trigger": {
+              "q-item-section": {},
+              "q-icon": {}
+            }
+          }
+        },
+        "suspension": {
+          "dropdown-button": {
+            "q-btn-dropdown": { "color": "warning", "outline": false },
+            "q-list": {},
+            "q-menu": {},
+            "menu-trigger": {
+              "q-item-section": {},
+              "q-icon": {}
+            }
+          }
+        },
+        "deactivation": {
+          "dropdown-button": {
+            "q-btn-dropdown": { "color": "negative", "outline": false },
+            "q-list": {},
+            "q-menu": {},
+            "menu-trigger": {
+              "q-item-section": {},
+              "q-icon": {}
             }
           }
         }
-      }
-    },
-    "confirmation-dialog": {
-      "q-dialog": { "persistent": false },
-      "buttons-card": {
-        "q-card": { "flat": true },
+      },
+      "form-dialog": {
+        "q-dialog": { "persistent": false },
+        "q-card": { "flat": true, "bordered": false },
         "q-card-actions": { "align": "right" },
-        "confirm-button": {
-          "q-btn": { "color": "primary", "outline": false }
-        },
-        "cancel-button": {
-          "q-btn": { "color": "primary", "outline": true }
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
-      }
-    },
-    "form-dialog": {
-      "q-dialog": { "persistent": false },
-      "q-card": { "flat": true, "bordered": false },
-      "q-card-actions": { "align": "right" },
-      "buttons-card": {
-        "q-card": { "flat": true },
-        "q-card-actions": { "align": "right" },
-        "confirm-button": {
-          "q-btn": { "color": "primary", "outline": false }
-        },
-        "cancel-button": {
-          "q-btn": { "color": "primary", "outline": true }
+      },
+      "confirmation-dialog": {
+        "q-dialog": { "persistent": false },
+        "buttons-card": {
+          "q-card": { "flat": true },
+          "q-card-actions": { "align": "right" },
+          "confirm-button": {
+            "q-btn": { "color": "primary", "outline": false }
+          },
+          "cancel-button": {
+            "q-btn": { "color": "primary", "outline": true }
+          }
         }
       }
     }

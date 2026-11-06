@@ -25,7 +25,6 @@
  */
 
 import type { LinPulsarAttributeConfiguration } from '@linagora/lin-pulsar-core';
-import type { AccountLifecycleAction } from './accountLifecycleUi';
 import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 import type { Remote } from './remotes';
 import type { ThemeVariables } from './theme';
@@ -63,18 +62,6 @@ export interface AppConfig {
   extraZones?: string[];
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
-
-  // ─── Accounts ───────────────────────────────────────────────────────────────
-
-  /**
-   * Form field configurations for each account lifecycle action dialog, keyed by action identifier (e.g.
-   * `"suspension.immediate"`, `"deactivation.scheduled"`). Each value is the ordered list of fields rendered inside the
-   * dialog.
-   */
-  accountLifecycleFields: Record<
-    AccountLifecycleAction,
-    LinPulsarAttributeConfiguration[]
-  >;
 
   // ─── Organizational units ────────────────────────────────────────────────────
 

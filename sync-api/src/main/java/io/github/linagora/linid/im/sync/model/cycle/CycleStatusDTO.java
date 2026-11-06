@@ -26,10 +26,15 @@
 
 package io.github.linagora.linid.im.sync.model.cycle;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Response body of the status of the synchronization cycle.
  *
  * @param running {@code true} while the cycle lock of the global job is held, by any instance
  */
-public record CycleStatusDTO(boolean running) {
+@Schema(description = "Status of the synchronization cycle")
+public record CycleStatusDTO(
+    @Schema(description = "True while the cycle lock of the global job is held, by any instance", example = "false")
+    boolean running) {
 }

@@ -79,6 +79,9 @@ Feature: Test Account details page display
   ## 176 Avatar import - upload dialog requires an image and cancel closes it
   ## 177 Avatar import - upload success displays the stored image
   ## 178 Avatar import - delete success removes the stored image
+  ## 179 Recompute rights - button opens the confirmation dialog
+  ## 180 Recompute rights - cancelling closes the dialog
+  ## 181 Recompute rights - confirming computes the rights of the account on the deployed applications
 
   Scenario: Roundtrip about Account Details
 
@@ -1120,3 +1123,87 @@ Feature: Test Account details page display
     And  I expect the HTML element ".q-notification__message" contains "Image supprimée avec succès."
     When I request '{{ env.E2E_FRONT_URL }}/avatars/accounts/00000000-0000-4000-8000-0000000000ce.png' with method 'GET'
     Then I expect status code is 404
+
+    ## 179 Recompute rights - button opens the confirmation dialog
+    # user3 belongs to the groups all-staff and developers: its rights differ on each seeded application
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
+    And  I set the text "user3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000a004"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000a004"
+    And  I expect the HTML element '[data-cy="confirm-dialog-button"]' to be visible
+    When I click on '[data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Recalculer les droits de user3_fn user3_ln ?"
+    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Le recalcul démarrera immédiatement."
+    And  I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And  I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]' contains "Recalculer"
+
+    ## 180 Recompute rights - cancelling closes the dialog
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+
+    ## 181 Recompute rights - confirming computes the rights of the account on the deployed applications
+    # Publishes the policies of the seeded applications on OPA: the recomputation of an account only computes its rights
+    # on the deployed applications. An application already deployed by the scheduled deployment is left as it is
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e001/deploy' with method 'POST'
+    Then I expect status code is 200
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e002/deploy' with method 'POST'
+    Then I expect status code is 200
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e003/deploy' with method 'POST'
+    Then I expect status code is 200
+
+    # The account has no rights yet: the rows read below can only come from this recomputation. helpdesk is left out, its
+    # recomputation by ApplicationDetailsPage.feature writing the rights of all the accounts
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "SELECT cpr_id FROM computed_rights WHERE act_id = '00000000-0000-4000-8000-00000000a004' AND app_id IN ('00000000-0000-4000-8000-00000000e001', '00000000-0000-4000-8000-00000000e002')"
+    Then  I expect 0 database results
+
+    When I click on '[data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" to be visible
+    And  I expect the HTML element ".q-notification__message" contains "Recalcul des droits demandé."
+
+    # Waits for the end of the job, whose lock is held since the answer displayed by the notification: 3 is
+    # LockNamespaces.ACCOUNT_RECOMPUTE, and the key the hash code of the account UUID
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "sync_api"
+    When  I execute sql request "SELECT pg_advisory_lock(3, -2147426300)"
+    And   I execute sql request "SELECT pg_advisory_unlock(3, -2147426300)"
+
+    # The claims are compared as the text of the jsonb column, which sorts the keys by length. to_compute is false when
+    # the row holds the current checksums of the payload, of the script and of the claims template
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "SELECT app_code, allow, roles::text AS roles, claims::text AS claims, to_compute FROM computed_rights JOIN account_computed_rights_view USING (act_id, app_id) WHERE act_id = $1 AND app_code IN ('dev-platform', 'helpdesk', 'intranet') ORDER BY app_code" with values:
+      """
+      [
+        "00000000-0000-4000-8000-00000000a004"
+      ]
+      """
+    Then  I expect 3 database results
+
+    # dev-platform allows the group developers, and gives the role maintainer to Division A1
+    And   I expect '{{ctx.dbResults[0].app_code}}' is 'dev-platform'
+    And   I expect '{{ctx.dbResults[0].allow}}' is 'true'
+    And   I expect '{{ctx.dbResults[0].roles}}' is '["developer", "maintainer"]'
+    And   I expect '{{ctx.dbResults[0].claims}}' is '{"uid": "user3", "teams": ["Division A1", "Team Beta"], "groups": ["all-staff", "developers"], "allowed": true}'
+    And   I expect '{{ctx.dbResults[0].to_compute}}' is 'false'
+
+    # helpdesk gives the signal allow to the group all-staff, but force_disallow prevails for the group developers
+    And   I expect '{{ctx.dbResults[1].app_code}}' is 'helpdesk'
+    And   I expect '{{ctx.dbResults[1].allow}}' is 'false'
+    And   I expect '{{ctx.dbResults[1].roles}}' is '[]'
+    And   I expect '{{ctx.dbResults[1].claims}}' is '{"login": "user3@example.com", "allowed": false, "profiles": []}'
+    And   I expect '{{ctx.dbResults[1].to_compute}}' is 'false'
+
+    # intranet allows Team Beta, and gives the role editor to the group developers
+    And   I expect '{{ctx.dbResults[2].app_code}}' is 'intranet'
+    And   I expect '{{ctx.dbResults[2].allow}}' is 'true'
+    And   I expect '{{ctx.dbResults[2].roles}}' is '["editor", "reader"]'
+    And   I expect '{{ctx.dbResults[2].claims}}' is '{"sub": "user3", "email": "user3@example.com", "roles": ["editor", "reader"]}'
+    And   I expect '{{ctx.dbResults[2].to_compute}}' is 'false'

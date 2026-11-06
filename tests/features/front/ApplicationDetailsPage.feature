@@ -30,6 +30,10 @@ Feature: Test Application details page display
 
   ################## Export application script ##################
   ## 301 Export button should be enabled
+  ## 302 Recompute rights button is disabled on a non-deployed application
+  ## 303 Recompute rights button opens the confirmation dialog on a deployed application
+  ## 304 Cancelling closes the dialog
+  ## 305 Confirming computes the rights of the accounts on the application
 
   ################## Test invalid id ####################
   ## 401 Should display an error notification when navigating to a non-existent application
@@ -95,7 +99,7 @@ Feature: Test Application details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--deployedAt"] [data-cy="title"]' contains "Déployée le"
     And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--deployedAt"] [data-cy="value"]' contains "-"
     And  I expect the HTML element '[data-cy="details-section_claims"]' to be visible
-    And  I expect the HTML element '[data-cy="details-section_claims"] [data-cy="information-card--claimsTemplate"] [data-cy="value"]' contains '{ "sub": "id" }'
+    And  I expect the HTML element '[data-cy="details-section_claims"] [data-cy="information-card--claimsTemplate"] [data-cy="value"]' contains '"sub": "id"'
     And  I expect the HTML element '[data-cy="details-section_audit"]' to be visible
     And  I expect the HTML element '[data-cy="details-section_audit"] [data-cy="information-card--createdBy"]' contains "admin_fn admin_ln"
     And  I expect the HTML element '[data-cy="entity-profile-panel_back-button"]' contains "Liste des applications"
@@ -409,7 +413,7 @@ Feature: Test Application details page display
     And  I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "app-detail-101"
     And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--domain"] [data-cy="value"]' contains "Identity"
     And  I expect the HTML element '[data-cy="entity-profile-panel"] [data-cy="information-card--description"] [data-cy="value"]' contains "An edited application"
-    And  I expect the HTML element '[data-cy="details-section_claims"] [data-cy="information-card--claimsTemplate"] [data-cy="value"]' contains '{ "sub": "login" }'
+    And  I expect the HTML element '[data-cy="details-section_claims"] [data-cy="information-card--claimsTemplate"] [data-cy="value"]' contains '"sub": "login"'
 
     ###########################################################
     ################## Export application script ##############
@@ -422,8 +426,76 @@ Feature: Test Application details page display
     Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/{{ctx.applicationId}}"
     And  I expect the HTML element '[data-cy="button_export"]' to be enabled
 
+    ## 302 Recompute rights button is disabled on a non-deployed application
+    And  I expect the HTML element '[data-cy="confirm-dialog-button"]' to be disabled
+
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.applicationId}}' with method 'DELETE'
     Then I expect status code is 204
+
+    ## 303 Recompute rights button opens the confirmation dialog on a deployed application
+    # Publishes the policy of the seeded application helpdesk on OPA, unless the scheduled deployment already did
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e003/deploy' with method 'POST'
+    Then I expect status code is 200
+
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications"
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000e003"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/applications/00000000-0000-4000-8000-00000000e003"
+    And  I expect the HTML element '[data-cy="confirm-dialog-button"]' to be enabled
+    When I click on '[data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Recalculer les droits sur Helpdesk ?"
+    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Le recalcul démarrera immédiatement."
+    And  I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And  I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]' contains "Recalculer"
+
+    ## 304 Cancelling closes the dialog
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+
+    ## 305 Confirming computes the rights of the accounts on the application
+    # user4 and user5 have no rights yet: the rows read below can only come from this recomputation
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "SELECT cpr_id FROM computed_rights WHERE app_id = '00000000-0000-4000-8000-00000000e003' AND act_id IN ('00000000-0000-4000-8000-00000000a005', '00000000-0000-4000-8000-00000000a006')"
+    Then  I expect 0 database results
+
+    When I click on '[data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" to be visible
+    And  I expect the HTML element ".q-notification__message" contains "Recalcul des droits demandé."
+
+    # Waits for the end of the job, whose lock is held since the answer displayed by the notification: 4 is
+    # LockNamespaces.APPLICATION_RECOMPUTE, and the key the hash code of the application UUID
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "sync_api"
+    When  I execute sql request "SELECT pg_advisory_lock(4, -2147442685)"
+    And   I execute sql request "SELECT pg_advisory_unlock(4, -2147442685)"
+
+    # The claims are compared as the text of the jsonb column, which sorts the keys by length. to_compute is false when
+    # the row holds the current checksums of the payload, of the script and of the claims template
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "SELECT external_id, allow, roles::text AS roles, claims::text AS claims, to_compute FROM computed_rights JOIN account_computed_rights_view USING (act_id, app_id) WHERE app_code = $1 AND external_id IN ('user4', 'user5') ORDER BY external_id" with values:
+      """
+      [
+        "helpdesk"
+      ]
+      """
+    Then  I expect 2 database results
+
+    # user4 is allowed with the group support
+    And   I expect '{{ctx.dbResults[0].external_id}}' is 'user4'
+    And   I expect '{{ctx.dbResults[0].allow}}' is 'true'
+    And   I expect '{{ctx.dbResults[0].roles}}' is '["agent"]'
+    And   I expect '{{ctx.dbResults[0].claims}}' is '{"login": "user4@example.com", "allowed": true, "profiles": ["agent"]}'
+    And   I expect '{{ctx.dbResults[0].to_compute}}' is 'false'
+
+    # user5 has no group: only force_allow allows it
+    And   I expect '{{ctx.dbResults[1].external_id}}' is 'user5'
+    And   I expect '{{ctx.dbResults[1].allow}}' is 'true'
+    And   I expect '{{ctx.dbResults[1].roles}}' is '["requester"]'
+    And   I expect '{{ctx.dbResults[1].claims}}' is '{"login": "user5@example.com", "allowed": true, "profiles": ["requester"]}'
+    And   I expect '{{ctx.dbResults[1].to_compute}}' is 'false'
 
   ####################################################
   ################## Test invalid id #################

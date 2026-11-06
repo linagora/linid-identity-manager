@@ -689,6 +689,20 @@
                 }
               }
             }
+          },
+          "ConfirmDialogButton": {
+            "title": "Recalculer les droits",
+            "submitSuccess": "Recalcul des droits demandé.",
+            "submitError": "Impossible de demander le recalcul des droits. Veuillez réessayer plus tard.",
+            "ConfirmationDialog": {
+              "title": "Recalculer les droits de ce compte ?",
+              "content": "Le recalcul démarrera immédiatement.",
+              "ButtonsCard": {
+                "confirm": "Recalculer",
+                "confirmLoading": "Envoi...",
+                "cancel": "Annuler"
+              }
+            }
           }
         }
       }

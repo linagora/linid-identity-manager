@@ -689,6 +689,20 @@
                 }
               }
             }
+          },
+          "ConfirmDialogButton": {
+            "title": "Recompute rights",
+            "submitSuccess": "Rights recomputation requested.",
+            "submitError": "Unable to request rights recomputation. Please try again later.",
+            "ConfirmationDialog": {
+              "title": "Recompute the rights of this account?",
+              "content": "The recomputation will start immediately.",
+              "ButtonsCard": {
+                "confirm": "Recompute",
+                "confirmLoading": "Requesting...",
+                "cancel": "Cancel"
+              }
+            }
           }
         }
       }

@@ -23,6 +23,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
   `email` and `roles` claims.
 
+#### Frontend
+
+- Moved the **lifecycle** of the account and organizational unit details pages to the `LifecyclePanel` of LinPulsar:
+  its banners, info texts, dropdowns, dialogs and requests are configured by the `props` of a `LinPulsar/LifecyclePanel`
+  zone, its translations by the `LifecyclePanel` key of the details pages, and its design by the `lifecycle-panel`
+  namespace of the new `design/lifecycle.json` file, shared by both pages.
+- Upgraded `@linagora/lin-pulsar-core` to **0.1.8**, whose `renderJson` renders the request bodies of the
+  `LifecyclePanel`.
+
+### Removed
+
+#### Frontend
+
+- Removed the `immediateActionDelay`, `accountLifecycleFields` and `organizationalUnitLifecycleFields` settings of
+  `config.json`, replaced by the props of the `LinPulsar/LifecyclePanel` zones.
+- Removed the `design/account-banner.json`, `design/organizational-unit-banner.json`, `design/account-info-text.json`
+  and `design/organizational-unit-info-text.json` design files, replaced by `design/lifecycle.json`: a `config.json`
+  still listing them fails to load the UI design, and it must list `design/lifecycle.json`.
+- Removed the `AccountLifecyclePanel` and `OrganizationalUnitLifecyclePanel` local components, with their banners and
+  info texts.
+
 ### Fixed
 
 #### Security

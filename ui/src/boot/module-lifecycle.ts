@@ -28,7 +28,6 @@ import { linPulsarModuleFederation } from '@linagora/lin-pulsar-core';
 import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
 import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
 import OrganizationalUnitParentField from 'components/field/OrganizationalUnitParentField.vue';
-import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
 import { appConfig } from './config';
 import { defineBoot } from '#q-app';
 
@@ -53,7 +52,6 @@ export default defineBoot(async ({ router }): Promise<void> => {
     localComponents: {
       ExportApplicationScriptBtn,
       OrganizationalUnitCreateChildBtn,
-      OrganizationalUnitLifecyclePanel,
       OrganizationalUnitParentField,
     },
   });

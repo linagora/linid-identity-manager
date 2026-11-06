@@ -52,8 +52,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 /**
  * Configuration of the payload build of the accounts: the readers of the account snapshots, the writer of the changed
  * payloads, and the steps chaining them with the processor building the payloads:
- * {@code allAccountsPayloadStep}, for every account, used by the global job, and {@code accountPayloadStep}, for one
- * account, used by its recomputation.
+ * {@code allAccountsPayloadStep}, for every account, used by the global job and by the recomputation of an application,
+ * and {@code accountPayloadStep}, for one account, used by its recomputation.
  */
 @Configuration
 public class PayloadStepConfig {

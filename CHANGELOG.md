@@ -73,6 +73,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `GET /sync/cycle`, answering `running: true` while the daily synchronization cycle runs. Both endpoints answer
   `503` when `sync-api` cannot be reached or does not answer within `SYNC_API_CONNECT_TIMEOUT` (default `5s`) and
   `SYNC_API_READ_TIMEOUT` (default `10s`), and `502` when it answers with an error or an empty body.
+- Added the **immediate recomputation of the rights of all the accounts on an application** with
+  `POST /applications/{id}/recompute-rights`, answering `202` at once: `sync-api` rebuilds the payloads of all the
+  accounts, then computes the rights on the application of the accounts whose pair changed, in the background, without
+  calling OPA when nothing changed. `alreadyRunning` is `true` when a recomputation of the application is already
+  running, on any instance, and no new one is started. The endpoint answers `400` when the application has no script or
+  is not deployed, `404` when it is unknown, and `503` and `502` like `POST /accounts/{id}/recompute-rights`, with which
+  it shares the limit of 8 recomputations running and 16 waiting per instance.
 
 #### Frontend
 

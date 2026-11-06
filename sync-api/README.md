@@ -126,8 +126,9 @@ which builds the payloads from the first account and computes all the pairs stil
 left by the failed cycle.
 
 A job that fails raises no exception to the code starting it: Spring Batch only sets the status of its execution.
-`JobStatusListener`, registered as a listener of `syncJob` and `accountRecomputeJob`, raises the `jobNotCompleted` alert
-when a job ends with another status than `COMPLETED`, with its parameters and one of its failures.
+`JobStatusListener`, registered as a listener of `syncJob`, `accountRecomputeJob` and `applicationRecomputeJob`, raises
+the `jobNotCompleted` alert when a job ends with another status than `COMPLETED`, with its parameters and one of its
+failures.
 
 ---
 
@@ -250,7 +251,50 @@ restricted to the `sync_api` database, since `pg_locks` lists the locks of every
 Jobs are started at the same time, so Spring Batch creates its executions with
 `spring.batch.jdbc.isolation-level-for-create: repeatable_read`: with its default `SERIALIZABLE`, PostgreSQL makes part
 of them fail with serialization errors, some after the request was answered. The session locks, not this level, prevent
-two jobs of the same account, or two cycles, from running together.
+two jobs of the same account or of the same application, or two cycles, from running together.
+
+---
+
+## Application rights recomputation
+
+linid-api relays the recomputation of an application to one endpoint:
+
+| Endpoint                                   | Response                                                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| `POST /applications/{id}/recompute-rights` | `202`, `{ "alreadyRunning": false }` when the job is started, `true` when one is already running |
+
+`applicationRecomputeJob`, in `ApplicationRecomputeJobConfig`, recomputes the rights of all the accounts on one
+application without waiting for the next cycle. Its parameters are `applicationId` and `requestedAt`, both identifying,
+so that each request is a new job instance; a `DefaultJobParametersValidator` rejects the parameters without them before
+any job execution is created: without `applicationId`, the job would rebuild the payloads of all the accounts, then end
+`COMPLETED` without computing anything. It runs two steps, and stops at the first failed one, like `syncJob`:
+
+- `allAccountsPayloadStep`, the step of `syncJob`, reused as is, builds and writes the payloads of all the accounts.
+- `applicationComputeRightsStep`, built like `allPairsComputeRightsStep`, on `applicationPairsReader`: once the payloads
+  are rebuilt, only the pairs of the application whose payload, script or claims template checksum changed are computed,
+  so that OPA is not called when nothing changed. The pairs are selected by their checksums only, including the accounts
+  without any role yet: OPA decides who gets a role, so the concerned accounts are not known in advance.
+
+The job goes on after the error of a pair, which stays `to_compute`. In both steps, an account locked beyond
+`SYNC_LOCK_TIMEOUT`, by a chunk of the cycle or of another recomputation, makes the chunk fail, and the job end
+`FAILED`. A failed job is not restarted: a new request after a stop is a new job instance, which builds the payloads
+again from the first account and only computes the pairs still `to_compute`, the pairs already written no longer being
+`to_compute`.
+
+`RecomputeJobServiceImpl` starts the job like the recomputation of an account, in a task of the application task
+executor, and answers at once, without end notification. There is no `404`: linid-api checks that the application exists
+and is deployed, and called for an application not deployed, the job would find no pair to compute. Before starting the
+job, it takes the session lock of the recomputation of the application (see [Several instances](#several-instances)):
+when it is already held, no job is started and `alreadyRunning` is `true`.
+
+The recomputations of the applications share with those of the accounts the limit of `spring.task.execution.pool`, 8
+jobs running and 16 waiting per instance, and the `503` answered beyond it, and with the other jobs and the cycle the
+pool of the linid-api database: `LINID_DATABASE_MAX_POOL_SIZE` should grow with `core-size`, as described in
+[Account rights recomputation](#account-rights-recomputation). A recomputation of an application rebuilds the payloads
+of all the accounts, so it keeps one of the 8 threads much longer than a recomputation of an account. It can outlast
+`spring.lifecycle.timeout-per-shutdown-phase` when the instance stops. Its job then fails on the closed pools: it raises
+`jobNotStarted`, not `jobNotCompleted`, and its execution stays `STARTED`. The jobs still waiting are dropped, each one
+raising the `jobNotStarted` alert. A new request, or the next cycle, computes the pairs left `to_compute`.
 
 ---
 
@@ -277,6 +321,13 @@ PostgreSQL advisory locks, in their two-integer form `(namespace, key)`, each ki
   accounts with the same hash code share the lock: while one is recomputed, a request for the other one starts no job
   and answers `alreadyRunning: true`. Like the cycle lock, it disappears with the instance that held it, unlike an
   execution of the Spring Batch tables, which stays `STARTED` after a crash.
+- **Application recompute lock** `(LockNamespaces.APPLICATION_RECOMPUTE, applicationId.hashCode())`:
+  `RecomputeJobServiceImpl` takes it like the account recompute lock, with `pg_try_advisory_lock` in the `sync_api`
+  database, through `SessionLockService`, on a dedicated connection of `sessionLockDataSource`, outside the pool, before
+  starting `applicationRecomputeJob`, and closes the connection at the end of the job, even when it fails or cannot be
+  launched. One recomputation of an application runs at a time, whatever the instance. Two applications with the same
+  hash code share the lock: while one is recomputed, a request for the other one starts no job and answers
+  `alreadyRunning: true`.
 - **Per-account lock** `(LockNamespaces.ACCOUNT, accountId.hashCode())`: the payload build and the computation of the
   rights take `pg_advisory_xact_lock` on the accounts of each chunk, in its transaction of the linid-api database, so
   that two processings, cycles or recomputations, never write the same account at the same time. `AccountSnapshotLoader`

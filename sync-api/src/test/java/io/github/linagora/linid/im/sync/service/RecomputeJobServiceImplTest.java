@@ -37,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -48,6 +49,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
 import ch.qos.logback.core.read.ListAppender;
 import io.github.linagora.linid.im.sync.batch.AccountRecomputeJobConfig;
+import io.github.linagora.linid.im.sync.batch.ApplicationRecomputeJobConfig;
 import io.github.linagora.linid.im.sync.model.recompute.RecomputeRightsDTO;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -82,6 +84,8 @@ class RecomputeJobServiceImplTest {
 
     private static final UUID ACCOUNT_ID = UUID.fromString("00000000-0000-4000-8000-000000000001");
 
+    private static final UUID APPLICATION_ID = UUID.fromString("00000000-0000-4000-8000-0000000000a1");
+
     @Mock
     private SessionLockService sessionLockService;
 
@@ -93,6 +97,9 @@ class RecomputeJobServiceImplTest {
 
     @Mock
     private Job accountRecomputeJob;
+
+    @Mock
+    private Job applicationRecomputeJob;
 
     private final List<Runnable> tasks = new ArrayList<>();
 
@@ -108,6 +115,8 @@ class RecomputeJobServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        lenient().when(accountRecomputeJob.getName()).thenReturn("accountRecomputeJob");
+        lenient().when(applicationRecomputeJob.getName()).thenReturn("applicationRecomputeJob");
         service = service(tasks::add);
         appender = new ListAppender<>();
         appender.start();
@@ -260,21 +269,174 @@ class RecomputeJobServiceImplTest {
         verifyNoInteractions(jobOperator);
     }
 
+    @Test
+    @DisplayName("recomputeApplicationRights should take the lock of the application, start applicationRecomputeJob in "
+        + "the background with the application and the date of the request as identifying parameters, and close the "
+        + "lock once the job ended")
+    void testRecomputeApplicationRights() throws Exception {
+        applicationLock(Optional.of(lock));
+        var before = LocalDateTime.now(ZoneOffset.UTC);
+
+        assertEquals(new RecomputeRightsDTO(false), service.recomputeApplicationRights(APPLICATION_ID));
+
+        assertEquals(1, tasks.size());
+        verifyNoInteractions(jobOperator);
+        verify(lock, never()).close();
+
+        tasks.getFirst().run();
+
+        var parameters = ArgumentCaptor.forClass(JobParameters.class);
+        var order = inOrder(jobOperator, lock);
+        order.verify(jobOperator).start(eq(applicationRecomputeJob), parameters.capture());
+        order.verify(lock).close();
+        JobParameter<?> applicationId = parameters.getValue()
+            .getParameter(ApplicationRecomputeJobConfig.APPLICATION_ID);
+        assertNotNull(applicationId);
+        assertEquals(APPLICATION_ID, applicationId.value());
+        assertTrue(applicationId.identifying());
+        JobParameter<?> requestedAt = parameters.getValue().getParameter(ApplicationRecomputeJobConfig.REQUESTED_AT);
+        assertNotNull(requestedAt);
+        assertTrue(requestedAt.identifying());
+        var value = (LocalDateTime) requestedAt.value();
+        assertFalse(value.isBefore(before) || value.isAfter(LocalDateTime.now(ZoneOffset.UTC)));
+        assertTrue(appender.list.isEmpty());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should start no job and log it when a recomputation of the application is "
+        + "already running")
+    void testRecomputeApplicationRights_alreadyRunning() {
+        applicationLock(Optional.empty());
+
+        assertEquals(new RecomputeRightsDTO(true), service.recomputeApplicationRights(APPLICATION_ID));
+
+        assertTrue(tasks.isEmpty());
+        verifyNoInteractions(jobOperator);
+        assertEquals(1, appender.list.size());
+        assertEquals(Level.INFO, appender.list.getFirst().getLevel());
+        assertEquals("Recomputation of application " + APPLICATION_ID + " not started: a recomputation of the "
+            + "application is already running", appender.list.getFirst().getFormattedMessage());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should raise the alert on an exception of the launch of the job and close "
+        + "the lock")
+    void testRecomputeApplicationRights_launchFailure() throws Exception {
+        applicationLock(Optional.of(lock));
+        var exception = new InvalidJobParametersException("The JobParameters do not contain required keys");
+        when(jobOperator.start(eq(applicationRecomputeJob), any())).thenThrow(exception);
+        service.recomputeApplicationRights(APPLICATION_ID);
+
+        tasks.getFirst().run();
+
+        verify(lock).close();
+        assertApplicationJobNotRun(exception);
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should raise the alert on an unexpected exception of the job and close "
+        + "the lock")
+    void testRecomputeApplicationRights_jobException() throws Exception {
+        applicationLock(Optional.of(lock));
+        var exception = new IllegalStateException("job repository unreachable");
+        when(jobOperator.start(eq(applicationRecomputeJob), any())).thenThrow(exception);
+        service.recomputeApplicationRights(APPLICATION_ID);
+
+        tasks.getFirst().run();
+
+        verify(lock).close();
+        assertApplicationJobNotRun(exception);
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should close the lock and let the exception through when the executor "
+        + "rejects the job")
+    void testRecomputeApplicationRights_taskRejected() {
+        applicationLock(Optional.of(lock));
+        var exception = new TaskRejectedException("executor shut down");
+        service = service(task -> {
+            throw exception;
+        });
+
+        assertSame(exception,
+            assertThrows(TaskRejectedException.class, () -> service.recomputeApplicationRights(APPLICATION_ID)));
+
+        verifyNoInteractions(jobOperator);
+        verify(lock).close();
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should close the lock and raise the alert when the executor drops the job "
+        + "still waiting at its shutdown")
+    void testRecomputeApplicationRights_droppedAtShutdown() {
+        applicationLock(Optional.of(lock));
+        var executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.initialize();
+        var neverReleased = new CountDownLatch(1);
+        executor.execute(() -> {
+            try {
+                neverReleased.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        });
+        service(executor).recomputeApplicationRights(APPLICATION_ID);
+
+        executor.shutdown();
+
+        verifyNoInteractions(jobOperator);
+        verify(lock).close();
+        assertEquals(1, alertAppender.list.size());
+        assertEquals("Job not started, left to the next cycle — job=applicationRecomputeJob, application="
+            + APPLICATION_ID, alertAppender.list.getFirst().getFormattedMessage());
+        assertInstanceOf(CancellationException.class,
+            ((ThrowableProxy) alertAppender.list.getFirst().getThrowableProxy()).getThrowable());
+    }
+
+    @Test
+    @DisplayName("recomputeApplicationRights should let the exception through when the lock cannot be taken")
+    void testRecomputeApplicationRights_lockError() {
+        var exception = new CannotGetJdbcConnectionException("connection refused");
+        when(sessionLockService.tryLock(anyInt(), anyInt())).thenThrow(exception);
+
+        assertSame(exception, assertThrows(CannotGetJdbcConnectionException.class,
+            () -> service.recomputeApplicationRights(APPLICATION_ID)));
+
+        assertTrue(tasks.isEmpty());
+        verifyNoInteractions(jobOperator);
+    }
+
     private RecomputeJobServiceImpl service(final TaskExecutor taskExecutor) {
-        return new RecomputeJobServiceImpl(sessionLockService, taskExecutor, jobOperator, accountRecomputeJob);
+        return new RecomputeJobServiceImpl(sessionLockService, taskExecutor, jobOperator, accountRecomputeJob,
+            applicationRecomputeJob);
     }
 
     private void assertJobNotRun(final Exception exception) {
+        assertAlert("Job not started, left to the next cycle — job=accountRecomputeJob, account=" + ACCOUNT_ID,
+            exception);
+    }
+
+    private void assertApplicationJobNotRun(final Exception exception) {
+        assertAlert("Job not started, left to the next cycle — job=applicationRecomputeJob, application="
+            + APPLICATION_ID, exception);
+    }
+
+    private void assertAlert(final String message, final Exception exception) {
         assertTrue(appender.list.isEmpty());
         assertEquals(1, alertAppender.list.size());
         assertEquals(Level.ERROR, alertAppender.list.getFirst().getLevel());
-        assertEquals("Job not started, left to the next cycle — job=accountRecomputeJob, account=" + ACCOUNT_ID,
-            alertAppender.list.getFirst().getFormattedMessage());
+        assertEquals(message, alertAppender.list.getFirst().getFormattedMessage());
         assertSame(exception, ((ThrowableProxy) alertAppender.list.getFirst().getThrowableProxy()).getThrowable());
     }
 
     private void accountLock(final Optional<SessionLock> accountLock) {
         when(sessionLockService.tryLock(LockNamespaces.ACCOUNT_RECOMPUTE, ACCOUNT_ID.hashCode()))
             .thenReturn(accountLock);
+    }
+
+    private void applicationLock(final Optional<SessionLock> applicationLock) {
+        when(sessionLockService.tryLock(LockNamespaces.APPLICATION_RECOMPUTE, APPLICATION_ID.hashCode()))
+            .thenReturn(applicationLock);
     }
 }

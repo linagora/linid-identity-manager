@@ -32,8 +32,9 @@ spring:
   task:
     execution:
       pool:
-        # Each recomputation of an account holds a connection of the sync_api database as soon as it waits in the queue:
-        # the pool limits them to core-size running and queue-capacity waiting, and rejects the next ones.
+        # Each recomputation of an account or of an application holds a connection of the sync_api database as soon as
+        # it waits in the queue: the pool limits them to core-size running and queue-capacity waiting, and rejects the
+        # next ones.
         # The jobs running and the cycle share the linid-api pool, each chunk holding a connection during its OPA calls:
         # LINID_DATABASE_MAX_POOL_SIZE should grow with core-size, up to core-size + 1 for all of them to run at once
         core-size: 8

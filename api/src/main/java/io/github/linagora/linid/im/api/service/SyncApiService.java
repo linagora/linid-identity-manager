@@ -46,6 +46,16 @@ public interface SyncApiService {
     RecomputeRightsDTO recomputeAccountRights(UUID id);
 
     /**
+     * Asks sync-api to recompute the rights of all the accounts on an application in the background.
+     *
+     * @param id the application UUID, which the caller checks is deployed
+     * @return the answer of sync-api, telling whether a recomputation of the application was already running
+     * @throws io.github.linagora.linid.im.corelib.exception.ApiException with status {@code 503} when sync-api cannot
+     *     be reached or too many recomputations are already waiting, {@code 502} when it answers with an error
+     */
+    RecomputeRightsDTO recomputeApplicationRights(UUID id);
+
+    /**
      * Reads the status of the daily synchronization cycle from sync-api.
      *
      * @return the status of the cycle

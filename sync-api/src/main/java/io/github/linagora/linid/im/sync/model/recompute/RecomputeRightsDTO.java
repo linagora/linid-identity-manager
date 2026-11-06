@@ -27,10 +27,10 @@
 package io.github.linagora.linid.im.sync.model.recompute;
 
 /**
- * Response body of the recomputation of the rights of an account.
+ * Response body of the recomputation of the rights of an account or of an application.
  *
- * @param alreadyRunning {@code true} when a recomputation of the rights of the account was already running and no job
- *     was started
+ * @param alreadyRunning {@code true} when a recomputation of the rights of the account or of the application was
+ *     already running and no job was started
  */
 public record RecomputeRightsDTO(boolean alreadyRunning) {
 }

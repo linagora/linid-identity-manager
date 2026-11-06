@@ -27,7 +27,7 @@
 /**
  * Provides the response bodies of the recomputations.
  *
- * <p>This package contains the answer of the recomputation of the rights of an account, telling whether a recomputation
- * was already running.</p>
+ * <p>This package contains the answer of the recomputation of the rights of an account or of an application, telling
+ * whether a recomputation was already running.</p>
  */
 package io.github.linagora.linid.im.sync.model.recompute;

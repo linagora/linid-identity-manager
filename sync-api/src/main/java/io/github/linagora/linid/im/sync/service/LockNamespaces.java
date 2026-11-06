@@ -59,6 +59,13 @@ public final class LockNamespaces {
      */
     public static final int ACCOUNT_RECOMPUTE = 3;
 
+    /**
+     * Namespace of the lock of the recomputation of an application, taken in the {@code sync-api} database for the
+     * whole job, with the hash code of the {@code app_id} of the application as key: one recomputation of an
+     * application at a time, whatever the instance.
+     */
+    public static final int APPLICATION_RECOMPUTE = 4;
+
     private LockNamespaces() {
     }
 }

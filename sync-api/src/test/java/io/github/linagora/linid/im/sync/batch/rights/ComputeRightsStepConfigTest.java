@@ -326,6 +326,75 @@ class ComputeRightsStepConfigTest {
         order.verify(transactionManager).commit(any());
     }
 
+    @Test
+    @DisplayName("applicationComputeRightsStep should read, compute and write the pairs of the application, in a "
+        + "transaction where the accounts of the chunk are locked before its pairs are computed")
+    void testApplicationComputeRightsStep() throws Exception {
+        var first = pair(ACCOUNT_ID, APPLICATION_ID);
+        var second = pair(OTHER_ACCOUNT_ID, APPLICATION_ID);
+        when(repository.findByApplicationIdAndToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAsc(
+            APPLICATION_ID, LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
+            .thenReturn(window(false, first, second));
+        when(rightsComputationService.compute(first, Set.of())).thenReturn(RIGHTS);
+        when(rightsComputationService.compute(second, Set.of())).thenReturn(RIGHTS);
+        when(repository.findChecksumsByAccountIdAndApplicationId(ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.of(new PairChecksums(null, null, null)));
+        when(repository.findChecksumsByAccountIdAndApplicationId(OTHER_ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.of(new PairChecksums(null, null, null)));
+        when(computedRightRepository.findByAccountIdAndApplicationId(ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.empty());
+        when(computedRightRepository.findByAccountIdAndApplicationId(OTHER_ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.empty());
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        var stepExecution = stepExecution();
+
+        var step = config.applicationComputeRightsStep(new ResourcelessJobRepository(), transactionManager,
+            config.applicationPairsReader(APPLICATION_ID), processor(), writer(),
+            new ComputeRightsStepListener(accountLockService));
+        step.execute(stepExecution);
+
+        assertEquals("applicationComputeRightsStep", step.getName());
+        assertEquals(BatchStatus.COMPLETED, stepExecution.getStatus());
+        assertEquals(2, stepExecution.getWriteCount());
+        assertEquals(List.of(ACCOUNT_ID, OTHER_ACCOUNT_ID),
+            written.stream().map(ComputedRight::getAccountId).toList());
+        assertEquals(APPLICATION_ID, written.getFirst().getApplicationId());
+        var order = inOrder(transactionManager, accountLockService, rightsComputationService);
+        order.verify(transactionManager).getTransaction(any());
+        order.verify(accountLockService).lockAccounts(List.of(ACCOUNT_ID, OTHER_ACCOUNT_ID));
+        order.verify(rightsComputationService).compute(first, Set.of());
+        order.verify(rightsComputationService).compute(second, Set.of());
+        order.verify(transactionManager).commit(any());
+    }
+
+    @Test
+    @DisplayName("applicationComputeRightsStep should go on after the error of a pair, which stays to compute")
+    void testApplicationComputeRightsStep_pairError() throws Exception {
+        var first = pair(ACCOUNT_ID, APPLICATION_ID);
+        var second = pair(OTHER_ACCOUNT_ID, APPLICATION_ID);
+        when(repository.findByApplicationIdAndToComputeTrueAndAccountIdGreaterThanEqualOrderByAccountIdAsc(
+            APPLICATION_ID, LOWEST_ACCOUNT_ID, ScrollPosition.keyset(), LIMIT))
+            .thenReturn(window(false, first, second));
+        when(rightsComputationService.compute(first, Set.of())).thenThrow(new RightsComputationException(
+            "Unable to compute the rights of the pair", new IllegalStateException("Unclosed tag")));
+        when(rightsComputationService.compute(second, Set.of())).thenReturn(RIGHTS);
+        when(repository.findChecksumsByAccountIdAndApplicationId(OTHER_ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.of(new PairChecksums(null, null, null)));
+        when(computedRightRepository.findByAccountIdAndApplicationId(OTHER_ACCOUNT_ID, APPLICATION_ID))
+            .thenReturn(Optional.empty());
+        when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
+        var stepExecution = stepExecution();
+
+        config.applicationComputeRightsStep(new ResourcelessJobRepository(), transactionManager,
+            config.applicationPairsReader(APPLICATION_ID), processor(), writer(),
+            new ComputeRightsStepListener(accountLockService)).execute(stepExecution);
+
+        assertEquals(BatchStatus.COMPLETED, stepExecution.getStatus());
+        assertEquals(1, stepExecution.getWriteCount());
+        assertEquals(1, stepExecution.getProcessSkipCount());
+        assertEquals(List.of(OTHER_ACCOUNT_ID), written.stream().map(ComputedRight::getAccountId).toList());
+    }
+
     private Step step() {
         when(transactionManager.getTransaction(any())).thenAnswer(invocation -> new SimpleTransactionStatus());
         return config.allPairsComputeRightsStep(new ResourcelessJobRepository(), transactionManager, processor(),

@@ -28,7 +28,7 @@
  * Provides the REST controllers of the LinID synchronization API.
  *
  * <p>This package contains the endpoints called by linid-api, through mutual TLS: the recomputation of the rights of
- * an account and the status of the synchronization cycle. The controllers hold no logic, which belongs to the
- * services.</p>
+ * an account or of an application, and the status of the synchronization cycle. The controllers hold no logic, which
+ * belongs to the services.</p>
  */
 package io.github.linagora.linid.im.sync.controller;

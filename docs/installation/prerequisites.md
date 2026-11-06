@@ -54,8 +54,9 @@ Several `sync-api` instances coordinate with PostgreSQL advisory locks, which ne
 synchronization cycle is a session lock of the `sync_api` database, held by a connection that stays idle during the
 whole cycle: the `sync_api` database must not be reached through PgBouncer in transaction pooling mode, and
 `idle_session_timeout` must not be set for the runtime account. This connection is opened outside the connection pool,
-like the one held by each recomputation of an account, running or waiting: count, per instance, one connection more
-than the pool for the cycle, plus 24 for the recomputations (8 running and 16 waiting), in `max_connections`.
+like the one held by each recomputation of an account or of an application, running or waiting: count, per instance,
+one connection more than the pool for the cycle, plus 24 for the recomputations (8 running and 16 waiting), in
+`max_connections`.
 
 ### 2️⃣ Java Runtime
 

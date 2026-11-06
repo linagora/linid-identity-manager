@@ -31,11 +31,13 @@ import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationViewDTO;
 import io.github.linagora.linid.im.api.model.common.AvatarEntity;
+import io.github.linagora.linid.im.api.model.sync.RecomputeRightsDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
 import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OpaApplicationDeployerService;
+import io.github.linagora.linid.im.api.service.SyncApiService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.swagger.v3.oas.annotations.Operation;
@@ -104,6 +106,11 @@ public class ApplicationController {
      * Service for deploying OPA application policies.
      */
     private final OpaApplicationDeployerService opaApplicationDeployerService;
+
+    /**
+     * Service calling sync-api, which computes the rights of the accounts.
+     */
+    private final SyncApiService syncApiService;
 
     /**
      * Creates a new application.
@@ -234,6 +241,43 @@ public class ApplicationController {
                 force);
         var application = opaApplicationDeployerService.deploy(userPrincipal, id, force);
         return ResponseEntity.status(HttpStatus.OK).body(applicationMapper.toDTO(application));
+    }
+
+    /**
+     * Starts the immediate recomputation of the rights of all the accounts on an application, relayed to sync-api,
+     * which rebuilds the payloads of all the accounts then computes the rights on the application of the accounts whose
+     * pair changed, in the background.
+     *
+     * <p>The application must have a script and a non-null {@code deployedAt}: sync-api would otherwise find no pair to
+     * compute.</p>
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the application UUID
+     * @return the answer of sync-api, telling whether a recomputation of the application was already running, with HTTP
+     *     202 status
+     */
+    @PostMapping("/{id}/recompute-rights")
+    @Operation(summary = "Recompute the rights of all the accounts on an application")
+    @ApiResponse(responseCode = "202", description = "Recomputation started, or already running for this application")
+    @ApiResponse(responseCode = "400", description = "Application without script or not deployed", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    @ApiResponse(responseCode = "502", description = "Error answered by sync-api", content = @Content)
+    @ApiResponse(responseCode = "503", description = "sync-api unreachable, or too many recomputations already waiting",
+        content = @Content)
+    public ResponseEntity<RecomputeRightsDTO> recomputeRights(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id) {
+        log.info("[{}] Received POST request to recompute the rights of application {}", userPrincipal.getEmail(), id);
+        var entity = applicationService.findViewById(userPrincipal, id);
+
+        if (!entity.getHasScript() || entity.getDeployedAt() == null) {
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of("error.application.not_deployed", Map.of("id", id.toString()))
+            );
+        }
+
+        return ResponseEntity.accepted().body(syncApiService.recomputeApplicationRights(id));
     }
 
     /**

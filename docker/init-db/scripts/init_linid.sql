@@ -800,3 +800,130 @@ $$
 
     END
 $$;
+
+-- Applications with roles, enabled rules, a script and a claims template, whose
+-- rights are read by the e2e scenarios. UUIDs are deterministic so that the
+-- scenarios can target them directly through /applications/{id}. deployed_at stays
+-- NULL: linid-api publishes the policies on OPA, as for any pending application.
+DO
+$$
+    DECLARE
+        admin_id      UUID := '00000000-0000-4000-8000-00000000a001';
+        -- Text around the rules in the template opa-policy.rego.j2 of linid-api: it must
+        -- stay identical, so that the API generates the same script from these rules.
+        script_header TEXT := $rego$
+
+import rego.v1
+
+# Shared state contributed to by rule fragments through partial set rules.
+# Fragments must only "contains" values into these sets; they must never reassign them.
+signals contains signal if {
+    some signal in []
+}
+
+roles contains role if {
+    some role in []
+}
+
+$rego$;
+        script_footer TEXT := $rego$
+# Fixed resolution block owned by the template. Fragments must not redefine these rules.
+default final_allow := false
+
+final_allow if {
+    not "force_disallow" in signals
+    "force_allow" in signals
+}
+
+final_allow if {
+    not "force_disallow" in signals
+    not "force_allow" in signals
+    "allow" in signals
+}
+
+result := {
+    "allow": final_allow,
+    "roles": roles
+}
+$rego$;
+    BEGIN
+        -- =========================================================
+        -- 1. APPLICATIONS
+        -- =========================================================
+        INSERT INTO applications (app_id, code, name, description, domain, type, claims_template,
+                                  claims_template_checksum, created_by, updated_by)
+        SELECT seed.app_id::UUID, seed.code, seed.name, seed.description, seed.domain, 'OIDC', seed.claims_template,
+               encode(sha256(convert_to(seed.claims_template, 'UTF8')), 'hex'), admin_id, admin_id
+        FROM (VALUES ('00000000-0000-4000-8000-00000000e001', 'intranet', 'Intranet',
+                      'Intranet of the organization.', 'Collaboration',
+                      '{ "sub": {{ payload.external_id | tojson }}, "email": {{ payload.email | tojson }}, "roles": {{ roles | tojson }} }'),
+                     ('00000000-0000-4000-8000-00000000e002', 'dev-platform', 'Development platform',
+                      'Source code and continuous integration platform.', 'Engineering',
+                      '{ "uid": {{ payload.external_id | tojson }}, "teams": {{ payload.organizational_units | tojson }}, "groups": {{ payload.groups | tojson }}, "allowed": {{ allow | tojson }} }'),
+                     ('00000000-0000-4000-8000-00000000e003', 'helpdesk', 'Helpdesk',
+                      'User support ticketing tool.', 'Support',
+                      '{ "login": {{ payload.email | tojson }}, "allowed": {{ allow | tojson }}, "profiles": {{ roles | tojson }} }'))
+                 AS seed (app_id, code, name, description, domain, claims_template)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 2. APPLICATION ROLES
+        -- =========================================================
+        INSERT INTO application_roles (app_id, name, description, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-00000000e001', 'reader', 'Reads the intranet.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e001', 'editor', 'Publishes on the intranet.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e002', 'developer', 'Works on the projects.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e002', 'maintainer', 'Maintains the projects.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e003', 'agent', 'Handles the tickets.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e003', 'requester', 'Opens tickets.', admin_id, admin_id)
+        ON CONFLICT (app_id, name) DO NOTHING;
+
+        -- =========================================================
+        -- 3. APPLICATION RULES
+        -- The rules read the payload built by sync-api. helpdesk also
+        -- covers force_allow, and force_disallow prevailing over allow.
+        -- =========================================================
+        INSERT INTO application_rules (app_id, code, description, priority, script, script_checksum, disabled,
+                                       created_by, updated_by)
+        SELECT seed.app_id::UUID, seed.code, seed.description, seed.priority, seed.script,
+               encode(sha256(convert_to(seed.script, 'UTF8')), 'hex'), false, admin_id, admin_id
+        FROM (VALUES ('00000000-0000-4000-8000-00000000e001', 'ALLOW_TEAM_BETA', 'Allows the members of Team Beta.', 1,
+                      'signals contains "allow" if "Team Beta" in input.organizational_units'),
+                     ('00000000-0000-4000-8000-00000000e001', 'ROLE_READER', 'Team Beta reads the intranet.', 2,
+                      'roles contains "reader" if "Team Beta" in input.organizational_units'),
+                     ('00000000-0000-4000-8000-00000000e001', 'ROLE_EDITOR', 'The developers publish.', 3,
+                      'roles contains "editor" if "developers" in input.groups'),
+                     ('00000000-0000-4000-8000-00000000e002', 'ALLOW_DEVELOPERS', 'Allows the developers.', 1,
+                      E'signals contains "allow" if "developers" in input.groups\nroles contains "developer" if "developers" in input.groups'),
+                     ('00000000-0000-4000-8000-00000000e002', 'ROLE_MAINTAINER', 'Division A1 maintains the projects.', 2,
+                      'roles contains "maintainer" if "Division A1" in input.organizational_units'),
+                     ('00000000-0000-4000-8000-00000000e003', 'ALLOW_STAFF', 'Allows the staff and the support.', 1,
+                      E'signals contains "allow" if "all-staff" in input.groups\nsignals contains "allow" if "support" in input.groups\nroles contains "agent" if "support" in input.groups'),
+                     ('00000000-0000-4000-8000-00000000e003', 'FORCE_ALLOW_USER5', 'Forces the access of user5.', 2,
+                      E'signals contains "force_allow" if input.email == "user5@example.com"\nroles contains "requester" if input.email == "user5@example.com"'),
+                     ('00000000-0000-4000-8000-00000000e003', 'FORCE_DISALLOW_DEVELOPERS', 'Refuses the developers.', 3,
+                      'signals contains "force_disallow" if "developers" in input.groups'))
+                 AS seed (app_id, code, description, priority, script)
+        ON CONFLICT (app_id, code) DO NOTHING;
+
+        -- =========================================================
+        -- 4. APPLICATION SCRIPTS
+        -- =========================================================
+        UPDATE applications
+        SET script          = rendered.script,
+            script_checksum = encode(sha256(convert_to(rendered.script, 'UTF8')), 'hex')
+        FROM (SELECT app.app_id,
+                     'package authz["' || app.code || '"]' || script_header
+                         || string_agg(E'\n' || rule.script || E'\n\n', '' ORDER BY rule.priority)
+                         || script_footer AS script
+              FROM applications app
+                       JOIN application_rules rule ON rule.app_id = app.app_id
+              WHERE app.app_id IN ('00000000-0000-4000-8000-00000000e001',
+                                   '00000000-0000-4000-8000-00000000e002',
+                                   '00000000-0000-4000-8000-00000000e003')
+                AND NOT rule.disabled
+              GROUP BY app.app_id, app.code) AS rendered
+        WHERE applications.app_id = rendered.app_id
+          AND applications.script IS NULL;
+    END
+$$;

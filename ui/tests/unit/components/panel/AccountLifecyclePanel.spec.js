@@ -53,6 +53,8 @@ const { mockNotify, mockUiEventSubjectNext, mockGlobalT, mockScopedT } =
   }));
 
 vi.mock('@linagora/lin-pulsar-core', () => ({
+  LinPulsarZoneRenderer: {},
+  useLinPulsarZoneStore: () => ({ hasZoneEntries: vi.fn(() => false) }),
   loadAsyncComponent: vi.fn(() => null),
   useNotify: () => ({
     Notify: mockNotify,

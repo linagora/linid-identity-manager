@@ -70,6 +70,14 @@
       }
     },
     {
+      "zone": "moduleAccountDetailsPage.account-lifecycle-panel.actions",
+      "plugin": "LinPulsar/ConfirmDialogButton",
+      "props": {
+        "url": "/accounts/{{ entity.id }}/recompute-rights",
+        "method": "POST"
+      }
+    },
+    {
       "zone": "moduleAccountDetailsPage.content.before",
       "component": "AccountLifecyclePanel"
     },

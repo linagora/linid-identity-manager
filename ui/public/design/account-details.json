@@ -176,6 +176,22 @@
         }
       }
     },
+    "lifecycle-actions": {
+      "confirm-dialog-button": {
+        "q-btn": {
+          "color": "primary",
+          "icon": "sync",
+          "outline": false
+        },
+        "confirmation-dialog": {
+          "buttons-card": {
+            "confirm-button": {
+              "q-btn": { "color": "primary", "outline": false }
+            }
+          }
+        }
+      }
+    },
     "activation-actions": {
       "dropdown-button": {
         "q-btn-dropdown": { "color": "positive", "outline": false },

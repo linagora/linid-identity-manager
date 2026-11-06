@@ -760,7 +760,21 @@
       "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
     },
     "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes",
-    "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
+    "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}",
+    "ConfirmDialogButton": {
+      "title": "Recalculer les droits",
+      "submitSuccess": "Recalcul des droits demandé.",
+      "submitError": "Impossible de demander le recalcul des droits. Veuillez réessayer plus tard.",
+      "ConfirmationDialog": {
+        "title": "Recalculer les droits de {firstname} {lastname} ?",
+        "content": "Le recalcul démarrera immédiatement.",
+        "ButtonsCard": {
+          "confirm": "Recalculer",
+          "confirmLoading": "Envoi...",
+          "cancel": "Annuler"
+        }
+      }
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "Ce compte est désactivé depuis le {date}.",

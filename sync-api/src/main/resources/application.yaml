@@ -52,6 +52,13 @@ management:
       exposure:
         include: health
 
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED}
+  show-actuator: ${SWAGGER_ENABLED}
+
 server:
   port: 8443
   ssl:

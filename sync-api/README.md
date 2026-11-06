@@ -70,6 +70,28 @@ curl --cacert ../docker/certs/ca.crt \
 
 ---
 
+## API Documentation
+
+When Swagger is enabled (`SWAGGER_ENABLED=true`), the full API documentation is available, in dev, at:
+
+```
+https://localhost:8444/swagger-ui/index.html
+```
+
+It requires the client certificate of linid-api, like any other endpoint: a browser only reaches it once
+`docker/dev/resources/api-client-keystore.p12` is imported, with the `SSL_KEY_PASSWORD` of `docker/dev/env/cert.env`.
+With this certificate, `Try it out` really starts the recomputations.
+
+The OpenAPI document can also be read without a browser:
+
+```bash
+curl --cacert ../docker/certs/ca.crt \
+  --cert ../docker/dev/resources/api-client.crt --key ../docker/dev/resources/api-client.key \
+  https://localhost:8444/v3/api-docs
+```
+
+---
+
 ## Databases
 
 `sync-api` connects to two databases:
@@ -451,6 +473,7 @@ OPA input. The policies are deployed on OPA by linid-api: `sync-api` only evalua
 | `OPA_EVALUATION_PATH`            | Path of the result of an application policy, `{code}` being the application code | `/v1/data/authz/{code}/result` |
 | `OPA_CONNECT_TIMEOUT`            | Maximum time to establish the connection to the OPA server, as a duration        | `5s`                           |
 | `OPA_READ_TIMEOUT`               | Maximum time to wait for the response of the OPA server, as a duration           | `10s`                          |
+| `SWAGGER_ENABLED`                | Enable Swagger UI and API docs                                                   | —                              |
 | `LOGGING_LEVEL`                  | Root logging level                                                               | `INFO`                         |
 | `EXTERNAL_CONFIGURATION`         | Path to the external YAML configuration file, holding the `sync-data` section    | —                              |
 | `SERVER_PORT`                    | HTTPS port                                                                       | `8443`                         |

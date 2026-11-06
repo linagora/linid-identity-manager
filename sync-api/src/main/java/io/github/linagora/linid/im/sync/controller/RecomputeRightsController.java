@@ -28,6 +28,10 @@ package io.github.linagora.linid.im.sync.controller;
 
 import io.github.linagora.linid.im.sync.model.recompute.RecomputeRightsDTO;
 import io.github.linagora.linid.im.sync.service.RecomputeJobService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Slf4j
 @RestController
+@Tag(name = "Rights recomputation", description = "Recomputation of the rights of an account or of an application")
 public class RecomputeRightsController {
 
     /**
@@ -70,6 +75,9 @@ public class RecomputeRightsController {
      * @return {@code 202} with whether a recomputation of the account was already running
      */
     @PostMapping("/accounts/{id}/recompute-rights")
+    @Operation(summary = "Recompute the rights of an account")
+    @ApiResponse(responseCode = "202", description = "Recomputation started, or already running for this account")
+    @ApiResponse(responseCode = "503", description = "Too many recomputations already waiting", content = @Content)
     public ResponseEntity<RecomputeRightsDTO> recomputeAccountRights(@PathVariable final UUID id) {
         log.info("Received POST request to recompute the rights of account {}", id);
         return ResponseEntity.accepted().body(recomputeJobService.recomputeAccountRights(id));
@@ -90,6 +98,9 @@ public class RecomputeRightsController {
      * @return {@code 202} with whether a recomputation of the application was already running
      */
     @PostMapping("/applications/{id}/recompute-rights")
+    @Operation(summary = "Recompute the rights of all the accounts on an application")
+    @ApiResponse(responseCode = "202", description = "Recomputation started, or already running for this application")
+    @ApiResponse(responseCode = "503", description = "Too many recomputations already waiting", content = @Content)
     public ResponseEntity<RecomputeRightsDTO> recomputeApplicationRights(@PathVariable final UUID id) {
         log.info("Received POST request to recompute the rights of application {}", id);
         return ResponseEntity.accepted().body(recomputeJobService.recomputeApplicationRights(id));

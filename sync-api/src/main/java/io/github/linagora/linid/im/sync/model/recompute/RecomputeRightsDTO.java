@@ -26,11 +26,18 @@
 
 package io.github.linagora.linid.im.sync.model.recompute;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * Response body of the recomputation of the rights of an account or of an application.
  *
  * @param alreadyRunning {@code true} when a recomputation of the rights of the account or of the application was
  *     already running and no job was started
  */
-public record RecomputeRightsDTO(boolean alreadyRunning) {
+@Schema(description = "Answer of the recomputation of the rights of an account or of an application")
+public record RecomputeRightsDTO(
+    @Schema(description = "True when a recomputation of the rights of the account or of the application was already "
+        + "running and no job was started",
+        example = "false")
+    boolean alreadyRunning) {
 }

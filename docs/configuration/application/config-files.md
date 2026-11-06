@@ -264,6 +264,9 @@ OPA_READ_TIMEOUT=10s
 # Path to the external configuration file, holding the sources and the template of the account payloads
 EXTERNAL_CONFIGURATION=/app/sync-config.yaml
 
+# Enable or disable Swagger UI
+SWAGGER_ENABLED=true
+
 # Logging level (DEBUG, INFO, WARN, ERROR)
 LOGGING_LEVEL=INFO
 ```
@@ -709,7 +712,8 @@ Database configuration is distributed between `db.env`, `api.env`, `lemon.env`, 
 
 ### 2. Logging & Swagger
 
-The API logging level and Swagger UI can be configured through `api.env`.
+The API logging level and Swagger UI can be configured through `api.env`, and those of `sync-api` through
+`sync-api.env`. The Swagger UI of `sync-api` requires the client certificate of the API, like its other endpoints.
 
 ### 3. SSL / HTTPS
 

@@ -28,6 +28,9 @@ package io.github.linagora.linid.im.sync.controller;
 
 import io.github.linagora.linid.im.sync.model.cycle.CycleStatusDTO;
 import io.github.linagora.linid.im.sync.service.CycleService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping("/cycle")
+@Tag(name = "Cycle", description = "Status of the synchronization cycle")
 public class CycleController {
 
     /**
@@ -63,6 +67,8 @@ public class CycleController {
      * @return {@code 200} with the status of the cycle
      */
     @GetMapping
+    @Operation(summary = "Get the status of the synchronization cycle")
+    @ApiResponse(responseCode = "200", description = "Status of the cycle")
     public ResponseEntity<CycleStatusDTO> getStatus() {
         return ResponseEntity.ok(cycleService.getCycleStatus());
     }

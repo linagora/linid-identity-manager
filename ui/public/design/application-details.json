@@ -94,6 +94,20 @@
                 }
               }
             }
+          },
+          "confirm-dialog-button": {
+            "q-btn": {
+              "color": "primary",
+              "icon": "sync",
+              "outline": false
+            },
+            "confirmation-dialog": {
+              "buttons-card": {
+                "confirm-button": {
+                  "q-btn": { "color": "primary", "outline": false }
+                }
+              }
+            }
           }
         }
       },

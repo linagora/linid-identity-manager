@@ -85,6 +85,15 @@
       "component": "ExportApplicationScriptBtn"
     },
     {
+      "zone": "moduleApplicationDetailsPage.entity-profile-panel.actions.prepend",
+      "plugin": "LinPulsar/ConfirmDialogButton",
+      "props": {
+        "url": "/applications/{{ entity.id }}/recompute-rights",
+        "method": "POST",
+        "disable": "{{ not entity.hasScript or not entity.deployedAt }}"
+      }
+    },
+    {
       "zone": "moduleApplicationDetailsPage.content.after",
       "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {

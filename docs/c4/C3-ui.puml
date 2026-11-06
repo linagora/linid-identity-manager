@@ -23,22 +23,14 @@ Container_Boundary(ui, "LinID UI (Module Federation host)") {
 
   ' --- Services ------------------------------------------------------------
   Component(auth_service, "AuthService", "Service", "Wraps oidc-client-ts: init, login, logout, getUser, getAccessToken, handleCallback, silent renew, clearUser.")
-  Component(account_service, "AccountService", "Service", "REST client for account lifecycle: suspend, deactivate, reactivate, setAccountValidity (PUT /accounts/{id}/status/*).")
   Component(application_service, "ApplicationService", "Service", "REST client: exportApplicationScript (GET /applications/{id}/script as Blob).")
-  Component(ou_service, "OrganizationalUnitService", "Service", "REST client for OU lifecycle: getById, suspend, reactivate (GET/PUT /organizational-units/{id}/*).")
+  Component(ou_service, "OrganizationalUnitService", "Service", "REST client: getOrganizationalUnitById (GET /organizational-units/{id}).")
 
   ' --- Stores (from @linagora/linid-im-front-corelib) ----------------------
   Component(user_store, "useLinidUserStore", "Pinia Store (corelib)", "Authenticated user's claims (profile).")
   Component(user_pref_store, "useLinidUserPreference", "Pinia Store (corelib)", "Persists user preferences (e.g. selected language).")
   Component(ui_store, "useLinidUiStore", "Pinia Store (corelib)", "Global UI state: available languages, current locale, main navigation menu items.")
   Component(zone_store, "useLinidZoneStore", "Pinia Store (corelib)", "Zone-based plugin registry: maps zone keys to federated components/plugins.")
-
-  ' --- Composables ---------------------------------------------------------
-  Component(use_account_mapper, "useAccountMapper", "Composable", "Converts AccountDTO to AccountStatus; maps form values to API records; flattens status for dialog pre-fill.")
-  Component(use_account_lifecycle_ui, "useAccountLifecycleUi", "Composable", "Projects AccountStatus ref into deterministic lifecycle UI state (badges, banners, info text, dropdown items) across 13 cases.")
-  Component(use_ou_mapper, "useOrganizationalUnitMapper", "Composable", "Converts OrganizationalUnitDTO to OrganizationalUnitStatus; maps form values to API records.")
-  Component(use_ou_lifecycle_ui, "useOrganizationalUnitLifecycleUi", "Composable", "Projects OrganizationalUnitStatus ref into deterministic lifecycle UI state across 3 cases.")
-  Component(use_lifecycle_dialogs, "useLifecycleDialogs", "Composable", "Centralizes lifecycle dialog plumbing: openFormDialog & openConfirmationDialog emit UI events for catalogUI/FormDialog & ConfirmationDialog.")
 
   ' --- Local components: Pages --------------------------------------------
   Component(homepage, "Homepage", "Page", "Renders intro/open-source/license/branding HTML from i18n.")
@@ -47,10 +39,6 @@ Container_Boundary(ui, "LinID UI (Module Federation host)") {
   Component(auth_logged_out, "AuthenticationLoggedOutPage", "Page", "Processes post-logout callback; re-initiates login.")
   Component(auth_silent_renew, "AuthenticationSilentRenewPage", "Page", "Silent token renewal callback in hidden iframe.")
 
-  ' --- Local components: Panels -------------------------------------------
-  Component(account_lifecycle_panel, "AccountLifecyclePanel", "Panel", "Orchestrates account lifecycle UI: banners, info text, dialogs; calls AccountService; emits account-status-updated.")
-  Component(ou_lifecycle_panel, "OrganizationalUnitLifecyclePanel", "Panel", "Orchestrates OU lifecycle UI: suspended banner, info text, dialogs; calls OrganizationalUnitService; emits organizational-unit-status-updated.")
-
   ' --- Local components: Buttons ------------------------------------------
   Component(export_script_btn, "ExportApplicationScriptBtn", "Button", "Downloads application OPA Rego script as .rego file.")
   Component(ou_create_child_btn, "OrganizationalUnitCreateChildBtn", "Button", "Navigates to /organizational-units/new?parent={id} to create child OU.")
@@ -58,14 +46,8 @@ Container_Boundary(ui, "LinID UI (Module Federation host)") {
   ' --- Local components: Fields -------------------------------------------
   Component(ou_parent_field, "OrganizationalUnitParentField", "Field", "Resolves parent OU from route query; displays name; emits parent id.")
 
-  ' --- Local components: Banners & Info texts -----------------------------
-  Component(account_banners, "Account Banners", "Banner", "AccountSuspendedBanner, AccountDeactivatedBanner, AccountDeactivatedWarningBanner.")
-  Component(ou_banners, "OU Banners", "Banner", "OrganizationalUnitSuspendedBanner.")
-  Component(account_info_texts, "Account Info Texts", "Info Text", "AccountNotActivatedInfoText, AccountSuspendedInfoText, AccountDeactivatedInfoText.")
-  Component(ou_info_texts, "OU Info Texts", "Info Text", "OrganizationalUnitSuspendedInfoText.")
-
   ' --- Module config files (dynamic routes) -------------------------------
-  Component(module_configs, "Module Config Files", "JSON Config", "14 JSON files in /modules/: AccountsPage, AccountCreationPage, AccountDetailsPage, ApplicationsPage, ApplicationCreationPage, ApplicationDetailsPage, GroupsPage, GroupCreationPage, GroupDetailsPage, OrganizationalUnitPage, OrganizationalUnitCreationPage, OrganizationalUnitDetailsPage, RolesPage, RoleCreationPage. Drive dynamic route registration via linidModuleFederation.init. AccountDetailsPage includes a read-only groups section; OrganizationalUnitDetailsPage manages functional roles on attached accounts; GroupDetailsPage manages group memberships via an editable accounts table.")
+  Component(module_configs, "Module Config Files", "JSON Config", "14 JSON files in /modules/: AccountsPage, AccountCreationPage, AccountDetailsPage, ApplicationsPage, ApplicationCreationPage, ApplicationDetailsPage, GroupsPage, GroupCreationPage, GroupDetailsPage, OrganizationalUnitPage, OrganizationalUnitCreationPage, OrganizationalUnitDetailsPage, RolesPage, RoleCreationPage. Drive dynamic route registration via linidModuleFederation.init. AccountDetailsPage and OrganizationalUnitDetailsPage configure their lifecycle through the LinPulsar/LifecyclePanel zone; AccountDetailsPage includes a read-only groups section; OrganizationalUnitDetailsPage manages functional roles on attached accounts; GroupDetailsPage manages group memberships via an editable accounts table.")
 }
 
 ' --- Module Federation remote (loaded at runtime from config.json) --------
@@ -91,25 +73,10 @@ Rel(boot_ui_design, boot_config, "Reads design file list")
 
 ' --- Relationships: services -> API / Auth ---------------------------------
 Rel(auth_service, auth, "OIDC login flow (authorization code + PKCE), token renewal, RP-initiated logout", "OIDC/HTTPS")
-Rel(account_service, api, "Calls /accounts/{id}/status/*", "HTTPS/REST")
 Rel(application_service, api, "Calls /applications/{id}/script", "HTTPS/REST")
-Rel(ou_service, api, "Calls /organizational-units/{id}/*", "HTTPS/REST")
-
-' --- Relationships: panels -> services / composables -----------------------
-Rel(account_lifecycle_panel, use_account_lifecycle_ui, "Uses")
-Rel(account_lifecycle_panel, use_lifecycle_dialogs, "Uses")
-Rel(account_lifecycle_panel, account_service, "Calls lifecycle endpoints")
-Rel(ou_lifecycle_panel, use_ou_lifecycle_ui, "Uses")
-Rel(ou_lifecycle_panel, use_lifecycle_dialogs, "Uses")
-Rel(ou_lifecycle_panel, ou_service, "Calls lifecycle endpoints")
-
-' --- Relationships: composables -> services --------------------------------
-Rel(use_account_mapper, account_service, "Maps DTOs to API records")
-Rel(use_ou_mapper, ou_service, "Maps DTOs to API records")
+Rel(ou_service, api, "Calls /organizational-units/{id}", "HTTPS/REST")
 
 ' --- Relationships: local components -> zones -----------------------------
-Rel(boot_lifecycle, account_lifecycle_panel, "Registers in account details zone")
-Rel(boot_lifecycle, ou_lifecycle_panel, "Registers in OU details zone")
 Rel(boot_lifecycle, export_script_btn, "Registers in application details zone")
 Rel(boot_lifecycle, ou_create_child_btn, "Registers in OU details zone")
 Rel(boot_lifecycle, ou_parent_field, "Registers in OU creation form zone")

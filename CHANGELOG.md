@@ -83,6 +83,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Frontend
 
+- Added a **Recompute rights** button on the account details page: a confirmation dialog triggers
+  `POST /accounts/{id}/recompute-rights` and shows a notification once the recomputation is requested.
+- Added a **Recompute rights** button on the application details page: a confirmation dialog triggers
+  `POST /applications/{id}/recompute-rights` and shows a notification once the recomputation is requested.
+  The button is disabled while the application has no script or is not deployed.
 - Added the **avatar image import** on the account, application, organizational unit and group details pages: the
   stored image is displayed instead of the generated avatar, and can be uploaded or deleted from the profile
   panel.

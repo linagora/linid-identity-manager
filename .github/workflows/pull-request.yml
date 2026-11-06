@@ -67,7 +67,7 @@ jobs:
           allowed_prefixes: "feature,bugfix,improvement,release,hotfix"
           ignore: main
           min_length: 5
-          max_length: 50
+          max_length: 75
 
   commit-checks:
     name: Check commit messages

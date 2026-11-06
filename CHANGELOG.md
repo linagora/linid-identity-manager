@@ -108,6 +108,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded `@quasar/app-vite` to **3.10.3**: the Quasar wrappers are now imported from `#q-app` and the folder aliases
   (`src`, `boot`, `components`...) are declared in `quasar.config.ts`.
 - Raised the minimum Node.js version to **22.22** and dropped Node.js 20, as required by `@quasar/app-vite` 3.
+- Moved the **lifecycle** of the account and organizational unit details pages to the `LifecyclePanel` of LinPulsar:
+  its banners, info texts, dropdowns, dialogs and requests are configured by the `props` of a `LinPulsar/LifecyclePanel`
+  zone, its translations by the `LifecyclePanel` key of the details pages, and its design by their `lifecycle-panel`
+  namespace.
+- Upgraded `@linagora/lin-pulsar-core` to **0.1.8**, whose `renderJson` renders the request bodies of the
+  `LifecyclePanel`.
 
 #### Documentation
 
@@ -124,6 +130,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Removed the unused `@quasar/quasar-app-extension-testing-unit-vitest`, `@testing-library/jest-dom` and
   `@testing-library/vue` dependencies.
+- Removed the `immediateActionDelay`, `accountLifecycleFields` and `organizationalUnitLifecycleFields` settings of
+  `config.json`, replaced by the props of the `LinPulsar/LifecyclePanel` zones.
+- Removed the `design/account-banner.json`, `design/organizational-unit-banner.json`, `design/account-info-text.json`
+  and `design/organizational-unit-info-text.json` design files, replaced by the `lifecycle-panel` namespace of
+  `account-details.json` and `organizational-unit-details.json`: a `config.json` still listing them fails to load the UI
+  design.
+- Removed the `AccountLifecyclePanel` and `OrganizationalUnitLifecyclePanel` local components, with their banners and
+  info texts.
 
 ### Fixed
 

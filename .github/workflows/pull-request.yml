@@ -647,6 +647,9 @@ jobs:
           - image: linid-identity-manager-api
             build-task: build:image:api
             skip-files: /usr/bin/pebble
+          - image: linid-identity-manager-sync-api
+            build-task: build:image:sync-api
+            skip-files: ""
           - image: linid-identity-manager-ui
             build-task: build:image:ui
             skip-files: ""

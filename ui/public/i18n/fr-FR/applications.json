@@ -289,11 +289,6 @@
       },
       "actions": {
         "ButtonsCard": {
-          "export": {
-            "label": "Exporter script",
-            "success": "Script exporté avec succès.",
-            "error": "Erreur lors de l'export du script."
-          },
           "editButton": {
             "FormDialogButton": {
               "title": "",
@@ -450,6 +445,11 @@
       "ButtonsCard": {
         "add": "Ajouter une règle",
         "save": "Sauvegarder",
+        "export": {
+          "label": "Exporter script",
+          "success": "Script exporté avec succès.",
+          "error": "Erreur lors de l'export du script."
+        },
         "ConfirmDialogButton": {
           "title": "Recalculer les droits",
           "submitSuccess": "Recalcul des droits demandé.",

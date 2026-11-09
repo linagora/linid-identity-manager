@@ -63,13 +63,6 @@
         "buttons-card": {
           "q-card": { "flat": true },
           "q-card-actions": { "align": "right" },
-          "export": {
-            "q-btn": {
-              "color": "primary",
-              "icon": "download",
-              "outline": false
-            }
-          },
           "edit-button": {
             "form-dialog-button": {
               "q-btn": {
@@ -135,7 +128,7 @@
           "claimsTemplate": {
             "information-card": {
               "q-icon": { "color": "secondary", "name": "token" },
-              "q-card": {}
+              "q-card": { "style": "grid-column: 1 / -1" }
             }
           }
         }
@@ -235,6 +228,13 @@
     },
     "generic-sortable-list-card": {
       "buttons-card": {
+        "export": {
+          "q-btn": {
+            "color": "primary",
+            "icon": "download",
+            "outline": false
+          }
+        },
         "confirm-dialog-button": {
           "q-btn": {
             "color": "primary",

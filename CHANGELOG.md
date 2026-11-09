@@ -150,7 +150,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
   `sync-api`.
 - Ran the CI jobs on the Linagora runner instead of the GitHub-hosted runners, the Node.js and Maven jobs in containers.
-- Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.3 in the demo and E2E environments.
+- Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.6 in the demo and E2E environments.
 
 ## [0.11.4] - 2026-11-05
 

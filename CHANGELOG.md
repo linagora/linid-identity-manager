@@ -135,6 +135,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed CVE-2026-118257 affecting vue-i18n, `@intlify/core-base` and `@intlify/shared`.
 - Fixed GHSA-g2v6-rqmx-r4w6 affecting `@vue/server-renderer`.
 
+#### Frontend
+
+- Enabled the **Export script** button of the application details page as soon as a rule is created, without
+  reloading the page.
+
 ### Build
 
 - Replaced the **linagora/linid-catalog-ui** Docker image by **linagora/lin-pulsar** in the demo and E2E environments.

@@ -234,6 +234,22 @@
       }
     },
     "generic-sortable-list-card": {
+      "buttons-card": {
+        "confirm-dialog-button": {
+          "q-btn": {
+            "color": "primary",
+            "icon": "sync",
+            "outline": false
+          },
+          "confirmation-dialog": {
+            "buttons-card": {
+              "confirm-button": {
+                "q-btn": { "color": "primary", "outline": false }
+              }
+            }
+          }
+        }
+      },
       "q-card": { "flat": true, "bordered": false },
       "header-section": {
         "q-card-section": { "horizontal": true }

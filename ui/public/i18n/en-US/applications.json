@@ -449,7 +449,21 @@
       "createError": "Unable to create the rule. Please try again later.",
       "ButtonsCard": {
         "add": "Add a rule",
-        "save": "Save"
+        "save": "Save",
+        "ConfirmDialogButton": {
+          "title": "Recompute rights",
+          "submitSuccess": "Rights recomputation requested.",
+          "submitError": "Unable to request rights recomputation. Please try again later.",
+          "ConfirmationDialog": {
+            "title": "Recompute the rights on {name}?",
+            "content": "The recomputation will start immediately.",
+            "ButtonsCard": {
+              "confirm": "Recompute",
+              "confirmLoading": "Requesting...",
+              "cancel": "Cancel"
+            }
+          }
+        }
       },
       "CreateFormDialog": {
         "title": "Add a rule",

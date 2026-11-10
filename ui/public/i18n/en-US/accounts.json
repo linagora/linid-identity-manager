@@ -760,7 +760,21 @@
       "status": "Unable to update the account status. Please try again later."
     },
     "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
-    "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
+    "scheduledRevalidationSuccess": "The account will be reactivated from {date}",
+    "ConfirmDialogButton": {
+      "title": "Recompute rights",
+      "submitSuccess": "Rights recomputation requested.",
+      "submitError": "Unable to request rights recomputation. Please try again later.",
+      "ConfirmationDialog": {
+        "title": "Recompute the rights of {firstname} {lastname}?",
+        "content": "The recomputation will start immediately.",
+        "ButtonsCard": {
+          "confirm": "Recompute",
+          "confirmLoading": "Requesting...",
+          "cancel": "Cancel"
+        }
+      }
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "This account has been deactivated since {date}.",

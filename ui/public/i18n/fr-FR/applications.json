@@ -289,11 +289,6 @@
       },
       "actions": {
         "ButtonsCard": {
-          "export": {
-            "label": "Exporter script",
-            "success": "Script exporté avec succès.",
-            "error": "Erreur lors de l'export du script."
-          },
           "editButton": {
             "FormDialogButton": {
               "title": "",
@@ -449,7 +444,26 @@
       "createError": "Impossible de créer la règle. Veuillez réessayer plus tard.",
       "ButtonsCard": {
         "add": "Ajouter une règle",
-        "save": "Sauvegarder"
+        "save": "Sauvegarder",
+        "export": {
+          "label": "Exporter script",
+          "success": "Script exporté avec succès.",
+          "error": "Erreur lors de l'export du script."
+        },
+        "ConfirmDialogButton": {
+          "title": "Recalculer les droits",
+          "submitSuccess": "Recalcul des droits demandé.",
+          "submitError": "Impossible de demander le recalcul des droits. Veuillez réessayer plus tard.",
+          "ConfirmationDialog": {
+            "title": "Recalculer les droits sur {name} ?",
+            "content": "Le recalcul démarrera immédiatement.",
+            "ButtonsCard": {
+              "confirm": "Recalculer",
+              "confirmLoading": "Envoi...",
+              "cancel": "Annuler"
+            }
+          }
+        }
       },
       "CreateFormDialog": {
         "title": "Ajouter une règle",

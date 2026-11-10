@@ -346,6 +346,25 @@ end   = now() + 30 days
 
 The relative dates ensure that these test cases remain valid regardless of when the database is initialized.
 
+### Applications
+
+Three applications are created with their roles, enabled rules, script and claims template, so that `sync-api` has rights to
+compute:
+
+```text
+intranet
+dev-platform
+helpdesk
+```
+
+Their UUIDs are fixed, from `00000000-0000-4000-8000-00000000e001` to `00000000-0000-4000-8000-00000000e003`.
+
+`deployed_at` stays `NULL`: linid-api publishes the policies on OPA, at its next scheduled deployment or with
+`POST /applications/{id}/deploy`. `sync-api` computes the rights of an application once it is deployed.
+
+The script is built from the rules with the text of the template `opa-policy.rego.j2` of linid-api, copied in the seed:
+a change to this template must also be made in `init_linid.sql`.
+
 ## `scripts/init_sync_api_linid_user.sql`
 
 This script gives `sync_api_linid_user` the grants `sync-api` needs in the `linid` database:

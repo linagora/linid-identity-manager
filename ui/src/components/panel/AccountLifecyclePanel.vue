@@ -65,7 +65,7 @@
     <AccountNotActivatedInfoText v-if="lifecycleUi.showNotActivatedInfoText" />
 
     <div
-      v-if="hasAnyLifecycleAction"
+      v-if="hasAnyLifecycleAction || hasZoneEntries(actionsZone)"
       class="row q-gutter-x-sm account-lifecycle-panel--actions"
       data-cy="account-lifecycle-actions"
     >
@@ -96,6 +96,13 @@
         data-cy="account-deactivation-actions"
         @item-click="onLifecycleAction"
       />
+      <LinPulsarZoneRenderer
+        :zone="actionsZone"
+        :entity="entity"
+        :instance-id="uiNamespace"
+        :ui-namespace="`${uiNamespace}.lifecycle-actions`"
+        :i18n-scope="i18nScope"
+      />
     </div>
   </div>
   <!-- v8 ignore stop -->
@@ -104,9 +111,11 @@
 <script setup lang="ts">
 import type { DropdownClickPayload } from '@linagora/lin-pulsar-core';
 import {
+  LinPulsarZoneRenderer,
   loadAsyncComponent,
   uiEventSubject,
   useCommonMapper,
+  useLinPulsarZoneStore,
   useNotify,
   useScopedI18n,
 } from '@linagora/lin-pulsar-core';
@@ -174,6 +183,11 @@ const dropdownButton = loadAsyncComponent('LinPulsar/DropdownButton');
 const { openFormDialog, openConfirmationDialog } = useLifecycleDialogs(
   props.uiNamespace
 );
+
+/** Plugin zone rendered after the lifecycle actions, used for instance by the button recomputing the rights. */
+const actionsZone = `${props.uiNamespace}.account-lifecycle-panel.actions`;
+
+const { hasZoneEntries } = useLinPulsarZoneStore();
 
 const hasAnyLifecycleAction = computed(() =>
   Boolean(

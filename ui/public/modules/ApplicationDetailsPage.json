@@ -81,8 +81,17 @@
       }
     },
     {
-      "zone": "moduleApplicationDetailsPage.entity-profile-panel.actions.prepend",
+      "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.actions.prepend",
       "component": "ExportApplicationScriptBtn"
+    },
+    {
+      "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.actions.prepend",
+      "plugin": "LinPulsar/ConfirmDialogButton",
+      "props": {
+        "url": "/applications/{{ entity.id }}/recompute-rights",
+        "method": "POST",
+        "disable": "{{ not entity.hasScript or not entity.deployedAt }}"
+      }
     },
     {
       "zone": "moduleApplicationDetailsPage.content.after",
@@ -240,7 +249,13 @@
       },
       {
         "key": "claims",
-        "fieldOrder": ["claimsTemplate"]
+        "fieldOrder": ["claimsTemplate"],
+        "formatters": [
+          {
+            "field": "claimsTemplate",
+            "type": "jinja"
+          }
+        ]
       }
     ]
   }

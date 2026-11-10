@@ -83,14 +83,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Frontend
 
+- Added a **Recompute rights** button on the account details page: a confirmation dialog triggers
+  `POST /accounts/{id}/recompute-rights` and shows a notification once the recomputation is requested.
+- Added a **Recompute rights** button on the application details page: a confirmation dialog triggers
+  `POST /applications/{id}/recompute-rights` and shows a notification once the recomputation is requested.
+  The button is disabled while the application has no script or is not deployed.
 - Added the **avatar image import** on the account, application, organizational unit and group details pages: the
   stored image is displayed instead of the generated avatar, and can be uploaded or deleted from the profile
   panel.
+- Displayed the **claims template** of the application details page as an indented Jinja template, over the full
+  width of the card.
 
 ### Changed
 
 #### Frontend
 
+- Moved the **Export script** button of the application details page from the profile panel to the rules card.
 - Integrated the smart filter configuration that **manages how filter values are displayed** in the filter chips.
 - Replaced `@linagora/linid-im-front-corelib` by **`@linagora/lin-pulsar-core`** and the `catalogUI` Module Federation
   remote by **`LinPulsar`** (served under `/lin-pulsar`).
@@ -150,7 +158,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
   `sync-api`.
 - Ran the CI jobs on the Linagora runner instead of the GitHub-hosted runners, the Node.js and Maven jobs in containers.
-- Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.3 in the demo and E2E environments.
+- Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.6 in the demo and E2E environments.
+- Seeded the **intranet**, **dev-platform** and **helpdesk** applications, with their roles, rules, claims templates
+  and scripts, in the development and E2E databases.
 
 ## [0.11.4] - 2026-11-05
 

@@ -401,7 +401,11 @@ The script creates the following test accounts:
 admin
 user1
 user2
+noaccount
 ```
+
+Their password is `password`, stored in plain text: the LemonLDAP::NG templates do not hash the passwords
+(`dbiAuthPasswordHash` is empty).
 
 All credentials in this script are intended exclusively for development/test environments.
 

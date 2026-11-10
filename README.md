@@ -133,7 +133,7 @@ task start:demo
 
 * **Backend API**: `https://localhost:8443/swagger-ui/index.html`
 * **Frontend UI**: `https://linid.localtest.me:9000`
-* **LemonLDAP portal**: `https://linid.localtest.me:9000/auth` (pre-configured demo, served through the frontend nginx)
+* **LemonLDAP portal**: `https://linid.localtest.me:9000/auth` (pre-configured for development only)
 * **Apache Superset™**: `http://localhost:8088`
 
 #### **Demo credentials**
@@ -145,13 +145,17 @@ task start:demo
 | **LemonLDAP::NG**    | `user2`    | `password`  |
 | **Apache Superset™** | `superset` | `password`  |
 
+> ⚠️ These credentials are public development values: never use them in a real deployment.
+
 ---
 
 ### 📝 Notes
 
 * `task start:demo` is intended for **quick testing / development only**
 * For custom environments, use the **Docker folders** with their README (`docker/<environment>/README.md`)
-* No manual configuration required for the demo
+* No manual configuration required for the demo: LemonLDAP::NG is pre-configured with hard-coded secrets and test
+  accounts, **for development only**. Replace this configuration before any real deployment, see
+  [docs/configuration/authentication/oidc](docs/configuration/authentication/oidc.md)
 
 ---
 
@@ -183,6 +187,9 @@ LinId supports **OIDC-based authentication**.
 ### Supported Providers
 
 * LemonLDAP
+
+> ⚠️ The LemonLDAP::NG configuration provided with the Docker environments is for development only.
+> See: [docs/configuration/authentication/oidc](docs/configuration/authentication/oidc.md)
 
 ### Certificates
 

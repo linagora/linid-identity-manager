@@ -14,6 +14,10 @@ This page lists the environment variables of the **UI server**.
 | E2E           | `docker/e2e/env/ui.env`, plus `e2e.env` (CI) or `local.env` (local runs)          |
 | Demo          | `docker/demo/.env`                                                                |
 
+> ⚠️ The values of these files are development values. `OIDC_CLIENT_SECRET` and `SESSION_SECRET` are public: replace
+> them, together with the pre-configured LemonLDAP::NG, before any real deployment (see
+> [authentication/oidc](../authentication/oidc.md)).
+
 ---
 
 ## ⚙️ Runtime variables

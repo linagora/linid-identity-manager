@@ -3,6 +3,10 @@
 This environment is intended for end-to-end (E2E) testing.
 All services are containerized with ports exposed for debugging and test access.
 
+> ⚠️ Not for production: the LemonLDAP::NG configuration (`resources/lmConf-1.template.json`), the `env/*.env` files and
+> the seed scripts contain hard-coded, public secrets and test accounts. Replace them before any real deployment, see
+> [OIDC configuration](../../docs/configuration/authentication/oidc.md).
+
 ## Quick Start
 
 Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build the `api`, `sync-api`, `ui` and `superset` images and start everything with the following commands.

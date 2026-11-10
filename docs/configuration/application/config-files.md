@@ -18,6 +18,10 @@ The demo environment uses the following configuration files:
 
 > ⚠️ Do **not commit secrets** to version control.
 
+> ⚠️ The values below are the **development values** of the Docker environments. The secrets they contain, including
+> the LemonLDAP::NG ones, are public: replace them before any real deployment, see
+> [authentication/oidc](../authentication/oidc.md).
+
 ---
 
 ## 🧩 Environment Variables
@@ -320,6 +324,9 @@ DATALAKE_DATABASE_NAME=datalake
 ---
 
 ### 🔐 LemonLDAP::NG — `lemon.env`
+
+These variables configure the pre-configured LemonLDAP::NG of the Docker environments, which is for development only
+(see [authentication/oidc](../authentication/oidc.md)).
 
 ```text
 ################################################################################

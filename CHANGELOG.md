@@ -109,6 +109,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`src`, `boot`, `components`...) are declared in `quasar.config.ts`.
 - Raised the minimum Node.js version to **22.22** and dropped Node.js 20, as required by `@quasar/app-vite` 3.
 
+#### Documentation
+
+- Stated that the **pre-configured LemonLDAP::NG** of the Docker environments is for development only, listed its
+  hard-coded secrets and test accounts, and described what to replace and keep before a real deployment.
+
 ### Removed
 
 #### Backend

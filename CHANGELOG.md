@@ -96,6 +96,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+#### Backend
+
+- Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
+  `email` and `roles` claims.
+
 #### Frontend
 
 - Moved the **Export script** button of the application details page from the profile panel to the rules card.

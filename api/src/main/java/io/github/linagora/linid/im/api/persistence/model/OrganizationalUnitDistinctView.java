@@ -116,6 +116,13 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
     private String roleNames;
 
     /**
+     * Every hierarchy path of this organizational unit.
+     */
+    @Type(JsonType.class)
+    @Column(name = "hierarchy_paths", columnDefinition = "jsonb")
+    private List<List<UUID>> hierarchyPaths;
+
+    /**
      * Time range during which the organizational unit is suspended. {@code null} when no suspension
      * is configured.
      */
@@ -203,6 +210,9 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
      * @param extraParameters additional deployment-specific attributes stored as JSON.
      * @param roleNames the names of the distinct functional roles held by the accounts attached to the
      *                  organizational unit, represented as a comma-separated list.
+     * @param hierarchyPaths every hierarchy path of the organizational unit, each one listing the
+     *                       identifiers of its ancestors from the top-most ancestor (a unit without
+     *                       parent, normally the root) down to its parent.
      */
     @SuppressWarnings("checkstyle:ParameterNumber")
     public OrganizationalUnitDistinctView(final String createdBy,
@@ -222,7 +232,8 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
                                           final boolean suspended,
                                           final OrganizationalUnitStatusEnum status,
                                           final Map<String, Object> extraParameters,
-                                          final String roleNames) {
+                                          final String roleNames,
+                                          final List<List<UUID>> hierarchyPaths) {
         super(createdBy, updatedBy, insertDate, updateDate);
         this.id = id;
         this.name = name;
@@ -238,5 +249,6 @@ public class OrganizationalUnitDistinctView extends AbstractViewEntity {
         this.status = status;
         this.extraParameters = extraParameters;
         this.roleNames = roleNames;
+        this.hierarchyPaths = hierarchyPaths;
     }
 }

@@ -18,10 +18,13 @@ Feature: Test API Organizational unit endpoints
   ################## Find All (GET /organizational-units) #############
   ## 301 Should return paginated list of organizational-units
   ## 302 Should filter organizational units by functional role
+  ## 303 Should return one hierarchy path per route to the root in the list
 
   ################## Find By Id (GET /organizational-units/{id}) ######
   ## 401 Should return 200 for existing organizational unit
   ## 402 Should return 404 for unknown organizational unit id
+  ## 403 Should return the hierarchy paths of the root and of a child of a multi-parent organizational unit
+  ## 404 Should start the hierarchy paths at the child of a deleted organizational unit
 
   ################## Delete (DELETE /organizational-units/{id}) #######
   ## 501 Should return 204 when deleting existing organizational unit
@@ -271,6 +274,16 @@ Feature: Test API Organizational unit endpoints
     Then I expect status code is 200
     And  I expect '{{response.body.roleNames}}' is 'Viewer'
 
+  Scenario: 303 - Should return one hierarchy path per route to the root in the list
+    # Team Delta has two parents: Dept A2-1 (Company A) and Dept B1-1 (Company B)
+    When I request '{{env.E2E_API_URL}}/organizational-units?id=00000000-0000-4000-8000-00000000fff1' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.totalElements}}' is '1'
+    And  I expect '{{response.body.content[0].name}}' is 'Team Delta'
+    And  I expect '{{response.body.content[0].hierarchyPaths.length}}' is '2'
+    And  I expect '{{response.body.content[0].hierarchyPaths[0] | dump}}' is '["{{ctx.rootID}}","00000000-0000-4000-8000-00000000000a","00000000-0000-4000-8000-00000000000d","00000000-0000-4000-8000-0000000000b1"]'
+    And  I expect '{{response.body.content[0].hierarchyPaths[1] | dump}}' is '["{{ctx.rootID}}","00000000-0000-4000-8000-00000000000b","00000000-0000-4000-8000-00000000000e","00000000-0000-4000-8000-0000000000c1"]'
+
   #################################################################
   ################## Find By Id (GET /organizational-units/{id}) ##
   #################################################################
@@ -302,6 +315,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.parents[0].id}}' is not empty
     And  I expect '{{response.body.parents[0].parent}}' is "{{ctx.rootID}}"
     And  I expect '{{response.body.parents[0].extraParameters | dump}}' is 'null'
+    And  I expect '{{response.body.hierarchyPaths | dump}}' is '[["{{ctx.rootID}}"]]'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then I expect status code is 204
@@ -325,6 +339,88 @@ Feature: Test API Organizational unit endpoints
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'GET'
     Then I expect status code is 404
     And  I expect '{{response.body.errorKey}}' is 'error.organizational.unit.not_found'
+
+  Scenario: 403 - Should return the hierarchy paths of the root and of a child of a multi-parent organizational unit
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.rootID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.hierarchyPaths | dump}}' is '[[]]'
+
+    # Team Delta has two parents, so its child is reachable through two routes as well
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "00000000-0000-4000-8000-00000000fff1",
+        "name": "Team Delta child",
+        "type": "TEAM",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.hierarchyPaths.length}}' is '2'
+    And  I expect '{{response.body.hierarchyPaths[0] | dump}}' is '["{{ctx.rootID}}","00000000-0000-4000-8000-00000000000a","00000000-0000-4000-8000-00000000000d","00000000-0000-4000-8000-0000000000b1","00000000-0000-4000-8000-00000000fff1"]'
+    And  I expect '{{response.body.hierarchyPaths[1] | dump}}' is '["{{ctx.rootID}}","00000000-0000-4000-8000-00000000000b","00000000-0000-4000-8000-00000000000e","00000000-0000-4000-8000-0000000000c1","00000000-0000-4000-8000-00000000fff1"]'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 404 - Should start the hierarchy paths at the child of a deleted organizational unit
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "hierarchy-test1",
+        "type": "hierarchy-test1",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'deletedID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.deletedID}}",
+        "name": "hierarchy-test2",
+        "type": "hierarchy-test2",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'childID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.childID}}",
+        "name": "hierarchy-test3",
+        "type": "hierarchy-test3",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grandchildID' as '{{response.body.id}}' in context
+
+    # Deleting the parent removes its relations, so its child is left without parent, like the root
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.deletedID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.childID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.hierarchyPaths | dump}}' is '[[]]'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.grandchildID}}' with method 'GET'
+    Then I expect status code is 200
+    And  I expect '{{response.body.hierarchyPaths | dump}}' is '[["{{ctx.childID}}"]]'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.grandchildID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.childID}}' with method 'DELETE'
+    Then I expect status code is 204
 
   ####################################################
   ################## Delete (DELETE /organizational-units/{id}) ###
@@ -588,6 +684,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.suspensionSubreason}}' is 'MERGER'
     And  I expect '{{response.body.suspensionComment}}' is 'Suspended pending department merger'
     And  I expect '{{response.body.isSuspended}}' is "false"
+    And  I expect '{{response.body.hierarchyPaths | dump}}' is '[["{{ctx.rootID}}"]]'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'GET'
     Then I expect status code is 200
@@ -822,6 +919,7 @@ Feature: Test API Organizational unit endpoints
     And  I expect '{{response.body.reactivationComment}}' is 'Reactivated after review'
     And  I expect '{{response.body.isSuspended}}' is "false"
     And  I expect '{{response.body.status}}' is 'ACTIVE'
+    And  I expect '{{response.body.hierarchyPaths | dump}}' is '[["{{ctx.rootID}}"]]'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouID}}' with method 'DELETE'
     Then I expect status code is 204

@@ -6,8 +6,8 @@ Claims are pieces of information about a user that applications receive via OIDC
 
 In **LinId Identity Manager**:
 
-* Applications define **which claims they require**
-* Claims are **computed from LDAP user data**
+* Each application defines **one claims template**, which produces all its claims
+* Claims are **computed from the payload of each account**, built from the data of the LinId database
 * LinId uses **Jinja templates** to generate claims dynamically
 
 > LinId does not handle authentication — it only manages **claims definitions**.
@@ -18,10 +18,13 @@ In **LinId Identity Manager**:
 
 ### 👤 User Data
 
-LinId synchronizes user accounts from LDAP:
+`sync-api` builds a **payload** for each account from the data of the LinId database:
 
-* Username, email, and attributes
-* Organizational Units (OU) membership
+* The `external_id` and `email` of the account
+* Other data of the account, such as its Organizational Units (OU) and groups
+
+The content of the payload is set by the `mapping` of `sync-data`
+👉 [application/config-files](../application/config-files.md#-account-payloads--sync-data)
 
 ### 🏷️ Claims
 
@@ -34,11 +37,10 @@ A claim represents:
 
 ### 📦 Application-Specific Claims
 
-Each application can define:
+The claims template of each application defines:
 
-* Which claims it **requires**
-* How each claim is **computed from user data**
-* Optional defaults
+* Which claims the application **receives**
+* How each claim is **computed from the payload of the account** and the roles returned by OPA
 
 > This ensures applications only receive relevant information.
 
@@ -48,47 +50,57 @@ Each application can define:
 
 LinId uses **Jinja templates** to generate claim values dynamically.
 
-Example template:
+The claims template of an application is rendered for each account with these variables:
+
+| Variable  | Content                                                                    |
+| --------- | -------------------------------------------------------------------------- |
+| `payload` | Payload of the account, built from the `mapping` of `sync-data`            |
+| `allow`   | `allow` returned by OPA, `true` or `false`                                 |
+| `roles`   | Roles returned by OPA, a sorted list of role names, empty when it has none |
+
+Example: the claims template of the `LINID` system application, which gives the claims LinId needs in its tokens.
+The API identifies the user by the `email` claim.
 
 ```jinja id="claims-example"
 {
-  "username": "{{ user.username }}",
-  "email": "{{ user.email }}",
-  "department": "{{ user.name }}"
+  "sub": {{ payload.external_id | tojson }},
+  "email": {{ payload.email | tojson }},
+  "roles": {{ roles | tojson }}
 }
 ```
 
-* `user` → Internal user information
+* Every value is inserted with the `tojson` filter, without quotes: a string is correctly escaped, and a list stays a
+  JSON array
 * Loops / conditionals allowed for complex logic
 * Output is rendered as a **JSON object for claims**
+
+The computation of the claims and its errors are described in
+👉 [application/config-files](../application/config-files.md#-claims-template)
 
 ---
 
 ## ⚙️ How to Configure Claims in LinId
 
-1. Select an **application** in LinId
-2. Open the **Claims tab**
-3. Define each claim using a **Jinja template**
-4. Test the template against a user preview
-5. Save configuration
+1. Set the **Claims generation template** of an application: in the **Claims management** section when creating it,
+   or by editing the application from its details page
+2. Save the application
+3. Check the template in the **Claims** card of the details page
 
-> 🚧 TODO: Add screenshots and step-by-step UI instructions
+When the template changes, `sync-api` computes the claims of every account again at its next cycle, for an application
+that is deployed. The **Recompute rights** button of the application starts this computation at once.
+
+> 🚧 TODO: Add screenshots
 
 ---
 
 ## 🔄 Example Workflow
 
-1. User `alice@example.com` exists in LinID
-2. User belongs to OU `Finance`
-3. Application `PayrollApp` requires claims:
-
-    * username
-    * email
-    * department
-    * roles
-4. LinId generates claims using Jinja templates
-5. LemonLDAP injects claims into OIDC token
-6. Application receives token with all required claims
+1. Account `alice@example.com` exists in LinId
+2. The account belongs to OU `Finance`
+3. `sync-api` builds the payload of the account, with its `external_id`, its `email` and its OUs
+4. OPA evaluates the policy of application `PayrollApp` with this payload, and returns the roles of the account
+5. `sync-api` renders the claims template of `PayrollApp` with the payload and the roles
+6. The rendered claims are stored in the `computed_rights` table of the LinId database
 
 ---
 
@@ -109,6 +121,3 @@ Example template:
 
 * Integrate claims with policies (OPA):
   👉 [advanced/policies](../advanced/policies.md)
-
-* Customize UI for claims preview (optional):
-  👉 [ui/theming](../ui/theming.md)

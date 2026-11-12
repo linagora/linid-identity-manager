@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   through Spring Cloud Vault, disabled by default: each application reads its own secret and a secret shared by both,
   with the environment variables `VAULT_ENABLED`, `VAULT_URI`, `VAULT_AUTHENTICATION`, `VAULT_TOKEN`,
   `VAULT_APPLICATION_NAME`, `VAULT_KV_BACKEND` and `VAULT_DEFAULT_CONTEXT`.
+- Added the **hierarchy paths of the organizational units** (`hierarchyPaths`) to `GET /organizational-units`,
+  `GET /organizational-units/{id}`, `PUT /organizational-units/{id}/status/suspend` and
+  `PUT /organizational-units/{id}/status/reactivate`: each path lists the identifiers of its ancestors from the
+  top-most ancestor (a unit without parent, normally the root) down to its parent.
 
 ### Changed
 

@@ -127,6 +127,19 @@ public class OrganizationalUnitViewDTO {
     private String roleNames;
 
     /**
+     * Every hierarchy path of the organizational unit, each one listing the identifiers of its ancestors from the root
+     * down to its parent, the organizational unit itself excluded.
+     */
+    @Schema(
+        description = "Every hierarchy path of the organizational unit. Each path lists the identifiers of its "
+            + "ancestors from the root down to its parent, the organizational unit itself excluded. An organizational "
+            + "unit reachable through several parents has one path per route to the root, and the root has a single "
+            + "empty path.",
+        example = "[[\"550e8400-e29b-41d4-a716-446655440001\", \"550e8400-e29b-41d4-a716-446655440000\"]]"
+    )
+    private List<List<UUID>> hierarchyPaths;
+
+    /**
      * Time range during which the organizational unit is suspended.
      */
     @Schema(description = "Time range during which the organizational unit is suspended")

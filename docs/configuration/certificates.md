@@ -46,9 +46,7 @@ The same certificate is used by:
 | Sync API       | HTTPS via `sync-api-keystore.p12` (same key pair)  |
 | Superset       | HTTPS on the analytics instance                    |
 
-It is an end-entity certificate (`CA:FALSE`), so it cannot sign other certificates. Since every service holds its
-key, a CA certificate (the default of `openssl req -x509`) would let any of them issue a client certificate with the
-subject of the API (`CN=linid-api`), accepted by `sync-api`.
+It is an end-entity certificate (`CA:FALSE`): no service can use it to sign a client certificate accepted by `sync-api`.
 
 ---
 
@@ -99,9 +97,9 @@ Generated automatically by the certificate tasks:
 * **Sync API keystore** (`docker/<env>/resources/sync-api-keystore.p12`): the same PKCS12
   archive, used by `sync-api` to serve HTTPS. It is never packaged in the `sync-api` image:
   the E2E environment mounts it in the container.
-* **API client keystore** (`docker/<env>/resources/api-client-keystore.p12`): PKCS12 archive of a client certificate
-  (`CN=linid-api`, `clientAuth` extended key usage) signed by the local CA, presented by the API to `sync-api` only
-  (mutual TLS). It is never packaged in the API image: the E2E environment mounts it in the container.
+* **API client keystore** (`docker/<env>/resources/api-client-keystore.p12`): client certificate
+  (`CN=linid-api`) presented by the API to `sync-api` (mutual TLS). It is never packaged in the
+  API image: the E2E environment mounts it in the container.
 * **Truststore** (`truststore.jks`): contains only the local CA certificate. Because
   every service certificate is signed by that CA, this single entry lets the API validate
   TLS connections to LemonLDAP::NG, Superset, and any future HTTPS service. `sync-api` also uses it to validate the

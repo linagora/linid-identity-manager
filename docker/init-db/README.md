@@ -117,11 +117,11 @@ sync_api_user
 sync_api_linid_user
 ```
 
-`sync_api_linid_user` is the account of `sync-api` in the `linid` database. It owns no database: its grants are given by
-`scripts/init_sync_api_linid_user.sql`, once the API migrations have created the LinID tables.
+`sync_api_linid_user` is the account of `sync-api` in the `linid` database, granted by
+`scripts/init_sync_api_linid_user.sql`.
 
-Each database is owned by its corresponding application role, except `sync_api`: it stays owned by the
-administrator, since the owner of a database owns its `public` schema and can create tables in it.
+Each database is owned by its corresponding application role, except `sync_api`, owned by the administrator so that
+`sync_api_user` cannot create tables in it.
 
 This provides logical separation between applications and avoids using the PostgreSQL superuser from application containers.
 
@@ -179,9 +179,7 @@ SELECT to_regclass('public.account_payload_view');
 
 This is important because the LinID schema is created by the application itself, typically through its database migration mechanism.
 
-Flyway commits each migration separately, so the script waits for the relation of the most recent migration used by
-`init_linid.sql` and `init_sync_api_linid_user.sql`: waiting for an older table would let them run before the later
-tables exist. A script that starts using a relation of a more recent migration updates this wait.
+It waits for the most recent relation used by the seed scripts: update this wait when a script uses a newer one.
 
 The initialization script therefore does not attempt to create the LinID schema.
 
@@ -359,11 +357,10 @@ helpdesk
 
 Their UUIDs are fixed, from `00000000-0000-4000-8000-00000000e001` to `00000000-0000-4000-8000-00000000e003`.
 
-`deployed_at` stays `NULL`: linid-api publishes the policies on OPA, at its next scheduled deployment or with
-`POST /applications/{id}/deploy`. `sync-api` computes the rights of an application once it is deployed.
+They are not deployed: `sync-api` computes their rights once linid-api has published their policies on OPA.
 
-The script is built from the rules with the text of the template `opa-policy.rego.j2` of linid-api, copied in the seed:
-a change to this template must also be made in `init_linid.sql`.
+Their script is copied from the template `opa-policy.rego.j2` of linid-api: apply any change of this template to
+`init_linid.sql` as well.
 
 ## `scripts/init_sync_api_linid_user.sql`
 
@@ -374,8 +371,7 @@ This script gives `sync_api_linid_user` the grants `sync-api` needs in the `lini
 | `accounts`, `applications`, `application_roles`, `account_computed_rights_view`, `account_payload_view` | `SELECT`                     |
 | `account_payloads`, `computed_rights`                                                                   | `SELECT`, `INSERT`, `UPDATE` |
 
-`sync_api_linid_user` cannot change the other tables, nor create or alter a table. The audit tables of
-`account_payloads` and `computed_rights` are written by `SECURITY DEFINER` triggers and need no grant.
+`sync_api_linid_user` cannot change the other tables, nor create or alter a table.
 
 ## `scripts/init_lemon.sql`
 

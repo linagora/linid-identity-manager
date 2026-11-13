@@ -115,19 +115,19 @@ SUPERSET_RLS_CONFIG=/app/superset.yaml
 # before Superset's JWT_ACCESS_TOKEN_EXPIRES to avoid using an expired token)
 # SUPERSET_CACHE_OPTION=maximumSize=1,expireAfterWrite=55m,recordStats
 
-# Base URL of sync-api, called by the API with mutual TLS
+# Base URL of sync-api, called with mutual TLS
 SYNC_API_URL=https://sync-api:8443
 
-# Maximum time to establish the connection to sync-api, as a duration (e.g. 5s, 500ms)
+# Connection timeout to sync-api
 SYNC_API_CONNECT_TIMEOUT=5s
 
-# Maximum time to wait for the response of sync-api, as a duration (e.g. 10s, 500ms)
+# Read timeout of sync-api
 SYNC_API_READ_TIMEOUT=10s
 
-# Path to the PKCS12 key store holding the client certificate presented by the API to sync-api only
+# PKCS12 keystore of the client certificate presented to sync-api
 SYNC_API_CLIENT_KEY_STORE=file:/etc/ssl/api-client-keystore.p12
 
-# Password of the client key store and of its private key
+# Password of the client keystore and of its key
 SYNC_API_CLIENT_KEY_PASSWORD=password
 
 # Root directory of the avatar images, shared with the front-end web server that serves them
@@ -150,8 +150,7 @@ AVATAR_MAX_PIXELS=16000000
 
 ### 🔄 LinId Sync API — `sync-api.env`
 
-Used by the dev and E2E environments only: the demo does not run `sync-api`. `sync-api` only accepts the requests
-presenting the client certificate of the API (mutual TLS).
+Used by the dev and E2E environments only: the demo does not run `sync-api`.
 
 ```text
 ################################################################################
@@ -188,21 +187,19 @@ LINID_DATABASE_PORT=5432
 # Name of the linid-api database
 LINID_DATABASE_NAME=linid
 
-# Username of sync-api in the linid-api database, limited to the tables it reads and writes
+# Username of sync-api in the linid-api database
 LINID_DATABASE_USER=sync_api_linid_user
 
 # Password of sync-api in the linid-api database
 LINID_DATABASE_PASSWORD=password
 
-# Maximum number of connections to the linid-api database, shared by the cycle and the recomputations: it should grow
-# with spring.task.execution.pool.core-size, up to core-size + 1 for all of them to run at once (default: 5)
+# Maximum number of connections to the linid-api database (default: 5)
 # LINID_DATABASE_MAX_POOL_SIZE=5
 
-# act_id of the technical account of sync-api, shared by its instances and recorded as the author of their writes
+# act_id of the technical account of sync-api, author of its writes
 SYNC_TECHNICAL_ACCOUNT_ID=00000000-0000-4000-8000-00000000a012
 
-# Identifier of the instance, written with the rows it writes in the linid-api database, in its logs and in the
-# parameters of its jobs (default: the host name)
+# Identifier of the instance (default: the host name)
 # SYNC_INSTANCE_ID=sync-api-1
 
 # Path to SSL/TLS key store
@@ -220,49 +217,47 @@ SSL_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
 # Password for accessing the SSL/TLS trust store
 SSL_TRUSTSTORE_PASSWORD=password
 
-# Path to the trust store holding the CA that signed the client certificate of linid-api, used to validate the
-# client certificates
+# Path to the trust store validating the client certificate of linid-api
 SSL_CLIENT_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
 
 # Password for accessing the client trust store (default: SSL_TRUSTSTORE_PASSWORD)
 # SSL_CLIENT_TRUSTSTORE_PASSWORD=password
 
-# Subject of the only accepted client certificate, the one of linid-api, in the RFC 2253 format
+# Subject of the only accepted client certificate, the one of linid-api
 SYNC_ALLOWED_CLIENT=CN=linid-api
 
-# Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week),
-# in UTC whatever the time zone of the server. When several instances run, only one of them runs each cycle
+# Schedule of the synchronization cycle, as a Spring cron expression, in UTC
 SYNC_CRON="0 0 2 * * *"
 
-# Number of accounts read, built and written per chunk of the payload build, in one transaction (default: 500)
+# Number of accounts per chunk of the payload build (default: 500)
 # SYNC_PAYLOAD_CHUNK_SIZE=500
 
-# Number of account and application pairs read, computed and written per chunk by the computation of the rights
-# (default: 100)
+# Number of account and application pairs per chunk of the rights computation (default: 100)
 # SYNC_COMPUTE_CHUNK_SIZE=100
 
-# Number of inserts or updates sent together to the linid-api database, within the transaction of a chunk
-# (default: 50)
+# Number of inserts or updates sent together to the linid-api database (default: 50)
 # SYNC_JDBC_BATCH_SIZE=50
 
-# Maximum wait for the accounts of a chunk locked by another processing, as a duration (e.g. 30m, 90s): beyond it, the
-# chunk and the cycle fail. Keep it above the longest chunk, whose OPA calls are made under the locks (default: 30m)
+# Maximum wait for the accounts locked by another processing (default: 30m)
 # SYNC_LOCK_TIMEOUT=30m
 
 # Base URL of the OPA server used by sync-api to evaluate the application policies
 OPA_SERVER_URL=http://opa:8181
 
-# Path of the result of an application policy on the OPA server, {code} being the application code
+# Path of the result of an application policy, {code} being the application code
 OPA_EVALUATION_PATH=/v1/data/authz/{code}/result
 
-# Maximum time to establish the connection to the OPA server, as a duration (e.g. 5s, 500ms)
+# Connection timeout to the OPA server
 OPA_CONNECT_TIMEOUT=5s
 
-# Maximum time to wait for the response of the OPA server, as a duration (e.g. 10s, 500ms)
+# Read timeout of the OPA server
 OPA_READ_TIMEOUT=10s
 
-# Path to the external configuration file, holding the sources and the template of the account payloads
+# Path to the external configuration file, holding the sync-data section
 EXTERNAL_CONFIGURATION=/app/sync-config.yaml
+
+# Enable or disable Swagger UI
+SWAGGER_ENABLED=true
 
 # Logging level (DEBUG, INFO, WARN, ERROR)
 LOGGING_LEVEL=INFO
@@ -555,11 +550,10 @@ EXTERNAL_CONFIGURATION=/app/extra-configuration.yaml
 
 ## 🧾 Account Payloads — `sync-data`
 
-`sync-api` builds the payload of each account, the `input` document evaluated by the OPA policies of the
-applications (see [advanced/policies](../../advanced/policies.md)), from the data of the LinId database. The data read
-and the structure of the payload are set in the `sync-data` section of the file referenced by `EXTERNAL_CONFIGURATION`,
-which `sync-api` requires to start (`docker/dev/resources/sync-config.yaml` in the development environment,
-`docker/e2e/resources/sync/sync-config.yaml` in the E2E environment):
+`sync-api` builds the payload of each account, the `input` of the OPA policies (see
+[advanced/policies](../../advanced/policies.md)), from the `sync-data` section of the file referenced by
+`EXTERNAL_CONFIGURATION` (`docker/dev/resources/sync-config.yaml` in dev, `docker/e2e/resources/sync/sync-config.yaml`
+in E2E):
 
 | Key                                                | Default  | Description                                                        |
 | -------------------------------------------------- | -------- | ------------------------------------------------------------------ |
@@ -595,94 +589,31 @@ Payload built for an account:
 }
 ```
 
-### Sources
+* A source is a table or view of the LinId database, with at most one row per account, identified by an indexed `uuid`
+  column (`account-id-column`). `LINID_DATABASE_USER` needs the `SELECT` grant on it.
+* The source and column names match `[a-z_][a-z0-9_]*`.
+* Each source is a variable of the template, holding the row of the account, empty when the account has none.
+* A multi-valued attribute is a PostgreSQL array, sorted and without duplicates, so that an unchanged account keeps the
+  same payload.
+* Every value is inserted with the `tojson` filter, without quotes.
+* The `mapping` provides the `external_id` and `email` keys, read by the claims template of the LINID application.
+* Only the changed payloads are written, in the `account_payloads` table.
 
-* A source is any table or view of the LinId database: a table, one of its views, or a view created for the payload.
-  The `accounts` table is not required.
-* The PostgreSQL account of `sync-api` (`LINID_DATABASE_USER`) needs the `SELECT` grant on each source.
-* Every source has the column set in `account-id-column`, of type `uuid`, and at most one row per account. Each chunk
-  of accounts filters on this column, so it must rely on an index of the underlying tables.
-* A multi-valued attribute is a PostgreSQL array column, read as a list. It must be sorted and without duplicates,
-  so that the checksum of the payload is stable. The `account_payload_view` view gives, for each account, the sorted
-  names of its organizational units (`organizational_units`) and codes of its groups (`groups`), empty arrays when it
-  has none.
-* A `json` or `jsonb` column is read as JSON: `{{ accounts.extra_parameters | tojson }}` inserts the whole object,
-  and `{{ accounts.extra_parameters.department | tojson }}` one of its fields, `null` when it is absent. A timestamp
-  column is inserted as a number of milliseconds since the epoch.
-* The source and column names must match `[a-z_][a-z0-9_]*`: they are checked and quoted before being used in the SQL
-  queries.
-
-### Template
-
-* The template is rendered once per account with Jinjava, then parsed as a JSON object.
-* Each source is a variable of the template, named after the source, holding the columns of the row of the account.
-  The variable is empty when the account has no row in the source.
-* Every value is inserted with the `tojson` filter, without quotes: a list stays a JSON array, a string is correctly
-  escaped, and an empty variable gives `null`.
-* Every `mapping` provides the `external_id` and `email` keys: the claims template of the LINID system application
-  reads them in the payload to build its `sub` and `email` claims.
-
-### Errors
-
-`sync-api` logs an alert for each error (see `sync-api/README.md`):
-
-* **Invalid mapping**: the template is checked before any source is read, rendered with an empty context and parsed.
-  A Jinjava syntax error or a value inserted without `tojson` stops the payload build: nothing is written, and the
-  rights are not computed.
-* **Unreadable source**: an unknown source, an invalid name, a missing account id column or a database error stops
-  the payload build. The chunks already written stay written, and the other accounts keep their previous payload.
-* **Account in error**: an account with several rows in a source, or whose data gives a template error or an invalid
-  JSON, keeps its previous payload, and the payloads of the other accounts are built.
-
-### Chunk size
-
-The payloads are built by chunks of accounts: for each chunk, each source is read once, with the `act_id` of the
-accounts of the chunk, then the payloads are built and written in one transaction.
-
-```text
-SYNC_PAYLOAD_CHUNK_SIZE=500
-```
-
-* Reading the sources account by account would send one query per source and per account, and reading all the
-  accounts at once would hold every row in memory and every write in one transaction. A larger chunk sends fewer
-  queries, but holds more rows in memory and a longer transaction.
-* It is set in `sync-api.env` (`sync.payload.chunk-size`), not in the `sync-data` section: the `sync-data` section
-  describes the data, while the chunk size tunes the processing of `sync-api`.
-
-### Writing
-
-The payload of each account is written in the `account_payloads` table of the LinId database only when its checksum
-changed. The checksum is computed on its compact JSON, with its keys sorted at every level: the order of the keys in
-the template does not change it. The arrays keep their order. An account deleted since the start of the payload
-build is left out.
-
-```text
-SYNC_JDBC_BATCH_SIZE=50
-SYNC_INSTANCE_ID=sync-api-1
-```
-
-* `SYNC_JDBC_BATCH_SIZE` (default `50`) is the number of `INSERT` or `UPDATE` statements sent together to the LinId
-  database when a chunk is written, just before its commit, one round trip per group: a chunk of 500 changed payloads
-  takes 10 round trips instead of 500, and a chunk without change sends nothing. It does not change the chunk size, the
-  number of accounts per transaction.
-* `SYNC_INSTANCE_ID` (default: the host name) is the identifier of the instance, written in the `sync_instance_id`
-  column of the rows it writes, in its logs and in the parameters of its jobs.
+👉 Errors and alerts: [advanced/sync-api](../../advanced/sync-api.md#-alerts)
 
 ---
 
 ## 🎫 Claims Template
 
 For each account and each deployed application, `sync-api` evaluates the OPA policy of the application with the
-payload of the account, then renders the claims template of the application with Jinjava. The result is stored in the
-`computed_rights` table of the LinId database: the `allow` and the `roles` returned by OPA, and the rendered claims.
+payload of the account, then renders the claims template of the application. The result is stored in the
+`computed_rights` table.
 
-The claims template is a JSON template, whose values are Jinjava expressions, with these variables:
-
-| Variable  | Content                                                                    |
-| --------- | -------------------------------------------------------------------------- |
-| `payload` | Payload of the account, built from the `mapping` of `sync-data`            |
-| `allow`   | `allow` returned by OPA, `true` or `false`                                 |
-| `roles`   | Roles returned by OPA, a sorted list of role names, empty when it has none |
+| Variable  | Content                                                         |
+| --------- | --------------------------------------------------------------- |
+| `payload` | Payload of the account, built from the `mapping` of `sync-data` |
+| `allow`   | `allow` returned by OPA, `true` or `false`                      |
+| `roles`   | Roles returned by OPA, a sorted list of role names              |
 
 ```jinja
 {
@@ -692,12 +623,8 @@ The claims template is a JSON template, whose values are Jinjava expressions, wi
 }
 ```
 
-* As in the `mapping`, every value is inserted with the `tojson` filter, without quotes.
-* The rendered text must be a JSON object. The template is not checked when the application is saved: a template
-  error or a rendered text that is not a JSON object puts the pair in error. A pair in error raises an alert and
-  keeps its previous result, and is computed again at the next cycle.
-* A role returned by OPA and missing from the roles of the application raises an alert, and the result is stored
-  anyway.
+* As in the `mapping`, every value is inserted with the `tojson` filter, and the rendered text must be a JSON object.
+* The template is not checked when the application is saved: an error only shows as a `pairError` alert.
 
 ---
 
@@ -709,7 +636,8 @@ Database configuration is distributed between `db.env`, `api.env`, `lemon.env`, 
 
 ### 2. Logging & Swagger
 
-The API logging level and Swagger UI can be configured through `api.env`.
+The API logging level and Swagger UI can be configured through `api.env`, and those of `sync-api` through
+`sync-api.env`. The Swagger UI of `sync-api` requires the client certificate of the API, like its other endpoints.
 
 ### 3. SSL / HTTPS
 
@@ -734,8 +662,7 @@ Apache Superset™ configuration is isolated in `superset.env` and includes:
 
 ### 6. Open Policy Agent (OPA)
 
-The API and sync-api both communicate with OPA, through the `OPA_SERVER_URL` variable of `api.env` and of
-`sync-api.env`:
+The API and `sync-api` communicate with OPA through `OPA_SERVER_URL`, in `api.env` and `sync-api.env`:
 
 ```text
 OPA_SERVER_URL=http://opa:8181

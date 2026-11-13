@@ -26,41 +26,16 @@ Ensuring these are met will allow a smooth setup and avoid common issues.
 
 `sync-api` has its own `sync_api` database, with two accounts:
 
-* An **administrator account** (`DATABASE_ADMIN_USER`), owner of the `sync_api` database, which runs the Flyway
-  migrations of `sync-api` when it starts: they create the Spring Batch tables.
-* A **runtime account** (`DATABASE_USER`), used by `sync-api` to read and write the Spring Batch tables and to use
-  their sequences. It must not own the `sync_api` database, which would let it create tables in its `public` schema.
+* An **administrator account** (`DATABASE_ADMIN_USER`), owner of the database, which runs the migrations of `sync-api`
+* A **runtime account** (`DATABASE_USER`), which must not own it, with the grants of
+  [`init_db.sql`](../../docker/init-db/init_db.sql), run as `DATABASE_ADMIN_USER` before the first start of `sync-api`
 
-The grants of the runtime account are given by the administrator account, before the first start of `sync-api`:
-default privileges only apply to the tables and sequences later created by the account that defines them.
-
-```sql
-\connect sync_api
-
-GRANT USAGE ON SCHEMA public TO sync_api_user;
-
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
-    GRANT SELECT, INSERT, UPDATE, DELETE
-    ON TABLES
-    TO sync_api_user;
-
-ALTER DEFAULT PRIVILEGES IN SCHEMA public
-    GRANT USAGE, SELECT
-    ON SEQUENCES
-    TO sync_api_user;
-```
-
-Several `sync-api` instances coordinate with PostgreSQL advisory locks, which need no grant. The lock of the
-synchronization cycle is a session lock of the `sync_api` database, held by a connection that stays idle during the
-whole cycle: the `sync_api` database must not be reached through PgBouncer in transaction pooling mode, and
-`idle_session_timeout` must not be set for the runtime account. This connection is opened outside the connection pool,
-like the one held by each recomputation of an account or of an application, running or waiting: count, per instance,
-one connection more than the pool for the cycle, plus 24 for the recomputations (8 running and 16 waiting), in
-`max_connections`.
+> ⚠️ Check the [deployment constraints](../advanced/sync-api.md#%EF%B8%8F-deployment-constraints) of `sync-api` (PgBouncer,
+> `idle_session_timeout`, `max_connections`).
 
 ### 2️⃣ Java Runtime
 
-* **Java 21** (LTS) or later
+* **Java 25** (LTS) or later
 * Required for **backend Spring Boot application**
 
 ### 3️⃣ Node.js / Frontend
@@ -87,9 +62,8 @@ Some configuration depends on environment variables:
 * `AUTH_AUDIENCE` (expected `aud` claim of the access tokens, i.e. the audience declared for the API at the OIDC provider, distinct from the client ID)
 * `AUTH_JWT_EXPECTED_TYPE` (optional, JOSE `typ` header required on access tokens, default `at+jwt`)
 * `I18N_EXTERNAL_PATH` (optional, for backend/plugin translations)
-* `sync-api`: `LINID_DATABASE_HOST`, `LINID_DATABASE_PORT`, `LINID_DATABASE_NAME`, `LINID_DATABASE_USER`,
-  `LINID_DATABASE_PASSWORD` (its access to the LinId database) and `SYNC_TECHNICAL_ACCOUNT_ID` (its technical
-  account), see [sync-api access to the LinId database](#-sync-api-access-to-the-linid-database)
+* `LINID_DATABASE_*` and `SYNC_TECHNICAL_ACCOUNT_ID` for `sync-api`, see
+  [sync-api access to the LinId database](#-sync-api-access-to-the-linid-database)
 
 > ⚠️ A `.env` file can be used for local development
 
@@ -112,46 +86,26 @@ Some configuration depends on environment variables:
 
 LinId backend calls `sync-api` with mutual TLS, which requires:
 
-* A **client certificate for LinId backend**, with the `clientAuth` extended key usage, packaged as a PKCS12 keystore
-  (`SYNC_API_CLIENT_KEY_STORE`). LinId backend presents it to `sync-api` only.
-* The **CA trusted by `sync-api`**: a truststore holding the CA that signed this client certificate
-  (`SSL_CLIENT_TRUSTSTORE_PATH`). `sync-api` accepts any certificate chained to this CA whose subject is
-  `SYNC_ALLOWED_CLIENT`, so the certificates this CA issues to the other components must not be CA certificates.
-* A **certificate for `sync-api`** covering the hostname of `SYNC_API_URL`, trusted by the truststore of LinId backend
-  (`SSL_TRUSTSTORE_PATH`).
+* A **client certificate** for LinId backend (`clientAuth`), in a PKCS12 keystore (`SYNC_API_CLIENT_KEY_STORE`)
+* A **truststore** for `sync-api`, holding the CA of this certificate (`SSL_CLIENT_TRUSTSTORE_PATH`): the other
+  certificates issued by this CA must not be CA certificates
+* A **certificate for `sync-api`**, covering the hostname of `SYNC_API_URL` and trusted by LinId backend
+  (`SSL_TRUSTSTORE_PATH`)
 
 ---
 
 ## 🔄 sync-api access to the LinId database
 
-`sync-api` reads the account data in the LinId database and writes the payloads and the computed rights to it. It
-connects with its own PostgreSQL account (`LINID_DATABASE_USER`), limited to the tables and views it needs:
+`sync-api` connects to the LinId database with its own account (`LINID_DATABASE_USER`), which must not create nor alter
+any table:
 
-```sql
-CREATE ROLE sync_api_linid_user WITH LOGIN PASSWORD '<password>';
-```
+* Created like `sync_api_linid_user` in [`init_db.sql`](../../docker/init-db/init_db.sql)
+* Granted with [`init_sync_api_linid_user.sql`](../../docker/init-db/scripts/init_sync_api_linid_user.sql), once LinId
+  backend has created its tables
+* With the `SELECT` grant on each source of the account payloads (`sync-data.job.sources`)
 
-Its grants are given once LinId backend has created its tables and views, since its migrations run when it starts:
-
-```sql
-GRANT USAGE ON SCHEMA public TO sync_api_linid_user;
-
-GRANT SELECT
-    ON accounts, applications, application_roles, account_computed_rights_view, account_payload_view
-    TO sync_api_linid_user;
-
-GRANT SELECT, INSERT, UPDATE
-    ON account_payloads, computed_rights
-    TO sync_api_linid_user;
-```
-
-* This account must not create nor alter any table: the migrations of the LinId database stay in LinId backend.
-* Each source of the account payloads (`sync-data.job.sources`) needs the `SELECT` grant: the grants above cover
-  `accounts` and `account_payload_view`, the sources of the example configuration.
-* The audit tables of `account_payloads` and `computed_rights` are written by their triggers and need no grant.
-
-`sync-api` also records its writes with a **technical account** of LinId as author. Create it as an account of LinId,
-then set its `act_id` as `SYNC_TECHNICAL_ACCOUNT_ID`:
+Its writes have a **technical account** of LinId as author: create it, then set the returned `act_id` as
+`SYNC_TECHNICAL_ACCOUNT_ID`:
 
 ```sql
 INSERT INTO accounts (external_id, email, lastname, firstname, created_by, updated_by)

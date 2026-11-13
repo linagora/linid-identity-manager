@@ -52,6 +52,11 @@ Feature: Test API Organizational unit endpoints
   ################## Find accounts of O.U. (GET /organizational-units/{id}/accounts) #######
   ## 801 Should return <user> for <ou> organizational-unit
 
+  ################## Hierarchy closure (organizational_unit_closures) #######
+  ## 901 Should remove the ancestor paths of a detached organizational unit and of its descendants
+  ## 902 Should keep the ancestor paths reached through another parent when a relation is detached
+  ## 903 Should keep the closure table consistent with the relations after successive deletions
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -888,3 +893,262 @@ Feature: Test API Organizational unit endpoints
       | user3 | Division A1 |
       | user4 | Division A2 |
       | user5 | Division B1 |
+
+  #################################################################
+  ################## Hierarchy closure (organizational_unit_closures) #######
+  #################################################################
+  # The API neither detaches an organizational unit from its parent nor adds a second parent:
+  # these relations are deleted or inserted in database.
+  Scenario: 901 - Should remove the ancestor paths of a detached organizational unit and of its descendants
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # Hierarchy: root -> A -> B -> C
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "closure-901-a",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouAID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouAID}}",
+        "name": "closure-901-b",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouBID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouBID}}",
+        "name": "closure-901-c",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouCID' as '{{response.body.id}}' in context
+
+    When I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouCID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-901-a,closure-901-b,root'
+
+    # Detaching A -> B removes every path from root and A to B and C.
+    When I execute sql request "DELETE FROM organizational_unit_relations WHERE parent_id = $1 AND child_id = $2" with values:
+      """
+      ["{{ctx.ouAID}}", "{{ctx.ouBID}}"]
+      """
+    And  I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouBID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is empty
+
+    When I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouCID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-901-b'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouCID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouBID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouAID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 902 - Should keep the ancestor paths reached through another parent when a relation is detached
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # Hierarchy: root -> A -> C -> D and root -> B -> C
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "closure-902-a",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouAID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "closure-902-b",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouBID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouAID}}",
+        "name": "closure-902-c",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouCID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouCID}}",
+        "name": "closure-902-d",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouDID' as '{{response.body.id}}' in context
+
+    When I execute sql request "INSERT INTO organizational_unit_relations (parent_id, child_id, created_by, updated_by) SELECT $1, oun_id, created_by, created_by FROM organizational_units WHERE oun_id = $2" with values:
+      """
+      ["{{ctx.ouBID}}", "{{ctx.ouCID}}"]
+      """
+    And  I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouDID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-902-a,closure-902-b,closure-902-c,root'
+
+    # Detaching A -> C keeps the paths through B: root -> B -> C -> D.
+    When I execute sql request "DELETE FROM organizational_unit_relations WHERE parent_id = $1 AND child_id = $2" with values:
+      """
+      ["{{ctx.ouAID}}", "{{ctx.ouCID}}"]
+      """
+    And  I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouCID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-902-b,root'
+
+    When I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouDID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-902-b,closure-902-c,root'
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouDID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouCID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouBID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouAID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 903 - Should keep the closure table consistent with the relations after successive deletions
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # Hierarchy: root -> A -> B -> C -> D and A -> C
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "closure-903-a",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouAID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouAID}}",
+        "name": "closure-903-b",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouBID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouBID}}",
+        "name": "closure-903-c",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouCID' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.ouCID}}",
+        "name": "closure-903-d",
+        "type": "closure-test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouDID' as '{{response.body.id}}' in context
+
+    When I execute sql request "INSERT INTO organizational_unit_relations (parent_id, child_id, created_by, updated_by) SELECT $1, oun_id, created_by, created_by FROM organizational_units WHERE oun_id = $2" with values:
+      """
+      ["{{ctx.ouAID}}", "{{ctx.ouCID}}"]
+      """
+
+    # Detaching A -> C keeps the paths through B: root -> A -> B -> C -> D.
+    And  I execute sql request "DELETE FROM organizational_unit_relations WHERE parent_id = $1 AND child_id = $2" with values:
+      """
+      ["{{ctx.ouAID}}", "{{ctx.ouCID}}"]
+      """
+    And  I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouDID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-903-a,closure-903-b,closure-903-c,root'
+
+    # Deleting B removes its relations: C and D are no longer below root and A.
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouBID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I execute sql request "SELECT string_agg(o.name, ',' ORDER BY o.name) AS ancestors FROM organizational_unit_closures c JOIN organizational_units o ON o.oun_id = c.ancestor_id WHERE c.descendant_id = $1 AND c.depth > 0" with values:
+      """
+      ["{{ctx.ouDID}}"]
+      """
+    Then I expect '{{ctx.dbResults[0].ancestors}}' is 'closure-903-c'
+
+    # The closure table holds exactly the paths built from the relations.
+    When I execute sql request "WITH RECURSIVE expected AS (SELECT oun_id AS ancestor_id, oun_id AS descendant_id FROM organizational_units UNION SELECT e.ancestor_id, r.child_id FROM expected e JOIN organizational_unit_relations r ON r.parent_id = e.descendant_id) (SELECT ancestor_id, descendant_id FROM organizational_unit_closures EXCEPT SELECT ancestor_id, descendant_id FROM expected) UNION ALL (SELECT ancestor_id, descendant_id FROM expected EXCEPT SELECT ancestor_id, descendant_id FROM organizational_unit_closures)"
+    Then I expect 0 database results
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouDID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouCID}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouAID}}' with method 'DELETE'
+    Then I expect status code is 204

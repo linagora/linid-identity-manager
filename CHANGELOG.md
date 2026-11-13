@@ -80,6 +80,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   running, on any instance, and no new one is started. The endpoint answers `400` when the application has no script or
   is not deployed, `404` when it is unknown, and `503` and `502` like `POST /accounts/{id}/recompute-rights`, with which
   it shares the limit of 8 recomputations running and 16 waiting per instance.
+- Added the **hierarchy paths of the organizational units** (`hierarchyPaths`) to `GET /organizational-units`,
+  `GET /organizational-units/{id}`, `PUT /organizational-units/{id}/status/suspend` and
+  `PUT /organizational-units/{id}/status/reactivate`: each path lists the identifiers of its ancestors from the
+  top-most ancestor (a unit without parent, normally the root) down to its parent.
 
 #### Frontend
 

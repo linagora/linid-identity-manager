@@ -37,7 +37,31 @@ SELECT child.oun_id,
        NULLIF(CONCAT_WS(' ', updater.firstname, updater.lastname), '') AS updated_by,
        child.insert_date,
        child.update_date,
-       roles.role_names
+       roles.role_names,
+       (
+           WITH RECURSIVE ancestors AS (
+               SELECT child.oun_id AS oun_id,
+                      ARRAY []::UUID[] AS path
+               UNION ALL
+               SELECT r.parent_id,
+                      r.parent_id || a.path
+               FROM ancestors a
+                        JOIN organizational_unit_relations r
+                             ON r.child_id = a.oun_id
+               -- Stops the recursion on a hierarchy that already loops.
+               WHERE r.parent_id <> child.oun_id
+                 AND NOT r.parent_id = ANY (a.path)
+           )
+           SELECT COALESCE(JSONB_AGG(TO_JSONB(a.path) ORDER BY a.path), '[]'::JSONB)
+           FROM ancestors a
+           WHERE NOT EXISTS (
+               SELECT 1
+               FROM organizational_unit_relations r
+               WHERE r.child_id = a.oun_id
+               -- OFFSET 0 forces an index lookup here instead of a full table scan for every unit.
+               OFFSET 0
+           )
+       ) AS hierarchy_paths
 FROM organizational_units child
          LEFT JOIN organizational_unit_status s
                    ON s.oun_id = child.oun_id
@@ -69,7 +93,7 @@ FROM organizational_units child
              WHERE oua.oun_id = child.oun_id
          ) roles ON TRUE;
 
-COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizational units along with their parent organizational units and their suspension status (suspension period, current-state status reason / sub-reason / comment and a computed is_suspended flag and a computed status) and the functional roles held in them.';
+COMMENT ON VIEW organizational_units_view IS 'Aggregated view exposing organizational units along with their parent organizational units, the hierarchy paths of their ancestors and their suspension status (suspension period, current-state status reason / sub-reason / comment and a computed is_suspended flag and a computed status) and the functional roles held in them.';
 
 COMMENT ON COLUMN organizational_units_view.oun_id IS 'Primary key (UUID) of the organizational unit.';
 COMMENT ON COLUMN organizational_units_view.name IS 'Human-readable name of the organizational unit.';
@@ -90,3 +114,4 @@ COMMENT ON COLUMN organizational_units_view.updated_by IS 'Identifier of the las
 COMMENT ON COLUMN organizational_units_view.insert_date IS 'Date and time when the account record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN organizational_units_view.update_date IS 'Date and time when the account record was last updated. Default is now(). Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN organizational_units_view.role_names IS 'Comma-separated names of the distinct functional roles held by the accounts attached to the organizational unit, in alphabetical order. NULL when no account holds a role in it.';
+COMMENT ON COLUMN organizational_units_view.hierarchy_paths IS 'JSON array of every hierarchy path of this organizational unit. Each path is an array of the identifiers of its ancestors, ordered from the top-most ancestor (a unit without parent, normally the root) down to its parent. The paths are sorted by their identifiers. A unit without parent, such as the root or the child of a deleted unit, gets a single empty path: [[]]. A unit whose ancestors all loop, so that it reaches no unit without parent, gets no path: [].';

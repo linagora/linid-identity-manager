@@ -53,6 +53,8 @@ CREATE TABLE organizational_unit_relations
     UNIQUE (parent_id, child_id)
 );
 
+CREATE INDEX idx_organizational_unit_relations_child_id ON organizational_unit_relations (child_id);
+
 COMMENT ON TABLE organizational_unit_relations IS 'Stores direct parent-child relationships. This is the source of truth for the graph structure.';
 
 COMMENT ON COLUMN organizational_unit_relations.our_id IS 'Primary key (UUID) of the organizational unit relation.';
@@ -62,6 +64,8 @@ COMMENT ON COLUMN organizational_unit_relations.created_by IS 'Identifier of the
 COMMENT ON COLUMN organizational_unit_relations.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_unit_relations.insert_date IS 'Date and time when the account record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN organizational_unit_relations.update_date IS 'Date and time when the account record was last updated. Default is now(). Stored in UTC (TIMESTAMPTZ).';
+
+COMMENT ON INDEX idx_organizational_unit_relations_child_id IS 'Index on child organizational unit identifier to optimize lookups and joins on organizational_unit_relations by child, such as the walk up to the ancestors of a unit.';
 
 -- =========================================================
 -- CLOSURE TABLE

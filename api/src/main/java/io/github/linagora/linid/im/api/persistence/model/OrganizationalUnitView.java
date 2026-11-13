@@ -139,6 +139,13 @@ public class OrganizationalUnitView extends AbstractViewEntity {
     private String roleNames;
 
     /**
+     * Every hierarchy path of this organizational unit.
+     */
+    @Type(JsonType.class)
+    @Column(name = "hierarchy_paths", columnDefinition = "jsonb")
+    private List<List<UUID>> hierarchyPaths;
+
+    /**
      * Time range during which the organizational unit is suspended. {@code null} when no suspension
      * is configured.
      */

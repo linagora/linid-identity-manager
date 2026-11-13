@@ -619,6 +619,15 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.content[0].description}}' is 'System identity manager application'
     And  I expect '{{response.body.content[0].domain}}' is 'Security'
     And  I expect '{{response.body.content[0].type}}' is 'System'
+    # The claims template spans several lines: its line breaks are removed to compare it on one line
+    And  I expect '{{response.body.content[0].claimsTemplate | replace("\n", "")}}' is '{% raw %}{  "sub": {{ payload.external_id | tojson }},  "email": {{ payload.email | tojson }},  "roles": {{ roles | tojson }}}{% endraw %}'
+
+    # The checksum is not exposed by the API: it is read in the database, and compared with the SHA-256 of the claims
+    # template, the algorithm of ChecksumService
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When I execute sql request "SELECT claims_template_checksum = encode(sha256(convert_to(claims_template, 'UTF8')), 'hex') AS checksum_matches FROM applications WHERE code = 'LINID'"
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].checksum_matches}}' is 'true'
 
   Scenario: 802 - Should return 400 when updating the LINID system application
     When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'

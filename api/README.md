@@ -16,7 +16,7 @@ This API allows you to:
 
 ## Prerequisites
 
-- Java 21+
+- Java 25+
 - Maven 3.8+ (or use the included `./mvnw` wrapper)
 - PostgreSQL 15+
 

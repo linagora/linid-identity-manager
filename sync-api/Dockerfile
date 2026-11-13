@@ -11,6 +11,7 @@ RUN --mount=type=secret,id=maven_settings \
     fi
 
 FROM eclipse-temurin:25-jre
+RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /app/target/*.jar linid-identity-manager-sync-api.jar
 EXPOSE 8443

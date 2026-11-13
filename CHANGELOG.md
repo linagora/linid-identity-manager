@@ -148,6 +148,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed CVE-2026-118257 affecting vue-i18n, `@intlify/core-base` and `@intlify/shared`.
 - Fixed GHSA-g2v6-rqmx-r4w6 affecting `@vue/server-renderer`.
 
+#### Backend
+
+- Fixed the **deletion of an organizational unit relation**, which left in `organizational_unit_closures` the paths
+  from the former ancestors to the child and its descendants: they are now rebuilt from
+  `organizational_unit_relations`, keeping the paths still reached through another parent, and a migration repairs
+  the paths of existing databases.
+
 #### Frontend
 
 - Enabled the **Export script** button of the application details page as soon as a rule is created, without

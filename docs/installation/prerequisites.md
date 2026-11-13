@@ -60,7 +60,7 @@ one connection more than the pool for the cycle, plus 24 for the recomputations 
 
 ### 2️⃣ Java Runtime
 
-* **Java 21** (LTS) or later
+* **Java 25** (LTS) or later
 * Required for **backend Spring Boot application**
 
 ### 3️⃣ Node.js / Frontend

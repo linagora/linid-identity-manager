@@ -24,9 +24,6 @@
  * LinID Identity Manager software.
  */
 
-import type { LinPulsarAttributeConfiguration } from '@linagora/lin-pulsar-core';
-import type { AccountLifecycleAction } from './accountLifecycleUi';
-import type { OrganizationalUnitLifecycleAction } from './organizationalUnitLifecycleUi';
 import type { Remote } from './remotes';
 import type { ThemeVariables } from './theme';
 
@@ -55,35 +52,10 @@ export interface AppConfig {
   themeVariables: ThemeVariables;
   /** List of remote Module Federation modules. */
   remotes: Remote[];
-  /** Defines the delay(in minutes) applied when reactivating a suspended or inactive account. */
-  immediateActionDelay: number;
   /** List of module files to be loaded for the UI. */
   modules: string[];
   /** List of additional zone definition files to be loaded for the UI. */
   extraZones?: string[];
   /** List of design files to be loaded for the UI. */
   designFiles: string[];
-
-  // ─── Accounts ───────────────────────────────────────────────────────────────
-
-  /**
-   * Form field configurations for each account lifecycle action dialog, keyed by action identifier (e.g.
-   * `"suspension.immediate"`, `"deactivation.scheduled"`). Each value is the ordered list of fields rendered inside the
-   * dialog.
-   */
-  accountLifecycleFields: Record<
-    AccountLifecycleAction,
-    LinPulsarAttributeConfiguration[]
-  >;
-
-  // ─── Organizational units ────────────────────────────────────────────────────
-
-  /**
-   * Form field configurations for each OU lifecycle action dialog, keyed by action identifier (e.g.
-   * `"suspension.immediate"`, `"suspension.scheduled"`).
-   */
-  organizationalUnitLifecycleFields: Record<
-    OrganizationalUnitLifecycleAction,
-    LinPulsarAttributeConfiguration[]
-  >;
 }

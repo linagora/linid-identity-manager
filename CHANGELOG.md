@@ -27,6 +27,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   account to the subject of another one and act with its rights. A database administrator can still fix a wrong
   `external_id` with an SQL `UPDATE`, described in `docs/configuration/authentication/oidc.md`.
 
+#### Backend
+
+- Fixed the **deletion of an organizational unit relation**, which left in `organizational_unit_closures` the paths
+  from the former ancestors to the child and its descendants: they are now rebuilt from
+  `organizational_unit_relations`, keeping the paths still reached through another parent.
+
 ## [0.12.0] - 2026-11-16
 
 ### Added

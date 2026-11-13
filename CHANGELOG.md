@@ -80,6 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   running, on any instance, and no new one is started. The endpoint answers `400` when the application has no script or
   is not deployed, `404` when it is unknown, and `503` and `502` like `POST /accounts/{id}/recompute-rights`, with which
   it shares the limit of 8 recomputations running and 16 waiting per instance.
+- Added the **Swagger documentation of sync-api**, enabled with the environment variable `SWAGGER_ENABLED`, required
+  like in linid-api. It sits behind the mutual TLS, like the other endpoints of `sync-api`.
 
 #### Frontend
 
@@ -113,6 +115,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Stated that the **pre-configured LemonLDAP::NG** of the Docker environments is for development only, listed its
   hard-coded secrets and test accounts, and described what to replace and keep before a real deployment.
+- Added the **sync-api page** (`docs/advanced/sync-api.md`), describing its synchronization cycle, its recomputations,
+  its locks between instances, its deployment constraints and its alerts, which the README of `sync-api` now links to.
 
 ### Removed
 
@@ -129,8 +133,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Security
 
+- Fixed CVE-2026-102554 affecting com.google.guava:guava, in sync-api.
 - Fixed CVE-2026-89407 and CVE-2026-89425 affecting Jackson Core.
 - Fixed CVE-2026-91776 and CVE-2026-91777 affecting Jackson Databind.
+- Fixed CVE-2026-75140 affecting org.jsoup:jsoup, shaded in com.hubspot.jinjava:jinjava, in sync-api.
 - Fixed CVE-2026-39244, CVE-2026-77301, CVE-2026-92000, CVE-2026-102282 and CVE-2026-114102 affecting adm-zip.
 - Fixed CVE-2026-101898, CVE-2026-101901, CVE-2026-101903, CVE-2026-101905, CVE-2026-101906, CVE-2026-101907 and
   CVE-2026-101909 affecting axios.
@@ -147,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed CVE-2026-112942 affecting Vite.
 - Fixed CVE-2026-118257 affecting vue-i18n, `@intlify/core-base` and `@intlify/shared`.
 - Fixed GHSA-g2v6-rqmx-r4w6 affecting `@vue/server-renderer`.
+- Fixed CVE-2026-109518 affecting apt and libapt-pkg7.0, in the sync-api image.
 
 #### Frontend
 

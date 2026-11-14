@@ -225,8 +225,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Execute checkstyle
-        run: mvn -ntp checkstyle:check
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp checkstyle:check
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   api-javadoc:
     name: API - Javadoc
@@ -243,8 +253,18 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Generate Javadoc
-        run: mvn -ntp clean compile javadoc:javadoc
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp clean compile javadoc:javadoc
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   api-tests:
     name: API - Unit tests
@@ -261,11 +281,17 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Execute unit tests
-        run: mvn -ntp test
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp test
 
       - name: Execute mutation tests
-        run: mvn -ntp org.pitest:pitest-maven:mutationCoverage
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp org.pitest:pitest-maven:mutationCoverage
 
       - name: Extract summary from pitest
         run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
@@ -275,6 +301,10 @@ jobs:
         with:
           header: api-tests
           path: api/pitest.html
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   api-check-dependencies:
     name: API - Check dependencies
@@ -291,14 +321,24 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Execute check dependencies
-        run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
 
       - name: Post comment
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: api-check-dependencies
           path: api/dependency-updates.txt
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   sync-api-check-style:
     name: Sync API - Code style
@@ -319,8 +359,18 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Execute checkstyle
-        run: mvn -ntp checkstyle:check
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp checkstyle:check
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   sync-api-javadoc:
     name: Sync API - Javadoc
@@ -341,8 +391,18 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Generate Javadoc
-        run: mvn -ntp clean compile javadoc:javadoc
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp clean compile javadoc:javadoc
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   sync-api-tests:
     name: Sync API - Unit tests
@@ -364,11 +424,17 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Execute unit tests
-        run: mvn -ntp test
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp test
 
       - name: Execute mutation tests
-        run: mvn -ntp org.pitest:pitest-maven:mutationCoverage
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp org.pitest:pitest-maven:mutationCoverage
 
       - name: Extract summary from pitest
         run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
@@ -378,6 +444,10 @@ jobs:
         with:
           header: sync-api-tests
           path: sync-api/pitest.html
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   sync-api-check-dependencies:
     name: Sync API - Check dependencies
@@ -399,14 +469,24 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Execute check dependencies
-        run: mvn -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
 
       - name: Post comment
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: sync-api-check-dependencies
           path: sync-api/dependency-updates.txt
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   e2e-check-style:
     name: E2E - Code style
@@ -439,6 +519,12 @@ jobs:
         with:
           submodules: "recursive"
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Install Task
         uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
         with:
@@ -452,6 +538,8 @@ jobs:
       - name: Install envsubst for the config tasks
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext-base
       - name: Run e2e tests
+        env:
+          MAVEN_SETTINGS_FILE: ${{ runner.temp }}/maven-settings.xml
         run: |
           task setup:e2e
           task start:test:ci
@@ -467,6 +555,10 @@ jobs:
         if: failure()
         working-directory: docker/e2e
         run: docker compose --env-file env/e2e.env down
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   security-malware-scan:
     name: Security - Malware Scan
@@ -496,6 +588,12 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Set up Node.js for the TypeScript extraction of CodeQL
         uses: actions/setup-node@v6
         with:
@@ -506,9 +604,13 @@ jobs:
       # CodeQL autobuild fails when several subdirectories hold a build file, so each Maven project is built explicitly
       - name: Build Java projects
         run: |
-          mvn -ntp -f api/pom.xml test-compile
-          mvn -ntp -f sync-api/pom.xml test-compile
+          mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp -f api/pom.xml test-compile
+          mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp -f sync-api/pom.xml test-compile
       - uses: github/codeql-action/analyze@v4
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
 
   security-dependency-review:
     name: Security - Dependency Review
@@ -560,9 +662,20 @@ jobs:
         uses: arduino/setup-task@c0bc642852239c2689f73f4ea6459c29405f3c52 # v3.0.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Configure Maven proxy
+        if: matrix.image == 'linid-identity-manager-api'
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
       # Builds only the scanned image: each image is built once, in parallel with the other one
       - name: Build image
+        env:
+          MAVEN_SETTINGS_FILE: ${{ matrix.image == 'linid-identity-manager-api' && format('{0}/maven-settings.xml', runner.temp) || '' }}
         run: task ${{ matrix.build-task }}
+      - name: Remove Maven proxy credentials
+        if: always() && matrix.image == 'linid-identity-manager-api'
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ matrix.image }}

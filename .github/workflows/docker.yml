@@ -45,12 +45,23 @@ jobs:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
 
+      - name: Configure Maven proxy
+        uses: ./.github/actions/maven-proxy
+        with:
+          username: ${{ secrets.MAVEN_PROXY_USERNAME }}
+          password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
+
       - name: Build and push Docker image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: ${{ matrix.component }}
           file: ${{ matrix.component }}/Dockerfile
+          secret-files: maven_settings=${{ runner.temp }}/maven-settings.xml
           push: true
           tags: |
             ${{ matrix.image }}:latest
             ${{ matrix.image }}:${{ github.ref_name }}
+
+      - name: Remove Maven proxy credentials
+        if: always()
+        run: rm -f "$RUNNER_TEMP/maven-settings.xml"

@@ -53,4 +53,3 @@ runs:
         EOF
         fi
         chmod 600 "$settings"
-        printf 'MAVEN_SETTINGS_FILE=%s\n' "$settings" >> "$GITHUB_ENV"

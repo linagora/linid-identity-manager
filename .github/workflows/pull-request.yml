@@ -232,7 +232,7 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Execute checkstyle
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp checkstyle:check
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp checkstyle:check
 
       - name: Remove Maven proxy credentials
         if: always()
@@ -260,7 +260,7 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Generate Javadoc
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp clean compile javadoc:javadoc
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp clean compile javadoc:javadoc
 
       - name: Remove Maven proxy credentials
         if: always()
@@ -288,10 +288,10 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Execute unit tests
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp test
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp test
 
       - name: Execute mutation tests
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp org.pitest:pitest-maven:mutationCoverage
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp org.pitest:pitest-maven:mutationCoverage
 
       - name: Extract summary from pitest
         run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
@@ -328,7 +328,7 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Execute check dependencies
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
 
       - name: Post comment
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
@@ -366,7 +366,7 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Execute checkstyle
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp checkstyle:check
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp checkstyle:check
 
       - name: Remove Maven proxy credentials
         if: always()
@@ -398,7 +398,7 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Generate Javadoc
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp clean compile javadoc:javadoc
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp clean compile javadoc:javadoc
 
       - name: Remove Maven proxy credentials
         if: always()
@@ -431,10 +431,10 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Execute unit tests
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp test
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp test
 
       - name: Execute mutation tests
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp org.pitest:pitest-maven:mutationCoverage
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp org.pitest:pitest-maven:mutationCoverage
 
       - name: Extract summary from pitest
         run: echo "<html><head></head><body><h1>Pit Test Coverage Report</h1><h3>Project Summary</h3>" > pitest.html && perl -0777 -ne 'print "$1\n" if /(<table>.*?<\/table>)/s' target/pit-reports/index.html >> pitest.html && echo "</body></html>" >> pitest.html
@@ -476,7 +476,7 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
 
       - name: Execute check dependencies
-        run: mvn -s "$MAVEN_SETTINGS_FILE" -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
+        run: mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp versions:display-dependency-updates -DprocessDependencyManagement=false -Dversions.outputFile=dependency-updates.txt
 
       - name: Post comment
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
@@ -538,6 +538,8 @@ jobs:
       - name: Install envsubst for the config tasks
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends gettext-base
       - name: Run e2e tests
+        env:
+          MAVEN_SETTINGS_FILE: ${{ runner.temp }}/maven-settings.xml
         run: |
           task setup:e2e
           task start:test:ci
@@ -602,8 +604,8 @@ jobs:
       # CodeQL autobuild fails when several subdirectories hold a build file, so each Maven project is built explicitly
       - name: Build Java projects
         run: |
-          mvn -s "$MAVEN_SETTINGS_FILE" -ntp -f api/pom.xml test-compile
-          mvn -s "$MAVEN_SETTINGS_FILE" -ntp -f sync-api/pom.xml test-compile
+          mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp -f api/pom.xml test-compile
+          mvn -s "$RUNNER_TEMP/maven-settings.xml" -ntp -f sync-api/pom.xml test-compile
       - uses: github/codeql-action/analyze@v4
 
       - name: Remove Maven proxy credentials
@@ -668,6 +670,8 @@ jobs:
           password: ${{ secrets.MAVEN_PROXY_PASSWORD }}
       # Builds only the scanned image: each image is built once, in parallel with the other one
       - name: Build image
+        env:
+          MAVEN_SETTINGS_FILE: ${{ matrix.image == 'linid-identity-manager-api' && format('{0}/maven-settings.xml', runner.temp) || '' }}
         run: task ${{ matrix.build-task }}
       - name: Remove Maven proxy credentials
         if: always() && matrix.image == 'linid-identity-manager-api'

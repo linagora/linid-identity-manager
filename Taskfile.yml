@@ -485,7 +485,12 @@ tasks:
       LOG_FILE: "/tmp/linid-{{.IMAGE_NAME}}-image.log"
     cmd: |
       sh -c '
-        docker build --quiet -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}} {{.CONTEXT_DIR}} > {{.LOG_FILE}} 2>&1 &
+        set --
+        if { [ "{{.IMAGE_NAME}}" = "linid-identity-manager-api" ] || [ "{{.IMAGE_NAME}}" = "linid-identity-manager-sync-api" ]; } && [ -n "${MAVEN_SETTINGS_FILE:-}" ]; then
+          [ -f "$MAVEN_SETTINGS_FILE" ] || { echo "Maven settings file does not exist" >&2; exit 1; }
+          set -- --secret "id=maven_settings,src=$MAVEN_SETTINGS_FILE"
+        fi
+        docker build "$@" --quiet -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}} {{.CONTEXT_DIR}} > {{.LOG_FILE}} 2>&1 &
         p=$!
         while kill -0 $p 2>/dev/null; do
           dots=""

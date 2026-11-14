@@ -1,0 +1,55 @@
+name: Configure Maven proxy
+description: Create private Maven settings for CI commands and optional Docker BuildKit secrets.
+inputs:
+  username:
+    description: Read-only Reposilite username
+    required: false
+  password:
+    description: Read-only Reposilite password
+    required: false
+runs:
+  using: composite
+  steps:
+    - name: Write Maven settings
+      shell: bash
+      env:
+        PROXY_USERNAME: ${{ inputs.username }}
+        PROXY_PASSWORD: ${{ inputs.password }}
+      run: |
+        set -euo pipefail
+        settings="$RUNNER_TEMP/maven-settings.xml"
+        if { [ -n "$PROXY_USERNAME" ] && [ -z "$PROXY_PASSWORD" ]; } ||
+           { [ -z "$PROXY_USERNAME" ] && [ -n "$PROXY_PASSWORD" ]; }; then
+          echo "Both Maven proxy credentials must be configured." >&2
+          exit 1
+        fi
+        umask 077
+        if [ -z "$PROXY_USERNAME" ]; then
+          echo "Proxy credentials unavailable; using Maven Central directly."
+          printf '<settings/>\n' > "$settings"
+        else
+          escape_xml() {
+            printf '%s' "$1" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/"/\&quot;/g' -e "s/'/\&apos;/g"
+          }
+          username=$(escape_xml "$PROXY_USERNAME")
+          password=$(escape_xml "$PROXY_PASSWORD")
+          cat > "$settings" <<EOF
+        <settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+          <mirrors>
+            <mirror>
+              <id>central-cache</id>
+              <mirrorOf>central</mirrorOf>
+              <url>https://maven.linagora.com/central/</url>
+            </mirror>
+          </mirrors>
+          <servers>
+            <server>
+              <id>central-cache</id>
+              <username>$username</username>
+              <password>$password</password>
+            </server>
+          </servers>
+        </settings>
+        EOF
+        fi
+        chmod 600 "$settings"

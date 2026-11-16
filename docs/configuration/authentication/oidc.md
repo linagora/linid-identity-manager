@@ -74,6 +74,9 @@ Do not deploy the provided templates. Set up LemonLDAP::NG for your environment,
 * Generate a dedicated OIDC signing key pair and keep the private key out of source control
 * Use dedicated database accounts with strong passwords, retrieved from your secret-management system
 * Use your own hostnames and certificates issued by a trusted CA
+* Derive the `sub` claim (`oidcRPMetaDataOptionsUserIDAttr`) from the directory attribute that holds the
+  `external_id` of the LinId accounts. Do not give the `external_id` of a deleted account to a new one: the
+  applications that key their data on the `sub` would give the newcomer the data of their predecessor
 
 The LemonLDAP::NG configuration must keep the settings LinId relies on:
 
@@ -85,7 +88,7 @@ The LemonLDAP::NG configuration must keep the settings LinId relies on:
 | Refresh tokens                                               | `oidcRPMetaDataOptionsRefreshToken: 1`                                               | The UI server refreshes the tokens            |
 | JWT access tokens with the `at+jwt` type                     | `oidcRPMetaDataOptionsAccessTokenJWT: 1`, without `oidcRPMetaDataOptionsNoJwtHeader` | Checked by the API (`AUTH_JWT_EXPECTED_TYPE`) |
 | API audience                                                 | `oidcRPMetaDataOptionsAdditionalAudiences`                                           | Must match `AUTH_AUDIENCE` of the API         |
-| `email` claim in the access token                            | `oidcRPMetaDataOptionsAccessTokenClaims: 1`                                          | The API resolves the LinId account from it    |
+| `sub` claim matching the `external_id` of the LinId account  | `oidcRPMetaDataOptionsUserIDAttr` (default: `whatToTrace`, i.e. `uid`)               | The API resolves the LinId account from it    |
 | Secure SSO cookie                                            | `securedCookie: 1`                                                                   | The SSO cookie is only sent over HTTPS        |
 
 👉 See:

@@ -20,7 +20,7 @@ Container_Boundary(api, "LinID API") {
   Component(sync_api_config, "SyncApiConfig", "Config", "Creates the RestClient bean targeting sync-api, with the client certificate of the sync-api-client SSL bundle (mutual TLS).")
 
   ' --- Filters & Exception handler ----------------------------------------
-  Component(user_auth_filter, "UserAuthenticationFilter", "Security Filter", "Runs after JWT Bearer filter; extracts email claim, resolves LinID account, sets UserPrincipal in security context. Rejects 401 if no account matches.")
+  Component(user_auth_filter, "UserAuthenticationFilter", "Security Filter", "Runs after JWT Bearer filter; resolves the LinID account whose external_id matches the sub claim, sets UserPrincipal in security context. Rejects 401 if no account matches.")
   Component(copyright_filter, "CopyrightFilter", "Servlet Filter", "Adds configurable X-Copyright header to all responses (modes: default, custom, none).")
   Component(exception_handler, "GlobalExceptionHandler", "Controller Advice", "Intercepts ApiException & validation exceptions, translates messages via i18n, returns standardized error body.")
 
@@ -39,7 +39,7 @@ Container_Boundary(api, "LinID API") {
   Component(sync_ctrl, "SyncController", "REST Controller (/sync)", "Status of the daily synchronization cycle (GET /sync/cycle).")
 
   ' --- Services -----------------------------------------------------------
-  Component(account_svc, "AccountService", "Service", "CRUD & lifecycle management for accounts; email/externalId lookup; paginated search; findAllGroups (account groups).")
+  Component(account_svc, "AccountService", "Service", "CRUD & lifecycle management for accounts; externalId lookup; paginated search; findAllGroups (account groups).")
   Component(application_svc, "ApplicationService", "Service", "CRUD for applications; regeneratePolicy() compiles active rules into Rego via OpaService.")
   Component(app_role_svc, "ApplicationRoleService", "Service", "CRUD for application roles; system-reserved application role immutability.")
   Component(app_rule_svc, "ApplicationRuleService", "Service", "CRUD for application rules (Rego fragments); checksum computation; unique-code enforcement.")
@@ -132,7 +132,7 @@ Rel(superset_svc, superset_cache_svc, "Caches access token, evicts it on 401/403
 Rel(avatar_svc, image_sanitizer, "Sanitizes uploaded image")
 
 ' --- Relationships: filters -> services -----------------------------------
-Rel(user_auth_filter, account_svc, "Resolves account by email")
+Rel(user_auth_filter, account_svc, "Resolves account by external_id (JWT sub)")
 Rel(security_config, user_auth_filter, "Registers filter")
 Rel(exception_handler, i18n_svc, "Translates error messages")
 

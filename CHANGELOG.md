@@ -166,6 +166,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.6 in the demo and E2E environments.
 - Seeded the **intranet**, **dev-platform** and **helpdesk** applications, with their roles, rules, claims templates
   and scripts, in the development and E2E databases.
+- Routed the Maven Central downloads of the CI jobs and of the API and Sync API image builds through the Linagora
+  Reposilite proxy, with read-only credentials passed as a BuildKit secret to the image builds.
 
 ## [0.11.4] - 2026-11-05
 

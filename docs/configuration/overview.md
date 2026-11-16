@@ -53,6 +53,7 @@ This domain defines how LinId behaves at runtime.
 
 * YAML configuration files
 * Environment variables
+* Secrets read from OpenBao
 * Global application settings
 
 ### Why it matters:
@@ -129,6 +130,7 @@ LinId supports multiple configuration methods:
 
 * Static configuration (YAML files)
 * Environment variables
+* Secrets in OpenBao (API and `sync-api`)
 * Dynamic configuration (via UI or APIs - depending on features)
 
 > 🚧 TODO: Clarify dynamic configuration capabilities
@@ -138,7 +140,8 @@ LinId supports multiple configuration methods:
 ## ⚠️ Best Practices
 
 * Keep configurations modular and isolated
-* Use environment variables for sensitive data
+* Keep sensitive data out of the configuration files: in OpenBao, or at least in environment variables, see
+  [application/config-files](application/config-files.md#8-secrets--openbao)
 * Version your configuration files
 * Validate OIDC and certificate setup early
 * Document your claims and policies

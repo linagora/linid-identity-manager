@@ -43,6 +43,14 @@
 	</properties>
 	<dependencyManagement>
 		<dependencies>
+			<!-- Spring Cloud 2025.1.4 accepts Spring Boot 4.0 and 4.1 (spring-cloud-commons 5.0.4) -->
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>2025.1.4</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<!-- Overrides the version brought by jinjava to fix CVE-2026-102554 -->
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -52,6 +60,10 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-vault-config</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>

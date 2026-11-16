@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,6 +61,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -338,6 +340,7 @@ class RoleServiceImplTest {
 
         verify(roleDistinctViewRepository).findFirstById(id);
         verify(roleRepository).deleteById(id);
+        verify(roleRepository).flush();
     }
 
     @Test
@@ -358,6 +361,25 @@ class RoleServiceImplTest {
         assertEquals("error.role.in_use", exception.getError().key());
 
         verify(roleRepository, never()).deleteById(any(UUID.class));
+    }
+
+    @Test
+    @DisplayName("Should throw ApiException 400 when the database rejects deleting a role held by a hidden account")
+    void testDeleteById_shouldThrow400WhenForeignKeyViolated() {
+        UUID id = UUID.randomUUID();
+        var entity = createSampleRoleView(id);
+
+        when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
+        doThrow(new DataIntegrityViolationException("organizational_unit_accounts_rol_id_fkey"))
+                .when(roleRepository).flush();
+
+        ApiException exception = assertThrows(
+                ApiException.class,
+                () -> roleService.deleteById(userPrincipal, id)
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST.value(), exception.getStatusCode());
+        assertEquals("error.role.in_use", exception.getError().key());
     }
 
     @Test

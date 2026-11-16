@@ -42,6 +42,7 @@ import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -167,6 +168,15 @@ public class RoleServiceImpl implements RoleService {
             );
         }
 
-        roleRepository.deleteById(id);
+        try {
+            roleRepository.deleteById(id);
+            // Flush so the foreign key violation surfaces here rather than at commit time.
+            roleRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST.value(),
+                    I18nMessage.of("error.role.in_use", Map.of("id", id.toString()))
+            );
+        }
     }
 }

@@ -24,8 +24,8 @@
  * LinID Identity Manager software.
  */
 
-import type { MenuItem } from '@linagora/linid-im-front-corelib';
-import { useCommonMapper } from '@linagora/linid-im-front-corelib';
+import type { MenuItem } from '@linagora/lin-pulsar-core';
+import { useCommonMapper } from '@linagora/lin-pulsar-core';
 import type {
   OrganizationalUnitLifecycleAction,
   OrganizationalUnitLifecycleUi,

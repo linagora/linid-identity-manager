@@ -8,7 +8,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   resolve: {
     alias: {
-      '#q-app/wrappers': fileURLToPath(
+      '#q-app': fileURLToPath(
         new URL('./tests/mocks/quasar-wrappers.ts', import.meta.url)
       ),
     },
@@ -31,7 +31,6 @@ export default defineConfig({
         '**/*.spec.ts',
         '**/tests/**',
         '**/test/**',
-        'src/env.d.ts',
         'src/types/**',
         'src/i18n/**',
         'src/boot/axios.ts',

@@ -32,7 +32,7 @@ const { mockPush } = vi.hoisted(() => ({
   mockPush: vi.fn(),
 }));
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
+vi.mock('@linagora/lin-pulsar-core', () => ({
   useScopedI18n: () => ({ t: vi.fn((v) => v) }),
   useUiDesign: () => ({ ui: vi.fn(() => ({})) }),
 }));

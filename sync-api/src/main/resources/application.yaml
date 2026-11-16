@@ -1,0 +1,130 @@
+spring:
+  application:
+    name: LinId-Sync-API
+
+  config:
+    import: file:${EXTERNAL_CONFIGURATION}
+
+  datasource:
+    url: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  # The migrations run with the administrator account, since the datasource account cannot create tables
+  flyway:
+    baseline-on-migrate: true
+    baseline-version: 0
+    out-of-order: true
+    user: ${DATABASE_ADMIN_USER}
+    password: ${DATABASE_ADMIN_PASSWORD}
+
+  batch:
+    jdbc:
+      # The Spring Batch tables are created by the Flyway migrations
+      initialize-schema: never
+      # With the default SERIALIZABLE, PostgreSQL makes jobs started at the same time fail with serialization errors
+      isolation-level-for-create: repeatable_read
+    job:
+      # Jobs are never started when the application starts
+      enabled: false
+
+  task:
+    execution:
+      pool:
+        # Each recomputation of an account or of an application holds a connection of the sync_api database as soon as
+        # it waits in the queue: the pool limits them to core-size running and queue-capacity waiting, and rejects the
+        # next ones.
+        # The jobs running and the cycle share the linid-api pool, each chunk holding a connection during its OPA calls:
+        # LINID_DATABASE_MAX_POOL_SIZE should grow with core-size, up to core-size + 1 for all of them to run at once
+        core-size: 8
+        max-size: 8
+        queue-capacity: 16
+      shutdown:
+        # Must stay false. The jobs running and waiting when the instance stops go on during
+        # spring.lifecycle.timeout-per-shutdown-phase, before the datasources close. With true, this wait is skipped and
+        # the executor, destroyed after the datasources, only waits for jobs failing on the closed pools
+        await-termination: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  api-docs:
+    enabled: ${SWAGGER_ENABLED}
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED}
+  show-actuator: ${SWAGGER_ENABLED}
+
+server:
+  port: 8443
+  ssl:
+    key-store: ${SSL_KEY_STORE}
+    key-store-type: ${SSL_KEY_STORE_TYPE:PKCS12}
+    key-store-password: ${SSL_KEY_PASSWORD}
+    key-password: ${SSL_KEY_PASSWORD}
+    # Mutual TLS: Tomcat rejects during the handshake any client without a certificate signed by a trusted CA
+    client-auth: need
+    trust-store: ${SSL_CLIENT_TRUSTSTORE_PATH}
+    trust-store-password: ${SSL_CLIENT_TRUSTSTORE_PASSWORD:${SSL_TRUSTSTORE_PASSWORD}}
+    truststore:
+      path: ${SSL_TRUSTSTORE_PATH}
+      password: ${SSL_TRUSTSTORE_PASSWORD}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL:INFO}
+
+linid:
+  datasource:
+    url: jdbc:postgresql://${LINID_DATABASE_HOST}:${LINID_DATABASE_PORT}/${LINID_DATABASE_NAME}
+    username: ${LINID_DATABASE_USER}
+    password: ${LINID_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: linid
+      maximum-pool-size: ${LINID_DATABASE_MAX_POOL_SIZE:5}
+  jpa:
+    properties:
+      # Number of inserts or updates sent together to the linid-api database, within the transaction of a chunk
+      "[hibernate.jdbc.batch_size]": ${SYNC_JDBC_BATCH_SIZE:50}
+      # The queries of a chunk do not flush its pending changes, which its writer flushes at once: otherwise, each
+      # query reading a table already changed in the chunk would send these changes one by one, outside the groups
+      "[org.hibernate.flushMode]": COMMIT
+
+sync:
+  # Schedule of the global job, as a Spring cron expression (second, minute, hour, day of month, month, day of week),
+  # in UTC
+  cron: "${SYNC_CRON:0 0 2 * * *}"
+  # Subject of the only accepted client certificate, since the other components have certificates signed by the
+  # same CA
+  allowed-client: ${SYNC_ALLOWED_CLIENT}
+  # act_id of the technical account of sync-api in the linid-api database, shared by its instances and recorded as
+  # the author of their writes
+  technical-account-id: ${SYNC_TECHNICAL_ACCOUNT_ID}
+  # Identifier of the instance, written with the rows it writes in the linid-api database. The host name by default,
+  # evaluated when the property is injected with @Value
+  instance-id: ${SYNC_INSTANCE_ID:#{T(java.net.InetAddress).getLocalHost().getHostName()}}
+  # Maximum wait for the per-account locks of a chunk, held by another processing, as a duration (e.g. 30m, 90s):
+  # beyond it, the chunk fails. Above the longest chunk, whose OPA calls are made under the locks
+  lock-timeout: ${SYNC_LOCK_TIMEOUT:30m}
+  payload:
+    # Number of accounts read, built and written per chunk of the payload build, in one transaction
+    chunk-size: ${SYNC_PAYLOAD_CHUNK_SIZE:500}
+  compute:
+    # Number of account and application pairs read, computed and written per chunk by the computation of the rights.
+    # Each pair costs an OPA call, during which the chunk holds a connection of the linid-api pool
+    chunk-size: ${SYNC_COMPUTE_CHUNK_SIZE:100}
+
+opa:
+  # OPA server, on which linid-api deploys the policies of the applications
+  server-url: ${OPA_SERVER_URL:http://opa:8181}
+  # Path of the result of an application policy, {code} being the application code
+  evaluation-path: ${OPA_EVALUATION_PATH:/v1/data/authz/{code}/result}
+  # Maximum time to establish the connection to the OPA server, as a duration (e.g. 5s, 500ms)
+  connect-timeout: ${OPA_CONNECT_TIMEOUT:5s}
+  # Maximum time to wait for the response of the OPA server, as a duration (e.g. 10s, 500ms)
+  read-timeout: ${OPA_READ_TIMEOUT:10s}

@@ -80,12 +80,12 @@
       }
     },
     "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
-    "LinidSmartFilter": {
+    "LinPulsarSmartFilter": {
       "label": "Current search filter",
       "hint": "Enter your filter",
       "prefix": "",
       "suffix": "",
-      "LinidFilterChip": {
+      "LinPulsarFilterChip": {
         "firstname": {
           "type": "First name",
           "separator": "or"
@@ -104,7 +104,8 @@
         },
         "organizationalUnitId": {
           "type": "Organizational unit",
-          "separator": "or"
+          "separator": "or",
+          "value": "{name}"
         },
         "createdBy": {
           "type": "Created by",
@@ -115,7 +116,7 @@
           "separator": "or"
         }
       },
-      "LinidFilterPanel": {
+      "LinPulsarFilterPanel": {
         "title": "Filter by:",
         "columnFilter": {
           "firstname": "First name",
@@ -127,7 +128,7 @@
           "insertDate": "Creation date"
         }
       },
-      "LinidFavoritePanel": {
+      "LinPulsarFavoritePanel": {
         "title": "Favorites",
         "noData": "No favorite available",
         "createFavorite": "Create a favorite",
@@ -601,6 +602,51 @@
           "email": "Email"
         }
       },
+      "avatar": {
+        "MenuButton": {
+          "editImageButton": {
+            "FormDialogButton": {
+              "title": "Update",
+              "submitSuccess": "Image successfully updated.",
+              "submitError": "Unable to update the image. Please try again later.",
+              "FormDialog": {
+                "title": "Edit the image of {firstname} {lastname}",
+                "fields": {
+                  "file": {
+                    "label": "Image *",
+                    "validation": {
+                      "required": "This field is required.",
+                      "maxFileSize": "The image must not exceed {maxFileSize} MB.",
+                      "allowedExtensions": "Allowed extensions: {extensions}."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Upload",
+                  "confirmLoading": "Uploading...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          },
+          "deleteImageButton": {
+            "ConfirmDialogButton": {
+              "title": "Delete",
+              "submitSuccess": "Image successfully deleted.",
+              "submitError": "Unable to delete the image. Please try again later.",
+              "ConfirmationDialog": {
+                "title": "Delete the image of {firstname} {lastname}?",
+                "content": "The generated avatar will be displayed instead.",
+                "ButtonsCard": {
+                  "confirm": "Delete",
+                  "confirmLoading": "Deleting...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
+        }
+      },
       "actions": {
         "ButtonsCard": {
           "editButton": {
@@ -714,7 +760,21 @@
       "status": "Unable to update the account status. Please try again later."
     },
     "immediateRevalidationSuccess": "The account can be reactivated in one minute | The account can be reactivated in {count} minutes",
-    "scheduledRevalidationSuccess": "The account will be reactivated from {date}"
+    "scheduledRevalidationSuccess": "The account will be reactivated from {date}",
+    "ConfirmDialogButton": {
+      "title": "Recompute rights",
+      "submitSuccess": "Rights recomputation requested.",
+      "submitError": "Unable to request rights recomputation. Please try again later.",
+      "ConfirmationDialog": {
+        "title": "Recompute the rights of {firstname} {lastname}?",
+        "content": "The recomputation will start immediately.",
+        "ButtonsCard": {
+          "confirm": "Recompute",
+          "confirmLoading": "Requesting...",
+          "cancel": "Cancel"
+        }
+      }
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "This account has been deactivated since {date}.",

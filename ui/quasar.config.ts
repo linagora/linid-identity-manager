@@ -1,9 +1,11 @@
 // Configuration for your app
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
+import { createReadStream, statSync } from 'node:fs';
+import { join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { federation } from '@module-federation/vite';
-import { defineConfig } from '#q-app/wrappers';
+import { defineConfig } from '#q-app';
 
 export default defineConfig((ctx) => {
   return {
@@ -43,9 +45,16 @@ export default defineConfig((ctx) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
+      alias: {
+        src: ctx.appPaths.srcDir,
+        components: ctx.appPaths.resolve.src('components'),
+        layouts: ctx.appPaths.resolve.src('layouts'),
+        pages: ctx.appPaths.resolve.src('pages'),
+        boot: ctx.appPaths.resolve.src('boot'),
+      },
       target: {
         browser: ['es2022', 'firefox115', 'chrome115', 'safari14', 'brave115'],
-        node: 'node20',
+        node: 'node22',
       },
 
       typescript: {
@@ -57,7 +66,7 @@ export default defineConfig((ctx) => {
       vueRouterMode: 'history', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
-      // vueOptionsAPI: false,
+      vueOptionsAPI: true,
 
       // rebuildCache: true, // rebuilds Vite/linter/etc cache on startup
 
@@ -84,33 +93,87 @@ export default defineConfig((ctx) => {
           },
         };
         viteConf.plugins?.push(
+          // The API stores the avatars in docker/avatars (see AVATAR_LOCATION in docker/dev/env/api.env).
+          // Serve that directory under /avatars, as Nginx does in the Docker environments, so the profile
+          // panels display the uploaded images in dev mode too. The files all carry the configured
+          // avatar.extension, png by default, which is the type served here.
+          {
+            name: 'linid-serve-avatars',
+            apply: 'serve',
+            configureServer(server) {
+              const avatarsDir = fileURLToPath(
+                new URL('../docker/avatars', import.meta.url)
+              );
+
+              // Resolves the requested file under avatarsDir, or undefined for a
+              // malformed URL or a path leaving the directory.
+              const resolveAvatar = (url = '/') => {
+                try {
+                  const path = decodeURIComponent(url.split('?')[0] ?? '/');
+                  const file = join(avatarsDir, normalize(path));
+
+                  return file.startsWith(avatarsDir + sep) ? file : undefined;
+                } catch {
+                  return undefined;
+                }
+              };
+
+              // Always answers without calling next(): a missing avatar must get a
+              // 404, not the SPA fallback of Vite to index.html.
+              server.middlewares.use('/avatars', (request, response) => {
+                const file = resolveAvatar(request.url);
+                const stats = file
+                  ? statSync(file, { throwIfNoEntry: false })
+                  : undefined;
+
+                if (!file || !stats?.isFile()) {
+                  response.statusCode = 404;
+                  response.end();
+                  return;
+                }
+
+                response.setHeader('Content-Type', 'image/png');
+                response.setHeader('Content-Length', stats.size);
+                response.setHeader('Cache-Control', 'no-cache');
+                response.setHeader('X-Content-Type-Options', 'nosniff');
+                response.setHeader(
+                  'Content-Security-Policy',
+                  "default-src 'none'; sandbox"
+                );
+                createReadStream(file)
+                  .on('error', () => response.destroy())
+                  .pipe(response);
+              });
+            },
+          },
           federation({
             name: 'linid-identity-manager-ui',
             remotes: {},
+            dts: false,
             shared: {
               vue: {
                 singleton: true,
-                requiredVersion: '3.5.39',
+                requiredVersion: '3.5.44',
               },
               'vue-router': {
                 singleton: true,
-                requiredVersion: '5.1.0',
+                requiredVersion: '5.4.0',
               },
               quasar: {
                 singleton: true,
-                requiredVersion: '2.21.1',
+                requiredVersion: '2.35.2',
               },
-              '@linagora/linid-im-front-corelib': {
+              '@linagora/lin-pulsar-core': {
                 singleton: true,
                 strictVersion: true,
               } as Record<string, unknown>,
               pinia: {
                 singleton: true,
-                requiredVersion: '3.0.4',
+                requiredVersion: '4.1.0',
               },
               'vue-i18n': {
                 singleton: true,
-                requiredVersion: '11.4.6',
+                requiredVersion: '11.4.16',
               },
             },
           })

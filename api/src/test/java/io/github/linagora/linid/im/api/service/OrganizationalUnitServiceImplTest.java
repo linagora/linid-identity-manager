@@ -139,6 +139,7 @@ class OrganizationalUnitServiceImplTest {
     @Spy
     private OrganizationalUnitStatusMapperImpl organizationalUnitStatusMapper = new OrganizationalUnitStatusMapperImpl();
 
+
     @InjectMocks
     private OrganizationalUnitServiceImpl service;
 
@@ -284,6 +285,25 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.organizational.unit.not_found", exception.getError().key());
         assertEquals(uuid.toString(), exception.getError().context().get("id"));
+    }
+
+    @Test
+    @DisplayName("should delete an existing organizational unit and its avatar")
+    void testDeleteById_shouldDeleteWhenFound() {
+        var rootUuid = UUID.randomUUID();
+        var uuid = UUID.randomUUID();
+        var root = OrganizationalUnit.builder()
+            .id(rootUuid)
+            .name("root")
+            .type("root")
+            .build();
+
+        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
+
+        service.deleteById(userPrincipal, uuid);
+
+        verify(organizationalUnitRepository).deleteById(uuid);
     }
 
     @Test

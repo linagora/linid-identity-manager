@@ -91,7 +91,9 @@ services:
       - ./env/${ENV}.env
     volumes:
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ./resources/api-client-keystore.p12:/etc/ssl/api-client-keystore.p12:ro
       - ./resources/superset.yaml:/app/superset.yaml:ro
+      - ../avatars:/app/avatars
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
       interval: 5s
@@ -101,6 +103,31 @@ services:
     depends_on:
       auth:
         condition: service_healthy
+      db:
+        condition: service_healthy
+      opa:
+        condition: service_healthy
+
+  sync-api:
+    image: linid-identity-manager-sync-api
+    container_name: sync-api
+    networks:
+      - linid-e2e-network
+    ports:
+      - 8444:8443
+    env_file:
+      - ./env/sync-api.env
+    volumes:
+      - ./resources/sync-api-keystore.p12:/etc/ssl/keystore.p12:ro
+      - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ./resources/sync/sync-config.yaml:/app/sync-config.yaml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    depends_on:
       db:
         condition: service_healthy
       opa:
@@ -126,29 +153,30 @@ services:
       - ./resources/server.crt:/etc/server/certs/server.crt:ro
       - ./resources/server.key:/etc/server/certs/server.key:ro
       - ./resources/${CONFIG_DIR}/conf/config.json:/app/spa/config.json:ro
+      - ../avatars:/app/spa/avatars:ro
     healthcheck:
       test: ["CMD-SHELL", "wget -q --spider --no-check-certificate https://localhost/health"]
       interval: 5s
       timeout: 3s
       retries: 10
     depends_on:
-      catalog-ui:
+      lin-pulsar:
         condition: service_started
       api:
         condition: service_healthy
       auth:
         condition: service_healthy
 
-  catalog-ui:
-    image: linagora/linid-catalog-ui:v0.2.133
-    container_name: catalog-ui
+  lin-pulsar:
+    image: linagora/lin-pulsar:v0.3.6
+    container_name: lin-pulsar
     networks:
       - linid-e2e-network
     volumes:
       - ./resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
 
   e2e-test-runner:
-    image: vincentmoittie/e2e-test-runner:v1.13.0
+    image: vincentmoittie/e2e-test-runner:v2.2.0
     container_name: e2e-test-runner
     networks:
       - linid-e2e-network
@@ -156,8 +184,12 @@ services:
       - ./env/${ENV}.env
     volumes:
       - ../../tests/features:/app/features
+      - ./resources/api-client.crt:/app/certs/api-client.crt:ro
+      - ./resources/api-client.key:/app/certs/api-client.key:ro
     depends_on:
       api:
+        condition: service_healthy
+      sync-api:
         condition: service_healthy
       ui:
         condition: service_healthy

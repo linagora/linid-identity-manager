@@ -24,9 +24,9 @@
  * LinID Identity Manager software.
  */
 
-import { setUiDesign } from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
+import { setUiDesign } from '@linagora/lin-pulsar-core';
 import { appConfig } from 'boot/config';
+import { defineBoot } from '#q-app';
 
 /**
  * Boot file that registers ui design configuration.

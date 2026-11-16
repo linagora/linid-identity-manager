@@ -86,7 +86,7 @@ Features and APIs may evolve.
 > 🚧 Minimal setup to run LinId Identity Manager in under 5 minutes
 
 LinId provides a **Taskfile** to simplify running the demo environment.
-All you need is **Docker** and **Task** installed on your machine.
+All you need is **Docker**, **Task** and **Java 25** installed on your machine.
 
 ---
 
@@ -94,6 +94,7 @@ All you need is **Docker** and **Task** installed on your machine.
 
 * **Docker 24+** and **Docker Compose 2+**
 * **Task** ([https://taskfile.dev/#/installation](https://taskfile.dev/#/installation))
+* **Java 25**, whose `keytool` builds the truststore in the certificate tasks of the Taskfile (`task setup:demo`)
 
 > ⚠️ Make sure Docker is running before executing any tasks.
 
@@ -132,7 +133,7 @@ task start:demo
 
 * **Backend API**: `https://localhost:8443/swagger-ui/index.html`
 * **Frontend UI**: `https://linid.localtest.me:9000`
-* **LemonLDAP portal**: `https://linid.localtest.me:9000/auth` (pre-configured demo, served through the frontend nginx)
+* **LemonLDAP portal**: `https://linid.localtest.me:9000/auth` (pre-configured for development only)
 * **Apache Superset™**: `http://localhost:8088`
 
 #### **Demo credentials**
@@ -144,13 +145,17 @@ task start:demo
 | **LemonLDAP::NG**    | `user2`    | `password`  |
 | **Apache Superset™** | `superset` | `password`  |
 
+> ⚠️ These credentials are public development values: never use them in a real deployment.
+
 ---
 
 ### 📝 Notes
 
 * `task start:demo` is intended for **quick testing / development only**
 * For custom environments, use the **Docker folders** with their README (`docker/<environment>/README.md`)
-* No manual configuration required for the demo
+* No manual configuration required for the demo: LemonLDAP::NG is pre-configured with hard-coded secrets and test
+  accounts, **for development only**. Replace this configuration before any real deployment, see
+  [docs/configuration/authentication/oidc](docs/configuration/authentication/oidc.md)
 
 ---
 
@@ -182,6 +187,9 @@ LinId supports **OIDC-based authentication**.
 ### Supported Providers
 
 * LemonLDAP
+
+> ⚠️ The LemonLDAP::NG configuration provided with the Docker environments is for development only.
+> See: [docs/configuration/authentication/oidc](docs/configuration/authentication/oidc.md)
 
 ### Certificates
 
@@ -238,11 +246,11 @@ A rule must only **contribute** to the shared sets with `contains` (it must neve
 ```rego
 # Grant the "reader" role and allow access to members of the "public" organizational unit.
 roles contains "reader" if {
-    input.user.organizationalUnit == "public"
+    "public" in input.organizational_units
 }
 
 signals contains "allow" if {
-    input.user.organizationalUnit == "public"
+    "public" in input.organizational_units
 }
 ```
 
@@ -250,7 +258,7 @@ Unconditionally grant access to administrators, overriding any plain `allow`:
 
 ```rego
 signals contains "force_allow" if {
-    input.user.admin == true
+    input.admin == true
 }
 ```
 
@@ -258,7 +266,7 @@ Always deny suspended users, overriding everything else:
 
 ```rego
 signals contains "force_disallow" if {
-    input.user.suspended == true
+    input.suspended == true
 }
 ```
 

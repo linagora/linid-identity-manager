@@ -5,6 +5,177 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-11-16
+
+### Added
+
+#### Backend
+
+- Added the **avatar upload and deletion endpoints** (`POST /avatars/{entity}/{id}`, `DELETE /avatars/{entity}/{id}`)
+  for accounts, applications, organizational units and groups, including:
+  - Validation of the entity type, of the entity existence, of the file extension (`avatar.extension`) and of
+    the file size (`AVATAR_MAX_SIZE`, in MB, through the Spring multipart limits).
+  - Validation of the file content: the real type is detected from the bytes, and the image is re-encoded from
+    its pixels only before being stored.
+  - Storage under `{avatar.location}/{entity}/{id}.{avatar.extension}`, replacing any existing avatar through a
+    temporary file, so a failed upload never leaves the entity without its previous image.
+  - A `docker/avatars` directory shared between the API and Nginx, which serves it under `/avatars` without content
+    sniffing and fully sandboxed, seeded with a default administrator avatar.
+- Added a **claims template checksum** on applications (`applications.claims_template_checksum`), computed by the
+  API when an application is created or its claims template is updated, so that template changes can be detected.
+- Added the **sync-api** application, built with Spring Boot and Spring Batch to compute the rights of the accounts,
+  with its `sync_api` database and the environment variables `DATABASE_*`, `SSL_*`, `SYNC_CRON`, `LOGGING_LEVEL` and
+  `EXTERNAL_CONFIGURATION`.
+- Added the **synchronization tables** `account_payloads` and `computed_rights`, with their audit tables, to store the
+  payload of each account and the rights computed by `sync-api` for each account and application pair.
+- Added the **mutual TLS between linid-api and sync-api**, with the environment variables `SYNC_API_*`,
+  `SSL_CLIENT_TRUSTSTORE_*` and `SYNC_ALLOWED_CLIENT`.
+- Added a **checksum service** to sync-api, computing the SHA-256 checksum of the account payloads with the same
+  algorithm as the API, so that both applications return the same checksum for the same input.
+- Added the **Spring Batch tables** of `sync-api`, created by its Flyway migrations with the environment variables
+  `DATABASE_ADMIN_USER` and `DATABASE_ADMIN_PASSWORD`.
+- Added the **connection of sync-api to the linid-api database**, with its own PostgreSQL account
+  `sync_api_linid_user`, limited to reading the accounts and the applications and to writing the payloads and the
+  computed rights, and a technical account recorded as the author of its writes, with the environment variables
+  `LINID_DATABASE_*` and `SYNC_TECHNICAL_ACCOUNT_ID`.
+- Added the **`account_computed_rights_view` view**, with one row per account and deployed application, read by
+  `sync-api` to list the accounts whose payload is built and to select the account and application pairs whose rights
+  must be computed, and the `SELECT` grant of `sync_api_linid_user` on it.
+- Added an **OPA service** to sync-api, evaluating the policy of an application for an account with the account
+  payload as the OPA input, configured by the environment variables `OPA_SERVER_URL`, `OPA_EVALUATION_PATH`,
+  `OPA_CONNECT_TIMEOUT` and `OPA_READ_TIMEOUT`.
+- Added the **selection of the account and application pairs to compute** to `sync-api`: the pairs whose
+  `to_compute` is true, for the global job, for one account or for one application, read by windows of
+  `SYNC_COMPUTE_CHUNK_SIZE` pairs (default `100`), each one starting after the last pair read.
+- Added the **build of the account payloads** in `sync-api`, from the tables and views of the linid-api database
+  listed in the `sync-data` section of its external configuration, now required (`EXTERNAL_CONFIGURATION`), and a
+  Jinjava JSON template, with the **`account_payload_view` view**, gathering the organizational units and the groups of
+  each account in sorted arrays, and the environment variable `SYNC_PAYLOAD_CHUNK_SIZE` (default `500`).
+- Added the **writing of the account payloads** in `sync-api`: the payload of each account is written in
+  `account_payloads` only when its checksum, computed on its JSON with sorted keys, changed, with the environment
+  variables `SYNC_JDBC_BATCH_SIZE` (default `50`) and `SYNC_INSTANCE_ID` (default: the host name).
+- Added the **computation of the rights and claims** of each account and application pair in `sync-api`: the `allow`
+  and the `roles` returned by OPA, and the claims rendered from the claims template of the application with the
+  `payload`, `allow` and `roles` variables, stored in `computed_rights` with the checksums used. A pair in error keeps
+  its previous result and is computed again at the next cycle. No component reads them yet: they will be pushed to the
+  LDAP in a later release.
+- Added the **scheduled synchronization** in `sync-api`: at the time of the cron `SYNC_CRON` (default `0 0 2 * * *`, in
+  UTC), the global job builds the payloads of all the accounts, then computes the rights of the pairs to compute, only
+  when the payloads were built. Several instances can run at the same time: only one of them runs each cycle, a cycle
+  never starts while the previous one is running, and two processings never write the same account at the same time.
+  A failed cycle is not restarted: the next cycle computes everything again. `SYNC_LOCK_TIMEOUT` (default `30m`) limits
+  the wait for the accounts locked by another processing.
+- Added the **immediate recomputation of the rights of an account** with `POST /accounts/{id}/recompute-rights`, answering
+  `202` at once: `sync-api` rebuilds the payload of the account, then computes its rights on the deployed applications
+  whose pair changed, in the background, without calling OPA when nothing changed. `alreadyRunning` is `true` when a
+  recomputation of the account is already running, on any instance, and no new one is started. An instance runs 8
+  recomputations at a time and keeps 16 waiting: beyond them, the endpoint answers `503`.
+- Added `GET /sync/cycle`, answering `running: true` while the daily synchronization cycle runs. Both endpoints answer
+  `503` when `sync-api` cannot be reached or does not answer within `SYNC_API_CONNECT_TIMEOUT` (default `5s`) and
+  `SYNC_API_READ_TIMEOUT` (default `10s`), and `502` when it answers with an error or an empty body.
+- Added the **immediate recomputation of the rights of all the accounts on an application** with
+  `POST /applications/{id}/recompute-rights`, answering `202` at once: `sync-api` rebuilds the payloads of all the
+  accounts, then computes the rights on the application of the accounts whose pair changed, in the background, without
+  calling OPA when nothing changed. `alreadyRunning` is `true` when a recomputation of the application is already
+  running, on any instance, and no new one is started. The endpoint answers `400` when the application has no script or
+  is not deployed, `404` when it is unknown, and `503` and `502` like `POST /accounts/{id}/recompute-rights`, with which
+  it shares the limit of 8 recomputations running and 16 waiting per instance.
+- Added the **Swagger documentation of sync-api**, enabled with the environment variable `SWAGGER_ENABLED`, required
+  like in linid-api. It sits behind the mutual TLS, like the other endpoints of `sync-api`.
+
+#### Frontend
+
+- Added a **Recompute rights** button on the account details page: a confirmation dialog triggers
+  `POST /accounts/{id}/recompute-rights` and shows a notification once the recomputation is requested.
+- Added a **Recompute rights** button on the application details page: a confirmation dialog triggers
+  `POST /applications/{id}/recompute-rights` and shows a notification once the recomputation is requested.
+  The button is disabled while the application has no script or is not deployed.
+- Added the **avatar image import** on the account, application, organizational unit and group details pages: the
+  stored image is displayed instead of the generated avatar, and can be uploaded or deleted from the profile
+  panel.
+- Displayed the **claims template** of the application details page as an indented Jinja template, over the full
+  width of the card.
+
+### Changed
+
+#### Frontend
+
+- Moved the **Export script** button of the application details page from the profile panel to the rules card.
+- Integrated the smart filter configuration that **manages how filter values are displayed** in the filter chips.
+- Replaced `@linagora/linid-im-front-corelib` by **`@linagora/lin-pulsar-core`** and the `catalogUI` Module Federation
+  remote by **`LinPulsar`** (served under `/lin-pulsar`).
+- Renamed the `CATALOG_UI_UPSTREAM` environment variable of the UI server to **`LIN_PULSAR_UPSTREAM`**.
+- Upgraded `@linagora/lin-pulsar-core` to **0.1.6** and the dependencies of the UI and of the UI server, including
+  ESLint 10, Pinia 4, Quasar 2.35, Vue Router 5.4, Vite 8.3 and Vitest 5.
+- Upgraded `@quasar/app-vite` to **3.10.3**: the Quasar wrappers are now imported from `#q-app` and the folder aliases
+  (`src`, `boot`, `components`...) are declared in `quasar.config.ts`.
+- Raised the minimum Node.js version to **22.22** and dropped Node.js 20, as required by `@quasar/app-vite` 3.
+
+#### Documentation
+
+- Stated that the **pre-configured LemonLDAP::NG** of the Docker environments is for development only, listed its
+  hard-coded secrets and test accounts, and described what to replace and keep before a real deployment.
+- Added the **sync-api page** (`docs/advanced/sync-api.md`), describing its synchronization cycle, its recomputations,
+  its locks between instances, its deployment constraints and its alerts, which the README of `sync-api` now links to.
+
+### Removed
+
+#### Backend
+
+- Removed the `payload` and `checksum` columns of the `accounts` table, moved to `account_payloads`.
+
+#### Frontend
+
+- Removed the unused `@quasar/quasar-app-extension-testing-unit-vitest`, `@testing-library/jest-dom` and
+  `@testing-library/vue` dependencies.
+
+### Fixed
+
+#### Security
+
+- Fixed CVE-2026-102554 affecting com.google.guava:guava, in sync-api.
+- Fixed CVE-2026-89407 and CVE-2026-89425 affecting Jackson Core.
+- Fixed CVE-2026-91776 and CVE-2026-91777 affecting Jackson Databind.
+- Fixed CVE-2026-75140 affecting org.jsoup:jsoup, shaded in com.hubspot.jinjava:jinjava, in sync-api.
+- Fixed CVE-2026-39244, CVE-2026-77301, CVE-2026-92000, CVE-2026-102282 and CVE-2026-114102 affecting adm-zip.
+- Fixed CVE-2026-101898, CVE-2026-101901, CVE-2026-101903, CVE-2026-101905, CVE-2026-101906, CVE-2026-101907 and
+  CVE-2026-101909 affecting axios.
+- Fixed CVE-2026-111181 affecting body-parser.
+- Fixed CVE-2026-110095, CVE-2026-110180, CVE-2026-110306 and CVE-2026-110725 affecting fast-uri, used by the UI server.
+- Fixed CVE-2026-111755, CVE-2026-111756 and CVE-2026-116689 affecting follow-redirects.
+- Fixed CVE-2025-61927, CVE-2026-33943, CVE-2026-34226, CVE-2026-115895 and CVE-2026-118660 affecting happy-dom.
+- Fixed CVE-2026-118772 affecting joi, used by the UI server.
+- Fixed CVE-2026-106102 and CVE-2026-106104 affecting Quasar.
+- Fixed CVE-2026-106105, CVE-2026-106106 and CVE-2026-106107 affecting `@quasar/app-vite`.
+- Fixed CVE-2026-93749 affecting source-map-js.
+- Fixed CVE-2026-13697, CVE-2026-19534, CVE-2026-84961, CVE-2026-87018, CVE-2026-109383, CVE-2026-109829 and
+  CVE-2026-109869 affecting undici, used by `@module-federation/dts-plugin`.
+- Fixed CVE-2026-112942 affecting Vite.
+- Fixed CVE-2026-118257 affecting vue-i18n, `@intlify/core-base` and `@intlify/shared`.
+- Fixed GHSA-g2v6-rqmx-r4w6 affecting `@vue/server-renderer`.
+- Fixed CVE-2026-109518 affecting apt and libapt-pkg7.0, in the sync-api image.
+
+#### Frontend
+
+- Enabled the **Export script** button of the application details page as soon as a rule is created, without
+  reloading the page.
+
+### Build
+
+- Replaced the **linagora/linid-catalog-ui** Docker image by **linagora/lin-pulsar** in the demo and E2E environments.
+- Update E2E-test-runner to version 2.2.0
+- Added `sync-api` to the E2E environment and its database to the dev environment, built, tested and scanned it in the
+  CI, and published the **linagora/linid-sync-api** Docker image.
+- Generated the client certificate of linid-api in `task setup:certs`, mounted it in the E2E environment, and made the
+  shared server certificate an end-entity certificate, so that it cannot sign a client certificate accepted by
+  `sync-api`.
+- Ran the CI jobs on the Linagora runner instead of the GitHub-hosted runners, the Node.js and Maven jobs in containers.
+- Upgraded the **linagora/lin-pulsar** Docker image to version 0.3.6 in the demo and E2E environments.
+- Seeded the **intranet**, **dev-platform** and **helpdesk** applications, with their roles, rules, claims templates
+  and scripts, in the development and E2E databases.
+- Routed the Maven Central downloads of the CI jobs and of the API and Sync API image builds through the Linagora
+  Reposilite proxy, with read-only credentials passed as a BuildKit secret to the image builds.
+
 ## [0.11.4] - 2026-11-05
 
 ### Fixed
@@ -577,3 +748,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [0.11.2]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.2
 [0.11.3]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.3
 [0.11.4]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.11.4
+[0.12.0]: https://github.com/linagora/linid-identity-manager/releases/tag/v0.12.0

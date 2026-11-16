@@ -44,11 +44,11 @@
 
 <script setup lang="ts">
 import {
-  type LinidQIconProps,
+  type LinPulsarQIconProps,
   useCommonMapper,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import { DATE_FORMAT_KEY } from 'src/types/common';
 import type { OrganizationalUnitInfoTextProps } from 'src/types/organizationalUnitInfoTextProps';
 import { computed } from 'vue';
@@ -68,7 +68,7 @@ const startDate = computed(() =>
 );
 
 const uiProps = {
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
+  icon: ui<LinPulsarQIconProps>(localUiNamespace, 'q-icon'),
 };
 </script>
 

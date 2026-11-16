@@ -1,0 +1,16 @@
+sync-data:
+  job:
+    # Sources read to build the payloads, by name: tables or views of the linid-api database
+    sources:
+      accounts:
+        account-id-column: act_id
+      account_payload_view:
+        account-id-column: act_id
+    # JSON template of the payload, whose values are Jinjava expressions inserted with the tojson filter
+    mapping: |
+      {
+        "external_id": {{ accounts.external_id | tojson }},
+        "email": {{ accounts.email | tojson }},
+        "organizational_units": {{ account_payload_view.organizational_units | tojson }},
+        "groups": {{ account_payload_view.groups | tojson }}
+      }

@@ -158,7 +158,7 @@ Feature: Test Group details page
     ## 204 Edit dialog should exclude the edited group from the parent group options
     When I click on '[data-cy="entity-profile-panel_edit-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I click on '[data-cy="field_parentId"] .q-select__focus-target'
+    When I click on '[data-cy="field_parentId"]'
     Then I expect the HTML element '[role="listbox"]' to be visible
     And  I expect the HTML element '[role="listbox"]' contains "All Staff"
     And  I expect the HTML element '[role="listbox"]' contains "IT Department"

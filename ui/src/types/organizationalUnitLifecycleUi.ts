@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import type { MenuItem } from '@linagora/linid-im-front-corelib';
+import type { MenuItem } from '@linagora/lin-pulsar-core';
 
 /**
  * Whitelist of dotted lifecycle action keys exposed in the OU dropdowns and banner buttons.

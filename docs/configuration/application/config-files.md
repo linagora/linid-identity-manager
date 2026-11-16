@@ -9,6 +9,7 @@ LinId uses **service-specific environment files** for its configuration. Each se
 The demo environment uses the following configuration files:
 
 * `api.env`: LinId API configuration
+* `sync-api.env`: LinId Sync API configuration (dev and E2E environments only)
 * `cert.env`: SSL/TLS configuration
 * `db.env`: PostgreSQL configuration
 * `lemon.env`: LemonLDAP::NG configuration
@@ -16,6 +17,10 @@ The demo environment uses the following configuration files:
 * `superset.env`: Apache Superset™ configuration
 
 > ⚠️ Do **not commit secrets** to version control.
+
+> ⚠️ The values below are the **development values** of the Docker environments. The secrets they contain, including
+> the LemonLDAP::NG ones, are public: replace them before any real deployment, see
+> [authentication/oidc](../authentication/oidc.md).
 
 ---
 
@@ -109,6 +114,153 @@ SUPERSET_RLS_CONFIG=/app/superset.yaml
 # Caffeine cache spec for the Superset access token (single entry, renewed
 # before Superset's JWT_ACCESS_TOKEN_EXPIRES to avoid using an expired token)
 # SUPERSET_CACHE_OPTION=maximumSize=1,expireAfterWrite=55m,recordStats
+
+# Base URL of sync-api, called with mutual TLS
+SYNC_API_URL=https://sync-api:8443
+
+# Connection timeout to sync-api
+SYNC_API_CONNECT_TIMEOUT=5s
+
+# Read timeout of sync-api
+SYNC_API_READ_TIMEOUT=10s
+
+# PKCS12 keystore of the client certificate presented to sync-api
+SYNC_API_CLIENT_KEY_STORE=file:/etc/ssl/api-client-keystore.p12
+
+# Password of the client keystore and of its key
+SYNC_API_CLIENT_KEY_PASSWORD=password
+
+# Root directory of the avatar images, shared with the front-end web server that serves them
+AVATAR_LOCATION=/app/avatars
+
+# Only allowed avatar file extension
+AVATAR_EXTENSION=png
+
+# Maximum allowed avatar file size, in MB
+AVATAR_MAX_SIZE=10
+
+# Compression quality of the re-encoded JPEG avatars, only used when AVATAR_EXTENSION is a JPEG one
+AVATAR_JPEG_QUALITY=0.9
+
+# Maximum width times height of the uploaded avatar images, checked before decoding
+AVATAR_MAX_PIXELS=16000000
+```
+
+---
+
+### 🔄 LinId Sync API — `sync-api.env`
+
+Used by the dev and E2E environments only: the demo does not run `sync-api`.
+
+```text
+################################################################################
+#                             LINID-SYNC-API CONFIGURATION                     #
+################################################################################
+
+# PostgreSQL database host
+DATABASE_HOST=db
+
+# PostgreSQL database port
+DATABASE_PORT=5432
+
+# PostgreSQL database administrator username
+DATABASE_ADMIN_USER=admin
+
+# PostgreSQL database administrator password
+DATABASE_ADMIN_PASSWORD=password
+
+# Name of the database
+DATABASE_NAME=sync_api
+
+# Database username
+DATABASE_USER=sync_api_user
+
+# Database password
+DATABASE_PASSWORD=password
+
+# PostgreSQL host of the linid-api database
+LINID_DATABASE_HOST=db
+
+# PostgreSQL port of the linid-api database
+LINID_DATABASE_PORT=5432
+
+# Name of the linid-api database
+LINID_DATABASE_NAME=linid
+
+# Username of sync-api in the linid-api database
+LINID_DATABASE_USER=sync_api_linid_user
+
+# Password of sync-api in the linid-api database
+LINID_DATABASE_PASSWORD=password
+
+# Maximum number of connections to the linid-api database (default: 5)
+# LINID_DATABASE_MAX_POOL_SIZE=5
+
+# act_id of the technical account of sync-api, author of its writes
+SYNC_TECHNICAL_ACCOUNT_ID=00000000-0000-4000-8000-00000000a012
+
+# Identifier of the instance (default: the host name)
+# SYNC_INSTANCE_ID=sync-api-1
+
+# Path to SSL/TLS key store
+SSL_KEY_STORE=file:/etc/ssl/keystore.p12
+
+# Type of the SSL/TLS key store (PKCS12 or JKS)
+SSL_KEY_STORE_TYPE=PKCS12
+
+# Password for the individual SSL key within the key store
+SSL_KEY_PASSWORD=password
+
+# Path to SSL/TLS trust store
+SSL_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
+
+# Password for accessing the SSL/TLS trust store
+SSL_TRUSTSTORE_PASSWORD=password
+
+# Path to the trust store validating the client certificate of linid-api
+SSL_CLIENT_TRUSTSTORE_PATH=file:/etc/ssl/truststore.jks
+
+# Password for accessing the client trust store (default: SSL_TRUSTSTORE_PASSWORD)
+# SSL_CLIENT_TRUSTSTORE_PASSWORD=password
+
+# Subject of the only accepted client certificate, the one of linid-api
+SYNC_ALLOWED_CLIENT=CN=linid-api
+
+# Schedule of the synchronization cycle, as a Spring cron expression, in UTC
+SYNC_CRON="0 0 2 * * *"
+
+# Number of accounts per chunk of the payload build (default: 500)
+# SYNC_PAYLOAD_CHUNK_SIZE=500
+
+# Number of account and application pairs per chunk of the rights computation (default: 100)
+# SYNC_COMPUTE_CHUNK_SIZE=100
+
+# Number of inserts or updates sent together to the linid-api database (default: 50)
+# SYNC_JDBC_BATCH_SIZE=50
+
+# Maximum wait for the accounts locked by another processing (default: 30m)
+# SYNC_LOCK_TIMEOUT=30m
+
+# Base URL of the OPA server used by sync-api to evaluate the application policies
+OPA_SERVER_URL=http://opa:8181
+
+# Path of the result of an application policy, {code} being the application code
+OPA_EVALUATION_PATH=/v1/data/authz/{code}/result
+
+# Connection timeout to the OPA server
+OPA_CONNECT_TIMEOUT=5s
+
+# Read timeout of the OPA server
+OPA_READ_TIMEOUT=10s
+
+# Path to the external configuration file, holding the sync-data section
+EXTERNAL_CONFIGURATION=/app/sync-config.yaml
+
+# Enable or disable Swagger UI
+SWAGGER_ENABLED=true
+
+# Logging level (DEBUG, INFO, WARN, ERROR)
+LOGGING_LEVEL=INFO
 ```
 
 ---
@@ -167,6 +319,9 @@ DATALAKE_DATABASE_NAME=datalake
 ---
 
 ### 🔐 LemonLDAP::NG — `lemon.env`
+
+These variables configure the pre-configured LemonLDAP::NG of the Docker environments, which is for development only
+(see [authentication/oidc](../authentication/oidc.md)).
 
 ```text
 ################################################################################
@@ -316,6 +471,12 @@ E2E_DATABASE_ADMIN_PASSWORD=password
 # Name of the database
 E2E_DATABASE_NAME=linid
 
+# Username of sync-api in the database, the LINID_DATABASE_USER of sync-api.env
+E2E_DATABASE_SYNC_API_USER=sync_api_linid_user
+
+# Password of sync-api in the database, the LINID_DATABASE_PASSWORD of sync-api.env
+E2E_DATABASE_SYNC_API_PASSWORD=password
+
 # Timezone for the application
 TZ=Europe/Paris
 
@@ -387,6 +548,86 @@ EXTERNAL_CONFIGURATION=/app/extra-configuration.yaml
 
 ---
 
+## 🧾 Account Payloads — `sync-data`
+
+`sync-api` builds the payload of each account, the `input` of the OPA policies (see
+[advanced/policies](../../advanced/policies.md)), from the `sync-data` section of the file referenced by
+`EXTERNAL_CONFIGURATION` (`docker/dev/resources/sync-config.yaml` in dev, `docker/e2e/resources/sync/sync-config.yaml`
+in E2E):
+
+| Key                                                | Default  | Description                                                        |
+| -------------------------------------------------- | -------- | ------------------------------------------------------------------ |
+| `sync-data.job.sources`                            | —        | Sources read to build the payloads, by name                        |
+| `sync-data.job.sources.<source>.account-id-column` | `act_id` | Column of the source holding the `act_id` of the account           |
+| `sync-data.job.mapping`                            | —        | JSON template of the payload, whose values are Jinjava expressions |
+
+```yaml
+sync-data:
+  job:
+    sources:
+      accounts:
+        account-id-column: act_id
+      account_payload_view:
+        account-id-column: act_id
+    mapping: |
+      {
+        "external_id": {{ accounts.external_id | tojson }},
+        "email": {{ accounts.email | tojson }},
+        "organizational_units": {{ account_payload_view.organizational_units | tojson }},
+        "groups": {{ account_payload_view.groups | tojson }}
+      }
+```
+
+Payload built for an account:
+
+```json
+{
+  "external_id": "jdoe",
+  "email": "jdoe@example.com",
+  "organizational_units": ["Paris", "R&D"],
+  "groups": ["DEV", "RND"]
+}
+```
+
+* A source is a table or view of the LinId database, with at most one row per account, identified by an indexed `uuid`
+  column (`account-id-column`). `LINID_DATABASE_USER` needs the `SELECT` grant on it.
+* The source and column names match `[a-z_][a-z0-9_]*`.
+* Each source is a variable of the template, holding the row of the account, empty when the account has none.
+* A multi-valued attribute is a PostgreSQL array, sorted and without duplicates, so that an unchanged account keeps the
+  same payload.
+* Every value is inserted with the `tojson` filter, without quotes.
+* The `mapping` provides the `external_id` and `email` keys, read by the claims template of the LINID application.
+* Only the changed payloads are written, in the `account_payloads` table.
+
+👉 Errors and alerts: [advanced/sync-api](../../advanced/sync-api.md#-alerts)
+
+---
+
+## 🎫 Claims Template
+
+For each account and each deployed application, `sync-api` evaluates the OPA policy of the application with the
+payload of the account, then renders the claims template of the application. The result is stored in the
+`computed_rights` table.
+
+| Variable  | Content                                                         |
+| --------- | --------------------------------------------------------------- |
+| `payload` | Payload of the account, built from the `mapping` of `sync-data` |
+| `allow`   | `allow` returned by OPA, `true` or `false`                      |
+| `roles`   | Roles returned by OPA, a sorted list of role names              |
+
+```jinja
+{
+  "sub": {{ payload.external_id | tojson }},
+  "email": {{ payload.email | tojson }},
+  "roles": {{ roles | tojson }}
+}
+```
+
+* As in the `mapping`, every value is inserted with the `tojson` filter, and the rendered text must be a JSON object.
+* The template is not checked when the application is saved: an error only shows as a `pairError` alert.
+
+---
+
 ## 🏷️ Key Configuration Domains
 
 ### 1. Database
@@ -395,7 +636,8 @@ Database configuration is distributed between `db.env`, `api.env`, `lemon.env`, 
 
 ### 2. Logging & Swagger
 
-The API logging level and Swagger UI can be configured through `api.env`.
+The API logging level and Swagger UI can be configured through `api.env`, and those of `sync-api` through
+`sync-api.env`. The Swagger UI of `sync-api` requires the client certificate of the API, like its other endpoints.
 
 ### 3. SSL / HTTPS
 
@@ -420,11 +662,44 @@ Apache Superset™ configuration is isolated in `superset.env` and includes:
 
 ### 6. Open Policy Agent (OPA)
 
-The API communicates with OPA using:
+The API and `sync-api` communicate with OPA through `OPA_SERVER_URL`, in `api.env` and `sync-api.env`:
 
 ```text
 OPA_SERVER_URL=http://opa:8181
 ```
+
+### 7. Avatars
+
+Avatar images uploaded through `POST /avatars/{entity}/{id}` are stored on the filesystem as
+`{AVATAR_LOCATION}/{entity}/{id}.{AVATAR_EXTENSION}` and served by the front-end web server, which mounts the same
+directory under `/avatars`. In this repository, that shared directory is `docker/avatars`, mounted in the `api`
+container as `/app/avatars` and in the `ui` container as `/usr/share/nginx/html/avatars`.
+
+In dev mode the two sides run natively: the API resolves `AVATAR_LOCATION` from the directory it is started in,
+`api/`, hence the `../docker/avatars` value of `docker/dev/env/api.env`, and the Quasar dev server serves that same
+directory under `/avatars`.
+
+```text
+AVATAR_LOCATION=/app/avatars
+AVATAR_EXTENSION=png
+AVATAR_MAX_SIZE=10
+AVATAR_JPEG_QUALITY=0.9
+AVATAR_MAX_PIXELS=16000000
+```
+
+`AVATAR_MAX_SIZE` feeds the Spring multipart limits (`spring.servlet.multipart`), so a larger upload is rejected
+before it reaches the API: the file part is capped at that size, the request size left unbounded by default
+(`SERVER_MAX_REQUEST_SIZE`, `-1` when unset) so a file of exactly the maximum size is not rejected for its
+multipart overhead.
+
+The uploaded files come from the users, so the API validates their content, not only their name: the real type is
+detected from the bytes and checked against `AVATAR_EXTENSION`, the dimensions are bounded by `AVATAR_MAX_PIXELS`
+before decoding, and the image is decoded and re-encoded from its pixels only, dropping metadata and anything
+appended to the image data. The front-end web server also serves the
+files without content sniffing (`X-Content-Type-Options: nosniff`) and fully sandboxed
+(`Content-Security-Policy: default-src 'none'; sandbox`): an image carrying a script, such as an SVG, cannot run
+anything when its URL is opened. Keep `AVATAR_EXTENSION` on an image format that cannot embed code, and mirror
+those headers in any other web server put in front of the avatars.
 
 ---
 

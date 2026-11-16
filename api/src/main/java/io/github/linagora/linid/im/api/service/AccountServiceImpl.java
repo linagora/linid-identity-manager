@@ -81,8 +81,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Implementation of {@link AccountService}.
  *
- * <p>Handles account CRUD operations including SHA-256 checksum generation
- * on creation and dynamic filtering via {@code spring-query-filter}.</p>
+ * <p>Handles account CRUD operations and dynamic filtering via {@code spring-query-filter}.</p>
  *
  * <p><b>Note for status-mutation endpoints:</b> {@link AccountView} is mapped to the
  * {@code accounts_view} SQL view, which is computed by joining {@code accounts} and
@@ -107,11 +106,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AccountServiceImpl implements AccountService {
 
     /**
-     * Default JSON payload assigned to newly created accounts.
-     */
-    private static final String DEFAULT_PAYLOAD = "{}";
-
-    /**
      * Repository for account persistence operations.
      */
     private final AccountRepository accountRepository;
@@ -120,11 +114,6 @@ public class AccountServiceImpl implements AccountService {
      * Repository for read-only account view operations, supporting dynamic filtering.
      */
     private final AccountDistinctViewRepository accountDistinctViewRepository;
-
-    /**
-     * Service for computing SHA-256 checksums.
-     */
-    private final ChecksumService checksumService;
 
     /**
      * Repository for account status persistence operations.
@@ -220,8 +209,6 @@ public class AccountServiceImpl implements AccountService {
         }
 
         Account entity = accountMapper.toAccount(account, userPrincipal);
-        entity.setPayload(DEFAULT_PAYLOAD);
-        entity.setChecksum(checksumService.compute(DEFAULT_PAYLOAD));
 
         Account createdAccount = accountRepository.save(entity);
 

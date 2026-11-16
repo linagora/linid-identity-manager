@@ -80,12 +80,12 @@
       }
     },
     "RenameFavoriteNotifyMessage": "Le favori '{name}' a été renommé.",
-    "LinidSmartFilter": {
+    "LinPulsarSmartFilter": {
       "label": "Filtre(s) de recherche",
       "hint": "Saisissez votre filtre",
       "prefix": "",
       "suffix": "",
-      "LinidFilterChip": {
+      "LinPulsarFilterChip": {
         "firstname": {
           "type": "Prénom",
           "separator": "ou"
@@ -104,7 +104,8 @@
         },
         "organizationalUnitId": {
           "type": "Unité organisationnelle",
-          "separator": "ou"
+          "separator": "ou",
+          "value": "{name}"
         },
         "createdBy": {
           "type": "Créé par",
@@ -115,7 +116,7 @@
           "separator": "ou"
         }
       },
-      "LinidFilterPanel": {
+      "LinPulsarFilterPanel": {
         "title": "Filtrer par :",
         "columnFilter": {
           "firstname": "Prénom",
@@ -127,7 +128,7 @@
           "insertDate": "Date de création"
         }
       },
-      "LinidFavoritePanel": {
+      "LinPulsarFavoritePanel": {
         "title": "Favoris",
         "noData": "Aucun favori disponible",
         "createFavorite": "Créer un favori",
@@ -601,6 +602,51 @@
           "email": "Email"
         }
       },
+      "avatar": {
+        "MenuButton": {
+          "editImageButton": {
+            "FormDialogButton": {
+              "title": "Mettre à jour",
+              "submitSuccess": "Image mise à jour avec succès.",
+              "submitError": "Impossible de mettre à jour l'image. Veuillez réessayer plus tard.",
+              "FormDialog": {
+                "title": "Modifier l'image de {firstname} {lastname}",
+                "fields": {
+                  "file": {
+                    "label": "Image *",
+                    "validation": {
+                      "required": "Ce champ est requis.",
+                      "maxFileSize": "L'image ne doit pas dépasser {maxFileSize} Mo.",
+                      "allowedExtensions": "Extensions autorisées : {extensions}."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Envoyer",
+                  "confirmLoading": "Envoi...",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          },
+          "deleteImageButton": {
+            "ConfirmDialogButton": {
+              "title": "Supprimer",
+              "submitSuccess": "Image supprimée avec succès.",
+              "submitError": "Impossible de supprimer l'image. Veuillez réessayer plus tard.",
+              "ConfirmationDialog": {
+                "title": "Supprimer l'image de {firstname} {lastname} ?",
+                "content": "L'avatar généré sera affiché à la place.",
+                "ButtonsCard": {
+                  "confirm": "Supprimer",
+                  "confirmLoading": "Suppression...",
+                  "cancel": "Annuler"
+                }
+              }
+            }
+          }
+        }
+      },
       "actions": {
         "ButtonsCard": {
           "editButton": {
@@ -714,7 +760,21 @@
       "status": "Impossible de mettre à jour le statut du compte. Veuillez réessayer plus tard."
     },
     "immediateRevalidationSuccess": "Le compte pourra être réactivé dans une minute | Le compte pourra être réactivé dans {count} minutes",
-    "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}"
+    "scheduledRevalidationSuccess": "Le compte sera réactivé à partir du {date}",
+    "ConfirmDialogButton": {
+      "title": "Recalculer les droits",
+      "submitSuccess": "Recalcul des droits demandé.",
+      "submitError": "Impossible de demander le recalcul des droits. Veuillez réessayer plus tard.",
+      "ConfirmationDialog": {
+        "title": "Recalculer les droits de {firstname} {lastname} ?",
+        "content": "Le recalcul démarrera immédiatement.",
+        "ButtonsCard": {
+          "confirm": "Recalculer",
+          "confirmLoading": "Envoi...",
+          "cancel": "Annuler"
+        }
+      }
+    }
   },
   "AccountDeactivatedBanner": {
     "content": "Ce compte est désactivé depuis le {date}.",

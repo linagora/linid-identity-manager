@@ -58,15 +58,15 @@
 
 <script lang="ts" setup>
 import type {
-  LinidQBannerProps,
-  LinidQBtnProps,
-  LinidQIconProps,
-} from '@linagora/linid-im-front-corelib';
+  LinPulsarQBannerProps,
+  LinPulsarQBtnProps,
+  LinPulsarQIconProps,
+} from '@linagora/lin-pulsar-core';
 import {
   useCommonMapper,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
   OrganizationalUnitBannerProps,
@@ -100,13 +100,13 @@ const contentI18nKey = computed(() =>
 );
 
 const uiProps = {
-  banner: ui<LinidQBannerProps>(localUiNamespace, 'q-banner'),
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
-  clearSuspensionButton: ui<LinidQBtnProps>(
+  banner: ui<LinPulsarQBannerProps>(localUiNamespace, 'q-banner'),
+  icon: ui<LinPulsarQIconProps>(localUiNamespace, 'q-icon'),
+  clearSuspensionButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.clear-suspension-button`,
     'q-btn'
   ),
-  modifySuspensionEndButton: ui<LinidQBtnProps>(
+  modifySuspensionEndButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.modify-suspension-end-button`,
     'q-btn'
   ),

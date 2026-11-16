@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Linagora
+ * Copyright (C) 2020-2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,14 +24,15 @@
  * LinID Identity Manager software.
  */
 
-declare namespace NodeJS {
-  /** Environment variables interface. */
-  interface ProcessEnv {
-    /** Node environment. */
-    NODE_ENV: string;
-    /** Vue router mode. */
-    VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined;
-    /** Vue router base path. */
-    VUE_ROUTER_BASE: string | undefined;
-  }
+package io.github.linagora.linid.im.sync.model.opa;
+
+import java.util.List;
+
+/**
+ * Result of the policy of an application, evaluated by OPA for an account.
+ *
+ * @param allow whether the account is allowed to access the application
+ * @param roles the roles of the account on the application, sorted and without duplicates as returned by OPA
+ */
+public record OpaResult(boolean allow, List<String> roles) {
 }

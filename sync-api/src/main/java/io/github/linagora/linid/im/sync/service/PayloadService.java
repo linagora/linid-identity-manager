@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2026 Linagora
+ * Copyright (C) 2020-2026 Linagora
  *
  * This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General
  * Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option)
@@ -24,14 +24,42 @@
  * LinID Identity Manager software.
  */
 
-declare module 'catalog-ui/*' {
-  import type { DefineComponent } from 'vue';
+package io.github.linagora.linid.im.sync.service;
 
-  /** This declaration allows TypeScript to recognize imports from the 'catalog-ui/*' path pattern as Vue components. */
-  const component: DefineComponent<
-    Record<string, unknown>,
-    Record<string, unknown>,
-    unknown
-  >;
-  export default component;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Builds the account payloads from the {@code mapping} of the {@code sync-data.job} section.
+ */
+public interface PayloadService {
+
+    /**
+     * Checks the {@code mapping} by rendering it with an empty context, where each source gives {@code null} through
+     * {@code tojson}, so that a valid {@code mapping} gives a JSON object.
+     *
+     * @throws IllegalStateException when the {@code mapping} is invalid, such as a Jinjava syntax error or a value
+     *     inserted without {@code tojson}, after logging the {@code invalidMapping} alert
+     */
+    void checkMapping();
+
+    /**
+     * Builds the payload of an account: the {@code mapping} is rendered with, for each source, a variable named after
+     * it holding the columns of the row of the account, empty when it has no row, and parsed as a JSON object.
+     *
+     * @param rowsBySource the rows of the account in each source, by source name
+     * @return the payload of the account
+     * @throws io.github.linagora.linid.im.sync.exception.PayloadException when the account has several rows in a
+     *     source, the template raises an error, or the rendered text is not a JSON object
+     */
+    Map<String, Object> build(Map<String, List<Map<String, Object>>> rowsBySource);
+
+    /**
+     * Computes the checksum of a payload on its compact JSON, with its keys sorted at every level, so that it does not
+     * depend on the order of the keys in the {@code mapping}. The arrays keep their order.
+     *
+     * @param payload the payload of an account
+     * @return the checksum of the payload
+     */
+    String checksum(Map<String, Object> payload);
 }

@@ -38,6 +38,14 @@ spring:
       schema: ${CLIENT_DATABASE_SCHEMA:public}
       location: ${CLIENT_DATABASE_MIGRATION_PATH:}
 
+  servlet:
+    multipart:
+      # The avatar endpoints are the only multipart endpoints: the file limit matches AVATAR_MAX_SIZE, and the
+      # request size is left unbounded by default so a file of exactly the maximum size is not rejected for its
+      # multipart overhead.
+      max-file-size: ${AVATAR_MAX_SIZE:10}MB
+      max-request-size: ${SERVER_MAX_REQUEST_SIZE:-1}
+
   security:
     oauth2:
       resourceserver:
@@ -49,6 +57,19 @@ spring:
           # Only needed if the OIDC provider issues another type
           # Leave the variable unset to use the default: an empty value is not the default and rejects every token
           expected-type: ${AUTH_JWT_EXPECTED_TYPE:at+jwt}
+
+  ssl:
+    bundle:
+      jks:
+        # Client certificate presented to sync-api only (mutual TLS), and truststore validating its certificate
+        sync-api-client:
+          keystore:
+            location: ${SYNC_API_CLIENT_KEY_STORE}
+            password: ${SYNC_API_CLIENT_KEY_PASSWORD}
+            type: PKCS12
+          truststore:
+            location: ${SSL_TRUSTSTORE_PATH}
+            password: ${SSL_TRUSTSTORE_PASSWORD}
 
   cache:
     type: caffeine
@@ -107,8 +128,21 @@ opa:
     server-url: ${OPA_SERVER_URL:http://opa:8181}
     interval: ${OPA_DEPLOYMENT_INTERVAL:5m}
 
+sync-api:
+  url: ${SYNC_API_URL}
+  # Maximum time to establish the connection to sync-api, as a duration (e.g. 5s, 500ms)
+  connect-timeout: ${SYNC_API_CONNECT_TIMEOUT:5s}
+  # Maximum time to wait for the response of sync-api, as a duration (e.g. 10s, 500ms)
+  read-timeout: ${SYNC_API_READ_TIMEOUT:10s}
+
 superset:
   url: ${SUPERSET_URL}
   username: ${SUPERSET_USERNAME}
   password: ${SUPERSET_PASSWORD}
   rls-config: ${SUPERSET_RLS_CONFIG}
+
+avatar:
+  location: ${AVATAR_LOCATION:/app/avatars}
+  extension: ${AVATAR_EXTENSION:png}
+  jpeg-quality: ${AVATAR_JPEG_QUALITY:0.9}
+  max-pixels: ${AVATAR_MAX_PIXELS:16000000}

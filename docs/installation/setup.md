@@ -28,6 +28,10 @@ cat README.md
 
 > ✅ Each README contains the full steps to start the Docker environment, including backend, frontend, and LemonLDAP.
 
+> ⚠️ The Docker environments, including their pre-configured LemonLDAP::NG, are for development only: their secrets and
+> test accounts are hard-coded and public. Replace them before any real deployment, see
+> [configuration/authentication/oidc](../configuration/authentication/oidc.md).
+
 ---
 
 ## ⚙️ Post-Installation Checks

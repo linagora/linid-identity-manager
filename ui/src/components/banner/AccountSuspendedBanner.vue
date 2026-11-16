@@ -58,15 +58,15 @@
 
 <script lang="ts" setup>
 import type {
-  LinidQBannerProps,
-  LinidQBtnProps,
-  LinidQIconProps,
-} from '@linagora/linid-im-front-corelib';
+  LinPulsarQBannerProps,
+  LinPulsarQBtnProps,
+  LinPulsarQIconProps,
+} from '@linagora/lin-pulsar-core';
 import {
   useCommonMapper,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import type {
   AccountBannerProps,
   AccountSuspendedBannerOutputs,
@@ -96,13 +96,13 @@ const contentI18nKey = computed(() =>
     : 'content'
 );
 const uiProps = {
-  banner: ui<LinidQBannerProps>(localUiNamespace, 'q-banner'),
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
-  clearSuspensionButton: ui<LinidQBtnProps>(
+  banner: ui<LinPulsarQBannerProps>(localUiNamespace, 'q-banner'),
+  icon: ui<LinPulsarQIconProps>(localUiNamespace, 'q-icon'),
+  clearSuspensionButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.clear-suspension-button`,
     'q-btn'
   ),
-  modifySuspensionButton: ui<LinidQBtnProps>(
+  modifySuspensionButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.modify-suspension-button`,
     'q-btn'
   ),

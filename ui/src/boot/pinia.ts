@@ -26,21 +26,21 @@
 
 import {
   setPiniaStore,
-  useLinidZoneStore,
-} from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '#q-app/wrappers';
+  useLinPulsarZoneStore,
+} from '@linagora/lin-pulsar-core';
+import { defineBoot } from '#q-app';
 
 /** Boot file that initializes Pinia and registers it in the corelib. */
 export default defineBoot(async ({ app }) => {
   setPiniaStore(app.config.globalProperties.$pinia);
-  const linidZoneStore = useLinidZoneStore();
+  const linPulsarZoneStore = useLinPulsarZoneStore();
 
-  linidZoneStore.registerPluginOnce(
+  linPulsarZoneStore.registerPluginOnce(
     'base-layout.dialogComponent',
-    'catalogUI/ConfirmationDialog'
+    'LinPulsar/ConfirmationDialog'
   );
-  linidZoneStore.registerPluginOnce(
+  linPulsarZoneStore.registerPluginOnce(
     'base-layout.dialogComponent',
-    'catalogUI/FormDialog'
+    'LinPulsar/FormDialog'
   );
 });

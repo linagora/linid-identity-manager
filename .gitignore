@@ -21,9 +21,16 @@ docker/**/*.crt
 docker/**/*.key
 docker/**/*.pub
 docker/**/*.jks
+docker/**/*.p12
 docker/dev/resources/llng
 docker/e2e/resources/local
 docker/e2e/resources/ci
 docker/demo/resources/local
 api/**/*.jks
 api/**/*.p12
+
+# Uploaded avatars (shared API / nginx directory), except the default administrator avatar
+docker/avatars/*
+!docker/avatars/accounts/
+docker/avatars/accounts/*
+!docker/avatars/accounts/00000000-0000-4000-8000-00000000a001.png

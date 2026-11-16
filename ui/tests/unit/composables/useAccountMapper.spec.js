@@ -24,7 +24,6 @@
  * LinID Identity Manager software.
  */
 
-import dayjs from 'dayjs';
 import { useAccountMapper } from 'src/composables/useAccountMapper';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useI18n } from 'vue-i18n';
@@ -34,7 +33,7 @@ vi.mock('vue-i18n', () => ({
   useI18n: vi.fn(),
 }));
 
-vi.mock('@linagora/linid-im-front-corelib', () => ({
+vi.mock('@linagora/lin-pulsar-core', () => ({
   useCommonMapper: () => ({
     toDate: mockToDate('YYYY-MM-DD HH:mm'),
     toDateISO: mockToDateISO(),

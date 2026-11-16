@@ -51,6 +51,7 @@
   "error.application.code.already_exists": "Application already exists for code '{code}'",
   "error.application.script.missing": "Unable to deploy application {applicationId}: there is no script in the application.",
   "error.application.script.not_found": "Application script not found: {id}",
+  "error.application.not_deployed": "Unable to recompute the rights of application {id}: it has no script or it is not deployed.",
   "error.application.system_reserved": "Application '{code}' is a system-reserved record and cannot be modified or deleted.",
   "error.application_rule.not_found": "Application rule not found: {id}",
   "error.application_rule.code.already_exists": "Application rule already exists for code '{code}'",
@@ -74,5 +75,15 @@
   "error.superset.guest_token": "Unable to retrieve the guest token",
   "error.superset.session_cookie": "Superset session cookie is missing",
   "error.superset.slug_configuration": "Unable to retrieve the Superset dashboard configuration associated with the slug.",
-  "error.user_preference.not_found": "User preference not found: {key}"
+  "error.sync_api.unavailable": "The synchronization service is unavailable",
+  "error.sync_api.bad_gateway": "The synchronization service answered with an error",
+  "error.user_preference.not_found": "User preference not found: {key}",
+  "error.avatar.entity.unsupported": "Unsupported avatar entity type: {entity}",
+  "error.avatar.file.empty": "The uploaded avatar file is empty.",
+  "error.avatar.extension.invalid": "The avatar file extension must be {extension}.",
+  "error.avatar.content.invalid": "The avatar file content is not a valid {extension} image.",
+  "error.avatar.dimensions.invalid": "The avatar image dimensions exceed the allowed maximum.",
+  "error.avatar.storage": "Unable to store the avatar of {id}.",
+  "error.avatar.deletion": "Unable to delete the avatar of {id}.",
+  "error.upload.too_large": "The uploaded file exceeds the maximum allowed size."
 }

@@ -38,7 +38,7 @@ export PLUGIN_LOADER_PATH=/path/to/plugins
 {
   "remotes": [
     {
-      "name": "catalogUI",
+      "name": "LinPulsar",
       "entry": "http://localhost:5001/mf-manifest.json"
     }
   ],

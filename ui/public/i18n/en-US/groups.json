@@ -79,12 +79,12 @@
       }
     },
     "RenameFavoriteNotifyMessage": "The favorite '{name}' has been renamed.",
-    "LinidSmartFilter": {
+    "LinPulsarSmartFilter": {
       "label": "Current search filter",
       "hint": "Enter your filter",
       "prefix": "",
       "suffix": "",
-      "LinidFilterChip": {
+      "LinPulsarFilterChip": {
         "name": {
           "type": "Label",
           "separator": "or"
@@ -99,7 +99,8 @@
         },
         "organizationalUnitId": {
           "type": "Organizational unit",
-          "separator": "or"
+          "separator": "or",
+          "value": "{name}"
         },
         "applicationName": {
           "type": "Application",
@@ -110,7 +111,7 @@
           "separator": "or"
         }
       },
-      "LinidFilterPanel": {
+      "LinPulsarFilterPanel": {
         "title": "Filter by:",
         "columnFilter": {
           "name": "Label",
@@ -121,7 +122,7 @@
           "email": "Email"
         }
       },
-      "LinidFavoritePanel": {
+      "LinPulsarFavoritePanel": {
         "title": "Favorites",
         "noData": "No favorite available",
         "createFavorite": "Create a favorite",
@@ -235,6 +236,51 @@
           "description": "Description",
           "organizationalUnitName": "Organizational unit",
           "applicationName": "Application"
+        }
+      },
+      "avatar": {
+        "MenuButton": {
+          "editImageButton": {
+            "FormDialogButton": {
+              "title": "Update",
+              "submitSuccess": "Image successfully updated.",
+              "submitError": "Unable to update the image. Please try again later.",
+              "FormDialog": {
+                "title": "Edit the image of {name}",
+                "fields": {
+                  "file": {
+                    "label": "Image *",
+                    "validation": {
+                      "required": "This field is required.",
+                      "maxFileSize": "The image must not exceed {maxFileSize} MB.",
+                      "allowedExtensions": "Allowed extensions: {extensions}."
+                    }
+                  }
+                },
+                "ButtonsCard": {
+                  "confirm": "Upload",
+                  "confirmLoading": "Uploading...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          },
+          "deleteImageButton": {
+            "ConfirmDialogButton": {
+              "title": "Delete",
+              "submitSuccess": "Image successfully deleted.",
+              "submitError": "Unable to delete the image. Please try again later.",
+              "ConfirmationDialog": {
+                "title": "Delete the image of {name}?",
+                "content": "The generated avatar will be displayed instead.",
+                "ButtonsCard": {
+                  "confirm": "Delete",
+                  "confirmLoading": "Deleting...",
+                  "cancel": "Cancel"
+                }
+              }
+            }
+          }
         }
       },
       "actions": {

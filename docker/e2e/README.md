@@ -3,16 +3,20 @@
 This environment is intended for end-to-end (E2E) testing.
 All services are containerized with ports exposed for debugging and test access.
 
+> ⚠️ Not for production: the LemonLDAP::NG configuration (`resources/lmConf-1.template.json`), the `env/*.env` files and
+> the seed scripts contain hard-coded, public secrets and test accounts. Replace them before any real deployment, see
+> [OIDC configuration](../../docs/configuration/authentication/oidc.md).
+
 ## Quick Start
 
-Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build the `api`, `ui` and `superset` images and start everything with the following commands.
+Generate certificates, LemonLDAP::NG required configuration file, Frontend OIDC configuration file, build the `api`, `sync-api`, `ui` and `superset` images and start everything with the following commands.
 
 ```bash
 task setup:e2e
 task start:e2e
 ```
 
-The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.2.133`), its version is pinned in `docker-compose.yml`.
+The `lin-pulsar` image is pulled from Docker Hub (`linagora/lin-pulsar:v0.3.6`), its version is pinned in `docker-compose.yml`.
 
 ## Services
 
@@ -20,8 +24,9 @@ The `catalog-ui` image is pulled from Docker Hub (`linagora/linid-catalog-ui:v0.
 | --------------- | ------------------------------- | --------------------------- |
 | db              | (internal network)              | Default database            |
 | api             | (internal network)              | LinID Identity Manager API  |
+| sync-api        | https://localhost:8444          | LinID synchronization API   |
 | ui              | https://linid.localtest.me:9000 | LinID Identity Manager UI   |
-| catalog-ui      | (internal network)              | UI components library       |
+| lin-pulsar      | (internal network)              | UI components library       |
 | auth            | (internal network)              | LemonLDAP::NG portal        |
 | e2e-test-runner | (internal network)              | Runner to execute e2e tests |
 

@@ -24,14 +24,14 @@
  * LinID Identity Manager software.
  */
 
-import { linidModuleFederation } from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
+import { linPulsarModuleFederation } from '@linagora/lin-pulsar-core';
 import ExportApplicationScriptBtn from 'components/btn/ExportApplicationScriptBtn.vue';
 import OrganizationalUnitCreateChildBtn from 'components/btn/OrganizationalUnitCreateChildBtn.vue';
 import OrganizationalUnitParentField from 'components/field/OrganizationalUnitParentField.vue';
 import AccountLifecyclePanel from 'components/panel/AccountLifecyclePanel.vue';
 import OrganizationalUnitLifecyclePanel from 'components/panel/OrganizationalUnitLifecyclePanel.vue';
 import { appConfig } from './config';
+import { defineBoot } from '#q-app';
 
 /**
  * Application bootstrapping entry point.
@@ -46,7 +46,7 @@ import { appConfig } from './config';
  * @returns Resolves once all modules have completed every lifecycle phase.
  */
 export default defineBoot(async ({ router }): Promise<void> => {
-  await linidModuleFederation.init({
+  await linPulsarModuleFederation.init({
     router,
     remotes: appConfig.remotes,
     modules: appConfig.modules,

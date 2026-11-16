@@ -24,9 +24,9 @@
  * LinID Identity Manager software.
  */
 
-import { setNunjucksEnv } from '@linagora/linid-im-front-corelib';
+import { setNunjucksEnv } from '@linagora/lin-pulsar-core';
 import nunjucks from 'nunjucks';
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '#q-app';
 
 export default defineBoot(async ({ app }) => {
   const nunjucksEnv = nunjucks.configure({ autoescape: false });

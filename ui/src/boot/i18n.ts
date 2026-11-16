@@ -29,14 +29,14 @@ import {
   merge,
   resolveLocale,
   setI18nInstance,
-  useLinidUiStore,
-} from '@linagora/linid-im-front-corelib';
+  useLinPulsarUiStore,
+} from '@linagora/lin-pulsar-core';
 import { api } from 'boot/axios';
 import { appConfig } from 'boot/config';
 import { Quasar } from 'quasar';
 import type messages from 'src/i18n';
 import { createI18n, type I18n } from 'vue-i18n';
-import { defineBoot } from '#q-app/wrappers';
+import { defineBoot } from '#q-app';
 
 /** Type defining the available message languages. */
 export type MessageLanguages = keyof typeof messages;
@@ -83,7 +83,7 @@ export default defineBoot(async ({ app }) => {
     messages[lang] = merge(apiMessages, mergedMessages);
   }
 
-  const uiStore = useLinidUiStore();
+  const uiStore = useLinPulsarUiStore();
   uiStore.setAvailableLanguages(appConfig.i18n.languages);
   // Seed the store with the configured default so resolveLocale has a valid
   // fallback when no user preference or persisted language exists yet.

@@ -62,15 +62,15 @@
 
 <script lang="ts" setup>
 import type {
-  LinidQBannerProps,
-  LinidQBtnProps,
-  LinidQIconProps,
-} from '@linagora/linid-im-front-corelib';
+  LinPulsarQBannerProps,
+  LinPulsarQBtnProps,
+  LinPulsarQIconProps,
+} from '@linagora/lin-pulsar-core';
 import {
   useCommonMapper,
   useScopedI18n,
   useUiDesign,
-} from '@linagora/linid-im-front-corelib';
+} from '@linagora/lin-pulsar-core';
 import type {
   AccountBannerProps,
   AccountDeactivatedWarningBannerOutputs,
@@ -92,13 +92,13 @@ const endDate = computed(() =>
   toDate(props.accountStatus.validityPeriod.end, DATE_FORMAT_KEY)
 );
 const uiProps = {
-  banner: ui<LinidQBannerProps>(localUiNamespace, 'q-banner'),
-  icon: ui<LinidQIconProps>(localUiNamespace, 'q-icon'),
-  deactivateImmediateButton: ui<LinidQBtnProps>(
+  banner: ui<LinPulsarQBannerProps>(localUiNamespace, 'q-banner'),
+  icon: ui<LinPulsarQIconProps>(localUiNamespace, 'q-icon'),
+  deactivateImmediateButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.deactivate-immediate-button`,
     'q-btn'
   ),
-  modifyDeactivationButton: ui<LinidQBtnProps>(
+  modifyDeactivationButton: ui<LinPulsarQBtnProps>(
     `${localUiNamespace}.modify-deactivation-button`,
     'q-btn'
   ),

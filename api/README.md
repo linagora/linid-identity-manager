@@ -16,7 +16,7 @@ This API allows you to:
 
 ## Prerequisites
 
-- Java 21+
+- Java 25+
 - Maven 3.8+ (or use the included `./mvnw` wrapper)
 - PostgreSQL 15+
 
@@ -110,6 +110,19 @@ When the token is valid but no account matches its `email` claim, the API respon
 | `SSL_KEY_PASSWORD`        | Password for private key and keystore     | Yes                    |
 | `SSL_TRUSTSTORE_PATH`     | Path to truststore                        | Yes                    |
 | `SSL_TRUSTSTORE_PASSWORD` | Truststore password                       | Yes                    |
+
+### Sync API
+
+The API calls `sync-api` with mutual TLS, presenting a client certificate to `sync-api` only. When `sync-api` does not
+answer within the timeouts, it is considered unreachable and the API answers `503`.
+
+| Variable                       | Description                                                           | Required   |
+| ------------------------------ | --------------------------------------------------------------------- | ---------- |
+| `SYNC_API_URL`                 | Base URL of `sync-api`                                                | Yes        |
+| `SYNC_API_CLIENT_KEY_STORE`    | Path to the PKCS12 keystore of the client certificate                 | Yes        |
+| `SYNC_API_CLIENT_KEY_PASSWORD` | Password for the client keystore and its key                          | Yes        |
+| `SYNC_API_CONNECT_TIMEOUT`     | Maximum time to establish the connection to `sync-api`, as a duration | No (`5s`)  |
+| `SYNC_API_READ_TIMEOUT`        | Maximum time to wait for the response of `sync-api`, as a duration    | No (`10s`) |
 
 ### Application
 

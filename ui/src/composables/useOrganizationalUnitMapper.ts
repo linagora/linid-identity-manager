@@ -24,7 +24,7 @@
  * LinID Identity Manager software.
  */
 
-import { useCommonMapper } from '@linagora/linid-im-front-corelib';
+import { useCommonMapper } from '@linagora/lin-pulsar-core';
 import { DATE_FORMAT_KEY } from 'src/types/common';
 import type {
   OrganizationalUnitDTO,

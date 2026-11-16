@@ -67,8 +67,12 @@ services:
       - SSL_TRUSTSTORE_PATH=${SSL_TRUSTSTORE_PATH}
       - SSL_TRUSTSTORE_PASSWORD=${SSL_TRUSTSTORE_PASSWORD}
       - OPA_SERVER_URL=${OPA_SERVER_URL}
+      - AVATAR_LOCATION=${AVATAR_LOCATION}
+      - AVATAR_EXTENSION=${AVATAR_EXTENSION}
+      - AVATAR_MAX_SIZE=${AVATAR_MAX_SIZE}
     volumes:
       - ./resources/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ../avatars:/app/avatars
     healthcheck:
       test:
         [
@@ -135,17 +139,18 @@ services:
 #      - ./resources/front-i18n/en-US.json:/app/spa/i18n/en-US.json:ro
 #      - ./resources/front-i18n/fr-FR.json:/app/spa/i18n/fr-FR.json:ro
       - ./resources/${CONFIG_DIR}/conf/config.json:/app/spa/config.json:ro
+      - ../avatars:/app/spa/avatars:ro
     depends_on:
-      catalog-ui:
+      lin-pulsar:
         condition: service_started
       api:
         condition: service_healthy
       auth:
         condition: service_healthy
 
-  catalog-ui:
-    image: catalog-ui
-    container_name: catalog-ui
+  lin-pulsar:
+    image: linagora/lin-pulsar:v0.3.6
+    container_name: lin-pulsar
     networks:
       - linid-demo-network
     volumes:

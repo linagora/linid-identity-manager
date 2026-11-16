@@ -1,10 +1,10 @@
 {
   "instanceId": "moduleOrganizationalUnitCreationPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "organizational-units",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "organizational-units",
   "basePath": "/organizational-units",
   "zones": [
@@ -18,8 +18,8 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
-    "page": "catalogUI/GenericCreationPage",
+    "layout": "LinPulsar/BaseLayout",
+    "page": "LinPulsar/GenericCreationPage",
     "pagePath": "new",
     "parentPath": "/organizational-units/{{ query.parent }}",
     "successPath": "/organizational-units/{{ entity.id }}",

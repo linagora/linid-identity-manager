@@ -14,6 +14,10 @@ This page lists the environment variables of the **UI server**.
 | E2E           | `docker/e2e/env/ui.env`, plus `e2e.env` (CI) or `local.env` (local runs)          |
 | Demo          | `docker/demo/.env`                                                                |
 
+> ⚠️ The values of these files are development values. `OIDC_CLIENT_SECRET` and `SESSION_SECRET` are public: replace
+> them, together with the pre-configured LemonLDAP::NG, before any real deployment (see
+> [authentication/oidc](../authentication/oidc.md)).
+
 ---
 
 ## ⚙️ Runtime variables
@@ -42,7 +46,7 @@ Used by `task setup:config` to generate `server-config.json`.
 | `SERVER_KEY_PATH`               | `http.tls.key`                                                   | `/etc/server/certs/server.key`           | Path to the server key                            |
 | `HTTP_TRUST_PROXY`              | `http.trustProxy`                                                | `false`                                  | Trusted reverse proxy, written as JSON            |
 | `API_UPSTREAM`                  | `upstream` of `/backend`                                         | `https://api:8443`                       | URL of the API upstream                           |
-| `CATALOG_UI_UPSTREAM`           | `upstream` of `/catalog-ui`                                      | `http://catalog-ui`                      | URL of the Catalog UI upstream                    |
+| `LIN_PULSAR_UPSTREAM`           | `upstream` of `/lin-pulsar`                                      | `http://lin-pulsar`                      | URL of the LinPulsar upstream                     |
 | `AUTH_UPSTREAM`                 | `upstream` of the LemonLDAP::NG routes, `discovery.issuer`       | `http://auth`                            | URL of the Auth upstream                          |
 | `LEMONLDAP_REDIRECT_URL`        | `callbackUri`, `logoutUrl`, `postLogoutRedirectUri`              | `https://linid.localtest.me:9000`        | Public URL of the application                     |
 | `LEMONLDAP_PORTAL_HOSTNAME`     | `oidc.oauth2.credentials.http.headers.host`                      | `linid.localtest.me`                     | `Host` of the LemonLDAP::NG portal                |

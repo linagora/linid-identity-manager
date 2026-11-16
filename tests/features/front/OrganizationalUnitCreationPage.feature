@@ -53,7 +53,7 @@ Feature: Test Organizational Unit creation page
     And  I expect the HTML element '[data-cy="generic-creation-page_title"]' contains "Création d'une unité organisationnelle"
     And  I expect the HTML element '[data-cy="field_parent"]' to be visible
     And  I expect the HTML element '[data-cy="field_name"]' to be visible
-    And  I expect the HTML element '[data-cy="field_type"]' to be visible
+    And  I expect the HTML element '.q-field:has([data-cy="field_type"])' to be visible
     And  I expect the HTML element '[data-cy="button_cancel"]' contains "Retour"
     And  I expect the HTML element '[data-cy="button_confirm"]' contains "Créer"
 
@@ -61,7 +61,7 @@ Feature: Test Organizational Unit creation page
     And I expect the HTML element '[data-cy="field_parent"] input' to have value "root"
 
     ## 103 Type select should expose the static types from the configuration
-    When I click on '[data-cy="field_type"] .q-select__focus-target'
+    When I click on '[data-cy="field_type"]'
     Then I expect the HTML element '[role="listbox"]' to be visible
     And  I expect the HTML element '[role="listbox"]' contains "COMPANY"
     And  I expect the HTML element '[role="listbox"]' contains "DEPARTMENT"
@@ -75,7 +75,7 @@ Feature: Test Organizational Unit creation page
 
     ## 105 Submitting a valid form should create the organizational unit
     When I set the text "EngineeringE2E" in the HTML element "[data-cy=\"field_name\"]"
-    And  I click on '[data-cy="field_type"] .q-select__focus-target'
+    And  I click on '[data-cy="field_type"]'
     And  I click on '[role="listbox"] [role="option"]:first-child'
     And  I click on '[data-cy="button_confirm"]'
 

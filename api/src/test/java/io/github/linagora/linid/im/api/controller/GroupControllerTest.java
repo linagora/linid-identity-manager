@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.controller;
 
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.group.GroupAccountMapper;
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
@@ -36,6 +37,7 @@ import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.GroupService;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
@@ -69,6 +71,9 @@ import static org.mockito.Mockito.when;
 class GroupControllerTest {
 
     @Mock
+    private AvatarService avatarService;
+
+    @Mock
     private GroupService groupService;
 
     @Mock
@@ -88,7 +93,8 @@ class GroupControllerTest {
 
     @BeforeEach
     void setUp() {
-        controller = new GroupController(groupService, groupMapper, groupAccountMapper, pagedResponseStatusResolver);
+        controller = new GroupController(avatarService, groupService, groupMapper, groupAccountMapper,
+            pagedResponseStatusResolver);
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
@@ -197,11 +203,13 @@ class GroupControllerTest {
     @Test
     @DisplayName("Should delete group by id")
     void testDeleteById() {
+        var id = UUID.randomUUID();
         doNothing().when(groupService).deleteById(any(), any());
 
-        var response = controller.deleteById(userPrincipal, UUID.randomUUID());
+        var response = controller.deleteById(userPrincipal, id);
 
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(avatarService).deleteQuietly(AvatarEntity.GROUPS, id);
     }
 }

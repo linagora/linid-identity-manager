@@ -40,12 +40,16 @@ import io.github.linagora.linid.im.api.model.account.AccountSuspensionRecord;
 import io.github.linagora.linid.im.api.model.account.AccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.account.AccountViewDTO;
+import io.github.linagora.linid.im.api.model.common.AvatarEntity;
+import io.github.linagora.linid.im.api.model.sync.RecomputeRightsDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.AccountGroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountOrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.AccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AccountService;
+import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
+import io.github.linagora.linid.im.api.service.SyncApiService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -84,6 +88,11 @@ import java.util.UUID;
 public class AccountController {
 
     /**
+     * Service removing the avatar image of a deleted entity.
+     */
+    private final AvatarService avatarService;
+
+    /**
      * Service handling account business logic.
      */
     private final AccountService accountService;
@@ -112,6 +121,11 @@ public class AccountController {
      * Mapper for account group view entity-to-DTO conversion.
      */
     private final AccountGroupMapper accountGroupMapper;
+
+    /**
+     * Service relaying the recomputations to sync-api.
+     */
+    private final SyncApiService syncApiService;
 
     /**
      * Creates a new account.
@@ -278,7 +292,32 @@ public class AccountController {
         @PathVariable final UUID id) {
         log.info("[{}] Received DELETE request for account {}", userPrincipal.getEmail(), id);
         accountService.deleteById(userPrincipal, id);
+        avatarService.deleteQuietly(AvatarEntity.ACCOUNTS, id);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Starts the immediate recomputation of the rights of an account, relayed to sync-api, which rebuilds its payload
+     * then computes its rights on the deployed applications whose pair changed, in the background.
+     *
+     * @param userPrincipal the authenticated user
+     * @param id            the account UUID
+     * @return the answer of sync-api, telling whether a recomputation of the account was already running, with HTTP
+     *     202 status
+     */
+    @PostMapping("/{id}/recompute-rights")
+    @Operation(summary = "Recompute the rights of an account")
+    @ApiResponse(responseCode = "202", description = "Recomputation started, or already running for this account")
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    @ApiResponse(responseCode = "502", description = "Error answered by sync-api", content = @Content)
+    @ApiResponse(responseCode = "503", description = "sync-api unreachable, or too many recomputations already waiting",
+        content = @Content)
+    public ResponseEntity<RecomputeRightsDTO> recomputeRights(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID id) {
+        log.info("[{}] Received POST request to recompute the rights of account {}", userPrincipal.getEmail(), id);
+        accountService.existsById(userPrincipal, id);
+        return ResponseEntity.accepted().body(syncApiService.recomputeAccountRights(id));
     }
 
     /**

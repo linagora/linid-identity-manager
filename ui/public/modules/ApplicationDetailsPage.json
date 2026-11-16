@@ -1,16 +1,16 @@
 {
   "instanceId": "moduleApplicationDetailsPage",
-  "remoteName": "catalogUI",
+  "remoteName": "LinPulsar",
   "entity": "applications",
-  "lifecycleRemote": "catalogUI/PageLifecycle",
-  "routesRemote": "catalogUI/PageRoutes",
-  "i18nRemote": "catalogUI/EmptyI18n",
+  "lifecycleRemote": "LinPulsar/PageLifecycle",
+  "routesRemote": "LinPulsar/PageRoutes",
+  "i18nRemote": "LinPulsar/EmptyI18n",
   "apiEndpoint": "applications",
   "basePath": "/applications",
   "zones": [
     {
       "zone": "moduleApplicationDetailsPage.side-left",
-      "plugin": "catalogUI/EntityProfilePanel",
+      "plugin": "LinPulsar/EntityProfilePanel",
       "props": {
         "parentPath": "/applications",
         "fieldOrder": ["type", "domain", "description", "deployedAt"],
@@ -26,6 +26,16 @@
         "avatarOptions": {
           "seed": ["{{ entity.code }}"],
           "style": "shape-grid"
+        },
+        "avatarLocation": "/avatars/applications/{{ entity.id }}.png",
+        "importOptions": {
+          "enabled": true,
+          "maxFileSize": 10,
+          "allowedExtensions": ["png"],
+          "endpoints": {
+            "upload": "/avatars/applications/{{ entity.id }}",
+            "delete": "/avatars/applications/{{ entity.id }}"
+          }
         },
         "updateEndpoint": "/applications/{{ entity.id }}",
         "updateBody": {
@@ -71,12 +81,21 @@
       }
     },
     {
-      "zone": "moduleApplicationDetailsPage.entity-profile-panel.actions.prepend",
+      "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.actions.prepend",
       "component": "ExportApplicationScriptBtn"
     },
     {
+      "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.actions.prepend",
+      "plugin": "LinPulsar/ConfirmDialogButton",
+      "props": {
+        "url": "/applications/{{ entity.id }}/recompute-rights",
+        "method": "POST",
+        "disable": "{{ not entity.hasScript or not entity.deployedAt }}"
+      }
+    },
+    {
       "zone": "moduleApplicationDetailsPage.content.after",
-      "plugin": "catalogUI/GenericEditableTableCard",
+      "plugin": "LinPulsar/GenericEditableTableCard",
       "props": {
         "rowKey": "id",
         "columns": [
@@ -119,10 +138,12 @@
     },
     {
       "zone": "moduleApplicationDetailsPage.content.after",
-      "plugin": "catalogUI/GenericSortableListCard",
+      "plugin": "LinPulsar/GenericSortableListCard",
       "props": {
         "itemKey": "id",
         "listenToItemUpdate": "update:item",
+        "emitOnCreate": "application-updated",
+        "emitOnSave": "application-updated",
         "fields": [
           {
             "name": "code",
@@ -183,7 +204,7 @@
     },
     {
       "zone": "moduleApplicationDetailsPage.generic-sortable-list-card.item.actions",
-      "plugin": "catalogUI/EntityAttributeField",
+      "plugin": "LinPulsar/EntityAttributeField",
       "props": {
         "definition": {
           "name": "disabled",
@@ -199,8 +220,8 @@
     }
   ],
   "options": {
-    "layout": "catalogUI/BaseLayout",
-    "page": "catalogUI/GenericDetailsPage",
+    "layout": "LinPulsar/BaseLayout",
+    "page": "LinPulsar/GenericDetailsPage",
     "pagePath": ":id",
     "parentPath": "/applications",
     "enableActions": false,
@@ -228,7 +249,13 @@
       },
       {
         "key": "claims",
-        "fieldOrder": ["claimsTemplate"]
+        "fieldOrder": ["claimsTemplate"],
+        "formatters": [
+          {
+            "field": "claimsTemplate",
+            "type": "jinja"
+          }
+        ]
       }
     ]
   }

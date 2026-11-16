@@ -37,7 +37,7 @@
   },
   "proxies": [
     { "prefix": "/backend", "upstream": "${API_UPSTREAM}", "withAccessToken": true },
-    { "prefix": "/catalog-ui", "upstream": "${CATALOG_UI_UPSTREAM}" },
+    { "prefix": "/lin-pulsar", "upstream": "${LIN_PULSAR_UPSTREAM}" },
     { "prefix": "/auth/me", "upstream": "${AUTH_UPSTREAM}", "rewritePrefix": "${OIDC_USERINFO_PATH}", "withAccessToken": true },
     { "prefix": "/auth", "upstream": "${AUTH_UPSTREAM}" },
     { "prefix": "/static", "upstream": "${AUTH_UPSTREAM}", "keepPrefix": true },

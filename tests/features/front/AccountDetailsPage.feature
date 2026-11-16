@@ -75,6 +75,13 @@ Feature: Test Account details page display
   ## 172 Both tables should be read-only
   ## 173 Should display an empty organizational units table for an unattached account
   ## 174 Should display an empty groups table for an account without group
+  ## 175 Avatar import - only the edit action is listed while no image is stored
+  ## 176 Avatar import - upload dialog requires an image and cancel closes it
+  ## 177 Avatar import - upload success displays the stored image
+  ## 178 Avatar import - delete success removes the stored image
+  ## 179 Recompute rights - button opens the confirmation dialog
+  ## 180 Recompute rights - cancelling closes the dialog
+  ## 181 Recompute rights - confirming computes the rights of the account on the deployed applications
 
   Scenario: Roundtrip about Account Details
 
@@ -167,8 +174,8 @@ Feature: Test Account details page display
     And   I expect the HTML element ".generic-entity-table" exists
 
     ## 107 Lifecycle case 1 - INACTIVE, future validity start
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c1@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -182,8 +189,8 @@ Feature: Test Account details page display
     ## 108 Lifecycle case 2 - INACTIVE, not activated yet
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c2@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -197,8 +204,8 @@ Feature: Test Account details page display
     ## 109 Lifecycle case 3 - ACTIVE, no end date, no suspension
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -214,8 +221,8 @@ Feature: Test Account details page display
     ## 110 Lifecycle case 4 - ACTIVE, end > 15 days, no suspension
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c4@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -230,8 +237,8 @@ Feature: Test Account details page display
     ## 111 Lifecycle case 5 - ACTIVE, end <= 15 days, no suspension
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c5@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -246,8 +253,8 @@ Feature: Test Account details page display
     ## 112 Lifecycle case 6 - ACTIVE, no end date, suspension planned
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c6@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -263,8 +270,8 @@ Feature: Test Account details page display
     ## 113 Lifecycle case 7 - ACTIVE, end > 15 days, suspension planned
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c7@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -280,8 +287,8 @@ Feature: Test Account details page display
     ## 114 Lifecycle case 8 - ACTIVE, end <= 15 days, suspension planned
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c8@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -297,8 +304,8 @@ Feature: Test Account details page display
     ## 115 Lifecycle case 9 - SUSPENDED, no validity end, no suspension end
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c9@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -313,8 +320,8 @@ Feature: Test Account details page display
     ## 116 Lifecycle case 10 - SUSPENDED, no validity end, suspension with end
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c10@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -329,8 +336,8 @@ Feature: Test Account details page display
     ## 117 Lifecycle case 11 - SUSPENDED, end > 15 days
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c11@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -345,8 +352,8 @@ Feature: Test Account details page display
     ## 118 Lifecycle case 12 - SUSPENDED, end <= 15 days
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c12@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -361,8 +368,8 @@ Feature: Test Account details page display
     ## 119 Immediate activation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d1@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -397,8 +404,8 @@ Feature: Test Account details page display
     ## 122 Scheduled activation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d5@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -453,8 +460,8 @@ Feature: Test Account details page display
     ## 127 Immediate suspension - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d2@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -494,8 +501,8 @@ Feature: Test Account details page display
     ## 130 Scheduled suspension - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d8@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -599,8 +606,8 @@ Feature: Test Account details page display
     ## 139 Modify suspension - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d9@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -692,8 +699,8 @@ Feature: Test Account details page display
     ## 147 Immediate reactivation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d4@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -726,8 +733,8 @@ Feature: Test Account details page display
     ## 150 Immediate deactivation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -767,8 +774,8 @@ Feature: Test Account details page display
     ## 153 Scheduled deactivation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d6@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -830,8 +837,8 @@ Feature: Test Account details page display
     ## 158 Modify deactivation - dialog opens correctly
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "dialog-d7@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -888,8 +895,8 @@ Feature: Test Account details page display
     ## 163 Lifecycle case 13 - INACTIVE, deactivated (validity end in the past): deactivated banner and inactive badge
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c13@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -954,8 +961,8 @@ Feature: Test Account details page display
     # Navigate through the list like every other section: SPA navigation avoids a full reload
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "edit-me@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -1001,8 +1008,8 @@ Feature: Test Account details page display
     ## 169 Should display the organizational units card of the account
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "user3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -1060,8 +1067,8 @@ Feature: Test Account details page display
     # lifecycle-c14 is the only account of the dataset with no membership at all
     When I click on '[data-cy="entity-profile-panel_back-button"]'
     Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
-    When I click on '[data-cy="linid-smart-filter-field"]'
-    And  I click on '[data-cy="linid-filter-panel_item-email"]'
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
     And  I set the text "lifecycle-c14@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
     And  I click on '[data-cy="text-search-filter-panel_search"]'
     Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
@@ -1076,3 +1083,127 @@ Feature: Test Account details page display
     And  I expect the HTML element '[data-cy="generic-editable-table-card_title"]:eq(1)' contains "Groupes"
     And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) tbody tr' not exists
     And  I expect the HTML element '[data-cy="generic-entity-table"]:eq(1) .q-table__bottom--nodata' contains "Aucun groupe pour ce compte."
+
+    ## 175 Avatar import - only the edit action is listed while no image is stored
+    And  I expect the HTML element '[data-cy="entity-profile-panel_avatar-menu-button"]' to be visible
+    When I click on '[data-cy="entity-profile-panel_avatar-menu-button"]'
+    Then I expect the HTML element '[data-cy="entity-profile-panel_edit-image-button"]' contains "Mettre à jour"
+    And  I expect the HTML element '[data-cy="entity-profile-panel_delete-image-button"]' not exists
+
+    ## 176 Avatar import - upload dialog requires an image and cancel closes it
+    When I click on '[data-cy="entity-profile-panel_edit-image-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier l'image de Inactive DeactivatedReactivatable"
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_file"]' to be visible
+    When I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog"] .q-field__messages' contains "Ce champ est requis."
+    When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+
+    ## 177 Avatar import - upload success displays the stored image
+    When I click on '[data-cy="entity-profile-panel_avatar-menu-button"]'
+    And  I click on '[data-cy="entity-profile-panel_edit-image-button"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    When I set file input '[data-cy="field_file"]' with file '../features/resources/avatar.png'
+    And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="form-dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" contains "Image mise à jour avec succès."
+    When I request '{{ env.E2E_FRONT_URL }}/avatars/accounts/00000000-0000-4000-8000-0000000000ce.png' with method 'GET'
+    Then I expect status code is 200
+
+    ## 178 Avatar import - delete success removes the stored image
+    When I click on '[data-cy="entity-profile-panel_avatar-menu-button"]'
+    Then I expect the HTML element '[data-cy="entity-profile-panel_delete-image-button"]' contains "Supprimer"
+    When I click on '[data-cy="entity-profile-panel_delete-image-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Supprimer l'image de Inactive DeactivatedReactivatable ?"
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" contains "Image supprimée avec succès."
+    When I request '{{ env.E2E_FRONT_URL }}/avatars/accounts/00000000-0000-4000-8000-0000000000ce.png' with method 'GET'
+    Then I expect status code is 404
+
+    ## 179 Recompute rights - button opens the confirmation dialog
+    # user3 belongs to the groups all-staff and developers: its rights differ on each seeded application
+    When I click on '[data-cy="entity-profile-panel_back-button"]'
+    Then I expect current url contains "{{ env.E2E_FRONT_URL }}/accounts"
+    When I click on '[data-cy="lin-pulsar-smart-filter-field"]'
+    And  I click on '[data-cy="lin-pulsar-filter-panel_item-email"]'
+    And  I set the text "user3@example.com" in the HTML element '[data-cy="text-search-filter-panel_input"]'
+    And  I click on '[data-cy="text-search-filter-panel_search"]'
+    Then I expect the HTML element '[data-cy="item-row"]' appear 1 times on screen
+    When I click on '[data-cy="see-button_00000000-0000-4000-8000-00000000a004"]'
+    Then I expect current url is "{{ env.E2E_FRONT_URL }}/accounts/00000000-0000-4000-8000-00000000a004"
+    And  I expect the HTML element '[data-cy="confirm-dialog-button"]' to be visible
+    When I click on '[data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    And  I expect the HTML element '[data-cy="confirmation_dialog_title"]' contains "Recalculer les droits de user3_fn user3_ln ?"
+    And  I expect the HTML element '[data-cy="confirmation_dialog_content"]' contains "Le recalcul démarrera immédiatement."
+    And  I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]' contains "Annuler"
+    And  I expect the HTML element '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]' contains "Recalculer"
+
+    ## 180 Recompute rights - cancelling closes the dialog
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_cancel"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+
+    ## 181 Recompute rights - confirming computes the rights of the account on the deployed applications
+    # Publishes the policies of the seeded applications on OPA: the recomputation of an account only computes its rights
+    # on the deployed applications. An application already deployed by the scheduled deployment is left as it is
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e001/deploy' with method 'POST'
+    Then I expect status code is 200
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e002/deploy' with method 'POST'
+    Then I expect status code is 200
+    When I request '{{env.E2E_API_URL}}/applications/00000000-0000-4000-8000-00000000e003/deploy' with method 'POST'
+    Then I expect status code is 200
+
+    # The account has no rights yet: the rows read below can only come from this recomputation. helpdesk is left out, its
+    # recomputation by ApplicationDetailsPage.feature writing the rights of all the accounts
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "SELECT cpr_id FROM computed_rights WHERE act_id = '00000000-0000-4000-8000-00000000a004' AND app_id IN ('00000000-0000-4000-8000-00000000e001', '00000000-0000-4000-8000-00000000e002')"
+    Then  I expect 0 database results
+
+    When I click on '[data-cy="confirm-dialog-button"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' to be visible
+    When I click on '[data-cy="confirmation_dialog"] [data-cy="button_confirm"]'
+    Then I expect the HTML element '[data-cy="confirmation_dialog"]' not exists
+    And  I expect the HTML element ".q-notification__message" to be visible
+    And  I expect the HTML element ".q-notification__message" contains "Recalcul des droits demandé."
+
+    # Waits for the end of the job, whose lock is held since the answer displayed by the notification: 3 is
+    # LockNamespaces.ACCOUNT_RECOMPUTE, and the key the hash code of the account UUID
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "sync_api"
+    When  I execute sql request "SELECT pg_advisory_lock(3, -2147426300)"
+    And   I execute sql request "SELECT pg_advisory_unlock(3, -2147426300)"
+
+    # The claims are compared as the text of the jsonb column, which sorts the keys by length. to_compute is false when
+    # the row holds the current checksums of the payload, of the script and of the claims template
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "SELECT app_code, allow, roles::text AS roles, claims::text AS claims, to_compute FROM computed_rights JOIN account_computed_rights_view USING (act_id, app_id) WHERE act_id = $1 AND app_code IN ('dev-platform', 'helpdesk', 'intranet') ORDER BY app_code" with values:
+      """
+      [
+        "00000000-0000-4000-8000-00000000a004"
+      ]
+      """
+    Then  I expect 3 database results
+
+    # dev-platform allows the group developers, and gives the role maintainer to Division A1
+    And   I expect '{{ctx.dbResults[0].app_code}}' is 'dev-platform'
+    And   I expect '{{ctx.dbResults[0].allow}}' is 'true'
+    And   I expect '{{ctx.dbResults[0].roles}}' is '["developer", "maintainer"]'
+    And   I expect '{{ctx.dbResults[0].claims}}' is '{"uid": "user3", "teams": ["Division A1", "Team Beta"], "groups": ["all-staff", "developers"], "allowed": true}'
+    And   I expect '{{ctx.dbResults[0].to_compute}}' is 'false'
+
+    # helpdesk gives the signal allow to the group all-staff, but force_disallow prevails for the group developers
+    And   I expect '{{ctx.dbResults[1].app_code}}' is 'helpdesk'
+    And   I expect '{{ctx.dbResults[1].allow}}' is 'false'
+    And   I expect '{{ctx.dbResults[1].roles}}' is '[]'
+    And   I expect '{{ctx.dbResults[1].claims}}' is '{"login": "user3@example.com", "allowed": false, "profiles": []}'
+    And   I expect '{{ctx.dbResults[1].to_compute}}' is 'false'
+
+    # intranet allows Team Beta, and gives the role editor to the group developers
+    And   I expect '{{ctx.dbResults[2].app_code}}' is 'intranet'
+    And   I expect '{{ctx.dbResults[2].allow}}' is 'true'
+    And   I expect '{{ctx.dbResults[2].roles}}' is '["editor", "reader"]'
+    And   I expect '{{ctx.dbResults[2].claims}}' is '{"sub": "user3", "email": "user3@example.com", "roles": ["editor", "reader"]}'
+    And   I expect '{{ctx.dbResults[2].to_compute}}' is 'false'

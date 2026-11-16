@@ -1,51 +1,48 @@
 -- All users are created by account admin. The admin row uses a deterministic
 -- UUID so other rows can reference it directly through created_by / updated_by.
 INSERT
-INTO accounts (act_id, external_id, email, lastname, firstname, payload,
-               checksum, created_by, updated_by)
+INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
 VALUES ('00000000-0000-4000-8000-00000000a001', 'admin',
         'admin@example.com', 'admin_ln', 'admin_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a002', 'user1', 'user1@example.com', 'user1_ln', 'user1_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a003', 'user2', 'user2@example.com', 'user2_ln', 'user2_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a004', 'user3', 'user3@example.com', 'user3_ln', 'user3_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a005', 'user4', 'user4@example.com', 'user4_ln', 'user4_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a006', 'user5', 'user5@example.com', 'user5_ln', 'user5_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a007', 'user6', 'user6@example.com', 'user6_ln', 'user6_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a008', 'user7', 'user7@example.com', 'user7_ln', 'user7_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a009', 'user8', 'user8@example.com', 'user8_ln', 'user8_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a010', 'user9', 'user9@example.com', 'user9_ln', 'user9_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000a011', 'user10', 'user10@example.com', 'user10_ln', 'user10_fn',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (email) DO NOTHING;
+
+-- Technical account of sync-api, recorded as the author of its writes. Its
+-- UUID is the SYNC_TECHNICAL_ACCOUNT_ID of the dev and e2e environments.
+INSERT
+INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000a012', 'sync-api', 'sync-api@example.com', 'API', 'Sync',
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
@@ -65,76 +62,61 @@ ON CONFLICT (code) DO NOTHING;
 -- expressed relatively to now() so the cases stay valid regardless of when
 -- the test environment is rebuilt.
 INSERT
-INTO accounts (act_id, external_id, email, lastname, firstname, payload,
-               checksum, created_by, updated_by)
+INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
 VALUES ('00000000-0000-4000-8000-0000000000c1', 'lifecycle-c1',
         'lifecycle-c1@example.com', 'FutureStart', 'Inactive',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c2', 'lifecycle-c2',
         'lifecycle-c2@example.com', 'NotActivated', 'Inactive',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c3', 'lifecycle-c3',
         'lifecycle-c3@example.com', 'NoEnd', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c4', 'lifecycle-c4',
         'lifecycle-c4@example.com', 'EndFar', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c5', 'lifecycle-c5',
         'lifecycle-c5@example.com', 'EndSoon', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c6', 'lifecycle-c6',
         'lifecycle-c6@example.com', 'NoEndSuspending', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c7', 'lifecycle-c7',
         'lifecycle-c7@example.com', 'EndFarSuspending', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c8', 'lifecycle-c8',
         'lifecycle-c8@example.com', 'EndSoonSuspending', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000c9', 'lifecycle-c9',
         'lifecycle-c9@example.com', 'NoEnd', 'Suspended',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000000a', 'lifecycle-c10',
         'lifecycle-c10@example.com', 'WithSuspensionEnd', 'Suspended',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000000b', 'lifecycle-c11',
         'lifecycle-c11@example.com', 'EndFar', 'Suspended',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-00000000000c', 'lifecycle-c12',
         'lifecycle-c12@example.com', 'EndSoon', 'Suspended',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000cd', 'lifecycle-c13',
         'lifecycle-c13@example.com', 'Deactivated', 'Inactive',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000ce', 'lifecycle-c14',
         'lifecycle-c14@example.com', 'DeactivatedReactivatable', 'Inactive',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
@@ -305,51 +287,41 @@ ON CONFLICT (act_id) DO NOTHING;
 -- One account per dialog group, with deterministic UUIDs for e2e targeting.
 -- Each account exposes the minimum required state to trigger the listed dialogs.
 INSERT
-INTO accounts (act_id, external_id, email, lastname, firstname, payload,
-               checksum, created_by, updated_by)
+INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
 VALUES ('00000000-0000-4000-8000-0000000000d1', 'dialog-d1',
         'dialog-d1@example.com', 'ActivationDialogs', 'Inactive',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d2', 'dialog-d2',
         'dialog-d2@example.com', 'SuspDeactDialogs', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d3', 'dialog-d3',
         'dialog-d3@example.com', 'DeactImmediateDialog', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d4', 'dialog-d4',
         'dialog-d4@example.com', 'ReactivImmediate', 'Suspended',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d5', 'dialog-d5',
         'dialog-d5@example.com', 'ActScheduledDialog', 'Inactive',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d6', 'dialog-d6',
         'dialog-d6@example.com', 'DeactScheduled', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d7', 'dialog-d7',
         'dialog-d7@example.com', 'ModifyDeact', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d8', 'dialog-d8',
         'dialog-d8@example.com', 'SuspScheduled', 'Active',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001'),
        ('00000000-0000-4000-8000-0000000000d9', 'dialog-d9',
         'dialog-d9@example.com', 'ModifySusp', 'Suspended',
-        '{}'::jsonb, encode(digest('{}', 'sha256'), 'hex'),
         '00000000-0000-4000-8000-00000000a001',
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
@@ -826,5 +798,132 @@ $$
                ('00000000-0000-4000-8000-000000009005', user4_id, admin_id, admin_id)
         ON CONFLICT (grp_id, act_id) DO NOTHING;
 
+    END
+$$;
+
+-- Applications with roles, enabled rules, a script and a claims template, whose
+-- rights are read by the e2e scenarios. UUIDs are deterministic so that the
+-- scenarios can target them directly through /applications/{id}. deployed_at stays
+-- NULL: linid-api publishes the policies on OPA, as for any pending application.
+DO
+$$
+    DECLARE
+        admin_id      UUID := '00000000-0000-4000-8000-00000000a001';
+        -- Text around the rules in the template opa-policy.rego.j2 of linid-api: it must
+        -- stay identical, so that the API generates the same script from these rules.
+        script_header TEXT := $rego$
+
+import rego.v1
+
+# Shared state contributed to by rule fragments through partial set rules.
+# Fragments must only "contains" values into these sets; they must never reassign them.
+signals contains signal if {
+    some signal in []
+}
+
+roles contains role if {
+    some role in []
+}
+
+$rego$;
+        script_footer TEXT := $rego$
+# Fixed resolution block owned by the template. Fragments must not redefine these rules.
+default final_allow := false
+
+final_allow if {
+    not "force_disallow" in signals
+    "force_allow" in signals
+}
+
+final_allow if {
+    not "force_disallow" in signals
+    not "force_allow" in signals
+    "allow" in signals
+}
+
+result := {
+    "allow": final_allow,
+    "roles": roles
+}
+$rego$;
+    BEGIN
+        -- =========================================================
+        -- 1. APPLICATIONS
+        -- =========================================================
+        INSERT INTO applications (app_id, code, name, description, domain, type, claims_template,
+                                  claims_template_checksum, created_by, updated_by)
+        SELECT seed.app_id::UUID, seed.code, seed.name, seed.description, seed.domain, 'OIDC', seed.claims_template,
+               encode(sha256(convert_to(seed.claims_template, 'UTF8')), 'hex'), admin_id, admin_id
+        FROM (VALUES ('00000000-0000-4000-8000-00000000e001', 'intranet', 'Intranet',
+                      'Intranet of the organization.', 'Collaboration',
+                      '{ "sub": {{ payload.external_id | tojson }}, "email": {{ payload.email | tojson }}, "roles": {{ roles | tojson }} }'),
+                     ('00000000-0000-4000-8000-00000000e002', 'dev-platform', 'Development platform',
+                      'Source code and continuous integration platform.', 'Engineering',
+                      '{ "uid": {{ payload.external_id | tojson }}, "teams": {{ payload.organizational_units | tojson }}, "groups": {{ payload.groups | tojson }}, "allowed": {{ allow | tojson }} }'),
+                     ('00000000-0000-4000-8000-00000000e003', 'helpdesk', 'Helpdesk',
+                      'User support ticketing tool.', 'Support',
+                      '{ "login": {{ payload.email | tojson }}, "allowed": {{ allow | tojson }}, "profiles": {{ roles | tojson }} }'))
+                 AS seed (app_id, code, name, description, domain, claims_template)
+        ON CONFLICT (code) DO NOTHING;
+
+        -- =========================================================
+        -- 2. APPLICATION ROLES
+        -- =========================================================
+        INSERT INTO application_roles (app_id, name, description, created_by, updated_by)
+        VALUES ('00000000-0000-4000-8000-00000000e001', 'reader', 'Reads the intranet.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e001', 'editor', 'Publishes on the intranet.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e002', 'developer', 'Works on the projects.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e002', 'maintainer', 'Maintains the projects.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e003', 'agent', 'Handles the tickets.', admin_id, admin_id),
+               ('00000000-0000-4000-8000-00000000e003', 'requester', 'Opens tickets.', admin_id, admin_id)
+        ON CONFLICT (app_id, name) DO NOTHING;
+
+        -- =========================================================
+        -- 3. APPLICATION RULES
+        -- The rules read the payload built by sync-api. helpdesk also
+        -- covers force_allow, and force_disallow prevailing over allow.
+        -- =========================================================
+        INSERT INTO application_rules (app_id, code, description, priority, script, script_checksum, disabled,
+                                       created_by, updated_by)
+        SELECT seed.app_id::UUID, seed.code, seed.description, seed.priority, seed.script,
+               encode(sha256(convert_to(seed.script, 'UTF8')), 'hex'), false, admin_id, admin_id
+        FROM (VALUES ('00000000-0000-4000-8000-00000000e001', 'ALLOW_TEAM_BETA', 'Allows the members of Team Beta.', 1,
+                      'signals contains "allow" if "Team Beta" in input.organizational_units'),
+                     ('00000000-0000-4000-8000-00000000e001', 'ROLE_READER', 'Team Beta reads the intranet.', 2,
+                      'roles contains "reader" if "Team Beta" in input.organizational_units'),
+                     ('00000000-0000-4000-8000-00000000e001', 'ROLE_EDITOR', 'The developers publish.', 3,
+                      'roles contains "editor" if "developers" in input.groups'),
+                     ('00000000-0000-4000-8000-00000000e002', 'ALLOW_DEVELOPERS', 'Allows the developers.', 1,
+                      E'signals contains "allow" if "developers" in input.groups\nroles contains "developer" if "developers" in input.groups'),
+                     ('00000000-0000-4000-8000-00000000e002', 'ROLE_MAINTAINER', 'Division A1 maintains the projects.', 2,
+                      'roles contains "maintainer" if "Division A1" in input.organizational_units'),
+                     ('00000000-0000-4000-8000-00000000e003', 'ALLOW_STAFF', 'Allows the staff and the support.', 1,
+                      E'signals contains "allow" if "all-staff" in input.groups\nsignals contains "allow" if "support" in input.groups\nroles contains "agent" if "support" in input.groups'),
+                     ('00000000-0000-4000-8000-00000000e003', 'FORCE_ALLOW_USER5', 'Forces the access of user5.', 2,
+                      E'signals contains "force_allow" if input.email == "user5@example.com"\nroles contains "requester" if input.email == "user5@example.com"'),
+                     ('00000000-0000-4000-8000-00000000e003', 'FORCE_DISALLOW_DEVELOPERS', 'Refuses the developers.', 3,
+                      'signals contains "force_disallow" if "developers" in input.groups'))
+                 AS seed (app_id, code, description, priority, script)
+        ON CONFLICT (app_id, code) DO NOTHING;
+
+        -- =========================================================
+        -- 4. APPLICATION SCRIPTS
+        -- =========================================================
+        UPDATE applications
+        SET script          = rendered.script,
+            script_checksum = encode(sha256(convert_to(rendered.script, 'UTF8')), 'hex')
+        FROM (SELECT app.app_id,
+                     'package authz["' || app.code || '"]' || script_header
+                         || string_agg(E'\n' || rule.script || E'\n\n', '' ORDER BY rule.priority)
+                         || script_footer AS script
+              FROM applications app
+                       JOIN application_rules rule ON rule.app_id = app.app_id
+              WHERE app.app_id IN ('00000000-0000-4000-8000-00000000e001',
+                                   '00000000-0000-4000-8000-00000000e002',
+                                   '00000000-0000-4000-8000-00000000e003')
+                AND NOT rule.disabled
+              GROUP BY app.app_id, app.code) AS rendered
+        WHERE applications.app_id = rendered.app_id
+          AND applications.script IS NULL;
     END
 $$;

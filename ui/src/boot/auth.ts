@@ -25,11 +25,11 @@
  */
 
 import {
-  useLinidUserStore,
-  useLinidUserPreference,
-} from '@linagora/linid-im-front-corelib';
-import { defineBoot } from '@quasar/app-vite/wrappers';
+  useLinPulsarUserStore,
+  useLinPulsarUserPreference,
+} from '@linagora/lin-pulsar-core';
 import { getLoginUrl, getUserClaims } from 'src/services/AuthService';
+import { defineBoot } from '#q-app';
 
 export default defineBoot(async () => {
   const claims = await getUserClaims();
@@ -41,8 +41,8 @@ export default defineBoot(async () => {
     await new Promise<never>(() => {});
   }
 
-  const userStore = useLinidUserStore();
-  const { init } = useLinidUserPreference();
+  const userStore = useLinPulsarUserStore();
+  const { init } = useLinPulsarUserPreference();
 
   userStore.setUserFromClaims(claims);
   await init();

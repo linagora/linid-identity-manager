@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the **deletion of an organizational unit relation**, which left in `organizational_unit_closures` the paths
   from the former ancestors to the child and its descendants: they are now rebuilt from
   `organizational_unit_relations`, keeping the paths still reached through another parent.
+- Refused to delete a functional role still held by an account, instead of silently removing it from that account.
 
 ## [0.12.0] - 2026-11-16
 

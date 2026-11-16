@@ -97,7 +97,7 @@ public class OrganizationalUnitAccount extends AbstractEntity {
 
     /**
      * Identifier of the functional role held by the account within the organizational unit.
-     * {@code null} when the role has been deleted or was never assigned.
+     * {@code null} when the role was never assigned.
      */
     @Column(name = "rol_id")
     @FilterType(type = UUID.class)

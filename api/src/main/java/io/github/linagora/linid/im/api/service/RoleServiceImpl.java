@@ -159,15 +159,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
-        RoleDistinctView role = findById(userPrincipal, id);
+        findById(userPrincipal, id);
 
-        if (!role.isDeletable()) {
-            throw new ApiException(
-                    HttpStatus.BAD_REQUEST.value(),
-                    I18nMessage.of("error.role.in_use", Map.of("id", id.toString()))
-            );
-        }
-
+        // The foreign key decides, not roles_view.deletable: the view only sees the caller's rows under RLS.
         try {
             roleRepository.deleteById(id);
             // Flush so the foreign key violation surfaces here rather than at commit time.

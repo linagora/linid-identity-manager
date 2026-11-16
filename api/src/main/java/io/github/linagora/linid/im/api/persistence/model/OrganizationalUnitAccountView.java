@@ -256,7 +256,7 @@ public class OrganizationalUnitAccountView extends AbstractViewEntity {
 
     /**
      * Identifier of the functional role held by the account within the organizational unit.
-     * {@code null} when the role has been deleted or was never assigned.
+     * {@code null} when the role was never assigned.
      */
     @Column(name = "role_id")
     @FilterType(type = UUID.class)
@@ -268,7 +268,7 @@ public class OrganizationalUnitAccountView extends AbstractViewEntity {
 
     /**
      * Human-readable name of the functional role held by the account within the organizational unit.
-     * {@code null} when the role has been deleted or was never assigned.
+     * {@code null} when the role was never assigned.
      */
     @Column(name = "role_name")
     @FilterType(type = String.class)

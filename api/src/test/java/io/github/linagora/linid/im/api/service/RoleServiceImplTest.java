@@ -344,28 +344,23 @@ class RoleServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw ApiException 400 when deleting a role held by an account")
-    void testDeleteById_shouldThrow400WhenHeld() {
+    @DisplayName("Should delete role even when the view marks it as not deletable")
+    void testDeleteById_shouldIgnoreViewDeletableFlag() {
         UUID id = UUID.randomUUID();
         var entity = createSampleRoleView(id);
         entity.setDeletable(false);
 
         when(roleDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(entity));
 
-        ApiException exception = assertThrows(
-                ApiException.class,
-                () -> roleService.deleteById(userPrincipal, id)
-        );
+        roleService.deleteById(userPrincipal, id);
 
-        assertEquals(HttpStatus.BAD_REQUEST.value(), exception.getStatusCode());
-        assertEquals("error.role.in_use", exception.getError().key());
-
-        verify(roleRepository, never()).deleteById(any(UUID.class));
+        verify(roleRepository).deleteById(id);
+        verify(roleRepository).flush();
     }
 
     @Test
-    @DisplayName("Should throw ApiException 400 when the database rejects deleting a role held by a hidden account")
-    void testDeleteById_shouldThrow400WhenForeignKeyViolated() {
+    @DisplayName("Should throw ApiException 400 when the database rejects the role deletion")
+    void testDeleteById_shouldThrow400WhenDatabaseRejectsDeletion() {
         UUID id = UUID.randomUUID();
         var entity = createSampleRoleView(id);
 

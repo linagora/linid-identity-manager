@@ -34,11 +34,12 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.Map;
 import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Request payload for creating a new account.
  *
- * @param externalId     external identifier (e.g. OIDC sub)
+ * @param externalId     external identifier (e.g. OIDC sub), trimmed
  * @param lastname       last name of the account holder
  * @param firstname      first name of the account holder
  * @param email          email address, must be valid format
@@ -74,4 +75,12 @@ public record AccountRecord(
     @Schema(description = "Additional deployment-specific attributes stored as JSON")
     Map<String, Object> extraParameters
 ) {
+
+    /**
+     * Trims the external identifier: the authentication matches it exactly against the {@code sub} claim of the
+     * access token, so a stray space would lock the account holder out.
+     */
+    public AccountRecord {
+        externalId = StringUtils.trim(externalId);
+    }
 }

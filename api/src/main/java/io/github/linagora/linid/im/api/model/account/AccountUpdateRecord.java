@@ -31,11 +31,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Request payload for updating the editable attributes of an existing account.
  *
- * @param externalId      external identifier (e.g. OIDC sub)
+ * @param externalId      external identifier (e.g. OIDC sub), trimmed
  * @param lastname        last name of the account holder
  * @param firstname       first name of the account holder
  * @param email           email address, must be valid format
@@ -58,4 +59,13 @@ public record AccountUpdateRecord(
     @Schema(description = "Additional deployment-specific attributes stored as JSON")
     Map<String, Object> extraParameters
 ) {
+
+    /**
+     * Trims the external identifier before it is validated, checked for uniqueness and saved: the authentication
+     * matches it exactly against the {@code sub} claim of the access token, so a stray space would lock the account
+     * holder out.
+     */
+    public AccountUpdateRecord {
+        externalId = StringUtils.trim(externalId);
+    }
 }

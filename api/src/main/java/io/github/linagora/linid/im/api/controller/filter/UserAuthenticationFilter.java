@@ -34,6 +34,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -51,15 +52,21 @@ import java.util.Optional;
 /**
  * Filter that authenticates incoming HTTP requests based on JWT tokens.
  *
- * <p>This filter extracts the JWT from the security context, validates it, retrieves the corresponding
- * {@link UserPrincipal} and sets the authentication in the security context.
+ * <p>This filter extracts the JWT from the security context, resolves the account whose {@code external_id}
+ * matches its {@code sub} claim and sets the corresponding {@link UserPrincipal} in the security context.
+ * The account is never resolved from the {@code email} claim: some identity providers let users change their own
+ * email address, which would let them authenticate as the account holding it, whereas only the identity provider
+ * sets the subject.
  *
  * <p>When a token is presented but no account matches it, the request fails through the
  * {@link AuthenticationEntryPoint} with a {@code 401} response, as a bearer token rejected by the resource
- * server would. Without credentials the request goes down the chain, which issues the standard challenge.
+ * server would. A warning with the subject of the token is logged, since an {@code external_id} that differs
+ * from the subject at the identity provider would otherwise end in a {@code 401} that leaves no trace. Without
+ * credentials the request goes down the chain, which issues the standard challenge.
  *
  * <p>Extends {@link OncePerRequestFilter} to ensure that this filter is executed once per request.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class UserAuthenticationFilter extends OncePerRequestFilter {
 
@@ -86,10 +93,11 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        Optional<String> email = emailOf(authentication).filter(StringUtils::isNotBlank);
-        Optional<Account> account = email.flatMap(accountService::getAccountByEmail);
+        Optional<String> subject = subjectOf(authentication).filter(StringUtils::isNotBlank);
+        Optional<Account> account = subject.flatMap(accountService::getAccountByExternalId);
 
         if (account.isEmpty()) {
+            log.warn("No account matches the subject of the access token (sub={})", subject.orElse(null));
             SecurityContextHolder.clearContext();
             entryPoint.commence(request, response, new InvalidBearerTokenException(""));
             return;
@@ -97,7 +105,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
 
         UserPrincipal user = new UserPrincipal();
         user.setId(account.get().getId());
-        user.setEmail(email.get());
+        user.setEmail(account.get().getEmail());
 
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken(user, null, List.of())
@@ -107,14 +115,14 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Returns the {@code email} claim of the JWT held by the given authentication.
+     * Returns the {@code sub} claim of the JWT held by the given authentication.
      *
      * @param authentication the current authentication
-     * @return the email claim, empty when the principal is not a JWT or the claim is missing
+     * @return the subject, empty when the principal is not a JWT or the claim is missing
      */
-    private static Optional<String> emailOf(final Authentication authentication) {
+    private static Optional<String> subjectOf(final Authentication authentication) {
         if (authentication.getPrincipal() instanceof Jwt jwt) {
-            return Optional.ofNullable(jwt.getClaimAsString("email"));
+            return Optional.ofNullable(jwt.getSubject());
         }
 
         return Optional.empty();

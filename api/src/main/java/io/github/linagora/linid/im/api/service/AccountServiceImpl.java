@@ -330,12 +330,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Account> getAccountByEmail(final String email) {
-        if (StringUtils.isBlank(email)) {
+    public Optional<Account> getAccountByExternalId(final String externalId) {
+        if (StringUtils.isBlank(externalId)) {
             return Optional.empty();
         }
 
-        return accountRepository.findAccountByEmail(email.toLowerCase());
+        return accountRepository.findAccountByExternalId(externalId);
     }
 
     @Override

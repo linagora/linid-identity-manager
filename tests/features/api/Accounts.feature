@@ -8,6 +8,7 @@ Feature: Test API Account endpoints
   ## 102 Should return 401 when an ID token is used as bearer
   ## 103 Should return 401 when the token is valid but no account matches
   ## 104 Should return 401 without any Authorization header
+  ## 105 Should return 401 when the token carries the email of an account but not its subject
 
   ################## Create (POST /accounts) ##############
   ## 201 Should create an account with valid data
@@ -146,6 +147,25 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
     Then  I expect status code is 401
     And   I expect http header 'WWW-Authenticate' contains 'Bearer'
+
+  Scenario: 105 - Should return 401 when the token carries the email of an account but not its subject
+    Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
+    And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
+      """
+      grant_type=password&username=impostor&password=password&scope=openid email profile roles
+      """
+    Then  I expect status code is 200
+    And   I set http header 'Authorization' with 'Bearer {{response.body.access_token}}'
+    And   I set http header 'Content-Type' with 'application/json'
+    # The SSO gives impostor the email of admin, but no account has its subject
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/userinfo' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.email}}' is 'admin@example.com'
+    And   I expect '{{response.body.sub}}' is 'impostor'
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
 
   ####################################################
   ################## Create (POST /accounts) ##########

@@ -10,3 +10,5 @@ INSERT INTO lemonldap_accounts (username, password, cn, mail, roles) VALUES ('ad
 INSERT INTO lemonldap_accounts (username, password, cn, mail, roles) VALUES ('user1', 'password', 'user1 name', 'user1@example.com', 'user');
 INSERT INTO lemonldap_accounts (username, password, cn, mail, roles) VALUES ('user2', 'password', 'user2 name', 'user2@example.com', 'user');
 INSERT INTO lemonldap_accounts (username, password, cn, mail, roles) VALUES ('noaccount', 'password', 'noaccount name', 'noaccount@example.com', 'user');
+-- Carries the email of admin on purpose: no LinID account has its subject, so the API must reject its tokens.
+INSERT INTO lemonldap_accounts (username, password, cn, mail, roles) VALUES ('impostor', 'password', 'impostor name', 'admin@example.com', 'user');

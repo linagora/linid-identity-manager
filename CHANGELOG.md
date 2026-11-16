@@ -14,6 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
   `email` and `roles` claims.
 
+### Fixed
+
+#### Security
+
+- Resolved the authenticated account from the **`sub` claim** of the access token, matched against
+  `accounts.external_id`, instead of the `email` claim, which could be changed to impersonate another account. The
+  `sub` claim issued by the OIDC provider must equal the `external_id` of the account, otherwise its requests get
+  `401 Unauthorized`.
+- Made the **external identifier** of an account read-only once the account is created: `PUT /accounts/{id}` ignores
+  `externalId` and the account edit dialog no longer shows it, since an account administrator could otherwise bind an
+  account to the subject of another one and act with its rights. A database administrator can still fix a wrong
+  `external_id` with an SQL `UPDATE`, described in `docs/configuration/authentication/oidc.md`.
+
 ## [0.12.0] - 2026-11-16
 
 ### Added

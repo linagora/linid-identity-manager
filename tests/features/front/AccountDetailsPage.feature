@@ -68,7 +68,7 @@ Feature: Test Account details page display
   ## 165 Immediate revalidation - cancel button closes the dialog
   ## 166 Scheduled revalidation - dialog opens with an end date and a mandatory justification field
   ## 167 Scheduled revalidation - success, account re-validated after form submission
-  ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
+  ## 168 Edit account - dialog pre-filled, save updates names and email, identifier not editable
   ## 169 Should display the organizational units card of the account
   ## 170 Should list every organizational unit of the account exactly once
   ## 171 Should display the groups card of the account
@@ -938,7 +938,7 @@ Feature: Test Account details page display
     And  I expect the HTML element ".q-notification__message" to be visible
     And  I expect the HTML element ".q-notification__message" contains "Le compte sera réactivé à partir du"
 
-    ## 168 Edit account - dialog pre-filled, save updates identifier, names and email
+    ## 168 Edit account - dialog pre-filled, save updates names and email, identifier not editable
     Given I set http header 'Content-Type' with 'application/json'
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
@@ -982,19 +982,20 @@ Feature: Test Account details page display
 
     When I click on '[data-cy="entity-profile-panel_edit-button"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
+    # The identifier is fixed at creation: the authentication resolves the account from it
+    And  I expect the HTML element '[data-cy="form-dialog"] [data-cy="field_externalId"]' not exists
 
     # Clearing a required field displays the validation message
     When I clear the text in the HTML element '[data-cy="field_email"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' contains "Ce champ est requis."
 
-    When I set the text "edited-id" in the HTML element '[data-cy="field_externalId"]'
-    And  I set the text "Edwina" in the HTML element '[data-cy="field_firstname"]'
+    When I set the text "Edwina" in the HTML element '[data-cy="field_firstname"]'
     And  I set the text "Edited" in the HTML element '[data-cy="field_lastname"]'
     And  I set the text "edited@example.com" in the HTML element '[data-cy="field_email"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element ".q-notification__message" contains "Le compte a été mis à jour avec succès."
-    And  I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "edited-id"
+    And  I expect the HTML element '[data-cy="information-card--externalId"] [data-cy="value"]' contains "edit-me"
     And  I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "Edwina Edited"
     And  I expect the HTML element '[data-cy="entity-profile-panel_subtitle"]' contains "edited@example.com"
 

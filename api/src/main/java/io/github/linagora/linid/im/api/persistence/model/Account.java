@@ -72,8 +72,11 @@ public class Account extends AbstractEntity {
 
     /**
      * External identifier (e.g. OIDC sub or external system ID).
+     *
+     * <p>Fixed at creation: the column is excluded from every {@code UPDATE} issued by Hibernate,
+     * so a change made to this field on a managed entity is silently not persisted.</p>
      */
-    @Column(name = "external_id", nullable = false)
+    @Column(name = "external_id", nullable = false, updatable = false)
     @FilterType(type = String.class)
     private String externalId;
 

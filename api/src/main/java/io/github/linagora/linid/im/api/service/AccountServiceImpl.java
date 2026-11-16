@@ -306,16 +306,6 @@ public class AccountServiceImpl implements AccountService {
                 );
             });
 
-        accountRepository.findAccountByExternalId(record.externalId())
-            .filter(other -> !other.getId().equals(accountId))
-            .ifPresent(other -> {
-                throw new ApiException(
-                    HttpStatus.BAD_REQUEST.value(),
-                    I18nMessage.of("error.account.external_id_already_used",
-                        Map.of("externalId", record.externalId()))
-                );
-            });
-
         accountMapper.applyUpdate(account, record, userPrincipal.getId());
         accountRepository.saveAndFlush(account);
 

@@ -123,10 +123,9 @@ public interface AccountService {
     void existsById(UserPrincipal userPrincipal, UUID id);
 
     /**
-     * Updates the editable attributes ({@code externalId}, {@code lastname}, {@code firstname},
-     * {@code email} and, when provided, {@code extraParameters}) of the account with the given
-     * identifier. An email or external identifier already used by another account is rejected with
-     * an HTTP 400 error.
+     * Updates the editable attributes ({@code lastname}, {@code firstname}, {@code email} and, when
+     * provided, {@code extraParameters}) of the account with the given identifier. An email already
+     * used by another account is rejected with an HTTP 400 error.
      *
      * @param userPrincipal the authenticated user
      * @param accountId     the account UUID

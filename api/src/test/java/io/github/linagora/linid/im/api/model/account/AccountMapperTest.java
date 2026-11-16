@@ -41,7 +41,7 @@ class AccountMapperTest {
     private final AccountMapper mapper = new AccountMapperImpl();
 
     @Test
-    @DisplayName("applyUpdate should write only the editable fields and the updater identifier")
+    @DisplayName("applyUpdate should write only the editable fields and the updater identifier, never the external id")
     void testApplyUpdate_shouldWriteEditableFieldsOnly() {
         UUID accountId = UUID.randomUUID();
         UUID creatorId = UUID.randomUUID();
@@ -54,11 +54,11 @@ class AccountMapperTest {
         account.setEmail("john@example.com");
         account.setCreatedBy(creatorId);
         account.setUpdatedBy(creatorId);
-        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        var record = new AccountUpdateRecord("Smith", "Jane", "jane@example.com", null);
 
         mapper.applyUpdate(account, record, updaterId);
 
-        assertEquals("ext-002", account.getExternalId());
+        assertEquals("ext-001", account.getExternalId());
         assertEquals("Smith", account.getLastname());
         assertEquals("Jane", account.getFirstname());
         assertEquals("jane@example.com", account.getEmail());
@@ -75,13 +75,12 @@ class AccountMapperTest {
         account.setExtraParameters(Map.of("kept", "value"));
 
         mapper.applyUpdate(account,
-            new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null),
+            new AccountUpdateRecord("Smith", "Jane", "jane@example.com", null),
             updaterId);
         assertEquals(Map.of("kept", "value"), account.getExtraParameters());
 
         mapper.applyUpdate(account,
-            new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com",
-                Map.of("updated", true)),
+            new AccountUpdateRecord("Smith", "Jane", "jane@example.com", Map.of("updated", true)),
             updaterId);
         assertEquals(Map.of("updated", true), account.getExtraParameters());
     }

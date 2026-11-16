@@ -72,9 +72,9 @@ public interface AccountMapper {
      * Applies the editable fields of an {@link AccountUpdateRecord} to an existing {@link Account}
      * entity.
      *
-     * <p>Only {@code externalId}, {@code lastname}, {@code firstname}, {@code email},
-     * {@code extraParameters} and the updater's identifier ({@code updatedBy}) are written; every
-     * other field, including the audit timestamps managed by the database, is left untouched.
+     * <p>Only {@code lastname}, {@code firstname}, {@code email}, {@code extraParameters} and the
+     * updater's identifier ({@code updatedBy}) are written; every other field, including
+     * {@code externalId} and the audit timestamps managed by the database, is left untouched.
      * {@code extraParameters} is only written when present in the record, so callers that do not
      * send it — such as the profile panel edition dialog — preserve the stored value.</p>
      *
@@ -88,7 +88,7 @@ public interface AccountMapper {
     @Mapping(target = "createdBy", ignore = true)
     @Mapping(target = "insertDate", ignore = true)
     @Mapping(target = "updateDate", ignore = true)
-    @Mapping(target = "externalId", source = "record.externalId")
+    @Mapping(target = "externalId", ignore = true)
     @Mapping(target = "lastname", source = "record.lastname")
     @Mapping(target = "firstname", source = "record.firstname")
     @Mapping(target = "email", source = "record.email")

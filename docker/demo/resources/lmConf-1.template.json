@@ -34,7 +34,6 @@
     "linid-im": {
       "email": "mail",
       "name": "cn",
-      "sub": "uid",
       "preferred_username": "uid",
       "roles": "roles"
     }

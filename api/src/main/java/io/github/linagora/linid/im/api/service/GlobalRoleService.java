@@ -28,7 +28,11 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleViewQueryFilterDto;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service interface for global role management operations.
@@ -47,4 +51,28 @@ public interface GlobalRoleService {
      * @return the created {@link GlobalRole}
      */
     GlobalRole create(UserPrincipal userPrincipal, UUID accountId, String role);
+
+    /**
+     * Retrieves a paginated list of global roles, optionally filtered.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination information
+     * @return a page of {@link GlobalRoleView}
+     */
+    Page<GlobalRoleView> findAll(UserPrincipal userPrincipal, GlobalRoleViewQueryFilterDto filters, Pageable pageable);
+
+    /**
+     * Retrieves a paginated list of the global roles held by an account, optionally filtered.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param filters       generated filter DTO from query parameters, restricted to the account
+     * @param pageable      pagination information
+     * @return a page of {@link GlobalRoleView}
+     */
+    Page<GlobalRoleView> findAllByAccountId(UserPrincipal userPrincipal,
+                                            UUID accountId,
+                                            GlobalRoleViewQueryFilterDto filters,
+                                            Pageable pageable);
 }

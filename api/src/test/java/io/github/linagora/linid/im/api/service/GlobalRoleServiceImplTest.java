@@ -28,18 +28,26 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GlobalRoleRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GlobalRoleViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,6 +63,9 @@ class GlobalRoleServiceImplTest {
 
     @Mock
     private GlobalRoleRepository globalRoleRepository;
+
+    @Mock
+    private GlobalRoleViewRepository globalRoleViewRepository;
 
     @Mock
     private AccountRepository accountRepository;
@@ -153,5 +164,54 @@ class GlobalRoleServiceImplTest {
 
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.global_role.already_assigned", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("findAll should delegate to the global role view repository")
+    void testFindAll_shouldDelegateToRepository() {
+        var entity = GlobalRoleView.builder().id(UUID.randomUUID()).role(GlobalRoleEnum.GROUPS_ADMIN).build();
+        when(globalRoleViewRepository.findAll(
+            ArgumentMatchers.<Specification<GlobalRoleView>>any(),
+            ArgumentMatchers.any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        var result = service.findAll(userPrincipal, new GlobalRoleViewQueryFilterDto(), Pageable.unpaged());
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(entity.getId(), result.getContent().getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("findAllByAccountId should restrict the global roles to the account")
+    void testFindAllByAccountId_shouldRestrictToAccount() {
+        var accountId = UUID.randomUUID();
+        var filters = new GlobalRoleViewQueryFilterDto();
+        var entity = GlobalRoleView.builder().id(UUID.randomUUID()).accountId(accountId)
+            .role(GlobalRoleEnum.ROLES_AUDITOR).build();
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(globalRoleViewRepository.findAll(
+            ArgumentMatchers.<Specification<GlobalRoleView>>any(),
+            ArgumentMatchers.any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        var result = service.findAllByAccountId(userPrincipal, accountId, filters, Pageable.unpaged());
+
+        assertEquals(List.of(accountId.toString()), filters.getAccountId());
+        assertEquals(1, result.getTotalElements());
+        assertEquals(entity.getId(), result.getContent().getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("findAllByAccountId should throw a 404 when the account does not exist")
+    void testFindAllByAccountId_shouldThrowWhenAccountAbsent() {
+        var accountId = UUID.randomUUID();
+        var filters = new GlobalRoleViewQueryFilterDto();
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.findAllByAccountId(userPrincipal, accountId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
     }
 }

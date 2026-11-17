@@ -27,10 +27,12 @@
 package io.github.linagora.linid.im.api.model.globalrole;
 
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
 import org.mapstruct.Mapper;
 
 /**
- * MapStruct mapper responsible for converting {@link GlobalRole} entities into their DTO models.
+ * MapStruct mapper responsible for converting {@link GlobalRole} / {@link GlobalRoleView} entities into their
+ * DTO models.
  */
 @Mapper(componentModel = "spring")
 public interface GlobalRoleMapper {
@@ -42,4 +44,12 @@ public interface GlobalRoleMapper {
      * @return the mapped DTO
      */
     GlobalRoleDTO toDTO(GlobalRole globalRole);
+
+    /**
+     * Converts a {@link GlobalRoleView} entity into a {@link GlobalRoleViewDTO}.
+     *
+     * @param globalRoleView the source entity
+     * @return the mapped DTO
+     */
+    GlobalRoleViewDTO toDTO(GlobalRoleView globalRoleView);
 }

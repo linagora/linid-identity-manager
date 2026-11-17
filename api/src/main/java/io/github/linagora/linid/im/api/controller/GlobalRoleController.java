@@ -28,8 +28,10 @@ package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.globalrole.GlobalRoleDTO;
 import io.github.linagora.linid.im.api.model.globalrole.GlobalRoleMapper;
+import io.github.linagora.linid.im.api.model.globalrole.GlobalRoleViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.GlobalRoleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,15 +42,21 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST controller for global role management endpoints.
+ *
+ * <p>Provides the listing, assignment and removal of global roles, with pagination and filtering
+ * support via {@code spring-query-filter}.</p>
  */
 @Slf4j
 @RestController
@@ -65,6 +73,60 @@ public class GlobalRoleController {
      * Mapper for entity-to-DTO conversion.
      */
     private final GlobalRoleMapper globalRoleMapper;
+
+    /**
+     * Resolver for paginated response HTTP status.
+     */
+    private final PagedResponseStatusResolver pagedResponseStatusResolver;
+
+    /**
+     * Retrieves a paginated and optionally filtered list of global roles.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of global role view DTOs
+     */
+    @GetMapping("/global-roles")
+    @Operation(summary = "Get all global roles with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of global roles")
+    @ApiResponse(responseCode = "206", description = "Partial list of global roles (more pages available)")
+    public ResponseEntity<Page<GlobalRoleViewDTO>> findAll(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        final GlobalRoleViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request to list global roles with filters {} and pageable {}",
+            userPrincipal.getEmail(), filters, pageable);
+        var page = globalRoleService.findAll(userPrincipal, filters, pageable).map(globalRoleMapper::toDTO);
+        return pagedResponseStatusResolver.resolve(page);
+    }
+
+    /**
+     * Retrieves the global roles held by an account, with pagination and filtering.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the account UUID
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of global role view DTOs
+     */
+    @GetMapping("/accounts/{accountId}/global-roles")
+    @Operation(summary = "Get all global roles of an account with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of the account global roles")
+    @ApiResponse(responseCode = "206",
+        description = "Partial list of the account global roles (more pages available)")
+    @ApiResponse(responseCode = "404", description = "Account not found", content = @Content)
+    public ResponseEntity<Page<GlobalRoleViewDTO>> findAllByAccountId(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID accountId,
+        final GlobalRoleViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for account {} global roles with filters {} and pageable {}",
+            userPrincipal.getEmail(), accountId, filters, pageable);
+        var page = globalRoleService.findAllByAccountId(userPrincipal, accountId, filters, pageable)
+            .map(globalRoleMapper::toDTO);
+        return pagedResponseStatusResolver.resolve(page);
+    }
 
     /**
      * Assigns a global role to an account.

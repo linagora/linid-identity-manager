@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.globalrole.GlobalRoleDTO;
 import io.github.linagora.linid.im.api.model.globalrole.GlobalRoleMapper;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.GlobalRoleService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,12 +38,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,13 +61,16 @@ class GlobalRoleControllerTest {
     @Mock
     private GlobalRoleMapper globalRoleMapper;
 
+    @Mock
+    private PagedResponseStatusResolver pagedResponseStatusResolver;
+
     private GlobalRoleController controller;
 
     private UserPrincipal userPrincipal;
 
     @BeforeEach
     void setUp() {
-        controller = new GlobalRoleController(globalRoleService, globalRoleMapper);
+        controller = new GlobalRoleController(globalRoleService, globalRoleMapper, pagedResponseStatusResolver);
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
@@ -80,5 +89,34 @@ class GlobalRoleControllerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertSame(dto, response.getBody());
+    }
+
+    @Test
+    @DisplayName("Should return the page of global roles resolved by the paged response status")
+    void testFindAll() {
+        var filters = new GlobalRoleViewQueryFilterDto();
+        var resolved = ResponseEntity.ok(new PageImpl<>(List.<Object>of()));
+        when(globalRoleService.findAll(userPrincipal, filters, Pageable.unpaged()))
+            .thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any())).thenAnswer(invocation -> resolved);
+
+        var response = controller.findAll(userPrincipal, filters, Pageable.unpaged());
+
+        assertSame(resolved, response);
+    }
+
+    @Test
+    @DisplayName("Should return the page of the account global roles resolved by the paged response status")
+    void testFindAllByAccountId() {
+        var accountId = UUID.randomUUID();
+        var filters = new GlobalRoleViewQueryFilterDto();
+        var resolved = ResponseEntity.ok(new PageImpl<>(List.<Object>of()));
+        when(globalRoleService.findAllByAccountId(userPrincipal, accountId, filters, Pageable.unpaged()))
+            .thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any())).thenAnswer(invocation -> resolved);
+
+        var response = controller.findAllByAccountId(userPrincipal, accountId, filters, Pageable.unpaged());
+
+        assertSame(resolved, response);
     }
 }

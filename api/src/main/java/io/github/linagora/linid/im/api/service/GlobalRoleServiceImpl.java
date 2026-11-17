@@ -29,15 +29,22 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRoleViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GlobalRoleRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GlobalRoleViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +63,12 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
     private final GlobalRoleRepository globalRoleRepository;
 
     /**
-     * Repository used to check the existence of the account receiving the role.
+     * Read-only repository for the global role view.
+     */
+    private final GlobalRoleViewRepository globalRoleViewRepository;
+
+    /**
+     * Repository used to check the existence of the accounts.
      */
     private final AccountRepository accountRepository;
 
@@ -64,12 +76,7 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
     public GlobalRole create(final UserPrincipal userPrincipal, final UUID accountId, final String role) {
         var globalRole = toGlobalRole(role);
 
-        if (!accountRepository.existsById(accountId)) {
-            throw new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
-            );
-        }
+        checkAccountExists(accountId);
 
         if (globalRoleRepository.existsByAccountIdAndRole(accountId, globalRole)) {
             throw alreadyAssigned(accountId, globalRole);
@@ -121,5 +128,42 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
                 HttpStatus.BAD_REQUEST.value(),
                 I18nMessage.of("error.global_role.unknown", Map.of("role", role))
             ));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<GlobalRoleView> findAll(final UserPrincipal userPrincipal,
+                                        final GlobalRoleViewQueryFilterDto filters,
+                                        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(GlobalRoleView.class, filters);
+
+        return globalRoleViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<GlobalRoleView> findAllByAccountId(final UserPrincipal userPrincipal,
+                                                   final UUID accountId,
+                                                   final GlobalRoleViewQueryFilterDto filters,
+                                                   final Pageable pageable) {
+        checkAccountExists(accountId);
+        filters.setAccountId(List.of(accountId.toString()));
+
+        return findAll(userPrincipal, filters, pageable);
+    }
+
+    /**
+     * Checks that the given account exists.
+     *
+     * @param accountId the account UUID
+     * @throws ApiException with HTTP 404 when the account does not exist
+     */
+    private void checkAccountExists(final UUID accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            );
+        }
     }
 }

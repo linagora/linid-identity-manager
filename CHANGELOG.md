@@ -18,13 +18,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **declaration of the SUPER_ADMIN through configuration** (`LINID_SUPER_ADMIN_SUB`): the account whose
   `external_id` equals this value is the SUPER_ADMIN, without anything written to the database, and the API logs a
   warning naming it at each startup while the variable is set.
+- Added the **global roles** (`global_roles` table, audited in `global_roles_audit`) and their endpoints
+  (`GET /global-roles`, `GET /accounts/{accountId}/global-roles`, `POST /accounts/{accountId}/global-roles/{role}`,
+  `DELETE /accounts/{accountId}/global-roles/{role}`), open to every authenticated user.
 
 ### Changed
 
 #### Backend
 
-- Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
-  `email` and `roles` claims.
+- Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account)
+  and `email` claims.
+
+### Removed
+
+#### Backend
+
+- Removed the `Administrator` application role of the `LINID` application, replaced by the global roles.
 
 ### Fixed
 

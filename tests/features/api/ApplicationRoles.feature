@@ -36,7 +36,7 @@ Feature: Test API Application Role endpoints
   ## 505 Should return 404 when updating a role of an unknown application
 
   ################## System application roles (code LINID) #############
-  ## 601 Should expose the seeded Administrator role of the LINID application
+  ## 601 Should expose no role on the LINID application
   ## 602 Should return 400 when creating a role on the LINID application
   ## 603 Should return 400 when updating a role of the LINID application
   ## 604 Should return 400 when deleting a role of the LINID application
@@ -600,16 +600,14 @@ Feature: Test API Application Role endpoints
   ################## System application roles ########
   ####################################################
 
-  Scenario: 601 - Should expose the seeded Administrator role of the LINID application
+  Scenario: 601 - Should expose no role on the LINID application
     When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
     Then I expect status code is 200
     And  I store 'linidId' as '{{response.body.content[0].id}}' in context
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
     Then I expect status code is 200
-    And  I expect '{{response.body.totalElements}}' is "1"
-    And  I expect '{{response.body.content[0].name}}' is 'Administrator'
-    And  I expect '{{response.body.content[0].description}}' is 'System administrator role'
+    And  I expect '{{response.body.totalElements}}' is "0"
 
   Scenario: 602 - Should return 400 when creating a role on the LINID application
     When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
@@ -626,19 +624,20 @@ Feature: Test API Application Role endpoints
     Then I expect status code is 400
     And  I expect '{{response.body.errorKey}}' is 'error.application_role.system_reserved'
 
-    # The seeded role must remain the only one.
+    # The LINID application must still have no role.
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
     Then I expect status code is 200
-    And  I expect '{{response.body.totalElements}}' is "1"
+    And  I expect '{{response.body.totalElements}}' is "0"
 
   Scenario: 603 - Should return 400 when updating a role of the LINID application
     When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
     Then I expect status code is 200
     And  I store 'linidId' as '{{response.body.content[0].id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
-    Then I expect status code is 200
-    And  I store 'linidRoleId' as '{{response.body.content[0].id}}' in context
+    # The API cannot create a role on LINID: the role is inserted directly in the database.
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "INSERT INTO application_roles (app_id, name, description) VALUES ('{{ctx.linidId}}', 'linid-role-603', 'Role inserted outside the API') RETURNING aro_id"
+    Then  I store 'linidRoleId' as '{{ctx.dbResults[0].aro_id}}' in context
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'PUT' with body:
       """
@@ -653,16 +652,19 @@ Feature: Test API Application Role endpoints
     # The role must be left untouched.
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'GET'
     Then I expect status code is 200
-    And  I expect '{{response.body.name}}' is 'Administrator'
+    And  I expect '{{response.body.name}}' is 'linid-role-603'
+
+    When I execute sql request "DELETE FROM application_roles WHERE aro_id = '{{ctx.linidRoleId}}'"
 
   Scenario: 604 - Should return 400 when deleting a role of the LINID application
     When I request '{{env.E2E_API_URL}}/applications?code=LINID' with method 'GET'
     Then I expect status code is 200
     And  I store 'linidId' as '{{response.body.content[0].id}}' in context
 
-    When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles' with method 'GET'
-    Then I expect status code is 200
-    And  I store 'linidRoleId' as '{{response.body.content[0].id}}' in context
+    # The API cannot create a role on LINID: the role is inserted directly in the database.
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+    When  I execute sql request "INSERT INTO application_roles (app_id, name, description) VALUES ('{{ctx.linidId}}', 'linid-role-604', 'Role inserted outside the API') RETURNING aro_id"
+    Then  I store 'linidRoleId' as '{{ctx.dbResults[0].aro_id}}' in context
 
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'DELETE'
     Then I expect status code is 400
@@ -671,3 +673,5 @@ Feature: Test API Application Role endpoints
     # The role must still exist.
     When I request '{{env.E2E_API_URL}}/applications/{{ctx.linidId}}/roles/{{ctx.linidRoleId}}' with method 'GET'
     Then I expect status code is 200
+
+    When I execute sql request "DELETE FROM application_roles WHERE aro_id = '{{ctx.linidRoleId}}'"

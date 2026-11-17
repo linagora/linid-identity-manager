@@ -15,13 +15,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   through Spring Cloud Vault, disabled by default: each application reads its own secret and a secret shared by both,
   with the environment variables `VAULT_ENABLED`, `VAULT_URI`, `VAULT_AUTHENTICATION`, `VAULT_TOKEN`,
   `VAULT_APPLICATION_NAME`, `VAULT_KV_BACKEND` and `VAULT_DEFAULT_CONTEXT`.
+- Added the **global roles** (`global_roles` table, audited in `global_roles_audit`) and their endpoints
+  (`GET /global-roles`, `GET /accounts/{accountId}/global-roles`, `POST /accounts/{accountId}/global-roles/{role}`,
+  `DELETE /accounts/{accountId}/global-roles/{role}`), open to every authenticated user.
 
 ### Changed
 
 #### Backend
 
-- Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
-  `email` and `roles` claims.
+- Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account)
+  and `email` claims.
+
+### Removed
+
+#### Backend
+
+- Removed the `Administrator` application role of the `LINID` application, replaced by the global roles.
 
 ### Fixed
 

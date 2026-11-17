@@ -51,6 +51,7 @@
     "design/account-details.json",
     "design/organizational-unit-details.json",
     "design/status-badge.json",
+    "design/lifecycle.json",
     "design/accounts-page.json",
     "design/applications-page.json",
     "design/application-creation.json",

@@ -59,13 +59,12 @@ The claims template of an application is rendered for each account with these va
 | `roles`   | Roles returned by OPA, a sorted list of role names, empty when it has none |
 
 Example: the claims template of the `LINID` system application, which gives the claims LinId needs in its tokens.
-The API identifies the user by the `email` claim.
+The API identifies the user by the `sub` claim, matched against the `external_id` of the account.
 
 ```jinja id="claims-example"
 {
   "sub": {{ payload.external_id | tojson }},
-  "email": {{ payload.email | tojson }},
-  "roles": {{ roles | tojson }}
+  "email": {{ payload.email | tojson }}
 }
 ```
 

@@ -75,6 +75,10 @@ AUTH_AUDIENCE=linid-im-api
 # Leave the variable unset to use the default: an empty value is not the default and rejects every token
 AUTH_JWT_EXPECTED_TYPE=at+jwt
 
+# external_id (JWT "sub" claim) of the account declared SUPER_ADMIN, which gets every right and must already exist
+# Unset by default: remove the variable then restart the API to take the role away
+# LINID_SUPER_ADMIN_SUB=admin
+
 # Path to SSL/TLS key store
 SSL_KEY_STORE=classpath:keystore.p12
 
@@ -540,6 +544,10 @@ AUTH_AUDIENCE=linid-im-api
 # Only needed if the OIDC provider issues another type
 # Leave the variable unset to use the default: an empty value is not the default and rejects every token
 AUTH_JWT_EXPECTED_TYPE=at+jwt
+
+# external_id (JWT "sub" claim) of the account declared SUPER_ADMIN, which gets every right and must already exist
+# Unset by default: remove the variable then restart the API to take the role away
+# LINID_SUPER_ADMIN_SUB=admin
 ```
 
 ---
@@ -784,6 +792,22 @@ The secrets are only read at startup: restart the application after changing the
 
 The startup stops when OpenBao cannot be reached or refuses the access, with an error naming OpenBao. A missing secret
 (`secret/linid`) never stops the startup.
+
+### 9. SUPER_ADMIN
+
+The SUPER_ADMIN is declared through `LINID_SUPER_ADMIN_SUB`, in `api.env`: the account whose `external_id`, the `sub`
+claim of its tokens, equals this value has every right. Nothing is written to the database. The global roles,
+SUPER_ADMIN included, are not added to the tokens.
+
+```text
+LINID_SUPER_ADMIN_SUB=admin
+```
+
+* The account must already exist in LinId: a token matching no account is rejected with `401`. Creating this account
+  on an empty database is not handled.
+* At each startup, while the variable is set, the API logs a warning naming the declared `external_id`.
+* To revoke the role, for example once an administrators manager is named, remove the variable then restart the API:
+  the account loses the role and the warning is no longer logged.
 
 ---
 

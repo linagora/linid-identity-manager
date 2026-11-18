@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -42,12 +43,17 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
@@ -60,9 +66,11 @@ import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,6 +80,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.FOREIGN_KEY_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.UNIQUE_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.hasSqlState;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.violatedConstraint;
 
 /**
  * Default implementation of {@link OrganizationalUnitService}.
@@ -107,7 +120,17 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     private final OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
 
     /**
-     * Repository used to check the existence of accounts to attach.
+     * Repository used to manage {@link OrganizationalUnitManager} persistence operations.
+     */
+    private final OrganizationalUnitManagerRepository organizationalUnitManagerRepository;
+
+    /**
+     * Repository used to read {@link OrganizationalUnitManagerView} projections.
+     */
+    private final OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
+
+    /**
+     * Repository used to check the existence of accounts to attach or to add as managers.
      */
     private final AccountRepository accountRepository;
 
@@ -296,14 +319,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UUID organizationalUnitId,
         final OrganizationalUnitAccountRecord record) {
         existsById(userPrincipal, organizationalUnitId);
-
-        if (!accountRepository.existsById(record.accountId())) {
-            throw new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.account.not_found", Map.of("id", record.accountId().toString()))
-            );
-        }
-
+        assertAccountExists(record.accountId());
         assertRoleExists(record.roleId());
 
         if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
@@ -373,6 +389,140 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         existsById(userPrincipal, organizationalUnitId);
 
         organizationalUnitAccountRepository.delete(findRelation(organizationalUnitId, accountId));
+    }
+
+    @Override
+    public Page<OrganizationalUnitManagerView> findAllManagers(
+        final UserPrincipal userPrincipal,
+        final OrganizationalUnitManagerViewQueryFilterDto filters,
+        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitManagerView.class, filters);
+
+        return organizationalUnitManagerViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public OrganizationalUnitManager addManager(
+        final UserPrincipal userPrincipal,
+        final UUID organizationalUnitId,
+        final OrganizationalUnitManagerRecord record) {
+        existsById(userPrincipal, organizationalUnitId);
+        assertAccountExists(record.accountId());
+
+        if (organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(
+            organizationalUnitId, record.accountId())) {
+            throw managerAlreadyExists(record.accountId());
+        }
+
+        var entity = OrganizationalUnitManager.builder()
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(record.accountId())
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        // Flush so that a rejection by the database surfaces here rather than at commit time: the same manager
+        // added, or the organizational unit or the account deleted, by a concurrent request after the checks above.
+        try {
+            return organizationalUnitManagerRepository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException e) {
+            if (hasSqlState(e, UNIQUE_VIOLATION)) {
+                throw managerAlreadyExists(record.accountId());
+            }
+
+            if (hasSqlState(e, FOREIGN_KEY_VIOLATION)) {
+                throw managerReferenceNotFound(e, organizationalUnitId, record.accountId());
+            }
+
+            throw e;
+        }
+    }
+
+    @Override
+    public void removeManager(final UserPrincipal userPrincipal,
+                              final UUID organizationalUnitId,
+                              final UUID accountId) {
+        existsById(userPrincipal, organizationalUnitId);
+
+        var manager = organizationalUnitManagerRepository
+            .findByOrganizationalUnitIdAndAccountId(organizationalUnitId, accountId)
+            .orElseThrow(() -> managerNotFound(accountId));
+
+        // Flush so that a removal by a concurrent request after the lookup above surfaces here rather than at commit
+        // time: the delete then matches no row, which Hibernate reports as an optimistic lock failure.
+        try {
+            organizationalUnitManagerRepository.delete(manager);
+            organizationalUnitManagerRepository.flush();
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw managerNotFound(accountId);
+        }
+    }
+
+    /**
+     * Builds the error returned when the account is not a manager of the organizational unit.
+     *
+     * @param accountId the account identifier
+     * @return an {@link ApiException} with HTTP 404
+     */
+    private ApiException managerNotFound(final UUID accountId) {
+        return new ApiException(
+            HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.organizational.unit.manager.not_found", Map.of("id", accountId.toString()))
+        );
+    }
+
+    /**
+     * Builds the error returned when the account is already a manager of the organizational unit.
+     *
+     * @param accountId the account identifier
+     * @return an {@link ApiException} with HTTP 400
+     */
+    private ApiException managerAlreadyExists(final UUID accountId) {
+        return new ApiException(
+            HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.organizational.unit.manager.already_exists", Map.of("id", accountId.toString()))
+        );
+    }
+
+    /**
+     * Builds the 404 {@link ApiException} of the organizational unit or the account whose foreign key the database
+     * rejected. The foreign keys of {@code organizational_unit_managers} are unnamed: PostgreSQL names them
+     * {@code organizational_unit_managers_<column>_fkey}.
+     *
+     * @param exception            the foreign key violation raised by the flush
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the account identifier
+     * @return the 404 exception of the missing reference, or {@code exception} when its constraint is not known
+     */
+    private RuntimeException managerReferenceNotFound(final DataIntegrityViolationException exception,
+                                                      final UUID organizationalUnitId,
+                                                      final UUID accountId) {
+        return switch (violatedConstraint(exception)) {
+            case "organizational_unit_managers_oun_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.not_found", Map.of("id", organizationalUnitId.toString()))
+            );
+            case "organizational_unit_managers_act_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            );
+            case null, default -> exception;
+        };
+    }
+
+    /**
+     * Ensures an account exists.
+     *
+     * @param accountId the unique identifier of the account
+     * @throws ApiException with a 404 status when no account matches the identifier
+     */
+    private void assertAccountExists(final UUID accountId) {
+        if (!accountRepository.existsById(accountId)) {
+            throw new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            );
+        }
     }
 
     /**

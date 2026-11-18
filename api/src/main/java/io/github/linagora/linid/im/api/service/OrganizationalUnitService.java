@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
@@ -37,6 +38,9 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -156,6 +160,47 @@ public interface OrganizationalUnitService {
      * @param accountId            the unique identifier of the attached account
      */
     void detachAccount(UserPrincipal userPrincipal, UUID organizationalUnitId, UUID accountId);
+
+    /**
+     * Retrieves a paginated list of organizational unit manager views matching the provided filters.
+     *
+     * @param userPrincipal the authenticated user performing the request
+     * @param filters       filtering criteria applied to the query
+     * @param pageable      pagination and sorting parameters
+     * @return a page of {@link OrganizationalUnitManagerView}
+     */
+    Page<OrganizationalUnitManagerView> findAllManagers(
+        UserPrincipal userPrincipal,
+        OrganizationalUnitManagerViewQueryFilterDto filters,
+        Pageable pageable
+    );
+
+    /**
+     * Adds an account as a manager of an organizational unit.
+     *
+     * <p>The account does not need to be attached to the organizational unit.</p>
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param record               the payload holding the identifier of the account to add as a manager
+     * @return the created {@link OrganizationalUnitManager}
+     */
+    OrganizationalUnitManager addManager(
+        UserPrincipal userPrincipal,
+        UUID organizationalUnitId,
+        OrganizationalUnitManagerRecord record
+    );
+
+    /**
+     * Removes a manager from an organizational unit.
+     *
+     * <p>A manager can remove themselves, and the last manager of an organizational unit can be removed.</p>
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param accountId            the unique identifier of the manager account
+     */
+    void removeManager(UserPrincipal userPrincipal, UUID organizationalUnitId, UUID accountId);
 
     /**
      * Deletes an organizational unit by its unique identifier.

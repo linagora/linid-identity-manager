@@ -223,6 +223,10 @@ user10
 
 The accounts are created with generated UUIDs and development email addresses.
 
+It also creates `norole` (`00000000-0000-4000-8000-00000000a013`), an account without any role: it holds no global
+role and, attached to no organizational unit, no functional role. The E2E tests call with it the endpoints that every
+authenticated user can call.
+
 It also creates the technical account of `sync-api`, recorded as the author of its writes, with the fixed UUID
 `00000000-0000-4000-8000-00000000a012` set as `SYNC_TECHNICAL_ACCOUNT_ID` in the dev and E2E environments.
 
@@ -397,6 +401,7 @@ The script creates the following test accounts:
 admin
 user1
 user2
+norole
 noaccount
 impostor
 ```

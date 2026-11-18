@@ -34,6 +34,7 @@ They allow you to:
 
 * Group users by department, team, or business unit
 * Attach accounts, each holding a functional role within the unit
+* Name managers, who do not need to be attached to the unit
 * Apply consistent access rules across groups
 
 ---

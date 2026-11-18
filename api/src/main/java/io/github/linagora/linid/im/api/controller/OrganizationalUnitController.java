@@ -33,6 +33,10 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountViewDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitDTO;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerDTO;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerViewDTO;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
@@ -40,6 +44,7 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
@@ -98,6 +103,11 @@ public class OrganizationalUnitController {
      * Mapper for entity-to-DTO conversion.
      */
     private final OrganizationalUnitAccountMapper accountMapper;
+
+    /**
+     * Mapper converting organizational unit manager entities into DTOs.
+     */
+    private final OrganizationalUnitManagerMapper managerMapper;
 
     /**
      * Resolver for paginated response HTTP status.
@@ -277,6 +287,87 @@ public class OrganizationalUnitController {
         log.info("[{}] Received DELETE request to detach account {} from organizational unit {}",
             userPrincipal.getEmail(), accountId, organizationalUnitId);
         service.detachAccount(userPrincipal, organizationalUnitId, accountId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Retrieves the managers of an organizational unit using pagination and optional filtering.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param filters              the filtering criteria
+     * @param pageable             pagination information
+     * @return the matching managers
+     */
+    @GetMapping("/{organizationalUnitId}/managers")
+    @Operation(summary = "Get all organizational unit managers with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of organizational unit managers")
+    @ApiResponse(responseCode = "206",
+        description = "Partial list of organizational unit managers (more pages available)")
+    @ApiResponse(responseCode = "404", description = "Organizational unit not found", content = @Content)
+    public ResponseEntity<Page<OrganizationalUnitManagerViewDTO>> findAllManagers(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        final OrganizationalUnitManagerViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for organizational unit {} managers with {}", userPrincipal.getEmail(),
+            organizationalUnitId, filters);
+
+        service.existsById(userPrincipal, organizationalUnitId);
+
+        filters.setOrganizationalUnitId(List.of(organizationalUnitId.toString()));
+
+        var pages = service.findAllManagers(userPrincipal, filters, pageable)
+            .map(managerMapper::toDTO);
+
+        return pagedResponseStatusResolver.resolve(pages);
+    }
+
+    /**
+     * Adds a manager to an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param record               the payload holding the identifier of the account to add as a manager
+     * @return the created manager with HTTP 201 status
+     */
+    @PostMapping("/{organizationalUnitId}/managers")
+    @Operation(summary = "Add a manager to an organizational unit")
+    @ApiResponse(responseCode = "201", description = "Manager successfully added")
+    @ApiResponse(responseCode = "400", description = "Invalid request body or account already manager",
+        content = @Content)
+    @ApiResponse(responseCode = "404", description = "Organizational unit or account not found",
+        content = @Content)
+    public ResponseEntity<OrganizationalUnitManagerDTO> addManager(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        @Valid @RequestBody final OrganizationalUnitManagerRecord record) {
+        log.info("[{}] Received POST request to add a manager to organizational unit {} with {}",
+            userPrincipal.getEmail(), organizationalUnitId, record);
+        var entity = service.addManager(userPrincipal, organizationalUnitId, record);
+        return ResponseEntity.status(HttpStatus.CREATED).body(managerMapper.toDTO(entity));
+    }
+
+    /**
+     * Removes a manager from an organizational unit.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the organizational unit identifier
+     * @param accountId            the manager account identifier
+     * @return an empty response with HTTP 204 status
+     */
+    @DeleteMapping("/{organizationalUnitId}/managers/{accountId}")
+    @Operation(summary = "Remove a manager from an organizational unit")
+    @ApiResponse(responseCode = "204", description = "Manager successfully removed")
+    @ApiResponse(responseCode = "404", description = "Organizational unit or manager not found",
+        content = @Content)
+    public ResponseEntity<Void> removeManager(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID organizationalUnitId,
+        @PathVariable final UUID accountId) {
+        log.info("[{}] Received DELETE request to remove manager {} from organizational unit {}",
+            userPrincipal.getEmail(), accountId, organizationalUnitId);
+        service.removeManager(userPrincipal, organizationalUnitId, accountId);
         return ResponseEntity.noContent().build();
     }
 

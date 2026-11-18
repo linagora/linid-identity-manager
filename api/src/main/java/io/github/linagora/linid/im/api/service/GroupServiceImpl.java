@@ -34,7 +34,6 @@ import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
@@ -80,7 +79,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupViewRepository groupViewRepository;
 
     /**
-     * Repository used to read the ancestors of a group from the recursive ancestors view.
+     * Repository used to read the ancestors of a group from the ancestors view over the group closure table.
      */
     private final GroupAncestorRepository groupAncestorRepository;
 
@@ -269,8 +268,8 @@ public class GroupServiceImpl implements GroupService {
 
     /**
      * Ensures the candidate parent group exists and that attaching the group to it does not create a cycle: the
-     * group must be neither the parent itself nor one of the parent's ancestors, read from the recursive
-     * ancestors view.
+     * group must be neither the parent itself nor one of the parent's ancestors, read from the ancestors view over
+     * the group closure table. The database rejects cycles as well; this check turns them into a 400 error.
      *
      * @param id       the identifier of the group being updated, {@code null} on creation
      * @param parentId the identifier of the candidate parent group, possibly {@code null}
@@ -292,11 +291,7 @@ public class GroupServiceImpl implements GroupService {
             throw parentCycle(id, parentId);
         }
 
-        var ancestorIds = groupAncestorRepository.findAllByGroupId(parentId).stream()
-            .map(GroupAncestor::getAncestorId)
-            .toList();
-
-        if (ancestorIds.contains(id)) {
+        if (groupAncestorRepository.existsByGroupIdAndAncestorId(parentId, id)) {
             throw parentCycle(id, parentId);
         }
     }

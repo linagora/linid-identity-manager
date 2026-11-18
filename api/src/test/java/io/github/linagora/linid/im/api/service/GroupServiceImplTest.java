@@ -34,7 +34,6 @@ import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
@@ -159,7 +158,7 @@ class GroupServiceImplTest {
         var result = service.create(userPrincipal, withReferences);
 
         assertSame(mapped, result);
-        verify(groupAncestorRepository, never()).findAllByGroupId(any());
+        verify(groupAncestorRepository, never()).existsByGroupIdAndAncestorId(any(), any());
         verify(organizationalUnitService).existsById(userPrincipal, organizationalUnitId);
         verify(applicationService).findById(userPrincipal, applicationId);
     }
@@ -268,7 +267,7 @@ class GroupServiceImplTest {
         when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
         when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
         when(groupRepository.existsById(parentId)).thenReturn(true);
-        when(groupAncestorRepository.findAllByGroupId(parentId)).thenReturn(List.of());
+        when(groupAncestorRepository.existsByGroupIdAndAncestorId(parentId, id)).thenReturn(false);
         when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, update);
@@ -338,7 +337,7 @@ class GroupServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, selfParent));
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.group.parent.cycle", exception.getError().key());
-        verify(groupAncestorRepository, never()).findAllByGroupId(any());
+        verify(groupAncestorRepository, never()).existsByGroupIdAndAncestorId(any(), any());
         verify(groupRepository, never()).save(any());
     }
 
@@ -354,8 +353,7 @@ class GroupServiceImplTest {
         when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
         when(groupRepository.existsById(grandChildId)).thenReturn(true);
         // The group is an ancestor of grandChild: attaching it under grandChild closes the loop.
-        when(groupAncestorRepository.findAllByGroupId(grandChildId))
-            .thenReturn(List.of(new GroupAncestor(id.toString() + grandChildId, grandChildId, id)));
+        when(groupAncestorRepository.existsByGroupIdAndAncestorId(grandChildId, id)).thenReturn(true);
 
         var exception = assertThrows(ApiException.class,
             () -> service.update(userPrincipal, id, descendantParent));

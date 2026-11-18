@@ -144,6 +144,14 @@ AVATAR_JPEG_QUALITY=0.9
 
 # Maximum width times height of the uploaded avatar images, checked before decoding
 AVATAR_MAX_PIXELS=16000000
+
+# Read the secrets from OpenBao, see "Secrets — OpenBao" below
+# VAULT_ENABLED=false
+# VAULT_URI=https://openbao:8200
+# VAULT_AUTHENTICATION=TOKEN
+# VAULT_TOKEN=
+# VAULT_APPLICATION_NAME=linid-api
+# VAULT_KV_BACKEND=secret
 ```
 
 ---
@@ -261,6 +269,14 @@ SWAGGER_ENABLED=true
 
 # Logging level (DEBUG, INFO, WARN, ERROR)
 LOGGING_LEVEL=INFO
+
+# Read the secrets from OpenBao, see "Secrets — OpenBao" below
+# VAULT_ENABLED=false
+# VAULT_URI=https://openbao:8200
+# VAULT_AUTHENTICATION=TOKEN
+# VAULT_TOKEN=
+# VAULT_APPLICATION_NAME=linid-sync-api
+# VAULT_KV_BACKEND=secret
 ```
 
 ---
@@ -701,11 +717,81 @@ files without content sniffing (`X-Content-Type-Options: nosniff`) and fully san
 anything when its URL is opened. Keep `AVATAR_EXTENSION` on an image format that cannot embed code, and mirror
 those headers in any other web server put in front of the avatars.
 
+### 8. Secrets — OpenBao
+
+The API and `sync-api` can read their secrets at startup from the KV engine of [OpenBao](https://openbao.org) (or
+HashiCorp Vault, whose API it shares), through Spring Cloud Vault, instead of receiving them as environment variables.
+It is disabled by default (`VAULT_ENABLED=false`).
+
+Each key of a secret is a property: a key named like a variable used as a `${...}` placeholder in the
+`application.yaml` of the application (e.g. `DATABASE_PASSWORD`) replaces this variable, which must then be removed
+from the `.env` file. A variable that is still set takes precedence over the key of the same name, even with an empty
+value: a line kept as `DATABASE_PASSWORD=` replaces the key of OpenBao with an empty string. Other keys are ignored,
+e.g. `SERVER_PORT` for `sync-api`, as are the `VAULT_*` variables and `EXTERNAL_CONFIGURATION`, read before OpenBao.
+
+Each application reads two secrets, the second being shared by both:
+
+* `<VAULT_KV_BACKEND>/<VAULT_APPLICATION_NAME>`: `secret/linid-api` or `secret/linid-sync-api` by default
+* `<VAULT_KV_BACKEND>/<VAULT_DEFAULT_CONTEXT>`: `secret/linid` by default
+
+A missing secret is ignored.
+
+```bash
+bao kv put secret/linid-api \
+  DATABASE_PASSWORD=... DATABASE_ADMIN_PASSWORD=... SSL_KEY_PASSWORD=... SSL_TRUSTSTORE_PASSWORD=... \
+  SUPERSET_PASSWORD=... SYNC_API_CLIENT_KEY_PASSWORD=...
+bao kv put secret/linid-sync-api \
+  DATABASE_PASSWORD=... DATABASE_ADMIN_PASSWORD=... LINID_DATABASE_PASSWORD=... \
+  SSL_KEY_PASSWORD=... SSL_TRUSTSTORE_PASSWORD=...
+```
+
+The token (or the role of the `APPROLE` / `KUBERNETES` authentication) needs the `read` capability on both secrets,
+even when the shared one does not exist: unlike a missing secret, a refused access (403) stops the startup. With the
+KV version 2 engine, the policy targets the `data/` path, e.g. for `linid-api`:
+
+```bash
+bao policy write linid-api - <<EOF
+path "secret/data/linid-api" { capabilities = ["read"] }
+path "secret/data/linid"     { capabilities = ["read"] }
+EOF
+```
+
+```text
+VAULT_ENABLED=true
+VAULT_URI=https://openbao:8200
+VAULT_AUTHENTICATION=TOKEN
+VAULT_TOKEN=...
+```
+
+| Variable                 | Description                                                   | Default                                |
+| ------------------------ | ------------------------------------------------------------- | -------------------------------------- |
+| `VAULT_ENABLED`          | Read the secrets from OpenBao                                 | `false`                                |
+| `VAULT_URI`              | URL of OpenBao                                                | `https://openbao:8200`                 |
+| `VAULT_AUTHENTICATION`   | Authentication method (`TOKEN`, `APPROLE`, `KUBERNETES`, ...) | `TOKEN`                                |
+| `VAULT_TOKEN`            | Token, for the `TOKEN` authentication                         | —                                      |
+| `VAULT_APPLICATION_NAME` | Name of the secret of the application                         | `linid-api` / `linid-sync-api`         |
+| `VAULT_KV_BACKEND`       | Mount path of the KV engine                                   | `secret`                               |
+| `VAULT_DEFAULT_CONTEXT`  | Name of the secret shared by both applications                | `linid`                                |
+
+Any other `spring.cloud.vault.*` property can be set with its environment variable, for instance:
+
+* `APPROLE` authentication: `SPRING_CLOUD_VAULT_APP_ROLE_ROLE_ID` and `SPRING_CLOUD_VAULT_APP_ROLE_SECRET_ID`
+* `KUBERNETES` authentication: `SPRING_CLOUD_VAULT_KUBERNETES_ROLE`
+* OpenBao certificate signed by a private CA: `SPRING_CLOUD_VAULT_SSL_TRUST_STORE` and
+  `SPRING_CLOUD_VAULT_SSL_TRUST_STORE_PASSWORD`
+
+The secrets are only read at startup: restart the application after changing them.
+
+The startup stops when OpenBao cannot be reached or refuses the access, with an error naming OpenBao. A missing secret
+(`secret/linid`) never stops the startup.
+
 ---
 
 ## 📝 Best Practices
 
-* Store `.env` files securely.
+* Store `.env` files securely, even with the secrets kept in OpenBao (see [Secrets — OpenBao](#8-secrets--openbao)):
+  with the default `TOKEN` authentication, `VAULT_TOKEN` reads every secret of the application. In production, prefer
+  the `APPROLE` or `KUBERNETES` authentication.
 * Version control **only non-sensitive configuration templates**.
 * Never use production credentials in development or demo environments.
 * Use service-specific environment files rather than a single global `.env`.

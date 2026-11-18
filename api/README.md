@@ -142,6 +142,32 @@ answer within the timeouts, it is considered unreachable and the API answers `50
 | `CLIENT_DATABASE_SCHEMA`         | Client Flyway schema                         | `public`                   |
 | `CLIENT_DATABASE_MIGRATION_PATH` | Client Flyway migration path                 | —                          |
 
+### OpenBao
+
+The secrets can be read at startup from the KV engine of [OpenBao](https://openbao.org), or of HashiCorp Vault whose
+API it shares, with Spring Cloud Vault. Each key of a secret is a property: a key named like a variable used as a
+`${...}` placeholder in `application.yaml` (e.g. `DATABASE_PASSWORD`) replaces this variable, which can then be left
+unset. Other keys are ignored, as are the `VAULT_*` variables and `EXTERNAL_CONFIGURATION`, read before
+OpenBao. A variable that is set takes precedence over a key of the same name.
+
+Two secrets are read: `<VAULT_KV_BACKEND>/<VAULT_APPLICATION_NAME>`, then `<VAULT_KV_BACKEND>/<VAULT_DEFAULT_CONTEXT>`
+(`linid`), shared with `sync-api`. Any other `spring.cloud.vault.*` property can be set with its environment variable,
+e.g. `SPRING_CLOUD_VAULT_APP_ROLE_ROLE_ID` and `SPRING_CLOUD_VAULT_APP_ROLE_SECRET_ID` for the `APPROLE` authentication,
+or `SPRING_CLOUD_VAULT_SSL_TRUST_STORE` and `SPRING_CLOUD_VAULT_SSL_TRUST_STORE_PASSWORD` for an OpenBao certificate
+signed by a private CA.
+
+When OpenBao cannot be reached or refuses the access, the startup stops. A missing secret is ignored.
+
+| Variable                 | Description                                                    | Default                |
+| ------------------------ | -------------------------------------------------------------- | ---------------------- |
+| `VAULT_ENABLED`          | Read the secrets from OpenBao                                  | `false`                |
+| `VAULT_URI`              | URL of OpenBao                                                 | `https://openbao:8200` |
+| `VAULT_AUTHENTICATION`   | Authentication method (`TOKEN`, `APPROLE`, `KUBERNETES`, ...)  | `TOKEN`                |
+| `VAULT_TOKEN`            | Token, for the `TOKEN` authentication                          | —                      |
+| `VAULT_APPLICATION_NAME` | Name of the secret of this application                         | `linid-api`            |
+| `VAULT_KV_BACKEND`       | Mount path of the KV engine                                    | `secret`               |
+| `VAULT_DEFAULT_CONTEXT`  | Name of the secret shared by both applications                 | `linid`                |
+
 ---
 
 ## Generate Certificates for HTTPS

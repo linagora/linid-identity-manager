@@ -3,7 +3,31 @@ spring:
     name: LinId-Identity-Manager
 
   config:
-    import: optional:file:${EXTERNAL_CONFIGURATION}
+    import:
+      - optional:file:${EXTERNAL_CONFIGURATION}
+      - optional:vault://
+
+  cloud:
+    # Secrets read at startup from the KV engine of OpenBao (or HashiCorp Vault, same API), when VAULT_ENABLED is true.
+    # Each key of the secret is a property: naming it like an environment variable (e.g. DATABASE_PASSWORD) fills the
+    # matching placeholder of this file, except EXTERNAL_CONFIGURATION and the VAULT_* variables, resolved before
+    # OpenBao is read. An environment variable still takes precedence over a key of the same name.
+    # Any other spring.cloud.vault property can be set with its environment variable
+    # (e.g. SPRING_CLOUD_VAULT_APP_ROLE_ROLE_ID)
+    vault:
+      enabled: ${VAULT_ENABLED:false}
+      # Stop the startup when OpenBao cannot be reached or refuses the access: its secrets are needed at startup anyway
+      fail-fast: true
+      uri: ${VAULT_URI:https://openbao:8200}
+      # TOKEN, APPROLE, KUBERNETES...
+      authentication: ${VAULT_AUTHENTICATION:TOKEN}
+      token: ${VAULT_TOKEN:}
+      # Secrets read: <backend>/<application-name>, then <backend>/<default-context> shared by both applications
+      application-name: ${VAULT_APPLICATION_NAME:linid-api}
+      kv:
+        backend: ${VAULT_KV_BACKEND:secret}
+        # LinID context instead of Spring's generic "application", shared by every Spring application on the mount
+        default-context: ${VAULT_DEFAULT_CONTEXT:linid}
 
   data:
     web:
@@ -78,6 +102,10 @@ spring:
       spec: ${SUPERSET_CACHE_OPTION:maximumSize=1,expireAfterWrite=55m,recordStats}
 
 management:
+  health:
+    # Secrets are only read at startup: an unreachable OpenBao must not turn /actuator/health DOWN
+    vault:
+      enabled: false
   endpoints:
     web:
       exposure:

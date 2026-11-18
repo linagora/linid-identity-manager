@@ -207,8 +207,10 @@ LinId is highly configurable and supports multiple configuration domains:
 
 * YAML-based configuration files
 * Environment-based overrides
+* Secrets read from [OpenBao](https://openbao.org) (API and `sync-api`)
 
 > See: [docs/configuration/application/](docs/configuration/application/config-files.md)
+> and [secrets with OpenBao](docs/configuration/application/config-files.md#8-secrets--openbao)
 
 ---
 

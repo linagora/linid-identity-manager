@@ -32,6 +32,10 @@ package io.github.linagora.linid.im.sync.service;
  * <p>The locks are taken in their two-integer form, {@code (namespace, key)}: each kind of lock has its own namespace,
  * so that it never meets the locks of another kind. The one-key form, used by the lock of Flyway, does not overlap the
  * two-key form.</p>
+ *
+ * <p>In the linid-api database, the namespaces from 16384 upward are taken by the locks of the hierarchies: the
+ * {@code hierarchy_lock()} trigger function of linid-api uses the OID of the closure table of a hierarchy as namespace,
+ * and user table OIDs start at 16384. A new namespace must stay below 16384.</p>
  */
 public final class LockNamespaces {
 

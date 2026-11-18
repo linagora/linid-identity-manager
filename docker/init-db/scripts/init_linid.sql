@@ -773,7 +773,7 @@ $$
         -- =========================================================
         -- 3. LEVEL 3 - children of Developers
         -- Third level, so that the parent chain is deep enough to exercise
-        -- the recursive group_ancestors_view.
+        -- the group closure paths.
         -- =========================================================
         INSERT INTO groups (grp_id, parent_id, oun_id, app_id, code, name, description, email,
                             created_by, updated_by)

@@ -34,7 +34,6 @@ import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
@@ -45,19 +44,24 @@ import io.github.linagora.linid.im.api.persistence.repository.GroupRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -159,7 +163,7 @@ class GroupServiceImplTest {
         var result = service.create(userPrincipal, withReferences);
 
         assertSame(mapped, result);
-        verify(groupAncestorRepository, never()).findAllByGroupId(any());
+        verify(groupAncestorRepository, never()).existsByGroupIdAndAncestorId(any(), any());
         verify(organizationalUnitService).existsById(userPrincipal, organizationalUnitId);
         verify(applicationService).findById(userPrincipal, applicationId);
     }
@@ -268,13 +272,13 @@ class GroupServiceImplTest {
         when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
         when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
         when(groupRepository.existsById(parentId)).thenReturn(true);
-        when(groupAncestorRepository.findAllByGroupId(parentId)).thenReturn(List.of());
-        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(groupAncestorRepository.existsByGroupIdAndAncestorId(parentId, id)).thenReturn(false);
+        when(groupRepository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, update);
 
         var captor = ArgumentCaptor.forClass(Group.class);
-        verify(groupRepository).save(captor.capture());
+        verify(groupRepository).saveAndFlush(captor.capture());
         var saved = captor.getValue();
 
         // The persisted entity must be the loaded one, with every record field propagated.
@@ -305,7 +309,7 @@ class GroupServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, record));
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.group.code.already_exists", exception.getError().key());
-        verify(groupRepository, never()).save(any());
+        verify(groupRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -322,7 +326,7 @@ class GroupServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, withParent));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.group.not_found", exception.getError().key());
-        verify(groupRepository, never()).save(any());
+        verify(groupRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -338,8 +342,8 @@ class GroupServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, selfParent));
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.group.parent.cycle", exception.getError().key());
-        verify(groupAncestorRepository, never()).findAllByGroupId(any());
-        verify(groupRepository, never()).save(any());
+        verify(groupAncestorRepository, never()).existsByGroupIdAndAncestorId(any(), any());
+        verify(groupRepository, never()).saveAndFlush(any());
     }
 
     @Test
@@ -354,14 +358,112 @@ class GroupServiceImplTest {
         when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
         when(groupRepository.existsById(grandChildId)).thenReturn(true);
         // The group is an ancestor of grandChild: attaching it under grandChild closes the loop.
-        when(groupAncestorRepository.findAllByGroupId(grandChildId))
-            .thenReturn(List.of(new GroupAncestor(id.toString() + grandChildId, grandChildId, id)));
+        when(groupAncestorRepository.existsByGroupIdAndAncestorId(grandChildId, id)).thenReturn(true);
 
         var exception = assertThrows(ApiException.class,
             () -> service.update(userPrincipal, id, descendantParent));
         assertEquals(400, exception.getStatusCode());
         assertEquals("error.group.parent.cycle", exception.getError().key());
-        verify(groupRepository, never()).save(any());
+        verify(groupRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("update should throw the cycle error when the database rejects the parent")
+    void testUpdate_shouldThrowWhenDatabaseRejectsCycle() {
+        var id = UUID.randomUUID();
+        var parentId = UUID.randomUUID();
+        var withParent = new GroupRecord("developers", "Developers", parentId, null, null, null, null, Map.of());
+        var existing = Group.builder().id(id).code("developers").build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        when(groupRepository.existsById(parentId)).thenReturn(true);
+        // The check passes, but a concurrent parent change committed since then closes the cycle.
+        when(groupAncestorRepository.existsByGroupIdAndAncestorId(parentId, id)).thenReturn(false);
+        doThrow(new DataIntegrityViolationException("cycle",
+            new SQLException("Cycle detected in the group hierarchy", "23514")))
+            .when(groupRepository).saveAndFlush(any());
+
+        var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, withParent));
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.group.parent.cycle", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("update should throw the code error when the database rejects a code taken concurrently")
+    void testUpdate_shouldThrowWhenDatabaseRejectsCode() {
+        var id = UUID.randomUUID();
+        var existing = Group.builder().id(id).code("old-code").build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        // The check passes, but a concurrent request takes the code before the flush.
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        doThrow(new DataIntegrityViolationException("duplicate",
+            new SQLException("duplicate key value violates unique constraint", "23505")))
+            .when(groupRepository).saveAndFlush(any());
+
+        var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, record));
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.group.code.already_exists", exception.getError().key());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "groups_parent_id_fkey, error.group.not_found",
+        "groups_oun_id_fkey, error.organizational.unit.not_found",
+        "groups_app_id_fkey, error.application.not_found"
+    })
+    @DisplayName("update should throw the 404 of a reference that the database rejects as deleted concurrently")
+    void testUpdate_shouldThrowNotFoundWhenDatabaseRejectsDeletedReference(final String constraint,
+                                                                           final String errorKey) {
+        var id = UUID.randomUUID();
+        var parentId = UUID.randomUUID();
+        var withReferences = new GroupRecord("developers", "Developers", parentId, null, null, UUID.randomUUID(),
+            UUID.randomUUID(), Map.of());
+        var existing = Group.builder().id(id).code("developers").build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        when(groupRepository.existsById(parentId)).thenReturn(true);
+        // The checks pass, but a concurrent request deletes the reference before the flush.
+        var sqlException = new SQLException(
+            "insert or update on table \"groups\" violates foreign key constraint \"" + constraint + "\"", "23503");
+        doThrow(new DataIntegrityViolationException("foreign key",
+            new ConstraintViolationException("could not execute statement", sqlException, constraint)))
+            .when(groupRepository).saveAndFlush(any());
+
+        var exception = assertThrows(ApiException.class, () -> service.update(userPrincipal, id, withReferences));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals(errorKey, exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("update should rethrow a foreign key violation whose constraint is not known")
+    void testUpdate_shouldRethrowUnknownForeignKeyViolation() {
+        var id = UUID.randomUUID();
+        var existing = Group.builder().id(id).code("old-code").build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        var foreignKeyViolation = new DataIntegrityViolationException("foreign key",
+            new SQLException("insert or update violates foreign key constraint", "23503"));
+        doThrow(foreignKeyViolation).when(groupRepository).saveAndFlush(any());
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.update(userPrincipal, id, record));
+        assertSame(foreignKeyViolation, exception);
+    }
+
+    @Test
+    @DisplayName("update should rethrow the database rejections other than a cycle, a taken code or a deleted reference")
+    void testUpdate_shouldRethrowOtherIntegrityViolations() {
+        var id = UUID.randomUUID();
+        var existing = Group.builder().id(id).code("old-code").build();
+        when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
+        var notNullViolation = new DataIntegrityViolationException("not null",
+            new SQLException("null value in column \"name\" violates not-null constraint", "23502"));
+        doThrow(notNullViolation).when(groupRepository).saveAndFlush(any());
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.update(userPrincipal, id, record));
+        assertSame(notNullViolation, exception);
     }
 
     @Test
@@ -398,7 +500,7 @@ class GroupServiceImplTest {
         var existing = Group.builder().id(id).code("developers").extraParameters(Map.of("team", "core")).build();
         when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
         when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
-        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(groupRepository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, withoutExtraParameters);
 
@@ -547,7 +649,7 @@ class GroupServiceImplTest {
         var existing = Group.builder().id(id).code("developers").extraParameters(Map.of("team", "core")).build();
         when(groupRepository.findById(id)).thenReturn(Optional.of(existing));
         when(groupRepository.existsByCodeAndIdNot("developers", id)).thenReturn(false);
-        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(groupRepository.saveAndFlush(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = service.update(userPrincipal, id, withExtraParameters);
 

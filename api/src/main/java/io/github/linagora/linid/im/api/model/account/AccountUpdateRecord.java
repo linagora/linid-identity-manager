@@ -35,7 +35,6 @@ import java.util.Map;
 /**
  * Request payload for updating the editable attributes of an existing account.
  *
- * @param externalId      external identifier (e.g. OIDC sub)
  * @param lastname        last name of the account holder
  * @param firstname       first name of the account holder
  * @param email           email address, must be valid format
@@ -43,9 +42,6 @@ import java.util.Map;
  */
 @Schema(description = "Request payload for updating an existing account")
 public record AccountUpdateRecord(
-    @NotBlank @Schema(description = "External identifier", example = "oidc-sub-12345")
-    String externalId,
-
     @NotBlank @Schema(description = "Last name", example = "Doe")
     String lastname,
 

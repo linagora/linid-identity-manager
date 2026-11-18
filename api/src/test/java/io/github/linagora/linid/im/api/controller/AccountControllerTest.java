@@ -387,7 +387,7 @@ class AccountControllerTest {
     @DisplayName("Should update account and return 200 with AccountViewDTO")
     void testUpdate_shouldReturn200WithAccountViewDTO() {
         UUID id = UUID.randomUUID();
-        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        var record = new AccountUpdateRecord("Smith", "Jane", "jane@example.com", null);
         var entity = createSampleViewEntity();
         var dto = createSampleViewDTO(entity);
         when(accountService.update(userPrincipal, id, record)).thenReturn(entity);

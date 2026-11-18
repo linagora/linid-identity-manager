@@ -74,6 +74,12 @@ Do not deploy the provided templates. Set up LemonLDAP::NG for your environment,
 * Generate a dedicated OIDC signing key pair and keep the private key out of source control
 * Use dedicated database accounts with strong passwords, retrieved from your secret-management system
 * Use your own hostnames and certificates issued by a trusted CA
+* Derive the `sub` claim (`oidcRPMetaDataOptionsUserIDAttr`) from the directory attribute that holds the
+  `external_id` of the LinId accounts: the `external_id` is set in LinId when the account is created, and only a
+  database administrator can change it afterwards (see
+  [Changing the External Identifier of an Account](#-changing-the-external-identifier-of-an-account)). Do not
+  give the `external_id` of a deleted account to a new one: the applications that key their data on the `sub` would
+  give the newcomer the data of their predecessor
 
 The LemonLDAP::NG configuration must keep the settings LinId relies on:
 
@@ -85,13 +91,38 @@ The LemonLDAP::NG configuration must keep the settings LinId relies on:
 | Refresh tokens                                               | `oidcRPMetaDataOptionsRefreshToken: 1`                                               | The UI server refreshes the tokens            |
 | JWT access tokens with the `at+jwt` type                     | `oidcRPMetaDataOptionsAccessTokenJWT: 1`, without `oidcRPMetaDataOptionsNoJwtHeader` | Checked by the API (`AUTH_JWT_EXPECTED_TYPE`) |
 | API audience                                                 | `oidcRPMetaDataOptionsAdditionalAudiences`                                           | Must match `AUTH_AUDIENCE` of the API         |
-| `email` claim in the access token                            | `oidcRPMetaDataOptionsAccessTokenClaims: 1`                                          | The API resolves the LinId account from it    |
+| `sub` claim matching the `external_id` of the LinId account  | `oidcRPMetaDataOptionsUserIDAttr` (default: `whatToTrace`, i.e. `uid`)               | The API resolves the LinId account from it    |
 | Secure SSO cookie                                            | `securedCookie: 1`                                                                   | The SSO cookie is only sent over HTTPS        |
 
 👉 See:
 
 * [ui/server-environment](../ui/server-environment.md) for the OIDC settings of the UI server
 * [application/config-files](../application/config-files.md) for the OIDC settings of the API
+
+---
+
+## 🔧 Changing the External Identifier of an Account
+
+The UI and the API never change the `external_id` of an existing account: an account administrator could otherwise
+bind an account to the subject of another one and act with its rights. A database administrator changes it with SQL,
+for instance to fix a typing error made at creation, or an account whose `external_id` does not equal its `sub` claim:
+such an account gets `401 Unauthorized` and cannot sign in, even when it is the only administrator. Recreating the
+account instead would lose its organizational units, groups and history.
+
+```sql
+UPDATE accounts
+SET external_id = '<new external_id>',
+    updated_by  = '<act_id of the administrator responsible for the change>'
+WHERE act_id = '<act_id of the account>';
+```
+
+* Set `updated_by`: the audit trigger records this account as the author of the change in `accounts_audit`
+* The unique index on `external_id` rejects a value already used by another account
+* Write the new value in the directory attribute the `sub` claim is derived from too, otherwise the account still gets
+  `401 Unauthorized`
+* Recompute the rights of the account (`POST /accounts/{id}/recompute-rights`): until then, or until the next daily
+  cycle, the claims of the applications still carry the old `external_id`
+* The applications that key their data on the `sub` see a new user, who no longer reaches the data of the old one
 
 ---
 

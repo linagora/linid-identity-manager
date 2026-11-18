@@ -657,12 +657,6 @@
               "FormDialog": {
                 "title": "Modifier {firstname} {lastname}",
                 "fields": {
-                  "externalId": {
-                    "label": "Identifiant *",
-                    "validation": {
-                      "required": "Ce champ est requis."
-                    }
-                  },
                   "firstname": {
                     "label": "Prénom *",
                     "validation": {

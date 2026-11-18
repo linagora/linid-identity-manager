@@ -505,11 +505,10 @@ class AccountServiceImplTest {
         existing.setId(id);
         var view = new AccountDistinctView();
         view.setId(id);
-        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        var record = new AccountUpdateRecord("Smith", "Jane", "jane@example.com", null);
 
         when(accountRepository.findById(id)).thenReturn(Optional.of(existing));
         when(accountRepository.findAccountByEmail(record.email())).thenReturn(Optional.of(existing));
-        when(accountRepository.findAccountByExternalId(record.externalId())).thenReturn(Optional.of(existing));
         when(accountRepository.saveAndFlush(existing)).thenReturn(existing);
         when(accountDistinctViewRepository.findFirstById(id)).thenReturn(Optional.of(view));
 
@@ -528,7 +527,7 @@ class AccountServiceImplTest {
         existing.setId(id);
         var other = new Account();
         other.setId(UUID.randomUUID());
-        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        var record = new AccountUpdateRecord("Smith", "Jane", "jane@example.com", null);
 
         when(accountRepository.findById(id)).thenReturn(Optional.of(existing));
         when(accountRepository.findAccountByEmail("jane@example.com")).thenReturn(Optional.of(other));
@@ -541,31 +540,10 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("update should throw 400 when the external identifier is already used by another account")
-    void testUpdate_shouldThrow400WhenExternalIdUsedByAnotherAccount() {
-        UUID id = UUID.randomUUID();
-        var existing = new Account();
-        existing.setId(id);
-        var other = new Account();
-        other.setId(UUID.randomUUID());
-        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
-
-        when(accountRepository.findById(id)).thenReturn(Optional.of(existing));
-        when(accountRepository.findAccountByEmail("jane@example.com")).thenReturn(Optional.empty());
-        when(accountRepository.findAccountByExternalId("ext-002")).thenReturn(Optional.of(other));
-
-        ApiException exception = assertThrows(ApiException.class,
-            () -> accountService.update(userPrincipal, id, record));
-
-        assertEquals(400, exception.getStatusCode());
-        assertEquals("error.account.external_id_already_used", exception.getError().key());
-    }
-
-    @Test
     @DisplayName("update should throw 404 when the account does not exist")
     void testUpdate_shouldThrow404WhenAccountNotFound() {
         UUID id = UUID.randomUUID();
-        var record = new AccountUpdateRecord("ext-002", "Smith", "Jane", "jane@example.com", null);
+        var record = new AccountUpdateRecord("Smith", "Jane", "jane@example.com", null);
         when(accountRepository.findById(id)).thenReturn(Optional.empty());
 
         ApiException exception = assertThrows(ApiException.class,
@@ -603,25 +581,27 @@ class AccountServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should get account by email")
-    void testGetAccountByEmail_shouldReturnOptional() {
+    @DisplayName("Should get account by external identifier, compared as is")
+    void testGetAccountByExternalId_shouldReturnOptional() {
         UUID id = UUID.randomUUID();
         var entity = new Account();
         entity.setId(id);
-        when(accountRepository.findAccountByEmail("email")).thenReturn(Optional.of(entity));
+        when(accountRepository.findAccountByExternalId("User-Sub")).thenReturn(Optional.of(entity));
 
-        var account = accountService.getAccountByEmail("email");
+        var account = accountService.getAccountByExternalId("User-Sub");
 
         assertTrue(account.isPresent());
         assertEquals(entity, account.get());
+        verify(accountRepository).findAccountByExternalId("User-Sub");
     }
 
     @Test
-    @DisplayName("Should get empty account on null email")
-    void testGetAccountByEmail_shouldReturnOptionalOnNull() {
-        assertTrue(accountService.getAccountByEmail(null).isEmpty());
-        assertTrue(accountService.getAccountByEmail("").isEmpty());
-        assertTrue(accountService.getAccountByEmail("  ").isEmpty());
+    @DisplayName("Should get empty account on blank external identifier")
+    void testGetAccountByExternalId_shouldReturnOptionalOnBlank() {
+        assertTrue(accountService.getAccountByExternalId(null).isEmpty());
+        assertTrue(accountService.getAccountByExternalId("").isEmpty());
+        assertTrue(accountService.getAccountByExternalId("  ").isEmpty());
+        verify(accountRepository, never()).findAccountByExternalId(any());
     }
 
     @Test

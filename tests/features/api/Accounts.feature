@@ -8,6 +8,7 @@ Feature: Test API Account endpoints
   ## 102 Should return 401 when an ID token is used as bearer
   ## 103 Should return 401 when the token is valid but no account matches
   ## 104 Should return 401 without any Authorization header
+  ## 105 Should return 401 when the token carries the email of an account but not its subject
 
   ################## Create (POST /accounts) ##############
   ## 201 Should create an account with valid data
@@ -69,10 +70,10 @@ Feature: Test API Account endpoints
   ## 707 Should return 404 when activating unknown account
 
   ################## Update (PUT /accounts/{id}) #####
-  ## 801 Should update the editable attributes of an existing account
+  ## 801 Should update the editable attributes of an existing account and keep its external identifier
   ## 802 Should return 404 when updating an unknown account
   ## 803 Should return 400 when updating with an invalid
-  ## 804 Should return 400 when updating with an email or external identifier already used
+  ## 804 Should return 400 when updating with an email already used
 
   ################## Find organizational units of an account (GET /accounts/{id}/organizational-units) #####
   ## 901 Should return <ou> for the <user> account
@@ -146,6 +147,25 @@ Feature: Test API Account endpoints
     When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
     Then  I expect status code is 401
     And   I expect http header 'WWW-Authenticate' contains 'Bearer'
+
+  Scenario: 105 - Should return 401 when the token carries the email of an account but not its subject
+    Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
+    And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/token' with method 'POST' with body:
+      """
+      grant_type=password&username=impostor&password=password&scope=openid email profile roles
+      """
+    Then  I expect status code is 200
+    And   I set http header 'Authorization' with 'Bearer {{response.body.access_token}}'
+    And   I set http header 'Content-Type' with 'application/json'
+    # The SSO gives impostor the email of admin, but no account has its subject
+    When  I request '{{env.E2E_AUTH_URL}}/oauth2/userinfo' with method 'GET'
+    Then  I expect status code is 200
+    And   I expect '{{response.body.email}}' is 'admin@example.com'
+    And   I expect '{{response.body.sub}}' is 'impostor'
+    When  I request '{{env.E2E_API_URL}}/accounts' with method 'GET'
+    Then  I expect status code is 401
+    And   I expect http header 'WWW-Authenticate' contains 'invalid_token'
 
   ####################################################
   ################## Create (POST /accounts) ##########
@@ -1224,7 +1244,7 @@ Feature: Test API Account endpoints
   ################## Update (PUT /accounts/{id}) #####
   ####################################################
 
-  Scenario: 801 - Should update the editable attributes of an existing account
+  Scenario: 801 - Should update the editable attributes of an existing account and keep its external identifier
     When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
@@ -1244,6 +1264,7 @@ Feature: Test API Account endpoints
     Then I expect status code is 201
     And  I store 'accountId' as '{{response.body.id}}' in context
 
+    # The external identifier is ignored: the authentication resolves the account from it
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
       {
@@ -1256,7 +1277,7 @@ Feature: Test API Account endpoints
       """
     Then I expect status code is 200
     And  I expect '{{response.body.id}}' is '{{ctx.accountId}}'
-    And  I expect '{{response.body.externalId}}' is 'ext-801-updated'
+    And  I expect '{{response.body.externalId}}' is 'ext-801'
     And  I expect '{{response.body.lastname}}' is 'After'
     And  I expect '{{response.body.firstname}}' is 'Updated'
     And  I expect '{{response.body.email}}' is 'updated801@example.com'
@@ -1267,7 +1288,6 @@ Feature: Test API Account endpoints
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-801-updated",
         "lastname": "After",
         "firstname": "Updated",
         "email": "updated801@example.com"
@@ -1283,7 +1303,6 @@ Feature: Test API Account endpoints
     When I request '{{env.E2E_API_URL}}/accounts/00000000-0000-4000-8000-000000000000' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-802",
         "lastname": "Doe",
         "firstname": "Jane",
         "email": "update802@example.com"
@@ -1316,7 +1335,6 @@ Feature: Test API Account endpoints
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.accountId}}' with method 'PUT' with body:
       """
       {
-        "externalId": "<externalId>",
         "lastname": "<lastname>",
         "firstname": "<firstname>",
         "email": "<email>"
@@ -1331,13 +1349,12 @@ Feature: Test API Account endpoints
     Then I expect status code is 204
 
     Examples:
-      | field      | externalId | lastname | firstname | email                 |
-      | email      | ext-803    | Doe      | Jane      | not-an-email          |
-      | externalId |            | Doe      | Jane      | update803@example.com |
-      | lastname   | ext-803    |          | Jane      | update803@example.com |
-      | firstname  | ext-803    | Doe      |           | update803@example.com |
+      | field     | lastname | firstname | email                 |
+      | email     | Doe      | Jane      | not-an-email          |
+      | lastname  |          | Jane      | update803@example.com |
+      | firstname | Doe      |           | update803@example.com |
 
-  Scenario: 804 - Should return 400 when updating with an email or external identifier already used
+  Scenario: 804 - Should return 400 when updating with an email already used
     When I request '{{env.E2E_API_URL}}/accounts' with method 'POST' with body:
       """
       {
@@ -1379,7 +1396,6 @@ Feature: Test API Account endpoints
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-804-b",
         "lastname": "Doe",
         "firstname": "Jane",
         "email": "update804-a@example.com"
@@ -1389,24 +1405,10 @@ Feature: Test API Account endpoints
     And  I expect '{{response.body.errorKey}}' is 'error.account.email_already_used'
     And  I expect '{{response.body.status}}' is '400'
 
-    When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
-      """
-      {
-        "externalId": "ext-804-a",
-        "lastname": "Doe",
-        "firstname": "Jane",
-        "email": "update804-b@example.com"
-      }
-      """
-    Then I expect status code is 400
-    And  I expect '{{response.body.errorKey}}' is 'error.account.external_id_already_used'
-    And  I expect '{{response.body.status}}' is '400'
-
     # Updating an account with its own current values must stay allowed
     When I request '{{env.E2E_API_URL}}/accounts/{{ctx.secondAccountId}}' with method 'PUT' with body:
       """
       {
-        "externalId": "ext-804-b",
         "lastname": "Doe",
         "firstname": "Jane",
         "email": "update804-b@example.com"

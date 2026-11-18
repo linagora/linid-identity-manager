@@ -306,16 +306,6 @@ public class AccountServiceImpl implements AccountService {
                 );
             });
 
-        accountRepository.findAccountByExternalId(record.externalId())
-            .filter(other -> !other.getId().equals(accountId))
-            .ifPresent(other -> {
-                throw new ApiException(
-                    HttpStatus.BAD_REQUEST.value(),
-                    I18nMessage.of("error.account.external_id_already_used",
-                        Map.of("externalId", record.externalId()))
-                );
-            });
-
         accountMapper.applyUpdate(account, record, userPrincipal.getId());
         accountRepository.saveAndFlush(account);
 
@@ -330,12 +320,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<Account> getAccountByEmail(final String email) {
-        if (StringUtils.isBlank(email)) {
+    public Optional<Account> getAccountByExternalId(final String externalId) {
+        if (StringUtils.isBlank(externalId)) {
             return Optional.empty();
         }
 
-        return accountRepository.findAccountByEmail(email.toLowerCase());
+        return accountRepository.findAccountByExternalId(externalId);
     }
 
     @Override

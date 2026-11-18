@@ -123,10 +123,9 @@ public interface AccountService {
     void existsById(UserPrincipal userPrincipal, UUID id);
 
     /**
-     * Updates the editable attributes ({@code externalId}, {@code lastname}, {@code firstname},
-     * {@code email} and, when provided, {@code extraParameters}) of the account with the given
-     * identifier. An email or external identifier already used by another account is rejected with
-     * an HTTP 400 error.
+     * Updates the editable attributes ({@code lastname}, {@code firstname}, {@code email} and, when
+     * provided, {@code extraParameters}) of the account with the given identifier. An email already
+     * used by another account is rejected with an HTTP 400 error.
      *
      * @param userPrincipal the authenticated user
      * @param accountId     the account UUID
@@ -144,13 +143,16 @@ public interface AccountService {
     void deleteById(UserPrincipal userPrincipal, UUID id);
 
     /**
-     * Retrieves an {@link Account} associated with the given email address.
+     * Retrieves the {@link Account} associated with the given external identifier.
      *
-     * @param email the email address used to look up the account
+     * <p>The authentication flow matches it against the {@code sub} claim of the access token, so the
+     * comparison is exact: an OIDC subject is case-sensitive.
+     *
+     * @param externalId the external identifier used to look up the account
      * @return an {@link Optional} containing the matching {@link Account} if found,
-     * or {@link Optional#empty()} if no account exists for the given email
+     * or {@link Optional#empty()} if the identifier is blank or no account carries it
      */
-    Optional<Account> getAccountByEmail(String email);
+    Optional<Account> getAccountByExternalId(String externalId);
 
     /**
      * Suspends the account with the given identifier, either immediately or as a scheduled suspension,

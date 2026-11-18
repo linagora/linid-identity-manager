@@ -73,8 +73,11 @@ Authentication is configured via:
 - `AUTH_AUDIENCE`: expected `aud` claim of the access tokens, i.e. the audience declared for the API at the OIDC provider (not the client ID)
 - `AUTH_JWT_EXPECTED_TYPE`: JOSE `typ` header required on access tokens (default `at+jwt`, compared case-insensitively); only change it if the OIDC provider issues another type. Leave the variable unset to use the default: an empty value is not the default and rejects every token
 
-The `UserAuthenticationFilter` extracts the user email from the JWT token and creates a `UserPrincipal` in the security context.
-When the token is valid but no account matches its `email` claim, the API responds `401 Unauthorized` with a `WWW-Authenticate: Bearer` header, like any rejected bearer token.
+The `UserAuthenticationFilter` resolves the account whose `external_id` matches the `sub` claim of the JWT token and creates a `UserPrincipal` in the security context.
+The `email` claim is never used to resolve the account: some OIDC providers let users change their own email address, whereas only the OIDC provider sets the subject.
+The `external_id` is set when the account is created and cannot be changed afterwards through the API: `PUT /accounts/{id}` ignores it, since changing it would bind the account to another identity. A database administrator can still change it with SQL: see [Changing the External Identifier of an Account](../docs/configuration/authentication/oidc.md#-changing-the-external-identifier-of-an-account).
+The subject is only as stable as the attribute the OIDC provider derives it from: see [Before a Real Deployment](../docs/configuration/authentication/oidc.md#-before-a-real-deployment).
+When the token is valid but no account matches its `sub` claim, the API responds `401 Unauthorized` with a `WWW-Authenticate: Bearer` header, like any rejected bearer token, and logs a warning with the subject.
 
 ---
 

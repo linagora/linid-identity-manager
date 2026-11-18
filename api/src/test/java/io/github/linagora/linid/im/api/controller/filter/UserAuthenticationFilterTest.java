@@ -36,8 +36,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.service.AccountService;
@@ -51,6 +56,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -66,6 +72,7 @@ class UserAuthenticationFilterTest {
     private MockHttpServletResponse response;
     private FilterChain filterChain;
     private AccountService accountService;
+    private ListAppender<ILoggingEvent> logAppender;
 
     @BeforeEach
     void setUp() {
@@ -74,62 +81,71 @@ class UserAuthenticationFilterTest {
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         filterChain = mock(FilterChain.class);
+        logAppender = new ListAppender<>();
+        logAppender.start();
+        ((Logger) LoggerFactory.getLogger(UserAuthenticationFilter.class)).addAppender(logAppender);
 
         SecurityContextHolder.clearContext();
     }
 
     @AfterEach
     void tearDown() {
+        ((Logger) LoggerFactory.getLogger(UserAuthenticationFilter.class)).detachAppender(logAppender);
         SecurityContextHolder.clearContext();
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should set authentication")
-    void doFilterInternal_withValidJwt_setsAuthenticationAndContinues() throws ServletException, IOException {
-        // Mock Jwt
-        Jwt jwt = mock(Jwt.class);
+    @DisplayName("test doFilterInternal: should authenticate the account matching the subject")
+    void doFilterInternal_withKnownSubject_setsAuthenticationAndContinues() throws ServletException, IOException {
         UUID uuid = UUID.randomUUID();
-        when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
-        when(accountService.getAccountByEmail("test@example.com")).thenReturn(
-            Optional.of(Account.builder().id(uuid).build()));
+        when(accountService.getAccountByExternalId("user-sub")).thenReturn(
+            Optional.of(Account.builder().id(uuid).email("user@example.com").build()));
+        authenticateWith(jwt("user-sub", "user@example.com"));
 
-        // Set Authentication with mocked Jwt as principal
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
-        );
-
-        // Execute filter
         filter.doFilterInternal(request, response, filterChain);
 
-        // Verify filterChain continued
         verify(filterChain, times(1)).doFilter(request, response);
-
-        // Verify SecurityContext now has UserPrincipal
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        assertNotNull(auth);
-        assertInstanceOf(UserPrincipal.class, auth.getPrincipal());
-
-        UserPrincipal user = (UserPrincipal) auth.getPrincipal();
+        UserPrincipal user = authenticatedUser();
         assertEquals(uuid, user.getId());
-        assertEquals("test@example.com", user.getEmail());
+        assertEquals("user@example.com", user.getEmail());
+        assertTrue(logAppender.list.isEmpty());
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should respond 401 on unknown account")
-    void doFilterInternal_withUnknownAccount_respondsUnauthorized() throws ServletException, IOException {
-        // Mock Jwt
-        Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaimAsString("email")).thenReturn("test@example.com");
-        when(accountService.getAccountByEmail("test@example.com")).thenReturn(Optional.empty());
+    @DisplayName("test doFilterInternal: should ignore the email claim when resolving the account")
+    void doFilterInternal_withEmailOfAnotherAccount_resolvesTheSubject() throws ServletException, IOException {
+        UUID uuid = UUID.randomUUID();
+        when(accountService.getAccountByExternalId("user-sub")).thenReturn(
+            Optional.of(Account.builder().id(uuid).email("user@example.com").build()));
+        // The token carries the email of another account: only its subject designates the account.
+        authenticateWith(jwt("user-sub", "admin@example.com"));
 
-        // Set Authentication with mocked Jwt as principal
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
-        );
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(1)).doFilter(request, response);
+        UserPrincipal user = authenticatedUser();
+        assertEquals(uuid, user.getId());
+        assertEquals("user@example.com", user.getEmail());
+        // No other lookup, such as a fallback on the email, may designate the account.
+        verify(accountService, times(1)).getAccountByExternalId("user-sub");
+        verifyNoMoreInteractions(accountService);
+    }
+
+    @Test
+    @DisplayName("test doFilterInternal: should respond 401 on unknown subject")
+    void doFilterInternal_withUnknownSubject_respondsUnauthorized() throws ServletException, IOException {
+        when(accountService.getAccountByExternalId("unknown-sub")).thenReturn(Optional.empty());
+        // A known email does not make up for an unknown subject.
+        authenticateWith(jwt("unknown-sub", "admin@example.com"));
 
         filter.doFilterInternal(request, response, filterChain);
 
         assertUnauthorized();
+        verify(accountService, times(1)).getAccountByExternalId("unknown-sub");
+        // Without this warning, an external_id that differs from the subject would be a silent 401.
+        assertEquals(1, logAppender.list.size());
+        assertEquals(Level.WARN, logAppender.list.getFirst().getLevel());
+        assertTrue(logAppender.list.getFirst().getFormattedMessage().contains("sub=unknown-sub"));
     }
 
     @Test
@@ -143,52 +159,62 @@ class UserAuthenticationFilterTest {
         verify(filterChain, times(1)).doFilter(request, response);
         assertNull(SecurityContextHolder.getContext().getAuthentication());
         assertNull(response.getHeader("WWW-Authenticate"));
-        verify(accountService, never()).getAccountByEmail(any());
+        verify(accountService, never()).getAccountByExternalId(any());
     }
 
     @Test
     @DisplayName("test doFilterInternal: should respond 401 on invalid token")
     void doFilterInternal_withInvalidPrincipal_respondsUnauthorized() throws ServletException, IOException {
         // Principal is not a Jwt
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken("not-a-jwt", null, List.of())
-        );
+        authenticateWith("not-a-jwt");
 
         filter.doFilterInternal(request, response, filterChain);
 
         assertUnauthorized();
+        verify(accountService, never()).getAccountByExternalId(any());
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should respond 401 when email claim is null")
-    void doFilterInternal_withNullEmailClaim_respondsUnauthorized() throws ServletException, IOException {
-        Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaimAsString("email")).thenReturn(null);
-
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
-        );
+    @DisplayName("test doFilterInternal: should respond 401 when the subject claim is missing")
+    void doFilterInternal_withoutSubject_respondsUnauthorized() throws ServletException, IOException {
+        authenticateWith(Jwt.withTokenValue("token").header("alg", "RS256")
+            .claim("email", "admin@example.com").build());
 
         filter.doFilterInternal(request, response, filterChain);
 
         assertUnauthorized();
-        verify(accountService, never()).getAccountByEmail(any());
+        verify(accountService, never()).getAccountByExternalId(any());
     }
 
     @Test
-    @DisplayName("test doFilterInternal: should respond 401 when email claim is blank")
-    void doFilterInternal_withBlankEmailClaim_respondsUnauthorized() throws ServletException, IOException {
-        Jwt jwt = mock(Jwt.class);
-        when(jwt.getClaimAsString("email")).thenReturn("   ");
-
-        SecurityContextHolder.getContext().setAuthentication(
-            new UsernamePasswordAuthenticationToken(jwt, null, List.of())
-        );
+    @DisplayName("test doFilterInternal: should respond 401 when the subject claim is blank")
+    void doFilterInternal_withBlankSubject_respondsUnauthorized() throws ServletException, IOException {
+        authenticateWith(jwt("   ", "admin@example.com"));
 
         filter.doFilterInternal(request, response, filterChain);
 
         assertUnauthorized();
-        verify(accountService, never()).getAccountByEmail(any());
+        verify(accountService, never()).getAccountByExternalId(any());
+    }
+
+    private static Jwt jwt(final String subject, final String email) {
+        return Jwt.withTokenValue("token")
+            .header("alg", "RS256")
+            .subject(subject)
+            .claim("email", email)
+            .build();
+    }
+
+    private static void authenticateWith(final Object principal) {
+        SecurityContextHolder.getContext().setAuthentication(
+            new UsernamePasswordAuthenticationToken(principal, null, List.of())
+        );
+    }
+
+    private static UserPrincipal authenticatedUser() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
+        return assertInstanceOf(UserPrincipal.class, auth.getPrincipal());
     }
 
     private void assertUnauthorized() throws ServletException, IOException {

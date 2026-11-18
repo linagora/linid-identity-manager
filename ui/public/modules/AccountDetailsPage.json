@@ -31,19 +31,11 @@
         },
         "updateEndpoint": "/accounts/{{ entity.id }}",
         "updateBody": {
-          "externalId": "{{ entity.externalId }}",
           "lastname": "{{ entity.lastname }}",
           "firstname": "{{ entity.firstname }}",
           "email": "{{ entity.email }}"
         },
         "formFields": [
-          {
-            "name": "externalId",
-            "type": "String",
-            "input": "Text",
-            "required": true,
-            "inputSettings": {}
-          },
           {
             "name": "firstname",
             "type": "String",

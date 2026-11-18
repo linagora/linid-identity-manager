@@ -397,7 +397,12 @@ The script creates the following test accounts:
 admin
 user1
 user2
+noaccount
+impostor
 ```
+
+`noaccount` and `impostor` have no LinID account: the E2E tests check that the API rejects their tokens, even though
+`impostor` carries the email of `admin`.
 
 All credentials in this script are intended exclusively for development/test environments.
 

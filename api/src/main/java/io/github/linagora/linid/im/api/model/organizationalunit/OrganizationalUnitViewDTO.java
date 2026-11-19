@@ -127,6 +127,23 @@ public class OrganizationalUnitViewDTO {
     private String roleNames;
 
     /**
+     * Every hierarchy path of the organizational unit, each one listing the identifiers of its ancestors from the
+     * top-most ancestor (a unit without parent, normally the root) down to its parent. The paths are sorted by their
+     * identifiers. A unit without parent, such as the root or the child of a deleted unit, gets a single empty path:
+     * {@code [[]]}. A unit whose ancestors all loop, so that it reaches no unit without parent, gets no path:
+     * {@code []}.
+     */
+    @Schema(
+        description = "Every hierarchy path of the organizational unit. Each path lists the identifiers of its "
+            + "ancestors from the top-most ancestor (a unit without parent, normally the root) down to its parent. "
+            + "The paths are sorted by their identifiers. A unit without parent, such as the root or the child of a "
+            + "deleted unit, gets a single empty path: [[]]. A unit whose ancestors all loop, so that it reaches no "
+            + "unit without parent, gets no path: [].",
+        example = "[[\"550e8400-e29b-41d4-a716-446655440002\", \"550e8400-e29b-41d4-a716-446655440001\"]]"
+    )
+    private List<List<UUID>> hierarchyPaths;
+
+    /**
      * Time range during which the organizational unit is suspended.
      */
     @Schema(description = "Time range during which the organizational unit is suspended")

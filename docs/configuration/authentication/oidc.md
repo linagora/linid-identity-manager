@@ -116,7 +116,7 @@ SET external_id = '<new external_id>',
 WHERE act_id = '<act_id of the account>';
 ```
 
-* Set `updated_by`: the audit trigger records this account as the author of the change in `accounts_audit`
+* Set `updated_by`: the audit trigger records this account as the author of the change in the `audit` table
 * The unique index on `external_id` rejects a value already used by another account
 * Write the new value in the directory attribute the `sub` claim is derived from too, otherwise the account still gets
   `401 Unauthorized`

@@ -198,4 +198,30 @@ src/main/resources/db/migration/
 Current migrations:
 
 - `V1__init.sql` — pgcrypto extension, `update_timestamp()` trigger function
-- `V2__create_table_accounts.sql` — `accounts` table with indexes, triggers, and comments
+- `V2__create_table_audit.sql` — `audit_trigger_role` role, `audit` table and `f_audit()` trigger function
+- `V3__create_table_accounts.sql` — `accounts` table with indexes, triggers, and comments
+
+### Audit
+
+The trigger function `f_audit()` records every change of an audited table in the `audit` table. To audit a table,
+create its trigger in the migration that creates the table:
+
+```sql
+GRANT SELECT ON group_accounts TO audit_trigger_role;
+
+CREATE TRIGGER tg_group_accounts_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON group_accounts
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('group=grp_id', 'account=act_id');
+```
+
+The `payload` of each audit record holds:
+
+* `row`: the changed row, or the deleted row for a `DELETE`
+* `changed_by`: the account found in the `updated_by` column of the row, or in `created_by` when it is empty
+* one entry per trigger argument `<key>=<column>`: the row referenced by the foreign key on `<column>`, without the
+  columns listed after it with a `-` prefix, for instance `'application=app_id -script -configuration'`
+
+The audited table needs a single-column UUID primary key, stored in `record_id`. `f_audit()` runs as
+`audit_trigger_role`, which reads the related rows: every audited table grants it `SELECT`.

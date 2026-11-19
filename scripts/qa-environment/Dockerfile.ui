@@ -1,0 +1,21 @@
+# The UI (SPA and Fastify server) of ui/ (the build context). Same as ui/Dockerfile, plus a BuildKit cache for the pnpm store.
+FROM node:22-alpine AS builder
+RUN corepack enable && corepack prepare pnpm@latest --activate
+WORKDIR /app
+COPY . .
+ENV CI=true
+RUN rm -rf node_modules dist server/node_modules server/dist
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
+RUN pnpm build
+RUN pnpm --filter @linagora/linid-identity-manager-ui-server build
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store pnpm --filter @linagora/linid-identity-manager-ui-server --prod --config.inject-workspace-packages=true deploy /deploy/server
+
+FROM node:22-alpine
+RUN apk upgrade --no-cache \
+    && rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+              /opt/yarn-v* /usr/local/bin/yarn /usr/local/bin/yarnpkg
+WORKDIR /app
+COPY --from=builder /deploy/server ./server
+COPY --from=builder /app/dist/spa ./spa
+EXPOSE 19320
+CMD ["node", "server/dist/main.js"]

@@ -27,6 +27,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   manager. A manager does not need to be attached to the organizational unit, can remove themselves, and the last
   manager can be removed. Deleting an organizational unit or an account removes its managers. These endpoints are open
   to every authenticated user.
+- Added the **managers of an application**: the `application_managers` table with its audit table and SQL view, and
+  the endpoints to list (`GET /applications/{id}/managers`), add (`POST /applications/{id}/managers`) and remove
+  (`DELETE /applications/{id}/managers/{accountId}`) a manager. A manager can remove themselves, and the last manager
+  can be removed. Deleting an application or an account removes its managers. These endpoints are open to every
+  authenticated user.
 
 ### Changed
 

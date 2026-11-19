@@ -28,29 +28,43 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
 import io.github.linagora.linid.im.api.service.validation.SystemApplicationValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -87,6 +101,15 @@ class ApplicationServiceImplTest {
     @Mock
     private SystemApplicationValidator systemApplicationValidator;
 
+
+    @Mock
+    private ApplicationManagerRepository applicationManagerRepository;
+
+    @Mock
+    private ApplicationManagerViewRepository applicationManagerViewRepository;
+
+    @Mock
+    private AccountService accountService;
 
     @InjectMocks
     private ApplicationServiceImpl service;
@@ -411,5 +434,260 @@ class ApplicationServiceImplTest {
         var result = service.update(userPrincipal, id, withExtraParameters);
 
         assertEquals(Map.of("team", "platform"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("findAllManagers should find the managers through the view repository")
+    void testFindAllManagers() {
+        when(applicationManagerViewRepository.findAll(
+            ArgumentMatchers.<Specification<ApplicationManagerView>>any(), any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(new ApplicationManagerView())));
+
+        var result = service.findAllManagers(userPrincipal, new ApplicationManagerViewQueryFilterDto(),
+            Pageable.unpaged());
+
+        assertEquals(1, result.getTotalElements());
+        verify(applicationManagerViewRepository).findAll(
+            ArgumentMatchers.<Specification<ApplicationManagerView>>any(), any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("addManager should save the manager with the authenticated user as author")
+    void testAddManager() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(false);
+        when(applicationManagerRepository.saveAndFlush(any(ApplicationManager.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.addManager(userPrincipal, applicationId, new ApplicationManagerRecord(accountId));
+
+        assertEquals(applicationId, result.getApplicationId());
+        assertEquals(accountId, result.getAccountId());
+        assertEquals(userPrincipal.getId(), result.getCreatedBy());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+        verify(accountService).existsById(userPrincipal, accountId);
+    }
+
+    @Test
+    @DisplayName("addManager should throw when the application does not exist")
+    void testAddManager_shouldThrowWhenApplicationAbsent() {
+        var applicationId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(false);
+        var managerRecord = new ApplicationManagerRecord(UUID.randomUUID());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.application.not_found", exception.getError().key());
+        verify(applicationManagerRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("addManager should throw when the account does not exist")
+    void testAddManager_shouldThrowWhenAccountAbsent() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
+        var managerRecord = new ApplicationManagerRecord(accountId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(applicationManagerRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("addManager should throw when the account is already a manager of the application")
+    void testAddManager_shouldThrowWhenAlreadyManager() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(true);
+        var managerRecord = new ApplicationManagerRecord(accountId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application_manager.already_exists", exception.getError().key());
+        assertEquals(Map.of("id", accountId.toString()), exception.getError().context());
+        verify(applicationManagerRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("addManager should throw a 400 when a concurrent request added the same manager first")
+    void testAddManager_shouldThrowWhenManagerAddedConcurrently() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(false);
+        when(applicationManagerRepository.saveAndFlush(any(ApplicationManager.class)))
+            .thenThrow(new DataIntegrityViolationException("uk_application_managers_app_id_act_id",
+                new SQLException("duplicate key value violates unique constraint", "23505")));
+        var managerRecord = new ApplicationManagerRecord(accountId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.application_manager.already_exists", exception.getError().key());
+        assertEquals(Map.of("id", accountId.toString()), exception.getError().context());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "application_managers_app_id_fkey, error.application.not_found",
+        "application_managers_act_id_fkey, error.account.not_found"
+    })
+    @DisplayName("addManager should throw the 404 of the application or the account deleted by a concurrent request")
+    void testAddManager_shouldThrowNotFoundWhenReferenceDeletedConcurrently(final String constraint,
+                                                                            final String errorKey) {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(false);
+        // The checks pass, but a concurrent request deletes the reference before the flush.
+        var sqlException = new SQLException("insert or update on table \"application_managers\" violates "
+            + "foreign key constraint \"" + constraint + "\"", "23503");
+        when(applicationManagerRepository.saveAndFlush(any(ApplicationManager.class)))
+            .thenThrow(new DataIntegrityViolationException("foreign key",
+                new ConstraintViolationException("could not execute statement", sqlException, constraint)));
+        var managerRecord = new ApplicationManagerRecord(accountId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals(errorKey, exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("addManager should rethrow a foreign key violation whose constraint is not known")
+    void testAddManager_shouldRethrowUnknownForeignKeyViolation() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(false);
+        var foreignKeyViolation = new DataIntegrityViolationException("foreign key",
+            new SQLException("insert or update violates foreign key constraint", "23503"));
+        when(applicationManagerRepository.saveAndFlush(any(ApplicationManager.class)))
+            .thenThrow(foreignKeyViolation);
+        var managerRecord = new ApplicationManagerRecord(accountId);
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertSame(foreignKeyViolation, exception);
+    }
+
+    @Test
+    @DisplayName("addManager should rethrow the database rejections other than a manager added or a reference deleted")
+    void testAddManager_shouldRethrowOtherIntegrityViolations() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(false);
+        var notNullViolation = new DataIntegrityViolationException("not null",
+            new SQLException("null value in column \"created_by\" violates not-null constraint", "23502"));
+        when(applicationManagerRepository.saveAndFlush(any(ApplicationManager.class)))
+            .thenThrow(notNullViolation);
+        var managerRecord = new ApplicationManagerRecord(accountId);
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.addManager(userPrincipal, applicationId, managerRecord));
+
+        assertSame(notNullViolation, exception);
+    }
+
+    @Test
+    @DisplayName("removeManager should delete the manager")
+    void testRemoveManager() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = ApplicationManager.builder()
+            .id(UUID.randomUUID())
+            .applicationId(applicationId)
+            .accountId(accountId)
+            .build();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.findByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(Optional.of(entity));
+
+        assertDoesNotThrow(() -> service.removeManager(userPrincipal, applicationId, accountId));
+
+        InOrder order = inOrder(applicationManagerRepository);
+        order.verify(applicationManagerRepository).delete(entity);
+        order.verify(applicationManagerRepository).flush();
+    }
+
+    @Test
+    @DisplayName("removeManager should throw a 404 when a concurrent request removed the same manager first")
+    void testRemoveManager_shouldThrowWhenManagerRemovedConcurrently() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = ApplicationManager.builder()
+            .id(UUID.randomUUID())
+            .applicationId(applicationId)
+            .accountId(accountId)
+            .build();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.findByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(Optional.of(entity));
+        // The lookup finds the manager, but a concurrent request removes it first: the delete matches no row.
+        doThrow(new ObjectOptimisticLockingFailureException(ApplicationManager.class, entity.getId()))
+            .when(applicationManagerRepository).flush();
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, applicationId, accountId));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.application_manager.not_found", exception.getError().key());
+        assertEquals(Map.of("id", accountId.toString()), exception.getError().context());
+    }
+
+    @Test
+    @DisplayName("removeManager should throw when the application does not exist")
+    void testRemoveManager_shouldThrowWhenApplicationAbsent() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, applicationId, accountId));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.application.not_found", exception.getError().key());
+        verify(applicationManagerRepository, never()).delete(any(ApplicationManager.class));
+    }
+
+    @Test
+    @DisplayName("removeManager should throw when the account is not a manager of the application")
+    void testRemoveManager_shouldThrowWhenNotManager() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(applicationRepository.existsById(applicationId)).thenReturn(true);
+        when(applicationManagerRepository.findByApplicationIdAndAccountId(applicationId, accountId))
+            .thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, applicationId, accountId));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.application_manager.not_found", exception.getError().key());
+        assertEquals(Map.of("id", accountId.toString()), exception.getError().context());
+        verify(applicationManagerRepository, never()).delete(any(ApplicationManager.class));
     }
 }

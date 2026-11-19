@@ -27,8 +27,12 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import org.springframework.data.domain.Page;
@@ -131,4 +135,38 @@ public interface ApplicationService {
      * @param applicationId the identifier of the application whose policy must be regenerated
      */
     void regeneratePolicy(UUID applicationId);
+
+    /**
+     * Retrieves a paginated list of application manager views matching the provided filters.
+     *
+     * @param userPrincipal the authenticated user
+     * @param filters       the query filters applied to the view
+     * @param pageable      the pagination parameters
+     * @return a page of application manager views
+     */
+    Page<ApplicationManagerView> findAllManagers(
+        UserPrincipal userPrincipal,
+        ApplicationManagerViewQueryFilterDto filters,
+        Pageable pageable);
+
+    /**
+     * Adds an account as a manager of the given application.
+     *
+     * @param userPrincipal the authenticated user
+     * @param applicationId the identifier of the managed application
+     * @param record        the payload holding the identifier of the account to add as a manager
+     * @return the created application manager
+     */
+    ApplicationManager addManager(UserPrincipal userPrincipal, UUID applicationId, ApplicationManagerRecord record);
+
+    /**
+     * Removes a manager from the given application.
+     *
+     * <p>A manager can remove themselves, and the last manager of an application can be removed.</p>
+     *
+     * @param userPrincipal the authenticated user
+     * @param applicationId the identifier of the managed application
+     * @param accountId     the identifier of the manager account
+     */
+    void removeManager(UserPrincipal userPrincipal, UUID applicationId, UUID accountId);
 }

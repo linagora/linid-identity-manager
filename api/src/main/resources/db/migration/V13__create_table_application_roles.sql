@@ -19,6 +19,14 @@ CREATE TRIGGER tg_application_roles_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON application_roles TO audit_trigger_role;
+
+CREATE TRIGGER tg_application_roles_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON application_roles
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE application_roles IS 'Table storing the roles exposed by an application, each identified by a name unique within the application, with audit data.';
 
 COMMENT ON COLUMN application_roles.aro_id IS 'Primary key. UUID automatically generated for each application role.';
@@ -35,3 +43,4 @@ COMMENT ON CONSTRAINT uk_application_roles_app_id_name ON application_roles IS '
 COMMENT ON INDEX idx_application_roles_app_id IS 'Index on application identifier to optimize lookups and joins on application_roles by application.';
 
 COMMENT ON TRIGGER tg_application_roles_set_update_date ON application_roles IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_application_roles_audit ON application_roles IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on application_roles to record the change in the audit table.';

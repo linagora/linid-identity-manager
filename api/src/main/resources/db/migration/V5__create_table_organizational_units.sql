@@ -21,6 +21,14 @@ CREATE TRIGGER tg_organizational_unit_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON organizational_units TO audit_trigger_role;
+
+CREATE TRIGGER tg_organizational_units_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON organizational_units
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE organizational_units IS 'Stores all organizational units (nodes of the DAG).';
 
 COMMENT ON COLUMN organizational_units.oun_id IS 'Primary key (UUID) of the organizational unit.';
@@ -35,6 +43,7 @@ COMMENT ON COLUMN organizational_units.update_date IS 'Date and time when the ac
 COMMENT ON CONSTRAINT uk_organizational_units_type_name ON organizational_units IS 'Ensures that an organizational unit name is unique within a given organizational unit type.';
 
 COMMENT ON TRIGGER tg_organizational_unit_set_update_date ON organizational_units IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_organizational_units_audit ON organizational_units IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on organizational_units to record the change in the audit table.';
 
 -- =========================================================
 -- RELATIONS (DIRECT EDGES)
@@ -53,6 +62,14 @@ CREATE TABLE organizational_unit_relations
     UNIQUE (parent_id, child_id)
 );
 
+GRANT SELECT ON organizational_unit_relations TO audit_trigger_role;
+
+CREATE TRIGGER tg_organizational_unit_relations_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON organizational_unit_relations
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('parent=parent_id', 'child=child_id');
+
 COMMENT ON TABLE organizational_unit_relations IS 'Stores direct parent-child relationships. This is the source of truth for the graph structure.';
 
 COMMENT ON COLUMN organizational_unit_relations.our_id IS 'Primary key (UUID) of the organizational unit relation.';
@@ -62,6 +79,8 @@ COMMENT ON COLUMN organizational_unit_relations.created_by IS 'Identifier of the
 COMMENT ON COLUMN organizational_unit_relations.updated_by IS 'Identifier of the last updater of this record (user, service, or system).';
 COMMENT ON COLUMN organizational_unit_relations.insert_date IS 'Date and time when the account record was created. Default is now(). Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN organizational_unit_relations.update_date IS 'Date and time when the account record was last updated. Default is now(). Stored in UTC (TIMESTAMPTZ).';
+
+COMMENT ON TRIGGER tg_organizational_unit_relations_audit ON organizational_unit_relations IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on organizational_unit_relations to record the change, with the related parent and child organizational units, in the audit table.';
 
 -- =========================================================
 -- CLOSURE TABLE

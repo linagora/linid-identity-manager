@@ -28,6 +28,14 @@ CREATE TRIGGER tg_account_status_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON account_status TO audit_trigger_role;
+
+CREATE TRIGGER tg_account_status_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON account_status
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('account=act_id');
+
 COMMENT ON TABLE account_status IS 'Table storing the lifecycle status of an account: validity and suspension time ranges, activation timestamp, per-action reason / sub-reason / comment (suspension, deactivation, reactivation), along with audit information (created_by, updated_by, insert_date, update_date).';
 
 COMMENT ON COLUMN account_status.ast_id IS 'Primary key. UUID automatically generated for each account status record.';
@@ -52,3 +60,4 @@ COMMENT ON INDEX idx_account_status_validity IS 'GIST index on validity_period t
 COMMENT ON INDEX idx_account_status_suspension IS 'GIST index on suspension_period to speed up range containment and overlap queries.';
 
 COMMENT ON TRIGGER tg_account_status_set_update_date ON account_status IS 'Trigger that sets update_date to the current timestamp (NOW()) whenever a row in account_status is updated.';
+COMMENT ON TRIGGER tg_account_status_audit ON account_status IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on account_status to record the change, with the related account, in the audit table.';

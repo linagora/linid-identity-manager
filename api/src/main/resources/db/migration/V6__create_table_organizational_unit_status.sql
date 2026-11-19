@@ -21,6 +21,14 @@ CREATE TRIGGER tg_organizational_unit_status_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON organizational_unit_status TO audit_trigger_role;
+
+CREATE TRIGGER tg_organizational_unit_status_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON organizational_unit_status
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('organizational_unit=oun_id');
+
 -- ---------------------------------------------------------------------------
 -- Automatic status initialization
 -- ---------------------------------------------------------------------------
@@ -68,6 +76,7 @@ COMMENT ON COLUMN organizational_unit_status.update_date IS 'Date and time when 
 COMMENT ON INDEX idx_organizational_unit_status_suspension IS 'GIST index on suspension_period to speed up range containment and overlap queries.';
 
 COMMENT ON TRIGGER tg_organizational_unit_status_set_update_date ON organizational_unit_status IS 'Trigger that sets update_date to the current timestamp (NOW()) whenever a row in organizational_unit_status is updated.';
+COMMENT ON TRIGGER tg_organizational_unit_status_audit ON organizational_unit_status IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on organizational_unit_status to record the change, with the related organizational unit, in the audit table.';
 
 COMMENT ON FUNCTION f_init_organizational_unit_status() IS 'Trigger function that automatically inserts a default organizational_unit_status row (no suspension) whenever an organizational unit is created, falling back to a constant system UUID for audit fields when the source unit has no creator / updater.';
 

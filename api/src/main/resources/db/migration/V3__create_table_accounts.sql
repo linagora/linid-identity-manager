@@ -20,6 +20,14 @@ CREATE TRIGGER tg_accounts_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON accounts TO audit_trigger_role;
+
+CREATE TRIGGER tg_accounts_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON accounts
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE accounts IS 'Table storing account-related information, including internal and external identifiers, contact email, and audit data.';
 
 COMMENT ON COLUMN accounts.act_id IS 'Primary key. UUID automatically generated for each account.';
@@ -36,3 +44,4 @@ COMMENT ON COLUMN accounts.update_date IS 'Date and time when the account record
 COMMENT ON INDEX idx_accounts_external_id IS 'Unique index on external_id to enforce uniqueness and improve query performance when searching by external_id.';
 
 COMMENT ON TRIGGER tg_accounts_set_update_date ON accounts IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_accounts_audit ON accounts IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on accounts to record the change in the audit table.';

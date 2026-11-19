@@ -19,6 +19,14 @@ CREATE TRIGGER tg_roles_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON roles TO audit_trigger_role;
+
+CREATE TRIGGER tg_roles_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON roles
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE roles IS 'Table storing functional roles used to organize permissions, responsibilities, or business functions within the identity management system.';
 
 COMMENT ON COLUMN roles.rol_id IS 'Primary key. UUID automatically generated for each role.';
@@ -34,3 +42,4 @@ COMMENT ON COLUMN roles.update_date IS 'Date and time when the record was last u
 COMMENT ON INDEX idx_roles_code IS 'Unique index enforcing role code uniqueness and improving lookup performance by role code.';
 
 COMMENT ON TRIGGER tg_roles_set_update_date ON roles IS 'Trigger that invokes update_timestamp() before each UPDATE statement to automatically refresh update_date.';
+COMMENT ON TRIGGER tg_roles_audit ON roles IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on roles to record the change in the audit table.';

@@ -1,0 +1,151 @@
+# The LinID QA stack: docker/e2e's services (same env files, same seed), under the compose project of the QA scripts,
+# without fixed container or network names, with the images of this working tree and ports on 127.0.0.1 only.
+# The generated files (certificates, rendered configuration) are in ${QA_GEN_DIR}, written by start.sh.
+# Run it through start.sh / stop.sh, which set the variables (see common.sh).
+
+services:
+  db:
+    image: postgres:18.4-alpine
+    env_file: [../../docker/e2e/env/db.env]
+    volumes:
+      - ../../docker/init-db/init_db.sql:/docker-entrypoint-initdb.d/init_db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "psql -U $$POSTGRES_USER -d $$POSTGRES_DB -c 'SELECT 1' || exit 1"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  init-db:
+    image: postgres:18.4-alpine
+    depends_on:
+      db: {condition: service_healthy}
+    env_file: [../../docker/e2e/env/db.env]
+    volumes:
+      - ../../docker/init-db/scripts:/app/scripts:ro
+      - ../../docker/init-db/init_data.sh:/app/init_data.sh:ro
+    entrypoint: ["/bin/sh", "/app/init_data.sh"]
+
+  # The avatars live in a volume (the API writes them, the UI serves them), seeded with the default administrator's one
+  init-avatars:
+    image: postgres:18.4-alpine
+    user: root
+    volumes:
+      - ../../docker/avatars:/seed:ro
+      - avatars:/avatars
+    entrypoint: ["sh", "-c", "cp -a /seed/. /avatars/ && chmod -R a+rwX /avatars"]
+
+  auth:
+    image: lemonldapng/lemonldap-ng:2.23
+    env_file: [../../docker/e2e/env/lemon.env]
+    environment:
+      PORTAL_HOSTNAME: ${QA_HOST}
+      SSODOMAIN: ${QA_HOST}
+    ports:
+      - "127.0.0.1:${QA_AUTH_PORT}:80"
+    volumes:
+      - ${QA_GEN_DIR}/llng/conf:/var/lib/lemonldap-ng/conf
+      - ${QA_GEN_DIR}/certs/oidc.key:/etc/keys/oidc.key:ro
+      - ${QA_GEN_DIR}/certs/oidc.pub:/etc/keys/oidc.pub:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider -q --header=\"Host: $$SSODOMAIN\" \"http://127.0.0.1/checkstate?secret=$$LEMONLDAP_CHECKSTATE_SECRET\""]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+      start_period: 20s
+    depends_on:
+      db: {condition: service_healthy}
+
+  opa:
+    image: openpolicyagent/opa:1.18.1
+    command: ["run", "--server", "--addr=0.0.0.0:8181"]
+    healthcheck:
+      test: ["CMD", "/opa", "version"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  api:
+    image: ${QA_IMAGE_API}
+    env_file: [../../docker/e2e/env/api.env]
+    environment:
+      # The issuer is the public address, which the stack's network resolves to the ui container (its alias)
+      AUTH_ISSUER_URI: ${QA_APP_URL}/auth
+      AUTH_JWK_SET_URI: ${QA_APP_URL}/auth/oauth2/jwks
+      SSL_KEY_STORE: file:/etc/ssl/keystore.p12
+    ports:
+      - "127.0.0.1:${QA_API_PORT}:8443"
+    volumes:
+      - ${QA_GEN_DIR}/certs/api-keystore.p12:/etc/ssl/keystore.p12:ro
+      - ${QA_GEN_DIR}/certs/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ${QA_GEN_DIR}/certs/api-client-keystore.p12:/etc/ssl/api-client-keystore.p12:ro
+      - ../../docker/e2e/resources/superset.yaml:/app/superset.yaml:ro
+      - avatars:/app/avatars
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    depends_on:
+      auth: {condition: service_healthy}
+      db: {condition: service_healthy}
+      opa: {condition: service_healthy}
+      init-avatars: {condition: service_completed_successfully}
+
+  sync-api:
+    image: ${QA_IMAGE_SYNC}
+    env_file: [../../docker/e2e/env/sync-api.env]
+    ports:
+      - "127.0.0.1:${QA_SYNC_PORT}:8443"
+    volumes:
+      - ${QA_GEN_DIR}/certs/sync-api-keystore.p12:/etc/ssl/keystore.p12:ro
+      - ${QA_GEN_DIR}/certs/truststore.jks:/etc/ssl/truststore.jks:ro
+      - ../../docker/e2e/resources/sync/sync-config.yaml:/app/sync-config.yaml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/8443' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    depends_on:
+      db: {condition: service_healthy}
+      opa: {condition: service_healthy}
+
+  ui:
+    image: ${QA_IMAGE_UI}
+    env_file: [../../docker/e2e/env/ui.env]
+    environment:
+      APP_ENV: QA
+      OIDC_CLIENT_SECRET: linid-im-secret   # the public test value of docker/e2e/env/e2e.env, shared with LemonLDAP
+      LEMONLDAP_PORTAL_HOSTNAME: ${QA_HOST}
+      LEMONLDAP_REDIRECT_URL: ${QA_APP_URL}
+    networks:
+      default:
+        aliases: ["${QA_HOST}"]
+    ports:
+      - "127.0.0.1:${QA_UI_PORT}:${QA_UI_PORT}"
+    volumes:
+      - ${QA_GEN_DIR}/certs/ca.crt:/etc/server/certs/ca.crt:ro
+      - ${QA_GEN_DIR}/conf/server-config.json:/app/server-config.json:ro
+      - ${QA_GEN_DIR}/certs/server.crt:/etc/server/certs/server.crt:ro
+      - ${QA_GEN_DIR}/certs/server.key:/etc/server/certs/server.key:ro
+      - ${QA_GEN_DIR}/conf/config.json:/app/spa/config.json:ro
+      - avatars:/app/spa/avatars:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --no-check-certificate https://localhost:${QA_UI_PORT}/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      lin-pulsar: {condition: service_started}
+      api: {condition: service_healthy}
+      auth: {condition: service_healthy}
+
+  lin-pulsar:
+    image: linagora/lin-pulsar:v0.3.6
+    volumes:
+      - ../../docker/e2e/resources/nginx-modules.conf:/etc/nginx/nginx.conf:ro
+
+volumes:
+  avatars:

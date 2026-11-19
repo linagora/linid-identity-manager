@@ -82,6 +82,17 @@ public interface OrganizationalUnitService {
     void existsById(UserPrincipal userPrincipal, UUID id);
 
     /**
+     * Checks whether the given account manages the given organizational unit, directly or through one of its
+     * ancestors.
+     *
+     * @param userPrincipal        the authenticated user performing the operation
+     * @param organizationalUnitId the unique identifier of the organizational unit
+     * @param accountId            the unique identifier of the account
+     * @return {@code true} when the account is a manager of the organizational unit or of one of its ancestors
+     */
+    boolean isManagedBy(UserPrincipal userPrincipal, UUID organizationalUnitId, UUID accountId);
+
+    /**
      * Retrieves an organizational unit view by its unique identifier.
      *
      * @param userPrincipal the authenticated user performing the operation

@@ -43,6 +43,7 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitClosure;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
@@ -52,6 +53,7 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQ
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitClosureRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
@@ -89,8 +91,10 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -117,6 +121,9 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
+
+    @Mock
+    private OrganizationalUnitClosureRepository organizationalUnitClosureRepository;
 
     @Mock
     private AccountRepository accountRepository;
@@ -1180,5 +1187,43 @@ class OrganizationalUnitServiceImplTest {
         var result = service.update(userPrincipal, uuid, record);
 
         assertEquals(Map.of("team", "platform"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("isManagedBy should be true when the account manages an ancestor of the organizational unit")
+    void testIsManagedBy_shouldBeTrueThroughAncestor() {
+        var organizationalUnitId = UUID.randomUUID();
+        var parentId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(organizationalUnitClosureRepository.findAllByDescendantId(organizationalUnitId)).thenReturn(List.of(
+            new OrganizationalUnitClosure(organizationalUnitId, organizationalUnitId, 0),
+            new OrganizationalUnitClosure(parentId, organizationalUnitId, 1)));
+        when(organizationalUnitManagerRepository.existsByAccountIdAndOrganizationalUnitIdIn(
+            accountId, List.of(organizationalUnitId, parentId))).thenReturn(true);
+
+        assertTrue(service.isManagedBy(userPrincipal, organizationalUnitId, accountId));
+    }
+
+    @Test
+    @DisplayName("isManagedBy should be false when the account manages neither the unit nor its ancestors")
+    void testIsManagedBy_shouldBeFalseWhenNotManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(organizationalUnitClosureRepository.findAllByDescendantId(organizationalUnitId)).thenReturn(List.of(
+            new OrganizationalUnitClosure(organizationalUnitId, organizationalUnitId, 0)));
+        when(organizationalUnitManagerRepository.existsByAccountIdAndOrganizationalUnitIdIn(
+            accountId, List.of(organizationalUnitId))).thenReturn(false);
+
+        assertFalse(service.isManagedBy(userPrincipal, organizationalUnitId, accountId));
+    }
+
+    @Test
+    @DisplayName("isManagedBy should be false without querying the managers when the unit has no closure row")
+    void testIsManagedBy_shouldBeFalseWhenUnknownUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        when(organizationalUnitClosureRepository.findAllByDescendantId(organizationalUnitId)).thenReturn(List.of());
+
+        assertFalse(service.isManagedBy(userPrincipal, organizationalUnitId, UUID.randomUUID()));
+        verify(organizationalUnitManagerRepository, never()).existsByAccountIdAndOrganizationalUnitIdIn(any(), any());
     }
 }

@@ -48,6 +48,10 @@ They can:
 * Be nested under a parent group
 * Be attached to an organizational unit
 * Be attached to an application
+* Name managers, who do not need to be members of the group
+
+A manager of an organizational unit, or of one of its parent units, who creates a group in this unit becomes a
+manager of the new group.
 
 ---
 

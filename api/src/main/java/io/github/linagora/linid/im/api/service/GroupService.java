@@ -27,12 +27,16 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
+import io.github.linagora.linid.im.api.model.group.GroupManagerRecord;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.GroupManager;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerView;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import java.util.UUID;
@@ -49,6 +53,9 @@ public interface GroupService {
      *
      * <p>The {@code code} must be unique. When provided, the parent group, the organizational unit and the
      * application must exist.</p>
+     *
+     * <p>When the authenticated user manages the organizational unit of the group, directly or through one of its
+     * ancestors, they also become a manager of the new group.</p>
      *
      * @param userPrincipal the authenticated user
      * @param group         the group creation record
@@ -122,6 +129,41 @@ public interface GroupService {
      * @param accountId     the attached account UUID
      */
     void detachAccount(UserPrincipal userPrincipal, UUID groupId, UUID accountId);
+
+    /**
+     * Retrieves a paginated list of group manager views matching the provided filters.
+     *
+     * @param userPrincipal the authenticated user performing the request
+     * @param filters       filtering criteria applied to the query
+     * @param pageable      pagination and sorting parameters
+     * @return a page of {@link GroupManagerView}
+     */
+    Page<GroupManagerView> findAllManagers(UserPrincipal userPrincipal,
+                                           GroupManagerViewQueryFilterDto filters,
+                                           Pageable pageable);
+
+    /**
+     * Adds an account as a manager of a group.
+     *
+     * <p>The account does not need to be a member of the group.</p>
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param groupId       the unique identifier of the group
+     * @param record        the payload holding the identifier of the account to add as a manager
+     * @return the created {@link GroupManager}
+     */
+    GroupManager addManager(UserPrincipal userPrincipal, UUID groupId, GroupManagerRecord record);
+
+    /**
+     * Removes a manager from a group.
+     *
+     * <p>A manager can remove themselves, and the last manager of a group can be removed.</p>
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param groupId       the unique identifier of the group
+     * @param accountId     the unique identifier of the manager account
+     */
+    void removeManager(UserPrincipal userPrincipal, UUID groupId, UUID accountId);
 
     /**
      * Updates the group with the given identifier.

@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.persistence.repository;
 
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -58,4 +59,13 @@ public interface OrganizationalUnitManagerRepository extends JpaRepository<Organ
      * @return {@code true} when the manager record exists
      */
     boolean existsByOrganizationalUnitIdAndAccountId(UUID organizationalUnitId, UUID accountId);
+
+    /**
+     * Checks whether the given account is a manager of at least one of the given organizational units.
+     *
+     * @param accountId             the account identifier
+     * @param organizationalUnitIds the organizational unit identifiers
+     * @return {@code true} when the account manages one of the organizational units
+     */
+    boolean existsByAccountIdAndOrganizationalUnitIdIn(UUID accountId, Collection<UUID> organizationalUnitIds);
 }

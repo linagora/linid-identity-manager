@@ -30,7 +30,7 @@ Container_Boundary(api, "LinID API") {
   Component(application_ctrl, "ApplicationController", "REST Controller (/applications)", "CRUD for applications; triggers OPA policy deployment; exports Rego script; recomputes the rights of its accounts (POST /applications/{id}/recompute-rights).")
   Component(app_role_ctrl, "ApplicationRoleController", "REST Controller (/applications/{id}/roles)", "CRUD for application roles.")
   Component(app_rule_ctrl, "ApplicationRuleController", "REST Controller (/applications/{id}/rules)", "CRUD for application rules (Rego fragments); triggers policy regeneration.")
-  Component(group_ctrl, "GroupController", "REST Controller (/groups)", "CRUD for groups (hierarchical, with parent/OU/application references); group memberships: list/attach/detach accounts (GET/POST/DELETE /groups/{id}/accounts).")
+  Component(group_ctrl, "GroupController", "REST Controller (/groups)", "CRUD for groups (hierarchical, with parent/OU/application references); group memberships: list/attach/detach accounts (GET/POST/DELETE /groups/{id}/accounts); group managers: list/add/remove (GET/POST/DELETE /groups/{id}/managers).")
   Component(ou_ctrl, "OrganizationalUnitController", "REST Controller (/organizational-units)", "CRUD & lifecycle (suspend, reactivate) for OUs; account attach (requires a functional role)/detach/update relation (PUT) to change role; lists OU accounts; OU managers: list/add/remove (GET/POST/DELETE /organizational-units/{id}/managers).")
   Component(role_ctrl, "RoleController", "REST Controller (/roles)", "CRUD for functional roles; refuses deletion when a role is held by at least one account.")
   Component(superset_ctrl, "SupersetController", "REST Controller (/superset)", "Generates Superset guest tokens; resolves dashboard ID from slug.")
@@ -43,8 +43,8 @@ Container_Boundary(api, "LinID API") {
   Component(application_svc, "ApplicationService", "Service", "CRUD for applications; regeneratePolicy() compiles active rules into Rego via OpaService.")
   Component(app_role_svc, "ApplicationRoleService", "Service", "CRUD for application roles; system-reserved application role immutability.")
   Component(app_rule_svc, "ApplicationRuleService", "Service", "CRUD for application rules (Rego fragments); checksum computation; unique-code enforcement.")
-  Component(group_svc, "GroupService", "Service", "CRUD for groups; parent-group cycle detection; unique-code enforcement; group memberships (attach/detach accounts, list accounts); checks referenced OU, application and account existence.")
-  Component(ou_svc, "OrganizationalUnitService", "Service", "CRUD & lifecycle for organizational units; account attach (requires a functional role)/detach/update relation; OU managers (add/remove, list managers); paginated search; checks role and account existence.")
+  Component(group_svc, "GroupService", "Service", "CRUD for groups; parent-group cycle detection; unique-code enforcement; group memberships (attach/detach accounts, list accounts); group managers (add/remove, list managers); makes the creator of a group a manager when they manage its OU or a parent OU; checks referenced OU, application and account existence.")
+  Component(ou_svc, "OrganizationalUnitService", "Service", "CRUD & lifecycle for organizational units; account attach (requires a functional role)/detach/update relation; OU managers (add/remove, list managers); tells whether an account manages an OU or one of its parents; paginated search; checks role and account existence.")
   Component(role_svc, "RoleService", "Service", "CRUD for functional roles; unique-code enforcement; refuses deletion when role held by an account (isDeletable flag).")
   Component(avatar_svc, "AvatarService", "Service", "Checks the extension, stores the avatar file as {location}/{entity}/{id}.{extension}, deletes it.")
   Component(image_sanitizer, "ImageSanitizer", "Service", "Checks the real image type (magic bytes) and dimensions, then redraws the image from its pixels: metadata and trailing payloads are dropped.")
@@ -68,8 +68,8 @@ Container_Boundary(api, "LinID API") {
   ' --- Repositories (JPA) -------------------------------------------------
   ComponentDb(account_repos, "Account Repositories", "JPA Repositories", "AccountRepository, AccountStatusRepository, AccountDistinctViewRepository, AccountOrganizationalUnitViewRepository, AccountGroupViewRepository.")
   ComponentDb(application_repos, "Application Repositories", "JPA Repositories", "ApplicationRepository, ApplicationViewRepository, ApplicationRoleRepository, ApplicationRoleViewRepository, ApplicationRuleRepository, ApplicationRuleViewRepository.")
-  ComponentDb(group_repos, "Group Repositories", "JPA Repositories", "GroupRepository, GroupViewRepository, GroupAncestorRepository, GroupAccountRepository, GroupAccountViewRepository.")
-  ComponentDb(ou_repos, "Organizational Unit Repositories", "JPA Repositories", "OrganizationalUnitRepository, OrganizationalUnitViewRepository, OrganizationalUnitDistinctViewRepository, OrganizationalUnitRelationRepository, OrganizationalUnitStatusRepository, OrganizationalUnitAccountRepository, OrganizationalUnitAccountViewRepository, OrganizationalUnitManagerRepository, OrganizationalUnitManagerViewRepository.")
+  ComponentDb(group_repos, "Group Repositories", "JPA Repositories", "GroupRepository, GroupViewRepository, GroupAncestorRepository, GroupAccountRepository, GroupAccountViewRepository, GroupManagerRepository, GroupManagerViewRepository.")
+  ComponentDb(ou_repos, "Organizational Unit Repositories", "JPA Repositories", "OrganizationalUnitRepository, OrganizationalUnitViewRepository, OrganizationalUnitDistinctViewRepository, OrganizationalUnitRelationRepository, OrganizationalUnitStatusRepository, OrganizationalUnitAccountRepository, OrganizationalUnitAccountViewRepository, OrganizationalUnitManagerRepository, OrganizationalUnitManagerViewRepository, OrganizationalUnitClosureRepository.")
   ComponentDb(role_repos, "Role Repositories", "JPA Repositories", "RoleRepository, RoleDistinctViewRepository.")
   ComponentDb(user_pref_repo, "UserPreferenceRepository", "JPA Repository", "CRUD for UserPreference entities.")
 }
@@ -114,8 +114,8 @@ Rel(superset_svc, account_repos, "Reads account data for RLS")
 Rel(superset_svc, ou_repos, "Reads OU data for RLS")
 
 ' --- Relationships: cross-service (references & membership) ----------------
-Rel(group_svc, account_repos, "Checks account exists for attach")
-Rel(group_svc, ou_svc, "Checks OU exists")
+Rel(group_svc, account_repos, "Checks account exists for attach and managers")
+Rel(group_svc, ou_svc, "Checks OU exists and whether the creator manages it")
 Rel(group_svc, application_svc, "Checks application exists")
 Rel(ou_svc, role_repos, "Checks role exists")
 

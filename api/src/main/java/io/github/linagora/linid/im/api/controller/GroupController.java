@@ -32,11 +32,16 @@ import io.github.linagora.linid.im.api.model.group.GroupAccountMapper;
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupAccountViewDTO;
 import io.github.linagora.linid.im.api.model.group.GroupDTO;
+import io.github.linagora.linid.im.api.model.group.GroupManagerDTO;
+import io.github.linagora.linid.im.api.model.group.GroupManagerMapper;
+import io.github.linagora.linid.im.api.model.group.GroupManagerRecord;
+import io.github.linagora.linid.im.api.model.group.GroupManagerViewDTO;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.group.GroupViewDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.GroupService;
@@ -95,6 +100,11 @@ public class GroupController {
      * Mapper for group account entity-to-DTO conversion.
      */
     private final GroupAccountMapper groupAccountMapper;
+
+    /**
+     * Mapper for group manager entity-to-DTO conversion.
+     */
+    private final GroupManagerMapper groupManagerMapper;
 
     /**
      * Resolver for paginated response HTTP status.
@@ -238,6 +248,84 @@ public class GroupController {
         log.info("[{}] Received DELETE request to detach account {} from group {}", userPrincipal.getEmail(),
             accountId, groupId);
         groupService.detachAccount(userPrincipal, groupId, accountId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Retrieves a paginated and optionally filtered list of the managers of a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of group manager view DTOs
+     */
+    @GetMapping("/{groupId}/managers")
+    @Operation(summary = "Get all group managers with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of group managers")
+    @ApiResponse(responseCode = "206", description = "Partial list of group managers (more pages available)")
+    @ApiResponse(responseCode = "404", description = "Group not found", content = @Content)
+    public ResponseEntity<Page<GroupManagerViewDTO>> findAllManagers(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID groupId,
+        final GroupManagerViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request for group {} managers with {}", userPrincipal.getEmail(), groupId,
+            filters);
+
+        groupService.existsById(userPrincipal, groupId);
+
+        filters.setGroupId(List.of(groupId.toString()));
+
+        var pages = groupService.findAllManagers(userPrincipal, filters, pageable)
+            .map(groupManagerMapper::toDTO);
+
+        return pagedResponseStatusResolver.resolve(pages);
+    }
+
+    /**
+     * Adds a manager to a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param record        the payload holding the identifier of the account to add as a manager
+     * @return the created manager with HTTP 201 status
+     */
+    @PostMapping("/{groupId}/managers")
+    @Operation(summary = "Add a manager to a group")
+    @ApiResponse(responseCode = "201", description = "Manager successfully added")
+    @ApiResponse(responseCode = "400", description = "Invalid request body or account already manager",
+        content = @Content)
+    @ApiResponse(responseCode = "404", description = "Group or account not found", content = @Content)
+    public ResponseEntity<GroupManagerDTO> addManager(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID groupId,
+        @Valid @RequestBody final GroupManagerRecord record) {
+        log.info("[{}] Received POST request to add a manager to group {} with {}", userPrincipal.getEmail(),
+            groupId, record);
+        var entity = groupService.addManager(userPrincipal, groupId, record);
+        return ResponseEntity.status(HttpStatus.CREATED).body(groupManagerMapper.toDTO(entity));
+    }
+
+    /**
+     * Removes a manager from a group.
+     *
+     * @param userPrincipal the authenticated user
+     * @param groupId       the group UUID
+     * @param accountId     the manager account UUID
+     * @return an empty response with HTTP 204 status
+     */
+    @DeleteMapping("/{groupId}/managers/{accountId}")
+    @Operation(summary = "Remove a manager from a group")
+    @ApiResponse(responseCode = "204", description = "Manager successfully removed")
+    @ApiResponse(responseCode = "404", description = "Group or manager not found", content = @Content)
+    public ResponseEntity<Void> removeManager(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID groupId,
+        @PathVariable final UUID accountId) {
+        log.info("[{}] Received DELETE request to remove manager {} from group {}", userPrincipal.getEmail(),
+            accountId, groupId);
+        groupService.removeManager(userPrincipal, groupId, accountId);
         return ResponseEntity.noContent().build();
     }
 

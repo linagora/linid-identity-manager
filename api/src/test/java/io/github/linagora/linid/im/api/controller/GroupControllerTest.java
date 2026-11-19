@@ -29,12 +29,16 @@ package io.github.linagora.linid.im.api.controller;
 import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.group.GroupAccountMapper;
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
+import io.github.linagora.linid.im.api.model.group.GroupManagerMapper;
+import io.github.linagora.linid.im.api.model.group.GroupManagerRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.GroupManager;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AvatarService;
@@ -83,6 +87,9 @@ class GroupControllerTest {
     private GroupAccountMapper groupAccountMapper;
 
     @Mock
+    private GroupManagerMapper groupManagerMapper;
+
+    @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
 
     private GroupController controller;
@@ -94,7 +101,7 @@ class GroupControllerTest {
     @BeforeEach
     void setUp() {
         controller = new GroupController(avatarService, groupService, groupMapper, groupAccountMapper,
-            pagedResponseStatusResolver);
+            groupManagerMapper, pagedResponseStatusResolver);
         userPrincipal = new UserPrincipal();
         userPrincipal.setId(UUID.randomUUID());
         userPrincipal.setEmail("admin@example.com");
@@ -176,6 +183,62 @@ class GroupControllerTest {
 
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should restrict the managers listing to the requested group")
+    void testFindAllManagers() {
+        var groupId = UUID.randomUUID();
+        var filters = new GroupManagerViewQueryFilterDto();
+        when(groupService.findAllManagers(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
+
+        var response = controller.findAllManagers(userPrincipal, groupId, filters, Pageable.unpaged());
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(groupId.toString()), filters.getGroupId());
+        verify(groupService).existsById(userPrincipal, groupId);
+    }
+
+    @Test
+    @DisplayName("Should propagate the 404 raised when listing the managers of an unknown group")
+    void testFindAllManagers_shouldPropagateUnknownGroup() {
+        var groupId = UUID.randomUUID();
+        var filters = new GroupManagerViewQueryFilterDto();
+        doThrow(new ApiException(404, I18nMessage.of("error.group.not_found")))
+            .when(groupService).existsById(userPrincipal, groupId);
+
+        var exception = assertThrows(ApiException.class, () -> controller.findAllManagers(
+            userPrincipal, groupId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(groupService, never()).findAllManagers(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should add a manager to a group")
+    void testAddManager() {
+        when(groupService.addManager(any(), any(), any())).thenReturn(new GroupManager());
+
+        var response = controller.addManager(userPrincipal, UUID.randomUUID(),
+            new GroupManagerRecord(UUID.randomUUID()));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    @DisplayName("Should remove a manager from a group")
+    void testRemoveManager() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        var response = controller.removeManager(userPrincipal, groupId, accountId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(groupService).removeManager(userPrincipal, groupId, accountId);
     }
 
     @Test

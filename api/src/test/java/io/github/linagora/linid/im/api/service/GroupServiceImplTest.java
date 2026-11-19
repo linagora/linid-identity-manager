@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
+import io.github.linagora.linid.im.api.model.group.GroupManagerRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
@@ -34,12 +35,16 @@ import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.GroupManager;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerView;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAncestorRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -53,6 +58,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,6 +66,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -72,6 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,7 +104,13 @@ class GroupServiceImplTest {
     private GroupAccountViewRepository groupAccountViewRepository;
 
     @Mock
-    private AccountRepository accountRepository;
+    private GroupManagerRepository groupManagerRepository;
+
+    @Mock
+    private GroupManagerViewRepository groupManagerViewRepository;
+
+    @Mock
+    private AccountService accountService;
 
     @Mock
     private OrganizationalUnitService organizationalUnitService;
@@ -550,7 +564,6 @@ class GroupServiceImplTest {
         var groupId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
         when(groupRepository.existsById(groupId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(groupAccountRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
         when(groupAccountRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -561,6 +574,7 @@ class GroupServiceImplTest {
         assertEquals(Map.of(), result.getExtraParameters());
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+        verify(accountService).existsById(userPrincipal, accountId);
     }
 
     @Test
@@ -583,7 +597,8 @@ class GroupServiceImplTest {
         var groupId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
         when(groupRepository.existsById(groupId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(false);
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
 
         var exception = assertThrows(ApiException.class, () -> service.attachAccount(
             userPrincipal, groupId, new GroupAccountRecord(accountId, Map.of())));
@@ -599,7 +614,6 @@ class GroupServiceImplTest {
         var groupId = UUID.randomUUID();
         var accountId = UUID.randomUUID();
         when(groupRepository.existsById(groupId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(groupAccountRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(true);
 
         var exception = assertThrows(ApiException.class, () -> service.attachAccount(
@@ -638,6 +652,235 @@ class GroupServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.group.account.not_attached", exception.getError().key());
         verify(groupAccountRepository, never()).delete(any(GroupAccount.class));
+    }
+
+    @Test
+    @DisplayName("findAllManagers should delegate to the group manager view repository")
+    void testFindAllManagers_shouldDelegateToRepository() {
+        var entity = GroupManagerView.builder().id(UUID.randomUUID()).groupId(UUID.randomUUID()).build();
+        var filters = new GroupManagerViewQueryFilterDto();
+        when(groupManagerViewRepository.findAll(
+            ArgumentMatchers.<Specification<GroupManagerView>>any(),
+            ArgumentMatchers.any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        var result = service.findAllManagers(userPrincipal, filters, Pageable.unpaged());
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(entity.getId(), result.getContent().getFirst().getId());
+    }
+
+    @Test
+    @DisplayName("addManager should persist the manager with the authenticated user as author")
+    void testAddManager_shouldPersistManager() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
+        when(groupManagerRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.addManager(userPrincipal, groupId, new GroupManagerRecord(accountId));
+
+        assertEquals(groupId, result.getGroupId());
+        assertEquals(accountId, result.getAccountId());
+        assertEquals(userPrincipal.getId(), result.getCreatedBy());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+        verify(groupManagerRepository).flush();
+        verify(accountService).existsById(userPrincipal, accountId);
+    }
+
+    @Test
+    @DisplayName("addManager should throw a 400 when a concurrent request added the same manager")
+    void testAddManager_shouldThrowWhenManagerAddedConcurrently() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
+        doThrow(new DataIntegrityViolationException("uk_group_managers_grp_id_act_id",
+            new SQLException("duplicate key value violates unique constraint", "23505")))
+            .when(groupManagerRepository).flush();
+
+        var exception = assertThrows(ApiException.class, () -> service.addManager(
+            userPrincipal, groupId, new GroupManagerRecord(accountId)));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.group.manager.already_exists", exception.getError().key());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "group_managers_grp_id_fkey, error.group.not_found",
+        "group_managers_act_id_fkey, error.account.not_found"
+    })
+    @DisplayName("addManager should throw the 404 of the group or the account deleted by a concurrent request")
+    void testAddManager_shouldThrowNotFoundWhenReferenceDeletedConcurrently(final String constraint,
+                                                                            final String errorKey) {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
+        // The checks pass, but a concurrent request deletes the reference before the flush.
+        var sqlException = new SQLException("insert or update on table \"group_managers\" violates "
+            + "foreign key constraint \"" + constraint + "\"", "23503");
+        doThrow(new DataIntegrityViolationException("foreign key",
+            new ConstraintViolationException("could not execute statement", sqlException, constraint)))
+            .when(groupManagerRepository).flush();
+        var managerRecord = new GroupManagerRecord(accountId);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, groupId, managerRecord));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals(errorKey, exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("addManager should rethrow a foreign key violation whose constraint is not known")
+    void testAddManager_shouldRethrowUnknownForeignKeyViolation() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
+        var foreignKeyViolation = new DataIntegrityViolationException("foreign key",
+            new SQLException("insert or update violates foreign key constraint", "23503"));
+        doThrow(foreignKeyViolation).when(groupManagerRepository).flush();
+        var managerRecord = new GroupManagerRecord(accountId);
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.addManager(userPrincipal, groupId, managerRecord));
+
+        assertSame(foreignKeyViolation, exception);
+    }
+
+    @Test
+    @DisplayName("addManager should rethrow the database rejections other than a manager added or a reference deleted")
+    void testAddManager_shouldRethrowOtherIntegrityViolations() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(false);
+        var notNullViolation = new DataIntegrityViolationException("not null",
+            new SQLException("null value in column \"created_by\" violates not-null constraint", "23502"));
+        doThrow(notNullViolation).when(groupManagerRepository).flush();
+        var managerRecord = new GroupManagerRecord(accountId);
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.addManager(userPrincipal, groupId, managerRecord));
+
+        assertSame(notNullViolation, exception);
+    }
+
+    @Test
+    @DisplayName("addManager should throw a 404 when the group does not exist")
+    void testAddManager_shouldThrowWhenGroupAbsent() {
+        var groupId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class, () -> service.addManager(
+            userPrincipal, groupId, new GroupManagerRecord(UUID.randomUUID())));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.not_found", exception.getError().key());
+        verify(groupManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("addManager should throw a 404 when the account does not exist")
+    void testAddManager_shouldThrowWhenAccountAbsent() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
+
+        var exception = assertThrows(ApiException.class, () -> service.addManager(
+            userPrincipal, groupId, new GroupManagerRecord(accountId)));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(groupManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("addManager should throw a 400 when the account is already a manager of the group")
+    void testAddManager_shouldThrowWhenAlreadyManager() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.existsByGroupIdAndAccountId(groupId, accountId)).thenReturn(true);
+
+        var exception = assertThrows(ApiException.class, () -> service.addManager(
+            userPrincipal, groupId, new GroupManagerRecord(accountId)));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.group.manager.already_exists", exception.getError().key());
+        verify(groupManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("removeManager should delete the manager record")
+    void testRemoveManager_shouldDeleteManager() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var manager = GroupManager.builder().id(UUID.randomUUID()).groupId(groupId).accountId(accountId).build();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.findByGroupIdAndAccountId(groupId, accountId)).thenReturn(Optional.of(manager));
+
+        service.removeManager(userPrincipal, groupId, accountId);
+
+        InOrder order = inOrder(groupManagerRepository);
+        order.verify(groupManagerRepository).delete(manager);
+        order.verify(groupManagerRepository).flush();
+    }
+
+    @Test
+    @DisplayName("removeManager should throw a 404 when a concurrent request removed the same manager first")
+    void testRemoveManager_shouldThrowWhenManagerRemovedConcurrently() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var manager = GroupManager.builder().id(UUID.randomUUID()).groupId(groupId).accountId(accountId).build();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.findByGroupIdAndAccountId(groupId, accountId)).thenReturn(Optional.of(manager));
+        // The lookup finds the manager, but a concurrent request removes it first: the delete matches no row.
+        doThrow(new ObjectOptimisticLockingFailureException(GroupManager.class, manager.getId()))
+            .when(groupManagerRepository).flush();
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, groupId, accountId));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.manager.not_found", exception.getError().key());
+        assertEquals(Map.of("id", accountId.toString()), exception.getError().context());
+    }
+
+    @Test
+    @DisplayName("removeManager should throw a 404 when the group does not exist")
+    void testRemoveManager_shouldThrowWhenGroupAbsent() {
+        var groupId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, groupId, UUID.randomUUID()));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.not_found", exception.getError().key());
+        verify(groupManagerRepository, never()).delete(any(GroupManager.class));
+    }
+
+    @Test
+    @DisplayName("removeManager should throw a 404 when the account is not a manager of the group")
+    void testRemoveManager_shouldThrowWhenNotManager() {
+        var groupId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(groupRepository.existsById(groupId)).thenReturn(true);
+        when(groupManagerRepository.findByGroupIdAndAccountId(groupId, accountId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, groupId, accountId));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.group.manager.not_found", exception.getError().key());
+        verify(groupManagerRepository, never()).delete(any(GroupManager.class));
     }
 
     @Test

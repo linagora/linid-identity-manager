@@ -27,7 +27,7 @@ Container_Boundary(api, "LinID API") {
   ' --- Controllers --------------------------------------------------------
   Component(avatar_ctrl, "AvatarController", "REST Controller (/avatars)", "Uploads (multipart, size bounded by the Spring multipart limits) and deletes the avatar of an entity (POST/DELETE /avatars/{entity}/{id}).")
   Component(account_ctrl, "AccountController", "REST Controller (/accounts)", "CRUD & lifecycle (suspend, deactivate, reactivate, activate, schedule-activation) for accounts; lists account OUs (GET /accounts/{id}/organizational-units) and groups (GET /accounts/{id}/groups); recomputes its rights (POST /accounts/{id}/recompute-rights).")
-  Component(application_ctrl, "ApplicationController", "REST Controller (/applications)", "CRUD for applications; triggers OPA policy deployment; exports Rego script; recomputes the rights of its accounts (POST /applications/{id}/recompute-rights).")
+  Component(application_ctrl, "ApplicationController", "REST Controller (/applications)", "CRUD for applications; triggers OPA policy deployment; exports Rego script; recomputes the rights of its accounts (POST /applications/{id}/recompute-rights); application managers: list/add/remove (GET/POST/DELETE /applications/{id}/managers).")
   Component(app_role_ctrl, "ApplicationRoleController", "REST Controller (/applications/{id}/roles)", "CRUD for application roles.")
   Component(app_rule_ctrl, "ApplicationRuleController", "REST Controller (/applications/{id}/rules)", "CRUD for application rules (Rego fragments); triggers policy regeneration.")
   Component(group_ctrl, "GroupController", "REST Controller (/groups)", "CRUD for groups (hierarchical, with parent/OU/application references); group memberships: list/attach/detach accounts (GET/POST/DELETE /groups/{id}/accounts).")
@@ -40,7 +40,7 @@ Container_Boundary(api, "LinID API") {
 
   ' --- Services -----------------------------------------------------------
   Component(account_svc, "AccountService", "Service", "CRUD & lifecycle management for accounts; externalId lookup; paginated search; findAllGroups (account groups).")
-  Component(application_svc, "ApplicationService", "Service", "CRUD for applications; regeneratePolicy() compiles active rules into Rego via OpaService.")
+  Component(application_svc, "ApplicationService", "Service", "CRUD for applications; regeneratePolicy() compiles active rules into Rego via OpaService; application managers (add/remove, list managers), checks account existence, rejects an account already manager.")
   Component(app_role_svc, "ApplicationRoleService", "Service", "CRUD for application roles; system-reserved application role immutability.")
   Component(app_rule_svc, "ApplicationRuleService", "Service", "CRUD for application rules (Rego fragments); checksum computation; unique-code enforcement.")
   Component(group_svc, "GroupService", "Service", "CRUD for groups; parent-group cycle detection; unique-code enforcement; group memberships (attach/detach accounts, list accounts); checks referenced OU, application and account existence.")
@@ -67,7 +67,7 @@ Container_Boundary(api, "LinID API") {
 
   ' --- Repositories (JPA) -------------------------------------------------
   ComponentDb(account_repos, "Account Repositories", "JPA Repositories", "AccountRepository, AccountStatusRepository, AccountDistinctViewRepository, AccountOrganizationalUnitViewRepository, AccountGroupViewRepository.")
-  ComponentDb(application_repos, "Application Repositories", "JPA Repositories", "ApplicationRepository, ApplicationViewRepository, ApplicationRoleRepository, ApplicationRoleViewRepository, ApplicationRuleRepository, ApplicationRuleViewRepository.")
+  ComponentDb(application_repos, "Application Repositories", "JPA Repositories", "ApplicationRepository, ApplicationViewRepository, ApplicationRoleRepository, ApplicationRoleViewRepository, ApplicationRuleRepository, ApplicationRuleViewRepository, ApplicationManagerRepository, ApplicationManagerViewRepository.")
   ComponentDb(group_repos, "Group Repositories", "JPA Repositories", "GroupRepository, GroupViewRepository, GroupAncestorRepository, GroupAccountRepository, GroupAccountViewRepository.")
   ComponentDb(ou_repos, "Organizational Unit Repositories", "JPA Repositories", "OrganizationalUnitRepository, OrganizationalUnitViewRepository, OrganizationalUnitDistinctViewRepository, OrganizationalUnitRelationRepository, OrganizationalUnitStatusRepository, OrganizationalUnitAccountRepository, OrganizationalUnitAccountViewRepository.")
   ComponentDb(role_repos, "Role Repositories", "JPA Repositories", "RoleRepository, RoleDistinctViewRepository.")
@@ -106,6 +106,7 @@ Rel(account_svc, account_repos, "Uses")
 Rel(application_svc, application_repos, "Uses")
 Rel(app_role_svc, application_repos, "Uses")
 Rel(app_rule_svc, application_repos, "Uses")
+Rel(application_svc, account_svc, "Checks account exists for managers")
 Rel(group_svc, group_repos, "Uses")
 Rel(ou_svc, ou_repos, "Uses")
 Rel(role_svc, role_repos, "Uses")

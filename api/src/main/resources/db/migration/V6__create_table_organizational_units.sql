@@ -115,6 +115,13 @@ CREATE OR REPLACE FUNCTION organizational_unit_closures_insert()
     RETURNS TRIGGER AS
 $$
 BEGIN
+    -- One change of the hierarchy at a time: two concurrent changes would otherwise each read the closure from before
+    -- the other one, and could close a cycle or miss each other's paths. Relies on READ COMMITTED, where each statement
+    -- below reads what was committed while waiting. The OID of organizational_unit_closures as namespace names the
+    -- lock in pg_locks (classid::regclass) with no registry to keep: user table OIDs start at 16384, above the
+    -- namespaces of the sync-api locks.
+    PERFORM pg_advisory_xact_lock('organizational_unit_closures'::regclass::oid::int, 0);
+
     -- Cycle detection
     IF EXISTS (
         SELECT 1
@@ -195,6 +202,9 @@ CREATE OR REPLACE FUNCTION organizational_unit_closures_delete()
     RETURNS TRIGGER AS
 $$
 BEGIN
+    -- Same lock as organizational_unit_closures_insert(), for the same reason.
+    PERFORM pg_advisory_xact_lock('organizational_unit_closures'::regclass::oid::int, 0);
+
     -- Only the ancestors of the child and of its descendants can change.
     PERFORM organizational_unit_closures_rebuild(ARRAY(
         SELECT descendant_id
@@ -206,7 +216,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION organizational_unit_closures_delete() IS 'Trigger function that rebuilds the ancestor paths of the child organizational unit and of its descendants after a relation is deleted, keeping the paths still supported by another parent.';
+COMMENT ON FUNCTION organizational_unit_closures_delete() IS 'Trigger function that takes the lock of the organizational unit hierarchy until the end of the transaction, then rebuilds the ancestor paths of the child organizational unit and of its descendants after a relation is deleted, keeping the paths still supported by another parent.';
 
 CREATE TRIGGER trg_ou_relation_delete
     AFTER DELETE ON organizational_unit_relations

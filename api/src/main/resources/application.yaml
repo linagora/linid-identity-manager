@@ -163,6 +163,11 @@ sync-api:
   # Maximum time to wait for the response of sync-api, as a duration (e.g. 10s, 500ms)
   read-timeout: ${SYNC_API_READ_TIMEOUT:10s}
 
+super-admin:
+  # external_id (JWT "sub" claim) of the account declared SUPER_ADMIN, which must already exist
+  # Remove the variable then restart the API to take the role away, once an administrators manager is named
+  sub: ${LINID_SUPER_ADMIN_SUB:}
+
 superset:
   url: ${SUPERSET_URL}
   username: ${SUPERSET_USERNAME}

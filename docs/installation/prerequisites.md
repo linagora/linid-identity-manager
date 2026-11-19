@@ -61,6 +61,8 @@ Some configuration depends on environment variables:
 * `AUTH_JWK_SET_URI` (URL of the JSON Web Key Set of the OIDC issuer / LemonLDAP)
 * `AUTH_AUDIENCE` (expected `aud` claim of the access tokens, i.e. the audience declared for the API at the OIDC provider, distinct from the client ID)
 * `AUTH_JWT_EXPECTED_TYPE` (optional, JOSE `typ` header required on access tokens, default `at+jwt`)
+* `LINID_SUPER_ADMIN_SUB` (optional, `external_id` of an existing account declared SUPER_ADMIN, see
+  [SUPER_ADMIN](../configuration/application/config-files.md#9-super_admin))
 * `I18N_EXTERNAL_PATH` (optional, for backend/plugin translations)
 * `LINID_DATABASE_*` and `SYNC_TECHNICAL_ACCOUNT_ID` for `sync-api`, see
   [sync-api access to the LinId database](#-sync-api-access-to-the-linid-database)

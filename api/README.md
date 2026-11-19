@@ -79,6 +79,14 @@ The `external_id` is set when the account is created and cannot be changed after
 The subject is only as stable as the attribute the OIDC provider derives it from: see [Before a Real Deployment](../docs/configuration/authentication/oidc.md#-before-a-real-deployment).
 When the token is valid but no account matches its `sub` claim, the API responds `401 Unauthorized` with a `WWW-Authenticate: Bearer` header, like any rejected bearer token, and logs a warning with the subject.
 
+### SUPER_ADMIN
+
+The SUPER_ADMIN is declared by configuration, never stored in the database: the account whose `external_id` (the `sub` claim of its tokens) equals `LINID_SUPER_ADMIN_SUB` has every right. The global roles, SUPER_ADMIN included, stay internal to the API and are not added to the tokens.
+
+- The declared account must already exist, since a token matching no account gets a `401`.
+- At each startup, while the variable is set, the API logs a warning naming the declared `external_id`.
+- To take the role away, for example once an administrators manager is named, remove the variable then restart the API: the account loses the role and the warning is no longer logged.
+
 ---
 
 ## Environment Variables
@@ -103,6 +111,7 @@ When the token is valid but no account matches its `sub` claim, the API responds
 | `AUTH_JWK_SET_URI` | JWK Set URI     | Yes      |
 | `AUTH_AUDIENCE`    | Expected `aud`  | Yes      |
 | `AUTH_JWT_EXPECTED_TYPE` | Required `typ` header (default `at+jwt`) | No |
+| `LINID_SUPER_ADMIN_SUB` | `external_id` of the SUPER_ADMIN account, see [SUPER_ADMIN](#super_admin) | No |
 
 ### SSL
 

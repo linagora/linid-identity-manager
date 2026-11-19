@@ -32,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`DELETE /applications/{id}/managers/{accountId}`) a manager. A manager can remove themselves, and the last manager
   can be removed. Deleting an application or an account removes its managers. These endpoints are open to every
   authenticated user.
+- Added the **managers of a group**: the `group_managers` table with its audit table and SQL view, and the endpoints
+  to list (`GET /groups/{id}/managers`), add (`POST /groups/{id}/managers`) and remove
+  (`DELETE /groups/{id}/managers/{accountId}`) a manager. A manager does not need to be a member of the group, can
+  remove themselves, and the last manager can be removed. Deleting a group or an account removes its managers. A
+  manager of an organizational unit, or of one of its parent units, who creates a group in this unit (`POST /groups`)
+  becomes a manager of the new group. Every authenticated user can call these endpoints for now. The view migrations
+  are renumbered (V40 to V56): existing databases must be recreated.
 
 ### Changed
 

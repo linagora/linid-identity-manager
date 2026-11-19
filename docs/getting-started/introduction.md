@@ -44,7 +44,7 @@ Groups are named entities identified by a unique code.
 
 They can:
 
-* Be nested under a parent group
+* Be nested under a parent group, without cycles: a group can never become an ancestor of itself
 * Be attached to an organizational unit
 * Be attached to an application
 

@@ -34,6 +34,13 @@ Feature: Test API Group endpoints
   ## 507 Should return 400 updating a group with an invalid <field>
   ## 508 Should keep the extra parameters when the update payload omits them
 
+  ################## Closure paths (group_closures) ###################
+  ## 601 Should store the closure paths of a new group hierarchy
+  ## 602 Should rebuild the closure paths of a subtree moved under another parent
+  ## 603 Should remove the closure paths through a deleted group
+  ## 604 Should reject in the database a parent change closing a cycle
+  ## 605 Should reject in the database an insert closing a cycle
+
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
     And   I set http header 'Content-Type' with 'application/x-www-form-urlencoded'
@@ -668,3 +675,297 @@ Feature: Test API Group endpoints
 
     When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp508Id}}' with method 'DELETE'
     Then I expect status code is 204
+
+  ####################################################
+  ################## Closure paths (group_closures) ##
+  ####################################################
+
+  Scenario: 601 - Should store the closure paths of a new group hierarchy
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # A -> B -> C
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-601-a",
+        "name": "Group 601 A"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp601AId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-601-b",
+        "name": "Group 601 B",
+        "parentId": "{{ctx.grp601AId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp601BId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-601-c",
+        "name": "Group 601 C",
+        "parentId": "{{ctx.grp601BId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp601CId' as '{{response.body.id}}' in context
+
+    When I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth DESC, g.code) AS ancestors FROM group_closures c JOIN groups g ON g.grp_id = c.ancestor_id WHERE c.descendant_id = $1" with values:
+      """
+      ["{{ctx.grp601CId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].ancestors}}' is 'grp-601-a:2, grp-601-b:1, grp-601-c:0'
+
+    When I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth, g.code) AS descendants FROM group_closures c JOIN groups g ON g.grp_id = c.descendant_id WHERE c.ancestor_id = $1" with values:
+      """
+      ["{{ctx.grp601AId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].descendants}}' is 'grp-601-a:0, grp-601-b:1, grp-601-c:2'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp601CId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp601BId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp601AId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 602 - Should rebuild the closure paths of a subtree moved under another parent
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # A -> B -> C and D
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-602-a",
+        "name": "Group 602 A"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp602AId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-602-b",
+        "name": "Group 602 B",
+        "parentId": "{{ctx.grp602AId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp602BId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-602-c",
+        "name": "Group 602 C",
+        "parentId": "{{ctx.grp602BId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp602CId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-602-d",
+        "name": "Group 602 D"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp602DId' as '{{response.body.id}}' in context
+
+    # Moving B under D moves C with it, and leaves A without descendants.
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp602BId}}' with method 'PUT' with body:
+      """
+      {
+        "code": "grp-602-b",
+        "name": "Group 602 B",
+        "parentId": "{{ctx.grp602DId}}"
+      }
+      """
+    Then I expect status code is 200
+
+    When I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth DESC, g.code) AS ancestors FROM group_closures c JOIN groups g ON g.grp_id = c.ancestor_id WHERE c.descendant_id = $1" with values:
+      """
+      ["{{ctx.grp602CId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].ancestors}}' is 'grp-602-d:2, grp-602-b:1, grp-602-c:0'
+
+    When I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth, g.code) AS descendants FROM group_closures c JOIN groups g ON g.grp_id = c.descendant_id WHERE c.ancestor_id = $1" with values:
+      """
+      ["{{ctx.grp602AId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].descendants}}' is 'grp-602-a:0'
+
+    # group_closures matches the closure recomputed from groups.parent_id.
+    When I execute sql request "WITH RECURSIVE expected AS (SELECT grp_id AS ancestor_id, grp_id AS descendant_id, 0 AS depth FROM groups UNION ALL SELECT g.parent_id, e.descendant_id, e.depth + 1 FROM expected e JOIN groups g ON g.grp_id = e.ancestor_id WHERE g.parent_id IS NOT NULL) CYCLE ancestor_id SET is_cycle USING path SELECT count(*) AS total FROM ((SELECT ancestor_id, descendant_id, depth FROM expected WHERE NOT is_cycle EXCEPT SELECT ancestor_id, descendant_id, depth FROM group_closures) UNION ALL (SELECT ancestor_id, descendant_id, depth FROM group_closures EXCEPT SELECT ancestor_id, descendant_id, depth FROM expected WHERE NOT is_cycle)) AS diff"
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].total}}' is '0'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp602CId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp602BId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp602DId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp602AId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 603 - Should remove the closure paths through a deleted group
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # A -> B -> C
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-603-a",
+        "name": "Group 603 A"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp603AId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-603-b",
+        "name": "Group 603 B",
+        "parentId": "{{ctx.grp603AId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp603BId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-603-c",
+        "name": "Group 603 C",
+        "parentId": "{{ctx.grp603BId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp603CId' as '{{response.body.id}}' in context
+
+    # Deleting B makes C a top-level group: the path from A to C goes with B.
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp603BId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth DESC, g.code) AS ancestors FROM group_closures c JOIN groups g ON g.grp_id = c.ancestor_id WHERE c.descendant_id = $1" with values:
+      """
+      ["{{ctx.grp603CId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].ancestors}}' is 'grp-603-c:0'
+
+    When I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth, g.code) AS descendants FROM group_closures c JOIN groups g ON g.grp_id = c.descendant_id WHERE c.ancestor_id = $1" with values:
+      """
+      ["{{ctx.grp603AId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].descendants}}' is 'grp-603-a:0'
+
+    When I execute sql request "SELECT count(*) AS total FROM group_closures WHERE ancestor_id = $1 OR descendant_id = $1" with values:
+      """
+      ["{{ctx.grp603BId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].total}}' is '0'
+
+    # group_closures matches the closure recomputed from groups.parent_id.
+    When I execute sql request "WITH RECURSIVE expected AS (SELECT grp_id AS ancestor_id, grp_id AS descendant_id, 0 AS depth FROM groups UNION ALL SELECT g.parent_id, e.descendant_id, e.depth + 1 FROM expected e JOIN groups g ON g.grp_id = e.ancestor_id WHERE g.parent_id IS NOT NULL) CYCLE ancestor_id SET is_cycle USING path SELECT count(*) AS total FROM ((SELECT ancestor_id, descendant_id, depth FROM expected WHERE NOT is_cycle EXCEPT SELECT ancestor_id, descendant_id, depth FROM group_closures) UNION ALL (SELECT ancestor_id, descendant_id, depth FROM group_closures EXCEPT SELECT ancestor_id, descendant_id, depth FROM expected WHERE NOT is_cycle)) AS diff"
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].total}}' is '0'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp603CId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp603AId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 604 - Should reject in the database a parent change closing a cycle
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # A -> B -> C
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-604-a",
+        "name": "Group 604 A"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp604AId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-604-b",
+        "name": "Group 604 B",
+        "parentId": "{{ctx.grp604AId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp604BId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/groups' with method 'POST' with body:
+      """
+      {
+        "code": "grp-604-c",
+        "name": "Group 604 C",
+        "parentId": "{{ctx.grp604BId}}"
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'grp604CId' as '{{response.body.id}}' in context
+
+    # Without the API, attaching A under C must fail with check_violation: the block raises 'cycle accepted' otherwise.
+    When I execute sql request "DO $$ BEGIN UPDATE groups SET parent_id = '{{ctx.grp604CId}}' WHERE grp_id = '{{ctx.grp604AId}}'; RAISE EXCEPTION 'cycle accepted'; EXCEPTION WHEN check_violation THEN NULL; END $$"
+    And  I execute sql request "SELECT string_agg(g.code || ':' || c.depth, ', ' ORDER BY c.depth DESC, g.code) AS ancestors FROM group_closures c JOIN groups g ON g.grp_id = c.ancestor_id WHERE c.descendant_id = $1" with values:
+      """
+      ["{{ctx.grp604AId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].ancestors}}' is 'grp-604-a:0'
+
+    When I execute sql request "SELECT count(*) AS total FROM groups WHERE grp_id = $1 AND parent_id IS NULL" with values:
+      """
+      ["{{ctx.grp604AId}}"]
+      """
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].total}}' is '1'
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp604CId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp604BId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/groups/{{ctx.grp604AId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 605 - Should reject in the database an insert closing a cycle
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # Two groups inserted by one statement, each the parent of the other: the foreign keys are only checked at the end
+    # of the statement, so only the trigger can reject them. The block raises 'cycle accepted' otherwise.
+    When I execute sql request "DO $$ DECLARE a UUID := gen_random_uuid(); b UUID := gen_random_uuid(); BEGIN INSERT INTO groups (grp_id, code, name, parent_id) VALUES (a, 'grp-605-a', 'Group 605 A', b), (b, 'grp-605-b', 'Group 605 B', a); RAISE EXCEPTION 'cycle accepted'; EXCEPTION WHEN check_violation THEN NULL; END $$"
+    And  I execute sql request "SELECT count(*) AS total FROM groups WHERE code IN ('grp-605-a', 'grp-605-b')"
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].total}}' is '0'

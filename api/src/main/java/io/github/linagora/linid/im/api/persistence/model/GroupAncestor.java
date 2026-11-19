@@ -37,8 +37,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Immutable;
 
 /**
- * Read-only entity mapped to the recursive {@code group_ancestors_view}: one row per (group, ancestor) pair of
- * the group hierarchy, at any depth.
+ * Read-only entity mapped to {@code group_ancestors_view}, a view over the {@code group_closures} closure table: one
+ * row per (group, ancestor) pair of the group hierarchy, at any depth, without the group itself.
  */
 @Entity
 @Immutable

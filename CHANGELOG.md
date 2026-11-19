@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
   `email` and `roles` claims.
+- Changed the **group hierarchy** to be stored in the `group_closures` closure table, maintained by triggers on
+  `groups` when a group is created, moved or deleted. The database now rejects any parent closing a cycle of any
+  length, and `group_ancestors_view` reads this table instead of a recursive query. The triggers take a
+  transaction-level advisory lock, so that concurrent changes of the hierarchy run one at a time and can neither close
+  a cycle nor leave wrong paths. Existing databases must be recreated, since the `V24` and `V40` migrations changed.
 
 ### Fixed
 
@@ -42,6 +47,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from the former ancestors to the child and its descendants: they are now rebuilt from
   `organizational_unit_relations`, keeping the paths still reached through another parent.
 - Refused to delete a functional role still held by an account, instead of silently removing it from that account.
+- Fixed the **concurrent changes of the organizational unit hierarchy**, which could close a cycle, or leave missing or
+  stale paths in `organizational_unit_closures`: the triggers of `organizational_unit_relations` now take a
+  transaction-level advisory lock, so that these changes run one at a time. Existing databases must be recreated, since
+  the `V6` migration changed.
 
 ## [0.12.0] - 2026-11-16
 

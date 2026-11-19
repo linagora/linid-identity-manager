@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Backend
 
+- Changed the **audit of the database**: the 14 `*_audit` tables and their trigger functions are replaced by a single
+  `audit` table, filled by the generic trigger function `f_audit()`. A table is audited when the migration that creates
+  it also creates its trigger, whose arguments name the related rows to keep in the payload (for instance
+  `'account=act_id'`). The payload holds the changed row under `row`, the author under `changed_by` and one entry per
+  related row.
 - Changed the **claims template of the `LINID` application** to produce the `sub` (the `external_id` of the account),
   `email` and `roles` claims.
 
@@ -35,6 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `externalId` and the account edit dialog no longer shows it, since an account administrator could otherwise bind an
   account to the subject of another one and act with its rights. A database administrator can still fix a wrong
   `external_id` with an SQL `UPDATE`, described in `docs/configuration/authentication/oidc.md`.
+- Fixed the **audit trigger**, which a database account could bypass with a temporary table named `audit`: the
+  temporary tables of the session came first in the search path, so the audit records of its changes went there.
+  `f_audit()` now searches the `public` schema before them.
 
 #### Backend
 

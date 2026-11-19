@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS organizational_unit_audit
     changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE INDEX idx_organizational_unit_audit_oun_id ON organizational_unit_audit (oun_id);
+
 CREATE OR REPLACE FUNCTION f_audit_organizational_unit()
     RETURNS TRIGGER
     SECURITY DEFINER
@@ -61,6 +63,8 @@ REVOKE INSERT, UPDATE, DELETE ON organizational_unit_audit FROM PUBLIC;
 
 GRANT INSERT ON organizational_unit_audit TO audit_trigger_role;
 
+GRANT SELECT ON organizational_unit_audit TO audit_trigger_role;
+
 COMMENT ON TABLE organizational_unit_audit IS 'Audit table storing every INSERT, UPDATE and DELETE operation performed on the organizational_units table, including the actor JSONB snapshot.';
 
 COMMENT ON COLUMN organizational_unit_audit.ouna_id IS 'Primary key. UUID automatically generated for each audit record.';
@@ -68,5 +72,7 @@ COMMENT ON COLUMN organizational_unit_audit.oun_id IS 'Identifier of the organiz
 COMMENT ON COLUMN organizational_unit_audit.operation IS 'Type of SQL operation that produced the audit record (INSERT, UPDATE or DELETE).';
 COMMENT ON COLUMN organizational_unit_audit.payload IS 'JSONB snapshot of the changed row and the actor who performed the change.';
 COMMENT ON COLUMN organizational_unit_audit.changed_at IS 'Date and time when the change was recorded. Default is now(). Stored in UTC (TIMESTAMPTZ).';
+
+COMMENT ON INDEX idx_organizational_unit_audit_oun_id IS 'Index on organizational unit identifier to optimize the lookups of the history of an organizational unit, such as the last audited state of a deleted organizational unit, read by the audit functions of the tables that reference organizational units.';
 
 COMMENT ON TRIGGER tg_organizational_unit_audit ON organizational_units IS 'Trigger that invokes f_audit_organizational_unit() after every INSERT, UPDATE or DELETE on organizational_units to capture an audit record.';

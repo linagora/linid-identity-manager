@@ -31,6 +31,9 @@ import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerDTO;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerMapper;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -40,9 +43,13 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.AvatarService;
 import io.github.linagora.linid.im.api.service.OrganizationalUnitService;
+import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,8 +69,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,6 +92,9 @@ class OrganizationalUnitControllerTest {
 
     @Mock
     private OrganizationalUnitAccountMapper accountMapper;
+
+    @Mock
+    private OrganizationalUnitManagerMapper managerMapper;
 
     @Mock
     private PagedResponseStatusResolver pagedResponseStatusResolver;
@@ -179,6 +192,67 @@ class OrganizationalUnitControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(service).detachAccount(userPrincipal, organizationalUnitId, accountId);
+    }
+
+    @Test
+    @DisplayName("Should find the managers of an organizational unit, filtered on this organizational unit")
+    void testFindAllManagers() {
+        var organizationalUnitId = UUID.randomUUID();
+        var filters = new OrganizationalUnitManagerViewQueryFilterDto();
+        when(service.findAllManagers(any(), any(), any())).thenReturn(new PageImpl<>(List.of()));
+        when(pagedResponseStatusResolver.resolve(any())).thenReturn(ResponseEntity.ok(new PageImpl<>(List.of())));
+
+        var response = controller.findAllManagers(userPrincipal, organizationalUnitId, filters, Pageable.unpaged());
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(List.of(organizationalUnitId.toString()), filters.getOrganizationalUnitId());
+        verify(service).existsById(userPrincipal, organizationalUnitId);
+    }
+
+    @Test
+    @DisplayName("Should propagate the 404 raised when the organizational unit of the managers does not exist")
+    void testFindAllManagers_shouldPropagateUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var filters = new OrganizationalUnitManagerViewQueryFilterDto();
+        doThrow(new ApiException(404, I18nMessage.of("error.organizational.unit.not_found")))
+            .when(service).existsById(userPrincipal, organizationalUnitId);
+
+        var exception = assertThrows(ApiException.class, () -> controller.findAllManagers(
+            userPrincipal, organizationalUnitId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(service, never()).findAllManagers(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should add a manager to an organizational unit")
+    void testAddManager() {
+        var manager = new OrganizationalUnitManager();
+        var dto = new OrganizationalUnitManagerDTO();
+        when(service.addManager(any(), any(), any())).thenReturn(manager);
+        when(managerMapper.toDTO(manager)).thenReturn(dto);
+
+        var response = controller.addManager(userPrincipal, UUID.randomUUID(),
+            new OrganizationalUnitManagerRecord(UUID.randomUUID()));
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(dto, response.getBody());
+    }
+
+    @Test
+    @DisplayName("Should remove a manager from an organizational unit")
+    void testRemoveManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        doNothing().when(service).removeManager(any(), any(), any());
+
+        var response = controller.removeManager(userPrincipal, organizationalUnitId, accountId);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(service).removeManager(userPrincipal, organizationalUnitId, accountId);
     }
 
     @Test

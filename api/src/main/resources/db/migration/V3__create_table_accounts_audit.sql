@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS accounts_audit
     changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE INDEX idx_accounts_audit_act_id ON accounts_audit (act_id);
+
 CREATE OR REPLACE FUNCTION f_audit_account()
     RETURNS TRIGGER
     SECURITY DEFINER
@@ -62,3 +64,7 @@ EXECUTE FUNCTION f_audit_account();
 REVOKE INSERT, UPDATE, DELETE ON accounts_audit FROM PUBLIC;
 
 GRANT INSERT ON accounts_audit TO audit_trigger_role;
+
+GRANT SELECT ON accounts_audit TO audit_trigger_role;
+
+COMMENT ON INDEX idx_accounts_audit_act_id IS 'Index on account identifier to optimize the lookups of the history of an account, such as the last audited state of a deleted account, read by the audit functions of the tables that reference accounts.';

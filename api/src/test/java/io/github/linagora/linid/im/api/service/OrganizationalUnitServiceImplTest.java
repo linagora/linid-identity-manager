@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -42,12 +43,17 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
@@ -105,6 +111,12 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    @Mock
+    private OrganizationalUnitManagerRepository organizationalUnitManagerRepository;
+
+    @Mock
+    private OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
 
     @Mock
     private AccountRepository accountRepository;
@@ -607,6 +619,151 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.organizational.unit.account.not_attached", exception.getError().key());
         verify(organizationalUnitAccountRepository, never()).delete(any(OrganizationalUnitAccount.class));
+    }
+
+    @Test
+    @DisplayName("should find the managers through the view repository")
+    void testFindAllManagers_shouldDelegateToRepository() {
+        var pageable = PageRequest.of(0, 10);
+        var entity = new OrganizationalUnitManagerView();
+        var filters = new OrganizationalUnitManagerViewQueryFilterDto();
+        when(organizationalUnitManagerViewRepository.findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitManagerView>>any(),
+            any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        Page<OrganizationalUnitManagerView> result = service.findAllManagers(userPrincipal, filters, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(organizationalUnitManagerViewRepository).findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitManagerView>>any(),
+            any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("should add a manager to an organizational unit")
+    void testAddManager_shouldSaveManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        when(organizationalUnitManagerRepository.save(any(OrganizationalUnitManager.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.addManager(userPrincipal, organizationalUnitId,
+            new OrganizationalUnitManagerRecord(accountId));
+
+        assertEquals(organizationalUnitId, result.getOrganizationalUnitId());
+        assertEquals(accountId, result.getAccountId());
+        assertEquals(userPrincipal.getId(), result.getCreatedBy());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("should throw exception on add manager with unknown organizational unit")
+    void testAddManager_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(UUID.randomUUID());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("should throw exception on add manager with unknown account")
+    void testAddManager_shouldThrowExceptionOnUnknownAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("should throw exception on add manager with an account already manager")
+    void testAddManager_shouldThrowExceptionOnAlreadyManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(true);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.organizational.unit.manager.already_exists", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("should remove a manager from an organizational unit")
+    void testRemoveManager_shouldDeleteManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = OrganizationalUnitManager.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+
+        assertDoesNotThrow(() -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+
+        verify(organizationalUnitManagerRepository).delete(entity);
+    }
+
+    @Test
+    @DisplayName("should throw exception on remove manager with unknown organizational unit")
+    void testRemoveManager_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).delete(any(OrganizationalUnitManager.class));
+    }
+
+    @Test
+    @DisplayName("should throw exception on remove manager with an account that is not a manager")
+    void testRemoveManager_shouldThrowExceptionOnNotManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.manager.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).delete(any(OrganizationalUnitManager.class));
     }
 
     @Test

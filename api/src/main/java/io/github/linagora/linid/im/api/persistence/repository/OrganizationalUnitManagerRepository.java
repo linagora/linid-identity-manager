@@ -30,6 +30,8 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManag
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Spring Data JPA repository for {@link OrganizationalUnitManager}.
@@ -58,4 +60,18 @@ public interface OrganizationalUnitManagerRepository extends JpaRepository<Organ
      * @return {@code true} when the manager record exists
      */
     boolean existsByOrganizationalUnitIdAndAccountId(UUID organizationalUnitId, UUID accountId);
+
+    /**
+     * Checks whether the given account is a manager of the given organizational unit or of one of its ancestors,
+     * read from the closure table.
+     *
+     * @param accountId            the account identifier
+     * @param organizationalUnitId the organizational unit identifier
+     * @return {@code true} when the account manages the organizational unit or one of its ancestors
+     */
+    @Query("SELECT COUNT(m) > 0 FROM OrganizationalUnitManager m"
+        + " JOIN OrganizationalUnitClosure c ON c.ancestorId = m.organizationalUnitId"
+        + " WHERE c.descendantId = :organizationalUnitId AND m.accountId = :accountId")
+    boolean isManagerOfOrganizationalUnitOrAncestor(@Param("accountId") UUID accountId,
+                                                    @Param("organizationalUnitId") UUID organizationalUnitId);
 }

@@ -158,6 +158,52 @@ class GroupServiceImplTest {
         verify(groupRepository, never()).findById(any());
         verify(organizationalUnitService, never()).existsById(any(), any());
         verify(applicationService, never()).findById(any(), any());
+        // Without organizational unit, the creator never becomes a manager.
+        verify(organizationalUnitService, never()).isManagedBy(any(), any(), any());
+        verify(groupManagerRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("create should make the creator a manager when they manage the organizational unit of the group")
+    void testCreate_shouldAddCreatorAsManagerWhenOrganizationalUnitManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var withOrganizationalUnit = new GroupRecord("developers", "Developers", null, null, null,
+            organizationalUnitId, null, Map.of());
+        var mapped = Group.builder().id(UUID.randomUUID()).code("developers").build();
+        when(groupRepository.existsByCode("developers")).thenReturn(false);
+        when(mapper.toEntity(withOrganizationalUnit, userPrincipal)).thenReturn(mapped);
+        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitService.isManagedBy(userPrincipal, organizationalUnitId, userPrincipal.getId()))
+            .thenReturn(true);
+
+        var result = service.create(userPrincipal, withOrganizationalUnit);
+
+        assertSame(mapped, result);
+        var captor = ArgumentCaptor.forClass(GroupManager.class);
+        verify(groupManagerRepository).save(captor.capture());
+        assertEquals(mapped.getId(), captor.getValue().getGroupId());
+        assertEquals(userPrincipal.getId(), captor.getValue().getAccountId());
+        assertEquals(userPrincipal.getId(), captor.getValue().getCreatedBy());
+        assertEquals(userPrincipal.getId(), captor.getValue().getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("create should not make the creator a manager when they do not manage the organizational unit")
+    void testCreate_shouldNotAddCreatorAsManagerWhenNotOrganizationalUnitManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var withOrganizationalUnit = new GroupRecord("developers", "Developers", null, null, null,
+            organizationalUnitId, null, Map.of());
+        var mapped = Group.builder().id(UUID.randomUUID()).code("developers").build();
+        when(groupRepository.existsByCode("developers")).thenReturn(false);
+        when(mapper.toEntity(withOrganizationalUnit, userPrincipal)).thenReturn(mapped);
+        when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(organizationalUnitService.isManagedBy(userPrincipal, organizationalUnitId, userPrincipal.getId()))
+            .thenReturn(false);
+
+        var result = service.create(userPrincipal, withOrganizationalUnit);
+
+        assertSame(mapped, result);
+        verify(groupManagerRepository, never()).save(any());
     }
 
     @Test

@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS groups_audit
     changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE INDEX idx_groups_audit_grp_id ON groups_audit (grp_id);
+
 CREATE OR REPLACE FUNCTION f_audit_group()
     RETURNS TRIGGER
     SECURITY DEFINER
@@ -59,6 +61,8 @@ REVOKE INSERT, UPDATE, DELETE ON groups_audit FROM PUBLIC;
 
 GRANT INSERT ON groups_audit TO audit_trigger_role;
 
+GRANT SELECT ON groups_audit TO audit_trigger_role;
+
 COMMENT ON TABLE groups_audit IS 'Audit table storing every INSERT, UPDATE and DELETE operation performed on the groups table, including the actor JSONB snapshot.';
 
 COMMENT ON COLUMN groups_audit.gra_id IS 'Primary key. UUID automatically generated for each audit record.';
@@ -66,5 +70,7 @@ COMMENT ON COLUMN groups_audit.grp_id IS 'Identifier of the groups row affected 
 COMMENT ON COLUMN groups_audit.operation IS 'Type of SQL operation that produced the audit record (INSERT, UPDATE or DELETE).';
 COMMENT ON COLUMN groups_audit.payload IS 'JSONB snapshot of the changed row and the actor who performed the change.';
 COMMENT ON COLUMN groups_audit.changed_at IS 'Date and time when the change was recorded. Default is now(). Stored in UTC (TIMESTAMPTZ).';
+
+COMMENT ON INDEX idx_groups_audit_grp_id IS 'Index on group identifier to optimize the lookups of the history of a group, such as the last audited state of a deleted group, read by the audit functions of the tables that reference groups.';
 
 COMMENT ON TRIGGER tg_groups_audit ON groups IS 'Trigger that invokes f_audit_group() after every INSERT, UPDATE or DELETE on groups to capture an audit record.';

@@ -28,10 +28,16 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
@@ -45,6 +51,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,6 +63,9 @@ import org.springframework.transaction.annotation.Transactional;
  * The {@code claimsTemplateChecksum} is computed from the {@code claimsTemplate}. The {@code script}, its
  * {@code scriptChecksum}, the {@code deployedAt} date and the {@code configuration} are managed by a separate
  * process and are never set from the API requests.</p>
+ *
+ * <p>Also manages the managers of an application, enforcing the existence of the manager account and the
+ * uniqueness of an account among the managers of an application.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -96,6 +106,21 @@ public class ApplicationServiceImpl implements ApplicationService {
      * Validator protecting the system-reserved application from any mutation.
      */
     private final SystemApplicationValidator systemApplicationValidator;
+
+    /**
+     * Repository used to manage {@link ApplicationManager} persistence operations.
+     */
+    private final ApplicationManagerRepository applicationManagerRepository;
+
+    /**
+     * Repository used to read {@link ApplicationManagerView} projections.
+     */
+    private final ApplicationManagerViewRepository applicationManagerViewRepository;
+
+    /**
+     * Service used to check the existence of the account to add as a manager.
+     */
+    private final AccountService accountService;
 
     @Override
     public Application create(final UserPrincipal userPrincipal, final ApplicationRecord application) {
@@ -225,5 +250,64 @@ public class ApplicationServiceImpl implements ApplicationService {
         // TODO: replace once updatePolicy (raw script string) is reworked — workaround for stale @Version +
         //  @Generated updateDate after a prior operation in the same session
         applicationRepository.updatePolicy(applicationId, script, checksum);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ApplicationManagerView> findAllManagers(
+        final UserPrincipal userPrincipal,
+        final UUID applicationId,
+        final ApplicationManagerViewQueryFilterDto filters,
+        final Pageable pageable) {
+        existsById(userPrincipal, applicationId);
+
+        Specification<ApplicationManagerView> specification =
+            new SpringQueryFilterSpecification<>(ApplicationManagerView.class, filters)
+                .and(new SpringQueryFilterSpecification<>(ApplicationManagerView.class, Map.of(
+                    "applicationId", List.of(applicationId.toString())
+                )));
+
+        return applicationManagerViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public ApplicationManager addManager(
+        final UserPrincipal userPrincipal,
+        final UUID applicationId,
+        final ApplicationManagerRecord record) {
+        existsById(userPrincipal, applicationId);
+        accountService.existsById(userPrincipal, record.accountId());
+
+        if (applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, record.accountId())) {
+            throw new ApiException(
+                HttpStatus.BAD_REQUEST.value(),
+                I18nMessage.of("error.application_manager.already_exists", Map.of("id", record.accountId().toString()))
+            );
+        }
+
+        var entity = ApplicationManager.builder()
+            .applicationId(applicationId)
+            .accountId(record.accountId())
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        return applicationManagerRepository.save(entity);
+    }
+
+    @Override
+    public void removeManager(
+        final UserPrincipal userPrincipal,
+        final UUID applicationId,
+        final UUID accountId) {
+        existsById(userPrincipal, applicationId);
+
+        var manager = applicationManagerRepository.findByApplicationIdAndAccountId(applicationId, accountId)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.application_manager.not_found", Map.of("id", accountId.toString()))
+            ));
+
+        applicationManagerRepository.delete(manager);
     }
 }

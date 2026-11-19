@@ -58,6 +58,8 @@
   "error.application_role.not_found": "Rôle d'application introuvable : {id}",
   "error.application_role.name.already_exists": "Un rôle d'application existe déjà avec le nom « {name} »",
   "error.application_role.system_reserved": "Les rôles de l'application « {code} » réservée au système ne peuvent être ni créés, ni modifiés, ni supprimés.",
+  "error.application_manager.already_exists": "Le compte {id} est déjà gestionnaire de cette application",
+  "error.application_manager.not_found": "Le compte {id} n'est pas gestionnaire de cette application",
   "error.group.not_found": "Groupe introuvable : {id}",
   "error.group.code.already_exists": "Un groupe existe déjà avec le code « {code} »",
   "error.group.parent.cycle": "Le groupe {id} ne peut pas avoir le groupe {parentId} comme parent : cela créerait un cycle dans la hiérarchie des groupes.",

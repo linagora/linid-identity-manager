@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS applications_audit
     changed_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE INDEX idx_applications_audit_app_id ON applications_audit (app_id);
+
 CREATE OR REPLACE FUNCTION f_audit_application()
     RETURNS TRIGGER
     SECURITY DEFINER
@@ -61,6 +63,8 @@ REVOKE INSERT, UPDATE, DELETE ON applications_audit FROM PUBLIC;
 
 GRANT INSERT ON applications_audit TO audit_trigger_role;
 
+GRANT SELECT ON applications_audit TO audit_trigger_role;
+
 COMMENT ON TABLE applications_audit IS 'Audit table storing every INSERT, UPDATE and DELETE operation performed on the applications table, including the actor JSONB snapshot.';
 
 COMMENT ON COLUMN applications_audit.apa_id IS 'Primary key. UUID automatically generated for each audit record.';
@@ -68,5 +72,7 @@ COMMENT ON COLUMN applications_audit.app_id IS 'Identifier of the applications r
 COMMENT ON COLUMN applications_audit.operation IS 'Type of SQL operation that produced the audit record (INSERT, UPDATE or DELETE).';
 COMMENT ON COLUMN applications_audit.payload IS 'JSONB snapshot of the changed row and the actor who performed the change.';
 COMMENT ON COLUMN applications_audit.changed_at IS 'Date and time when the change was recorded. Default is now(). Stored in UTC (TIMESTAMPTZ).';
+
+COMMENT ON INDEX idx_applications_audit_app_id IS 'Index on application identifier to optimize the lookups of the history of an application, such as the last audited state of a deleted application, read by the audit functions of the tables that reference applications.';
 
 COMMENT ON TRIGGER tg_applications_audit ON applications IS 'Trigger that invokes f_audit_application() after every INSERT, UPDATE or DELETE on applications to capture an audit record.';

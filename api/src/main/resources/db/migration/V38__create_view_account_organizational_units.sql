@@ -35,5 +35,5 @@ COMMENT ON COLUMN account_organizational_units_view.updated_by IS 'Full name of 
 COMMENT ON COLUMN account_organizational_units_view.insert_date IS 'Date and time when the account was attached to the organizational unit. Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN account_organizational_units_view.update_date IS 'Date and time when the relationship was last updated. Stored in UTC (TIMESTAMPTZ).';
 COMMENT ON COLUMN account_organizational_units_view.relation_extra_parameters IS 'JSONB column containing custom attributes and metadata associated with the relationship between an account and an organizational unit. Intended for customer-specific or integration-specific extensions that are not part of the standard data model.';
-COMMENT ON COLUMN account_organizational_units_view.role_id IS 'Identifier of the functional role held by the account within the organizational unit. NULL when the role has been deleted.';
-COMMENT ON COLUMN account_organizational_units_view.role_name IS 'Human-readable name of the functional role held by the account within the organizational unit. NULL when the role has been deleted.';
+COMMENT ON COLUMN account_organizational_units_view.role_id IS 'Identifier of the functional role held by the account within the organizational unit. NULL when the role was never assigned.';
+COMMENT ON COLUMN account_organizational_units_view.role_name IS 'Human-readable name of the functional role held by the account within the organizational unit. NULL when the role was never assigned.';

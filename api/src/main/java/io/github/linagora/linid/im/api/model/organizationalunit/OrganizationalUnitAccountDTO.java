@@ -65,10 +65,10 @@ public class OrganizationalUnitAccountDTO {
 
     /**
      * Identifier of the functional role held by the account within the organizational unit.
-     * {@code null} when the role has been deleted or was never assigned.
+     * {@code null} when the role was never assigned.
      */
     @Schema(description = "Identifier of the functional role held by the account within the organizational unit, "
-        + "null when the role has been deleted or was never assigned", nullable = true)
+        + "null when the role was never assigned", nullable = true)
     private UUID roleId;
 
     /**

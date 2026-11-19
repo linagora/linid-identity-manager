@@ -116,7 +116,8 @@ public class GroupServiceImpl implements GroupService {
     private final AccountRepository accountRepository;
 
     /**
-     * Service used to check the existence of the referenced organizational unit.
+     * Service used to check the existence of the referenced organizational unit, and whether the creator of a
+     * group manages it.
      */
     private final OrganizationalUnitService organizationalUnitService;
 
@@ -139,9 +140,16 @@ public class GroupServiceImpl implements GroupService {
         ensureReferencesExist(userPrincipal, group);
         ensureParentIsValid(null, group.parentId());
 
-        var entity = mapper.toEntity(group, userPrincipal);
+        var entity = groupRepository.save(mapper.toEntity(group, userPrincipal));
 
-        return groupRepository.save(entity);
+        var organizationalUnitId = group.organizationalUnitId();
+
+        if (organizationalUnitId != null
+            && organizationalUnitService.isManagedBy(userPrincipal, organizationalUnitId, userPrincipal.getId())) {
+            saveManager(userPrincipal, entity.getId(), userPrincipal.getId());
+        }
+
+        return entity;
     }
 
     @Override

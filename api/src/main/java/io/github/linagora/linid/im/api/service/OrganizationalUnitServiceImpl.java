@@ -43,6 +43,7 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitClosure;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
@@ -52,6 +53,7 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQ
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitClosureRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
@@ -121,6 +123,11 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
      * Repository used to read {@link OrganizationalUnitManagerView} projections.
      */
     private final OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
+
+    /**
+     * Repository used to read the ancestors of an organizational unit from the closure table.
+     */
+    private final OrganizationalUnitClosureRepository organizationalUnitClosureRepository;
 
     /**
      * Repository used to check the existence of accounts to attach or to add as managers.
@@ -262,6 +269,24 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             HttpStatus.NOT_FOUND.value(),
             I18nMessage.of("error.organizational.unit.not_found", Map.of("id", id.toString()))
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isManagedBy(final UserPrincipal userPrincipal,
+                               final UUID organizationalUnitId,
+                               final UUID accountId) {
+        var organizationalUnitIds = organizationalUnitClosureRepository.findAllByDescendantId(organizationalUnitId)
+            .stream()
+            .map(OrganizationalUnitClosure::getAncestorId)
+            .toList();
+
+        if (organizationalUnitIds.isEmpty()) {
+            return false;
+        }
+
+        return organizationalUnitManagerRepository.existsByAccountIdAndOrganizationalUnitIdIn(
+            accountId, organizationalUnitIds);
     }
 
     @Override

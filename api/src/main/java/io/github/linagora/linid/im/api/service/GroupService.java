@@ -54,6 +54,9 @@ public interface GroupService {
      * <p>The {@code code} must be unique. When provided, the parent group, the organizational unit and the
      * application must exist.</p>
      *
+     * <p>When the authenticated user manages the organizational unit of the group, directly or through one of its
+     * ancestors, they also become a manager of the new group.</p>
+     *
      * @param userPrincipal the authenticated user
      * @param group         the group creation record
      * @return the created group entity

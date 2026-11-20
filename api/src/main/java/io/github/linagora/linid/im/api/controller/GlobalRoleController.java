@@ -44,6 +44,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -148,5 +149,29 @@ public class GlobalRoleController {
             role, accountId);
         var entity = globalRoleService.create(userPrincipal, accountId, role);
         return ResponseEntity.status(HttpStatus.CREATED).body(globalRoleMapper.toDTO(entity));
+    }
+
+    /**
+     * Removes a global role from the given account.
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the UUID of the account holding the role
+     * @param role          the global role to remove
+     * @return an empty response with HTTP 204 status
+     */
+    @DeleteMapping("/accounts/{accountId}/global-roles/{role}")
+    @Operation(summary = "Remove a global role from an account")
+    @ApiResponse(responseCode = "204", description = "Global role successfully removed")
+    @ApiResponse(responseCode = "400", description = "Unknown role (SUPER_ADMIN included)", content = @Content)
+    @ApiResponse(responseCode = "404", description = "Account not found or role not assigned to the account",
+        content = @Content)
+    public ResponseEntity<Void> delete(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID accountId,
+        @PathVariable final String role) {
+        log.info("[{}] Received DELETE request to remove global role {} from account {}", userPrincipal.getEmail(),
+            role, accountId);
+        globalRoleService.delete(userPrincipal, accountId, role);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -49,6 +49,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -118,5 +119,16 @@ class GlobalRoleControllerTest {
         var response = controller.findAllByAccountId(userPrincipal, accountId, filters, Pageable.unpaged());
 
         assertSame(resolved, response);
+    }
+
+    @Test
+    @DisplayName("Should remove the global role from the account with a 204 status")
+    void testDelete() {
+        var accountId = UUID.randomUUID();
+
+        var response = controller.delete(userPrincipal, accountId, "ACCOUNTS_ADMIN");
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(globalRoleService).delete(userPrincipal, accountId, "ACCOUNTS_ADMIN");
     }
 }

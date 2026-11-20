@@ -28,6 +28,7 @@ package io.github.linagora.linid.im.api.persistence.repository;
 
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -47,4 +48,13 @@ public interface GlobalRoleRepository extends JpaRepository<GlobalRole, UUID> {
      * @return {@code true} when the account holds the role
      */
     boolean existsByAccountIdAndRole(UUID accountId, GlobalRoleEnum role);
+
+    /**
+     * Finds the global role held by the given account.
+     *
+     * @param accountId the account identifier
+     * @param role      the global role
+     * @return the global role, or an empty {@link Optional} when the account does not hold it
+     */
+    Optional<GlobalRole> findByAccountIdAndRole(UUID accountId, GlobalRoleEnum role);
 }

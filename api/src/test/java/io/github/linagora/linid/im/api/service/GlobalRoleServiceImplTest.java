@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleViewQueryFilterDto;
@@ -47,6 +48,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -196,5 +198,63 @@ class GlobalRoleServiceImplTest {
 
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.account.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("delete should remove the role from the given account")
+    void testDelete_shouldRemoveRole() {
+        var accountId = UUID.randomUUID();
+        var entity = GlobalRole.builder().id(UUID.randomUUID()).accountId(accountId)
+            .role(GlobalRoleEnum.APPLICATIONS_AUDITOR).build();
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(globalRoleRepository.findByAccountIdAndRole(accountId, GlobalRoleEnum.APPLICATIONS_AUDITOR))
+            .thenReturn(Optional.of(entity));
+
+        service.delete(userPrincipal, accountId, "APPLICATIONS_AUDITOR");
+
+        verify(globalRoleRepository).delete(entity);
+    }
+
+    @Test
+    @DisplayName("delete should throw a 400 when the role is unknown")
+    void testDelete_shouldThrowWhenRoleUnknown() {
+        var accountId = UUID.randomUUID();
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.delete(userPrincipal, accountId, "SUPER_ADMIN"));
+
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.global_role.unknown", exception.getError().key());
+        verify(globalRoleRepository, never()).delete(any(GlobalRole.class));
+    }
+
+    @Test
+    @DisplayName("delete should throw a 404 when the account does not exist")
+    void testDelete_shouldThrowWhenAccountAbsent() {
+        var accountId = UUID.randomUUID();
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.delete(userPrincipal, accountId, "GROUPS_ADMIN"));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(globalRoleRepository, never()).delete(any(GlobalRole.class));
+    }
+
+    @Test
+    @DisplayName("delete should throw a 404 when the account does not hold the role")
+    void testDelete_shouldThrowWhenRoleNotAssigned() {
+        var accountId = UUID.randomUUID();
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(globalRoleRepository.findByAccountIdAndRole(accountId, GlobalRoleEnum.GROUPS_ADMIN))
+            .thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.delete(userPrincipal, accountId, "GROUPS_ADMIN"));
+
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.global_role.not_assigned", exception.getError().key());
+        verify(globalRoleRepository, never()).delete(any(GlobalRole.class));
     }
 }

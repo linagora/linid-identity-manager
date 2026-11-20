@@ -64,8 +64,7 @@ The API identifies the user by the `email` claim.
 ```jinja id="claims-example"
 {
   "sub": {{ payload.external_id | tojson }},
-  "email": {{ payload.email | tojson }},
-  "roles": {{ roles | tojson }}
+  "email": {{ payload.email | tojson }}
 }
 ```
 

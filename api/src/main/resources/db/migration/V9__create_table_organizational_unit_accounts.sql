@@ -22,6 +22,14 @@ CREATE TRIGGER tg_organizational_unit_accounts_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON organizational_unit_accounts TO audit_trigger_role;
+
+CREATE TRIGGER tg_organizational_unit_accounts_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON organizational_unit_accounts
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('organizational_unit=oun_id', 'account=act_id');
+
 COMMENT ON TABLE organizational_unit_accounts IS 'Stores the association between organizational units and accounts.';
 
 COMMENT ON COLUMN organizational_unit_accounts.oua_id IS 'Primary key (UUID) of the organizational unit to account association.';
@@ -42,3 +50,4 @@ COMMENT ON INDEX idx_organizational_unit_accounts_act_id IS 'Index on account id
 COMMENT ON INDEX idx_organizational_unit_accounts_rol_id IS 'Index on functional role identifier to optimize lookups and joins on organizational_unit_accounts by role.';
 
 COMMENT ON TRIGGER tg_organizational_unit_accounts_set_update_date ON organizational_unit_accounts IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_organizational_unit_accounts_audit ON organizational_unit_accounts IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on organizational_unit_accounts to record the change, with the related organizational unit and account, in the audit table.';

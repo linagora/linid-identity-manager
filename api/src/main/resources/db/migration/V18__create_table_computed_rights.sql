@@ -27,6 +27,14 @@ CREATE TRIGGER tg_computed_rights_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON computed_rights TO audit_trigger_role;
+
+CREATE TRIGGER tg_computed_rights_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON computed_rights
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('account=act_id', 'application=app_id -script -claims_template -configuration');
+
 COMMENT ON TABLE computed_rights IS 'Table storing the rights computed by sync-api for each account and application pair (allow, roles and claims), with the checksums used by the computation and the sync-api run that wrote it. A failed computation leaves the row unchanged, so that its outdated checksums select the pair again at the next cycle.';
 
 COMMENT ON COLUMN computed_rights.cpr_id IS 'Primary key. UUID automatically generated for each account and application pair.';
@@ -51,3 +59,4 @@ COMMENT ON CONSTRAINT ck_computed_rights_roles_array ON computed_rights IS 'Ensu
 COMMENT ON INDEX idx_computed_rights_app_id IS 'Index on application identifier to optimize the lookups by application and the cascade deletion of an application.';
 
 COMMENT ON TRIGGER tg_computed_rights_set_update_date ON computed_rights IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_computed_rights_audit ON computed_rights IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on computed_rights to record the change, with the related account and application (without its script, claims template and configuration), in the audit table.';

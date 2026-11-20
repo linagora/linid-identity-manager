@@ -23,6 +23,14 @@ CREATE TRIGGER tg_application_rules_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON application_rules TO audit_trigger_role;
+
+CREATE TRIGGER tg_application_rules_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON application_rules
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE application_rules IS 'Table storing executable rules attached to an application, each defining a prioritized script with enable/disable control and audit data.';
 
 COMMENT ON COLUMN application_rules.aru_id IS 'Primary key. UUID automatically generated for each application rule.';
@@ -43,3 +51,4 @@ COMMENT ON CONSTRAINT uk_application_rules_app_id_code ON application_rules IS '
 COMMENT ON INDEX idx_application_rules_app_id IS 'Index on application identifier to optimize lookups and joins on application_rules by application.';
 
 COMMENT ON TRIGGER tg_application_rules_set_update_date ON application_rules IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_application_rules_audit ON application_rules IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on application_rules to record the change in the audit table.';

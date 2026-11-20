@@ -27,6 +27,14 @@ CREATE TRIGGER tg_groups_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON groups TO audit_trigger_role;
+
+CREATE TRIGGER tg_groups_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON groups
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE groups IS 'Table storing group definitions, including optional parent group, organizational unit and application relationships, identification, and audit data.';
 
 COMMENT ON COLUMN groups.grp_id IS 'Primary key. UUID automatically generated for each group.';
@@ -51,3 +59,4 @@ COMMENT ON INDEX idx_groups_oun_id IS 'Index on organizational unit identifier t
 COMMENT ON INDEX idx_groups_app_id IS 'Index on application identifier to optimize lookups and joins on groups by application.';
 
 COMMENT ON TRIGGER tg_groups_set_update_date ON groups IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_groups_audit ON groups IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on groups to record the change in the audit table.';

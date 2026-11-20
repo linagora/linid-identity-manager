@@ -27,6 +27,14 @@ CREATE TRIGGER tg_applications_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON applications TO audit_trigger_role;
+
+CREATE TRIGGER tg_applications_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON applications
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit();
+
 COMMENT ON TABLE applications IS 'Table storing application definitions, including identification, claims template, optional provisioning script and configuration, and audit data.';
 
 COMMENT ON COLUMN applications.app_id IS 'Primary key. UUID automatically generated for each application.';
@@ -50,3 +58,4 @@ COMMENT ON COLUMN applications.update_date IS 'Date and time when the applicatio
 COMMENT ON INDEX idx_applications_code IS 'Unique index on code to enforce uniqueness and improve query performance when searching by code.';
 
 COMMENT ON TRIGGER tg_applications_set_update_date ON applications IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_applications_audit ON applications IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on applications to record the change in the audit table.';

@@ -20,6 +20,14 @@ CREATE TRIGGER tg_group_accounts_set_update_date
     FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
+GRANT SELECT ON group_accounts TO audit_trigger_role;
+
+CREATE TRIGGER tg_group_accounts_audit
+    AFTER INSERT OR UPDATE OR DELETE
+    ON group_accounts
+    FOR EACH ROW
+EXECUTE FUNCTION f_audit('group=grp_id', 'account=act_id');
+
 COMMENT ON TABLE group_accounts IS 'Stores the association between groups and accounts.';
 
 COMMENT ON COLUMN group_accounts.gra_id IS 'Primary key (UUID) of the group to account association.';
@@ -37,3 +45,4 @@ COMMENT ON INDEX idx_group_accounts_grp_id IS 'Index on group identifier to opti
 COMMENT ON INDEX idx_group_accounts_act_id IS 'Index on account identifier to optimize lookups and joins on group_accounts by account.';
 
 COMMENT ON TRIGGER tg_group_accounts_set_update_date ON group_accounts IS 'Trigger that invokes the update_timestamp() function before each UPDATE to automatically set update_date to NOW().';
+COMMENT ON TRIGGER tg_group_accounts_audit ON group_accounts IS 'Trigger that invokes f_audit() after every INSERT, UPDATE or DELETE on group_accounts to record the change, with the related group and account, in the audit table.';

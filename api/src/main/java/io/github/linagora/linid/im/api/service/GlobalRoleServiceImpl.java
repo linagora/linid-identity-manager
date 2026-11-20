@@ -152,6 +152,21 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
         return findAll(userPrincipal, filters, pageable);
     }
 
+    @Override
+    public void delete(final UserPrincipal userPrincipal, final UUID accountId, final String role) {
+        var globalRole = toGlobalRole(role);
+        checkAccountExists(accountId);
+
+        var entity = globalRoleRepository.findByAccountIdAndRole(accountId, globalRole)
+            .orElseThrow(() -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.global_role.not_assigned",
+                    Map.of("id", accountId.toString(), "role", globalRole.name()))
+            ));
+
+        globalRoleRepository.delete(entity);
+    }
+
     /**
      * Checks that the given account exists.
      *

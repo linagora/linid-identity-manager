@@ -75,4 +75,15 @@ public interface GlobalRoleService {
                                             UUID accountId,
                                             GlobalRoleViewQueryFilterDto filters,
                                             Pageable pageable);
+
+    /**
+     * Removes a global role from the given account.
+     *
+     * <p>The role must be one of the stored global roles, the account must exist and must hold the role.</p>
+     *
+     * @param userPrincipal the authenticated user
+     * @param accountId     the UUID of the account holding the role
+     * @param role          the global role to remove
+     */
+    void delete(UserPrincipal userPrincipal, UUID accountId, String role);
 }

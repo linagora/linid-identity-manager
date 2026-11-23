@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   through Spring Cloud Vault, disabled by default: each application reads its own secret and a secret shared by both,
   with the environment variables `VAULT_ENABLED`, `VAULT_URI`, `VAULT_AUTHENTICATION`, `VAULT_TOKEN`,
   `VAULT_APPLICATION_NAME`, `VAULT_KV_BACKEND` and `VAULT_DEFAULT_CONTEXT`.
+- Added the **declaration of the SUPER_ADMIN through configuration** (`LINID_SUPER_ADMIN_SUB`): the account whose
+  `external_id` equals this value is the SUPER_ADMIN, without anything written to the database, and the API logs a
+  warning naming it at each startup while the variable is set.
 
 ### Changed
 

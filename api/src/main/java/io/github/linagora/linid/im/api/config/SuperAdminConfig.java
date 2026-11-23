@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.config;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class SuperAdminConfig {
     /**
      * Subject of the SUPER_ADMIN, blank when no SUPER_ADMIN is declared.
      */
+    @Getter
     private final String sub;
 
     /**

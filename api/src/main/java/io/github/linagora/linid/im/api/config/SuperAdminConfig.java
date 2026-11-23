@@ -67,4 +67,14 @@ public class SuperAdminConfig {
                 + "every right. Remove the variable once an administrators manager is named.", sub);
         }
     }
+
+    /**
+     * Tells whether the account with the given {@code external_id} is the declared SUPER_ADMIN.
+     *
+     * @param externalId the {@code external_id} of the account
+     * @return {@code true} when a SUPER_ADMIN is declared and its subject equals {@code externalId}
+     */
+    public boolean isSuperAdmin(final String externalId) {
+        return StringUtils.isNotBlank(sub) && sub.equals(externalId);
+    }
 }

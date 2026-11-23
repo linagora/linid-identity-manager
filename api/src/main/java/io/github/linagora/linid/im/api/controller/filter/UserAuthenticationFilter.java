@@ -26,6 +26,7 @@
 
 package io.github.linagora.linid.im.api.controller.filter;
 
+import io.github.linagora.linid.im.api.config.SuperAdminConfig;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.service.AccountService;
@@ -53,10 +54,10 @@ import java.util.Optional;
  * Filter that authenticates incoming HTTP requests based on JWT tokens.
  *
  * <p>This filter extracts the JWT from the security context, resolves the account whose {@code external_id}
- * matches its {@code sub} claim and sets the corresponding {@link UserPrincipal} in the security context.
- * The account is never resolved from the {@code email} claim: some identity providers let users change their own
- * email address, which would let them authenticate as the account holding it, whereas only the identity provider
- * sets the subject.
+ * matches its {@code sub} claim and sets the corresponding {@link UserPrincipal} in the security context, marked as
+ * SUPER_ADMIN when this account is the one declared by {@link SuperAdminConfig}. The account is never resolved from
+ * the {@code email} claim: some identity providers let users change their own email address, which would let them
+ * authenticate as the account holding it, whereas only the identity provider sets the subject.
  *
  * <p>When a token is presented but no account matches it, the request fails through the
  * {@link AuthenticationEntryPoint} with a {@code 401} response, as a bearer token rejected by the resource
@@ -74,6 +75,11 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
      * Service used to retrieve Account.
      */
     private final AccountService accountService;
+
+    /**
+     * Configuration telling whether the authenticated account is the SUPER_ADMIN.
+     */
+    private final SuperAdminConfig superAdminConfig;
 
     /**
      * Entry point producing the {@code 401} response when no account matches the token.
@@ -106,6 +112,7 @@ public class UserAuthenticationFilter extends OncePerRequestFilter {
         UserPrincipal user = new UserPrincipal();
         user.setId(account.get().getId());
         user.setEmail(account.get().getEmail());
+        user.setSuperAdmin(superAdminConfig.isSuperAdmin(account.get().getExternalId()));
 
         SecurityContextHolder.getContext().setAuthentication(
             new UsernamePasswordAuthenticationToken(user, null, List.of())

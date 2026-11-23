@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.controller.filter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -43,6 +44,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import io.github.linagora.linid.im.api.config.SuperAdminConfig;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.service.AccountService;
@@ -77,7 +79,7 @@ class UserAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         accountService = mock(AccountService.class);
-        filter = new UserAuthenticationFilter(accountService);
+        filter = new UserAuthenticationFilter(accountService, new SuperAdminConfig("admin-sub"));
         request = new MockHttpServletRequest();
         response = new MockHttpServletResponse();
         filterChain = mock(FilterChain.class);
@@ -99,7 +101,7 @@ class UserAuthenticationFilterTest {
     void doFilterInternal_withKnownSubject_setsAuthenticationAndContinues() throws ServletException, IOException {
         UUID uuid = UUID.randomUUID();
         when(accountService.getAccountByExternalId("user-sub")).thenReturn(
-            Optional.of(Account.builder().id(uuid).email("user@example.com").build()));
+            Optional.of(Account.builder().id(uuid).externalId("user-sub").email("user@example.com").build()));
         authenticateWith(jwt("user-sub", "user@example.com"));
 
         filter.doFilterInternal(request, response, filterChain);
@@ -108,7 +110,24 @@ class UserAuthenticationFilterTest {
         UserPrincipal user = authenticatedUser();
         assertEquals(uuid, user.getId());
         assertEquals("user@example.com", user.getEmail());
+        assertFalse(user.isSuperAdmin());
         assertTrue(logAppender.list.isEmpty());
+    }
+
+    @Test
+    @DisplayName("test doFilterInternal: should mark the declared SUPER_ADMIN as such")
+    void doFilterInternal_withSuperAdminSubject_marksTheUserAsSuperAdmin() throws ServletException, IOException {
+        UUID uuid = UUID.randomUUID();
+        when(accountService.getAccountByExternalId("admin-sub")).thenReturn(
+            Optional.of(Account.builder().id(uuid).externalId("admin-sub").email("admin@example.com").build()));
+        authenticateWith(jwt("admin-sub", "admin@example.com"));
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain, times(1)).doFilter(request, response);
+        UserPrincipal user = authenticatedUser();
+        assertEquals(uuid, user.getId());
+        assertTrue(user.isSuperAdmin());
     }
 
     @Test

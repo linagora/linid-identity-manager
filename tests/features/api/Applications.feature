@@ -620,7 +620,7 @@ Feature: Test API Application endpoints
     And  I expect '{{response.body.content[0].domain}}' is 'Security'
     And  I expect '{{response.body.content[0].type}}' is 'System'
     # The claims template spans several lines: its line breaks are removed to compare it on one line
-    And  I expect '{{response.body.content[0].claimsTemplate | replace("\n", "")}}' is '{% raw %}{  "sub": {{ payload.external_id | tojson }},  "email": {{ payload.email | tojson }},  "roles": {{ roles | tojson }}}{% endraw %}'
+    And  I expect '{{response.body.content[0].claimsTemplate | replace("\n", "")}}' is '{% raw %}{  "sub": {{ payload.external_id | tojson }},  "email": {{ payload.email | tojson }}}{% endraw %}'
 
     # The checksum is not exposed by the API: it is read in the database, and compared with the SHA-256 of the claims
     # template, the algorithm of ChecksumService

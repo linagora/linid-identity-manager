@@ -112,7 +112,7 @@ public class ApplicationRuleController {
         log.info("[{}] Received POST request to create rule for application {} with {}",
             userPrincipal.getEmail(), applicationId, rule);
         var entity = applicationRuleService.create(userPrincipal, applicationId, rule);
-        applicationService.regeneratePolicy(applicationId);
+        applicationService.regeneratePolicy(userPrincipal, applicationId);
         return ResponseEntity.status(HttpStatus.CREATED).body(applicationRuleMapper.toDTO(entity));
     }
 
@@ -188,7 +188,7 @@ public class ApplicationRuleController {
         log.info("[{}] Received PUT request to update rule {} of application {} with {}",
             userPrincipal.getEmail(), ruleId, applicationId, rule);
         var entity = applicationRuleService.update(userPrincipal, applicationId, ruleId, rule);
-        applicationService.regeneratePolicy(applicationId);
+        applicationService.regeneratePolicy(userPrincipal, applicationId);
         return ResponseEntity.ok(applicationRuleMapper.toDTO(entity));
     }
 
@@ -211,7 +211,7 @@ public class ApplicationRuleController {
         log.info("[{}] Received DELETE request for rule {} of application {}",
             userPrincipal.getEmail(), ruleId, applicationId);
         applicationRuleService.deleteById(userPrincipal, applicationId, ruleId);
-        applicationService.regeneratePolicy(applicationId);
+        applicationService.regeneratePolicy(userPrincipal, applicationId);
         return ResponseEntity.noContent().build();
     }
 }

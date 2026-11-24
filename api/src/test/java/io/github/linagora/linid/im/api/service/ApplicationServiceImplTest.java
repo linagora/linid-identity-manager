@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
@@ -111,6 +112,9 @@ class ApplicationServiceImplTest {
     @Mock
     private AccountService accountService;
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
     @InjectMocks
     private ApplicationServiceImpl service;
 
@@ -144,6 +148,10 @@ class ApplicationServiceImplTest {
         assertSame(mapped, captor.getValue());
         assertSame(mapped, result);
         assertEquals("template-checksum", mapped.getClaimsTemplateChecksum());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).findByCode("my-app");
     }
 
     @Test
@@ -166,6 +174,10 @@ class ApplicationServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.findById(userPrincipal, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application.not_found", exception.getError().key());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).findById(id);
     }
 
     @Test
@@ -175,6 +187,10 @@ class ApplicationServiceImplTest {
         when(applicationRepository.existsById(id)).thenReturn(true);
 
         assertDoesNotThrow(() -> service.existsById(userPrincipal, id));
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(id);
     }
 
     @Test
@@ -198,6 +214,10 @@ class ApplicationServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.findViewById(userPrincipal, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application.not_found", exception.getError().key());
+
+        var inOrder = inOrder(rlsInterceptor, applicationViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationViewRepository).findById(id);
     }
 
     @Test
@@ -209,6 +229,10 @@ class ApplicationServiceImplTest {
         var page = service.findAll(userPrincipal, new ApplicationViewQueryFilterDto(), Pageable.unpaged());
 
         assertEquals(1, page.getTotalElements());
+
+        var inOrder = inOrder(rlsInterceptor, applicationViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationViewRepository).findAll(any(Specification.class), any(Pageable.class));
     }
 
     @Test
@@ -255,6 +279,10 @@ class ApplicationServiceImplTest {
         assertEquals("existing-checksum", saved.getScriptChecksum());
         assertEquals(OffsetDateTime.of(2026, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC), saved.getDeployedAt());
         assertEquals("existing-config", saved.getConfiguration());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRepository).findById(id);
     }
 
     @Test
@@ -305,6 +333,10 @@ class ApplicationServiceImplTest {
         var captor = ArgumentCaptor.forClass(Application.class);
         verify(applicationRepository).delete(captor.capture());
         assertSame(existing, captor.getValue());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRepository).findById(id);
     }
 
     @Test
@@ -365,10 +397,14 @@ class ApplicationServiceImplTest {
         when(opaService.generate(application, activeRules)).thenReturn("rendered-policy");
         when(checksumService.compute("rendered-policy")).thenReturn("policy-checksum");
 
-        service.regeneratePolicy(id);
+        service.regeneratePolicy(userPrincipal, id);
 
         // updatePolicy resets deployedAt to null inside the repository so the scheduler redeploys.
         verify(applicationRepository).updatePolicy(id, "rendered-policy", "policy-checksum");
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).findById(id);
     }
 
     @Test
@@ -383,7 +419,7 @@ class ApplicationServiceImplTest {
         when(opaService.generate(application, activeRules)).thenReturn("rendered-policy");
         when(checksumService.compute("rendered-policy")).thenReturn("same-checksum");
 
-        service.regeneratePolicy(id);
+        service.regeneratePolicy(userPrincipal, id);
 
         // The checksum is unchanged: the policy must not be updated nor the deployment status reset.
         verify(applicationRepository, never()).updatePolicy(any(), any(), any());
@@ -395,7 +431,7 @@ class ApplicationServiceImplTest {
         var id = UUID.randomUUID();
         when(applicationRepository.findById(id)).thenReturn(Optional.empty());
 
-        var exception = assertThrows(ApiException.class, () -> service.regeneratePolicy(id));
+        var exception = assertThrows(ApiException.class, () -> service.regeneratePolicy(userPrincipal, id));
 
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application.not_found", exception.getError().key());
@@ -449,6 +485,11 @@ class ApplicationServiceImplTest {
         assertEquals(1, result.getTotalElements());
         verify(applicationManagerViewRepository).findAll(
             ArgumentMatchers.<Specification<ApplicationManagerView>>any(), any(Pageable.class));
+
+        var inOrder = inOrder(rlsInterceptor, applicationManagerViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationManagerViewRepository).findAll(
+            ArgumentMatchers.<Specification<ApplicationManagerView>>any(), any(Pageable.class));
     }
 
     @Test
@@ -469,6 +510,10 @@ class ApplicationServiceImplTest {
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
         verify(accountService).existsById(userPrincipal, accountId);
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -631,6 +676,10 @@ class ApplicationServiceImplTest {
         InOrder order = inOrder(applicationManagerRepository);
         order.verify(applicationManagerRepository).delete(entity);
         order.verify(applicationManagerRepository).flush();
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test

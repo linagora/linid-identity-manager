@@ -28,20 +28,25 @@ package io.github.linagora.linid.im.api.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Test class: OpaDeploymentScheduler")
@@ -53,8 +58,34 @@ class OpaDeploymentSchedulerTest {
     @Mock
     private OpaApplicationDeployerService opaApplicationDeployerService;
 
+    @Mock
+    private TransactionTemplate transactionTemplate;
+
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
     @InjectMocks
     private OpaDeploymentScheduler scheduler;
+
+    @BeforeEach
+    void setUp() {
+        // Runs the callback given to the template, as a real transaction would.
+        when(transactionTemplate.execute(any())).thenAnswer(invocation ->
+            invocation.<TransactionCallback<?>>getArgument(0).doInTransaction(null));
+    }
+
+    @Test
+    @DisplayName("deployPendingApplications should read the pending applications in a transaction with a system RLS context")
+    void testDeployPendingApplications_readsInSystemContext() {
+        when(applicationRepository.findByDeployedAtIsNullAndScriptIsNotNull()).thenReturn(List.of());
+
+        scheduler.deployPendingApplications();
+
+        var inOrder = inOrder(transactionTemplate, rlsInterceptor, applicationRepository);
+        inOrder.verify(transactionTemplate).execute(any());
+        inOrder.verify(rlsInterceptor).securizeAsSystem();
+        inOrder.verify(applicationRepository).findByDeployedAtIsNullAndScriptIsNotNull();
+    }
 
     @Test
     @DisplayName("deployPendingApplications should deploy every pending application independently")

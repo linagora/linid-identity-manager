@@ -132,9 +132,10 @@ public interface ApplicationService {
      * on the application entity and resets the deployment status by setting {@code deployedAt} to {@code null} so the
      * application is picked up by the next scheduled deployment.</p>
      *
+     * @param userPrincipal the authenticated user whose change of the rules requires the regeneration
      * @param applicationId the identifier of the application whose policy must be regenerated
      */
-    void regeneratePolicy(UUID applicationId);
+    void regeneratePolicy(UserPrincipal userPrincipal, UUID applicationId);
 
     /**
      * Retrieves a paginated list of application manager views matching the provided filters.

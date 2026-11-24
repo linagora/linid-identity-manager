@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
@@ -128,8 +129,15 @@ public class ApplicationServiceImpl implements ApplicationService {
      */
     private final AccountService accountService;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public Application create(final UserPrincipal userPrincipal, final ApplicationRecord application) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (applicationRepository.findByCode(application.code()).isPresent()) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
@@ -148,6 +156,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     public Page<ApplicationView> findAll(final UserPrincipal userPrincipal,
                                          final ApplicationViewQueryFilterDto filters,
                                          final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(ApplicationView.class, filters);
 
         return applicationViewRepository.findAll(specification, pageable);
@@ -156,6 +166,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public Application findById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return applicationRepository.findById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -166,6 +178,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (applicationRepository.existsById(id)) {
             return;
         }
@@ -177,6 +191,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public ApplicationView findViewById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return applicationViewRepository.findById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -187,6 +203,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public Application update(final UserPrincipal userPrincipal, final UUID id,
                               final ApplicationRecord application) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, id);
 
         systemApplicationValidator.ensureApplicationIsMutable(entity);
@@ -227,6 +245,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, id);
 
         systemApplicationValidator.ensureApplicationIsMutable(entity);
@@ -235,7 +255,9 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public void regeneratePolicy(final UUID applicationId) {
+    public void regeneratePolicy(final UserPrincipal userPrincipal, final UUID applicationId) {
+        rlsInterceptor.securize(userPrincipal);
+
         var application = applicationRepository.findById(applicationId)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -264,6 +286,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         final UserPrincipal userPrincipal,
         final ApplicationManagerViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(ApplicationManagerView.class, filters);
 
         return applicationManagerViewRepository.findAll(specification, pageable);
@@ -274,6 +298,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final ApplicationManagerRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, applicationId);
         accountService.existsById(userPrincipal, record.accountId());
 
@@ -310,6 +336,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID accountId) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, applicationId);
 
         var manager = applicationManagerRepository.findByApplicationIdAndAccountId(applicationId, accountId)

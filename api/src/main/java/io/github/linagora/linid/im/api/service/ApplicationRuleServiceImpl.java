@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.application.rule.ApplicationRuleMapper;
 import io.github.linagora.linid.im.api.model.application.rule.ApplicationRuleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleViewQueryFilterDto;
@@ -88,11 +89,18 @@ public class ApplicationRuleServiceImpl implements ApplicationRuleService {
      */
     private final ChecksumService checksumService;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public ApplicationRule create(
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final ApplicationRuleRecord rule) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureApplicationExists(applicationId);
 
         if (applicationRuleRepository.existsByApplicationIdAndCode(applicationId, rule.code())) {
@@ -117,6 +125,8 @@ public class ApplicationRuleServiceImpl implements ApplicationRuleService {
         final UUID applicationId,
         final ApplicationRuleViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureApplicationExists(applicationId);
 
         Specification<ApplicationRuleView> specification =
@@ -134,6 +144,8 @@ public class ApplicationRuleServiceImpl implements ApplicationRuleService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return applicationRuleRepository.findByIdAndApplicationId(id, applicationId)
             .orElseThrow(() -> ruleNotFound(id));
     }
@@ -144,6 +156,8 @@ public class ApplicationRuleServiceImpl implements ApplicationRuleService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return applicationRuleViewRepository.findByIdAndApplicationId(id, applicationId)
             .orElseThrow(() -> ruleNotFound(id));
     }
@@ -154,6 +168,8 @@ public class ApplicationRuleServiceImpl implements ApplicationRuleService {
         final UUID applicationId,
         final UUID id,
         final ApplicationRuleRecord rule) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, applicationId, id);
 
         if (!rule.code().equals(entity.getCode())
@@ -183,6 +199,8 @@ public class ApplicationRuleServiceImpl implements ApplicationRuleService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, applicationId, id);
 
         applicationRuleRepository.delete(entity);

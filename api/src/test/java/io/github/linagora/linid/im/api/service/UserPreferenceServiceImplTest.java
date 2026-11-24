@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.model.user.preference.UserPreferenceMapper;
 import io.github.linagora.linid.im.api.model.user.preference.UserPreferenceRecord;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.UserPreference;
 import io.github.linagora.linid.im.api.persistence.repository.UserPreferenceRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -50,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -63,6 +65,9 @@ class UserPreferenceServiceImplTest {
 
     @Mock
     private UserPreferenceMapper userPreferenceMapper;
+
+    @Mock
+    private RlsInterceptor rlsInterceptor;
 
     @InjectMocks
     private UserPreferenceServiceImpl userPreferenceServiceImpl;
@@ -105,6 +110,10 @@ class UserPreferenceServiceImplTest {
         assertEquals("light", result.getValue());
         verify(userPreferenceRepository).save(existing);
         verify(userPreferenceMapper, never()).toUserPreference(any(), any());
+
+        var inOrder = inOrder(rlsInterceptor, userPreferenceRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(userPreferenceRepository).findByUserIdAndKey(userPrincipal.getId(), "theme");
     }
 
     @Test
@@ -134,6 +143,10 @@ class UserPreferenceServiceImplTest {
         userPreferenceServiceImpl.delete(userPrincipal, "theme");
 
         verify(userPreferenceRepository).delete(existing);
+
+        var inOrder = inOrder(rlsInterceptor, userPreferenceRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(userPreferenceRepository).findByUserIdAndKey(userPrincipal.getId(), "theme");
     }
 
     @Test
@@ -163,6 +176,10 @@ class UserPreferenceServiceImplTest {
         assertNotNull(result);
         assertEquals(2, result.size());
         verify(userPreferenceRepository).findByUserId(userPrincipal.getId());
+
+        var inOrder = inOrder(rlsInterceptor, userPreferenceRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(userPreferenceRepository).findByUserId(userPrincipal.getId());
     }
 
     @Test

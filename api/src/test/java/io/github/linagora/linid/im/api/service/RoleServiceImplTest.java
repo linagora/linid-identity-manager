@@ -34,13 +34,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.api.model.role.RoleMapper;
 import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Role;
 import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
@@ -86,6 +89,9 @@ class RoleServiceImplTest {
 
     @Mock
     private RoleMapper roleMapper;
+
+    @Mock
+    private RlsInterceptor rlsInterceptor;
 
     @InjectMocks
     private RoleServiceImpl roleService;
@@ -160,6 +166,10 @@ class RoleServiceImplTest {
         verify(roleRepository).existsByCode(record.code());
         verify(roleMapper).toRole(record, userPrincipal);
         verify(roleRepository).save(entity);
+
+        var inOrder = inOrder(rlsInterceptor, roleRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(roleRepository).existsByCode(record.code());
     }
 
     @Test
@@ -213,6 +223,11 @@ class RoleServiceImplTest {
                 any(Specification.class),
                 eq(pageable)
         );
+
+        var inOrder = inOrder(rlsInterceptor, executor);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(executor).findDistinctPageEntities(
+            eq(RoleView.class), eq(RoleDistinctView.class), any(Specification.class), eq(pageable));
     }
 
     @Test
@@ -230,6 +245,10 @@ class RoleServiceImplTest {
         assertEquals(id, result.getId());
 
         verify(roleDistinctViewRepository).findFirstById(id);
+
+        var inOrder = inOrder(rlsInterceptor, roleDistinctViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(roleDistinctViewRepository).findFirstById(id);
     }
 
     @Test
@@ -302,6 +321,10 @@ class RoleServiceImplTest {
             argThat(role -> userPrincipal.getId().equals(role.getUpdatedBy()))
         );
         verify(roleDistinctViewRepository).findFirstById(id);
+
+        var inOrder = inOrder(rlsInterceptor, roleRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(roleRepository).findById(id);
     }
 
     @Test
@@ -341,6 +364,10 @@ class RoleServiceImplTest {
         verify(roleDistinctViewRepository).findFirstById(id);
         verify(roleRepository).deleteById(id);
         verify(roleRepository).flush();
+
+        var inOrder = inOrder(rlsInterceptor, roleDistinctViewRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(roleDistinctViewRepository).findFirstById(id);
     }
 
     @Test

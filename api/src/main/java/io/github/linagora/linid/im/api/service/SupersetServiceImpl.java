@@ -39,6 +39,7 @@ import io.github.linagora.linid.im.api.model.superset.SupersetRlsConfig;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenDTO;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
@@ -53,6 +54,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
@@ -103,6 +105,17 @@ public class SupersetServiceImpl implements SupersetService {
     private final JinjaService jinjaService;
 
     /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
+    /**
+     * Template running the build of the RLS rules in a transaction, required to set the RLS context, while keeping the
+     * HTTP calls to Superset out of it.
+     */
+    private final TransactionTemplate transactionTemplate;
+
+    /**
      * Base URL of the Superset instance.
      */
     private final String url;
@@ -128,6 +141,8 @@ public class SupersetServiceImpl implements SupersetService {
      * @param accountDistinctViewRepository            repository used to retrieve account data for RLS rules
      * @param organizationalUnitDistinctViewRepository repository used to retrieve organizational unit data for RLS
      *                                                 rules
+     * @param rlsInterceptor                           interceptor setting the RLS context of the calling user
+     * @param transactionTemplate                      template running the build of the RLS rules in a transaction
      */
     public SupersetServiceImpl(@Value("${superset.url}") final String url,
                                @Value("${superset.rls-config}") final String rlsConfigPath,
@@ -135,7 +150,9 @@ public class SupersetServiceImpl implements SupersetService {
                                final JinjaService jinjaService,
                                final AccountDistinctViewRepository accountDistinctViewRepository,
                                final OrganizationalUnitDistinctViewRepository
-                                   organizationalUnitDistinctViewRepository) {
+                                   organizationalUnitDistinctViewRepository,
+                               final RlsInterceptor rlsInterceptor,
+                               final TransactionTemplate transactionTemplate) {
         this.url = url;
         this.restClient = RestClient.builder()
             .baseUrl(url)
@@ -144,6 +161,8 @@ public class SupersetServiceImpl implements SupersetService {
         this.accountDistinctViewRepository = accountDistinctViewRepository;
         this.organizationalUnitDistinctViewRepository = organizationalUnitDistinctViewRepository;
         this.supersetCacheService = supersetCacheService;
+        this.rlsInterceptor = rlsInterceptor;
+        this.transactionTemplate = transactionTemplate;
 
         initRlsConfiguration(rlsConfigPath);
     }
@@ -194,12 +213,18 @@ public class SupersetServiceImpl implements SupersetService {
     @Override
     public SupersetTokenDTO getToken(final UserPrincipal userPrincipal,
                                      final SupersetTokenRecord tokenRecord) {
+        // The transaction ends before the calls to Superset, so that it does not hold a pooled connection meanwhile.
+        var rlsRules = transactionTemplate.execute(status -> {
+            rlsInterceptor.securize(userPrincipal);
+            return buildRlsRules(userPrincipal, tokenRecord);
+        });
+
         var auth = getAuthContext();
 
         var guestTokenRequest = new SupersetGuestTokenRequest(
             new SupersetGuestTokenRequest.GuestUser(userPrincipal.getEmail(), "Guest", "User"),
             List.of(new SupersetGuestTokenRequest.Resource("dashboard", tokenRecord.dashboardId().toString())),
-            buildRlsRules(userPrincipal, tokenRecord)
+            rlsRules
         );
 
         var response = restClient.post()

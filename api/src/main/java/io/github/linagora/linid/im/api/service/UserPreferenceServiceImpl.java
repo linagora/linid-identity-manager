@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.model.user.preference.UserPreferenceMapper;
 import io.github.linagora.linid.im.api.model.user.preference.UserPreferenceRecord;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.UserPreference;
 import io.github.linagora.linid.im.api.persistence.repository.UserPreferenceRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -71,9 +72,15 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
      */
     private final UserPreferenceMapper userPreferenceMapper;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public UserPreference save(final UserPrincipal userPrincipal,
             final UserPreferenceRecord userPreference) {
+        rlsInterceptor.securize(userPrincipal);
 
         return userPreferenceRepository.findByUserIdAndKey(userPrincipal.getId(),
                 userPreference.key()).map(existing -> {
@@ -87,6 +94,8 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
 
     @Override
     public void delete(final UserPrincipal userPrincipal, final String key) {
+        rlsInterceptor.securize(userPrincipal);
+
         UserPreference existing = userPreferenceRepository.findByUserIdAndKey(
                 userPrincipal.getId(), key).orElseThrow(
                         () -> new ApiException(HttpStatus.NOT_FOUND.value(),
@@ -98,6 +107,8 @@ public class UserPreferenceServiceImpl implements UserPreferenceService {
     @Override
     @Transactional(readOnly = true)
     public List<UserPreference> findAll(final UserPrincipal userPrincipal) {
+        rlsInterceptor.securize(userPrincipal);
+
         return userPreferenceRepository.findByUserId(userPrincipal.getId());
     }
 }

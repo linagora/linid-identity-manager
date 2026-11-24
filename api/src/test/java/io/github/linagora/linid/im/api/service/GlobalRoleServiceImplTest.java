@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
@@ -55,6 +56,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,6 +73,9 @@ class GlobalRoleServiceImplTest {
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private RlsInterceptor rlsInterceptor;
 
     @InjectMocks
     private GlobalRoleServiceImpl service;
@@ -99,6 +104,10 @@ class GlobalRoleServiceImplTest {
         assertEquals(GlobalRoleEnum.ACCOUNTS_ADMIN, result.getRole());
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(accountId);
     }
 
     @Test
@@ -181,6 +190,11 @@ class GlobalRoleServiceImplTest {
 
         assertEquals(1, result.getTotalElements());
         assertEquals(entity.getId(), result.getContent().getFirst().getId());
+
+        var inOrder = inOrder(rlsInterceptor, globalRoleViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(globalRoleViewRepository).findAll(
+            ArgumentMatchers.<Specification<GlobalRoleView>>any(), ArgumentMatchers.any(Pageable.class));
     }
 
     @Test
@@ -201,6 +215,10 @@ class GlobalRoleServiceImplTest {
         assertEquals(List.of(accountId.toString()), filters.getAccountId());
         assertEquals(1, result.getTotalElements());
         assertEquals(entity.getId(), result.getContent().getFirst().getId());
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(accountId);
     }
 
     @Test
@@ -230,6 +248,10 @@ class GlobalRoleServiceImplTest {
         service.delete(userPrincipal, accountId, "APPLICATIONS_AUDITOR");
 
         verify(globalRoleRepository).delete(entity);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(accountId);
     }
 
     @Test

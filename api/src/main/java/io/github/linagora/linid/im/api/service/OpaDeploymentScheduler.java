@@ -26,18 +26,23 @@
 
 package io.github.linagora.linid.im.api.service;
 
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Periodically deploys to OPA every application whose policy is pending deployment.
  *
  * <p>Each application is deployed in its own transaction through the {@link OpaApplicationDeployerService},
  * so that a failure on one application neither rolls back the deployment of the others nor blocks the batch.</p>
+ *
+ * <p>This technical operation is not bound to a user: the pending applications are read in a system RLS
+ * context.</p>
  */
 @Slf4j
 @Component
@@ -55,6 +60,16 @@ public class OpaDeploymentScheduler {
     private final OpaApplicationDeployerService opaApplicationDeployerService;
 
     /**
+     * Template running the read of the pending applications in a transaction, required to set the RLS context.
+     */
+    private final TransactionTemplate transactionTemplate;
+
+    /**
+     * Interceptor setting the RLS context of the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
+    /**
      * Deploys all applications that are pending deployment to OPA.
      *
      * <p>Retrieves every application with a generated script that has not been deployed yet and deploys each one
@@ -63,7 +78,10 @@ public class OpaDeploymentScheduler {
      */
     @Scheduled(fixedDelayString = "${opa.deployment.interval:5m}")
     public void deployPendingApplications() {
-        var applications = applicationRepository.findByDeployedAtIsNullAndScriptIsNotNull();
+        var applications = transactionTemplate.execute(status -> {
+            rlsInterceptor.securizeAsSystem();
+            return applicationRepository.findByDeployedAtIsNullAndScriptIsNotNull();
+        });
 
         if (applications.isEmpty()) {
             log.debug("No application pending OPA deployment");

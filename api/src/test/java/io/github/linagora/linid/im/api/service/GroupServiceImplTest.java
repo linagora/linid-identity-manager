@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
@@ -72,7 +73,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -107,6 +110,9 @@ class GroupServiceImplTest {
     @Mock
     private GroupMapper mapper;
 
+
+    @Mock
+    private RlsInterceptor rlsInterceptor;
 
     @InjectMocks
     private GroupServiceImpl service;
@@ -144,6 +150,10 @@ class GroupServiceImplTest {
         verify(groupRepository, never()).findById(any());
         verify(organizationalUnitService, never()).existsById(any(), any());
         verify(applicationService, never()).findById(any(), any());
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(groupRepository).existsByCode("developers");
     }
 
     @Test
@@ -235,6 +245,10 @@ class GroupServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.findById(userPrincipal, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.group.not_found", exception.getError().key());
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(groupRepository).findById(id);
     }
 
     @Test
@@ -246,6 +260,10 @@ class GroupServiceImplTest {
         var exception = assertThrows(ApiException.class, () -> service.findViewById(userPrincipal, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.group.not_found", exception.getError().key());
+
+        var inOrder = inOrder(rlsInterceptor, groupViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(groupViewRepository).findById(id);
     }
 
     @Test
@@ -257,6 +275,10 @@ class GroupServiceImplTest {
         var page = service.findAll(userPrincipal, new GroupViewQueryFilterDto(), Pageable.unpaged());
 
         assertEquals(1, page.getTotalElements());
+
+        var inOrder = inOrder(rlsInterceptor, groupViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(groupViewRepository).findAll(any(Specification.class), any(Pageable.class));
     }
 
     @Test
@@ -296,6 +318,10 @@ class GroupServiceImplTest {
         assertEquals(userPrincipal.getId(), saved.getUpdatedBy());
         verify(organizationalUnitService).existsById(userPrincipal, organizationalUnitId);
         verify(applicationService).findById(userPrincipal, applicationId);
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(groupRepository).findById(id);
     }
 
     @Test
@@ -478,6 +504,10 @@ class GroupServiceImplTest {
         var captor = ArgumentCaptor.forClass(Group.class);
         verify(groupRepository).delete(captor.capture());
         assertSame(existing, captor.getValue());
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(groupRepository).findById(id);
     }
 
     @Test
@@ -514,6 +544,10 @@ class GroupServiceImplTest {
         when(groupRepository.existsById(id)).thenReturn(true);
 
         service.existsById(userPrincipal, id);
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(groupRepository).existsById(id);
     }
 
     @Test
@@ -542,6 +576,11 @@ class GroupServiceImplTest {
 
         assertEquals(1, result.getTotalElements());
         assertEquals(entity.getId(), result.getContent().getFirst().getId());
+
+        var inOrder = inOrder(rlsInterceptor, groupAccountViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(groupAccountViewRepository).findAll(
+            ArgumentMatchers.<Specification<GroupAccountView>>any(), ArgumentMatchers.any(Pageable.class));
     }
 
     @Test
@@ -561,6 +600,10 @@ class GroupServiceImplTest {
         assertEquals(Map.of(), result.getExtraParameters());
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(groupRepository).existsById(groupId);
     }
 
     @Test
@@ -622,6 +665,10 @@ class GroupServiceImplTest {
         service.detachAccount(userPrincipal, groupId, accountId);
 
         verify(groupAccountRepository).delete(relation);
+
+        var inOrder = inOrder(rlsInterceptor, groupRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(groupRepository).existsById(groupId);
     }
 
     @Test

@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.role.RoleMapper;
 import io.github.linagora.linid.im.api.model.role.RoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Role;
 import io.github.linagora.linid.im.api.persistence.model.RoleDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.RoleView;
@@ -80,8 +81,15 @@ public class RoleServiceImpl implements RoleService {
      */
     private final RoleMapper roleMapper;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public Role create(final UserPrincipal userPrincipal, final RoleRecord role) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (roleRepository.existsByCode(role.code())) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
@@ -100,6 +108,8 @@ public class RoleServiceImpl implements RoleService {
     public Page<RoleDistinctView> findAll(final UserPrincipal userPrincipal,
                                           final RoleViewQueryFilterDto filters,
                                           final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(RoleView.class, filters);
 
         return executor.findDistinctPageEntities(
@@ -113,6 +123,8 @@ public class RoleServiceImpl implements RoleService {
     @Override
     @Transactional(readOnly = true)
     public RoleDistinctView findById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return roleDistinctViewRepository.findFirstById(id)
                 .orElseThrow(() -> new ApiException(
                         HttpStatus.NOT_FOUND.value(),
@@ -125,6 +137,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public RoleDistinctView update(final UserPrincipal userPrincipal, final UUID roleId, final RoleRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         Role role = roleRepository.findById(roleId)
                 .orElseThrow(() -> new ApiException(
                         HttpStatus.NOT_FOUND.value(),
@@ -159,6 +173,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         findById(userPrincipal, id);
 
         // The foreign key decides, not roles_view.deletable: the view only sees the caller's rows under RLS.

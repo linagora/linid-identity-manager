@@ -29,11 +29,13 @@ package io.github.linagora.linid.im.api.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -63,6 +65,9 @@ class OpaApplicationDeployerServiceImplTest {
     @Mock
     private ApplicationService applicationService;
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
     @InjectMocks
     private OpaApplicationDeployerServiceImpl deployer;
 
@@ -88,6 +93,8 @@ class OpaApplicationDeployerServiceImplTest {
         var captor = ArgumentCaptor.forClass(Application.class);
         verify(applicationRepository).save(captor.capture());
         assertEquals(deployedAt, captor.getValue().getDeployedAt());
+
+        verify(rlsInterceptor).securizeAsSystem();
     }
 
     @Test
@@ -131,6 +138,11 @@ class OpaApplicationDeployerServiceImplTest {
         verify(applicationService).findById(userPrincipal, id);
         verify(opaService).publish(application);
         verify(applicationRepository).save(any());
+        var inOrder = inOrder(rlsInterceptor, applicationService);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationService).findById(userPrincipal, id);
+        // The deployment requested by a user must keep the user's RLS context, never a full access.
+        verify(rlsInterceptor, never()).securizeAsSystem();
     }
 
     @Test

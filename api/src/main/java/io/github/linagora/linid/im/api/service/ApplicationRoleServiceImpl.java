@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.application.role.ApplicationRoleMapper;
 import io.github.linagora.linid.im.api.model.application.role.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRole;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleViewQueryFilterDto;
@@ -86,11 +87,18 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
      */
     private final SystemApplicationValidator systemApplicationValidator;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public ApplicationRole create(
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final ApplicationRoleRecord role) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureApplicationExists(applicationId);
         systemApplicationValidator.ensureRolesAreMutable(applicationId);
 
@@ -111,6 +119,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final UUID applicationId,
         final ApplicationRoleViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureApplicationExists(applicationId);
 
         Specification<ApplicationRoleView> specification =
@@ -128,6 +138,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureApplicationExists(applicationId);
 
         return applicationRoleRepository.findByIdAndApplicationId(id, applicationId)
@@ -140,6 +152,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureApplicationExists(applicationId);
 
         return applicationRoleViewRepository.findByIdAndApplicationId(id, applicationId)
@@ -152,6 +166,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final UUID applicationId,
         final UUID id,
         final ApplicationRoleRecord role) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, applicationId, id);
 
         systemApplicationValidator.ensureRolesAreMutable(applicationId);
@@ -173,6 +189,8 @@ public class ApplicationRoleServiceImpl implements ApplicationRoleService {
         final UserPrincipal userPrincipal,
         final UUID applicationId,
         final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, applicationId, id);
 
         systemApplicationValidator.ensureRolesAreMutable(applicationId);

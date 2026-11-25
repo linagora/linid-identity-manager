@@ -32,6 +32,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   (`DELETE /applications/{id}/managers/{accountId}`) a manager. A manager can remove themselves, and the last manager
   can be removed. Deleting an application or an account removes its managers. These endpoints are open to every
   authenticated user.
+- Added the **Row-Level Security (RLS) context of each transaction**: the API sets the `linid.account_id`,
+  `linid.is_super_admin` and `linid.super_admin_sub` variables, local to the transaction so they never leak to the next
+  request using the same connection, for the authenticated account, or a full-access context for the operations not
+  bound to a user (resolution of the account at authentication, read of the root organizational unit, OPA deployment
+  scheduler). The `current_account_id()` and `is_super_admin()` SQL functions read the first two.
 
 ### Changed
 

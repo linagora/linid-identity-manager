@@ -27,7 +27,6 @@
 package io.github.linagora.linid.im.api.persistence.repository;
 
 import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.repository.Repository;
 
@@ -40,10 +39,11 @@ import org.springframework.data.repository.Repository;
 public interface GroupAncestorRepository extends Repository<GroupAncestor, String> {
 
     /**
-     * Finds every ancestor of the given group, at any depth.
+     * Checks whether a group is an ancestor of another group, at any depth.
      *
-     * @param groupId the identifier of the group whose ancestors are listed
-     * @return the (group, ancestor) pairs of the group, empty when it is a top-level group
+     * @param groupId    the identifier of the group whose ancestors are searched
+     * @param ancestorId the identifier of the candidate ancestor
+     * @return {@code true} when {@code ancestorId} is found up the parent chain of {@code groupId}
      */
-    List<GroupAncestor> findAllByGroupId(UUID groupId);
+    boolean existsByGroupIdAndAncestorId(UUID groupId, UUID ancestorId);
 }

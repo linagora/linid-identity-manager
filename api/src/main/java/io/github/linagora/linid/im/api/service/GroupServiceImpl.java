@@ -34,7 +34,6 @@ import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.model.GroupAncestor;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
@@ -46,11 +45,14 @@ import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepositor
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -70,6 +72,23 @@ import org.springframework.transaction.annotation.Transactional;
 public class GroupServiceImpl implements GroupService {
 
     /**
+     * PostgreSQL SQLState of a check violation. On an update of {@code groups}, only a cycle raises it: the
+     * {@code ck_groups_parent_id_not_self} constraint or the {@code group_closures_refresh()} trigger.
+     */
+    private static final String CHECK_VIOLATION = "23514";
+
+    /**
+     * PostgreSQL SQLState of a unique violation. On an update of {@code groups}, only the code raises it.
+     */
+    private static final String UNIQUE_VIOLATION = "23505";
+
+    /**
+     * PostgreSQL SQLState of a foreign key violation. On an update of {@code groups}, only a reference deleted by a
+     * concurrent request raises it: the parent group, the organizational unit or the application.
+     */
+    private static final String FOREIGN_KEY_VIOLATION = "23503";
+
+    /**
      * Repository used to manage {@link Group} persistence operations.
      */
     private final GroupRepository groupRepository;
@@ -80,7 +99,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupViewRepository groupViewRepository;
 
     /**
-     * Repository used to read the ancestors of a group from the recursive ancestors view.
+     * Repository used to read the ancestors of a group from the ancestors view over the group closure table.
      */
     private final GroupAncestorRepository groupAncestorRepository;
 
@@ -240,7 +259,25 @@ public class GroupServiceImpl implements GroupService {
 
         entity.setUpdatedBy(userPrincipal.getId());
 
-        return groupRepository.save(entity);
+        try {
+            // Flush so that a rejection by the database surfaces here rather than at commit time: a cycle, or a code
+            // taken or a reference deleted by a concurrent request after the checks above.
+            return groupRepository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException e) {
+            if (hasSqlState(e, CHECK_VIOLATION)) {
+                throw parentCycle(id, group.parentId());
+            }
+
+            if (hasSqlState(e, UNIQUE_VIOLATION)) {
+                throw codeAlreadyExists(group.code());
+            }
+
+            if (hasSqlState(e, FOREIGN_KEY_VIOLATION)) {
+                throw referenceNotFound(e, group);
+            }
+
+            throw e;
+        }
     }
 
     @Override
@@ -269,8 +306,9 @@ public class GroupServiceImpl implements GroupService {
 
     /**
      * Ensures the candidate parent group exists and that attaching the group to it does not create a cycle: the
-     * group must be neither the parent itself nor one of the parent's ancestors, read from the recursive
-     * ancestors view.
+     * group must be neither the parent itself nor one of the parent's ancestors, read from the ancestors view over
+     * the group closure table. The database rejects cycles as well, including one closed by a concurrent parent
+     * change committed after this check: {@link #update} flushes and turns that rejection into the same 400 error.
      *
      * @param id       the identifier of the group being updated, {@code null} on creation
      * @param parentId the identifier of the candidate parent group, possibly {@code null}
@@ -292,13 +330,62 @@ public class GroupServiceImpl implements GroupService {
             throw parentCycle(id, parentId);
         }
 
-        var ancestorIds = groupAncestorRepository.findAllByGroupId(parentId).stream()
-            .map(GroupAncestor::getAncestorId)
-            .toList();
-
-        if (ancestorIds.contains(id)) {
+        if (groupAncestorRepository.existsByGroupIdAndAncestorId(parentId, id)) {
             throw parentCycle(id, parentId);
         }
+    }
+
+    /**
+     * Tells whether the database rejected a write with the given SQLState.
+     *
+     * @param exception the exception raised by the flush
+     * @param sqlState  the expected PostgreSQL SQLState
+     * @return {@code true} if the most specific cause is an {@link SQLException} with this SQLState
+     */
+    private static boolean hasSqlState(final DataIntegrityViolationException exception, final String sqlState) {
+        return exception.getMostSpecificCause() instanceof SQLException sqlException
+            && sqlState.equals(sqlException.getSQLState());
+    }
+
+    /**
+     * Builds the 404 {@link ApiException} of the reference whose foreign key the database rejected. The foreign keys
+     * of {@code groups} are unnamed: PostgreSQL names them {@code groups_<column>_fkey}.
+     *
+     * @param exception the foreign key violation raised by the flush
+     * @param group     the request record carrying the references
+     * @return the 404 exception of the missing reference, or {@code exception} when its constraint is not known
+     */
+    private RuntimeException referenceNotFound(final DataIntegrityViolationException exception,
+                                               final GroupRecord group) {
+        return switch (violatedConstraint(exception)) {
+            case "groups_parent_id_fkey" -> groupNotFound(group.parentId());
+            case "groups_oun_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.organizational.unit.not_found",
+                    Map.of("id", group.organizationalUnitId().toString()))
+            );
+            case "groups_app_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.application.not_found", Map.of("id", group.applicationId().toString()))
+            );
+            case null, default -> exception;
+        };
+    }
+
+    /**
+     * Reads the name of the constraint violated by a write, as extracted by Hibernate.
+     *
+     * @param exception the exception raised by the flush
+     * @return the constraint name, or {@code null} when no cause carries it
+     */
+    private static String violatedConstraint(final DataIntegrityViolationException exception) {
+        for (Throwable cause = exception.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof ConstraintViolationException violation) {
+                return violation.getConstraintName();
+            }
+        }
+
+        return null;
     }
 
     /**

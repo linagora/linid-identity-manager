@@ -115,6 +115,9 @@ CREATE OR REPLACE FUNCTION organizational_unit_closures_insert()
     RETURNS TRIGGER AS
 $$
 BEGIN
+    -- trg_ou_relation_hierarchy_lock holds the lock of the organizational unit hierarchy: each statement below reads
+    -- what was committed while waiting for it.
+
     -- Cycle detection
     IF EXISTS (
         SELECT 1
@@ -122,7 +125,8 @@ BEGIN
         WHERE ancestor_id = NEW.child_id
           AND descendant_id = NEW.parent_id
     ) THEN
-        RAISE EXCEPTION 'Cycle detected: % -> %', NEW.parent_id, NEW.child_id;
+        RAISE EXCEPTION 'Cycle detected: % -> %', NEW.parent_id, NEW.child_id
+            USING ERRCODE = 'check_violation';
     END IF;
 
     -- Direct relation
@@ -195,6 +199,9 @@ CREATE OR REPLACE FUNCTION organizational_unit_closures_delete()
     RETURNS TRIGGER AS
 $$
 BEGIN
+    -- Under the same lock as organizational_unit_closures_insert(), also taken by trg_ou_hierarchy_lock when the
+    -- relation is deleted with an organizational unit.
+
     -- Only the ancestors of the child and of its descendants can change.
     PERFORM organizational_unit_closures_rebuild(ARRAY(
         SELECT descendant_id
@@ -206,9 +213,27 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-COMMENT ON FUNCTION organizational_unit_closures_delete() IS 'Trigger function that rebuilds the ancestor paths of the child organizational unit and of its descendants after a relation is deleted, keeping the paths still supported by another parent.';
+COMMENT ON FUNCTION organizational_unit_closures_delete() IS 'Trigger function that rebuilds the ancestor paths of the child organizational unit and of its descendants after a relation is deleted, keeping the paths still supported by another parent, under the lock of the organizational unit hierarchy.';
 
 CREATE TRIGGER trg_ou_relation_delete
     AFTER DELETE ON organizational_unit_relations
     FOR EACH ROW
 EXECUTE FUNCTION organizational_unit_closures_delete();
+
+-- =========================================================
+-- 5. LOCK OF THE HIERARCHY → ONE CHANGE AT A TIME
+-- =========================================================
+
+-- The deletion of an organizational unit deletes its relations.
+CREATE TRIGGER trg_ou_hierarchy_lock
+    BEFORE DELETE ON organizational_units
+    FOR EACH STATEMENT
+EXECUTE FUNCTION hierarchy_lock('organizational_unit_closures');
+
+CREATE TRIGGER trg_ou_relation_hierarchy_lock
+    BEFORE INSERT OR DELETE ON organizational_unit_relations
+    FOR EACH STATEMENT
+EXECUTE FUNCTION hierarchy_lock('organizational_unit_closures');
+
+COMMENT ON TRIGGER trg_ou_hierarchy_lock ON organizational_units IS 'Trigger that invokes hierarchy_lock() before each DELETE, which also deletes the relations of the organizational unit, to take the lock of the organizational unit hierarchy before any organizational unit is locked.';
+COMMENT ON TRIGGER trg_ou_relation_hierarchy_lock ON organizational_unit_relations IS 'Trigger that invokes hierarchy_lock() before each INSERT or DELETE, to take the lock of the organizational unit hierarchy before any organizational unit is locked.';

@@ -55,6 +55,7 @@ Feature: Test API Organizational unit endpoints
   ################## Closure paths (organizational_unit_closures) #######
   ## 901 Should remove the closure paths of a detached organizational unit and of its descendants
   ## 902 Should keep the closure paths still reached through another parent when a parent is detached
+  ## 903 Should hold the lock of the organizational unit hierarchy until the end of the transaction
 
   Background:
     Given I set http header 'Authorization' with '{{ env.E2E_AUTH_TOKEN }}'
@@ -1074,6 +1075,57 @@ Feature: Test API Organizational unit endpoints
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouDId}}' with method 'DELETE'
     Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouBId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+    When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouAId}}' with method 'DELETE'
+    Then I expect status code is 204
+
+  Scenario: 903 - Should hold the lock of the organizational unit hierarchy until the end of the transaction
+    Given I setup database with driver "postgres" host "{{env.E2E_DATABASE_HOST}}" port 5432 user "{{env.E2E_DATABASE_ADMIN_USER}}" password "{{env.E2E_DATABASE_ADMIN_PASSWORD}}" database "{{env.E2E_DATABASE_NAME}}"
+
+    # root -> A and root -> B
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "closure-903-a",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouAId' as '{{response.body.id}}' in context
+
+    When I request '{{env.E2E_API_URL}}/organizational-units' with method 'POST' with body:
+      """
+      {
+        "parent": "{{ctx.rootID}}",
+        "name": "closure-903-b",
+        "type": "test",
+        "extraParameters": {}
+      }
+      """
+    Then I expect status code is 201
+    And  I store 'ouBId' as '{{response.body.id}}' in context
+
+    # Unlike the lock of AccountRecompute.feature, which the API only reads, the triggers wait for this one: holding it
+    # from this session would block the API request, and the scenario with it. Each block checks instead, within the
+    # transaction of a change of the hierarchy, that the lock named by the OID of organizational_unit_closures is held,
+    # and raises 'lock not held' otherwise. A becomes a second parent of B, with the actors of the relation root -> B,
+    # then is detached from it.
+    When I execute sql request "DO $$ BEGIN INSERT INTO organizational_unit_relations (parent_id, child_id, created_by, updated_by) SELECT '{{ctx.ouAId}}', child_id, created_by, updated_by FROM organizational_unit_relations WHERE parent_id = '{{ctx.rootID}}' AND child_id = '{{ctx.ouBId}}'; IF NOT EXISTS (SELECT 1 FROM pg_locks WHERE locktype = 'advisory' AND classid = 'organizational_unit_closures'::regclass::oid AND objid = 0 AND objsubid = 2 AND pid = pg_backend_pid() AND granted) THEN RAISE EXCEPTION 'lock not held after a relation insert'; END IF; END $$"
+    And  I execute sql request "DO $$ BEGIN DELETE FROM organizational_unit_relations WHERE parent_id = '{{ctx.ouAId}}' AND child_id = '{{ctx.ouBId}}'; IF NOT EXISTS (SELECT 1 FROM pg_locks WHERE locktype = 'advisory' AND classid = 'organizational_unit_closures'::regclass::oid AND objid = 0 AND objsubid = 2 AND pid = pg_backend_pid() AND granted) THEN RAISE EXCEPTION 'lock not held after a relation delete'; END IF; END $$"
+
+    # C is created without any relation, which takes no lock, so no relation is deleted with it: only the statement-level
+    # trigger of the deletion, which takes the lock before the organizational unit is locked, can hold it.
+    And  I execute sql request "DO $$ BEGIN INSERT INTO organizational_units (name, type) VALUES ('closure-903-c', 'test'); DELETE FROM organizational_units WHERE name = 'closure-903-c' AND type = 'test'; IF NOT EXISTS (SELECT 1 FROM pg_locks WHERE locktype = 'advisory' AND classid = 'organizational_unit_closures'::regclass::oid AND objid = 0 AND objsubid = 2 AND pid = pg_backend_pid() AND granted) THEN RAISE EXCEPTION 'lock not held after an organizational unit delete'; END IF; END $$"
+
+    # Released at the end of the transaction: a lock kept by the session would block every later change of the hierarchy.
+    And  I execute sql request "SELECT count(*) AS total FROM pg_locks WHERE locktype = 'advisory' AND classid = 'organizational_unit_closures'::regclass::oid AND objid = 0 AND pid = pg_backend_pid()"
+    Then I expect 1 database results
+    And  I expect '{{ctx.dbResults[0].total}}' is '0'
 
     When I request '{{env.E2E_API_URL}}/organizational-units/{{ctx.ouBId}}' with method 'DELETE'
     Then I expect status code is 204

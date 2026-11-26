@@ -125,7 +125,7 @@ Rel(global_role_svc, account_repos, "Checks account exists")
 Rel(group_svc, ou_svc, "Checks OU exists")
 Rel(group_svc, application_svc, "Checks application exists")
 Rel(ou_svc, role_repos, "Checks role exists")
-Rel(ou_svc, account_repos, "Checks account exists")
+Rel(ou_svc, account_svc, "Checks account exists")
 
 ' --- Relationships: services -> OPA ---------------------------------------
 Rel(application_svc, opa_svc, "Generates policy")

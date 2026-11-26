@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitAccountUpdateRecord;
+import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitManagerRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitReactivationRecord;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitRecord;
@@ -42,12 +43,17 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccou
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManager;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerView;
+import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRelationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitStatusRepository;
@@ -60,21 +66,28 @@ import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import io.hypersistence.utils.hibernate.type.range.Range;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.hibernate.exception.ConstraintViolationException;
 import org.mockito.ArgumentMatchers;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import java.util.List;
 import java.util.Map;
@@ -84,8 +97,11 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -105,6 +121,12 @@ class OrganizationalUnitServiceImplTest {
 
     @Mock
     private OrganizationalUnitAccountRepository organizationalUnitAccountRepository;
+
+    @Mock
+    private OrganizationalUnitManagerRepository organizationalUnitManagerRepository;
+
+    @Mock
+    private OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
 
     @Mock
     private AccountRepository accountRepository;
@@ -607,6 +629,269 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.organizational.unit.account.not_attached", exception.getError().key());
         verify(organizationalUnitAccountRepository, never()).delete(any(OrganizationalUnitAccount.class));
+    }
+
+    @Test
+    @DisplayName("should find the managers through the view repository")
+    void testFindAllManagers_shouldDelegateToRepository() {
+        var pageable = PageRequest.of(0, 10);
+        var entity = new OrganizationalUnitManagerView();
+        var filters = new OrganizationalUnitManagerViewQueryFilterDto();
+        when(organizationalUnitManagerViewRepository.findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitManagerView>>any(),
+            any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(entity)));
+
+        Page<OrganizationalUnitManagerView> result = service.findAllManagers(userPrincipal, filters, pageable);
+
+        assertNotNull(result);
+        assertEquals(1, result.getTotalElements());
+        verify(organizationalUnitManagerViewRepository).findAll(
+            ArgumentMatchers.<Specification<OrganizationalUnitManagerView>>any(),
+            any(Pageable.class));
+    }
+
+    @Test
+    @DisplayName("should add a manager to an organizational unit")
+    void testAddManager_shouldSaveManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.addManager(userPrincipal, organizationalUnitId,
+            new OrganizationalUnitManagerRecord(accountId));
+
+        assertEquals(organizationalUnitId, result.getOrganizationalUnitId());
+        assertEquals(accountId, result.getAccountId());
+        assertEquals(userPrincipal.getId(), result.getCreatedBy());
+        assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+    }
+
+    @Test
+    @DisplayName("should throw exception on add manager with unknown organizational unit")
+    void testAddManager_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(UUID.randomUUID());
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("should throw exception on add manager with unknown account")
+    void testAddManager_shouldThrowExceptionOnUnknownAccount() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.account.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("should throw exception on add manager with an account already manager")
+    void testAddManager_shouldThrowExceptionOnAlreadyManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(true);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.organizational.unit.manager.already_exists", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    @DisplayName("should throw a 400 when a concurrent request added the same manager first")
+    void testAddManager_shouldThrowExceptionWhenManagerAddedConcurrently() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
+            .thenThrow(new DataIntegrityViolationException("uk_organizational_unit_managers_oun_id_act_id",
+                new SQLException("duplicate key value violates unique constraint", "23505")));
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(400, exception.getStatusCode());
+        assertEquals("error.organizational.unit.manager.already_exists", exception.getError().key());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "organizational_unit_managers_oun_id_fkey, error.organizational.unit.not_found",
+        "organizational_unit_managers_act_id_fkey, error.account.not_found"
+    })
+    @DisplayName("should throw the 404 of the organizational unit or the account deleted by a concurrent request")
+    void testAddManager_shouldThrowNotFoundWhenReferenceDeletedConcurrently(final String constraint,
+                                                                            final String errorKey) {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        // The checks pass, but a concurrent request deletes the reference before the flush.
+        var sqlException = new SQLException("insert or update on table \"organizational_unit_managers\" violates "
+            + "foreign key constraint \"" + constraint + "\"", "23503");
+        when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
+            .thenThrow(new DataIntegrityViolationException("foreign key",
+                new ConstraintViolationException("could not execute statement", sqlException, constraint)));
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals(errorKey, exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should rethrow a foreign key violation whose constraint is not known")
+    void testAddManager_shouldRethrowUnknownForeignKeyViolation() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        var foreignKeyViolation = new DataIntegrityViolationException("foreign key",
+            new SQLException("insert or update violates foreign key constraint", "23503"));
+        when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
+            .thenThrow(foreignKeyViolation);
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertSame(foreignKeyViolation, exception);
+    }
+
+    @Test
+    @DisplayName("should rethrow the database rejections other than a manager added or a reference deleted")
+    void testAddManager_shouldRethrowOtherIntegrityViolations() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var record = new OrganizationalUnitManagerRecord(accountId);
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(accountRepository.existsById(accountId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(false);
+        var notNullViolation = new DataIntegrityViolationException("not null",
+            new SQLException("null value in column \"created_by\" violates not-null constraint", "23502"));
+        when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
+            .thenThrow(notNullViolation);
+
+        var exception = assertThrows(DataIntegrityViolationException.class,
+            () -> service.addManager(userPrincipal, organizationalUnitId, record));
+        assertSame(notNullViolation, exception);
+    }
+
+    @Test
+    @DisplayName("should remove a manager from an organizational unit")
+    void testRemoveManager_shouldDeleteManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = OrganizationalUnitManager.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+
+        assertDoesNotThrow(() -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+
+        InOrder order = inOrder(organizationalUnitManagerRepository);
+        order.verify(organizationalUnitManagerRepository).delete(entity);
+        order.verify(organizationalUnitManagerRepository).flush();
+    }
+
+    @Test
+    @DisplayName("should throw a 404 when a concurrent request removed the same manager first")
+    void testRemoveManager_shouldThrowNotFoundWhenManagerRemovedConcurrently() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        var entity = OrganizationalUnitManager.builder()
+            .id(UUID.randomUUID())
+            .organizationalUnitId(organizationalUnitId)
+            .accountId(accountId)
+            .build();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.of(entity));
+        // The lookup finds the manager, but a concurrent request removes it first: the delete matches no row.
+        doThrow(new ObjectOptimisticLockingFailureException(OrganizationalUnitManager.class, entity.getId()))
+            .when(organizationalUnitManagerRepository).flush();
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.manager.not_found", exception.getError().key());
+    }
+
+    @Test
+    @DisplayName("should throw exception on remove manager with unknown organizational unit")
+    void testRemoveManager_shouldThrowExceptionOnUnknownOrganizationalUnit() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(false);
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).delete(any(OrganizationalUnitManager.class));
+    }
+
+    @Test
+    @DisplayName("should throw exception on remove manager with an account that is not a manager")
+    void testRemoveManager_shouldThrowExceptionOnNotManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
+        when(organizationalUnitManagerRepository.findByOrganizationalUnitIdAndAccountId(organizationalUnitId,
+            accountId)).thenReturn(Optional.empty());
+
+        var exception = assertThrows(ApiException.class,
+            () -> service.removeManager(userPrincipal, organizationalUnitId, accountId));
+        assertEquals(404, exception.getStatusCode());
+        assertEquals("error.organizational.unit.manager.not_found", exception.getError().key());
+        verify(organizationalUnitManagerRepository, never()).delete(any(OrganizationalUnitManager.class));
     }
 
     @Test

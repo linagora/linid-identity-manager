@@ -45,19 +45,23 @@ import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepositor
 import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.CHECK_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.FOREIGN_KEY_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.UNIQUE_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.hasSqlState;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.violatedConstraint;
 
 /**
  * Default implementation of {@link GroupService}.
@@ -70,23 +74,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class GroupServiceImpl implements GroupService {
-
-    /**
-     * PostgreSQL SQLState of a check violation. On an update of {@code groups}, only a cycle raises it: the
-     * {@code ck_groups_parent_id_not_self} constraint or the {@code group_closures_refresh()} trigger.
-     */
-    private static final String CHECK_VIOLATION = "23514";
-
-    /**
-     * PostgreSQL SQLState of a unique violation. On an update of {@code groups}, only the code raises it.
-     */
-    private static final String UNIQUE_VIOLATION = "23505";
-
-    /**
-     * PostgreSQL SQLState of a foreign key violation. On an update of {@code groups}, only a reference deleted by a
-     * concurrent request raises it: the parent group, the organizational unit or the application.
-     */
-    private static final String FOREIGN_KEY_VIOLATION = "23503";
 
     /**
      * Repository used to manage {@link Group} persistence operations.
@@ -264,6 +251,10 @@ public class GroupServiceImpl implements GroupService {
             // taken or a reference deleted by a concurrent request after the checks above.
             return groupRepository.saveAndFlush(entity);
         } catch (DataIntegrityViolationException e) {
+            // On an update of groups, each SQLState has a single cause: a check violation is a cycle (the
+            // ck_groups_parent_id_not_self constraint or the group_closures_refresh() trigger), a unique violation is
+            // the code, and a foreign key violation is a reference deleted by a concurrent request (the parent group,
+            // the organizational unit or the application).
             if (hasSqlState(e, CHECK_VIOLATION)) {
                 throw parentCycle(id, group.parentId());
             }
@@ -336,18 +327,6 @@ public class GroupServiceImpl implements GroupService {
     }
 
     /**
-     * Tells whether the database rejected a write with the given SQLState.
-     *
-     * @param exception the exception raised by the flush
-     * @param sqlState  the expected PostgreSQL SQLState
-     * @return {@code true} if the most specific cause is an {@link SQLException} with this SQLState
-     */
-    private static boolean hasSqlState(final DataIntegrityViolationException exception, final String sqlState) {
-        return exception.getMostSpecificCause() instanceof SQLException sqlException
-            && sqlState.equals(sqlException.getSQLState());
-    }
-
-    /**
      * Builds the 404 {@link ApiException} of the reference whose foreign key the database rejected. The foreign keys
      * of {@code groups} are unnamed: PostgreSQL names them {@code groups_<column>_fkey}.
      *
@@ -370,22 +349,6 @@ public class GroupServiceImpl implements GroupService {
             );
             case null, default -> exception;
         };
-    }
-
-    /**
-     * Reads the name of the constraint violated by a write, as extracted by Hibernate.
-     *
-     * @param exception the exception raised by the flush
-     * @return the constraint name, or {@code null} when no cause carries it
-     */
-    private static String violatedConstraint(final DataIntegrityViolationException exception) {
-        for (Throwable cause = exception.getCause(); cause != null; cause = cause.getCause()) {
-            if (cause instanceof ConstraintViolationException violation) {
-                return violation.getConstraintName();
-            }
-        }
-
-        return null;
     }
 
     /**

@@ -47,6 +47,24 @@ VALUES ('00000000-0000-4000-8000-00000000a012', 'sync-api', 'sync-api@example.co
         '00000000-0000-4000-8000-00000000a001')
 ON CONFLICT (email) DO NOTHING;
 
+-- Account without any role: no global role and no functional role, as it is
+-- attached to no organizational unit. The e2e scenarios call with it the
+-- endpoints that every authenticated user can call.
+INSERT
+INTO accounts (act_id, external_id, email, lastname, firstname, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000a013', 'norole', 'norole@example.com', 'norole_ln', 'norole_fn',
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT
+INTO account_status (act_id, validity_period, created_by, updated_by)
+VALUES ('00000000-0000-4000-8000-00000000a013',
+        tstzrange('2024-01-01 00:00:00+00'::timestamptz, NULL, '[)'),
+        '00000000-0000-4000-8000-00000000a001',
+        '00000000-0000-4000-8000-00000000a001')
+ON CONFLICT (act_id) DO NOTHING;
+
 -- Default functional role held by the accounts created by the e2e scenarios.
 -- The UUID is deterministic so the scenarios can reference it directly.
 INSERT

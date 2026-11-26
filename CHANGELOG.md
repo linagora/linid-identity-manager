@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the **global roles** (`global_roles` table, audited in `global_roles_audit`) and their endpoints
   (`GET /global-roles`, `GET /accounts/{accountId}/global-roles`, `POST /accounts/{accountId}/global-roles/{role}`,
   `DELETE /accounts/{accountId}/global-roles/{role}`), open to every authenticated user.
+- Added the **managers of an organizational unit**: the `organizational_unit_managers` table with its audit table and
+  SQL view, and the endpoints to list (`GET /organizational-units/{id}/managers`), add
+  (`POST /organizational-units/{id}/managers`) and remove (`DELETE /organizational-units/{id}/managers/{accountId}`) a
+  manager. A manager does not need to be attached to the organizational unit, can remove themselves, and the last
+  manager can be removed. Deleting an organizational unit or an account removes its managers. These endpoints are open
+  to every authenticated user.
 
 ### Changed
 
@@ -32,8 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `groups` when a group is created, moved or deleted. The database now rejects any parent closing a cycle of any
   length, and `group_ancestors_view` reads this table instead of a recursive query. Each statement creating, moving
   or deleting groups first takes a transaction-level advisory lock, so that concurrent changes of the hierarchy run
-  one at a time, without deadlocking, and can neither close a cycle nor leave wrong paths. Existing databases must be
-  recreated, since the `V1`, `V24` and `V42` migrations changed.
+  one at a time, without deadlocking, and can neither close a cycle nor leave wrong paths.
 
 ### Removed
 
@@ -63,7 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed the **concurrent changes of the organizational unit hierarchy**, which could close a cycle, or leave missing or
   stale paths in `organizational_unit_closures`: each statement inserting or deleting relations, or deleting
   organizational units, now first takes a transaction-level advisory lock, so that these changes run one at a time,
-  without deadlocking. Existing databases must be recreated, since the `V1` and `V6` migrations changed.
+  without deadlocking.
 
 ## [0.12.0] - 2026-11-16
 

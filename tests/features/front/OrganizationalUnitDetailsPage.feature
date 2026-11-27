@@ -50,11 +50,11 @@ Feature: Test Organizational Unit details panel display
     And   I expect the HTML element '[data-cy="entity-profile-panel_back-button"]' contains "Liste des unités organisationnelles"
 
     ## 102 Should display the suspension dropdown for an active OU
-    And I expect the HTML element '[data-cy="organizational-unit-suspension-actions"]' to be visible
-    And I expect the HTML element '[data-cy="organizational-unit-suspended-banner"]' not exists
+    And I expect the HTML element '[data-cy="lifecycle-buttons-card_suspension"]' to be visible
+    And I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
 
     ## 103 Immediate suspension should suspend the OU once confirmed
-    When I click on '[data-cy="organizational-unit-suspension-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Suspendre l'unité organisationnelle"
@@ -63,7 +63,7 @@ Feature: Test Organizational Unit details panel display
     And  I expect the HTML element '[data-cy="form-dialog_field-container_comment"]' to be visible
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
-    When I click on '[data-cy="organizational-unit-suspension-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_reason"]'
@@ -74,14 +74,14 @@ Feature: Test Organizational Unit details panel display
     And  I expect the HTML element ".q-notification__message" contains "Unité organisationnelle suspendue avec succès."
 
     ## 104 Schedule suspension should open the form dialog with date and reason fields
-    When I click on '[data-cy="organizational-unit-suspension-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Planifier une suspension"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_start"]' to be visible
-    And  I expect the HTML element '[data-cy="field_start"]' to be visible
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_end"]' to be visible
-    And  I expect the HTML element '[data-cy="field_end"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.start"]' to be visible
+    And  I expect the HTML element '[data-cy="field_suspensionPeriod.start"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' to be visible
+    And  I expect the HTML element '[data-cy="field_suspensionPeriod.end"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_field-container_reason"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_field-container_subreason"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_field-container_comment"]' to be visible
@@ -89,11 +89,11 @@ Feature: Test Organizational Unit details panel display
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 105 Schedule suspension should succeed when localized dates are submitted
-    When I click on '[data-cy="organizational-unit-suspension-actions"]'
+    When I click on '[data-cy="lifecycle-buttons-card_suspension"]'
     And  I click on '[data-cy="dropdown-button_item_suspension.scheduled"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "01/01/2100" in the HTML element '[data-cy="field_start"]'
-    And  I set the text "31/12/2100" in the HTML element '[data-cy="field_end"]'
+    When I set the text "01/01/2100" in the HTML element '[data-cy="field_suspensionPeriod.start"]'
+    And  I set the text "31/12/2100" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_reason"]'
     And  I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_subreason"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -101,7 +101,7 @@ Feature: Test Organizational Unit details panel display
     And  I expect the HTML element ".q-notification__message" to be visible
     And  I expect the HTML element ".q-notification__message" contains "Suspension planifiée avec succès."
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
-    And  I expect the HTML element '[data-cy="organizational-unit-suspended-info-text"]' to be visible
+    And  I expect the HTML element '[data-cy="lifecycle-panel_willSuspend"]' to be visible
 
     ## 106 Should display the suspended banner and badge for a currently suspended OU
     Given I store "suspended_ou_no_end_id" as "00000000-0000-4000-8000-0000000000e1" in context
@@ -115,23 +115,23 @@ Feature: Test Organizational Unit details panel display
     Then  I expect current url is "{{ env.E2E_FRONT_URL }}/organizational-units/{{ctx.suspended_ou_no_end_id}}"
     And   I expect the HTML element '[data-cy="entity-profile-panel_title"]' contains "SuspendedOuNoEnd"
     And   I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Suspendu"
-    And   I expect the HTML element '[data-cy="organizational-unit-suspended-banner"]' to be visible
-    And   I expect the HTML element '[data-cy="organizational-unit-activation-actions"]' not exists
-    And   I expect the HTML element '[data-cy="organizational-unit-suspension-actions"]' not exists
+    And   I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' to be visible
+    And   I expect the HTML element '[data-cy="lifecycle-buttons-card_activation"]' not exists
+    And   I expect the HTML element '[data-cy="lifecycle-buttons-card_suspension"]' not exists
 
     ## 107 Edit suspension end from the banner should open the form dialog
-    When I click on '[data-cy="organizational-unit-suspended-banner_modify-suspension-end-button"]'
+    When I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Modifier la fin de suspension"
-    And  I expect the HTML element '[data-cy="form-dialog_field-container_end"]' to be visible
-    And  I expect the HTML element '[data-cy="field_end"]' to be visible
+    And  I expect the HTML element '[data-cy="form-dialog_field-container_suspensionPeriod.end"]' to be visible
+    And  I expect the HTML element '[data-cy="field_suspensionPeriod.end"]' to be visible
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
 
     ## 108 Edit suspension end should succeed when a localized date is submitted
-    When I click on '[data-cy="organizational-unit-suspended-banner_modify-suspension-end-button"]'
+    When I click on '[data-cy="lifecycle-banners-card_suspended_suspension.modify"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
-    When I set the text "31/12/2100" in the HTML element '[data-cy="field_end"]'
+    When I set the text "31/12/2100" in the HTML element '[data-cy="field_suspensionPeriod.end"]'
     And  I select '.q-menu .q-item:contains("Suspension Reason A")' in '[data-cy="field_reason"]'
     And  I select '.q-menu .q-item:contains("Suspension Sub-reason A.1")' in '[data-cy="field_subreason"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
@@ -140,20 +140,20 @@ Feature: Test Organizational Unit details panel display
     And  I expect the HTML element ".q-notification__message" contains "Date de fin de suspension mise à jour avec succès."
 
     ## 109 Immediate reactivation from the banner should end the suspension once confirmed
-    When I click on '[data-cy="organizational-unit-suspended-banner_clear-suspension-button"]'
+    When I click on '[data-cy="lifecycle-banners-card_suspended_reactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     And  I expect the HTML element '[data-cy="form-dialog_title"]' contains "Réactiver l'unité organisationnelle"
     And  I expect the HTML element '[data-cy="form-dialog_field-container_comment"]' to be visible
     When I click on '[data-cy="form-dialog"] [data-cy="button_cancel"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
-    When I click on '[data-cy="organizational-unit-suspended-banner_clear-suspension-button"]'
+    When I click on '[data-cy="lifecycle-banners-card_suspended_reactivation.immediate"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' to be visible
     When I set the text "Réactivation e2e" in the HTML element '[data-cy="field_comment"]'
     And  I click on '[data-cy="form-dialog"] [data-cy="button_confirm"]'
     Then I expect the HTML element '[data-cy="form-dialog"]' not exists
     And  I expect the HTML element ".q-notification__message" to be visible
     And  I expect the HTML element ".q-notification__message" contains "L'unité organisationnelle a été réactivée avec succès."
-    And  I expect the HTML element '[data-cy="organizational-unit-suspended-banner"]' not exists
+    And  I expect the HTML element '[data-cy="lifecycle-banners-card_suspended"]' not exists
     And  I expect the HTML element '[data-cy="entity-profile-panel_status-badge"]' contains "Actif"
 
     ## 110 Visiting an unknown organizational unit should display a load-error notification

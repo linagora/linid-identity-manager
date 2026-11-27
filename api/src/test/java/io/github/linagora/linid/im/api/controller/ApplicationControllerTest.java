@@ -27,10 +27,17 @@
 package io.github.linagora.linid.im.api.controller;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerDTO;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerMapper;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerViewDTO;
 import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.sync.RecomputeRightsDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
@@ -46,6 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -61,6 +69,8 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -85,6 +95,9 @@ class ApplicationControllerTest {
     private ApplicationMapper applicationMapper;
 
     @Mock
+    private ApplicationManagerMapper applicationManagerMapper;
+
+    @Mock
     private SyncApiService syncApiService;
 
     private ApplicationController controller;
@@ -99,6 +112,7 @@ class ApplicationControllerTest {
             avatarService,
             applicationService,
             applicationMapper,
+            applicationManagerMapper,
             pagedResponseStatusResolver,
             opaApplicationDeployerService,
             syncApiService
@@ -326,5 +340,71 @@ class ApplicationControllerTest {
         application.setHasScript(hasScript);
         application.setDeployedAt(deployedAt);
         return application;
+    }
+
+    @Test
+    @DisplayName("Should find the managers of an application, filtered on this application")
+    void testFindAllManagers() {
+        var applicationId = UUID.randomUUID();
+        var view = new ApplicationManagerView();
+        var dto = ApplicationManagerViewDTO.builder().id(UUID.randomUUID()).build();
+        var filters = new ApplicationManagerViewQueryFilterDto();
+        var pageable = Pageable.unpaged();
+        ResponseEntity<Page<ApplicationManagerViewDTO>> expected = ResponseEntity.ok(new PageImpl<>(List.of(dto)));
+        when(applicationService.findAllManagers(userPrincipal, filters, pageable))
+            .thenReturn(new PageImpl<>(List.of(view)));
+        when(applicationManagerMapper.toDTO(view)).thenReturn(dto);
+        when(pagedResponseStatusResolver.<ApplicationManagerViewDTO>resolve(any())).thenReturn(expected);
+
+        var response = controller.findAllManagers(userPrincipal, applicationId, filters, pageable);
+
+        assertSame(expected, response);
+        assertEquals(List.of(applicationId.toString()), filters.getApplicationId());
+        verify(applicationService).existsById(userPrincipal, applicationId);
+        verify(applicationManagerMapper).toDTO(view);
+    }
+
+    @Test
+    @DisplayName("Should propagate the 404 raised when the application of the managers does not exist")
+    void testFindAllManagers_shouldPropagateUnknownApplication() {
+        var applicationId = UUID.randomUUID();
+        var filters = new ApplicationManagerViewQueryFilterDto();
+        doThrow(new ApiException(404, I18nMessage.of("error.application.not_found")))
+            .when(applicationService).existsById(userPrincipal, applicationId);
+
+        var exception = assertThrows(ApiException.class, () -> controller.findAllManagers(
+            userPrincipal, applicationId, filters, Pageable.unpaged()));
+
+        assertEquals(404, exception.getStatusCode());
+        verify(applicationService, never()).findAllManagers(any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Should add a manager to an application")
+    void testAddManager() {
+        var applicationId = UUID.randomUUID();
+        var managerRecord = new ApplicationManagerRecord(UUID.randomUUID());
+        var entity = new ApplicationManager();
+        var dto = ApplicationManagerDTO.builder().id(UUID.randomUUID()).build();
+        when(applicationService.addManager(userPrincipal, applicationId, managerRecord)).thenReturn(entity);
+        when(applicationManagerMapper.toDTO(entity)).thenReturn(dto);
+
+        var response = controller.addManager(userPrincipal, applicationId, managerRecord);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertSame(dto, response.getBody());
+    }
+
+    @Test
+    @DisplayName("Should remove a manager from an application")
+    void testRemoveManager() {
+        var applicationId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+
+        var response = controller.removeManager(userPrincipal, applicationId, accountId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(applicationService).removeManager(userPrincipal, applicationId, accountId);
     }
 }

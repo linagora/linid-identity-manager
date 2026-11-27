@@ -49,7 +49,6 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManag
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
@@ -130,9 +129,9 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     private final OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
 
     /**
-     * Repository used to check the existence of accounts to attach or to add as managers.
+     * Service used to check the existence of accounts to attach or to add as managers.
      */
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
     /**
      * Repository used to check the existence of the functional role held by an attached account.
@@ -319,7 +318,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UUID organizationalUnitId,
         final OrganizationalUnitAccountRecord record) {
         existsById(userPrincipal, organizationalUnitId);
-        assertAccountExists(record.accountId());
+        accountService.existsById(userPrincipal, record.accountId());
         assertRoleExists(record.roleId());
 
         if (organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(
@@ -407,7 +406,7 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UUID organizationalUnitId,
         final OrganizationalUnitManagerRecord record) {
         existsById(userPrincipal, organizationalUnitId);
-        assertAccountExists(record.accountId());
+        accountService.existsById(userPrincipal, record.accountId());
 
         if (organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(
             organizationalUnitId, record.accountId())) {
@@ -508,21 +507,6 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
             );
             case null, default -> exception;
         };
-    }
-
-    /**
-     * Ensures an account exists.
-     *
-     * @param accountId the unique identifier of the account
-     * @throws ApiException with a 404 status when no account matches the identifier
-     */
-    private void assertAccountExists(final UUID accountId) {
-        if (!accountRepository.existsById(accountId)) {
-            throw new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
-            );
-        }
     }
 
     /**

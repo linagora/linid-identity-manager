@@ -28,10 +28,16 @@ package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
 import io.github.linagora.linid.im.api.persistence.model.Application;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManager;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerView;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.ApplicationManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRuleRepository;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationViewRepository;
@@ -43,11 +49,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.FOREIGN_KEY_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.UNIQUE_VIOLATION;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.hasSqlState;
+import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.violatedConstraint;
 
 /**
  * Default implementation of {@link ApplicationService}.
@@ -56,6 +69,9 @@ import org.springframework.transaction.annotation.Transactional;
  * The {@code claimsTemplateChecksum} is computed from the {@code claimsTemplate}. The {@code script}, its
  * {@code scriptChecksum}, the {@code deployedAt} date and the {@code configuration} are managed by a separate
  * process and are never set from the API requests.</p>
+ *
+ * <p>Also manages the managers of an application, enforcing the existence of the manager account and the
+ * uniqueness of an account among the managers of an application.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -96,6 +112,21 @@ public class ApplicationServiceImpl implements ApplicationService {
      * Validator protecting the system-reserved application from any mutation.
      */
     private final SystemApplicationValidator systemApplicationValidator;
+
+    /**
+     * Repository used to manage {@link ApplicationManager} persistence operations.
+     */
+    private final ApplicationManagerRepository applicationManagerRepository;
+
+    /**
+     * Repository used to read {@link ApplicationManagerView} projections.
+     */
+    private final ApplicationManagerViewRepository applicationManagerViewRepository;
+
+    /**
+     * Service used to check the existence of the account to add as a manager.
+     */
+    private final AccountService accountService;
 
     @Override
     public Application create(final UserPrincipal userPrincipal, final ApplicationRecord application) {
@@ -225,5 +256,124 @@ public class ApplicationServiceImpl implements ApplicationService {
         // TODO: replace once updatePolicy (raw script string) is reworked — workaround for stale @Version +
         //  @Generated updateDate after a prior operation in the same session
         applicationRepository.updatePolicy(applicationId, script, checksum);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ApplicationManagerView> findAllManagers(
+        final UserPrincipal userPrincipal,
+        final ApplicationManagerViewQueryFilterDto filters,
+        final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(ApplicationManagerView.class, filters);
+
+        return applicationManagerViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public ApplicationManager addManager(
+        final UserPrincipal userPrincipal,
+        final UUID applicationId,
+        final ApplicationManagerRecord record) {
+        existsById(userPrincipal, applicationId);
+        accountService.existsById(userPrincipal, record.accountId());
+
+        if (applicationManagerRepository.existsByApplicationIdAndAccountId(applicationId, record.accountId())) {
+            throw managerAlreadyExists(record.accountId());
+        }
+
+        var entity = ApplicationManager.builder()
+            .applicationId(applicationId)
+            .accountId(record.accountId())
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        // Flush so that a rejection by the database surfaces here rather than at commit time: the same manager
+        // added, or the application or the account deleted, by a concurrent request after the checks above.
+        try {
+            return applicationManagerRepository.saveAndFlush(entity);
+        } catch (DataIntegrityViolationException e) {
+            if (hasSqlState(e, UNIQUE_VIOLATION)) {
+                throw managerAlreadyExists(record.accountId());
+            }
+
+            if (hasSqlState(e, FOREIGN_KEY_VIOLATION)) {
+                throw managerReferenceNotFound(e, applicationId, record.accountId());
+            }
+
+            throw e;
+        }
+    }
+
+    @Override
+    public void removeManager(
+        final UserPrincipal userPrincipal,
+        final UUID applicationId,
+        final UUID accountId) {
+        existsById(userPrincipal, applicationId);
+
+        var manager = applicationManagerRepository.findByApplicationIdAndAccountId(applicationId, accountId)
+            .orElseThrow(() -> managerNotFound(accountId));
+
+        // Flush so that a removal by a concurrent request after the lookup above surfaces here rather than at commit
+        // time: the delete then matches no row, which Hibernate reports as an optimistic lock failure.
+        try {
+            applicationManagerRepository.delete(manager);
+            applicationManagerRepository.flush();
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw managerNotFound(accountId);
+        }
+    }
+
+    /**
+     * Builds the error returned when the account is not a manager of the application.
+     *
+     * @param accountId the account identifier
+     * @return an {@link ApiException} with HTTP 404
+     */
+    private ApiException managerNotFound(final UUID accountId) {
+        return new ApiException(
+            HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.application_manager.not_found", Map.of("id", accountId.toString()))
+        );
+    }
+
+    /**
+     * Builds the error returned when the account is already a manager of the application.
+     *
+     * @param accountId the account identifier
+     * @return an {@link ApiException} with HTTP 400
+     */
+    private ApiException managerAlreadyExists(final UUID accountId) {
+        return new ApiException(
+            HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.application_manager.already_exists", Map.of("id", accountId.toString()))
+        );
+    }
+
+    /**
+     * Builds the 404 {@link ApiException} of the application or the account whose foreign key the database rejected.
+     * The foreign keys of {@code application_managers} are unnamed: PostgreSQL names them
+     * {@code application_managers_<column>_fkey}.
+     *
+     * @param exception     the foreign key violation raised by the flush
+     * @param applicationId the application identifier
+     * @param accountId     the account identifier
+     * @return the 404 exception of the missing reference, or {@code exception} when its constraint is not known
+     */
+    private RuntimeException managerReferenceNotFound(final DataIntegrityViolationException exception,
+                                                      final UUID applicationId,
+                                                      final UUID accountId) {
+        return switch (violatedConstraint(exception)) {
+            case "application_managers_app_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.application.not_found", Map.of("id", applicationId.toString()))
+            );
+            case "application_managers_act_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            );
+            case null, default -> exception;
+        };
     }
 }

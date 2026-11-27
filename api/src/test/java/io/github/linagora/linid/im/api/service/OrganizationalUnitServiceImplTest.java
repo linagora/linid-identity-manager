@@ -49,7 +49,6 @@ import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitManag
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitRelation;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitStatus;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.OrganizationalUnitManagerRepository;
@@ -62,6 +61,7 @@ import io.github.linagora.linid.im.api.persistence.repository.RoleRepository;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitReactivationValidator;
 import io.github.linagora.linid.im.api.service.validation.OrganizationalUnitSuspensionValidator;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
+import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
 import io.hypersistence.utils.hibernate.type.range.Range;
@@ -129,7 +129,7 @@ class OrganizationalUnitServiceImplTest {
     private OrganizationalUnitManagerViewRepository organizationalUnitManagerViewRepository;
 
     @Mock
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Mock
     private RoleRepository roleRepository;
@@ -381,7 +381,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of("key", "value"));
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(roleRepository.existsById(roleId)).thenReturn(true);
         when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
@@ -396,6 +395,7 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(Map.of("key", "value"), result.getExtraParameters());
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+        verify(accountService).existsById(userPrincipal, accountId);
     }
 
     @Test
@@ -421,7 +421,8 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(false);
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
 
         var exception = assertThrows(ApiException.class,
             () -> service.attachAccount(userPrincipal, organizationalUnitId, record));
@@ -438,7 +439,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(roleRepository.existsById(roleId)).thenReturn(false);
 
         var exception = assertThrows(ApiException.class,
@@ -457,7 +457,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitAccountRecord(accountId, roleId, Map.of());
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(roleRepository.existsById(roleId)).thenReturn(true);
         when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(true);
@@ -658,7 +657,6 @@ class OrganizationalUnitServiceImplTest {
         var accountId = UUID.randomUUID();
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
         when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
@@ -671,6 +669,7 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(accountId, result.getAccountId());
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+        verify(accountService).existsById(userPrincipal, accountId);
     }
 
     @Test
@@ -696,7 +695,8 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitManagerRecord(accountId);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(false);
+        doThrow(new ApiException(404, I18nMessage.of("error.account.not_found")))
+            .when(accountService).existsById(userPrincipal, accountId);
 
         var exception = assertThrows(ApiException.class,
             () -> service.addManager(userPrincipal, organizationalUnitId, record));
@@ -713,7 +713,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitManagerRecord(accountId);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(true);
 
@@ -732,7 +731,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitManagerRecord(accountId);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
         when(organizationalUnitManagerRepository.saveAndFlush(any(OrganizationalUnitManager.class)))
@@ -758,7 +756,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitManagerRecord(accountId);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
         // The checks pass, but a concurrent request deletes the reference before the flush.
@@ -782,7 +779,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitManagerRecord(accountId);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
         var foreignKeyViolation = new DataIntegrityViolationException("foreign key",
@@ -803,7 +799,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitManagerRecord(accountId);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(organizationalUnitManagerRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);
         var notNullViolation = new DataIntegrityViolationException("not null",
@@ -1276,7 +1271,6 @@ class OrganizationalUnitServiceImplTest {
         var record = new OrganizationalUnitAccountRecord(accountId, roleId, null);
 
         when(organizationalUnitRepository.existsById(organizationalUnitId)).thenReturn(true);
-        when(accountRepository.existsById(accountId)).thenReturn(true);
         when(roleRepository.existsById(roleId)).thenReturn(true);
         when(organizationalUnitAccountRepository.existsByOrganizationalUnitIdAndAccountId(organizationalUnitId,
             accountId)).thenReturn(false);

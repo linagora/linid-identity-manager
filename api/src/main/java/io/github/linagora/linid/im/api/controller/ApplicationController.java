@@ -30,9 +30,14 @@ import io.github.linagora.linid.im.api.model.application.ApplicationDTO;
 import io.github.linagora.linid.im.api.model.application.ApplicationMapper;
 import io.github.linagora.linid.im.api.model.application.ApplicationRecord;
 import io.github.linagora.linid.im.api.model.application.ApplicationViewDTO;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerDTO;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerMapper;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerRecord;
+import io.github.linagora.linid.im.api.model.application.manager.ApplicationManagerViewDTO;
 import io.github.linagora.linid.im.api.model.common.AvatarEntity;
 import io.github.linagora.linid.im.api.model.sync.RecomputeRightsDTO;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.model.ApplicationManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationViewQueryFilterDto;
 import io.github.linagora.linid.im.api.service.ApplicationService;
 import io.github.linagora.linid.im.api.service.AvatarService;
@@ -48,6 +53,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -96,6 +102,11 @@ public class ApplicationController {
      * Mapper for entity-to-DTO conversion.
      */
     private final ApplicationMapper applicationMapper;
+
+    /**
+     * Mapper for application manager entity-to-DTO conversion.
+     */
+    private final ApplicationManagerMapper applicationManagerMapper;
 
     /**
      * Resolver for paginated response HTTP status.
@@ -321,5 +332,85 @@ public class ApplicationController {
             )
             .contentType(MediaType.TEXT_PLAIN)
             .body(entity.getScript().getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Retrieves a paginated and optionally filtered list of the managers of the given application.
+     *
+     * <p>The path variable must stay named {@code applicationId}: Spring also binds the path variables to the
+     * filter DTO, and {@code id} would filter on the identifier of the manager record.</p>
+     *
+     * @param userPrincipal the authenticated user
+     * @param applicationId the managed application UUID
+     * @param filters       generated filter DTO from query parameters
+     * @param pageable      pagination parameters
+     * @return a page of application manager view DTOs
+     */
+    @GetMapping("/{applicationId}/managers")
+    @Operation(summary = "Get all managers of an application with pagination and filtering")
+    @ApiResponse(responseCode = "200", description = "Full list of application managers")
+    @ApiResponse(responseCode = "206", description = "Partial list of application managers (more pages available)")
+    @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    public ResponseEntity<Page<ApplicationManagerViewDTO>> findAllManagers(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID applicationId,
+        final ApplicationManagerViewQueryFilterDto filters,
+        final Pageable pageable) {
+        log.info("[{}] Received GET request to list managers of application {} with filters {} and pageable {}",
+            userPrincipal.getEmail(), applicationId, filters, pageable);
+
+        applicationService.existsById(userPrincipal, applicationId);
+
+        filters.setApplicationId(List.of(applicationId.toString()));
+
+        var page = applicationService.findAllManagers(userPrincipal, filters, pageable)
+            .map(applicationManagerMapper::toDTO);
+        return pagedResponseStatusResolver.resolve(page);
+    }
+
+    /**
+     * Adds a manager to the given application.
+     *
+     * @param userPrincipal the authenticated user
+     * @param applicationId the managed application UUID
+     * @param record        the payload holding the identifier of the account to add as a manager
+     * @return the created manager with HTTP 201 status
+     */
+    @PostMapping("/{applicationId}/managers")
+    @Operation(summary = "Add a manager to an application")
+    @ApiResponse(responseCode = "201", description = "Manager successfully added")
+    @ApiResponse(responseCode = "400", description = "Invalid request body or account already manager",
+        content = @Content)
+    @ApiResponse(responseCode = "404", description = "Application or account not found", content = @Content)
+    public ResponseEntity<ApplicationManagerDTO> addManager(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID applicationId,
+        @Valid @RequestBody final ApplicationManagerRecord record) {
+        log.info("[{}] Received POST request to add a manager to application {} with {}",
+            userPrincipal.getEmail(), applicationId, record);
+        var entity = applicationService.addManager(userPrincipal, applicationId, record);
+        return ResponseEntity.status(HttpStatus.CREATED).body(applicationManagerMapper.toDTO(entity));
+    }
+
+    /**
+     * Removes a manager from the given application.
+     *
+     * @param userPrincipal the authenticated user
+     * @param applicationId the managed application UUID
+     * @param accountId     the manager account UUID
+     * @return HTTP 204 No Content
+     */
+    @DeleteMapping("/{applicationId}/managers/{accountId}")
+    @Operation(summary = "Remove a manager from an application")
+    @ApiResponse(responseCode = "204", description = "Manager successfully removed")
+    @ApiResponse(responseCode = "404", description = "Application or manager not found", content = @Content)
+    public ResponseEntity<Void> removeManager(
+        @AuthenticationPrincipal final UserPrincipal userPrincipal,
+        @PathVariable final UUID applicationId,
+        @PathVariable final UUID accountId) {
+        log.info("[{}] Received DELETE request to remove manager {} from application {}",
+            userPrincipal.getEmail(), accountId, applicationId);
+        applicationService.removeManager(userPrincipal, applicationId, accountId);
+        return ResponseEntity.noContent().build();
     }
 }

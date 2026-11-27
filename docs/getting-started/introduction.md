@@ -70,6 +70,7 @@ Applications represent the systems connected to LinId.
 For each application, you can:
 
 * Define roles
+* Name managers
 * Configure authentication (OIDC)
 * Specify required claims
 * Control access rules

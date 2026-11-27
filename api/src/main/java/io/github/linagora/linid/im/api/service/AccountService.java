@@ -146,7 +146,10 @@ public interface AccountService {
      * Retrieves the {@link Account} associated with the given external identifier.
      *
      * <p>The authentication flow matches it against the {@code sub} claim of the access token, so the
-     * comparison is exact: an OIDC subject is case-sensitive.
+     * comparison is exact: an OIDC subject is case-sensitive.</p>
+     *
+     * <p>The caller is not known yet at this point, so the account is read in a system RLS context: only call it
+     * outside of a transaction started for a user.</p>
      *
      * @param externalId the external identifier used to look up the account
      * @return an {@link Optional} containing the matching {@link Account} if found,

@@ -66,6 +66,11 @@ public class SecurityConfig {
     private final AccountService accountService;
 
     /**
+     * Configuration telling whether the authenticated account is the SUPER_ADMIN.
+     */
+    private final SuperAdminConfig superAdminConfig;
+
+    /**
      * Public endpoints (no authentication, no custom filter).
      *
      * @param http the {@link HttpSecurity} to configure
@@ -106,7 +111,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
             .addFilterAfter(
-                new UserAuthenticationFilter(accountService), BearerTokenAuthenticationFilter.class);
+                new UserAuthenticationFilter(accountService, superAdminConfig),
+                BearerTokenAuthenticationFilter.class);
 
         return http.build();
     }

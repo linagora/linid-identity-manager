@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import ch.qos.logback.classic.Level;
@@ -38,6 +39,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.ConfigDataApplicationContextInitializer;
@@ -89,6 +91,27 @@ class SuperAdminConfigTest {
         new SuperAdminConfig(sub).warnWhenDeclared();
 
         assertTrue(logAppender.list.isEmpty());
+    }
+
+    @Test
+    @DisplayName("test isSuperAdmin: should be true for the account whose external_id is the declared subject")
+    void testIsSuperAdminWithDeclaredSubject() {
+        assertTrue(new SuperAdminConfig("jdoe").isSuperAdmin("jdoe"));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "jane", "JDOE"})
+    @DisplayName("test isSuperAdmin: should be false for any other external_id")
+    void testIsSuperAdminWithOtherExternalId(final String externalId) {
+        assertFalse(new SuperAdminConfig("jdoe").isSuperAdmin(externalId));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " "})
+    @DisplayName("test isSuperAdmin: should be false when no SUPER_ADMIN is declared, even for a blank external_id")
+    void testIsSuperAdminWithoutSub(final String sub) {
+        assertFalse(new SuperAdminConfig(sub).isSuperAdmin(sub));
     }
 
     @Test

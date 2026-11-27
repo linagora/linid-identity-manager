@@ -31,13 +31,16 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.api.model.application.role.ApplicationRoleMapper;
 import io.github.linagora.linid.im.api.model.application.role.ApplicationRoleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRole;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRoleViewQueryFilterDto;
@@ -81,6 +84,9 @@ class ApplicationRoleServiceImplTest {
     @Mock
     private SystemApplicationValidator systemApplicationValidator;
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
     @InjectMocks
     private ApplicationRoleServiceImpl service;
 
@@ -117,6 +123,10 @@ class ApplicationRoleServiceImplTest {
         assertSame(mapped, saved);
         assertSame(mapped, result);
         assertEquals(applicationId, saved.getApplicationId());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -157,6 +167,10 @@ class ApplicationRoleServiceImplTest {
             new ApplicationRoleViewQueryFilterDto(), Pageable.unpaged());
 
         assertEquals(1, result.getTotalElements());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -182,6 +196,10 @@ class ApplicationRoleServiceImplTest {
         when(applicationRoleRepository.findByIdAndApplicationId(id, applicationId)).thenReturn(Optional.of(entity));
 
         assertSame(entity, service.findById(userPrincipal, applicationId, id));
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -221,6 +239,10 @@ class ApplicationRoleServiceImplTest {
             .thenReturn(Optional.of(entity));
 
         assertSame(entity, service.findViewById(userPrincipal, applicationId, id));
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -267,6 +289,10 @@ class ApplicationRoleServiceImplTest {
         assertEquals("admin", result.getName());
         assertEquals("Grants full administrative access", result.getDescription());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -314,6 +340,10 @@ class ApplicationRoleServiceImplTest {
         var captor = ArgumentCaptor.forClass(ApplicationRole.class);
         verify(applicationRoleRepository).delete(captor.capture());
         assertSame(entity, captor.getValue());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test

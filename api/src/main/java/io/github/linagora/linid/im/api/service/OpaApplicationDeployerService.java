@@ -37,7 +37,7 @@ import java.util.UUID;
 public interface OpaApplicationDeployerService {
 
     /**
-     * Deploys an application policy to OPA.
+     * Deploys an application policy to OPA in a system RLS context, for technical operations not bound to a user.
      *
      * @param application the application to deploy
      * @return the deployed application with updated timestamp

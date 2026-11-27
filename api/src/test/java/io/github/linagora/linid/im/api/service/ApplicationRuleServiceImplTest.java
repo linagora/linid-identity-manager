@@ -31,13 +31,16 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.linagora.linid.im.api.model.application.rule.ApplicationRuleMapper;
 import io.github.linagora.linid.im.api.model.application.rule.ApplicationRuleRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRule;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleView;
 import io.github.linagora.linid.im.api.persistence.model.ApplicationRuleViewQueryFilterDto;
@@ -83,6 +86,9 @@ class ApplicationRuleServiceImplTest {
     @Mock
     private ChecksumService checksumService;
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
     @InjectMocks
     private ApplicationRuleServiceImpl service;
 
@@ -124,6 +130,10 @@ class ApplicationRuleServiceImplTest {
         // disabled must always be true on creation.
         assertTrue(saved.getDisabled());
         assertEquals("checksum-value", saved.getScriptChecksum());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -174,6 +184,10 @@ class ApplicationRuleServiceImplTest {
             new ApplicationRuleViewQueryFilterDto(), Pageable.unpaged());
 
         assertEquals(1, page.getTotalElements());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRepository).existsById(applicationId);
     }
 
     @Test
@@ -211,6 +225,10 @@ class ApplicationRuleServiceImplTest {
             () -> service.findById(userPrincipal, applicationId, id));
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.application_rule.not_found", exception.getError().key());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRuleRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRuleRepository).findByIdAndApplicationId(id, applicationId);
     }
 
     @Test
@@ -224,6 +242,10 @@ class ApplicationRuleServiceImplTest {
         var result = service.findViewById(userPrincipal, applicationId, id);
 
         assertSame(view, result);
+
+        var inOrder = inOrder(rlsInterceptor, applicationRuleViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(applicationRuleViewRepository).findByIdAndApplicationId(id, applicationId);
     }
 
     @Test
@@ -272,6 +294,10 @@ class ApplicationRuleServiceImplTest {
         assertEquals("new-checksum", saved.getScriptChecksum());
         assertEquals(false, saved.getDisabled());
         assertEquals(userPrincipal.getId(), saved.getUpdatedBy());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRuleRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRuleRepository).findByIdAndApplicationId(id, applicationId);
     }
 
     @Test
@@ -369,6 +395,10 @@ class ApplicationRuleServiceImplTest {
         var captor = ArgumentCaptor.forClass(ApplicationRule.class);
         verify(applicationRuleRepository).delete(captor.capture());
         assertSame(existing, captor.getValue());
+
+        var inOrder = inOrder(rlsInterceptor, applicationRuleRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(applicationRuleRepository).findByIdAndApplicationId(id, applicationId);
     }
 
     @Test

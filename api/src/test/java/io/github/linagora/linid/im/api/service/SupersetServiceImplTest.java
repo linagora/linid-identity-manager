@@ -29,6 +29,7 @@ package io.github.linagora.linid.im.api.service;
 import io.github.linagora.linid.im.api.model.superset.SupersetRlsConfig;
 import io.github.linagora.linid.im.api.model.superset.SupersetTokenRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitDistinctView;
 import io.github.linagora.linid.im.api.persistence.repository.AccountDistinctViewRepository;
@@ -41,6 +42,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -50,7 +53,11 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,6 +76,12 @@ class SupersetServiceImplTest {
     @Mock
     private JinjaService jinjaService;
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
+    @Mock
+    private TransactionTemplate transactionTemplate;
+
     private SupersetServiceImpl service;
 
     @BeforeEach
@@ -79,8 +92,52 @@ class SupersetServiceImplTest {
             supersetCacheService,
             jinjaService,
             accountDistinctViewRepository,
-            organizationalUnitDistinctViewRepository
+            organizationalUnitDistinctViewRepository,
+            rlsInterceptor,
+            transactionTemplate
         );
+    }
+
+    @Test
+    @DisplayName("getToken should set the RLS context of the user in the transaction before reading the RLS entity")
+    void shouldSetRlsContextOfUserInTransactionWhenGettingToken() {
+        var userPrincipal = new UserPrincipal();
+        userPrincipal.setId(UUID.randomUUID());
+        var rlsId = UUID.randomUUID();
+        var tokenRecord = new SupersetTokenRecord("dashboard", UUID.randomUUID(), rlsId.toString());
+        setRlsConfigurations(new SupersetRlsConfig("dashboard", true, 10, "ACCOUNT", "clause"));
+        when(accountDistinctViewRepository.findFirstById(rlsId))
+            .thenReturn(Optional.of(AccountDistinctView.builder().build()));
+        // Runs the callback given to the template, as a real transaction would.
+        when(transactionTemplate.execute(any())).thenAnswer(invocation ->
+            invocation.<TransactionCallback<?>>getArgument(0).doInTransaction(null));
+        // Stops the call before any request to Superset.
+        when(supersetCacheService.getAccessToken()).thenThrow(new IllegalStateException("Superset unavailable"));
+
+        assertThatThrownBy(() -> service.getToken(userPrincipal, tokenRecord))
+            .isInstanceOf(IllegalStateException.class);
+
+        var inOrder = inOrder(rlsInterceptor, accountDistinctViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountDistinctViewRepository).findFirstById(rlsId);
+    }
+
+    @Test
+    @DisplayName("getToken should call Superset outside of the transaction")
+    void shouldCallSupersetOutsideOfTransactionWhenGettingToken() {
+        var userPrincipal = new UserPrincipal();
+        userPrincipal.setId(UUID.randomUUID());
+        var tokenRecord = new SupersetTokenRecord("dashboard", UUID.randomUUID(), UUID.randomUUID().toString());
+        // Does not run the callback given to the template: only the code outside of the transaction runs.
+        when(transactionTemplate.execute(any())).thenReturn(List.of());
+        // Stops the call before any request to Superset.
+        when(supersetCacheService.getAccessToken()).thenThrow(new IllegalStateException("Superset unavailable"));
+
+        assertThatThrownBy(() -> service.getToken(userPrincipal, tokenRecord))
+            .isInstanceOf(IllegalStateException.class);
+
+        verify(supersetCacheService).getAccessToken();
+        verifyNoInteractions(rlsInterceptor);
     }
 
     @Test

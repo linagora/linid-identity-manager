@@ -38,6 +38,7 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusMapperImpl;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
@@ -75,6 +76,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.hibernate.exception.ConstraintViolationException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -88,6 +90,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 
 import java.util.List;
 import java.util.Map;
@@ -99,6 +103,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -162,6 +167,12 @@ class OrganizationalUnitServiceImplTest {
     private OrganizationalUnitStatusMapperImpl organizationalUnitStatusMapper = new OrganizationalUnitStatusMapperImpl();
 
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
+    @Mock
+    private PlatformTransactionManager transactionManager;
+
     @InjectMocks
     private OrganizationalUnitServiceImpl service;
 
@@ -179,31 +190,48 @@ class OrganizationalUnitServiceImplTest {
     }
 
     @Test
-    @DisplayName("should retrieve once the root organizational unit")
-    void testGetRoot_shouldRetrieveOnce() {
+    @DisplayName("should return the root organizational unit loaded at startup without reading it again")
+    void testGetRoot_shouldReturnLoadedRoot() {
         var root = OrganizationalUnit.builder()
             .id(UUID.randomUUID())
             .name("root")
             .type("root")
             .build();
+        loadRoot(root);
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        assertEquals(root, service.getRoot());
+        assertEquals(root, service.getRoot());
+        verify(organizationalUnitRepository, times(1)).findByNameAndType("root", "root");
+    }
 
-        var value = service.getRoot();
-        assertEquals(root, value);
+    @Test
+    @DisplayName("should load the root organizational unit in a read-only transaction with a system RLS context")
+    void testLoadRoot_shouldReadInSystemTransaction() {
+        var root = OrganizationalUnit.builder()
+            .id(UUID.randomUUID())
+            .name("root")
+            .type("root")
+            .build();
+        when(organizationalUnitRepository.findByNameAndType("root", "root")).thenReturn(Optional.of(root));
 
-        value = service.getRoot();
-        assertEquals(root, value);
-        verify(organizationalUnitRepository, times(1)).findByNameAndType(any(), any());
+        service.loadRoot();
+
+        var definition = ArgumentCaptor.forClass(TransactionDefinition.class);
+        var inOrder = inOrder(transactionManager, rlsInterceptor, organizationalUnitRepository);
+        inOrder.verify(transactionManager).getTransaction(definition.capture());
+        inOrder.verify(rlsInterceptor).securizeAsSystem();
+        inOrder.verify(organizationalUnitRepository).findByNameAndType("root", "root");
+        inOrder.verify(transactionManager).commit(any());
+        assertTrue(definition.getValue().isReadOnly());
     }
 
     @Test
     @DisplayName("should throw exception without root organizational unit")
-    void testGetRoot_shouldThrowException() {
+    void testLoadRoot_shouldThrowException() {
         when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.empty());
 
         var exception = assertThrows(ApiException.class,
-            () -> service.getRoot());
+            () -> service.loadRoot());
         assertEquals(500, exception.getStatusCode());
         assertEquals("error.organizational.unit.root.not_found", exception.getError().key());
     }
@@ -294,6 +322,8 @@ class OrganizationalUnitServiceImplTest {
 
         var result = service.create(userPrincipal, entity);
         assertEquals(expected, result);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -307,6 +337,21 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(404, exception.getStatusCode());
         assertEquals("error.organizational.unit.not_found", exception.getError().key());
         assertEquals(uuid.toString(), exception.getError().context().get("id"));
+
+        verify(rlsInterceptor).securize(userPrincipal);
+    }
+
+    @Test
+    @DisplayName("findViewById should return the view of the organizational unit")
+    void testFindViewById_shouldReturnView() {
+        var uuid = UUID.randomUUID();
+        var view = new OrganizationalUnitDistinctView();
+        when(organizationalUnitDistinctViewRepository.findFirstById(uuid)).thenReturn(Optional.of(view));
+
+        var result = service.findViewById(userPrincipal, uuid);
+
+        assertEquals(view, result);
+        verify(rlsInterceptor).securize(userPrincipal);
     }
 
     @Test
@@ -320,12 +365,14 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        loadRoot(root);
         when(organizationalUnitRepository.existsById(uuid)).thenReturn(true);
 
         service.deleteById(userPrincipal, uuid);
 
         verify(organizationalUnitRepository).deleteById(uuid);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -350,6 +397,8 @@ class OrganizationalUnitServiceImplTest {
             ArgumentMatchers.any(),
             ArgumentMatchers.any(),
             ArgumentMatchers.any());
+
+        verify(rlsInterceptor).securize(userPrincipal);
     }
 
     @Test
@@ -370,6 +419,8 @@ class OrganizationalUnitServiceImplTest {
         verify(organizationalUnitAccountViewRepository).findAll(
             ArgumentMatchers.any(),
             any(Pageable.class));
+
+        verify(rlsInterceptor).securize(userPrincipal);
     }
 
     @Test
@@ -396,6 +447,8 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
         verify(accountService).existsById(userPrincipal, accountId);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -491,6 +544,8 @@ class OrganizationalUnitServiceImplTest {
 
         assertEquals(Map.of("key", "updated"), result.getExtraParameters());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -597,6 +652,8 @@ class OrganizationalUnitServiceImplTest {
         assertDoesNotThrow(() -> service.detachAccount(userPrincipal, organizationalUnitId, accountId));
 
         verify(organizationalUnitAccountRepository).delete(entity);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -648,6 +705,8 @@ class OrganizationalUnitServiceImplTest {
         verify(organizationalUnitManagerViewRepository).findAll(
             ArgumentMatchers.<Specification<OrganizationalUnitManagerView>>any(),
             any(Pageable.class));
+
+        verify(rlsInterceptor).securize(userPrincipal);
     }
 
     @Test
@@ -670,6 +729,8 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(userPrincipal.getId(), result.getCreatedBy());
         assertEquals(userPrincipal.getId(), result.getUpdatedBy());
         verify(accountService).existsById(userPrincipal, accountId);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -831,6 +892,8 @@ class OrganizationalUnitServiceImplTest {
         InOrder order = inOrder(organizationalUnitManagerRepository);
         order.verify(organizationalUnitManagerRepository).delete(entity);
         order.verify(organizationalUnitManagerRepository).flush();
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -899,7 +962,7 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        loadRoot(root);
 
         var exception = assertThrows(ApiException.class,
             () -> service.deleteById(userPrincipal, uuid));
@@ -918,7 +981,7 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        loadRoot(root);
 
         var exception = assertThrows(ApiException.class,
             () -> service.deleteById(userPrincipal, uuid));
@@ -948,6 +1011,8 @@ class OrganizationalUnitServiceImplTest {
         when(organizationalUnitRepository.existsById(any())).thenReturn(true);
 
         assertDoesNotThrow(() -> service.existsById(userPrincipal, uuid));
+
+        verify(rlsInterceptor).securize(userPrincipal);
     }
 
     @Test
@@ -961,8 +1026,7 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any()))
-            .thenReturn(Optional.of(root));
+        loadRoot(root);
 
         var record = new OrganizationalUnitRecord(rootId, "test", "test", Map.of());
 
@@ -984,8 +1048,7 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any()))
-            .thenReturn(Optional.of(root));
+        loadRoot(root);
 
         var record = new OrganizationalUnitRecord(UUID.randomUUID(), "root", "test", Map.of());
 
@@ -1008,8 +1071,7 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any()))
-            .thenReturn(Optional.of(root));
+        loadRoot(root);
         var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "root", Map.of());
 
         var exception = assertThrows(ApiException.class,
@@ -1031,8 +1093,7 @@ class OrganizationalUnitServiceImplTest {
             .type("root")
             .build();
 
-        when(organizationalUnitRepository.findByNameAndType(any(), any()))
-            .thenReturn(Optional.of(root));
+        loadRoot(root);
         when(organizationalUnitRepository.findAll(any(SpringQueryFilterSpecification.class))).thenReturn(List.of(new OrganizationalUnit()));
 
         var record = new OrganizationalUnitRecord(UUID.randomUUID(), "test", "test", Map.of());
@@ -1069,7 +1130,7 @@ class OrganizationalUnitServiceImplTest {
             .build();
 
         when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        loadRoot(root);
         when(organizationalUnitRepository.save(any())).thenReturn(updated);
 
         var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", Map.of());
@@ -1079,6 +1140,8 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(updated, result);
 
         verify(organizationalUnitRepository, times(1)).save(entity);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -1153,6 +1216,8 @@ class OrganizationalUnitServiceImplTest {
             commonMapper.endOf(status.getSuspensionPeriod()).toInstant());
         verify(organizationalUnitSuspensionValidator).validate(status, record, uuid);
         verify(organizationalUnitStatusRepository).saveAndFlush(status);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -1214,6 +1279,8 @@ class OrganizationalUnitServiceImplTest {
         assertEquals(userPrincipal.getId(), status.getUpdatedBy());
         verify(organizationalUnitReactivationValidator).validate(status, record, uuid);
         verify(organizationalUnitStatusRepository).saveAndFlush(status);
+
+        verify(rlsInterceptor, times(2)).securize(userPrincipal);
     }
 
     @Test
@@ -1228,7 +1295,7 @@ class OrganizationalUnitServiceImplTest {
             .extraParameters(Map.of("team", "core"))
             .build();
         when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        loadRoot(root);
         when(organizationalUnitRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", null);
@@ -1294,7 +1361,7 @@ class OrganizationalUnitServiceImplTest {
             .extraParameters(Map.of("team", "core"))
             .build();
         when(organizationalUnitRepository.findById(uuid)).thenReturn(Optional.of(entity));
-        when(organizationalUnitRepository.findByNameAndType(any(), any())).thenReturn(Optional.of(root));
+        loadRoot(root);
         when(organizationalUnitRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var record = new OrganizationalUnitRecord(UUID.randomUUID(), "new", "new", Map.of("team", "platform"));
@@ -1302,5 +1369,13 @@ class OrganizationalUnitServiceImplTest {
         var result = service.update(userPrincipal, uuid, record);
 
         assertEquals(Map.of("team", "platform"), result.getExtraParameters());
+    }
+
+    /**
+     * Loads the given root organizational unit into the service, as done at startup.
+     */
+    private void loadRoot(final OrganizationalUnit root) {
+        when(organizationalUnitRepository.findByNameAndType("root", "root")).thenReturn(Optional.of(root));
+        service.loadRoot();
     }
 }

@@ -31,7 +31,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(callSuper = true)
 @Schema(description = "Data Transfer Object representing a user with roles and permissions")
 public class UserPrincipal extends UserDTO {
+
+    /**
+     * Indicates whether the user is the SUPER_ADMIN declared by {@code LINID_SUPER_ADMIN_SUB}.
+     */
+    @Schema(description = "Indicates whether the user is the SUPER_ADMIN declared by configuration", example = "false")
+    private boolean superAdmin;
 }

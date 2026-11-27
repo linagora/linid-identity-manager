@@ -30,6 +30,7 @@ import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
@@ -120,8 +121,15 @@ public class GroupServiceImpl implements GroupService {
      */
     private final GroupMapper mapper;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public Group create(final UserPrincipal userPrincipal, final GroupRecord group) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (groupRepository.existsByCode(group.code())) {
             throw codeAlreadyExists(group.code());
         }
@@ -139,6 +147,8 @@ public class GroupServiceImpl implements GroupService {
     public Page<GroupView> findAll(final UserPrincipal userPrincipal,
                                    final GroupViewQueryFilterDto filters,
                                    final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(GroupView.class, filters);
 
         return groupViewRepository.findAll(specification, pageable);
@@ -147,18 +157,24 @@ public class GroupServiceImpl implements GroupService {
     @Override
     @Transactional(readOnly = true)
     public Group findById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return groupRepository.findById(id).orElseThrow(() -> groupNotFound(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public GroupView findViewById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return groupViewRepository.findById(id).orElseThrow(() -> groupNotFound(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (groupRepository.existsById(id)) {
             return;
         }
@@ -171,6 +187,8 @@ public class GroupServiceImpl implements GroupService {
     public Page<GroupAccountView> findAllAccounts(final UserPrincipal userPrincipal,
                                                   final GroupAccountViewQueryFilterDto filters,
                                                   final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(GroupAccountView.class, filters);
 
         return groupAccountViewRepository.findAll(specification, pageable);
@@ -180,6 +198,8 @@ public class GroupServiceImpl implements GroupService {
     public GroupAccount attachAccount(final UserPrincipal userPrincipal,
                                       final UUID groupId,
                                       final GroupAccountRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, groupId);
 
         if (!accountRepository.existsById(record.accountId())) {
@@ -210,6 +230,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void detachAccount(final UserPrincipal userPrincipal, final UUID groupId, final UUID accountId) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, groupId);
 
         var relation = groupAccountRepository.findByGroupIdAndAccountId(groupId, accountId)
@@ -223,6 +245,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Group update(final UserPrincipal userPrincipal, final UUID id, final GroupRecord group) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, id);
 
         if (groupRepository.existsByCodeAndIdNot(group.code(), id)) {
@@ -273,6 +297,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         var entity = findById(userPrincipal, id);
 
         groupRepository.delete(entity);

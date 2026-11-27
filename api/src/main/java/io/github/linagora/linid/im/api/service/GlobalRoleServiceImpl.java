@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRole;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleEnum;
 import io.github.linagora.linid.im.api.persistence.model.GlobalRoleView;
@@ -72,8 +73,15 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
      */
     private final AccountRepository accountRepository;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public GlobalRole create(final UserPrincipal userPrincipal, final UUID accountId, final String role) {
+        rlsInterceptor.securize(userPrincipal);
+
         var globalRole = toGlobalRole(role);
 
         checkAccountExists(accountId);
@@ -135,6 +143,8 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
     public Page<GlobalRoleView> findAll(final UserPrincipal userPrincipal,
                                         final GlobalRoleViewQueryFilterDto filters,
                                         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(GlobalRoleView.class, filters);
 
         return globalRoleViewRepository.findAll(specification, pageable);
@@ -146,6 +156,8 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
                                                    final UUID accountId,
                                                    final GlobalRoleViewQueryFilterDto filters,
                                                    final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         checkAccountExists(accountId);
         filters.setAccountId(List.of(accountId.toString()));
 
@@ -154,6 +166,8 @@ public class GlobalRoleServiceImpl implements GlobalRoleService {
 
     @Override
     public void delete(final UserPrincipal userPrincipal, final UUID accountId, final String role) {
+        rlsInterceptor.securize(userPrincipal);
+
         var globalRole = toGlobalRole(role);
         checkAccountExists(accountId);
 

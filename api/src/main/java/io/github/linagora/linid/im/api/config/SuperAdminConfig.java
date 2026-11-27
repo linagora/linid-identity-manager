@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.config;
 
 import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class SuperAdminConfig {
     /**
      * Subject of the SUPER_ADMIN, blank when no SUPER_ADMIN is declared.
      */
+    @Getter
     private final String sub;
 
     /**
@@ -66,5 +68,15 @@ public class SuperAdminConfig {
             log.warn("A SUPER_ADMIN is declared by LINID_SUPER_ADMIN_SUB: the account whose external_id is '{}' has "
                 + "every right. Remove the variable once an administrators manager is named.", sub);
         }
+    }
+
+    /**
+     * Tells whether the account with the given {@code external_id} is the declared SUPER_ADMIN.
+     *
+     * @param externalId the {@code external_id} of the account
+     * @return {@code true} when a SUPER_ADMIN is declared and its subject equals {@code externalId}
+     */
+    public boolean isSuperAdmin(final String externalId) {
+        return StringUtils.isNotBlank(sub) && sub.equals(externalId);
     }
 }

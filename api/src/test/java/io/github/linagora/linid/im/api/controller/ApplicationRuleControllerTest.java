@@ -100,7 +100,7 @@ class ApplicationRuleControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         // creating a rule must trigger a regeneration of the owning application policy.
-        verify(applicationService).regeneratePolicy(applicationId);
+        verify(applicationService).regeneratePolicy(userPrincipal, applicationId);
     }
 
     @Test
@@ -139,7 +139,7 @@ class ApplicationRuleControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(applicationRuleService).update(userPrincipal, applicationId, ruleId, record);
         // updating a rule must trigger a regeneration of the owning application policy.
-        verify(applicationService).regeneratePolicy(applicationId);
+        verify(applicationService).regeneratePolicy(userPrincipal, applicationId);
     }
 
     @Test
@@ -152,6 +152,6 @@ class ApplicationRuleControllerTest {
         assertNotNull(response);
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         // deleting a rule must trigger a regeneration of the owning application policy.
-        verify(applicationService).regeneratePolicy(applicationId);
+        verify(applicationService).regeneratePolicy(userPrincipal, applicationId);
     }
 }

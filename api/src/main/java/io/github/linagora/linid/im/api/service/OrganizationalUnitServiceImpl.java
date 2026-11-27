@@ -38,6 +38,7 @@ import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUn
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitStatusMapper;
 import io.github.linagora.linid.im.api.model.organizationalunit.OrganizationalUnitSuspensionRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnit;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccount;
 import io.github.linagora.linid.im.api.persistence.model.OrganizationalUnitAccountView;
@@ -64,6 +65,8 @@ import io.github.linagora.linid.im.corelib.exception.ApiException;
 import io.github.linagora.linid.im.corelib.i18n.I18nMessage;
 import io.github.zorin95670.executor.SpringQueryExecutor;
 import io.github.zorin95670.specification.SpringQueryFilterSpecification;
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -71,7 +74,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.OffsetDateTime;
 import java.util.HashMap;
@@ -90,8 +95,7 @@ import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.vi
  *
  * <p>Provides access and management operations for organizational units and
  * their hierarchical relations.
- * <p>The root organizational unit is lazily initialized and cached after the
- * first successful lookup.
+ * <p>The root organizational unit is loaded once at startup.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -185,48 +189,51 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     private final SpringQueryExecutor executor;
 
     /**
-     * Cached root organizational unit instance.
-     * <p>Declared as {@code volatile} to ensure visibility across threads when
-     * lazily initialized using double-checked locking.
+     * Interceptor setting the RLS context of the calling user for the current transaction.
      */
-    private volatile OrganizationalUnit root;
+    private final RlsInterceptor rlsInterceptor;
 
     /**
-     * Returns the root organizational unit.
-     * <p>The root entity is lazily initialized on the first access and then cached
-     * for subsequent calls.
-     *
-     * @return the root organizational unit
-     * @throws ApiException if the root organizational unit cannot be found
+     * Transaction manager starting the transaction in which the root organizational unit is read.
      */
-    public OrganizationalUnit getRoot() {
-        if (root == null) {
-            synchronized (this) {
-                if (root == null) {
-                    root = initRoot();
-                }
-            }
-        }
-        return root;
-    }
+    private final PlatformTransactionManager transactionManager;
 
     /**
-     * Loads the root organizational unit from persistence storage.
+     * Root organizational unit, loaded once at startup by {@link #loadRoot()}.
+     */
+    @Getter
+    private OrganizationalUnit root;
+
+    /**
+     * Loads the root organizational unit at startup.
      *
-     * @return the root organizational unit
+     * <p>Loading it at startup rather than on the first call means that a user's transaction never has to open a
+     * second transaction, and take a second pooled connection, to read it. No user is bound to the startup, so it is
+     * read in a system RLS context.</p>
+     *
      * @throws ApiException if no root organizational unit exists
      */
-    private OrganizationalUnit initRoot() {
-        return organizationalUnitRepository.findByNameAndType("root", "root")
-            .orElseThrow(() -> new ApiException(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                I18nMessage.of("error.organizational.unit.root.not_found")
-            ));
+    @PostConstruct
+    public void loadRoot() {
+        var transaction = new TransactionTemplate(transactionManager);
+        transaction.setReadOnly(true);
+
+        root = transaction.execute(status -> {
+            rlsInterceptor.securizeAsSystem();
+
+            return organizationalUnitRepository.findByNameAndType("root", "root")
+                .orElseThrow(() -> new ApiException(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    I18nMessage.of("error.organizational.unit.root.not_found")
+                ));
+        });
     }
 
     @Override
     public OrganizationalUnit create(final UserPrincipal userPrincipal,
                                      final OrganizationalUnitRecord organizationalUnit) {
+        rlsInterceptor.securize(userPrincipal);
+
         if ("root".equalsIgnoreCase(organizationalUnit.name()) || "root".equalsIgnoreCase(organizationalUnit.type())) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
@@ -260,6 +267,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
     @Override
     public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (organizationalUnitRepository.existsById(id)) {
             return;
         }
@@ -272,6 +281,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
     @Override
     public OrganizationalUnit findById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return organizationalUnitRepository.findById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -281,6 +292,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
     @Override
     public OrganizationalUnitDistinctView findViewById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return organizationalUnitDistinctViewRepository.findFirstById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -292,6 +305,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     public Page<OrganizationalUnitDistinctView> findAll(final UserPrincipal userPrincipal,
                                                         final OrganizationalUnitViewQueryFilterDto filters,
                                                         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitView.class, filters);
 
         return executor.findDistinctPageEntities(
@@ -307,6 +322,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UserPrincipal userPrincipal,
         final OrganizationalUnitAccountViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitAccountView.class, filters);
 
         return organizationalUnitAccountViewRepository.findAll(specification, pageable);
@@ -317,6 +334,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UserPrincipal userPrincipal,
         final UUID organizationalUnitId,
         final OrganizationalUnitAccountRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, organizationalUnitId);
         accountService.existsById(userPrincipal, record.accountId());
         assertRoleExists(record.roleId());
@@ -348,6 +367,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UUID organizationalUnitId,
         final UUID accountId,
         final OrganizationalUnitAccountUpdateRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, organizationalUnitId);
 
         var entity = findRelation(organizationalUnitId, accountId);
@@ -385,6 +406,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     public void detachAccount(final UserPrincipal userPrincipal,
                               final UUID organizationalUnitId,
                               final UUID accountId) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, organizationalUnitId);
 
         organizationalUnitAccountRepository.delete(findRelation(organizationalUnitId, accountId));
@@ -395,6 +418,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UserPrincipal userPrincipal,
         final OrganizationalUnitManagerViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(OrganizationalUnitManagerView.class, filters);
 
         return organizationalUnitManagerViewRepository.findAll(specification, pageable);
@@ -405,6 +430,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
         final UserPrincipal userPrincipal,
         final UUID organizationalUnitId,
         final OrganizationalUnitManagerRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, organizationalUnitId);
         accountService.existsById(userPrincipal, record.accountId());
 
@@ -441,6 +468,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     public void removeManager(final UserPrincipal userPrincipal,
                               final UUID organizationalUnitId,
                               final UUID accountId) {
+        rlsInterceptor.securize(userPrincipal);
+
         existsById(userPrincipal, organizationalUnitId);
 
         var manager = organizationalUnitManagerRepository
@@ -529,6 +558,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (getRoot().getId().equals(id)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
@@ -545,6 +576,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     public OrganizationalUnit update(final UserPrincipal userPrincipal,
                                      final UUID id,
                                      final OrganizationalUnitRecord organizationalUnit) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (getRoot().getId().equals(id)) {
             throw new ApiException(
                 HttpStatus.BAD_REQUEST.value(),
@@ -592,6 +625,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     public OrganizationalUnitDistinctView suspend(final UserPrincipal userPrincipal,
                                                   final UUID id,
                                                   final OrganizationalUnitSuspensionRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureOrganizationalUnitExists(id);
         OrganizationalUnitStatus status = loadStatus(id);
 
@@ -607,6 +642,8 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     public OrganizationalUnitDistinctView reactivate(final UserPrincipal userPrincipal,
                                                      final UUID id,
                                                      final OrganizationalUnitReactivationRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureOrganizationalUnitExists(id);
         OrganizationalUnitStatus status = loadStatus(id);
 

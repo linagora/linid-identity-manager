@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Application;
 import io.github.linagora.linid.im.api.persistence.repository.ApplicationRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -68,9 +69,38 @@ public class OpaApplicationDeployerServiceImpl implements OpaApplicationDeployer
      */
     private final ApplicationService applicationService;
 
+    /**
+     * Interceptor setting the RLS context of the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
 
     @Override
     public Application deploy(final Application application) {
+        rlsInterceptor.securizeAsSystem();
+
+        return publishPolicy(application);
+    }
+
+    @Override
+    public Application deploy(final UserPrincipal userPrincipal, final UUID id, final boolean force) {
+        rlsInterceptor.securize(userPrincipal);
+
+        var application = applicationService.findById(userPrincipal, id);
+        if (!force && application.getDeployedAt() != null) {
+            return application;
+        }
+        return publishPolicy(application);
+    }
+
+    /**
+     * Publishes the policy of the application to OPA and records its deployment date, in the RLS context already set
+     * for the current transaction.
+     *
+     * @param application the application to deploy
+     * @return the deployed application with updated timestamp
+     */
+    private Application publishPolicy(final Application application) {
         if (application.getScript() == null || application.getScript().isEmpty()) {
             throw new ApiException(HttpStatus.BAD_REQUEST.value(), I18nMessage.of("error.application.script"
                     + ".missing", Map.of("applicationId", application.getId().toString())));
@@ -78,14 +108,5 @@ public class OpaApplicationDeployerServiceImpl implements OpaApplicationDeployer
         var deployedDate = opaService.publish(application);
         application.setDeployedAt(deployedDate);
         return applicationRepository.save(application);
-    }
-
-    @Override
-    public Application deploy(final UserPrincipal userPrincipal, final UUID id, final boolean force) {
-        var application = applicationService.findById(userPrincipal, id);
-        if (!force && application.getDeployedAt() != null) {
-            return application;
-        }
-        return deploy(application);
     }
 }

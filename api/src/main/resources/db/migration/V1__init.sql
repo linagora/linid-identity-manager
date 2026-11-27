@@ -37,4 +37,24 @@ $$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION hierarchy_lock() IS 'Trigger function that takes, until the end of the transaction, the lock of the hierarchy whose closure table is named by its argument, and rejects the change outside READ COMMITTED. For BEFORE ... FOR EACH STATEMENT triggers only: as a row-level BEFORE trigger, its NULL result would skip the row.';
 
+CREATE OR REPLACE FUNCTION current_account_id()
+    RETURNS UUID
+    STABLE
+AS
+$$
+SELECT NULLIF(current_setting('linid.account_id', true), '')::UUID;
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION current_account_id() IS 'Returns the id of the account calling the API, read from the linid.account_id variable that the API sets for each transaction. Returns NULL when no context is set and in a system context.';
+
+CREATE OR REPLACE FUNCTION is_super_admin()
+    RETURNS BOOLEAN
+    STABLE
+AS
+$$
+SELECT COALESCE(current_setting('linid.is_super_admin', true), '') = 'true';
+$$ LANGUAGE sql;
+
+COMMENT ON FUNCTION is_super_admin() IS 'Returns true when the caller is the SUPER_ADMIN or runs in a system context, read from the linid.is_super_admin variable that the API sets for each transaction. Returns false when no context is set.';
+
 CREATE ROLE audit_trigger_role NOLOGIN;

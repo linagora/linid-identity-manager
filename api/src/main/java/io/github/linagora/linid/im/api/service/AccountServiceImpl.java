@@ -38,6 +38,7 @@ import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
@@ -196,8 +197,14 @@ public class AccountServiceImpl implements AccountService {
      */
     private final SpringQueryExecutor executor;
 
+    /**
+     * Interceptor setting the RLS context of the calling user for the current transaction.
+     */
+    private final RlsInterceptor rlsInterceptor;
+
     @Override
     public Account create(final UserPrincipal userPrincipal, final AccountRecord account) {
+        rlsInterceptor.securize(userPrincipal);
 
         accountCreationValidator.validate(account);
 
@@ -232,6 +239,8 @@ public class AccountServiceImpl implements AccountService {
     public Page<AccountDistinctView> findAll(final UserPrincipal userPrincipal,
                                              final AccountViewQueryFilterDto filters,
                                              final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(AccountView.class, filters);
 
         return executor.findDistinctPageEntities(
@@ -248,6 +257,8 @@ public class AccountServiceImpl implements AccountService {
         final UserPrincipal userPrincipal,
         final AccountOrganizationalUnitViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(AccountOrganizationalUnitView.class, filters);
 
         return accountOrganizationalUnitViewRepository.findAll(specification, pageable);
@@ -259,6 +270,8 @@ public class AccountServiceImpl implements AccountService {
         final UserPrincipal userPrincipal,
         final AccountGroupViewQueryFilterDto filters,
         final Pageable pageable) {
+        rlsInterceptor.securize(userPrincipal);
+
         var specification = new SpringQueryFilterSpecification<>(AccountGroupView.class, filters);
 
         return accountGroupViewRepository.findAll(specification, pageable);
@@ -267,6 +280,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(readOnly = true)
     public AccountDistinctView findById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         return accountDistinctViewRepository.findFirstById(id)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -277,6 +292,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(readOnly = true)
     public void existsById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         if (accountRepository.existsById(id)) {
             return;
         }
@@ -291,6 +308,8 @@ public class AccountServiceImpl implements AccountService {
     public AccountDistinctView update(final UserPrincipal userPrincipal,
                                       final UUID accountId,
                                       final AccountUpdateRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         Account account = accountRepository.findById(accountId)
             .orElseThrow(() -> new ApiException(
                 HttpStatus.NOT_FOUND.value(),
@@ -314,6 +333,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deleteById(final UserPrincipal userPrincipal, final UUID id) {
+        rlsInterceptor.securize(userPrincipal);
+
         findById(userPrincipal, id);
         accountRepository.deleteById(id);
     }
@@ -321,6 +342,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(readOnly = true)
     public Optional<Account> getAccountByExternalId(final String externalId) {
+        rlsInterceptor.securizeAsSystem();
+
         if (StringUtils.isBlank(externalId)) {
             return Optional.empty();
         }
@@ -332,6 +355,8 @@ public class AccountServiceImpl implements AccountService {
     public AccountDistinctView suspend(final UserPrincipal userPrincipal,
                                final UUID accountId,
                                final AccountSuspensionRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureAccountExists(accountId);
         AccountStatus status = loadStatus(accountId);
 
@@ -347,6 +372,8 @@ public class AccountServiceImpl implements AccountService {
     public AccountDistinctView deactivate(final UserPrincipal userPrincipal,
                                   final UUID accountId,
                                   final AccountDeactivationRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureAccountExists(accountId);
         AccountStatus status = loadStatus(accountId);
 
@@ -366,6 +393,8 @@ public class AccountServiceImpl implements AccountService {
     public AccountDistinctView reactivate(final UserPrincipal userPrincipal,
                                   final UUID accountId,
                                   final AccountReactivationRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureAccountExists(accountId);
         AccountStatus status = loadStatus(accountId);
 
@@ -406,6 +435,8 @@ public class AccountServiceImpl implements AccountService {
     public AccountDistinctView updateValidity(final UserPrincipal userPrincipal,
                                       final UUID accountId,
                                       final AccountValidityRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureAccountExists(accountId);
         AccountStatus status = loadStatus(accountId);
 
@@ -425,6 +456,8 @@ public class AccountServiceImpl implements AccountService {
     public AccountDistinctView updateActivation(final UserPrincipal userPrincipal,
                                         final UUID accountId,
                                         final AccountActivationRecord record) {
+        rlsInterceptor.securize(userPrincipal);
+
         ensureAccountExists(accountId);
         AccountStatus status = loadStatus(accountId);
 

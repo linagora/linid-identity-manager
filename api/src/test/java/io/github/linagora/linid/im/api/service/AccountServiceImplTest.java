@@ -38,6 +38,7 @@ import io.github.linagora.linid.im.api.model.account.AccountValidityRecord;
 import io.github.linagora.linid.im.api.model.common.CommonMapper;
 import io.github.linagora.linid.im.api.model.common.PeriodRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
+import io.github.linagora.linid.im.api.persistence.interceptor.RlsInterceptor;
 import io.github.linagora.linid.im.api.persistence.model.Account;
 import io.github.linagora.linid.im.api.persistence.model.AccountDistinctView;
 import io.github.linagora.linid.im.api.persistence.model.AccountGroupView;
@@ -138,6 +139,9 @@ class AccountServiceImplTest {
     @Mock
     private SpringQueryExecutor executor;
 
+    @Mock
+    private RlsInterceptor rlsInterceptor;
+
     @InjectMocks
     private AccountServiceImpl accountService;
     private UserPrincipal userPrincipal;
@@ -185,6 +189,10 @@ class AccountServiceImplTest {
         assertEquals("john@example.com", result.getEmail());
         assertEquals(ADMIN_ID, result.getCreatedBy());
         assertEquals(ADMIN_ID, result.getUpdatedBy());
+
+        var inOrder = inOrder(rlsInterceptor, accountCreationValidator);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountCreationValidator).validate(request);
     }
 
     @Test
@@ -393,6 +401,11 @@ class AccountServiceImplTest {
             ArgumentMatchers.any(),
             ArgumentMatchers.any(),
             ArgumentMatchers.any());
+
+        var inOrder = inOrder(rlsInterceptor, executor);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(executor).findDistinctPageEntities(
+            ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any());
     }
 
     @Test
@@ -420,6 +433,11 @@ class AccountServiceImplTest {
         verify(accountOrganizationalUnitViewRepository).findAll(
             ArgumentMatchers.<Specification<AccountOrganizationalUnitView>>any(),
             ArgumentMatchers.any(Pageable.class));
+
+        var inOrder = inOrder(rlsInterceptor, accountOrganizationalUnitViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountOrganizationalUnitViewRepository).findAll(
+            ArgumentMatchers.<Specification<AccountOrganizationalUnitView>>any(), ArgumentMatchers.any(Pageable.class));
     }
 
     @Test
@@ -446,6 +464,11 @@ class AccountServiceImplTest {
         verify(accountGroupViewRepository).findAll(
             ArgumentMatchers.<Specification<AccountGroupView>>any(),
             ArgumentMatchers.any(Pageable.class));
+
+        var inOrder = inOrder(rlsInterceptor, accountGroupViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountGroupViewRepository).findAll(
+            ArgumentMatchers.<Specification<AccountGroupView>>any(), ArgumentMatchers.any(Pageable.class));
     }
 
     @Test
@@ -455,6 +478,10 @@ class AccountServiceImplTest {
         when(accountRepository.existsById(id)).thenReturn(true);
 
         assertDoesNotThrow(() -> accountService.existsById(userPrincipal, id));
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(id);
     }
 
     @Test
@@ -482,6 +509,10 @@ class AccountServiceImplTest {
 
         assertNotNull(result);
         assertEquals(id, result.getId());
+
+        var inOrder = inOrder(rlsInterceptor, accountDistinctViewRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountDistinctViewRepository).findFirstById(id);
     }
 
     @Test
@@ -517,6 +548,10 @@ class AccountServiceImplTest {
         assertSame(view, result);
         verify(accountMapper).applyUpdate(existing, record, ADMIN_ID);
         verify(accountRepository).saveAndFlush(existing);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).findById(id);
     }
 
     @Test
@@ -564,6 +599,10 @@ class AccountServiceImplTest {
         accountService.deleteById(userPrincipal, id);
 
         verify(accountRepository).deleteById(id);
+
+        var inOrder = inOrder(rlsInterceptor, accountDistinctViewRepository);
+        inOrder.verify(rlsInterceptor, times(2)).securize(userPrincipal);
+        inOrder.verify(accountDistinctViewRepository).findFirstById(id);
     }
 
     @Test
@@ -593,6 +632,8 @@ class AccountServiceImplTest {
         assertTrue(account.isPresent());
         assertEquals(entity, account.get());
         verify(accountRepository).findAccountByExternalId("User-Sub");
+
+        verify(rlsInterceptor).securizeAsSystem();
     }
 
     @Test
@@ -688,6 +729,10 @@ class AccountServiceImplTest {
         assertEquals(ADMIN_ID, existing.getUpdatedBy());
         verify(accountSuspensionValidator).validate(existing, record, id);
         verify(accountStatusRepository).saveAndFlush(existing);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(id);
     }
 
     @Test
@@ -774,6 +819,10 @@ class AccountServiceImplTest {
         assertEquals(ADMIN_ID, existing.getUpdatedBy());
         verify(accountDeactivationValidator).validate(existing, record, id);
         verify(accountStatusRepository).saveAndFlush(existing);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(id);
     }
 
     @Test
@@ -859,6 +908,10 @@ class AccountServiceImplTest {
         assertEquals(ADMIN_ID, existing.getUpdatedBy());
         verify(accountReactivationValidator).validate(existing, record, id);
         verify(accountStatusRepository).saveAndFlush(existing);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(id);
     }
 
     @Test
@@ -958,6 +1011,10 @@ class AccountServiceImplTest {
         assertEquals(ADMIN_ID, existing.getUpdatedBy());
         verify(accountValidityValidator).validate(existing, record, id);
         verify(accountStatusRepository).saveAndFlush(existing);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(id);
     }
 
     @Test
@@ -1043,6 +1100,10 @@ class AccountServiceImplTest {
         assertEquals(ADMIN_ID, existing.getUpdatedBy());
         verify(accountActivationValidator).validate(eq(existing), any(), eq(id));
         verify(accountStatusRepository).saveAndFlush(existing);
+
+        var inOrder = inOrder(rlsInterceptor, accountRepository);
+        inOrder.verify(rlsInterceptor).securize(userPrincipal);
+        inOrder.verify(accountRepository).existsById(id);
     }
 
     @Test

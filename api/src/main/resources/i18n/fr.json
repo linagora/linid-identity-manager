@@ -67,6 +67,8 @@
   "error.group.parent.cycle": "Le groupe {id} ne peut pas avoir le groupe {parentId} comme parent : cela créerait un cycle dans la hiérarchie des groupes.",
   "error.group.account.already_attached": "Le compte {id} est déjà rattaché à ce groupe",
   "error.group.account.not_attached": "Le compte {id} n'est pas rattaché à ce groupe",
+  "error.group.manager.already_exists": "Le compte {id} est déjà gestionnaire de ce groupe",
+  "error.group.manager.not_found": "Le compte {id} n'est pas gestionnaire de ce groupe",
   "error.global_role.not_assigned": "Le compte {id} ne détient pas le rôle global '{role}'",
   "error.global_role.unknown": "Rôle global inconnu : '{role}'",
   "error.global_role.already_assigned": "Le compte {id} détient déjà le rôle global '{role}'",

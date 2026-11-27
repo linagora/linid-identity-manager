@@ -96,9 +96,11 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -1302,5 +1304,27 @@ class OrganizationalUnitServiceImplTest {
         var result = service.update(userPrincipal, uuid, record);
 
         assertEquals(Map.of("team", "platform"), result.getExtraParameters());
+    }
+
+    @Test
+    @DisplayName("isManagedBy should be true when the account manages an ancestor of the organizational unit")
+    void testIsManagedBy_shouldBeTrueThroughAncestor() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(organizationalUnitManagerRepository.isManagerOfOrganizationalUnitOrAncestor(
+            accountId, organizationalUnitId)).thenReturn(true);
+
+        assertTrue(service.isManagedBy(userPrincipal, organizationalUnitId, accountId));
+    }
+
+    @Test
+    @DisplayName("isManagedBy should be false when the account manages neither the unit nor its ancestors")
+    void testIsManagedBy_shouldBeFalseWhenNotManager() {
+        var organizationalUnitId = UUID.randomUUID();
+        var accountId = UUID.randomUUID();
+        when(organizationalUnitManagerRepository.isManagerOfOrganizationalUnitOrAncestor(
+            accountId, organizationalUnitId)).thenReturn(false);
+
+        assertFalse(service.isManagedBy(userPrincipal, organizationalUnitId, accountId));
     }
 }

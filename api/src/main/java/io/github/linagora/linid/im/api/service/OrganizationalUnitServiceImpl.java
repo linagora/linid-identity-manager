@@ -271,6 +271,15 @@ public class OrganizationalUnitServiceImpl implements OrganizationalUnitService 
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public boolean isManagedBy(final UserPrincipal userPrincipal,
+                               final UUID organizationalUnitId,
+                               final UUID accountId) {
+        return organizationalUnitManagerRepository.isManagerOfOrganizationalUnitOrAncestor(
+            accountId, organizationalUnitId);
+    }
+
+    @Override
     public OrganizationalUnit findById(final UserPrincipal userPrincipal, final UUID id) {
         return organizationalUnitRepository.findById(id)
             .orElseThrow(() -> new ApiException(

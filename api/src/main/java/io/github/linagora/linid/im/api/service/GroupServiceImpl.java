@@ -27,6 +27,7 @@
 package io.github.linagora.linid.im.api.service;
 
 import io.github.linagora.linid.im.api.model.group.GroupAccountRecord;
+import io.github.linagora.linid.im.api.model.group.GroupManagerRecord;
 import io.github.linagora.linid.im.api.model.group.GroupMapper;
 import io.github.linagora.linid.im.api.model.group.GroupRecord;
 import io.github.linagora.linid.im.api.model.user.UserPrincipal;
@@ -34,12 +35,16 @@ import io.github.linagora.linid.im.api.persistence.model.Group;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccount;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountView;
 import io.github.linagora.linid.im.api.persistence.model.GroupAccountViewQueryFilterDto;
+import io.github.linagora.linid.im.api.persistence.model.GroupManager;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerView;
+import io.github.linagora.linid.im.api.persistence.model.GroupManagerViewQueryFilterDto;
 import io.github.linagora.linid.im.api.persistence.model.GroupView;
 import io.github.linagora.linid.im.api.persistence.model.GroupViewQueryFilterDto;
-import io.github.linagora.linid.im.api.persistence.repository.AccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAccountRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAccountViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupAncestorRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupManagerRepository;
+import io.github.linagora.linid.im.api.persistence.repository.GroupManagerViewRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupRepository;
 import io.github.linagora.linid.im.api.persistence.repository.GroupViewRepository;
 import io.github.linagora.linid.im.corelib.exception.ApiException;
@@ -54,6 +59,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,7 +74,7 @@ import static io.github.linagora.linid.im.api.service.DataIntegrityViolations.vi
  *
  * <p>Provides CRUD operations for groups, enforcing the uniqueness of the group code, the existence of the
  * referenced parent group, organizational unit and application, and the absence of cycles in the group
- * hierarchy.</p>
+ * hierarchy. Also manages the accounts attached to a group and the managers of a group.</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -101,12 +107,23 @@ public class GroupServiceImpl implements GroupService {
     private final GroupAccountViewRepository groupAccountViewRepository;
 
     /**
-     * Repository used to check the existence of accounts to attach.
+     * Repository used to manage {@link GroupManager} persistence operations.
      */
-    private final AccountRepository accountRepository;
+    private final GroupManagerRepository groupManagerRepository;
 
     /**
-     * Service used to check the existence of the referenced organizational unit.
+     * Repository used to read {@link GroupManagerView} projections.
+     */
+    private final GroupManagerViewRepository groupManagerViewRepository;
+
+    /**
+     * Service used to check the existence of the accounts to attach or to add as managers.
+     */
+    private final AccountService accountService;
+
+    /**
+     * Service used to check the existence of the referenced organizational unit, and whether the creator of a
+     * group manages it.
      */
     private final OrganizationalUnitService organizationalUnitService;
 
@@ -129,9 +146,16 @@ public class GroupServiceImpl implements GroupService {
         ensureReferencesExist(userPrincipal, group);
         ensureParentIsValid(null, group.parentId());
 
-        var entity = mapper.toEntity(group, userPrincipal);
+        var entity = groupRepository.save(mapper.toEntity(group, userPrincipal));
 
-        return groupRepository.save(entity);
+        var organizationalUnitId = group.organizationalUnitId();
+
+        if (organizationalUnitId != null
+            && organizationalUnitService.isManagedBy(userPrincipal, organizationalUnitId, userPrincipal.getId())) {
+            saveManager(userPrincipal, entity.getId(), userPrincipal.getId());
+        }
+
+        return entity;
     }
 
     @Override
@@ -181,13 +205,7 @@ public class GroupServiceImpl implements GroupService {
                                       final UUID groupId,
                                       final GroupAccountRecord record) {
         existsById(userPrincipal, groupId);
-
-        if (!accountRepository.existsById(record.accountId())) {
-            throw new ApiException(
-                HttpStatus.NOT_FOUND.value(),
-                I18nMessage.of("error.account.not_found", Map.of("id", record.accountId().toString()))
-            );
-        }
+        accountService.existsById(userPrincipal, record.accountId());
 
         if (groupAccountRepository.existsByGroupIdAndAccountId(groupId, record.accountId())) {
             throw new ApiException(
@@ -219,6 +237,63 @@ public class GroupServiceImpl implements GroupService {
             ));
 
         groupAccountRepository.delete(relation);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<GroupManagerView> findAllManagers(final UserPrincipal userPrincipal,
+                                                  final GroupManagerViewQueryFilterDto filters,
+                                                  final Pageable pageable) {
+        var specification = new SpringQueryFilterSpecification<>(GroupManagerView.class, filters);
+
+        return groupManagerViewRepository.findAll(specification, pageable);
+    }
+
+    @Override
+    public GroupManager addManager(final UserPrincipal userPrincipal,
+                                   final UUID groupId,
+                                   final GroupManagerRecord record) {
+        existsById(userPrincipal, groupId);
+        accountService.existsById(userPrincipal, record.accountId());
+
+        if (groupManagerRepository.existsByGroupIdAndAccountId(groupId, record.accountId())) {
+            throw managerAlreadyExists(record.accountId());
+        }
+
+        // Flush so that a rejection by the database surfaces here rather than at commit time: the same manager
+        // added, or the group or the account deleted, by a concurrent request after the checks above.
+        try {
+            var manager = saveManager(userPrincipal, groupId, record.accountId());
+            groupManagerRepository.flush();
+            return manager;
+        } catch (DataIntegrityViolationException e) {
+            if (hasSqlState(e, UNIQUE_VIOLATION)) {
+                throw managerAlreadyExists(record.accountId());
+            }
+
+            if (hasSqlState(e, FOREIGN_KEY_VIOLATION)) {
+                throw managerReferenceNotFound(e, groupId, record.accountId());
+            }
+
+            throw e;
+        }
+    }
+
+    @Override
+    public void removeManager(final UserPrincipal userPrincipal, final UUID groupId, final UUID accountId) {
+        existsById(userPrincipal, groupId);
+
+        var manager = groupManagerRepository.findByGroupIdAndAccountId(groupId, accountId)
+            .orElseThrow(() -> managerNotFound(accountId));
+
+        // Flush so that a removal by a concurrent request after the lookup above surfaces here rather than at commit
+        // time: the delete then matches no row, which Hibernate reports as an optimistic lock failure.
+        try {
+            groupManagerRepository.delete(manager);
+            groupManagerRepository.flush();
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw managerNotFound(accountId);
+        }
     }
 
     @Override
@@ -276,6 +351,25 @@ public class GroupServiceImpl implements GroupService {
         var entity = findById(userPrincipal, id);
 
         groupRepository.delete(entity);
+    }
+
+    /**
+     * Saves the given account as a manager of the given group, the authenticated user being the author.
+     *
+     * @param userPrincipal the authenticated user performing the operation
+     * @param groupId       the identifier of the managed group
+     * @param accountId     the identifier of the manager account
+     * @return the saved {@link GroupManager}
+     */
+    private GroupManager saveManager(final UserPrincipal userPrincipal, final UUID groupId, final UUID accountId) {
+        var entity = GroupManager.builder()
+            .groupId(groupId)
+            .accountId(accountId)
+            .createdBy(userPrincipal.getId())
+            .updatedBy(userPrincipal.getId())
+            .build();
+
+        return groupManagerRepository.save(entity);
     }
 
     /**
@@ -376,6 +470,54 @@ public class GroupServiceImpl implements GroupService {
             HttpStatus.BAD_REQUEST.value(),
             I18nMessage.of("error.group.code.already_exists", Map.of("code", code))
         );
+    }
+
+    /**
+     * Builds the 400 {@link ApiException} raised when an account is already a manager of a group.
+     *
+     * @param accountId the identifier of the account already manager
+     * @return the exception to throw
+     */
+    private ApiException managerAlreadyExists(final UUID accountId) {
+        return new ApiException(
+            HttpStatus.BAD_REQUEST.value(),
+            I18nMessage.of("error.group.manager.already_exists", Map.of("id", accountId.toString()))
+        );
+    }
+
+    /**
+     * Builds the 404 {@link ApiException} raised when an account is not a manager of a group.
+     *
+     * @param accountId the identifier of the account that is not a manager
+     * @return the exception to throw
+     */
+    private ApiException managerNotFound(final UUID accountId) {
+        return new ApiException(
+            HttpStatus.NOT_FOUND.value(),
+            I18nMessage.of("error.group.manager.not_found", Map.of("id", accountId.toString()))
+        );
+    }
+
+    /**
+     * Builds the 404 {@link ApiException} of the group or the account whose foreign key the database rejected. The
+     * foreign keys of {@code group_managers} are unnamed: PostgreSQL names them {@code group_managers_<column>_fkey}.
+     *
+     * @param exception the foreign key violation raised by the flush
+     * @param groupId   the group identifier
+     * @param accountId the account identifier
+     * @return the 404 exception of the missing reference, or {@code exception} when its constraint is not known
+     */
+    private RuntimeException managerReferenceNotFound(final DataIntegrityViolationException exception,
+                                                      final UUID groupId,
+                                                      final UUID accountId) {
+        return switch (violatedConstraint(exception)) {
+            case "group_managers_grp_id_fkey" -> groupNotFound(groupId);
+            case "group_managers_act_id_fkey" -> new ApiException(
+                HttpStatus.NOT_FOUND.value(),
+                I18nMessage.of("error.account.not_found", Map.of("id", accountId.toString()))
+            );
+            case null, default -> exception;
+        };
     }
 
     /**
